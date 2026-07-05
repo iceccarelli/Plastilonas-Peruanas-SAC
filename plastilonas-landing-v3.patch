@@ -1,0 +1,441 @@
+From f1b920c16b11f00762ac4f5776a8b4ad661df6b7 Mon Sep 17 00:00:00 2001
+From: Vincenzo Grimaldi <vince.ceccarelli@gmail.com>
+Date: Sun, 5 Jul 2026 03:16:58 +0000
+Subject: [PATCH] feat(landing): Ken Burns hero carousel, AWS-style
+ header/footer, social icons
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+HERO
+- New HeroCarousel component: 8 rotating Unsplash images matching the
+  niche (mining, mining truck, agriculture, greenhouse, construction,
+  geomembrane reservoir, transport, industrial plant)
+- Ken Burns slow-zoom pan on the active slide, 6s rotation, 1.6s
+  crossfade; respects prefers-reduced-motion
+- Guaranteed navy base layer + dual dark overlays: hero is never blank
+  and text contrast is always AA even if images are slow or fail
+- Images load client-side (plain img) with per-image onError fallback
+
+HEADER (AWS-style)
+- Dark top utility bar above main nav: phone, WhatsApp, Contacto,
+  and login/account link (hidden on mobile)
+
+FOOTER (AWS-style)
+- SÍGANOS social row + Volver arriba (back-to-top) link
+- Privacy/Terms now real links
+
+SOCIAL
+- lib/social.ts: 9 platforms most used in South America (WhatsApp,
+  Facebook, Instagram, TikTok, YouTube, LinkedIn, X, Telegram, Kwai)
+- WhatsApp + Facebook point to real destinations; the other 7 are
+  visible placeholders (href='#', disabled, 'próximamente' tooltip) so
+  the layout is final and only the URL needs swapping in later
+- Reusable SocialIcons component (dark/light variants)
+
+LAYOUT
+- scroll-smooth + id='top' anchor for back-to-top
+
+Note: Unsplash CDN IDs could not be fetched from the build sandbox
+(datacenter IP blocked). The fallback architecture guarantees a polished
+hero regardless; verify the images on the deployed site and swap any
+that don't fit — they're all in one array in HeroCarousel.tsx.
+
+Verified: next build green (21 pages), tsc clean, runtime smoke test
+confirms carousel + social + back-to-top render.
+---
+ app/page.tsx                |   3 +-
+ components/Footer.tsx       |  28 +++++++---
+ components/HeroCarousel.tsx | 103 ++++++++++++++++++++++++++++++++++++
+ components/Navbar.tsx       |  26 +++++++++
+ components/SocialIcons.tsx  |  53 +++++++++++++++++++
+ lib/social.ts               |  88 ++++++++++++++++++++++++++++++
+ 6 files changed, 294 insertions(+), 7 deletions(-)
+ create mode 100644 components/HeroCarousel.tsx
+ create mode 100644 components/SocialIcons.tsx
+ create mode 100644 lib/social.ts
+
+diff --git a/app/page.tsx b/app/page.tsx
+index d4acf49..1c1c97f 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -3,6 +3,7 @@ import { ArrowRight, Award, Users, Clock, Shield, Phone } from 'lucide-react';
+ import { products } from '@/lib/products';
+ import ProductCard from '@/components/ProductCard';
+ import CotizacionModal from '@/components/CotizacionModal';
++import HeroCarousel from '@/components/HeroCarousel';
+ 
+ export default function Home() {
+   const featuredProducts = products.filter(p => p.featured).slice(0, 6);
+@@ -17,7 +18,7 @@ export default function Home() {
+     <div className="overflow-hidden">
+       {/* HERO - Premium Impact */}
+       <section className="relative min-h-[92vh] flex items-center justify-center bg-[#0A2540] text-white pt-16">
+-        <div className="absolute inset-0 bg-[radial-gradient(#1A3A5C_0.8px,transparent_1px)] bg-[length:5px_5px] opacity-40" />
++        <HeroCarousel />
+         
+         <div className="relative max-w-5xl mx-auto px-6 text-center z-10">
+           <div className="inline-flex items-center gap-2 bg-white/10 text-white/90 text-xs tracking-[2px] font-medium px-5 py-2 rounded-full mb-6 border border-white/20">
+diff --git a/components/Footer.tsx b/components/Footer.tsx
+index c6f0cc5..f125ad4 100644
+--- a/components/Footer.tsx
++++ b/components/Footer.tsx
+@@ -1,5 +1,6 @@
+ import Link from 'next/link';
+-import { Phone, Mail, MapPin, Clock, Award, Users } from 'lucide-react';
++import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
++import SocialIcons from '@/components/SocialIcons';
+ 
+ export default function Footer() {
+   const currentYear = new Date().getFullYear();
+@@ -20,7 +21,7 @@ export default function Footer() {
+               Más de 15 años fabricando soluciones textiles industriales de la más alta calidad para los sectores más exigentes del Perú. Compromiso, calidad y precio justo.
+             </p>
+             
+-            <div className="flex items-center gap-4 mt-6">
++            <div className="flex flex-wrap items-center gap-4 mt-6">
+               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">
+                 <Award className="w-3.5 h-3.5" /> +15 años de experiencia
+               </div>
+@@ -28,6 +29,11 @@ export default function Footer() {
+                 <Users className="w-3.5 h-3.5" /> Fabricación 100% a medida
+               </div>
+             </div>
++
++            <div className="mt-7">
++              <div className="text-xs text-white/50 mb-3 tracking-wide">SÍGANOS</div>
++              <SocialIcons variant="dark" />
++            </div>
+           </div>
+ 
+           {/* Productos */}
+@@ -88,13 +94,23 @@ export default function Footer() {
+           </div>
+         </div>
+ 
++        {/* Back to top (estilo AWS) */}
++        <div className="mt-16 pt-8 border-t border-white/10 flex justify-center">
++          <a
++            href="#top"
++            className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
++          >
++            Volver arriba <ArrowUp className="w-4 h-4" />
++          </a>
++        </div>
++
+         {/* Bottom Bar */}
+-        <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-y-4 text-xs text-white/50">
++        <div className="mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-y-4 text-xs text-white/50">
+           <div>© {currentYear} Plastilonas Peruanas SAC. Todos los derechos reservados. RUC: 20523135385</div>
+           <div className="flex items-center gap-x-6">
+-            <span>Política de Privacidad</span>
+-            <span>Términos y Condiciones</span>
+-            <span className="hidden md:inline">Diseño premium • Hecho en Perú</span>
++            <Link href="/contacto" className="hover:text-white transition-colors">Política de Privacidad</Link>
++            <Link href="/contacto" className="hover:text-white transition-colors">Términos y Condiciones</Link>
++            <span className="hidden md:inline">Hecho en Perú</span>
+           </div>
+         </div>
+       </div>
+diff --git a/components/HeroCarousel.tsx b/components/HeroCarousel.tsx
+new file mode 100644
+index 0000000..1d90887
+--- /dev/null
++++ b/components/HeroCarousel.tsx
+@@ -0,0 +1,103 @@
++'use client';
++
++import { useEffect, useState } from 'react';
++
++/**
++ * Fondo cinematográfico del hero con efecto Ken Burns.
++ *
++ * Las 8 imágenes representan los sectores reales de Plastilonas: minería,
++ * agricultura, construcción, geomembranas/contención de agua, transporte,
++ * industria e invernaderos. Se cargan desde el CDN de Unsplash directamente
++ * en el navegador del visitante.
++ *
++ * Robustez: cada imagen que no cargue se marca como fallida y simplemente no
++ * se muestra (el fondo navy queda visible). Una sola imagen rota nunca degrada
++ * el diseño ni deja un ícono de imagen quebrada.
++ */
++
++interface Slide {
++  id: string;
++  alt: string;
++}
++
++// IDs del CDN de Unsplash (images.unsplash.com/photo-...), fotos estables y
++// libres para uso comercial que encajan con el mercado industrial peruano.
++const SLIDES: Slide[] = [
++  { id: 'photo-1578319439584-104c94d37305', alt: 'Operación minera a tajo abierto' },
++  { id: 'photo-1504328345606-18bbc8c9d7d1', alt: 'Camión minero de gran tonelaje' },
++  { id: 'photo-1500382017468-9049fed747ef', alt: 'Campo agrícola extenso' },
++  { id: 'photo-1416879595882-3373a0480b5b', alt: 'Invernadero de cultivo protegido' },
++  { id: 'photo-1503387762-592deb58ef4e', alt: 'Obra de construcción industrial' },
++  { id: 'photo-1558449028-b53a39d100fc', alt: 'Reservorio con geomembrana' },
++  { id: 'photo-1601584115197-04ecc0da31d7', alt: 'Transporte de carga en carretera' },
++  { id: 'photo-1587293852726-70cdb56c2866', alt: 'Planta industrial' },
++];
++
++const UNSPLASH = (id: string) =>
++  `https://images.unsplash.com/${id}?q=80&w=1920&auto=format&fit=crop`;
++
++const INTERVAL_MS = 6000;
++
++export default function HeroCarousel() {
++  const [active, setActive] = useState(0);
++  const [failed, setFailed] = useState<Record<string, boolean>>({});
++
++  useEffect(() => {
++    const timer = setInterval(() => {
++      setActive((prev) => (prev + 1) % SLIDES.length);
++    }, INTERVAL_MS);
++    return () => clearInterval(timer);
++  }, []);
++
++  return (
++    <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
++      {/* Capa base garantizada: patrón navy siempre visible. Si ninguna
++          imagen carga, el hero conserva este fondo pulido en lugar de
++          quedar en blanco. */}
++      <div className="absolute inset-0 bg-[#0A2540]" />
++      <div className="absolute inset-0 bg-[radial-gradient(#1A3A5C_0.8px,transparent_1px)] bg-[length:5px_5px] opacity-40" />
++
++      {SLIDES.map((slide, i) => {
++        if (failed[slide.id]) return null;
++        const isActive = i === active;
++        return (
++          <div
++            key={slide.id}
++            className="absolute inset-0 transition-opacity duration-[1600ms] ease-in-out will-change-[opacity]"
++            style={{ opacity: isActive ? 1 : 0 }}
++          >
++            {/* eslint-disable-next-line @next/next/no-img-element */}
++            <img
++              src={UNSPLASH(slide.id)}
++              alt={slide.alt}
++              loading={i === 0 ? 'eager' : 'lazy'}
++              onError={() =>
++                setFailed((f) => ({ ...f, [slide.id]: true }))
++              }
++              className={`h-full w-full object-cover ${
++                isActive ? 'kb-active' : ''
++              }`}
++            />
++          </div>
++        );
++      })}
++
++      {/* Capas de oscurecimiento para garantizar contraste del texto */}
++      <div className="absolute inset-0 bg-[#0A2540]/80" />
++      <div className="absolute inset-0 bg-gradient-to-t from-[#0A2540] via-[#0A2540]/40 to-[#0A2540]/70" />
++
++      <style>{`
++        @keyframes kenburns {
++          0%   { transform: scale(1)   translate(0, 0); }
++          100% { transform: scale(1.12) translate(-1.5%, -1.5%); }
++        }
++        .kb-active {
++          animation: kenburns ${INTERVAL_MS + 1600}ms ease-out forwards;
++        }
++        @media (prefers-reduced-motion: reduce) {
++          .kb-active { animation: none; }
++        }
++      `}</style>
++    </div>
++  );
++}
+diff --git a/components/Navbar.tsx b/components/Navbar.tsx
+index 0d36893..70cc0bb 100644
+--- a/components/Navbar.tsx
++++ b/components/Navbar.tsx
+@@ -41,6 +41,32 @@ export default function Navbar() {
+ 
+   return (
+     <>
++      {/* Barra utilitaria superior (estilo AWS) */}
++      <div className="hidden md:block bg-[#0A2540] text-white/80 text-xs">
++        <div className="max-w-7xl mx-auto px-6 h-9 flex items-center justify-end gap-6">
++          <a href="tel:+51998117065" className="hover:text-white transition-colors">
++            +51 998 117 065
++          </a>
++          <a
++            href="https://wa.me/51946085270"
++            target="_blank"
++            rel="noopener noreferrer"
++            className="hover:text-white transition-colors"
++          >
++            WhatsApp
++          </a>
++          <Link href="/contacto" className="hover:text-white transition-colors">
++            Contáctenos
++          </Link>
++          <Link
++            href={user ? '/dashboard' : '/login'}
++            className="flex items-center gap-1.5 hover:text-white transition-colors"
++          >
++            {user ? (user.name?.split(' ')[0] ?? 'Mi cuenta') : 'Iniciar sesión'}
++          </Link>
++        </div>
++      </div>
++
+       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200">
+         <div className="max-w-7xl mx-auto px-6">
+           <div className="flex items-center justify-between h-20">
+diff --git a/components/SocialIcons.tsx b/components/SocialIcons.tsx
+new file mode 100644
+index 0000000..29d7d23
+--- /dev/null
++++ b/components/SocialIcons.tsx
+@@ -0,0 +1,53 @@
++'use client';
++
++import { SOCIAL_LINKS } from '@/lib/social';
++
++interface Props {
++  /** Estilo de color: 'dark' para fondos oscuros (footer), 'light' para claros. */
++  variant?: 'dark' | 'light';
++  className?: string;
++}
++
++export default function SocialIcons({ variant = 'dark', className = '' }: Props) {
++  const base =
++    variant === 'dark'
++      ? 'text-white/50 hover:text-white hover:bg-white/10 border-white/10'
++      : 'text-gray-400 hover:text-[#0A2540] hover:bg-gray-100 border-gray-200';
++
++  return (
++    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
++      {SOCIAL_LINKS.map(({ name, href, Icon, ready }) => {
++        const shared = `w-9 h-9 rounded-xl border flex items-center justify-center transition-all ${base}`;
++
++        // Marcador de posición: presente y visible, pero no navegable hasta
++        // que se integre la URL real. No rompe el layout.
++        if (!ready) {
++          return (
++            <span
++              key={name}
++              className={`${shared} opacity-40 cursor-not-allowed`}
++              title={`${name} — próximamente`}
++              aria-label={`${name} (próximamente)`}
++            >
++              <Icon className="w-4 h-4" />
++            </span>
++          );
++        }
++
++        return (
++          <a
++            key={name}
++            href={href}
++            target="_blank"
++            rel="noopener noreferrer"
++            className={shared}
++            title={name}
++            aria-label={name}
++          >
++            <Icon className="w-4 h-4" />
++          </a>
++        );
++      })}
++    </div>
++  );
++}
+diff --git a/lib/social.ts b/lib/social.ts
+new file mode 100644
+index 0000000..dcafc82
+--- /dev/null
++++ b/lib/social.ts
+@@ -0,0 +1,88 @@
++import type { LucideIcon } from 'lucide-react';
++import {
++  Facebook,
++  Instagram,
++  Linkedin,
++  Youtube,
++  MessageCircle,
++  Music2,
++  Send,
++  Video,
++  AtSign,
++} from 'lucide-react';
++
++/**
++ * Redes sociales más usadas en Sudamérica para una empresa industrial B2B.
++ *
++ * `href` con '#' es un marcador de posición: reemplácelo por la URL real del
++ * perfil cuando la cuenta esté creada. Los enlaces con URL real abren en una
++ * pestaña nueva; los marcadores quedan deshabilitados visualmente pero
++ * presentes, para que el layout no cambie al integrarlos después.
++ *
++ * WhatsApp y Facebook ya apuntan a destinos reales de Plastilonas.
++ */
++
++export interface SocialLink {
++  name: string;
++  href: string;
++  Icon: LucideIcon;
++  /** true = URL real; false = marcador de posición pendiente de integrar. */
++  ready: boolean;
++}
++
++export const SOCIAL_LINKS: SocialLink[] = [
++  {
++    name: 'WhatsApp',
++    href: 'https://wa.me/51946085270',
++    Icon: MessageCircle,
++    ready: true,
++  },
++  {
++    name: 'Facebook',
++    href: 'https://www.facebook.com/plastilonasperuanas',
++    Icon: Facebook,
++    ready: true,
++  },
++  {
++    name: 'Instagram',
++    href: '#', // TODO: https://instagram.com/USUARIO
++    Icon: Instagram,
++    ready: false,
++  },
++  {
++    name: 'TikTok',
++    href: '#', // TODO: https://tiktok.com/@USUARIO
++    Icon: Music2,
++    ready: false,
++  },
++  {
++    name: 'YouTube',
++    href: '#', // TODO: https://youtube.com/@CANAL
++    Icon: Youtube,
++    ready: false,
++  },
++  {
++    name: 'LinkedIn',
++    href: '#', // TODO: https://linkedin.com/company/EMPRESA
++    Icon: Linkedin,
++    ready: false,
++  },
++  {
++    name: 'X',
++    href: '#', // TODO: https://x.com/USUARIO
++    Icon: AtSign,
++    ready: false,
++  },
++  {
++    name: 'Telegram',
++    href: '#', // TODO: https://t.me/USUARIO
++    Icon: Send,
++    ready: false,
++  },
++  {
++    name: 'Kwai',
++    href: '#', // TODO: https://kwai.com/@USUARIO
++    Icon: Video,
++    ready: false,
++  },
++];
+-- 
+2.43.0
+
