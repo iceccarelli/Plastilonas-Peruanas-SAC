@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useHideOnScroll } from '@/lib/useHideOnScroll';
 import {
   Menu, X, Search, ChevronDown, Phone, Award, LayoutDashboard
 } from 'lucide-react';
@@ -36,40 +37,48 @@ export default function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user ?? null;
+  const headerVisible = useHideOnScroll();
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
   return (
     <>
-      {/* Barra utilitaria superior (estilo AWS) */}
-      <div className="hidden md:block bg-[#0A2540] text-white/80 text-xs">
-        <div className="max-w-7xl mx-auto px-6 h-9 flex items-center justify-end gap-6">
-          <a href="tel:+51998117065" className="hover:text-white transition-colors">
-            +51 998 117 065
-          </a>
-          <a
-            href="https://wa.me/51946085270"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-white transition-colors"
-          >
-            WhatsApp
-          </a>
-          <Link href="/contacto" className="hover:text-white transition-colors">
-            Contáctenos
-          </Link>
-          <Link
-            href={user ? '/dashboard' : '/login'}
-            className="flex items-center gap-1.5 hover:text-white transition-colors"
-          >
-            {user ? (user.name?.split(' ')[0] ?? 'Mi cuenta') : 'Iniciar sesión'}
-          </Link>
+      {/* Encabezado fijo que se oculta al bajar y reaparece al subir.
+          Usa transform, no cambia el flujo: la página nunca "salta". */}
+      <div
+        className={`fixed top-0 inset-x-0 z-50 transition-transform duration-300 ease-out ${
+          headerVisible || isOpen ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
+        {/* Barra utilitaria superior (estilo AWS) */}
+        <div className="hidden md:block bg-[#0A2540] text-white/80 text-xs">
+          <div className="max-w-7xl mx-auto px-6 h-9 flex items-center justify-end gap-6">
+            <a href="tel:+51998117065" className="hover:text-white transition-colors">
+              +51 998 117 065
+            </a>
+            <a
+              href="https://wa.me/51946085270"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              WhatsApp
+            </a>
+            <Link href="/contacto" className="hover:text-white transition-colors">
+              Contáctenos
+            </Link>
+            <Link
+              href={user ? '/dashboard' : '/login'}
+              className="flex items-center gap-1.5 hover:text-white transition-colors"
+            >
+              {user ? (user.name?.split(' ')[0] ?? 'Mi cuenta') : 'Iniciar sesión'}
+            </Link>
+          </div>
         </div>
-      </div>
 
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-20">
+        <nav className="bg-white/95 backdrop-blur-lg border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
               <div className="w-11 h-11 bg-[#0A2540] rounded-xl flex items-center justify-center group-hover:bg-[#059669] transition-colors">
@@ -249,7 +258,12 @@ export default function Navbar() {
             </motion.div>
           )}
         </AnimatePresence>
-      </nav>
+        </nav>
+      </div>
+
+      {/* Espaciador: reserva la altura del encabezado fijo para que el
+          contenido no quede oculto debajo. md: incluye la barra utilitaria. */}
+      <div className="h-20 md:h-[116px]" aria-hidden="true" />
 
       {/* Command Palette */}
       <CommandPalette open={showCommand} onOpenChange={setShowCommand} />

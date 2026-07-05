@@ -4,6 +4,7 @@ import { products } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
 import CotizacionModal from '@/components/CotizacionModal';
 import HeroCarousel from '@/components/HeroCarousel';
+import SectionHeading from '@/components/SectionHeading';
 
 export default function Home() {
   const featuredProducts = products.filter(p => p.featured).slice(0, 6);
@@ -17,7 +18,7 @@ export default function Home() {
   return (
     <div className="overflow-hidden">
       {/* HERO - Premium Impact */}
-      <section className="relative min-h-[92vh] flex items-center justify-center bg-[#0A2540] text-white pt-16">
+      <section className="relative min-h-[88vh] flex items-center justify-center bg-[#0A2540] text-white">
         <HeroCarousel />
         
         <div className="relative max-w-5xl mx-auto px-6 text-center z-10">
@@ -84,15 +85,16 @@ export default function Home() {
 
       {/* CATEGORÍAS DESTACADAS */}
       <section className="max-w-7xl mx-auto px-6 pt-8 pb-16">
-        <div className="flex items-end justify-between mb-8">
-          <div>
-            <div className="uppercase text-xs tracking-[2px] text-[#059669] font-semibold">EXPERTOS EN</div>
-            <h2 className="text-3xl md:text-4xl tracking-tighter font-semibold text-[#0A2540]">Soluciones por sector</h2>
-          </div>
-          <Link href="/productos" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">
-            Ver todo el catálogo <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+        <SectionHeading
+          eyebrow="Expertos en"
+          title="Soluciones por sector"
+          className="mb-8"
+          action={
+            <Link href="/productos" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">
+              Ver todo el catálogo <ArrowRight className="w-4 h-4" />
+            </Link>
+          }
+        />
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
@@ -118,15 +120,16 @@ export default function Home() {
       {/* PRODUCTOS DESTACADOS */}
       <section className="bg-gray-50 py-16">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-end justify-between mb-9">
-            <div>
-              <div className="text-xs uppercase tracking-[2px] text-[#059669] font-semibold mb-1">NUESTRAS SOLUCIONES ESTRELLA</div>
-              <h2 className="text-4xl tracking-tighter font-semibold">Productos más solicitados</h2>
-            </div>
-            <Link href="/productos" className="text-sm font-medium flex items-center gap-1.5 text-[#059669] hover:underline">
-              Ver catálogo completo <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+          <SectionHeading
+            eyebrow="Nuestras soluciones estrella"
+            title="Productos más solicitados"
+            className="mb-9"
+            action={
+              <Link href="/productos" className="text-sm font-medium flex items-center gap-1.5 text-[#059669] hover:underline">
+                Ver catálogo completo <ArrowRight className="w-4 h-4" />
+              </Link>
+            }
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredProducts.map((product) => (
@@ -137,11 +140,12 @@ export default function Home() {
       </section>
 
       {/* SERVICIOS */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center mb-12">
-          <div className="text-xs tracking-[2px] text-[#059669] font-semibold">MÁS QUE FABRICACIÓN</div>
-          <h2 className="text-4xl tracking-tighter font-semibold mt-2">Servicios integrales de clase premium</h2>
-        </div>
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <SectionHeading
+          eyebrow="Más que fabricación"
+          title="Servicios integrales de clase premium"
+          className="mb-12"
+        />
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
@@ -157,7 +161,7 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="text-center mt-10">
+        <div className="mt-10">
           <Link href="/servicios" className="inline-flex items-center text-sm font-medium text-[#059669] hover:underline">
             Conocer todos nuestros servicios <ArrowRight className="ml-1.5 w-4 h-4" />
           </Link>
@@ -167,10 +171,14 @@ export default function Home() {
       {/* LA EMPRESA - SHORT */}
       <section className="bg-[#0A2540] text-white py-16">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <div className="uppercase tracking-[3px] text-xs text-white/50 mb-3">DESDE 2009</div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold mb-6">Compromiso real con la calidad y el cliente satisfecho.</h2>
-          <p className="text-white/80 max-w-2xl mx-auto text-lg">En Plastilonas Peruanas fabricamos con orgullo productos que superan las expectativas de los sectores más exigentes del país. Calidad, precio justo y atención personalizada son nuestra firma.</p>
-          
+          <SectionHeading
+            eyebrow="Desde 2009"
+            title="Compromiso real con la calidad y el cliente satisfecho."
+            description="En Plastilonas Peruanas fabricamos con orgullo productos que superan las expectativas de los sectores más exigentes del país. Calidad, precio justo y atención personalizada son nuestra firma."
+            align="center"
+            tone="light"
+          />
+
           <div className="mt-9">
             <Link href="/nosotros" className="inline-flex items-center gap-2 border border-white/30 hover:bg-white/10 px-8 py-3 rounded-2xl text-sm font-medium transition-all">
               Conozca nuestra historia <ArrowRight className="w-4 h-4" />
@@ -180,11 +188,12 @@ export default function Home() {
       </section>
 
       {/* POR QUÉ ELEGIRNOS */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center mb-10">
-          <div className="text-xs tracking-widest text-[#059669] font-semibold">POR QUÉ ELEGIRNOS</div>
-          <h2 className="text-4xl tracking-tighter font-semibold text-[#0A2540] mt-2">Fabricación directa, sin intermediarios</h2>
-        </div>
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <SectionHeading
+          eyebrow="Por qué elegirnos"
+          title="Fabricación directa, sin intermediarios"
+          className="mb-10"
+        />
 
         <div className="grid md:grid-cols-3 gap-6">
           {[
@@ -204,8 +213,13 @@ export default function Home() {
       {/* FINAL CTA */}
       <section className="bg-gradient-to-br from-[#059669] to-[#047857] py-20 text-white">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold mb-4">¿Listo para su próximo proyecto?</h2>
-          <p className="text-white/90 text-xl mb-9">Reciba una cotización personalizada según las especificaciones de su proyecto.</p>
+          <SectionHeading
+            title="¿Listo para su próximo proyecto?"
+            description="Reciba una cotización personalizada según las especificaciones de su proyecto."
+            align="center"
+            tone="light"
+            className="mb-9"
+          />
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/cotizacion" className="inline-flex justify-center items-center bg-white text-[#059669] hover:bg-white/90 px-14 py-4 rounded-2xl font-semibold text-lg transition-all active:scale-[0.985]">
