@@ -1,0 +1,202 @@
+From f7d90f97a2cf40b903726b51b1829e5e29ddc011 Mon Sep 17 00:00:00 2001
+From: Vincenzo Grimaldi <vince.ceccarelli@gmail.com>
+Date: Sun, 5 Jul 2026 02:26:46 +0000
+Subject: [PATCH] fix(responsive): mobile-first typography scaling and
+ viewport-safe overlays
+
+- Hero and all page h1/h2 headings now scale from mobile base sizes
+  (text-3xl/4xl) up to desktop (md:text-5xl/6xl/7xl); previously base
+  sizes were desktop-scale and wrapped badly on 360-390px phones
+- Hero trust row (RUC / Chorrillos / WhatsApp) wraps instead of
+  overflowing on narrow viewports
+- Stats numbers scale text-3xl -> md:text-5xl
+- Chatbot window height capped at min(560px, 100dvh - 8.5rem) so it
+  never exceeds small phone viewports (dvh accounts for mobile URL bars)
+- Quote modal capped at 100dvh - 2rem with internal scroll; previously
+  overflow-hidden clipped the form on phones with no way to reach the
+  submit button
+
+Verified: next build green (21 pages), applies with git am on top of
+the v1 fix commit.
+---
+ app/contacto/page.tsx          |  2 +-
+ app/cotizacion/page.tsx        |  2 +-
+ app/nosotros/page.tsx          |  2 +-
+ app/page.tsx                   | 14 +++++++-------
+ app/productos/[slug]/page.tsx  |  2 +-
+ app/productos/page.tsx         |  2 +-
+ app/servicios/page.tsx         |  2 +-
+ components/Chatbot.tsx         |  2 +-
+ components/CotizacionModal.tsx |  2 +-
+ 9 files changed, 15 insertions(+), 15 deletions(-)
+
+diff --git a/app/contacto/page.tsx b/app/contacto/page.tsx
+index 25dd096..6f1522c 100644
+--- a/app/contacto/page.tsx
++++ b/app/contacto/page.tsx
+@@ -42,7 +42,7 @@ export default function ContactoPage() {
+   return (
+     <div className="max-w-6xl mx-auto px-6 py-14">
+       <div className="max-w-2xl mb-12">
+-        <h1 className="text-6xl tracking-tighter font-semibold text-[#0A2540]">Hablemos de su proyecto</h1>
++        <h1 className="text-4xl sm:text-5xl md:text-6xl tracking-tighter font-semibold text-[#0A2540]">Hablemos de su proyecto</h1>
+         <p className="mt-4 text-xl text-gray-600">Estamos listos para ayudarle. Complete el formulario o contáctenos directamente por los canales preferidos.</p>
+       </div>
+ 
+diff --git a/app/cotizacion/page.tsx b/app/cotizacion/page.tsx
+index 3cd84e0..b8e82d0 100644
+--- a/app/cotizacion/page.tsx
++++ b/app/cotizacion/page.tsx
+@@ -12,7 +12,7 @@ export default function CotizacionPage() {
+     <div className="max-w-3xl mx-auto px-6 py-16 text-center">
+       <Link href="/" className="inline-flex items-center text-sm text-gray-500 hover:text-[#059669] mb-8"><ArrowLeft className="w-4 h-4 mr-1.5" /> Volver al inicio</Link>
+       
+-      <h1 className="text-5xl tracking-tighter font-semibold mb-4">Solicite su cotización</h1>
++      <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold mb-4">Solicite su cotización</h1>
+       <p className="text-xl text-gray-600 max-w-md mx-auto">Complete el formulario y su solicitud llegará directamente a nuestro equipo comercial por WhatsApp.</p>
+ 
+       <button 
+diff --git a/app/nosotros/page.tsx b/app/nosotros/page.tsx
+index 6ed89d2..dda52ce 100644
+--- a/app/nosotros/page.tsx
++++ b/app/nosotros/page.tsx
+@@ -5,7 +5,7 @@ export default function NosotrosPage() {
+     <div className="max-w-5xl mx-auto px-6 py-14">
+       <div className="max-w-3xl">
+         <div className="uppercase tracking-[3px] text-xs text-[#059669] font-semibold mb-3">DESDE 2009</div>
+-        <h1 className="text-6xl tracking-tighter font-semibold leading-none text-[#0A2540]">Más de 15 años fabricando confianza en el Perú.</h1>
++        <h1 className="text-4xl sm:text-5xl md:text-6xl tracking-tighter font-semibold leading-tight md:leading-none text-[#0A2540]">Más de 15 años fabricando confianza en el Perú.</h1>
+       </div>
+ 
+       <div className="prose prose-lg max-w-3xl mt-10 text-gray-700">
+diff --git a/app/page.tsx b/app/page.tsx
+index c4a0426..d4acf49 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -24,11 +24,11 @@ export default function Home() {
+             LÍDER EN SOLUCIONES TEXTILES INDUSTRIALES EN PERÚ
+           </div>
+           
+-          <h1 className="text-6xl md:text-7xl font-semibold tracking-tighter leading-[1.05] mb-6">
++          <h1 className="text-4xl sm:text-5xl md:text-7xl font-semibold tracking-tighter leading-[1.08] md:leading-[1.05] mb-6">
+             Soluciones industriales<br />de clase mundial<br />para el Perú.
+           </h1>
+           
+-          <p className="max-w-2xl mx-auto text-xl text-white/80 mb-10">
++          <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">
+             Más de 15 años fabricando Big Bags, Geomembranas, Carpas industriales y lonas a medida con la más alta calidad y compromiso.
+           </p>
+ 
+@@ -47,7 +47,7 @@ export default function Home() {
+             </Link>
+           </div>
+ 
+-          <div className="mt-12 flex items-center justify-center gap-8 text-xs tracking-widest text-white/50">
++          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs tracking-widest text-white/50">
+             <div>RUC 20523135385</div>
+             <div>CHORRILLOS, LIMA</div>
+             <div>WHATSAPP 24/7</div>
+@@ -74,7 +74,7 @@ export default function Home() {
+         <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-100 rounded-3xl overflow-hidden">
+           {stats.map((stat, i) => (
+             <div key={i} className="bg-white px-8 py-9 text-center border-r border-gray-100 last:border-r-0">
+-              <div className="text-5xl font-semibold tracking-tighter text-[#0A2540]">{stat.number}</div>
++              <div className="text-3xl md:text-5xl font-semibold tracking-tighter text-[#0A2540]">{stat.number}</div>
+               <div className="text-sm text-gray-500 mt-2 font-medium tracking-wide">{stat.label}</div>
+             </div>
+           ))}
+@@ -86,7 +86,7 @@ export default function Home() {
+         <div className="flex items-end justify-between mb-8">
+           <div>
+             <div className="uppercase text-xs tracking-[2px] text-[#059669] font-semibold">EXPERTOS EN</div>
+-            <h2 className="text-4xl tracking-tighter font-semibold text-[#0A2540]">Soluciones por sector</h2>
++            <h2 className="text-3xl md:text-4xl tracking-tighter font-semibold text-[#0A2540]">Soluciones por sector</h2>
+           </div>
+           <Link href="/productos" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">
+             Ver todo el catálogo <ArrowRight className="w-4 h-4" />
+@@ -167,7 +167,7 @@ export default function Home() {
+       <section className="bg-[#0A2540] text-white py-16">
+         <div className="max-w-4xl mx-auto px-6 text-center">
+           <div className="uppercase tracking-[3px] text-xs text-white/50 mb-3">DESDE 2009</div>
+-          <h2 className="text-5xl tracking-tighter font-semibold mb-6">Compromiso real con la calidad y el cliente satisfecho.</h2>
++          <h2 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold mb-6">Compromiso real con la calidad y el cliente satisfecho.</h2>
+           <p className="text-white/80 max-w-2xl mx-auto text-lg">En Plastilonas Peruanas fabricamos con orgullo productos que superan las expectativas de los sectores más exigentes del país. Calidad, precio justo y atención personalizada son nuestra firma.</p>
+           
+           <div className="mt-9">
+@@ -203,7 +203,7 @@ export default function Home() {
+       {/* FINAL CTA */}
+       <section className="bg-gradient-to-br from-[#059669] to-[#047857] py-20 text-white">
+         <div className="max-w-3xl mx-auto px-6 text-center">
+-          <h2 className="text-5xl tracking-tighter font-semibold mb-4">¿Listo para su próximo proyecto?</h2>
++          <h2 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold mb-4">¿Listo para su próximo proyecto?</h2>
+           <p className="text-white/90 text-xl mb-9">Reciba una cotización personalizada según las especificaciones de su proyecto.</p>
+           
+           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+diff --git a/app/productos/[slug]/page.tsx b/app/productos/[slug]/page.tsx
+index 0c46d91..0cdbac1 100644
+--- a/app/productos/[slug]/page.tsx
++++ b/app/productos/[slug]/page.tsx
+@@ -73,7 +73,7 @@ export default async function ProductDetailPage({ params }: Props) {
+             {product.popular && <span className="badge bg-amber-100 text-amber-700">Más vendido</span>}
+           </div>
+ 
+-          <h1 className="text-5xl tracking-tighter font-semibold text-[#0A2540] leading-none mb-5">{product.name}</h1>
++          <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold text-[#0A2540] leading-tight md:leading-none mb-5">{product.name}</h1>
+           
+           <p className="text-xl text-gray-600 leading-snug mb-8">{product.shortDescription}</p>
+ 
+diff --git a/app/productos/page.tsx b/app/productos/page.tsx
+index cdebdc7..4a15c4c 100644
+--- a/app/productos/page.tsx
++++ b/app/productos/page.tsx
+@@ -92,7 +92,7 @@ function ProductosContent() {
+       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
+         <div>
+           <div className="text-xs tracking-[2.5px] text-[#059669] font-semibold">CATÁLOGO COMPLETO</div>
+-          <h1 className="text-5xl tracking-tighter font-semibold text-[#0A2540]">Productos Industriales</h1>
++          <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold text-[#0A2540]">Productos Industriales</h1>
+           <p className="text-gray-600 mt-2">Soluciones de alta performance para los sectores más exigentes del Perú</p>
+         </div>
+         <div className="text-sm text-gray-500">{filteredProducts.length} productos encontrados</div>
+diff --git a/app/servicios/page.tsx b/app/servicios/page.tsx
+index 55c7649..b6bdd81 100644
+--- a/app/servicios/page.tsx
++++ b/app/servicios/page.tsx
+@@ -34,7 +34,7 @@ export default function ServiciosPage() {
+       <div className="bg-[#0A2540] text-white py-16">
+         <div className="max-w-4xl mx-auto px-6 text-center">
+           <div className="text-xs tracking-[3px] text-white/50 mb-2">MÁS ALLÁ DE LA FABRICACIÓN</div>
+-          <h1 className="text-6xl tracking-tighter font-semibold">Servicios integrales de nivel premium</h1>
++          <h1 className="text-4xl sm:text-5xl md:text-6xl tracking-tighter font-semibold">Servicios integrales de nivel premium</h1>
+           <p className="mt-5 text-xl text-white/80 max-w-lg mx-auto">Acompañamos su proyecto desde la idea hasta la entrega final con estándares de clase mundial.</p>
+         </div>
+       </div>
+diff --git a/components/Chatbot.tsx b/components/Chatbot.tsx
+index b793cb1..c3e1914 100644
+--- a/components/Chatbot.tsx
++++ b/components/Chatbot.tsx
+@@ -46,7 +46,7 @@ export default function Chatbot() {
+       <AnimatePresence>
+         {isOpen && (
+           <div className="fixed bottom-24 right-6 z-[95] w-[380px] max-w-[calc(100vw-3rem)] chatbot-window">
+-            <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 flex flex-col h-[560px] overflow-hidden">
++            <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 flex flex-col h-[min(560px,calc(100dvh-8.5rem))] overflow-hidden">
+               {/* Header */}
+               <div className="bg-[#0A2540] text-white px-6 py-5 flex items-center justify-between">
+                 <div className="flex items-center gap-3">
+diff --git a/components/CotizacionModal.tsx b/components/CotizacionModal.tsx
+index 164389f..aea0b9e 100644
+--- a/components/CotizacionModal.tsx
++++ b/components/CotizacionModal.tsx
+@@ -115,7 +115,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
+             animate={{ opacity: 1, scale: 1, y: 0 }}
+             exit={{ opacity: 0, scale: 0.96, y: 20 }}
+             transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+-            className="bg-white w-full max-w-[620px] rounded-3xl shadow-2xl overflow-hidden"
++            className="bg-white w-full max-w-[620px] max-h-[calc(100dvh-2rem)] rounded-3xl shadow-2xl overflow-y-auto"
+             onClick={e => e.stopPropagation()}
+           >
+             {/* Header */}
+-- 
+2.43.0
+
