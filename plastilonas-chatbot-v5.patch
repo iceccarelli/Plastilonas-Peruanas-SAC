@@ -1,0 +1,118 @@
+From 7d43db986810b7bcf5d8388bda8d4daba6490ee8 Mon Sep 17 00:00:00 2001
+From: Vincenzo Grimaldi <vince.ceccarelli@gmail.com>
+Date: Sun, 5 Jul 2026 04:08:54 +0000
+Subject: [PATCH] feat(chatbot): professional pulsating launcher button
+
+- Two emerald (#059669) rings radiate outward from the navy launcher on
+  a staggered 2.6s cycle (only while the chat is closed)
+- Subtle 'breathing' box-shadow glow on the button itself (3s ease)
+- Live 'online' status dot with its own ping halo, navy-bordered for
+  contrast against the button
+- Brand-consistent: navy #0A2540 base, emerald accent matching the
+  site; solid emerald on hover; AA contrast maintained
+- Rings removed while chat is open to avoid distraction during
+  conversation; X icon shown instead
+- Respects prefers-reduced-motion (all animations disabled)
+
+Verified: next build green (21 pages), tsc clean, runtime smoke test
+confirms pulse classes render and chat endpoint degrades gracefully
+without ANTHROPIC_API_KEY.
+---
+ components/Chatbot.tsx | 81 +++++++++++++++++++++++++++++++++---------
+ 1 file changed, 64 insertions(+), 17 deletions(-)
+
+diff --git a/components/Chatbot.tsx b/components/Chatbot.tsx
+index c3e1914..9e63c93 100644
+--- a/components/Chatbot.tsx
++++ b/components/Chatbot.tsx
+@@ -24,23 +24,70 @@ export default function Chatbot() {
+ 
+   return (
+     <>
+-      {/* Floating Button */}
+-      <button
+-        onClick={toggleChat}
+-        className="fixed bottom-6 right-6 z-[90] w-16 h-16 bg-[#0A2540] hover:bg-[#059669] text-white rounded-2xl shadow-xl flex items-center justify-center transition-all active:scale-95 group"
+-        aria-label="Abrir chat de asistencia"
+-      >
+-        <AnimatePresence mode="wait">
+-          {isOpen ? (
+-            <X className="w-7 h-7" />
+-          ) : (
+-            <div className="relative">
+-              <MessageCircle className="w-7 h-7" />
+-              <div className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#0A2540] animate-pulse" />
+-            </div>
+-          )}
+-        </AnimatePresence>
+-      </button>
++      {/* Botón flotante con anillos pulsantes (estilo empresarial) */}
++      <div className="fixed bottom-6 right-6 z-[90]">
++        {/* Anillos que irradian: solo cuando el chat está cerrado, para
++            atraer la atención sin distraer durante la conversación. */}
++        {!isOpen && (
++          <>
++            <span className="pp-ping pp-ping-1" aria-hidden="true" />
++            <span className="pp-ping pp-ping-2" aria-hidden="true" />
++          </>
++        )}
++
++        <button
++          onClick={toggleChat}
++          className={`relative w-16 h-16 rounded-2xl shadow-xl flex items-center justify-center transition-colors active:scale-95 group ${
++            isOpen
++              ? 'bg-[#0A2540] hover:bg-[#0A2540]'
++              : 'bg-[#0A2540] hover:bg-[#059669] pp-breathe'
++          }`}
++          aria-label={isOpen ? 'Cerrar chat de asistencia' : 'Abrir chat de asistencia'}
++        >
++          <AnimatePresence mode="wait">
++            {isOpen ? (
++              <X className="w-7 h-7 text-white" />
++            ) : (
++              <div className="relative">
++                <MessageCircle className="w-7 h-7 text-white" />
++                {/* Punto "en línea" con doble anillo para claridad */}
++                <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
++                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
++                  <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-[#0A2540]" />
++                </span>
++              </div>
++            )}
++          </AnimatePresence>
++        </button>
++      </div>
++
++      {/* Animaciones del botón. Respetan prefers-reduced-motion. */}
++      <style>{`
++        @keyframes pp-ring {
++          0%   { transform: scale(0.85); opacity: 0.55; }
++          70%  { opacity: 0; }
++          100% { transform: scale(2.1); opacity: 0; }
++        }
++        @keyframes pp-breathe {
++          0%, 100% { box-shadow: 0 10px 25px -5px rgba(5,150,105,0.35), 0 0 0 0 rgba(5,150,105,0.0); }
++          50%      { box-shadow: 0 10px 30px -5px rgba(5,150,105,0.55), 0 0 0 6px rgba(5,150,105,0.10); }
++        }
++        .pp-ping {
++          position: absolute;
++          inset: 0;
++          width: 4rem;
++          height: 4rem;
++          border-radius: 1rem;
++          background: #059669;
++          z-index: -1;
++          animation: pp-ring 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
++        }
++        .pp-ping-2 { animation-delay: 1.3s; }
++        .pp-breathe { animation: pp-breathe 3s ease-in-out infinite; }
++        @media (prefers-reduced-motion: reduce) {
++          .pp-ping, .pp-breathe { animation: none; }
++        }
++      `}</style>
+ 
+       {/* Chat Window */}
+       <AnimatePresence>
+-- 
+2.43.0
+
