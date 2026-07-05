@@ -1,0 +1,93 @@
+From 633523eff7f1ec310ef94ee39943f23d82bb4be5 Mon Sep 17 00:00:00 2001
+From: Vincenzo Grimaldi <vince.ceccarelli@gmail.com>
+Date: Sun, 5 Jul 2026 04:25:24 +0000
+Subject: [PATCH] fix(chat): real error reporting + current Haiku model
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- The route returned an opaque 'An error occurred.' that hid the actual
+  failure. Now logs the real exception (onError + getErrorMessage) to
+  Vercel logs, and returns a friendly WhatsApp-fallback message to users
+- Wrap handler in try/catch → 500 with detail instead of an unhandled
+  throw
+- Upgrade model claude-3-5-haiku-latest → claude-haiku-4-5 (current
+  generation, same low-cost tier)
+
+Diagnostic: with the key set, the most common cause of a stream error is
+an Anthropic account with no prepaid credit balance. Check Vercel logs
+after deploy — the real reason now prints there. If it mentions credit/
+balance, add credits at console.anthropic.com/settings/billing.
+
+Verified: next build green (21 pages), tsc clean.
+---
+ app/api/chat/route.ts | 51 ++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 38 insertions(+), 13 deletions(-)
+
+diff --git a/app/api/chat/route.ts b/app/api/chat/route.ts
+index 9a3f1fa..5ca6bbc 100644
+--- a/app/api/chat/route.ts
++++ b/app/api/chat/route.ts
+@@ -37,21 +37,46 @@ Responde siempre en español natural y profesional.`;
+ 
+ export async function POST(req: Request) {
+   if (!process.env.ANTHROPIC_API_KEY) {
+-    return Response.json(
+-      { error: 'chat_not_configured' },
+-      { status: 503 }
+-    );
++    return Response.json({ error: 'chat_not_configured' }, { status: 503 });
+   }
+ 
+-  const { messages } = await req.json();
++  try {
++    const { messages } = await req.json();
+ 
+-  const result = streamText({
+-    model: anthropic('claude-3-5-haiku-latest'),
+-    system: SYSTEM_PROMPT,
+-    messages,
+-    temperature: 0.65,
+-    maxTokens: 700,
+-  });
++    const result = streamText({
++      // Modelo Haiku de generación actual (rápido y económico).
++      model: anthropic('claude-haiku-4-5'),
++      system: SYSTEM_PROMPT,
++      messages,
++      temperature: 0.65,
++      maxTokens: 700,
++      // Registra el error real en los logs de Vercel para poder diagnosticar.
++      onError: ({ error }) => {
++        console.error('[chat] streamText error:', error);
++      },
++    });
+ 
+-  return result.toDataStreamResponse();
++    return result.toDataStreamResponse({
++      // Expone el motivo real al cliente en lugar de "An error occurred."
++      getErrorMessage: (error) => {
++        const msg =
++          error instanceof Error ? error.message : String(error);
++        console.error('[chat] toDataStreamResponse error:', msg);
++        // Mensaje amable para el usuario; el detalle queda en los logs.
++        if (/credit|billing|balance/i.test(msg)) {
++          return 'El asistente no está disponible temporalmente. Escríbanos por WhatsApp.';
++        }
++        if (/401|api key|authentication/i.test(msg)) {
++          return 'El asistente no está disponible temporalmente. Escríbanos por WhatsApp.';
++        }
++        return 'El asistente no está disponible en este momento. Escríbanos por WhatsApp.';
++      },
++    });
++  } catch (err) {
++    console.error('[chat] fatal error:', err);
++    return Response.json(
++      { error: 'chat_failed', detail: err instanceof Error ? err.message : String(err) },
++      { status: 500 }
++    );
++  }
+ }
+-- 
+2.43.0
+
