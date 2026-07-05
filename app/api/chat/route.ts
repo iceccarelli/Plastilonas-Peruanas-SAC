@@ -37,21 +37,46 @@ Responde siempre en español natural y profesional.`;
 
 export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {
-    return Response.json(
-      { error: 'chat_not_configured' },
-      { status: 503 }
-    );
+    return Response.json({ error: 'chat_not_configured' }, { status: 503 });
   }
 
-  const { messages } = await req.json();
+  try {
+    const { messages } = await req.json();
 
-  const result = streamText({
-    model: anthropic('claude-3-5-haiku-latest'),
-    system: SYSTEM_PROMPT,
-    messages,
-    temperature: 0.65,
-    maxTokens: 700,
-  });
+    const result = streamText({
+      // Modelo Haiku de generación actual (rápido y económico).
+      model: anthropic('claude-haiku-4-5'),
+      system: SYSTEM_PROMPT,
+      messages,
+      temperature: 0.65,
+      maxTokens: 700,
+      // Registra el error real en los logs de Vercel para poder diagnosticar.
+      onError: ({ error }) => {
+        console.error('[chat] streamText error:', error);
+      },
+    });
 
-  return result.toDataStreamResponse();
+    return result.toDataStreamResponse({
+      // Expone el motivo real al cliente en lugar de "An error occurred."
+      getErrorMessage: (error) => {
+        const msg =
+          error instanceof Error ? error.message : String(error);
+        console.error('[chat] toDataStreamResponse error:', msg);
+        // Mensaje amable para el usuario; el detalle queda en los logs.
+        if (/credit|billing|balance/i.test(msg)) {
+          return 'El asistente no está disponible temporalmente. Escríbanos por WhatsApp.';
+        }
+        if (/401|api key|authentication/i.test(msg)) {
+          return 'El asistente no está disponible temporalmente. Escríbanos por WhatsApp.';
+        }
+        return 'El asistente no está disponible en este momento. Escríbanos por WhatsApp.';
+      },
+    });
+  } catch (err) {
+    console.error('[chat] fatal error:', err);
+    return Response.json(
+      { error: 'chat_failed', detail: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
+  }
 }
