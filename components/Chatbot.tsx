@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { whatsappUrl, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -109,8 +110,16 @@ export default function Chatbot() {
                 )}
 
                 {error && (
-                  <div className="text-center text-xs text-red-500 bg-red-50 py-2 rounded-2xl">
-                    Error de conexión. Por favor intente nuevamente o contáctenos por WhatsApp.
+                  <div className="text-center text-xs bg-amber-50 border border-amber-100 text-amber-800 py-3 px-4 rounded-2xl space-y-2">
+                    <p>El asistente virtual no está disponible en este momento.</p>
+                    <a
+                      href={whatsappUrl('Hola, quisiera hacer una consulta sobre sus productos.')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block font-semibold text-[#059669] hover:underline"
+                    >
+                      Escríbanos por WhatsApp {WHATSAPP_DISPLAY} →
+                    </a>
                   </div>
                 )}
               </div>

@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Chatbot from '@/components/Chatbot';
 import { Toaster } from 'sonner';
+import AuthProvider from '@/components/AuthProvider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -73,11 +74,13 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-sans antialiased bg-white text-[#0A2540]">
-        <Navbar />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
-        <Chatbot />
-        <Toaster position="top-center" richColors closeButton />
+        <AuthProvider>
+          <Navbar />
+          <main className="min-h-screen">{children}</main>
+          <Footer />
+          <Chatbot />
+          <Toaster position="top-center" richColors closeButton />
+        </AuthProvider>
       </body>
     </html>
   );

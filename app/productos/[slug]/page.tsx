@@ -167,7 +167,7 @@ export default async function ProductDetailPage({ params }: Props) {
       {/* Final CTA */}
       <div className="mt-16 bg-[#0A2540] text-white rounded-3xl p-10 text-center">
         <h3 className="text-3xl tracking-tight font-semibold mb-3">¿Este producto se adapta a su proyecto?</h3>
-        <p className="text-white/80 mb-7 max-w-md mx-auto">Nuestro equipo técnico está listo para asesorarlo y entregarle una cotización personalizada en menos de 2 horas.</p>
+        <p className="text-white/80 mb-7 max-w-md mx-auto">Nuestro equipo técnico está listo para asesorarlo y entregarle una cotización personalizada para su proyecto.</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href={`/cotizacion?producto=${encodeURIComponent(product.name)}`} className="inline-flex items-center justify-center bg-white text-[#0A2540] hover:bg-white/90 px-10 py-3.5 rounded-2xl font-semibold">Solicitar Cotización Personalizada</Link>
           <a href="https://wa.me/51946085270" target="_blank" className="inline-flex items-center justify-center border border-white/30 hover:bg-white/10 px-8 py-3.5 rounded-2xl font-medium">Hablar con un especialista</a>

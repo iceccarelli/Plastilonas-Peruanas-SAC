@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
+import { buildContactMessage, openWhatsApp } from '@/lib/whatsapp';
 
 const contactSchema = z.object({
   nombre: z.string().min(3),
@@ -23,9 +24,18 @@ export default function ContactoPage() {
   });
 
   const onSubmit = async (data: ContactForm) => {
-    await new Promise(r => setTimeout(r, 1200));
-    console.log('Contacto:', data);
-    toast.success('Mensaje enviado correctamente', { description: 'Nos pondremos en contacto con usted a la brevedad.' });
+    // Envío real vía WhatsApp: el mensaje llega de verdad al equipo comercial.
+    openWhatsApp(
+      buildContactMessage({
+        nombre: data.nombre,
+        email: data.email,
+        asunto: data.asunto,
+        mensaje: `${data.mensaje} (Tel: ${data.telefono})`,
+      })
+    );
+    toast.success('Su mensaje está listo en WhatsApp', {
+      description: 'Pulse enviar en la ventana de WhatsApp para completar el envío.',
+    });
     reset();
   };
 

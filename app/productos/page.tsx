@@ -1,16 +1,28 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Search, Grid, List, Filter, X } from 'lucide-react';
 import { products, categories, sectors } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function ProductosPage() {
+function ProductosContent() {
+  // Los enlaces del navbar, footer y home usan ?categoria= y ?sector=.
+  // Antes estos parámetros se ignoraban y toda la navegación por categoría
+  // llevaba al catálogo sin filtrar.
+  const searchParams = useSearchParams();
+  const initialCategoria = searchParams.get('categoria');
+  const initialSector = searchParams.get('sector');
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    initialCategoria ? [initialCategoria] : []
+  );
+  const [selectedSectors, setSelectedSectors] = useState<string[]>(
+    initialSector ? [initialSector] : []
+  );
   const [sortBy, setSortBy] = useState<'name' | 'popular'>('popular');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
@@ -207,5 +219,13 @@ export default function ProductosPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductosPage() {
+  return (
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-6 py-20 text-gray-400">Cargando catálogo…</div>}>
+      <ProductosContent />
+    </Suspense>
   );
 }

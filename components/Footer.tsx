@@ -25,7 +25,7 @@ export default function Footer() {
                 <Award className="w-3.5 h-3.5" /> +15 años de experiencia
               </div>
               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">
-                <Users className="w-3.5 h-3.5" /> 500+ clientes satisfechos
+                <Users className="w-3.5 h-3.5" /> Fabricación 100% a medida
               </div>
             </div>
           </div>

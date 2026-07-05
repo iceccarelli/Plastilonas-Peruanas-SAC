@@ -1,18 +1,18 @@
-import { openai } from '@ai-sdk/openai';
+import { anthropic } from '@ai-sdk/anthropic';
 import { streamText } from 'ai';
 
-// IMPORTANT: Add your OpenAI API key in .env.local as OPENAI_API_KEY=sk-...
-// For production, consider using @ai-sdk/anthropic or xAI compatible endpoint.
-// The system prompt is optimized for Plastilonas Peruanas expert advisor.
+// Asistente comercial con Claude (Vercel AI SDK).
+// Requiere ANTHROPIC_API_KEY en el entorno. Sin la clave, respondemos 503 y
+// el widget muestra el canal de WhatsApp en lugar de un error críptico.
 
 export const maxDuration = 30;
 
-const SYSTEM_PROMPT = `Eres un asesor comercial experto y altamente profesional de Plastilonas Peruanas SAC, empresa líder en Perú con más de 15 años de experiencia fabricando soluciones textiles industriales de alta calidad.
+const SYSTEM_PROMPT = `Eres un asesor comercial experto y altamente profesional de Plastilonas Peruanas SAC, empresa peruana con más de 15 años de experiencia fabricando soluciones textiles industriales.
 
 Tu personalidad:
 - Amable, claro, directo y orientado a resultados.
 - Hablas español peruano natural y profesional.
-- Nunca inventas precios ni plazos exactos. Siempre indicas que se cotiza según especificaciones técnicas.
+- Nunca inventas precios, plazos, certificaciones ni capacidades. Siempre indicas que se cotiza según especificaciones técnicas.
 - Tu objetivo principal es entender la necesidad del cliente y guiarlo hacia una cotización precisa.
 
 Productos principales que conoces muy bien:
@@ -36,10 +36,17 @@ Directrices de respuesta:
 Responde siempre en español natural y profesional.`;
 
 export async function POST(req: Request) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return Response.json(
+      { error: 'chat_not_configured' },
+      { status: 503 }
+    );
+  }
+
   const { messages } = await req.json();
 
   const result = streamText({
-    model: openai('gpt-4o-mini'), // Change to 'gpt-4o' for higher quality if needed
+    model: anthropic('claude-3-5-haiku-latest'),
     system: SYSTEM_PROMPT,
     messages,
     temperature: 0.65,

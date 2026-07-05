@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  Menu, X, Search, ChevronDown, Phone, Award 
+import { useSession } from 'next-auth/react';
+import {
+  Menu, X, Search, ChevronDown, Phone, Award, LayoutDashboard
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CommandPalette from './CommandPalette';
@@ -33,6 +34,8 @@ export default function Navbar() {
   const [showCommand, setShowCommand] = useState(false);
   const [showCotizacion, setShowCotizacion] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const user = session?.user ?? null;
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
@@ -130,6 +133,29 @@ export default function Navbar() {
                 <kbd className="hidden lg:block ml-1 px-1.5 py-0.5 text-[10px] font-mono bg-gray-100 rounded">⌘K</kbd>
               </button>
 
+              {/* Login / Account */}
+              {user ? (
+                <Link
+                  href="/dashboard"
+                  className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0A2540] hover:text-[#059669] border border-gray-200 hover:border-[#059669] rounded-full transition-all active:scale-[0.985]"
+                >
+                  {user.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={user.image} alt="" className="w-5 h-5 rounded-full" />
+                  ) : (
+                    <LayoutDashboard className="w-4 h-4" />
+                  )}
+                  {user.name?.split(' ')[0] ?? 'Mi Cuenta'}
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="hidden md:flex items-center px-4 py-2 text-sm font-medium text-[#0A2540] hover:text-[#059669] transition-colors"
+                >
+                  Iniciar sesión
+                </Link>
+              )}
+
               {/* Cotización Button - Primary CTA */}
               <button
                 onClick={() => setShowCotizacion(true)}
@@ -182,7 +208,15 @@ export default function Navbar() {
                     Solicitar Cotización
                   </button>
                 </div>
-                <a href="https://wa.me/51946085270" target="_blank" className="flex items-center gap-2 text-[#059669]">
+                <Link
+                  href={user ? '/dashboard' : '/login'}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  {user ? 'Mi Cuenta' : 'Iniciar sesión'}
+                </Link>
+                <a href="https://wa.me/51946085270" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#059669]">
                   <Phone className="w-4 h-4" /> WhatsApp: +51 946 085 270
                 </a>
               </div>

@@ -8,6 +8,7 @@ import { X, Send, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { products } from '@/lib/products';
 import { toast } from 'sonner';
+import { buildQuoteMessage, openWhatsApp, saveQuoteLocally } from '@/lib/whatsapp';
 
 const formSchema = z.object({
   nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
@@ -54,18 +55,38 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
 
-    // Simulate API call / Server Action
-    await new Promise(resolve => setTimeout(resolve, 1450));
+    // Envío real: abrimos WhatsApp con la solicitud estructurada, lista para
+    // enviar al equipo comercial. Sin backend intermedio que pueda fallar.
+    const message = buildQuoteMessage({
+      nombre: data.nombre,
+      empresa: data.empresa,
+      email: data.email,
+      telefono: data.telefono,
+      producto: data.producto,
+      cantidad: data.cantidad,
+      mensaje: [data.mensaje, data.fechaNecesaria ? `Fecha requerida: ${data.fechaNecesaria}` : '']
+        .filter(Boolean)
+        .join(' — '),
+    });
 
-    // In production: Send to email service, CRM, or Server Action with resend/nodemailer
-    console.log('Cotización enviada:', data);
+    saveQuoteLocally({
+      nombre: data.nombre,
+      empresa: data.empresa,
+      email: data.email,
+      telefono: data.telefono,
+      producto: data.producto,
+      cantidad: data.cantidad,
+      mensaje: data.mensaje,
+    });
+
+    openWhatsApp(message);
 
     setIsSubmitting(false);
     setIsSuccess(true);
 
-    toast.success('¡Solicitud recibida con éxito!', {
-      description: 'Nuestro equipo comercial se contactará con usted en las próximas 2 horas hábiles.',
-      duration: 6000,
+    toast.success('Su solicitud está lista en WhatsApp', {
+      description: 'Pulse enviar en la ventana de WhatsApp para que nuestro equipo comercial la reciba de inmediato.',
+      duration: 7000,
     });
 
     setTimeout(() => {
@@ -101,7 +122,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
             <div className="flex items-center justify-between px-8 py-6 border-b">
               <div>
                 <h2 className="text-2xl font-semibold tracking-tight text-[#0A2540]">Solicitar Cotización</h2>
-                <p className="text-sm text-gray-500 mt-0.5">Respuesta garantizada en menos de 2 horas hábiles</p>
+                <p className="text-sm text-gray-500 mt-0.5">Atención directa por WhatsApp en horario comercial</p>
               </div>
               <button onClick={handleClose} className="p-2 text-gray-400 hover:text-gray-600 transition-colors" disabled={isSubmitting}>
                 <X className="w-5 h-5" />
@@ -114,7 +135,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
                   <CheckCircle className="w-10 h-10 text-[#059669]" />
                 </div>
                 <h3 className="text-2xl font-semibold text-[#0A2540] mb-3">¡Gracias por confiar en nosotros!</h3>
-                <p className="text-gray-600 max-w-sm mx-auto">Hemos recibido su solicitud. Un especialista de Plastilonas Peruanas se comunicará con usted muy pronto.</p>
+                <p className="text-gray-600 max-w-sm mx-auto">Su solicitud quedó lista en WhatsApp: pulse enviar en esa ventana y un especialista de Plastilonas Peruanas le responderá.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit(onSubmit)} className="px-8 py-8 space-y-6">
@@ -227,7 +248,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
                 </div>
 
                 <p className="text-center text-[10px] text-gray-400 pt-1">
-                  Sus datos están protegidos. Nos comprometemos a responder en un máximo de 2 horas hábiles.
+                  Sus datos se envían directamente a nuestro equipo comercial por WhatsApp. No los compartimos con terceros.
                 </p>
               </form>
             )}

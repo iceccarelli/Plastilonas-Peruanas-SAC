@@ -13,7 +13,7 @@ export default function CotizacionPage() {
       <Link href="/" className="inline-flex items-center text-sm text-gray-500 hover:text-[#059669] mb-8"><ArrowLeft className="w-4 h-4 mr-1.5" /> Volver al inicio</Link>
       
       <h1 className="text-5xl tracking-tighter font-semibold mb-4">Solicite su cotización</h1>
-      <p className="text-xl text-gray-600 max-w-md mx-auto">Complete el formulario y reciba una propuesta personalizada en menos de 2 horas hábiles.</p>
+      <p className="text-xl text-gray-600 max-w-md mx-auto">Complete el formulario y su solicitud llegará directamente a nuestro equipo comercial por WhatsApp.</p>
 
       <button 
         onClick={() => setShowModal(true)} 

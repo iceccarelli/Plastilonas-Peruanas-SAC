@@ -8,9 +8,9 @@ export default function Home() {
   const featuredProducts = products.filter(p => p.featured).slice(0, 6);
   const stats = [
     { number: '15+', label: 'Años de experiencia' },
-    { number: '500+', label: 'Clientes satisfechos' },
-    { number: '1200+', label: 'Proyectos entregados' },
-    { number: '98%', label: 'Tasa de recompra' },
+    { number: '6', label: 'Sectores atendidos' },
+    { number: '100%', label: 'Fabricación a medida' },
+    { number: 'Perú', label: 'Envíos a todo el país' },
   ];
 
   return (
@@ -49,7 +49,7 @@ export default function Home() {
 
           <div className="mt-12 flex items-center justify-center gap-8 text-xs tracking-widest text-white/50">
             <div>RUC 20523135385</div>
-            <div>CHorrillos, LIMA</div>
+            <div>CHORRILLOS, LIMA</div>
             <div>WHATSAPP 24/7</div>
           </div>
         </div>
@@ -62,7 +62,7 @@ export default function Home() {
       {/* TRUST BAR */}
       <div className="border-b bg-white py-5">
         <div className="max-w-6xl mx-auto px-6 flex flex-wrap justify-center md:justify-between items-center gap-x-10 gap-y-4 text-sm text-gray-500">
-          <div className="flex items-center gap-2"><Shield className="w-4 h-4 text-[#059669]" /> Calidad certificada ISO</div>
+          <div className="flex items-center gap-2"><Shield className="w-4 h-4 text-[#059669]" /> Materiales de alta resistencia</div>
           <div className="flex items-center gap-2"><Users className="w-4 h-4 text-[#059669]" /> Atención personalizada</div>
           <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-[#059669]" /> Entregas en todo el Perú</div>
           <div className="flex items-center gap-2"><Award className="w-4 h-4 text-[#059669]" /> +15 años de trayectoria</div>
@@ -178,25 +178,23 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TESTIMONIOS */}
+      {/* POR QUÉ ELEGIRNOS */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center mb-10">
-          <div className="text-xs tracking-widest text-[#059669] font-semibold">LO QUE DICEN NUESTROS CLIENTES</div>
+          <div className="text-xs tracking-widest text-[#059669] font-semibold">POR QUÉ ELEGIRNOS</div>
+          <h2 className="text-4xl tracking-tighter font-semibold text-[#0A2540] mt-2">Fabricación directa, sin intermediarios</h2>
         </div>
-        
+
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { name: "Carlos Mendoza", company: "Minera Las Bambas", content: "Los big bags de Plastilonas superaron nuestras expectativas en resistencia y durabilidad. Entrega impecable y atención de primera.", rating: 5 },
-            { name: "Ana Torres", company: "Agroexportadora del Sur", content: "Las mallas antiáfidas y las carpas para nuestros invernaderos han sido una excelente inversión. Calidad y precio imbatible.", rating: 5 },
-            { name: "Roberto Quispe", company: "Constructora Vial del Perú", content: "Geomembranas de excelente calidad para nuestro proyecto de canales de riego. El equipo técnico nos asesoró en todo momento.", rating: 5 },
-          ].map((t, i) => (
+            { title: "Fabricación a medida", content: "Cada Big Bag, geomembrana o carpa se confecciona según las especificaciones exactas de su proyecto: dimensiones, resistencia y acabados." },
+            { title: "Asesoría técnica real", content: "Hable directamente con quienes fabrican su producto. Le ayudamos a elegir el material correcto antes de cotizar, no después de comprar." },
+            { title: "Atención inmediata por WhatsApp", content: "Sin formularios que caen al vacío: su solicitud llega directo a nuestro equipo comercial y recibe respuesta en horario de atención." },
+          ].map((item, i) => (
             <div key={i} className="bg-white p-8 rounded-3xl border border-gray-100">
-              <div className="flex gap-1 mb-5">{'★'.repeat(t.rating)}</div>
-              <p className="text-gray-700 leading-relaxed mb-8">"{t.content}"</p>
-              <div>
-                <div className="font-semibold text-[#0A2540]">{t.name}</div>
-                <div className="text-sm text-gray-500">{t.company}</div>
-              </div>
+              <div className="w-10 h-10 bg-emerald-50 text-[#059669] rounded-2xl flex items-center justify-center font-bold mb-5">{i + 1}</div>
+              <div className="font-semibold text-lg text-[#0A2540] mb-3">{item.title}</div>
+              <p className="text-gray-600 leading-relaxed">{item.content}</p>
             </div>
           ))}
         </div>
@@ -206,7 +204,7 @@ export default function Home() {
       <section className="bg-gradient-to-br from-[#059669] to-[#047857] py-20 text-white">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-5xl tracking-tighter font-semibold mb-4">¿Listo para su próximo proyecto?</h2>
-          <p className="text-white/90 text-xl mb-9">Reciba una cotización personalizada en menos de 2 horas hábiles.</p>
+          <p className="text-white/90 text-xl mb-9">Reciba una cotización personalizada según las especificaciones de su proyecto.</p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/cotizacion" className="inline-flex justify-center items-center bg-white text-[#059669] hover:bg-white/90 px-14 py-4 rounded-2xl font-semibold text-lg transition-all active:scale-[0.985]">
