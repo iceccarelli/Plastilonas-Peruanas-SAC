@@ -92,7 +92,7 @@ function ProductosContent() {
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
         <div>
           <div className="text-xs tracking-[2.5px] text-[#059669] font-semibold">CATÁLOGO COMPLETO</div>
-          <h1 className="text-5xl tracking-tighter font-semibold text-[#0A2540]">Productos Industriales</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold text-[#0A2540]">Productos Industriales</h1>
           <p className="text-gray-600 mt-2">Soluciones de alta performance para los sectores más exigentes del Perú</p>
         </div>
         <div className="text-sm text-gray-500">{filteredProducts.length} productos encontrados</div>

@@ -42,7 +42,7 @@ export default function ContactoPage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-14">
       <div className="max-w-2xl mb-12">
-        <h1 className="text-6xl tracking-tighter font-semibold text-[#0A2540]">Hablemos de su proyecto</h1>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl tracking-tighter font-semibold text-[#0A2540]">Hablemos de su proyecto</h1>
         <p className="mt-4 text-xl text-gray-600">Estamos listos para ayudarle. Complete el formulario o contáctenos directamente por los canales preferidos.</p>
       </div>
 

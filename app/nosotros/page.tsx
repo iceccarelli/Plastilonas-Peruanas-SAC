@@ -5,7 +5,7 @@ export default function NosotrosPage() {
     <div className="max-w-5xl mx-auto px-6 py-14">
       <div className="max-w-3xl">
         <div className="uppercase tracking-[3px] text-xs text-[#059669] font-semibold mb-3">DESDE 2009</div>
-        <h1 className="text-6xl tracking-tighter font-semibold leading-none text-[#0A2540]">Más de 15 años fabricando confianza en el Perú.</h1>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl tracking-tighter font-semibold leading-tight md:leading-none text-[#0A2540]">Más de 15 años fabricando confianza en el Perú.</h1>
       </div>
 
       <div className="prose prose-lg max-w-3xl mt-10 text-gray-700">

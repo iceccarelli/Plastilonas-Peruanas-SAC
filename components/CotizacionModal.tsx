@@ -115,7 +115,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 20 }}
             transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
-            className="bg-white w-full max-w-[620px] rounded-3xl shadow-2xl overflow-hidden"
+            className="bg-white w-full max-w-[620px] max-h-[calc(100dvh-2rem)] rounded-3xl shadow-2xl overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}

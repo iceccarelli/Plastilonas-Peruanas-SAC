@@ -46,7 +46,7 @@ export default function Chatbot() {
       <AnimatePresence>
         {isOpen && (
           <div className="fixed bottom-24 right-6 z-[95] w-[380px] max-w-[calc(100vw-3rem)] chatbot-window">
-            <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 flex flex-col h-[560px] overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 flex flex-col h-[min(560px,calc(100dvh-8.5rem))] overflow-hidden">
               {/* Header */}
               <div className="bg-[#0A2540] text-white px-6 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-3">

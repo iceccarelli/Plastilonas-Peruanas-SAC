@@ -24,11 +24,11 @@ export default function Home() {
             LÍDER EN SOLUCIONES TEXTILES INDUSTRIALES EN PERÚ
           </div>
           
-          <h1 className="text-6xl md:text-7xl font-semibold tracking-tighter leading-[1.05] mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-semibold tracking-tighter leading-[1.08] md:leading-[1.05] mb-6">
             Soluciones industriales<br />de clase mundial<br />para el Perú.
           </h1>
           
-          <p className="max-w-2xl mx-auto text-xl text-white/80 mb-10">
+          <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">
             Más de 15 años fabricando Big Bags, Geomembranas, Carpas industriales y lonas a medida con la más alta calidad y compromiso.
           </p>
 
@@ -47,7 +47,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="mt-12 flex items-center justify-center gap-8 text-xs tracking-widest text-white/50">
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs tracking-widest text-white/50">
             <div>RUC 20523135385</div>
             <div>CHORRILLOS, LIMA</div>
             <div>WHATSAPP 24/7</div>
@@ -74,7 +74,7 @@ export default function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-100 rounded-3xl overflow-hidden">
           {stats.map((stat, i) => (
             <div key={i} className="bg-white px-8 py-9 text-center border-r border-gray-100 last:border-r-0">
-              <div className="text-5xl font-semibold tracking-tighter text-[#0A2540]">{stat.number}</div>
+              <div className="text-3xl md:text-5xl font-semibold tracking-tighter text-[#0A2540]">{stat.number}</div>
               <div className="text-sm text-gray-500 mt-2 font-medium tracking-wide">{stat.label}</div>
             </div>
           ))}
@@ -86,7 +86,7 @@ export default function Home() {
         <div className="flex items-end justify-between mb-8">
           <div>
             <div className="uppercase text-xs tracking-[2px] text-[#059669] font-semibold">EXPERTOS EN</div>
-            <h2 className="text-4xl tracking-tighter font-semibold text-[#0A2540]">Soluciones por sector</h2>
+            <h2 className="text-3xl md:text-4xl tracking-tighter font-semibold text-[#0A2540]">Soluciones por sector</h2>
           </div>
           <Link href="/productos" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">
             Ver todo el catálogo <ArrowRight className="w-4 h-4" />
@@ -167,7 +167,7 @@ export default function Home() {
       <section className="bg-[#0A2540] text-white py-16">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <div className="uppercase tracking-[3px] text-xs text-white/50 mb-3">DESDE 2009</div>
-          <h2 className="text-5xl tracking-tighter font-semibold mb-6">Compromiso real con la calidad y el cliente satisfecho.</h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold mb-6">Compromiso real con la calidad y el cliente satisfecho.</h2>
           <p className="text-white/80 max-w-2xl mx-auto text-lg">En Plastilonas Peruanas fabricamos con orgullo productos que superan las expectativas de los sectores más exigentes del país. Calidad, precio justo y atención personalizada son nuestra firma.</p>
           
           <div className="mt-9">
@@ -203,7 +203,7 @@ export default function Home() {
       {/* FINAL CTA */}
       <section className="bg-gradient-to-br from-[#059669] to-[#047857] py-20 text-white">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-5xl tracking-tighter font-semibold mb-4">¿Listo para su próximo proyecto?</h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold mb-4">¿Listo para su próximo proyecto?</h2>
           <p className="text-white/90 text-xl mb-9">Reciba una cotización personalizada según las especificaciones de su proyecto.</p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

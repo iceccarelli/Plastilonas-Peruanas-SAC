@@ -73,7 +73,7 @@ export default async function ProductDetailPage({ params }: Props) {
             {product.popular && <span className="badge bg-amber-100 text-amber-700">Más vendido</span>}
           </div>
 
-          <h1 className="text-5xl tracking-tighter font-semibold text-[#0A2540] leading-none mb-5">{product.name}</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold text-[#0A2540] leading-tight md:leading-none mb-5">{product.name}</h1>
           
           <p className="text-xl text-gray-600 leading-snug mb-8">{product.shortDescription}</p>
 
