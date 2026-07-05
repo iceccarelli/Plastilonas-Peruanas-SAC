@@ -3,6 +3,7 @@ import { ArrowRight, Award, Users, Clock, Shield, Phone } from 'lucide-react';
 import { products } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
 import CotizacionModal from '@/components/CotizacionModal';
+import HeroCarousel from '@/components/HeroCarousel';
 
 export default function Home() {
   const featuredProducts = products.filter(p => p.featured).slice(0, 6);
@@ -17,7 +18,7 @@ export default function Home() {
     <div className="overflow-hidden">
       {/* HERO - Premium Impact */}
       <section className="relative min-h-[92vh] flex items-center justify-center bg-[#0A2540] text-white pt-16">
-        <div className="absolute inset-0 bg-[radial-gradient(#1A3A5C_0.8px,transparent_1px)] bg-[length:5px_5px] opacity-40" />
+        <HeroCarousel />
         
         <div className="relative max-w-5xl mx-auto px-6 text-center z-10">
           <div className="inline-flex items-center gap-2 bg-white/10 text-white/90 text-xs tracking-[2px] font-medium px-5 py-2 rounded-full mb-6 border border-white/20">

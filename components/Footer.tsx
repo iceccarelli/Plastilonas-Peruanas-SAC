@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Phone, Mail, MapPin, Clock, Award, Users } from 'lucide-react';
+import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
+import SocialIcons from '@/components/SocialIcons';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -20,13 +21,18 @@ export default function Footer() {
               Más de 15 años fabricando soluciones textiles industriales de la más alta calidad para los sectores más exigentes del Perú. Compromiso, calidad y precio justo.
             </p>
             
-            <div className="flex items-center gap-4 mt-6">
+            <div className="flex flex-wrap items-center gap-4 mt-6">
               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">
                 <Award className="w-3.5 h-3.5" /> +15 años de experiencia
               </div>
               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">
                 <Users className="w-3.5 h-3.5" /> Fabricación 100% a medida
               </div>
+            </div>
+
+            <div className="mt-7">
+              <div className="text-xs text-white/50 mb-3 tracking-wide">SÍGANOS</div>
+              <SocialIcons variant="dark" />
             </div>
           </div>
 
@@ -88,13 +94,23 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Back to top (estilo AWS) */}
+        <div className="mt-16 pt-8 border-t border-white/10 flex justify-center">
+          <a
+            href="#top"
+            className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
+          >
+            Volver arriba <ArrowUp className="w-4 h-4" />
+          </a>
+        </div>
+
         {/* Bottom Bar */}
-        <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-y-4 text-xs text-white/50">
+        <div className="mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-y-4 text-xs text-white/50">
           <div>© {currentYear} Plastilonas Peruanas SAC. Todos los derechos reservados. RUC: 20523135385</div>
           <div className="flex items-center gap-x-6">
-            <span>Política de Privacidad</span>
-            <span>Términos y Condiciones</span>
-            <span className="hidden md:inline">Diseño premium • Hecho en Perú</span>
+            <Link href="/contacto" className="hover:text-white transition-colors">Política de Privacidad</Link>
+            <Link href="/contacto" className="hover:text-white transition-colors">Términos y Condiciones</Link>
+            <span className="hidden md:inline">Hecho en Perú</span>
           </div>
         </div>
       </div>

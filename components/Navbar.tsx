@@ -41,6 +41,32 @@ export default function Navbar() {
 
   return (
     <>
+      {/* Barra utilitaria superior (estilo AWS) */}
+      <div className="hidden md:block bg-[#0A2540] text-white/80 text-xs">
+        <div className="max-w-7xl mx-auto px-6 h-9 flex items-center justify-end gap-6">
+          <a href="tel:+51998117065" className="hover:text-white transition-colors">
+            +51 998 117 065
+          </a>
+          <a
+            href="https://wa.me/51946085270"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white transition-colors"
+          >
+            WhatsApp
+          </a>
+          <Link href="/contacto" className="hover:text-white transition-colors">
+            Contáctenos
+          </Link>
+          <Link
+            href={user ? '/dashboard' : '/login'}
+            className="flex items-center gap-1.5 hover:text-white transition-colors"
+          >
+            {user ? (user.name?.split(' ')[0] ?? 'Mi cuenta') : 'Iniciar sesión'}
+          </Link>
+        </div>
+      </div>
+
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between h-20">
