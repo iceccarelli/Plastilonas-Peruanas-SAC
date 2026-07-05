@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-playfair);
+  
+  /* Premium Color Palette - AWS Level + Industrial Warmth */
+  --color-navy: #0A2540;
+  --color-navy-light: #1A3A5C;
+  --color-emerald: #059669;
+  --color-emerald-dark: #047857;
+  --color-amber: #F59E0B;
+  --color-amber-dark: #D97706;
+  --color-gray-50: #F8FAFC;
+  --color-gray-100: #F1F5F9;
+  --color-gray-200: #E2E8F0;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1E293B;
+}
+
+body {
+  font-feature-settings: "kern" "tnum" "liga" "kern";
+}
+
+/* Premium Typography */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-feature-settings: "kern" "tnum" "liga" "kern";
+}
+
+/* Smooth micro-interactions */
+a, button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a:hover, button:hover {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Premium Card Styles */
+.product-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  border-color: var(--color-emerald);
+}
+
+/* Mega Menu Styles */
+.mega-menu {
+  animation: fadeInScale 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Command Palette */
+.command-palette {
+  animation: commandEnter 0.15s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes commandEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Chatbot Styles */
+.chatbot-window {
+  animation: slideUp 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Form Styles - Premium */
+.form-input {
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: var(--color-emerald);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+  outline: none;
+}
+
+/* Table Styles */
+.specs-table tr {
+  transition: background-color 0.1s ease;
+}
+
+.specs-table tr:hover {
+  background-color: var(--color-gray-50);
+}
+
+/* Filter Active States */
+.filter-active {
+  background-color: var(--color-emerald);
+  color: white;
+  border-color: var(--color-emerald);
+}
+
+/* WhatsApp Floating Button */
+.whatsapp-float {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.whatsapp-float:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 10px 15px -3px rgb(37 211 102 / 0.3);
+}
+
+/* Professional Badge */
+.badge {
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+/* Section Dividers */
+.section-divider {
+  background: linear-gradient(to right, transparent, var(--color-gray-200), transparent);
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.25rem !important;
+    line-height: 2.5rem !important;
+  }
+}
+
+/* Accessibility Focus */
+:focus-visible {
+  outline: 2px solid var(--color-emerald);
+  outline-offset: 2px;
+}
+
+/* Loading States */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-gray-100) 25%, var(--color-gray-200) 50%, var(--color-gray-100) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
