@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import Chatbot from '@/components/Chatbot';
 import { Toaster } from 'sonner';
 import AuthProvider from '@/components/AuthProvider';
+import StructuredData from '@/components/StructuredData';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -49,21 +50,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Plastilonas Peruanas SAC | Líder en Soluciones Textiles Industriales',
     description: 'Fabricamos Big Bags, Geomembranas, Carpas con estructura metálica, Mangas de Ventilación y lonas a medida con la más alta calidad para los sectores más exigentes del Perú.',
-    images: [
-      {
-        url: '/images/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Plastilonas Peruanas SAC - Soluciones Industriales Premium',
-      },
-    ],
+    // og:image lo genera app/opengraph-image.tsx (antes apuntaba a un archivo
+    // inexistente /images/og-image.jpg y las vistas previas salían en blanco).
     locale: 'es_PE',
     type: 'website',
   },
-  icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
-  },
+  // El favicon lo genera app/icon.tsx (antes /favicon.ico no existía).
 };
 
 export default function RootLayout({
@@ -74,6 +66,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-sans antialiased bg-white text-[#0A2540]">
+        <StructuredData />
         <AuthProvider>
           <Navbar />
           <main className="min-h-screen">{children}</main>

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { motion } from 'framer-motion';
+import ProductVisual from '@/components/ProductVisual';
 
 interface ProductCardProps {
   product: Product;
@@ -16,18 +17,11 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
       whileHover={{ y: -3 }}
       className="product-card group bg-white border border-gray-100 rounded-3xl overflow-hidden flex flex-col h-full"
     >
-      <div className="relative h-56 bg-gray-100 overflow-hidden">
-        {/* Placeholder for image - In production replace with real photos */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0A2540]/5 to-transparent" />
-        <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-10">
-          {product.category === 'Big Bags' && '📦'}
-          {product.category === 'Geomembranas' && '💧'}
-          {product.category === 'Carpas y Estructuras' && '🏗️'}
-          {product.category.includes('Mantas') && '🧥'}
-          {product.category === 'Mallas Agrícolas' && '🌿'}
-          {!['Big Bags', 'Geomembranas', 'Carpas y Estructuras'].some(c => product.category.includes(c)) && '🛠️'}
-        </div>
-        
+      <div className="relative h-56 overflow-hidden">
+        {/* Visual de marca por categoría. Cuando existan fotos reales del
+            producto, sustituir por <Image src={product.image} ... />. */}
+        <ProductVisual product={product} variant="card" />
+
         {product.popular && (
           <div className="absolute top-4 right-4 bg-[#059669] text-white text-[10px] font-bold tracking-wider px-3.5 py-1 rounded-full">MÁS VENDIDO</div>
         )}
