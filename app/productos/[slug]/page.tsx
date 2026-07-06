@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
 import { products } from '@/lib/products';
 import CotizacionModal from '@/components/CotizacionModal';
+import ProductVisual from '@/components/ProductVisual';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -20,12 +21,12 @@ export async function generateMetadata({ params }: Props) {
   
   if (!product) return { title: 'Producto no encontrado' };
 
+  // No se declara openGraph.images: product.image apunta a archivos aún
+  // inexistentes (/images/*.jpg), así que la página hereda la imagen OG del
+  // sitio (app/opengraph-image.tsx) en lugar de romper la vista previa.
   return {
     title: product.name,
     description: product.shortDescription,
-    openGraph: {
-      images: [{ url: product.image }],
-    },
   };
 }
 
@@ -53,18 +54,30 @@ export default async function ProductDetailPage({ params }: Props) {
       <div className="grid lg:grid-cols-2 gap-x-14 gap-y-10">
         {/* Gallery / Image */}
         <div>
-          <div className="aspect-[16/11] bg-gray-100 rounded-3xl overflow-hidden relative mb-4 border border-gray-100">
-            <div className="absolute inset-0 flex items-center justify-center text-[120px] opacity-5">
-              {product.category.includes('Big') && '📦'}
-              {product.category.includes('Geo') && '💧'}
-              {product.category.includes('Carpa') && '🏗️'}
-              {product.category.includes('Manta') && '🧥'}
-              {product.category.includes('Malla') && '🌿'}
-              {!['Big', 'Geo', 'Carpa', 'Manta', 'Malla'].some(k => product.category.includes(k)) && '🛠️'}
-            </div>
+          <div className="aspect-[16/11] rounded-3xl overflow-hidden relative mb-4 border border-gray-100">
+            <ProductVisual product={product} variant="hero" />
           </div>
-          <div className="text-xs text-center text-gray-400">Imágenes de alta resolución disponibles bajo solicitud • Reemplazar con fotos reales del cliente</div>
+          <div className="text-xs text-center text-gray-400">Fotografías reales de este producto disponibles bajo solicitud por WhatsApp</div>
         </div>
+
+        {/* Datos estructurados de producto (solo campos reales, sin precio inventado) */}
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Product',
+              name: product.name,
+              description: product.shortDescription,
+              category: product.category,
+              image: 'https://www.plastilonas.com/opengraph-image',
+              brand: { '@type': 'Brand', name: 'Plastilonas Peruanas SAC' },
+              manufacturer: { '@type': 'Organization', name: 'Plastilonas Peruanas SAC' },
+              areaServed: 'Perú',
+            }),
+          }}
+        />
 
         {/* Info */}
         <div>
