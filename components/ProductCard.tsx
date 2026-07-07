@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { motion } from 'framer-motion';
 import ProductVisual from '@/components/ProductVisual';
+import { formatPEN } from '@/lib/format';
 
 interface ProductCardProps {
   product: Product;
@@ -43,6 +44,18 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
           <p className="text-gray-600 text-[15px] line-clamp-3 leading-snug">
             {product.shortDescription}
           </p>
+
+          {typeof product.price === 'number' && (
+            <p className="mt-4 text-[#0A2540]">
+              <span className="text-2xl font-semibold tracking-tight">
+                {formatPEN(product.price)}
+              </span>
+              {product.priceUnit && (
+                <span className="text-sm text-gray-400"> / {product.priceUnit}</span>
+              )}
+              <span className="ml-2 text-[11px] text-gray-400">+ IGV</span>
+            </p>
+          )}
         </div>
 
         <div className="pt-5 mt-auto flex items-center justify-between border-t border-gray-100">
