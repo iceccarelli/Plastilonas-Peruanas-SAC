@@ -16,6 +16,16 @@ export interface Product {
   gallery: string[];
   featured: boolean;
   popular: boolean;
+  /**
+   * Precio de lista en PEN. OPCIONAL a propósito: la mayoría de productos
+   * industriales son a medida y siguen siendo "cotizar". Solo los SKUs
+   * estandarizados llevan precio y se vuelven comprables.
+   */
+  price?: number;
+  /** Unidad de venta mostrada junto al precio: 'unidad' | 'm²' | 'rollo'... */
+  priceUnit?: string;
+  /** Si es true, se puede añadir al carrito y comprar. Requiere `price`. */
+  purchasable?: boolean;
 }
 
 export interface Testimonial {

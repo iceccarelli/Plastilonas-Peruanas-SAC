@@ -37,7 +37,11 @@ export const products: Product[] = [
     image: '/images/big-bags.jpg',
     gallery: ['/images/big-bags.jpg', '/images/big-bags-2.jpg'],
     featured: true,
-    popular: true
+    popular: true,
+    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
+    price: 45.0,
+    priceUnit: 'unidad',
+    purchasable: true
   },
   {
     id: '2',
@@ -220,7 +224,11 @@ export const products: Product[] = [
     image: '/images/mallas-antiafidas.jpg',
     gallery: ['/images/mallas-antiafidas.jpg'],
     featured: true,
-    popular: false
+    popular: false,
+    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
+    price: 8.5,
+    priceUnit: 'm²',
+    purchasable: true
   },
   {
     id: '7',
@@ -363,7 +371,11 @@ export const products: Product[] = [
     image: '/images/mulch.jpg',
     gallery: ['/images/mulch.jpg'],
     featured: false,
-    popular: false
+    popular: false,
+    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
+    price: 25.0,
+    priceUnit: 'saco 50L',
+    purchasable: true
   },
   {
     id: '11',

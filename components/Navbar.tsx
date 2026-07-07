@@ -11,6 +11,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import CommandPalette from './CommandPalette';
 import CotizacionModal from './CotizacionModal';
+import CartButton from './CartButton';
 
 const navLinks = [
   { href: '/productos', label: 'Productos' },
@@ -73,6 +74,7 @@ export default function Navbar() {
             >
               {user ? (user.name?.split(' ')[0] ?? 'Mi cuenta') : 'Iniciar sesión'}
             </Link>
+            <CartButton />
           </div>
         </div>
 
