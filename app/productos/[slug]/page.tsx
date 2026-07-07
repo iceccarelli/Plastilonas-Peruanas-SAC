@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
 import { products } from '@/lib/products';
 import CotizacionModal from '@/components/CotizacionModal';
 import ProductVisual from '@/components/ProductVisual';
+import ProductBuyBox from '@/components/ProductBuyBox';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -89,6 +90,8 @@ export default async function ProductDetailPage({ params }: Props) {
           <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold text-[#0A2540] leading-tight md:leading-none mb-5">{product.name}</h1>
           
           <p className="text-xl text-gray-600 leading-snug mb-8">{product.shortDescription}</p>
+
+          <ProductBuyBox product={product} />
 
           <div className="flex flex-wrap gap-3 mb-9">
             <Link href={`/cotizacion?producto=${encodeURIComponent(product.name)}`} className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 bg-[#0A2540] hover:bg-[#059669] text-white px-9 py-4 rounded-2xl font-semibold text-sm transition-all active:scale-[0.985]">
