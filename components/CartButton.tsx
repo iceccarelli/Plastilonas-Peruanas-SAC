@@ -21,7 +21,7 @@ export default function CartButton({ className = '' }: { className?: string }) {
       type="button"
       onClick={open}
       aria-label="Abrir carrito"
-      className={`relative inline-flex items-center justify-center hover:text-white transition-colors ${className}`}
+      className={`relative inline-flex items-center justify-center transition-colors ${className}`}
     >
       <ShoppingCart className="w-4 h-4" />
       {count > 0 && (

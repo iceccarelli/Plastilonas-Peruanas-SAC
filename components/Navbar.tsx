@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useHideOnScroll } from '@/lib/useHideOnScroll';
 import {
-  Menu, X, Search, ChevronDown, Phone, Award, LayoutDashboard
+  Menu, X, Search, ChevronDown, Phone, Award, LayoutDashboard, ShoppingCart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CommandPalette from './CommandPalette';
@@ -74,7 +74,6 @@ export default function Navbar() {
             >
               {user ? (user.name?.split(' ')[0] ?? 'Mi cuenta') : 'Iniciar sesión'}
             </Link>
-            <CartButton />
           </div>
         </div>
 
@@ -202,6 +201,8 @@ export default function Navbar() {
                 Solicitar Cotización
               </button>
 
+              <CartButton className="p-2.5 text-[#0A2540] hover:text-[#059669]" />
+
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -245,6 +246,9 @@ export default function Navbar() {
                     Solicitar Cotización
                   </button>
                 </div>
+                <Link href="/carrito" onClick={() => setIsOpen(false)} className="flex items-center gap-2">
+                  <ShoppingCart className="w-4 h-4" /> Mi carrito
+                </Link>
                 <Link
                   href={user ? '/dashboard' : '/login'}
                   onClick={() => setIsOpen(false)}
