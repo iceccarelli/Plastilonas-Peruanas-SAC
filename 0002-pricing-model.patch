@@ -1,0 +1,157 @@
+From 1434835b5d45d271efea5664197b4379e9133099 Mon Sep 17 00:00:00 2001
+From: Grimaldi Engineering <dev@grimaldi.engineering>
+Date: Tue, 7 Jul 2026 15:17:58 +0000
+Subject: [PATCH 2/5] feat(catalog): opt-in pricing model for standardized SKUs
+
+Add optional price/priceUnit/purchasable fields to Product (non-breaking:
+custom industrial goods stay quote-first). Price only the 3 standardized
+SKUs (big bags, anti-aphid mesh, mulch) with clearly-marked PLACEHOLDER
+prices to be replaced before launch. Add PEN/IGV formatting helpers and
+show price on ProductCard when present.
+---
+ components/ProductCard.tsx | 13 +++++++++++++
+ lib/format.ts              | 38 ++++++++++++++++++++++++++++++++++++++
+ lib/products.ts            | 18 +++++++++++++++---
+ lib/types.ts               | 10 ++++++++++
+ 4 files changed, 76 insertions(+), 3 deletions(-)
+ create mode 100644 lib/format.ts
+
+diff --git a/components/ProductCard.tsx b/components/ProductCard.tsx
+index 1912f3f..1909cc8 100644
+--- a/components/ProductCard.tsx
++++ b/components/ProductCard.tsx
+@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
+ import { Product } from '@/lib/types';
+ import { motion } from 'framer-motion';
+ import ProductVisual from '@/components/ProductVisual';
++import { formatPEN } from '@/lib/format';
+ 
+ interface ProductCardProps {
+   product: Product;
+@@ -43,6 +44,18 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
+           <p className="text-gray-600 text-[15px] line-clamp-3 leading-snug">
+             {product.shortDescription}
+           </p>
++
++          {typeof product.price === 'number' && (
++            <p className="mt-4 text-[#0A2540]">
++              <span className="text-2xl font-semibold tracking-tight">
++                {formatPEN(product.price)}
++              </span>
++              {product.priceUnit && (
++                <span className="text-sm text-gray-400"> / {product.priceUnit}</span>
++              )}
++              <span className="ml-2 text-[11px] text-gray-400">+ IGV</span>
++            </p>
++          )}
+         </div>
+ 
+         <div className="pt-5 mt-auto flex items-center justify-between border-t border-gray-100">
+diff --git a/lib/format.ts b/lib/format.ts
+new file mode 100644
+index 0000000..1b84dbd
+--- /dev/null
++++ b/lib/format.ts
+@@ -0,0 +1,38 @@
++/** Utilidades de formato monetario (PEN) y conversión a céntimos. */
++
++export const IGV_RATE = 0.18; // IGV Perú 18%
++
++const penFormatter = new Intl.NumberFormat('es-PE', {
++  style: 'currency',
++  currency: 'PEN',
++  minimumFractionDigits: 2,
++});
++
++/** Formatea un monto en soles (número) a "S/ 1,234.00". */
++export function formatPEN(amount: number): string {
++  return penFormatter.format(amount);
++}
++
++/** Formatea un monto en céntimos a texto en soles. */
++export function formatCents(cents: number): string {
++  return penFormatter.format(cents / 100);
++}
++
++/** Convierte soles a céntimos enteros (evita errores de coma flotante). */
++export function toCents(amount: number): number {
++  return Math.round(amount * 100);
++}
++
++/** Desglosa un subtotal (en céntimos) en IGV y total. */
++export function withIgv(subtotalCents: number): {
++  subtotalCents: number;
++  igvCents: number;
++  totalCents: number;
++} {
++  const igvCents = Math.round(subtotalCents * IGV_RATE);
++  return {
++    subtotalCents,
++    igvCents,
++    totalCents: subtotalCents + igvCents,
++  };
++}
+diff --git a/lib/products.ts b/lib/products.ts
+index ce00489..77199a9 100644
+--- a/lib/products.ts
++++ b/lib/products.ts
+@@ -37,7 +37,11 @@ export const products: Product[] = [
+     image: '/images/big-bags.jpg',
+     gallery: ['/images/big-bags.jpg', '/images/big-bags-2.jpg'],
+     featured: true,
+-    popular: true
++    popular: true,
++    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
++    price: 45.0,
++    priceUnit: 'unidad',
++    purchasable: true
+   },
+   {
+     id: '2',
+@@ -220,7 +224,11 @@ export const products: Product[] = [
+     image: '/images/mallas-antiafidas.jpg',
+     gallery: ['/images/mallas-antiafidas.jpg'],
+     featured: true,
+-    popular: false
++    popular: false,
++    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
++    price: 8.5,
++    priceUnit: 'm²',
++    purchasable: true
+   },
+   {
+     id: '7',
+@@ -363,7 +371,11 @@ export const products: Product[] = [
+     image: '/images/mulch.jpg',
+     gallery: ['/images/mulch.jpg'],
+     featured: false,
+-    popular: false
++    popular: false,
++    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
++    price: 25.0,
++    priceUnit: 'saco 50L',
++    purchasable: true
+   },
+   {
+     id: '11',
+diff --git a/lib/types.ts b/lib/types.ts
+index e53bf5b..2975883 100644
+--- a/lib/types.ts
++++ b/lib/types.ts
+@@ -16,6 +16,16 @@ export interface Product {
+   gallery: string[];
+   featured: boolean;
+   popular: boolean;
++  /**
++   * Precio de lista en PEN. OPCIONAL a propósito: la mayoría de productos
++   * industriales son a medida y siguen siendo "cotizar". Solo los SKUs
++   * estandarizados llevan precio y se vuelven comprables.
++   */
++  price?: number;
++  /** Unidad de venta mostrada junto al precio: 'unidad' | 'm²' | 'rollo'... */
++  priceUnit?: string;
++  /** Si es true, se puede añadir al carrito y comprar. Requiere `price`. */
++  purchasable?: boolean;
+ }
+ 
+ export interface Testimonial {
