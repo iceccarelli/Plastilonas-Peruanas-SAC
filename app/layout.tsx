@@ -4,6 +4,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Chatbot from '@/components/Chatbot';
+import CartDrawer from '@/components/CartDrawer';
 import { Toaster } from 'sonner';
 import AuthProvider from '@/components/AuthProvider';
 import StructuredData from '@/components/StructuredData';
@@ -72,6 +73,7 @@ export default function RootLayout({
           <main className="min-h-screen">{children}</main>
           <Footer />
           <Chatbot />
+          <CartDrawer />
           <Toaster position="top-center" richColors closeButton />
         </AuthProvider>
       </body>

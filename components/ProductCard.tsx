@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/lib/cart-store';
 import { Product } from '@/lib/types';
 import { motion } from 'framer-motion';
 import ProductVisual from '@/components/ProductVisual';
@@ -13,6 +14,9 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, showSector = true }: ProductCardProps) {
+  const add = useCart((s) => s.add);
+  const isPurchasable = product.purchasable === true && typeof product.price === 'number';
+
   return (
     <motion.div 
       whileHover={{ y: -3 }}
@@ -66,12 +70,22 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
             Ver especificaciones <ArrowRight className="ml-1.5 w-4 h-4" />
           </Link>
           
-          <Link 
-            href={`/cotizacion?producto=${encodeURIComponent(product.name)}`}
-            className="text-xs font-semibold px-5 py-2 bg-[#0A2540] hover:bg-[#059669] text-white rounded-full transition-colors active:scale-[0.985]"
-          >
-            Cotizar
-          </Link>
+          {isPurchasable ? (
+            <button
+              type="button"
+              onClick={() => add(product)}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-5 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded-full transition-colors active:scale-[0.985]"
+            >
+              <ShoppingCart className="w-3.5 h-3.5" /> Agregar
+            </button>
+          ) : (
+            <Link
+              href={`/cotizacion?producto=${encodeURIComponent(product.name)}`}
+              className="text-xs font-semibold px-5 py-2 bg-[#0A2540] hover:bg-[#059669] text-white rounded-full transition-colors active:scale-[0.985]"
+            >
+              Cotizar
+            </Link>
+          )}
         </div>
       </div>
     </motion.div>
