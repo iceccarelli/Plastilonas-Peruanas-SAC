@@ -19,6 +19,54 @@
   --color-gray-600: #475569;
   --color-gray-700: #334155;
   --color-gray-800: #1E293B;
+
+  /* Semantic surface tokens — light (default) */
+  --surface: #FFFFFF;
+  --surface-muted: var(--color-gray-50);
+  --surface-raised: #FFFFFF;
+  --border: var(--color-gray-200);
+  --text: var(--color-navy);
+  --text-muted: var(--color-gray-600);
+  --brand: var(--color-emerald);
+  --brand-hover: var(--color-emerald-dark);
+}
+
+/* Dark theme — token overrides only. Existing rules that consume the
+   variables above (product-card, form-input, specs-table, focus-visible)
+   invert automatically. No component markup changes required. */
+.dark {
+  --surface: #0B1220;
+  --surface-muted: #111C2E;
+  --surface-raised: #16233A;
+  --border: #24354F;
+  --text: #E8EEF6;
+  --text-muted: #93A4BC;
+  --brand: #10B981;
+  --brand-hover: #34D399;
+
+  --color-gray-50: #111C2E;
+  --color-gray-100: #16233A;
+  --color-gray-200: #24354F;
+  --color-gray-600: #93A4BC;
+}
+
+html { color-scheme: light; }
+html.dark { color-scheme: dark; }
+
+body {
+  background-color: var(--surface);
+  color: var(--text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Respect OS-level motion preferences. Required for WCAG 2.1 AA (2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 body {
