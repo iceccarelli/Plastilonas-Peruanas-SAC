@@ -65,8 +65,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="font-sans antialiased bg-white text-[#0A2540]">
+    <html
+      lang="es"
+      className={`${inter.variable} ${playfair.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Aplica el tema antes del primer pintado: sin esto, una carga en
+            modo oscuro parpadea en blanco. Debe ser sincrono y estar en <head>. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');if(t==='dark')document.documentElement.classList.add('dark')}catch(e){}",
+          }}
+        />
+      </head>
+      {/* bg/text salen de los tokens de globals.css: las utilidades de Tailwind
+          (0,1,0) ganaban al selector body (0,0,1) y anulaban .dark */}
+      <body className="font-sans antialiased bg-[var(--surface)] text-[var(--text)]">
         <StructuredData />
         <AuthProvider>
           <Navbar />

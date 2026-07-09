@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import CommandPalette from './CommandPalette';
 import CotizacionModal from './CotizacionModal';
 import CartButton from './CartButton';
+import { ThemeToggle } from './ThemeToggle';
 
 const navLinks = [
   { href: '/productos', label: 'Productos' },
@@ -68,60 +69,56 @@ export default function Navbar() {
             <Link href="/contacto" className="hover:text-white transition-colors">
               Contáctenos
             </Link>
-            <Link
-              href={user ? '/dashboard' : '/login'}
-              className="flex items-center gap-1.5 hover:text-white transition-colors"
-            >
-              {user ? (user.name?.split(' ')[0] ?? 'Mi cuenta') : 'Iniciar sesión'}
-            </Link>
           </div>
         </div>
 
-        <nav className="bg-white/95 backdrop-blur-lg border-b border-gray-200">
+        <nav className="bg-white/95 dark:bg-[var(--surface-raised)]/95 backdrop-blur-lg border-b border-gray-200 dark:border-[var(--border)]">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="flex items-center justify-between h-20">
+            <div className="flex items-center justify-between gap-4 h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-11 h-11 bg-[#0A2540] rounded-xl flex items-center justify-center group-hover:bg-[#059669] transition-colors">
+            <Link href="/" className="flex items-center gap-3 group shrink-0">
+              <div className="w-11 h-11 shrink-0 bg-[#0A2540] dark:bg-[var(--brand)] rounded-xl flex items-center justify-center group-hover:bg-[#059669] transition-colors">
                 <span className="text-white font-bold text-2xl tracking-tighter">PP</span>
               </div>
-              <div>
-                <div className="font-semibold text-xl tracking-tight text-[#0A2540]">Plastilonas Peruanas</div>
-                <div className="text-[10px] text-gray-500 -mt-1 font-medium">SAC • DESDE 2009</div>
+              <div className="hidden sm:block">
+                <div className="font-semibold text-xl tracking-tight whitespace-nowrap text-[#0A2540] dark:text-[var(--text)]">Plastilonas Peruanas</div>
+                <div className="text-[10px] whitespace-nowrap text-gray-500 dark:text-[var(--text-muted)] -mt-1 font-medium">SAC • DESDE 2009</div>
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-9 text-sm font-medium">
+            <div className="hidden lg:flex items-center gap-6 xl:gap-8 text-sm font-medium shrink-0">
               {/* Mega Menu Productos */}
-              <div 
+              <div
                 className="relative"
                 onMouseEnter={() => setShowMegaMenu(true)}
                 onMouseLeave={() => setShowMegaMenu(false)}
               >
-                <button 
-                  className={`flex items-center gap-1.5 transition-colors hover:text-[#059669] ${isActive('/productos') ? 'text-[#059669]' : 'text-[#0A2540]'}`}
+                <button
+                  className={`flex items-center gap-1.5 whitespace-nowrap transition-colors hover:text-[#059669] ${isActive('/productos') ? 'text-[#059669]' : 'text-[#0A2540] dark:text-[var(--text)]'}`}
                   onClick={() => setShowMegaMenu(!showMegaMenu)}
+                  aria-expanded={showMegaMenu}
+                  aria-haspopup="true"
                 >
                   Productos
                   <ChevronDown className="w-4 h-4" />
                 </button>
-                
+
                 <AnimatePresence>
                   {showMegaMenu && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 8, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.98 }}
                       transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
-                      className="mega-menu absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[620px] bg-white rounded-2xl shadow-xl border border-gray-100 p-8"
+                      className="mega-menu absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[620px] bg-white dark:bg-[var(--surface-raised)] rounded-2xl shadow-xl border border-gray-100 dark:border-[var(--border)] p-8"
                     >
                       <div className="grid grid-cols-2 gap-x-10 gap-y-4">
                         {productCategories.map((cat, index) => (
                           <Link
                             key={index}
                             href={cat.href}
-                            className="group flex items-center justify-between py-2.5 px-4 rounded-xl hover:bg-gray-50 text-[#0A2540] hover:text-[#059669] transition-all"
+                            className="group flex items-center justify-between py-2.5 px-4 rounded-xl hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669] transition-all"
                             onClick={() => setShowMegaMenu(false)}
                           >
                             <span className="font-medium">{cat.name}</span>
@@ -129,9 +126,9 @@ export default function Navbar() {
                           </Link>
                         ))}
                       </div>
-                      <div className="mt-6 pt-6 border-t flex items-center justify-between text-xs">
-                        <div className="text-gray-500">¿Buscas algo específico?</div>
-                        <button 
+                      <div className="mt-6 pt-6 border-t dark:border-[var(--border)] flex items-center justify-between text-xs">
+                        <div className="text-gray-500 dark:text-[var(--text-muted)]">¿Buscas algo específico?</div>
+                        <button
                           onClick={() => {
                             setShowMegaMenu(false);
                             setShowCommand(true);
@@ -150,7 +147,7 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`transition-colors hover:text-[#059669] ${isActive(link.href) ? 'text-[#059669]' : 'text-[#0A2540]'}`}
+                  className={`whitespace-nowrap transition-colors hover:text-[#059669] ${isActive(link.href) ? 'text-[#059669]' : 'text-[#0A2540] dark:text-[var(--text)]'}`}
                 >
                   {link.label}
                 </Link>
@@ -158,16 +155,19 @@ export default function Navbar() {
             </div>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 shrink-0">
               {/* Search Button */}
               <button
                 onClick={() => setShowCommand(true)}
-                className="hidden md:flex items-center gap-2 px-4 py-2 text-sm text-gray-500 hover:text-[#0A2540] border border-gray-200 hover:border-gray-300 rounded-full transition-all active:scale-[0.985]"
+                aria-label="Buscar productos"
+                className="hidden md:flex items-center gap-2 px-3 xl:px-4 py-2 text-sm text-gray-500 dark:text-[var(--text-muted)] hover:text-[#0A2540] dark:hover:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] hover:border-gray-300 rounded-full transition-all active:scale-[0.985]"
               >
-                <Search className="w-4 h-4" />
-                <span className="hidden lg:inline">Buscar productos</span>
-                <kbd className="hidden lg:block ml-1 px-1.5 py-0.5 text-[10px] font-mono bg-gray-100 rounded">⌘K</kbd>
+                <Search className="w-4 h-4 shrink-0" />
+                <span className="hidden xl:inline whitespace-nowrap">Buscar productos</span>
+                <kbd className="hidden xl:block ml-1 px-1.5 py-0.5 text-[10px] font-mono bg-gray-100 dark:bg-[var(--surface-muted)] rounded">⌘K</kbd>
               </button>
+
+              <ThemeToggle />
 
               {/* Login / Account */}
               {user ? (
@@ -186,7 +186,7 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  className="hidden md:flex items-center px-4 py-2 text-sm font-medium text-[#0A2540] hover:text-[#059669] transition-colors"
+                  className="hidden md:flex items-center px-3 py-2 text-sm font-medium whitespace-nowrap text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669] transition-colors"
                 >
                   Iniciar sesión
                 </Link>
@@ -195,19 +195,20 @@ export default function Navbar() {
               {/* Cotización Button - Primary CTA */}
               <button
                 onClick={() => setShowCotizacion(true)}
-                className="hidden md:flex items-center gap-2.5 bg-[#0A2540] hover:bg-[#059669] text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-[0.985] shadow-sm"
+                className="hidden md:flex items-center gap-2.5 whitespace-nowrap bg-[#0A2540] dark:bg-[var(--brand)] hover:bg-[#059669] dark:hover:bg-[var(--brand-hover)] text-white px-5 xl:px-6 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-[0.985] shadow-sm"
               >
                 <Award className="w-4 h-4" />
                 Solicitar Cotización
               </button>
 
-              <CartButton className="p-2.5 text-[#0A2540] hover:text-[#059669]" />
+              <CartButton className="p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669]" />
 
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="lg:hidden p-2.5 text-[#0A2540]"
+                className="lg:hidden p-2.5 text-[#0A2540] dark:text-[var(--text)]"
                 aria-label="Toggle menu"
+                aria-expanded={isOpen}
               >
                 {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -222,7 +223,7 @@ export default function Navbar() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden border-t bg-white"
+              className="lg:hidden border-t dark:border-[var(--border)] bg-white dark:bg-[var(--surface-raised)]"
             >
               <div className="px-6 py-8 flex flex-col gap-6 text-lg font-medium">
                 {navLinks.map((link) => (
@@ -260,6 +261,7 @@ export default function Navbar() {
                 <a href="https://wa.me/51946085270" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#059669]">
                   <Phone className="w-4 h-4" /> WhatsApp: +51 946 085 270
                 </a>
+                <div className="pt-2"><ThemeToggle /></div>
               </div>
             </motion.div>
           )}
