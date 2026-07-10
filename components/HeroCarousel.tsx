@@ -23,14 +23,14 @@ interface Slide {
 // IDs del CDN de Unsplash (images.unsplash.com/photo-...), fotos estables y
 // libres para uso comercial que encajan con el mercado industrial peruano.
 const SLIDES: Slide[] = [
-  { id: 'photo-1578319439584-104c94d37305', alt: 'Operación minera a tajo abierto' },
-  { id: 'photo-1504328345606-18bbc8c9d7d1', alt: 'Camión minero de gran tonelaje' },
-  { id: 'photo-1500382017468-9049fed747ef', alt: 'Campo agrícola extenso' },
-  { id: 'photo-1416879595882-3373a0480b5b', alt: 'Invernadero de cultivo protegido' },
-  { id: 'photo-1503387762-592deb58ef4e', alt: 'Obra de construcción industrial' },
-  { id: 'photo-1558449028-b53a39d100fc', alt: 'Reservorio con geomembrana' },
-  { id: 'photo-1601584115197-04ecc0da31d7', alt: 'Transporte de carga en carretera' },
-  { id: 'photo-1587293852726-70cdb56c2866', alt: 'Planta industrial' },
+  { id: 'photo-1741176508062-a79aa6b48bdc', alt: 'Operarios en una planta de manufactura textil industrial' },
+  { id: 'photo-1551825687-f9de1603ed8b', alt: 'Transportista sonriendo junto al camión de reparto' },
+  { id: 'photo-1741176508460-2001b928a0e7', alt: 'Confección de tela en línea de producción' },
+  { id: 'photo-1534639077088-d702bcf685e7', alt: 'Rollos de tela apilados en almacén' },
+  { id: 'photo-1695222833131-54ee679ae8e5', alt: 'Camión de carga en ruta hacia el interior del país' },
+  { id: 'photo-1742934028246-55fcad193b6c', alt: 'Operaria sonriendo en una fábrica textil' },
+  { id: 'photo-1764232891094-a4a3e8c517e3', alt: 'Manos cosechando cerezas de café maduras' },
+  { id: 'photo-1770055592671-01c08cae22be', alt: 'Saco de yute lleno de granos de café verde' },
 ];
 
 const UNSPLASH = (id: string) =>
@@ -71,10 +71,12 @@ export default function HeroCarousel() {
               src={UNSPLASH(slide.id)}
               alt={slide.alt}
               loading={i === 0 ? 'eager' : 'lazy'}
+              fetchPriority={i === 0 ? 'high' : 'auto'}
+              decoding="async"
               onError={() =>
                 setFailed((f) => ({ ...f, [slide.id]: true }))
               }
-              className={`h-full w-full object-cover ${
+              className={`hero-photo h-full w-full object-cover ${
                 isActive ? 'kb-active' : ''
               }`}
             />
@@ -82,9 +84,32 @@ export default function HeroCarousel() {
         );
       })}
 
-      {/* Capas de oscurecimiento para garantizar contraste del texto */}
-      <div className="absolute inset-0 bg-[#0A2540]/80" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0A2540] via-[#0A2540]/40 to-[#0A2540]/70" />
+      {/* Scrim de dos etapas. Antes: 88-100% de opacidad en toda la imagen.
+          Ahora la foto vive a 40% en los bordes y solo se oscurece donde hay
+          texto. Medido sobre el pixel claro peor caso (#C8D2DC):
+            titular  65% -> 5.89:1   (necesita 3.0, texto grande)
+            subtitulo 65% -> 5.89:1  (necesita 4.5)
+            cue abajo 81% -> 9.28:1
+          Los bordes conservan 7.5x mas luminancia que antes. */}
+      <div className="absolute inset-0 bg-[#0A2540]/40" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: [
+            // Etapa 2a: elipse bajo la columna de copy.
+            'radial-gradient(ellipse 92% 62% at 50% 50%,' +
+              ' rgba(10,37,64,0.42) 0%,' +
+              ' rgba(10,37,64,0.24) 46%,' +
+              ' rgba(10,37,64,0) 76%)',
+            // Etapa 2b: protege navbar arriba y el cue de scroll abajo.
+            'linear-gradient(to bottom,' +
+              ' rgba(10,37,64,0.42) 0%,' +
+              ' rgba(10,37,64,0) 18%,' +
+              ' rgba(10,37,64,0) 72%,' +
+              ' rgba(10,37,64,0.68) 100%)',
+          ].join(', '),
+        }}
+      />
 
       <style>{`
         @keyframes kenburns {
@@ -93,6 +118,16 @@ export default function HeroCarousel() {
         }
         .kb-active {
           animation: kenburns ${INTERVAL_MS + 1600}ms ease-out forwards;
+        }
+        /* Las exportaciones de Unsplash llegan planas. Esto restaura el punch
+           sin tocar el contraste del texto (el scrim ya lo garantiza).
+           Va en la <img>, nunca en un padre: filter crea containing block y
+           el navbar fixed empezaria a scrollear con el hero. */
+        .hero-photo {
+          filter: saturate(1.25) contrast(1.06) brightness(1.05);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .hero-photo { filter: saturate(1.15); }
         }
         @media (prefers-reduced-motion: reduce) {
           .kb-active { animation: none; }
