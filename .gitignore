@@ -30,3 +30,6 @@ Thumbs.db
 *.tsbuildinfo
 
 *.patch
+
+# patch delivery artifacts
+*.patch

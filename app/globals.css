@@ -19,6 +19,58 @@
   --color-gray-600: #475569;
   --color-gray-700: #334155;
   --color-gray-800: #1E293B;
+
+  /* Semantic surface tokens — light (default) */
+  --surface: #FFFFFF;
+  --surface-muted: var(--color-gray-50);
+  --surface-raised: #FFFFFF;
+  --border: var(--color-gray-200);
+  --text: var(--color-navy);
+  --text-muted: var(--color-gray-600);
+  --brand: var(--color-emerald);
+  --brand-hover: var(--color-emerald-dark);
+}
+
+/* Dark theme — token overrides only. Existing rules that consume the
+   variables above (product-card, form-input, specs-table, focus-visible)
+   invert automatically. No component markup changes required. */
+.dark {
+  --surface: #0B1220;
+  --surface-muted: #111C2E;
+  --surface-raised: #16233A;
+  /* Escalera de elevacion, pasos medidos ~1.35:1 entre superficies
+     adyacentes, igual que AWS. No usar gradientes: bandas solidas. */
+  --surface-nav: #1C2C46;
+  --surface-deep: #060D18;
+  --border: #24354F;
+  --text: #E8EEF6;
+  --text-muted: #93A4BC;
+  --brand: #10B981;
+  --brand-hover: #34D399;
+
+  --color-gray-50: #111C2E;
+  --color-gray-100: #16233A;
+  --color-gray-200: #24354F;
+  --color-gray-600: #93A4BC;
+}
+
+html { color-scheme: light; }
+html.dark { color-scheme: dark; }
+
+body {
+  background-color: var(--surface);
+  color: var(--text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Respect OS-level motion preferences. Required for WCAG 2.1 AA (2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 body {
@@ -178,3 +230,42 @@ a:hover, button:hover {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ─── Capa de compatibilidad de tema ────────────────────────────────────
+   Los contenedores usan literales (.bg-white, .text-[#0A2540]). Al volver
+   <body> dependiente de tokens, los <h3> sin clase de color heredaban
+   --text (claro) sobre tarjetas blancas -> 1.17:1. Y los <h2> con
+   text-[#0A2540] quedaban sobre la pagina oscura -> 1.21:1.
+
+   Esta capa hace que los contenedores sigan al tema. Va limitada a <main>
+   para no tocar Navbar ni Footer, que ya manejan su propio dark:.
+
+   ES UN PARCHE. Lo correcto es migrar los literales de page.tsx,
+   SectionHeading.tsx y ProductCard.tsx a los tokens directamente.  */
+
+/* Superficies: la tarjeta sube un escalon respecto de la pagina. */
+.dark main :is(div, section, article, aside, li).bg-white {
+  background-color: var(--surface-raised);
+}
+.dark main :is(div, section, article, aside).bg-gray-50,
+.dark main :is(div, section, article, aside).bg-gray-100 {
+  background-color: var(--surface-muted);
+}
+
+/* 1.4.11: tarjeta #16233A vs pagina #0B1220 = 1.19:1, por debajo de 3.0.
+   box-shadow en vez de border: no desplaza el layout. */
+.dark main :is(div, section, article).bg-white {
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+/* Tinta */
+.dark main .text-\[\#0A2540\] { color: var(--text); }
+.dark main :is(.text-gray-500, .text-gray-600, .text-gray-700) { color: var(--text-muted); }
+.dark main :is(.border-gray-100, .border-gray-200) { border-color: var(--border); }
+
+/* Los CTA blancos del hero viven sobre imagen oscura: siguen blancos con
+   tinta navy (15.54:1). Deben ir DESPUES de las reglas de arriba. */
+.dark main :is(a, button).bg-white { background-color: #FFFFFF; box-shadow: none; }
+.dark main :is(a, button).bg-white.text-\[\#0A2540\],
+.dark main :is(a, button).bg-white .text-\[\#0A2540\] { color: #0A2540; }
+

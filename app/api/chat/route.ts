@@ -41,12 +41,22 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, currentPage } = await req.json();
+
+    // Contexto de pagina, opcional y retrocompatible: si el cliente no lo
+    // envia, el prompt queda exactamente como estaba.
+    const pageContext =
+      typeof currentPage === 'string' && currentPage.length > 0
+        ? `\n\nContexto: el usuario esta viendo la pagina ${currentPage}. ` +
+          'Si es una ficha de producto, centrate en sus especificaciones y en ' +
+          'que datos necesitas para cotizarlo. Si es el catalogo, ayudale a ' +
+          'filtrar por sector. Si es la portada, ofrece un panorama por sector.'
+        : '';
 
     const result = streamText({
       // Modelo Haiku de generación actual (rápido y económico).
       model: anthropic('claude-haiku-4-5'),
-      system: SYSTEM_PROMPT,
+      system: SYSTEM_PROMPT + pageContext,
       messages,
       temperature: 0.65,
       maxTokens: 700,
