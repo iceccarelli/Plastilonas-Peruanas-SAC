@@ -53,7 +53,7 @@ export default function Navbar() {
         }`}
       >
         {/* Barra utilitaria superior (estilo AWS) */}
-        <div className="hidden md:block bg-[#0A2540] text-white/80 text-xs">
+        <div className="hidden md:block bg-[#0A2540] dark:bg-[#060D18] text-white/80 text-xs border-b border-transparent dark:border-[#24354F]">
           <div className="max-w-7xl mx-auto px-6 h-9 flex items-center justify-end gap-6">
             <a href="tel:+51998117065" className="hover:text-white transition-colors">
               +51 998 117 065
@@ -72,13 +72,13 @@ export default function Navbar() {
           </div>
         </div>
 
-        <nav className="bg-white/95 dark:bg-[var(--surface-raised)]/95 backdrop-blur-lg border-b border-gray-200 dark:border-[var(--border)]">
+        <nav className="bg-white/95 dark:bg-[#1C2C46]/95 backdrop-blur-lg border-b border-gray-200 dark:border-[var(--border)]">
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex items-center justify-between gap-4 h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group shrink-0">
-              <div className="w-11 h-11 shrink-0 bg-[#0A2540] dark:bg-[var(--brand)] rounded-xl flex items-center justify-center group-hover:bg-[#059669] transition-colors">
-                <span className="text-white font-bold text-2xl tracking-tighter">PP</span>
+              <div className="w-11 h-11 shrink-0 bg-[#0A2540] dark:bg-[#10B981] rounded-xl flex items-center justify-center group-hover:bg-[#059669] dark:group-hover:bg-[#34D399] transition-colors">
+                <span className="text-white dark:text-[#0A2540] font-bold text-2xl tracking-tighter">PP</span>
               </div>
               <div className="hidden sm:block">
                 <div className="font-semibold text-xl tracking-tight whitespace-nowrap text-[#0A2540] dark:text-[var(--text)]">Plastilonas Peruanas</div>
@@ -195,7 +195,7 @@ export default function Navbar() {
               {/* Cotización Button - Primary CTA */}
               <button
                 onClick={() => setShowCotizacion(true)}
-                className="hidden md:flex items-center gap-2.5 whitespace-nowrap bg-[#0A2540] dark:bg-[var(--brand)] hover:bg-[#059669] dark:hover:bg-[var(--brand-hover)] text-white px-5 xl:px-6 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-[0.985] shadow-sm"
+                className="hidden md:flex items-center gap-2.5 whitespace-nowrap bg-[#0A2540] dark:bg-[#10B981] hover:bg-[#059669] dark:hover:bg-[#34D399] text-white dark:text-[#0A2540] px-5 xl:px-6 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-[0.985] shadow-sm"
               >
                 <Award className="w-4 h-4" />
                 Solicitar Cotización
@@ -242,7 +242,7 @@ export default function Navbar() {
                       setIsOpen(false);
                       setShowCotizacion(true);
                     }}
-                    className="w-full flex items-center justify-center gap-2 bg-[#0A2540] text-white py-3.5 rounded-2xl font-semibold"
+                    className="w-full flex items-center justify-center gap-2 bg-[#0A2540] dark:bg-[#10B981] text-white dark:text-[#0A2540] py-3.5 rounded-2xl font-semibold"
                   >
                     Solicitar Cotización
                   </button>

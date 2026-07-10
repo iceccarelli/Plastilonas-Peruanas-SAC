@@ -38,6 +38,10 @@
   --surface: #0B1220;
   --surface-muted: #111C2E;
   --surface-raised: #16233A;
+  /* Escalera de elevacion, pasos medidos ~1.35:1 entre superficies
+     adyacentes, igual que AWS. No usar gradientes: bandas solidas. */
+  --surface-nav: #1C2C46;
+  --surface-deep: #060D18;
   --border: #24354F;
   --text: #E8EEF6;
   --text-muted: #93A4BC;
