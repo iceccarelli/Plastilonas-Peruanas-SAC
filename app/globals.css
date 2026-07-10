@@ -230,3 +230,42 @@ a:hover, button:hover {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ─── Capa de compatibilidad de tema ────────────────────────────────────
+   Los contenedores usan literales (.bg-white, .text-[#0A2540]). Al volver
+   <body> dependiente de tokens, los <h3> sin clase de color heredaban
+   --text (claro) sobre tarjetas blancas -> 1.17:1. Y los <h2> con
+   text-[#0A2540] quedaban sobre la pagina oscura -> 1.21:1.
+
+   Esta capa hace que los contenedores sigan al tema. Va limitada a <main>
+   para no tocar Navbar ni Footer, que ya manejan su propio dark:.
+
+   ES UN PARCHE. Lo correcto es migrar los literales de page.tsx,
+   SectionHeading.tsx y ProductCard.tsx a los tokens directamente.  */
+
+/* Superficies: la tarjeta sube un escalon respecto de la pagina. */
+.dark main :is(div, section, article, aside, li).bg-white {
+  background-color: var(--surface-raised);
+}
+.dark main :is(div, section, article, aside).bg-gray-50,
+.dark main :is(div, section, article, aside).bg-gray-100 {
+  background-color: var(--surface-muted);
+}
+
+/* 1.4.11: tarjeta #16233A vs pagina #0B1220 = 1.19:1, por debajo de 3.0.
+   box-shadow en vez de border: no desplaza el layout. */
+.dark main :is(div, section, article).bg-white {
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+/* Tinta */
+.dark main .text-\[\#0A2540\] { color: var(--text); }
+.dark main :is(.text-gray-500, .text-gray-600, .text-gray-700) { color: var(--text-muted); }
+.dark main :is(.border-gray-100, .border-gray-200) { border-color: var(--border); }
+
+/* Los CTA blancos del hero viven sobre imagen oscura: siguen blancos con
+   tinta navy (15.54:1). Deben ir DESPUES de las reglas de arriba. */
+.dark main :is(a, button).bg-white { background-color: #FFFFFF; box-shadow: none; }
+.dark main :is(a, button).bg-white.text-\[\#0A2540\],
+.dark main :is(a, button).bg-white .text-\[\#0A2540\] { color: #0A2540; }
+
