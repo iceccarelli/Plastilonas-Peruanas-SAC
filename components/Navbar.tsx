@@ -9,6 +9,7 @@ import {
   Menu, X, Search, ChevronDown, Phone, Award, LayoutDashboard, ShoppingCart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { productFamilies, sectors } from '@/lib/products';
 import CommandPalette from './CommandPalette';
 import CotizacionModal from './CotizacionModal';
 import CartButton from './CartButton';
@@ -21,21 +22,19 @@ const navLinks = [
   { href: '/contacto', label: 'Contacto' },
 ];
 
-const productCategories = [
-  { name: 'Big Bags / Bolsones', href: '/productos?categoria=Big%20Bags' },
-  { name: 'Geomembranas de PVC', href: '/productos?categoria=Geomembranas' },
-  { name: 'Carpas y Estructuras', href: '/productos?categoria=Carpas%20y%20Estructuras' },
-  { name: 'Mangas de Ventilación', href: '/productos?categoria=Mangas%20de%20Ventilaci%C3%B3n' },
-  { name: 'Mallas Antiáfidas', href: '/productos?categoria=Mallas%20Agr%C3%ADcolas' },
-  { name: 'Mantas para Transporte', href: '/productos?categoria=Mantas%20para%20Transporte' },
-  { name: 'Ver todo el catálogo', href: '/productos' },
-];
+// Eje 1 (por categoría) y Eje 2 (por sector) se derivan del catálogo, de modo
+// que agregar una familia o un sector en lib/products.ts actualiza el menú.
+const familyHref = (name: string) =>
+  `/productos?categoria=${encodeURIComponent(name)}`;
+const sectorHref = (name: string) =>
+  `/productos?sector=${encodeURIComponent(name)}`;
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showMegaMenu, setShowMegaMenu] = useState(false);
   const [showCommand, setShowCommand] = useState(false);
   const [showCotizacion, setShowCotizacion] = useState(false);
+  const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user ?? null;
@@ -88,7 +87,7 @@ export default function Navbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-6 xl:gap-8 text-sm font-medium shrink-0">
-              {/* Mega Menu Productos */}
+              {/* Mega Menu Productos (dos ejes: categoría + sector) */}
               <div
                 className="relative"
                 onMouseEnter={() => setShowMegaMenu(true)}
@@ -111,23 +110,61 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.98 }}
                       transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
-                      className="mega-menu absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[620px] bg-white dark:bg-[var(--surface-raised)] rounded-2xl shadow-xl border border-gray-100 dark:border-[var(--border)] p-8"
+                      className="mega-menu absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[860px] bg-white dark:bg-[var(--surface-raised)] rounded-2xl shadow-xl border border-gray-100 dark:border-[var(--border)] p-8"
                     >
-                      <div className="grid grid-cols-2 gap-x-10 gap-y-4">
-                        {productCategories.map((cat, index) => (
-                          <Link
-                            key={index}
-                            href={cat.href}
-                            className="group flex items-center justify-between py-2.5 px-4 rounded-xl hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669] transition-all"
-                            onClick={() => setShowMegaMenu(false)}
-                          >
-                            <span className="font-medium">{cat.name}</span>
-                            <span className="text-gray-300 group-hover:text-[#059669] transition-colors">→</span>
-                          </Link>
-                        ))}
+                      <div className="grid grid-cols-3 gap-x-8">
+                        {/* Eje 1: por categoría (2 columnas de familias) */}
+                        <div className="col-span-2">
+                          <div className="text-xs uppercase tracking-[0.15em] text-[#059669] font-semibold mb-4">
+                            Por categoría
+                          </div>
+                          <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+                            {productFamilies.map((fam) => (
+                              <Link
+                                key={fam.slug}
+                                href={familyHref(fam.name)}
+                                className="group flex flex-col py-2 px-3 rounded-xl hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] transition-all"
+                                onClick={() => setShowMegaMenu(false)}
+                              >
+                                <span className="font-medium text-[#0A2540] dark:text-[var(--text)] group-hover:text-[#059669] text-sm">
+                                  {fam.name}
+                                </span>
+                                <span className="text-xs text-gray-400 dark:text-[var(--text-muted)]">
+                                  {fam.tagline}
+                                </span>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Eje 2: por sector */}
+                        <div className="border-l border-gray-100 dark:border-[var(--border)] pl-8">
+                          <div className="text-xs uppercase tracking-[0.15em] text-[#059669] font-semibold mb-4">
+                            Por sector
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            {sectors.map((sector) => (
+                              <Link
+                                key={sector}
+                                href={sectorHref(sector)}
+                                className="py-1.5 px-3 rounded-lg text-sm text-gray-600 dark:text-[var(--text-muted)] hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] hover:text-[#059669] transition-all"
+                                onClick={() => setShowMegaMenu(false)}
+                              >
+                                {sector}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
                       </div>
+
                       <div className="mt-6 pt-6 border-t dark:border-[var(--border)] flex items-center justify-between text-xs">
-                        <div className="text-gray-500 dark:text-[var(--text-muted)]">¿Buscas algo específico?</div>
+                        <Link
+                          href="/productos"
+                          onClick={() => setShowMegaMenu(false)}
+                          className="text-[#059669] hover:underline font-medium"
+                        >
+                          Ver todo el catálogo →
+                        </Link>
                         <button
                           onClick={() => {
                             setShowMegaMenu(false);
@@ -226,7 +263,49 @@ export default function Navbar() {
               className="lg:hidden border-t dark:border-[var(--border)] bg-white dark:bg-[var(--surface-raised)]"
             >
               <div className="px-6 py-8 flex flex-col gap-6 text-lg font-medium">
-                {navLinks.map((link) => (
+                {/* Productos con submenú desplegable de familias */}
+                <div>
+                  <button
+                    onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
+                    className="w-full flex items-center justify-between"
+                    aria-expanded={mobileProductsOpen}
+                  >
+                    <span className={isActive('/productos') ? 'text-[#059669]' : ''}>Productos</span>
+                    <ChevronDown className={`w-5 h-5 transition-transform ${mobileProductsOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {mobileProductsOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-3 pl-3 flex flex-col gap-2 text-base font-normal text-gray-600 dark:text-[var(--text-muted)]">
+                          {productFamilies.map((fam) => (
+                            <Link
+                              key={fam.slug}
+                              href={familyHref(fam.name)}
+                              onClick={() => setIsOpen(false)}
+                              className="py-1 hover:text-[#059669]"
+                            >
+                              {fam.name}
+                            </Link>
+                          ))}
+                          <Link
+                            href="/productos"
+                            onClick={() => setIsOpen(false)}
+                            className="py-1 text-[#059669] font-medium"
+                          >
+                            Ver todo el catálogo →
+                          </Link>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {navLinks.slice(1).map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
