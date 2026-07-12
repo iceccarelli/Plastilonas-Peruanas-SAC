@@ -4,17 +4,29 @@ import React, { useState, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Search, Grid, List, Filter, X } from 'lucide-react';
-import { products, categories, sectors } from '@/lib/products';
+import {
+  products,
+  categories,
+  sectors,
+  availabilityLabels,
+  sourcingLabels,
+} from '@/lib/products';
+import type { Availability } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Orden de los estados de disponibilidad para el filtro (estilo AWS: el estado
+// de la oferta es un eje de navegación de primera clase).
+const AVAILABILITY_ORDER: Availability[] = ['stock', 'a_medida', 'bajo_pedido'];
+
 function ProductosContent() {
-  // Los enlaces del navbar, footer y home usan ?categoria= y ?sector=.
-  // Antes estos parámetros se ignoraban y toda la navegación por categoría
-  // llevaba al catálogo sin filtrar.
+  // Los enlaces del navbar, footer y home usan ?categoria=, ?sector= y
+  // ?disponibilidad=. Antes estos parámetros se ignoraban y toda la navegación
+  // por categoría llevaba al catálogo sin filtrar.
   const searchParams = useSearchParams();
   const initialCategoria = searchParams.get('categoria');
   const initialSector = searchParams.get('sector');
+  const initialDisponibilidad = searchParams.get('disponibilidad');
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
@@ -22,6 +34,9 @@ function ProductosContent() {
   );
   const [selectedSectors, setSelectedSectors] = useState<string[]>(
     initialSector ? [initialSector] : []
+  );
+  const [selectedAvailability, setSelectedAvailability] = useState<string[]>(
+    initialDisponibilidad ? [initialDisponibilidad] : []
   );
   const [sortBy, setSortBy] = useState<'name' | 'popular'>('popular');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -51,6 +66,13 @@ function ProductosContent() {
       result = result.filter(p => p.sector.some(s => selectedSectors.includes(s)));
     }
 
+    // Availability filter (estado de la oferta)
+    if (selectedAvailability.length > 0) {
+      result = result.filter(p =>
+        selectedAvailability.includes(p.availability ?? 'a_medida')
+      );
+    }
+
     // Sort
     if (sortBy === 'name') {
       result.sort((a, b) => a.name.localeCompare(b.name));
@@ -63,7 +85,7 @@ function ProductosContent() {
     }
 
     return result;
-  }, [searchTerm, selectedCategories, selectedSectors, sortBy]);
+  }, [searchTerm, selectedCategories, selectedSectors, selectedAvailability, sortBy]);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev =>
@@ -77,14 +99,25 @@ function ProductosContent() {
     );
   };
 
+  const toggleAvailability = (a: string) => {
+    setSelectedAvailability(prev =>
+      prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a]
+    );
+  };
+
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedCategories([]);
     setSelectedSectors([]);
+    setSelectedAvailability([]);
     setSortBy('popular');
   };
 
-  const hasActiveFilters = searchTerm || selectedCategories.length > 0 || selectedSectors.length > 0;
+  const hasActiveFilters =
+    searchTerm ||
+    selectedCategories.length > 0 ||
+    selectedSectors.length > 0 ||
+    selectedAvailability.length > 0;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -165,6 +198,23 @@ function ProductosContent() {
               </div>
             </div>
 
+            {/* Availability (estado de la oferta) */}
+            <div className="mb-8">
+              <div className="text-xs uppercase tracking-widest text-gray-500 font-medium mb-3">DISPONIBILIDAD</div>
+              <div className="space-y-1.5">
+                {AVAILABILITY_ORDER.map(a => (
+                  <button
+                    key={a}
+                    onClick={() => toggleAvailability(a)}
+                    className={`w-full text-left px-4 py-2.5 text-sm rounded-2xl flex items-center justify-between transition-all ${selectedAvailability.includes(a) ? 'bg-[#0A2540] text-white font-medium' : 'hover:bg-gray-50 text-gray-700'}`}
+                  >
+                    {availabilityLabels[a]}
+                    {selectedAvailability.includes(a) && <span className="text-xs">✓</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Sectors */}
             <div>
               <div className="text-xs uppercase tracking-widest text-gray-500 font-medium mb-3">SECTOR DE APLICACIÓN</div>
@@ -188,15 +238,33 @@ function ProductosContent() {
           <AnimatePresence mode="wait">
             {filteredProducts.length > 0 ? (
               <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'space-y-4'}>
-                {filteredProducts.map((product, index) => (
+                {filteredProducts.map((product) => (
                   viewMode === 'grid' ? (
                     <ProductCard key={product.id} product={product} />
                   ) : (
                     <div key={product.id} className="flex gap-6 bg-white border border-gray-100 p-6 rounded-3xl group">
                       <div className="w-36 h-28 bg-gray-100 rounded-2xl flex-shrink-0" />
                       <div className="flex-1 min-w-0 pt-1">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center flex-wrap gap-2 mb-2">
                           <span className="badge bg-gray-100 text-gray-600 text-xs">{product.category}</span>
+                          {product.availability && (
+                            <span
+                              className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
+                                product.availability === 'stock'
+                                  ? 'bg-emerald-50 text-emerald-700'
+                                  : product.availability === 'bajo_pedido'
+                                  ? 'bg-amber-50 text-amber-700'
+                                  : 'bg-blue-50 text-blue-700'
+                              }`}
+                            >
+                              {availabilityLabels[product.availability]}
+                            </span>
+                          )}
+                          {product.sourcing && (
+                            <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-gray-50 text-gray-500 border border-gray-100">
+                              {sourcingLabels[product.sourcing]}
+                            </span>
+                          )}
                         </div>
                         <Link href={`/productos/${product.slug}`} className="font-semibold text-xl tracking-tight text-[#0A2540] group-hover:text-[#059669] block mb-2">{product.name}</Link>
                         <p className="text-sm text-gray-600 line-clamp-2 mb-4">{product.shortDescription}</p>
