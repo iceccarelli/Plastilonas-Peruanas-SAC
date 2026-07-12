@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowRight, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/lib/cart-store';
 import { Product } from '@/lib/types';
+import { availabilityLabels } from '@/lib/products';
 import { motion } from 'framer-motion';
 import ProductVisual from '@/components/ProductVisual';
 import { formatPEN } from '@/lib/format';
@@ -13,9 +14,16 @@ interface ProductCardProps {
   showSector?: boolean;
 }
 
+const AVAILABILITY_STYLES: Record<string, string> = {
+  stock: 'bg-emerald-500/90 text-white',
+  a_medida: 'bg-white/90 text-[#0A2540]',
+  bajo_pedido: 'bg-amber-400/95 text-[#0A2540]',
+};
+
 export default function ProductCard({ product, showSector = true }: ProductCardProps) {
   const add = useCart((s) => s.add);
   const isPurchasable = product.purchasable === true && typeof product.price === 'number';
+  const availability = product.availability ?? 'a_medida';
 
   return (
     <motion.div 
@@ -23,9 +31,13 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
       className="product-card group bg-white border border-gray-100 rounded-3xl overflow-hidden flex flex-col h-full"
     >
       <div className="relative h-56 overflow-hidden">
-        {/* Visual de marca por categoría. Cuando existan fotos reales del
-            producto, sustituir por <Image src={product.image} ... />. */}
         <ProductVisual product={product} variant="card" />
+
+        <div
+          className={`absolute top-4 left-4 text-[10px] font-bold tracking-wider px-3 py-1 rounded-full shadow-sm ${AVAILABILITY_STYLES[availability]}`}
+        >
+          {availabilityLabels[availability]?.toUpperCase()}
+        </div>
 
         {product.popular && (
           <div className="absolute top-4 right-4 bg-[#059669] text-white text-[10px] font-bold tracking-wider px-3.5 py-1 rounded-full">MÁS VENDIDO</div>

@@ -9,7 +9,6 @@ export default function Footer() {
     <footer className="bg-[#0A2540] text-white/90 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-12">
-          {/* Brand & Mission */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center">
@@ -20,7 +19,6 @@ export default function Footer() {
             <p className="text-white/70 max-w-md leading-relaxed text-[15px]">
               Más de 15 años fabricando soluciones textiles industriales de la más alta calidad para los sectores más exigentes del Perú. Compromiso, calidad y precio justo.
             </p>
-            
             <div className="flex flex-wrap items-center gap-4 mt-6">
               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">
                 <Award className="w-3.5 h-3.5" /> +15 años de experiencia
@@ -29,26 +27,24 @@ export default function Footer() {
                 <Users className="w-3.5 h-3.5" /> Fabricación 100% a medida
               </div>
             </div>
-
             <div className="mt-7">
               <div className="text-xs text-white/50 mb-3 tracking-wide">SÍGANOS</div>
               <SocialIcons variant="dark" />
             </div>
           </div>
 
-          {/* Productos */}
           <div>
             <div className="font-semibold text-white mb-4 tracking-wide text-sm">PRODUCTOS</div>
             <ul className="space-y-[13px] text-sm">
-              <li><Link href="/productos?categoria=Big%20Bags" className="hover:text-white transition-colors">Big Bags y Bolsones</Link></li>
-              <li><Link href="/productos?categoria=Geomembranas" className="hover:text-white transition-colors">Geomembranas de PVC</Link></li>
-              <li><Link href="/productos?categoria=Carpas%20y%20Estructuras" className="hover:text-white transition-colors">Carpas y Estructuras Metálicas</Link></li>
-              <li><Link href="/productos?categoria=Mangas%20de%20Ventilaci%C3%B3n" className="hover:text-white transition-colors">Mangas de Ventilación</Link></li>
+              <li><Link href="/productos?categoria=Envases%20y%20Embalaje" className="hover:text-white transition-colors">Envases y Embalaje</Link></li>
+              <li><Link href="/productos?categoria=Lonas%20y%20Cobertores" className="hover:text-white transition-colors">Lonas y Cobertores</Link></li>
+              <li><Link href="/productos?categoria=Geosint%C3%A9ticos%20e%20Impermeabilizaci%C3%B3n" className="hover:text-white transition-colors">Geosintéticos e Impermeabilización</Link></li>
+              <li><Link href="/productos?categoria=Estructuras%20y%20Arquitectura%20Textil" className="hover:text-white transition-colors">Estructuras y Arquitectura Textil</Link></li>
+              <li><Link href="/productos?categoria=Ventilaci%C3%B3n%20Industrial" className="hover:text-white transition-colors">Ventilación Industrial</Link></li>
               <li><Link href="/productos" className="hover:text-white transition-colors text-white/60">Ver catálogo completo →</Link></li>
             </ul>
           </div>
 
-          {/* Empresa */}
           <div>
             <div className="font-semibold text-white mb-4 tracking-wide text-sm">EMPRESA</div>
             <ul className="space-y-[13px] text-sm">
@@ -60,7 +56,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contacto */}
           <div>
             <div className="font-semibold text-white mb-4 tracking-wide text-sm">CONTACTO DIRECTO</div>
             <div className="space-y-4 text-sm">
@@ -94,17 +89,10 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Back to top (estilo AWS) */}
         <div className="mt-16 pt-8 border-t border-white/10 flex justify-center">
-          <a
-            href="#top"
-            className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
-          >
-            Volver arriba <ArrowUp className="w-4 h-4" />
-          </a>
+          <a href="#top" className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors">Volver arriba <ArrowUp className="w-4 h-4" /></a>
         </div>
 
-        {/* Bottom Bar */}
         <div className="mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-y-4 text-xs text-white/50">
           <div>© {currentYear} Plastilonas Peruanas SAC. Todos los derechos reservados. RUC: 20523135385</div>
           <div className="flex items-center gap-x-6">
