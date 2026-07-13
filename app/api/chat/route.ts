@@ -1,5 +1,6 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { streamText } from 'ai';
+import { products, productFamilies } from '@/lib/products';
 
 // Asistente comercial con Claude (Vercel AI SDK).
 // Requiere ANTHROPIC_API_KEY en el entorno. Sin la clave, respondemos 503 y
@@ -7,31 +8,52 @@ import { streamText } from 'ai';
 
 export const maxDuration = 30;
 
-const SYSTEM_PROMPT = `Eres un asesor comercial experto y altamente profesional de Plastilonas Peruanas SAC, empresa peruana con más de 15 años de experiencia fabricando soluciones textiles industriales.
+// Digest del catálogo generado desde lib/products (fuente única de verdad).
+// Al agregar o editar un producto, el asistente se actualiza automáticamente.
+const CATALOG = productFamilies
+  .map((fam) => {
+    const items = products.filter((p) => p.category === fam.name);
+    if (items.length === 0) return '';
+    const lines = items
+      .map((p) => {
+        const bajoPedido = (p.availability ?? 'a_medida') === 'bajo_pedido';
+        const flag = bajoPedido
+          ? ' [BAJO PEDIDO: no dar especificaciones numéricas; ofrecer ficha técnica en cotización]'
+          : '';
+        return `  - ${p.name}${flag}`;
+      })
+      .join('\n');
+    return `${fam.name}:\n${lines}`;
+  })
+  .filter(Boolean)
+  .join('\n\n');
+
+const SYSTEM_PROMPT = `Eres un asesor comercial experto y altamente profesional de Plastilonas Peruanas SAC, empresa peruana con más de 15 años de experiencia fabricando e instalando soluciones textiles e industriales a medida.
 
 Tu personalidad:
 - Amable, claro, directo y orientado a resultados.
 - Hablas español peruano natural y profesional.
-- Nunca inventas precios, plazos, certificaciones ni capacidades. Siempre indicas que se cotiza según especificaciones técnicas.
 - Tu objetivo principal es entender la necesidad del cliente y guiarlo hacia una cotización precisa.
 
-Productos principales que conoces muy bien:
-- Big Bags / Bolsones de Polipropileno (1T y 2T) para minería, agricultura y construcción.
-- Geomembranas de PVC soldadas por alta frecuencia para pozas, canales y contención.
-- Carpas de lona con estructuras metálicas (hangares, galpones, techos temporales).
-- Mangas de ventilación para minas y túneles.
-- Mallas antiáfidas y agrícolas.
-- Mantas y toldos para camiones.
-- Soluciones a medida (lonas plastificadas, rafia, polytarp).
+REGLA CRÍTICA DE HONESTIDAD (obligatoria, sin excepciones):
+- Nunca inventes números: espesores, resistencias, gramajes, capacidades, plazos ni precios.
+- Nunca afirmes certificaciones (ISO, ASTM, GRI, NFPA, MINEM, etc.) como propias. Si preguntan por certificados, di que se entrega la documentación disponible en la cotización.
+- Para productos marcados [BAJO PEDIDO] (geosintéticos PE/HDPE, geomembranas fortificada/bituminosa, geotextiles, geomallas, tuberías HDPE, tanques flexibles, biodigestores): son líneas de importación directa o de aliado técnico. NO des especificaciones técnicas concretas; explica que se definen por proyecto y que la ficha técnica y el certificado de lote del fabricante se entregan en la cotización.
+- Para el resto: puedes describir usos y beneficios, pero cualquier medida exacta se confirma en cotización.
+
+Catálogo actual (${products.length} productos en ${productFamilies.length} familias):
+
+${CATALOG}
+
+Servicios: fabricación 100% a medida, instalación propia, importación directa y asesoría técnica.
 
 Directrices de respuesta:
 1. Saluda de forma cálida y presenta brevemente tu rol.
-2. Haz preguntas precisas para entender: sector (minería/agricultura/construcción/transporte), aplicación específica, cantidad aproximada, ubicación y fecha requerida.
-3. Recomienda 1-2 productos relevantes con beneficios clave.
+2. Haz preguntas precisas para entender: sector, aplicación específica, cantidad aproximada, ubicación y fecha requerida.
+3. Recomienda 1-2 productos relevantes con beneficios clave (respetando la regla de honestidad).
 4. Invita siempre a solicitar una cotización formal a través del formulario del sitio.
 5. Si el cliente menciona urgencia o proyecto grande, sugiere contactar por WhatsApp (+51 946 085 270).
 6. Mantén las respuestas concisas pero completas (máximo 4-5 oraciones por turno).
-7. Nunca des información falsa sobre certificaciones o capacidades.
 
 Responde siempre en español natural y profesional.`;
 
@@ -43,8 +65,6 @@ export async function POST(req: Request) {
   try {
     const { messages, currentPage } = await req.json();
 
-    // Contexto de pagina, opcional y retrocompatible: si el cliente no lo
-    // envia, el prompt queda exactamente como estaba.
     const pageContext =
       typeof currentPage === 'string' && currentPage.length > 0
         ? `\n\nContexto: el usuario esta viendo la pagina ${currentPage}. ` +
@@ -54,25 +74,20 @@ export async function POST(req: Request) {
         : '';
 
     const result = streamText({
-      // Modelo Haiku de generación actual (rápido y económico).
       model: anthropic('claude-haiku-4-5'),
       system: SYSTEM_PROMPT + pageContext,
       messages,
       temperature: 0.65,
       maxTokens: 700,
-      // Registra el error real en los logs de Vercel para poder diagnosticar.
       onError: ({ error }) => {
         console.error('[chat] streamText error:', error);
       },
     });
 
     return result.toDataStreamResponse({
-      // Expone el motivo real al cliente en lugar de "An error occurred."
       getErrorMessage: (error) => {
-        const msg =
-          error instanceof Error ? error.message : String(error);
+        const msg = error instanceof Error ? error.message : String(error);
         console.error('[chat] toDataStreamResponse error:', msg);
-        // Mensaje amable para el usuario; el detalle queda en los logs.
         if (/credit|billing|balance/i.test(msg)) {
           return 'El asistente no está disponible temporalmente. Escríbanos por WhatsApp.';
         }

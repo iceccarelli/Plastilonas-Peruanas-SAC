@@ -5,6 +5,7 @@ import { products } from '@/lib/products';
 import CotizacionModal from '@/components/CotizacionModal';
 import ProductVisual from '@/components/ProductVisual';
 import ProductBuyBox from '@/components/ProductBuyBox';
+import ProductAvailability from '@/components/ProductAvailability';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -90,6 +91,8 @@ export default async function ProductDetailPage({ params }: Props) {
           <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold text-[#0A2540] leading-tight md:leading-none mb-5">{product.name}</h1>
           
           <p className="text-xl text-gray-600 leading-snug mb-8">{product.shortDescription}</p>
+
+          <ProductAvailability product={product} />
 
           <ProductBuyBox product={product} />
 
