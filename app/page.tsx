@@ -3,6 +3,7 @@ import { ArrowRight, Phone, Wrench, Layers, Clock, Award } from 'lucide-react';
 import { products, productFamilies, sectors } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
 import FeaturedDeck from '@/components/FeaturedDeck';
+import SwipeDeck from '@/components/SwipeDeck';
 import HeroCarousel from '@/components/HeroCarousel';
 import SectionHeading from '@/components/SectionHeading';
 import { Reveal } from '@/components/Reveal';
@@ -117,28 +118,39 @@ export default function Home() {
             <SectionHeading eyebrow="Por qué elegirnos" title="La ventaja de un solo proveedor, sin intermediarios" className="mb-10" />
           </Reveal>
           <Reveal delay={0.05}>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {whyus.map((item, i) => (
-                <div key={i} className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-[#059669]/40 hover:-translate-y-1 transition-all duration-300">
-                  <div className="w-10 h-10 bg-emerald-50 text-[#059669] rounded-2xl flex items-center justify-center font-bold mb-5">{i + 1}</div>
-                  <div className="font-semibold text-lg text-[#0A2540] mb-3">{item.title}</div>
-                  <p className="text-gray-600 leading-relaxed text-[15px]">{item.content}</p>
+            <SwipeDeck
+              numbered
+              cards={whyus.map((item, i) => ({ title: item.title, body: item.content, index: i + 1 }))}
+              desktop={
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {whyus.map((item, i) => (
+                    <div key={i} className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-[#059669]/40 hover:-translate-y-1 transition-all duration-300">
+                      <div className="w-10 h-10 bg-emerald-50 text-[#059669] rounded-2xl flex items-center justify-center font-bold mb-5">{i + 1}</div>
+                      <div className="font-semibold text-lg text-[#0A2540] mb-3">{item.title}</div>
+                      <p className="text-gray-600 leading-relaxed text-[15px]">{item.content}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              }
+            />
           </Reveal>
           <Reveal className="mt-16">
             <SectionHeading eyebrow="Más que fabricación" title="Servicios integrales, de principio a fin" className="mb-10" />
           </Reveal>
           <Reveal delay={0.05}>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {services.map((service, i) => (
-                <div key={i} className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-[#059669]/30 group transition-all duration-300">
-                  <div className="font-semibold text-xl tracking-tight mb-4 group-hover:text-[#059669] transition-colors">{service.title}</div>
-                  <p className="text-gray-600 leading-relaxed text-[15px]">{service.desc}</p>
+            <SwipeDeck
+              cards={services.map((service, i) => ({ title: service.title, body: service.desc, index: i + 1 }))}
+              desktop={
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {services.map((service, i) => (
+                    <div key={i} className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-[#059669]/30 group transition-all duration-300">
+                      <div className="font-semibold text-xl tracking-tight mb-4 group-hover:text-[#059669] transition-colors">{service.title}</div>
+                      <p className="text-gray-600 leading-relaxed text-[15px]">{service.desc}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              }
+            />
           </Reveal>
           <Reveal delay={0.1} className="mt-14">
             <div className="bg-[#0A2540] text-white rounded-3xl px-8 py-12 md:px-14 md:py-14 text-center">
