@@ -372,3 +372,22 @@ button[aria-pressed="true"] {
   flex-wrap: nowrap;
 }
 .sector-scroll > * { scroll-snap-align: start; flex: 0 0 auto; }
+
+/* ═══════════ MOBILE DENSITY (≤640px) — end the endless scroll ═══════════ */
+@media (max-width: 640px) {
+  /* Servicios + Por qué: 1-col -> 2-col so all items fit with minimal scroll */
+  main section .grid.md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 0.6rem !important; }
+  /* Compact those cards so 2-up reads cleanly */
+  main section .grid.md\:grid-cols-2 > div { padding: 1rem !important; border-radius: 1.25rem !important; }
+  main section .grid.md\:grid-cols-2 .text-xl { font-size: 0.95rem !important; line-height: 1.3 !important; }
+  main section .grid.md\:grid-cols-2 .text-lg { font-size: 0.95rem !important; }
+  main section .grid.md\:grid-cols-2 p { font-size: 0.8rem !important; line-height: 1.35 !important; }
+  main section .grid.md\:grid-cols-2 .w-10.h-10 { width: 2rem !important; height: 2rem !important; margin-bottom: 0.6rem !important; }
+
+  /* Family catalog: vertical list -> horizontal peek-carousel (swipe, 2.2 cards) */
+  .family-scroll { display: flex !important; gap: 0.7rem; overflow-x: auto; scroll-snap-type: x mandatory; grid-template-columns: none !important; }
+  .family-scroll > a { flex: 0 0 82%; scroll-snap-align: start; }
+
+  /* Kill stray off-canvas carousel arrow bleeding at screen edge */
+  .hero-arrow-left, [class*="carousel"] button.absolute.left-0 { display: none !important; }
+}

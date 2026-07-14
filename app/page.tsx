@@ -87,7 +87,7 @@ export default function Home() {
             </div>
           </Reveal>
           <Reveal delay={0.1}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="family-scroll no-scrollbar grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 -mx-6 px-6 sm:mx-0 sm:px-0">
               {productFamilies.map((fam) => (
                 <Link key={fam.slug} href={`/productos?categoria=${encodeURIComponent(fam.name)}`} className="group bg-white border border-gray-100 hover:border-[#059669] hover:shadow-lg hover:shadow-gray-100 rounded-3xl p-6 flex items-center justify-between gap-4 transition-all duration-300 hover:-translate-y-0.5">
                   <div>
