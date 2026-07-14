@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Phone, Wrench, Layers, Clock, Award } from 'lucide-react';
+import { ArrowRight, Phone, Wrench, Layers, Clock, Award, Ruler, HardHat, Ship, Lightbulb } from 'lucide-react';
 import { products, productFamilies, sectors } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
 import FeaturedDeck from '@/components/FeaturedDeck';
@@ -139,7 +139,7 @@ export default function Home() {
           </Reveal>
           <Reveal delay={0.05}>
             <SwipeDeck
-              cards={services.map((service, i) => ({ title: service.title, body: service.desc, index: i + 1 }))}
+              cards={services.map((service, i) => ({ title: service.title, body: service.desc, index: i + 1, Icon: [Ruler, HardHat, Ship, Lightbulb][i] }))}
               desktop={
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {services.map((service, i) => (
