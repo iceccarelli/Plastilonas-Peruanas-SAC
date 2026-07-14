@@ -103,7 +103,7 @@ export default function OpengraphImage() {
               display: 'flex',
             }}
           >
-            Big Bags · Geomembranas · Carpas · Mangas · Mallas · +15 años en el Perú
+            Big Bags · Geosintéticos · Estructuras · Mallas · Ventilación · +15 años en el Perú
           </div>
         </div>
 

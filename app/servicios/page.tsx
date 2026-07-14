@@ -12,13 +12,13 @@ export default function ServiciosPage() {
     {
       title: "Instalación Profesional",
       description: "Contamos con un equipo técnico altamente capacitado para la instalación de carpas, estructuras, geomembranas y sistemas de ventilación en obra.",
-      features: ["Instalación certificada", "Supervisión de calidad", "Capacitación al personal del cliente", "Mantenimiento preventivo", "Garantía de servicio"],
+      features: ["Instalación profesional", "Supervisión de calidad", "Capacitación al personal del cliente", "Mantenimiento preventivo", "Soporte post-venta"],
       icon: "🔧"
     },
     {
       title: "Importación Directa",
-      description: "Accedemos directamente a los mejores proveedores internacionales de materiales técnicos, garantizando precios competitivos y calidad certificada.",
-      features: ["Materiales de primera línea", "Precios sin intermediarios", "Trazabilidad completa", "Certificaciones internacionales", "Stock estratégico"],
+      description: "Accedemos directamente a proveedores internacionales de materiales técnicos, con precios competitivos y ficha técnica del material en cada cotización.",
+      features: ["Materiales de primera línea", "Precios sin intermediarios", "Trazabilidad completa", "Ficha técnica del fabricante", "Stock estratégico"],
       icon: "🌍"
     },
     {

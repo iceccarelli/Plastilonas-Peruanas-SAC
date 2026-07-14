@@ -18,7 +18,7 @@ export default function StructuredData() {
     '@id': 'https://www.plastilonas.com/#business',
     name: 'Plastilonas Peruanas SAC',
     description:
-      'Fabricación a medida de Big Bags, geomembranas de PVC, carpas industriales con estructura metálica, mangas de ventilación, mallas agrícolas y lonas plastificadas para minería, agricultura, construcción y transporte en el Perú.',
+      'Fabricación e instalación a medida de soluciones industriales en el Perú: big bags, lonas y cobertores, geosintéticos (geomembranas, geotextiles, geomallas), estructuras y arquitectura textil, mallas agrícolas, ventilación industrial y accesorios, para minería, agricultura, construcción, transporte e infraestructura.',
     url: 'https://www.plastilonas.com',
     image: 'https://www.plastilonas.com/opengraph-image',
     telephone: `+${WHATSAPP_NUMBER}`,

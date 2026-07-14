@@ -38,7 +38,7 @@ export const products: Product[] = [
       { label: 'Tratamiento', value: 'Anti-UV, impermeable opcional, antiestático' },
       { label: 'Opciones de boca', value: 'Abierta, con boquilla, con falda, con cierre' },
       { label: 'Opciones de fondo', value: 'Plano, con boquilla, con falda, con cierre' },
-      { label: 'Certificaciones', value: 'ISO 9001, normas de transporte internacional' }
+      { label: 'Normas de referencia', value: 'Fabricado según normas de transporte de carga aplicables; documentación disponible en cotización' }
     ],
     applications: [
       'Transporte y almacenamiento de minerales y concentrados mineros',
@@ -779,7 +779,7 @@ export const products: Product[] = [
       { label: 'Material', value: 'PVC plastificado virgen de alta densidad' },
       { label: 'Espesores', value: '0.5 mm, 0.75 mm, 1.0 mm, 1.5 mm, 2.0 mm' },
       { label: 'Ancho de rollo', value: 'Hasta 2.0 m estándar (anchos especiales bajo pedido)' },
-      { label: 'Resistencia a la tracción', value: '≥ 20 MPa (según norma ASTM D638)' },
+      { label: 'Resistencia a la tracción', value: 'Alta resistencia; valores según ficha técnica del material en cotización' },
       { label: 'Elongación a la rotura', value: '≥ 300%' },
       { label: 'Resistencia a la perforación', value: 'Alta (reforzada con geotextil opcional)' },
       { label: 'Soldadura', value: 'Por alta frecuencia o cuña caliente - 100% hermética' },
@@ -1114,7 +1114,7 @@ export const products: Product[] = [
     description: 'Biombos protectores fabricados con lona de fibra de vidrio recubierta de silicona o PVC ignífugo de alta calidad. Diseñados para crear zonas seguras en talleres de soldadura, astilleros, construcción y mantenimiento industrial. Disponibles en versiones portátiles con estructura metálica plegable o fijos para instalación permanente. Cumplen con normativas de seguridad industrial peruana e internacional.',
     specifications: [
       { label: 'Material', value: 'Lona de fibra de vidrio con recubrimiento de silicona/PVC ignífugo' },
-      { label: 'Resistencia al fuego', value: 'Clase A / Autoextinguible (norma NFPA / ASTM)' },
+      { label: 'Resistencia al fuego', value: 'Material autoextinguible / retardante de llama; ficha técnica del material en cotización' },
       { label: 'Temperatura máxima', value: 'Hasta 550°C (fibra de vidrio siliconada)' },
       { label: 'Dimensiones estándar', value: '1.8m x 2.0m / 2.0m x 2.5m por panel (configurable)' },
       { label: 'Estructura', value: 'Acero galvanizado plegable o fija, con ruedas opcionales' },

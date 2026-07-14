@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     default: 'Plastilonas Peruanas SAC | Soluciones Industriales de Lona y Plástico',
     template: '%s | Plastilonas Peruanas SAC',
   },
-  description: 'Más de 15 años fabricando Big Bags, Geomembranas, Carpas Industriales, Mangas de Ventilación y soluciones textiles a medida para minería, agricultura, construcción y transporte en Perú. Calidad premium, precios justos y atención personalizada.',
+  description: 'Más de 15 años fabricando e instalando soluciones industriales a medida en el Perú: big bags, lonas y cobertores, geosintéticos, estructuras y arquitectura textil, mallas agrícolas, ventilación industrial y más. Un solo proveedor, fabricación propia e instalación.',
   keywords: [
     'plastilonas peruanas',
     'big bags lima',
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.plastilonas.com'),
   openGraph: {
     title: 'Plastilonas Peruanas SAC | Líder en Soluciones Textiles Industriales',
-    description: 'Fabricamos Big Bags, Geomembranas, Carpas con estructura metálica, Mangas de Ventilación y lonas a medida con la más alta calidad para los sectores más exigentes del Perú.',
+    description: 'El portafolio industrial más completo del Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
     // og:image lo genera app/opengraph-image.tsx (antes apuntaba a un archivo
     // inexistente /images/og-image.jpg y las vistas previas salían en blanco).
     locale: 'es_PE',
