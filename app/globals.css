@@ -342,3 +342,33 @@ button[aria-pressed="true"] {
 /* Hide scrollbar on horizontal scroll rows but keep swipe */
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ═══════════ MOBILE SECTION POLISH (≤640px) ═══════════ */
+@media (max-width: 640px) {
+  /* 1+3. Content cards: less inner padding so they stop eating the screen.
+     Targets the rounded-3xl p-8 cards in Servicios / Por qué / Family. */
+  main .rounded-3xl.p-8 { padding: 1.35rem !important; }
+  /* Tighten vertical gaps between stacked cards */
+  main .gap-6 { gap: 0.85rem !important; }
+  /* Service/why headings a touch smaller so cards shrink */
+  main .rounded-3xl .text-xl { font-size: 1.05rem !important; line-height: 1.4 !important; }
+
+  /* 5. Chat button: smaller + higher so it never sits over card text.
+     Overrides the w-16 h-16 bottom-6 float. */
+  .fixed.bottom-6.right-6 { bottom: 1rem !important; right: 1rem !important; }
+  .fixed.bottom-6.right-6 > button { width: 3.25rem !important; height: 3.25rem !important; }
+  /* Lift the open chat window origin to match */
+  .fixed.bottom-24.right-6 { bottom: 4.75rem !important; }
+}
+
+/* ── 2. Sectores: peek-scroll row (one line, swipeable, next chip peeks) ── */
+.sector-scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.25rem;
+  flex-wrap: nowrap;
+}
+.sector-scroll > * { scroll-snap-align: start; flex: 0 0 auto; }

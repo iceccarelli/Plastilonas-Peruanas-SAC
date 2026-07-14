@@ -80,7 +80,7 @@ export default function Home() {
             <SectionHeading eyebrow="Todo lo que necesita, en un solo lugar" title="Explore el catálogo por familia" className="mb-6" action={<Link href="/productos" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el catálogo <ArrowRight className="w-4 h-4" /></Link>} />
           </Reveal>
           <Reveal delay={0.05}>
-            <div className="flex flex-wrap gap-2 mb-8">
+            <div className="sector-scroll no-scrollbar mb-8 -mx-6 px-6">
               {sectors.map((s) => (
                 <Link key={s} href={`/productos?sector=${encodeURIComponent(s)}`} className="px-4 py-1.5 text-xs font-medium rounded-full border border-gray-200 text-gray-600 hover:border-[#059669] hover:text-[#059669] transition-colors">{s}</Link>
               ))}
