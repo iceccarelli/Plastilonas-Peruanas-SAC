@@ -223,7 +223,7 @@ function ProductosContent() {
                   <button
                     key={sector}
                     onClick={() => toggleSector(sector)}
-                    className={`px-4 py-1.5 text-xs font-medium rounded-full border transition-all ${selectedSectors.includes(sector) ? 'bg-[#0A2540] text-white border-[#0A2540]' : 'border-gray-200 hover:border-gray-300 text-gray-600'}`}
+                    className={`px-4 py-1.5 text-xs font-medium rounded-full border transition-all ${selectedSectors.includes(sector) ? 'chip-selected' : 'border-gray-200 hover:border-gray-300 text-gray-600'}`}
                   >
                     {sector}
                   </button>

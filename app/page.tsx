@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight, Phone, Wrench, Layers, Clock, Award } from 'lucide-react';
 import { products, productFamilies, sectors } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
+import FeaturedDeck from '@/components/FeaturedDeck';
 import HeroCarousel from '@/components/HeroCarousel';
 import SectionHeading from '@/components/SectionHeading';
 import { Reveal } from '@/components/Reveal';
@@ -104,11 +105,7 @@ export default function Home() {
             <SectionHeading eyebrow="Nuestras soluciones estrella" title="Productos más solicitados" className="mb-9" action={<Link href="/productos" className="text-sm font-medium flex items-center gap-1.5 text-[#059669] hover:underline">Ver catálogo completo <ArrowRight className="w-4 h-4" /></Link>} />
           </Reveal>
           <Reveal delay={0.05}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            <FeaturedDeck products={featuredProducts} />
           </Reveal>
         </div>
       </section>

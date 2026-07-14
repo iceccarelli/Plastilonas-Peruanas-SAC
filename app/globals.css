@@ -313,3 +313,32 @@ button[aria-pressed="true"] {
 .product-card .h-56 { transition: filter 0.25s ease; }
 .product-card:hover .h-56,
 .product-card:active .h-56 { filter: brightness(1.12) saturate(1.08); }
+
+/* ═══════════ MOBILE POLISH LAYER (≤640px) — desktop untouched ═══════════ */
+@media (max-width: 640px) {
+  html, body { max-width: 100%; overflow-x: hidden; }
+  section.py-20, section.py-24 { padding-top: 3rem; padding-bottom: 3rem; }
+  .mt-20 { margin-top: 3rem !important; }
+  .mt-16 { margin-top: 2.5rem !important; }
+  section.min-h-\[92vh\] { min-height: 78vh; }
+  section.min-h-\[92vh\] h1 { font-size: 2.15rem !important; line-height: 1.12 !important; }
+  .product-card .h-56 { height: 11rem; }
+  .badge { font-size: 0.7rem; padding: 0.2rem 0.6rem; }
+  a, button { -webkit-tap-highlight-color: transparent; }
+}
+
+/* ── Bright gradient selected/active state (AWS "North America" style) ── */
+.chip-selected {
+  background-image: linear-gradient(120deg, #10B981, #059669 60%, #F59E0B) !important;
+  background-color: #059669 !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 14px -2px rgba(5, 150, 105, 0.5);
+}
+.product-card:active { transform: scale(0.985); }
+.product-card .h-56 { transition: filter 0.25s ease; }
+.product-card:hover .h-56, .product-card:active .h-56 { filter: brightness(1.12) saturate(1.08); }
+
+/* Hide scrollbar on horizontal scroll rows but keep swipe */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
