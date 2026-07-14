@@ -36,7 +36,7 @@ export default function Home() {
   return (
     <div className="overflow-hidden">
       {/* ===== 1 · HERO ===== */}
-      <section className="relative min-h-[92vh] flex flex-col items-center justify-center bg-[#0A2540] text-white">
+      <section className="relative min-h-[78vh] md:min-h-[92vh] flex flex-col items-center justify-center bg-[#0A2540] text-white py-16 md:py-0">
         <HeroCarousel />
         <div className="relative max-w-5xl mx-auto px-6 text-center z-10 pt-24">
           <Reveal>
@@ -55,7 +55,7 @@ export default function Home() {
             </div>
           </Reveal>
         </div>
-        <Reveal delay={0.2} className="relative z-10 w-full max-w-6xl mx-auto px-6 mt-16">
+        <Reveal delay={0.2} className="relative z-10 w-full max-w-6xl mx-auto px-6 mt-10 md:mt-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-3xl overflow-hidden border border-white/10 backdrop-blur-sm">
             {stats.map((stat, i) => (
               <div key={i} className="bg-white/5 px-6 py-7 text-center">

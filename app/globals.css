@@ -269,3 +269,47 @@ a:hover, button:hover {
 .dark main :is(a, button).bg-white.text-\[\#0A2540\],
 .dark main :is(a, button).bg-white .text-\[\#0A2540\] { color: #0A2540; }
 
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE POLISH LAYER  (≤640px)  — tightens spacing & sizing site-wide.
+   Purely responsive: desktop is untouched. Mirrors AWS/Square density.
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* 1. Kill any accidental horizontal scroll */
+  html, body { max-width: 100%; overflow-x: hidden; }
+
+  /* 2. Section vertical rhythm: 80px -> 48px. Reclaims dead space. */
+  section.py-20, section.py-24 { padding-top: 3rem; padding-bottom: 3rem; }
+  .mt-20 { margin-top: 3rem !important; }
+  .mt-16 { margin-top: 2.5rem !important; }
+
+  /* 3. Hero: shorter, tighter, not a full screen of navy */
+  section.min-h-\[92vh\] { min-height: 78vh; }
+  section.min-h-\[92vh\] h1 { font-size: 2.15rem !important; line-height: 1.12 !important; }
+  section.min-h-\[92vh\] .mt-16 { margin-top: 2rem !important; }
+
+  /* 4. Product visual placards: 224px -> 176px, lighter feel */
+  .product-card .h-56 { height: 11rem; }
+
+  /* 5. Badges/labels breathe less loudly on tiny screens */
+  .badge { font-size: 0.7rem; padding: 0.2rem 0.6rem; }
+
+  /* 6. Comfortable tap targets (Apple/Google min 44px) for pills & icons */
+  a, button { -webkit-tap-highlight-color: transparent; }
+}
+
+/* ── Bright selected / active states (all breakpoints) ─────────────
+   Tapped filter chips and cards get a clear brand highlight + lift. */
+.chip-selected,
+button[aria-pressed="true"] {
+  background-color: var(--color-emerald) !important;
+  color: #fff !important;
+  border-color: var(--color-emerald) !important;
+  box-shadow: 0 4px 14px -2px rgba(5, 150, 105, 0.45);
+}
+.product-card:active { transform: scale(0.985); }
+
+/* Card image brightens on tap/hover (the "brighten when selected" ask) */
+.product-card .h-56 { transition: filter 0.25s ease; }
+.product-card:hover .h-56,
+.product-card:active .h-56 { filter: brightness(1.12) saturate(1.08); }
