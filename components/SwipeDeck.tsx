@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Hand, type LucideIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Hand, Ruler, HardHat, Ship, Lightbulb, type LucideIcon } from 'lucide-react';
+
+const ICONS: Record<string, LucideIcon> = { ruler: Ruler, hardhat: HardHat, ship: Ship, lightbulb: Lightbulb };
 
 export interface DeckCard {
   title: string;
   body: string;
   index: number;      // 1-based badge number
-  Icon?: LucideIcon;  // optional per-card icon (Servicios)
+  icon?: string;      // optional per-card icon key (Servicios)
 }
 
 // Soft tints so each stacked card is visibly distinct (the "deck" cue).
@@ -80,7 +82,7 @@ export default function SwipeDeck({
                     className="w-11 h-11 rounded-2xl flex items-center justify-center font-bold mb-4 shrink-0"
                     style={{ backgroundColor: tint.ink, color: '#fff' }}
                   >
-                    {card.Icon ? <card.Icon className="w-5 h-5" /> : card.index}
+                    {card.icon && ICONS[card.icon] ? (() => { const I = ICONS[card.icon!]; return <I className="w-5 h-5" />; })() : card.index}
                   </div>
                   <div className="font-semibold text-lg text-[#0A2540] mb-2 tracking-tight leading-snug">{card.title}</div>
                   <p className="text-gray-600 leading-relaxed text-[15px]">{card.body}</p>
