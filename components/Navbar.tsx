@@ -193,6 +193,16 @@ export default function Navbar() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-2 shrink-0">
+              {/* Búsqueda móvil: AWS coloca la lupa en el header del móvil.
+                  Con 34 productos en 11 familias, buscar es la vía más rápida. */}
+              <button
+                onClick={() => setShowCommand(true)}
+                aria-label="Buscar productos"
+                className="md:hidden p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#047857] transition-colors"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
               {/* Search Button */}
               <button
                 onClick={() => setShowCommand(true)}

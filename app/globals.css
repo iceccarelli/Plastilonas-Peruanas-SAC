@@ -329,8 +329,8 @@ button[aria-pressed="true"] {
 
 /* ── Bright gradient selected/active state (AWS "North America" style) ── */
 .chip-selected {
-  background-image: linear-gradient(120deg, #10B981, #059669 60%, #F59E0B) !important;
-  background-color: #059669 !important;
+  background-image: linear-gradient(120deg, #047857, #065F46 70%, #0F766E) !important;
+  background-color: #047857 !important;
   color: #fff !important;
   border-color: transparent !important;
   box-shadow: 0 4px 14px -2px rgba(5, 150, 105, 0.5);
@@ -408,4 +408,26 @@ button[aria-pressed="true"] {
 }
 @media (prefers-reduced-motion: reduce) {
   .ticker-track { animation: none; flex-wrap: wrap; width: auto; }
+}
+
+/* ═══════════ CONTRASTE WCAG AA — verificado por medición ═══════════
+   #059669 sobre blanco = 3.77 (FALLA AA 4.5) -> #047857 = 5.48 (PASA).
+   #10B981 + texto blanco = 2.54 (FALLA) -> emerald-700 = 5.48 (PASA).
+   gray-400 = 2.54 (FALLA) -> gray-500 = 4.83 (PASA).
+   #10B981 sobre navy = 6.13 (PASA) -> se conserva.
+   Razón comercial: se lee a pleno sol en mina, obra y campo. ══════ */
+:root { --color-emerald-text: #047857; }
+.text-\[\#059669\] { color: #047857 !important; }
+.bg-\[\#059669\] { background-color: #047857 !important; }
+.hover\:bg-\[\#059669\]:hover { background-color: #047857 !important; }
+.hover\:text-\[\#059669\]:hover { color: #047857 !important; }
+.text-gray-400 { color: #6B7280 !important; }
+.bg-\[\#0A2540\] .text-\[\#10B981\],
+section.bg-\[\#0A2540\] .text-\[\#10B981\] { color: #10B981 !important; }
+
+/* Foco visible para teclado (AWS/Square: accesibilidad primero) */
+a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid #047857;
+  outline-offset: 2px;
+  border-radius: 0.5rem;
 }

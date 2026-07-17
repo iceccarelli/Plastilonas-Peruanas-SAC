@@ -15,7 +15,7 @@ interface ProductCardProps {
 }
 
 const AVAILABILITY_STYLES: Record<string, string> = {
-  stock: 'bg-emerald-500/90 text-white',
+  stock: 'bg-emerald-700 text-white',
   a_medida: 'bg-white/90 text-[#0A2540]',
   bajo_pedido: 'bg-amber-400/95 text-[#0A2540]',
 };
