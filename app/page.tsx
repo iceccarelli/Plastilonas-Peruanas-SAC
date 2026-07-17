@@ -3,6 +3,8 @@ import { ArrowRight, Phone, Wrench, Layers, Clock, Award } from 'lucide-react';
 import { products, productFamilies, sectors } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
 import FeaturedDeck from '@/components/FeaturedDeck';
+import SectorTicker from '@/components/SectorTicker';
+import FamilyCarousel from '@/components/FamilyCarousel';
 import SwipeDeck from '@/components/SwipeDeck';
 import HeroCarousel from '@/components/HeroCarousel';
 import SectionHeading from '@/components/SectionHeading';
@@ -10,6 +12,11 @@ import { Reveal } from '@/components/Reveal';
 
 export default function Home() {
   const featuredProducts = products.filter((p) => p.featured).slice(0, 6);
+  // Conteo REAL de soluciones por sector (se recalcula solo al editar el catálogo).
+  const sectorStats = sectors
+    .map((sec) => ({ sector: sec, count: products.filter((p) => p.sector.includes(sec)).length }))
+    .filter((s) => s.count > 0)
+    .sort((a, b) => b.count - a.count);
   const stats = [
     { number: '34+', label: 'Soluciones en catálogo' },
     { number: '11', label: 'Líneas de producto' },
@@ -81,24 +88,10 @@ export default function Home() {
             <SectionHeading eyebrow="Todo lo que necesita, en un solo lugar" title="Explore el catálogo por familia" className="mb-6" action={<Link href="/productos" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el catálogo <ArrowRight className="w-4 h-4" /></Link>} />
           </Reveal>
           <Reveal delay={0.05}>
-            <div className="sector-scroll no-scrollbar mb-8 -mx-6 px-6">
-              {sectors.map((s) => (
-                <Link key={s} href={`/productos?sector=${encodeURIComponent(s)}`} className="px-4 py-1.5 text-xs font-medium rounded-full border border-gray-200 text-gray-600 hover:border-[#059669] hover:text-[#059669] transition-colors">{s}</Link>
-              ))}
-            </div>
+            <SectorTicker items={sectorStats} />
           </Reveal>
           <Reveal delay={0.1}>
-            <div className="family-scroll no-scrollbar grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 -mx-6 px-6 sm:mx-0 sm:px-0">
-              {productFamilies.map((fam) => (
-                <Link key={fam.slug} href={`/productos?categoria=${encodeURIComponent(fam.name)}`} className="group bg-white border border-gray-100 hover:border-[#059669] hover:shadow-lg hover:shadow-gray-100 rounded-3xl p-6 flex items-center justify-between gap-4 transition-all duration-300 hover:-translate-y-0.5">
-                  <div>
-                    <div className="font-semibold text-lg tracking-tight text-[#0A2540] group-hover:text-[#059669] transition-colors">{fam.name}</div>
-                    <div className="text-sm text-gray-500 mt-1">{fam.tagline}</div>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-[#059669] group-hover:translate-x-1 transition-all shrink-0" />
-                </Link>
-              ))}
-            </div>
+            <FamilyCarousel families={productFamilies} />
           </Reveal>
           <p className="text-xs text-gray-400 mt-6 text-center">Fabricación propia, importación directa y líneas especializadas bajo pedido — con ficha técnica y respaldo en cada cotización.</p>
 

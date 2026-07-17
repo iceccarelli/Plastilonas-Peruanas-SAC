@@ -391,3 +391,21 @@ button[aria-pressed="true"] {
   /* Kill stray off-canvas carousel arrow bleeding at screen edge */
   .hero-arrow-left, [class*="carousel"] button.absolute.left-0 { display: none !important; }
 }
+
+/* ── Ticker de sectores: flujo continuo derecha -> izquierda ── */
+.ticker-wrap { overflow: hidden; position: relative; }
+.ticker-track {
+  display: flex;
+  gap: 0.5rem;
+  width: max-content;
+  animation: ticker-scroll 38s linear infinite;
+}
+.ticker-wrap:hover .ticker-track,
+.ticker-wrap:focus-within .ticker-track { animation-play-state: paused; }
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { animation: none; flex-wrap: wrap; width: auto; }
+}
