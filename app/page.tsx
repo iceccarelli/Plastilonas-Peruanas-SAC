@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Phone, Wrench, Layers, Clock, Award } from 'lucide-react';
+import { ArrowRight, Phone, ShieldCheck, MapPin, Truck, FileText } from 'lucide-react';
 import { products, productFamilies, sectors } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
 import FeaturedDeck from '@/components/FeaturedDeck';
@@ -9,6 +9,7 @@ import ServiceTabs from '@/components/ServiceTabs';
 import HeroCarousel from '@/components/HeroCarousel';
 import SectionHeading from '@/components/SectionHeading';
 import { Reveal } from '@/components/Reveal';
+import CountUp from '@/components/CountUp';
 
 export default function Home() {
   const featuredProducts = products.filter((p) => p.featured).slice(0, 6);
@@ -17,17 +18,21 @@ export default function Home() {
     .map((sec) => ({ sector: sec, count: products.filter((p) => p.sector.includes(sec)).length }))
     .filter((s) => s.count > 0)
     .sort((a, b) => b.count - a.count);
+  // Años reales fabricando (desde 2009). Se actualiza solo cada 1 de enero.
+  const anios = new Date().getFullYear() - 2009;
+  // Cifras calculadas del catálogo: nunca quedan desfasadas ni se inventan.
   const stats = [
-    { number: '34+', label: 'Soluciones en catálogo' },
-    { number: '11', label: 'Líneas de producto' },
-    { number: '15+', label: 'Años de experiencia' },
-    { number: 'Perú', label: 'Entrega nacional' },
+    { to: 100, suffix: '%', label: 'A medida', sub: 'Cada pieza a su especificación' },
+    { to: products.length, label: 'Soluciones', sub: `En ${productFamilies.length} líneas de producto` },
+    { to: anios, label: 'Años fabricando', sub: 'En el Perú desde 2009' },
+    { display: '24/7', label: 'WhatsApp', sub: 'Respuesta directa de fábrica' },
   ];
+  // Franja de legitimidad: datos verificables, no repite las cifras de arriba.
   const trust = [
-    { icon: Wrench, text: 'Fabricación e instalación propias' },
-    { icon: Layers, text: 'Portafolio integral, un solo proveedor' },
-    { icon: Clock, text: 'Entregas en todo el Perú' },
-    { icon: Award, text: '+15 años de trayectoria' },
+    { icon: ShieldCheck, text: 'RUC 20523135385' },
+    { icon: MapPin, text: 'Chorrillos, Lima — Perú' },
+    { icon: Truck, text: 'Entrega a todo el país' },
+    { icon: FileText, text: 'Ficha técnica en cada cotización' },
   ];
   const whyus = [
     { title: 'Fabricación e instalación propias', content: 'Confeccionamos e instalamos con nuestro propio equipo: una sola responsabilidad, del diseño a la obra.' },
@@ -67,9 +72,12 @@ export default function Home() {
         <Reveal delay={0.2} className="relative z-10 w-full max-w-6xl mx-auto px-6 mt-10 md:mt-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-3xl overflow-hidden border border-white/10 backdrop-blur-sm">
             {stats.map((stat, i) => (
-              <div key={i} className="bg-white/5 px-6 py-7 text-center">
-                <div className="text-3xl md:text-4xl font-semibold tracking-tighter text-white">{stat.number}</div>
-                <div className="text-xs text-white/60 mt-1.5 font-medium tracking-wide">{stat.label}</div>
+              <div key={i} className="bg-white/5 px-3 py-6 md:px-6 md:py-7 text-center">
+                <div className="text-3xl md:text-4xl font-semibold tracking-tighter text-white tabular-nums">
+                  <CountUp to={stat.to} suffix={stat.suffix} display={stat.display} />
+                </div>
+                <div className="text-xs text-white/85 mt-1.5 font-medium tracking-wide">{stat.label}</div>
+                <div className="text-[10px] text-white/45 mt-1 leading-snug">{stat.sub}</div>
               </div>
             ))}
           </div>
