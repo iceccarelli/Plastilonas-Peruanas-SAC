@@ -5,7 +5,7 @@ import ProductCard from '@/components/ProductCard';
 import FeaturedDeck from '@/components/FeaturedDeck';
 import SectorTicker from '@/components/SectorTicker';
 import FamilyCarousel from '@/components/FamilyCarousel';
-import SwipeDeck from '@/components/SwipeDeck';
+import ServiceTabs from '@/components/ServiceTabs';
 import HeroCarousel from '@/components/HeroCarousel';
 import SectionHeading from '@/components/SectionHeading';
 import { Reveal } from '@/components/Reveal';
@@ -104,54 +104,42 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== 3 · POR QUÉ + SERVICIOS ===== */}
-      <section className="bg-gray-50 py-20 md:py-24">
+      {/* ===== 3 · POR QUÉ — banda oscura de alto contraste ===== */}
+      <section className="bg-[#0A2540] text-white py-20 md:py-24">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
-            <SectionHeading eyebrow="Por qué elegirnos" title="La ventaja de un solo proveedor, sin intermediarios" className="mb-10" />
+            <div className="text-xs tracking-[2px] text-[#10B981] font-semibold mb-3">POR QUÉ ELEGIRNOS</div>
+            <h2 className="text-3xl md:text-5xl font-semibold tracking-tighter leading-tight max-w-3xl mb-4">La ventaja de un solo proveedor, sin intermediarios</h2>
+            <p className="text-white/60 max-w-2xl leading-relaxed mb-12">Desde 2009 fabricamos e instalamos con equipo propio. Una sola responsabilidad, del diseño a la obra.</p>
           </Reveal>
-          <Reveal delay={0.05}>
-            <SwipeDeck
-              numbered
-              cards={whyus.map((item, i) => ({ title: item.title, body: item.content, index: i + 1 }))}
-              desktop={
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {whyus.map((item, i) => (
-                    <div key={i} className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-[#059669]/40 hover:-translate-y-1 transition-all duration-300">
-                      <div className="w-10 h-10 bg-emerald-50 text-[#059669] rounded-2xl flex items-center justify-center font-bold mb-5">{i + 1}</div>
-                      <div className="font-semibold text-lg text-[#0A2540] mb-3">{item.title}</div>
-                      <p className="text-gray-600 leading-relaxed text-[15px]">{item.content}</p>
-                    </div>
-                  ))}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-9 md:gap-8">
+            {whyus.map((item, i) => (
+              <Reveal key={i} delay={0.04 * i}>
+                <div className="border-t border-white/15 pt-5">
+                  <div className="text-4xl md:text-5xl font-semibold tracking-tighter text-[#10B981] mb-3">0{i + 1}</div>
+                  <div className="font-semibold text-base md:text-lg mb-2 leading-snug">{item.title}</div>
+                  <p className="text-white/60 text-sm leading-relaxed">{item.content}</p>
                 </div>
-              }
-            />
+              </Reveal>
+            ))}
+          </div>
+          <Reveal delay={0.1}>
+            <div className="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+              <p className="text-white/70 text-sm max-w-xl">Compromiso real con la calidad y el cliente satisfecho — desde 2009 en el Perú.</p>
+              <Link href="/nosotros" className="inline-flex items-center justify-center gap-2 border border-white/30 hover:bg-white/10 px-7 py-3 rounded-2xl text-sm font-medium transition-all shrink-0">Conozca nuestra historia <ArrowRight className="w-4 h-4" /></Link>
+            </div>
           </Reveal>
-          <Reveal className="mt-16">
+        </div>
+      </section>
+
+      {/* ===== 4 · SERVICIOS — explorador por pestañas (patrón AWS) ===== */}
+      <section className="bg-white py-20 md:py-24">
+        <div className="max-w-7xl mx-auto px-6">
+          <Reveal>
             <SectionHeading eyebrow="Más que fabricación" title="Servicios integrales, de principio a fin" className="mb-10" />
           </Reveal>
           <Reveal delay={0.05}>
-            <SwipeDeck
-              cards={services.map((service, i) => ({ title: service.title, body: service.desc, index: i + 1, icon: ['ruler','hardhat','ship','lightbulb'][i] }))}
-              desktop={
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {services.map((service, i) => (
-                    <div key={i} className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-[#059669]/30 group transition-all duration-300">
-                      <div className="font-semibold text-xl tracking-tight mb-4 group-hover:text-[#059669] transition-colors">{service.title}</div>
-                      <p className="text-gray-600 leading-relaxed text-[15px]">{service.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              }
-            />
-          </Reveal>
-          <Reveal delay={0.1} className="mt-14">
-            <div className="bg-[#0A2540] text-white rounded-3xl px-8 py-12 md:px-14 md:py-14 text-center">
-              <div className="text-xs tracking-[2px] text-[#10B981] font-semibold mb-3">DESDE 2009</div>
-              <h3 className="text-2xl md:text-3xl font-semibold tracking-tight mb-4 max-w-3xl mx-auto">Compromiso real con la calidad y el cliente satisfecho.</h3>
-              <p className="text-white/70 max-w-2xl mx-auto leading-relaxed mb-8">En Plastilonas Peruanas fabricamos con orgullo soluciones que superan las expectativas de los sectores más exigentes del país. Calidad, precio justo y atención personalizada son nuestra firma.</p>
-              <Link href="/nosotros" className="inline-flex items-center gap-2 border border-white/30 hover:bg-white/10 px-8 py-3 rounded-2xl text-sm font-medium transition-all">Conozca nuestra historia <ArrowRight className="w-4 h-4" /></Link>
-            </div>
+            <ServiceTabs services={services.map((sv, i) => ({ ...sv, icon: ['ruler', 'hardhat', 'ship', 'lightbulb'][i] }))} />
           </Reveal>
         </div>
       </section>
