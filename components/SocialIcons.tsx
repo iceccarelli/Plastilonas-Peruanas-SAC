@@ -21,18 +21,8 @@ export default function SocialIcons({ variant = 'dark', className = '' }: Props)
 
         // Marcador de posición: presente y visible, pero no navegable hasta
         // que se integre la URL real. No rompe el layout.
-        if (!ready) {
-          return (
-            <span
-              key={name}
-              className={`${shared} opacity-40 cursor-not-allowed`}
-              title={`${name} — próximamente`}
-              aria-label={`${name} (próximamente)`}
-            >
-              <Icon className="w-4 h-4" />
-            </span>
-          );
-        }
+                // Solo mostramos redes con URL real configurada en lib/social.ts.
+        if (!ready) return null;
 
         return (
           <a

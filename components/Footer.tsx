@@ -1,14 +1,56 @@
 import Link from 'next/link';
 import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
 import SocialIcons from '@/components/SocialIcons';
+import FooterAccordion, { type FSection } from '@/components/FooterAccordion';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
+  const sections: FSection[] = [
+    { title: 'PRODUCTOS', links: [
+      { label: 'Envases y Embalaje', href: '/productos?categoria=Envases%20y%20Embalaje' },
+      { label: 'Lonas y Cobertores', href: '/productos?categoria=Lonas%20y%20Cobertores' },
+      { label: 'Geosintéticos e Impermeabilización', href: '/productos?categoria=Geosint%C3%A9ticos%20e%20Impermeabilizaci%C3%B3n' },
+      { label: 'Estructuras y Arquitectura Textil', href: '/productos?categoria=Estructuras%20y%20Arquitectura%20Textil' },
+      { label: 'Ventilación Industrial', href: '/productos?categoria=Ventilaci%C3%B3n%20Industrial' },
+      { label: 'Ver catálogo completo →', href: '/productos' },
+    ]},
+    { title: 'EMPRESA', links: [
+      { label: 'Sobre Nosotros', href: '/nosotros' },
+      { label: 'Nuestros Servicios', href: '/servicios' },
+      { label: 'Contacto', href: '/contacto' },
+      { label: 'Solicitar Cotización', href: '/cotizacion' },
+    ]},
+    { title: 'CONTACTO', links: [
+      { label: '+51 998 117 065 · Central', href: 'tel:+51998117065', external: true },
+      { label: 'ventas@plastilonas.com', href: 'mailto:ventas@plastilonas.com', external: true },
+      { label: 'Chorrillos, Lima — Perú', href: '/contacto' },
+    ]},
+  ];
+
   return (
     <footer className="bg-[#0A2540] text-white/90 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-12">
+        {/* ── Mobile: marca compacta + CTA + acordeón (patrón AWS) ── */}
+        <div className="md:hidden">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-xl tracking-tighter">PP</span>
+            </div>
+            <div className="font-semibold text-lg tracking-tight text-white">Plastilonas Peruanas SAC</div>
+          </div>
+          <p className="text-white/60 text-sm leading-relaxed mb-5">Fabricación e instalación propias. +15 años entregando a todo el Perú.</p>
+          <a href="https://wa.me/51946085270" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-[#0A2540] font-semibold py-3.5 rounded-2xl mb-6 active:scale-[0.99] transition">
+            <Phone className="w-4 h-4" /> WhatsApp 24/7 · +51 946 085 270
+          </a>
+          <FooterAccordion sections={sections} />
+          <div className="py-6">
+            <div className="text-xs text-white/40 mb-3 tracking-wide">SÍGANOS</div>
+            <SocialIcons variant="dark" />
+          </div>
+        </div>
+
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-12">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center">
