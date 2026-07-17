@@ -431,3 +431,53 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
   outline-offset: 2px;
   border-radius: 0.5rem;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   SISTEMA DE DISEÑO — jerarquía de forma y tipografía
+   Patrón AWS observado:
+     · Monoespaciada = metadato técnico (specs, estados, conteos).
+     · Radio PEQUEÑO = etiqueta informativa (no se toca).
+     · Radio PÍLDORA = acción (se toca).
+     · Panel/tarjeta = radio medio.
+   Antes: badges y botones compartían forma píldora -> el usuario
+   intentaba tocar etiquetas. La forma ahora codifica la función.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* 1 · Metadatos técnicos en monoespaciada */
+.badge,
+.tech-meta,
+.spec-label,
+.tabular-nums {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 2 · Jerarquía de radios */
+.badge {
+  border-radius: 0.375rem;      /* etiqueta: NO es un botón */
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  padding: 0.22rem 0.5rem;
+  text-transform: uppercase;
+}
+/* Los estados de producto también son etiquetas, no acciones */
+.product-card .absolute.top-4.left-4,
+.product-card .absolute.top-4.right-4 {
+  border-radius: 0.375rem !important;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.04em;
+}
+
+/* 3 · Transición de sección con solape redondeado (patrón AWS) */
+.section-lift {
+  position: relative;
+  z-index: 1;
+  border-top-left-radius: 2rem;
+  border-top-right-radius: 2rem;
+  margin-top: -2rem;
+}
+
+/* 4 · Ritmo de lectura: cuerpo más cómodo, títulos más ceñidos */
+main p { line-height: 1.6; }
+main h1, main h2, main h3 { letter-spacing: -0.02em; }

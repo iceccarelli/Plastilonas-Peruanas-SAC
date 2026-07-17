@@ -82,7 +82,7 @@ export default function Home() {
       </section>
 
       {/* ===== 2 · CATÁLOGO ===== */}
-      <section className="bg-white py-20 md:py-24">
+      <section className="bg-white py-20 md:py-24 section-lift">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
             <SectionHeading eyebrow="Todo lo que necesita, en un solo lugar" title="Explore el catálogo por familia" className="mb-6" action={<Link href="/productos" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el catálogo <ArrowRight className="w-4 h-4" /></Link>} />
