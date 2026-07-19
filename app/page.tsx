@@ -104,7 +104,7 @@ export default function Home() {
           <p className="text-xs text-gray-400 mt-6 text-center">Fabricación propia, importación directa y líneas especializadas bajo pedido — con ficha técnica y respaldo en cada cotización.</p>
 
           <Reveal className="mt-20">
-            <SectionHeading eyebrow="Nuestras soluciones estrella" title="Productos más solicitados" className="mb-9" action={<Link href="/productos" className="text-sm font-medium flex items-center gap-1.5 text-[#059669] hover:underline">Ver catálogo completo <ArrowRight className="w-4 h-4" /></Link>} />
+            <SectionHeading eyebrow="Nuestras soluciones estrella" title="Nuestras líneas insignia" className="mb-9" action={<Link href="/productos" className="text-sm font-medium flex items-center gap-1.5 text-[#059669] hover:underline">Ver catálogo completo <ArrowRight className="w-4 h-4" /></Link>} />
           </Reveal>
           <Reveal delay={0.05}>
             <FeaturedDeck products={featuredProducts} />

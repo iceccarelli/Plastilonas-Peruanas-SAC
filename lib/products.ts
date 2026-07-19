@@ -242,7 +242,7 @@ export const products: Product[] = [
     ],
     image: '/images/mantas-camiones.jpg',
     gallery: ['/images/mantas-camiones.jpg'],
-    featured: false,
+    featured: true,
     popular: true,
     sourcing: 'fabricacion_propia',
     availability: 'a_medida'
@@ -276,7 +276,7 @@ export const products: Product[] = [
     ],
     image: '/images/siders-tolderas.jpg',
     gallery: ['/images/siders-tolderas.jpg'],
-    featured: false,
+    featured: true,
     popular: false,
     sourcing: 'fabricacion_propia',
     availability: 'a_medida'
