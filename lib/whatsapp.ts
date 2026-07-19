@@ -57,7 +57,10 @@ export function whatsappUrl(message: string): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
+import { trackWhatsAppClick } from './analytics';
+
 export function openWhatsApp(message: string): void {
+  trackWhatsAppClick();
   window.open(whatsappUrl(message), '_blank', 'noopener,noreferrer');
 }
 

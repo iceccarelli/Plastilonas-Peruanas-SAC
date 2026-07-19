@@ -9,6 +9,8 @@ import CartDrawer from '@/components/CartDrawer';
 import { Toaster } from 'sonner';
 import AuthProvider from '@/components/AuthProvider';
 import StructuredData from '@/components/StructuredData';
+import Analytics from '@/components/Analytics';
+import ConsentBanner from '@/components/ConsentBanner';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -94,6 +96,7 @@ export default function RootLayout({
           (0,1,0) ganaban al selector body (0,0,1) y anulaban .dark */}
       <body className="font-sans antialiased bg-[var(--surface)] text-[var(--text)]">
         <StructuredData />
+        <Analytics />
         <AuthProvider>
           <Navbar />
           <main className="min-h-screen">{children}</main>
@@ -103,6 +106,7 @@ export default function RootLayout({
           <Toaster position="top-center" richColors closeButton />
         </AuthProvider>
               <ExitIntentModal />
+        <ConsentBanner />
       </body>
     </html>
   );
