@@ -12,7 +12,7 @@ import { Reveal } from '@/components/Reveal';
 import CountUp from '@/components/CountUp';
 
 export default function Home() {
-  const featuredProducts = products.filter((p) => p.featured).slice(0, 6);
+  const featuredProducts = [...products].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
   // Conteo REAL de soluciones por sector (se recalcula solo al editar el catálogo).
   const sectorStats = sectors
     .map((sec) => ({ sector: sec, count: products.filter((p) => p.sector.includes(sec)).length }))
