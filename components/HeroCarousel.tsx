@@ -2,39 +2,30 @@
 
 import { useEffect, useState } from 'react';
 
-/**
- * Fondo cinematográfico del hero con efecto Ken Burns.
- *
- * Las 8 imágenes representan los sectores reales de Plastilonas: minería,
- * agricultura, construcción, geomembranas/contención de agua, transporte,
- * industria e invernaderos. Se cargan desde el CDN de Unsplash directamente
- * en el navegador del visitante.
- *
- * Robustez: cada imagen que no cargue se marca como fallida y simplemente no
- * se muestra (el fondo navy queda visible). Una sola imagen rota nunca degrada
- * el diseño ni deja un ícono de imagen quebrada.
- */
-
 interface Slide {
-  id: string;
+  src: string;
   alt: string;
 }
 
-// IDs del CDN de Unsplash (images.unsplash.com/photo-...), fotos estables y
-// libres para uso comercial que encajan con el mercado industrial peruano.
+// Imágenes propias en /public/images/hero (1920×1080). La primera es el LCP.
 const SLIDES: Slide[] = [
-  { id: 'photo-1741176508062-a79aa6b48bdc', alt: 'Operarios en una planta de manufactura textil industrial' },
-  { id: 'photo-1551825687-f9de1603ed8b', alt: 'Transportista sonriendo junto al camión de reparto' },
-  { id: 'photo-1741176508460-2001b928a0e7', alt: 'Confección de tela en línea de producción' },
-  { id: 'photo-1534639077088-d702bcf685e7', alt: 'Rollos de tela apilados en almacén' },
-  { id: 'photo-1695222833131-54ee679ae8e5', alt: 'Camión de carga en ruta hacia el interior del país' },
-  { id: 'photo-1742934028246-55fcad193b6c', alt: 'Operaria sonriendo en una fábrica textil' },
-  { id: 'photo-1764232891094-a4a3e8c517e3', alt: 'Manos cosechando cerezas de café maduras' },
-  { id: 'photo-1770055592671-01c08cae22be', alt: 'Saco de yute lleno de granos de café verde' },
+  { src: '/images/hero/hero-01.jpg', alt: 'Paisaje industrial minero en los Andes peruanos' },
+  { src: '/images/hero/hero-02.jpg', alt: 'Carga de big bags (FIBC) en planta industrial' },
+  { src: '/images/hero/hero-03.jpg', alt: 'Instalación de geomembrana HDPE en poza de contención' },
+  { src: '/images/hero/hero-04.jpg', alt: 'Geotextil y geomalla en obra de movimiento de tierras' },
+  { src: '/images/hero/hero-05.jpg', alt: 'Estructura tensada de arquitectura textil' },
+  { src: '/images/hero/hero-06.jpg', alt: 'Malla agrícola de sombra y anti-granizo sobre cultivo' },
+  { src: '/images/hero/hero-07.jpg', alt: 'Tanque flexible (bladder) para almacenamiento de agua' },
+  { src: '/images/hero/hero-08.jpg', alt: 'Camión con siders y tolderas en carretera peruana' },
+  { src: '/images/hero/hero-09.jpg', alt: 'Mangas de ventilación industrial en planta' },
+  { src: '/images/hero/hero-10.jpg', alt: 'Almacén con rollos de lonas industriales' },
+  { src: '/images/hero/hero-11.jpg', alt: 'Operarios en línea de fabricación de lonas' },
+  { src: '/images/hero/hero-12.jpg', alt: 'Acopio minero cubierto con lona en altura' },
+  { src: '/images/hero/hero-13.jpg', alt: 'Invernadero con film técnico agrícola' },
+  { src: '/images/hero/hero-14.jpg', alt: 'Cosecha de café con sacos de yute y big bags' },
+  { src: '/images/hero/hero-15.jpg', alt: 'Geosintéticos para control de erosión en talud' },
+  { src: '/images/hero/hero-16.jpg', alt: 'Patio logístico con cargas paletizadas y embaladas' },
 ];
-
-const UNSPLASH = (id: string) =>
-  `https://images.unsplash.com/${id}?q=80&w=1920&auto=format&fit=crop`;
 
 const INTERVAL_MS = 6000;
 
@@ -51,62 +42,39 @@ export default function HeroCarousel() {
 
   return (
     <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-      {/* Capa base garantizada: patrón navy siempre visible. Si ninguna
-          imagen carga, el hero conserva este fondo pulido en lugar de
-          quedar en blanco. */}
       <div className="absolute inset-0 bg-[#0A2540]" />
       <div className="absolute inset-0 bg-[radial-gradient(#1A3A5C_0.8px,transparent_1px)] bg-[length:5px_5px] opacity-40" />
 
       {SLIDES.map((slide, i) => {
-        if (failed[slide.id]) return null;
+        if (failed[slide.src]) return null;
         const isActive = i === active;
         return (
           <div
-            key={slide.id}
+            key={slide.src}
             className="absolute inset-0 transition-opacity duration-[1600ms] ease-in-out will-change-[opacity]"
             style={{ opacity: isActive ? 1 : 0 }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={UNSPLASH(slide.id)}
+              src={slide.src}
               alt={slide.alt}
               loading={i === 0 ? 'eager' : 'lazy'}
               fetchPriority={i === 0 ? 'high' : 'auto'}
               decoding="async"
-              onError={() =>
-                setFailed((f) => ({ ...f, [slide.id]: true }))
-              }
-              className={`hero-photo h-full w-full object-cover ${
-                isActive ? 'kb-active' : ''
-              }`}
+              onError={() => setFailed((f) => ({ ...f, [slide.src]: true }))}
+              className={`hero-photo h-full w-full object-cover ${isActive ? 'kb-active' : ''}`}
             />
           </div>
         );
       })}
 
-      {/* Scrim de dos etapas. Antes: 88-100% de opacidad en toda la imagen.
-          Ahora la foto vive a 40% en los bordes y solo se oscurece donde hay
-          texto. Medido sobre el pixel claro peor caso (#C8D2DC):
-            titular  65% -> 5.89:1   (necesita 3.0, texto grande)
-            subtitulo 65% -> 5.89:1  (necesita 4.5)
-            cue abajo 81% -> 9.28:1
-          Los bordes conservan 7.5x mas luminancia que antes. */}
       <div className="absolute inset-0 bg-[#0A2540]/40" />
       <div
         className="absolute inset-0"
         style={{
           background: [
-            // Etapa 2a: elipse bajo la columna de copy.
-            'radial-gradient(ellipse 92% 62% at 50% 50%,' +
-              ' rgba(10,37,64,0.42) 0%,' +
-              ' rgba(10,37,64,0.24) 46%,' +
-              ' rgba(10,37,64,0) 76%)',
-            // Etapa 2b: protege navbar arriba y el cue de scroll abajo.
-            'linear-gradient(to bottom,' +
-              ' rgba(10,37,64,0.42) 0%,' +
-              ' rgba(10,37,64,0) 18%,' +
-              ' rgba(10,37,64,0) 72%,' +
-              ' rgba(10,37,64,0.68) 100%)',
+            'radial-gradient(ellipse 92% 62% at 50% 50%, rgba(10,37,64,0.42) 0%, rgba(10,37,64,0.24) 46%, rgba(10,37,64,0) 76%)',
+            'linear-gradient(to bottom, rgba(10,37,64,0.42) 0%, rgba(10,37,64,0) 18%, rgba(10,37,64,0) 72%, rgba(10,37,64,0.68) 100%)',
           ].join(', '),
         }}
       />
@@ -116,20 +84,10 @@ export default function HeroCarousel() {
           0%   { transform: scale(1)   translate(0, 0); }
           100% { transform: scale(1.12) translate(-1.5%, -1.5%); }
         }
-        .kb-active {
-          animation: kenburns ${INTERVAL_MS + 1600}ms ease-out forwards;
-        }
-        /* Las exportaciones de Unsplash llegan planas. Esto restaura el punch
-           sin tocar el contraste del texto (el scrim ya lo garantiza).
-           Va en la <img>, nunca en un padre: filter crea containing block y
-           el navbar fixed empezaria a scrollear con el hero. */
-        .hero-photo {
-          filter: saturate(1.25) contrast(1.06) brightness(1.05);
-        }
+        .kb-active { animation: kenburns ${INTERVAL_MS + 1600}ms ease-out forwards; }
+        .hero-photo { filter: saturate(1.25) contrast(1.06) brightness(1.05); }
         @media (prefers-reduced-motion: reduce) {
           .hero-photo { filter: saturate(1.15); }
-        }
-        @media (prefers-reduced-motion: reduce) {
           .kb-active { animation: none; }
         }
       `}</style>
