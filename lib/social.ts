@@ -1,88 +1,54 @@
-import type { LucideIcon } from 'lucide-react';
+import type { IconType } from 'react-icons';
 import {
-  Facebook,
-  Instagram,
-  Linkedin,
-  Youtube,
-  MessageCircle,
-  Music2,
-  Send,
-  Video,
-  AtSign,
-} from 'lucide-react';
+  SiWhatsapp,
+  SiFacebook,
+  SiInstagram,
+  SiTiktok,
+  SiYoutube,
+  SiX,
+  SiTelegram,
+  SiPinterest,
+  SiSnapchat,
+} from 'react-icons/si';
+import { FaLinkedin } from 'react-icons/fa';
 
 /**
- * Redes sociales más usadas en Sudamérica para una empresa industrial B2B.
+ * Las 10 plataformas sociales más usadas, en orden de prioridad para el mercado
+ * peruano B2B. Se muestran TODAS (base para wiring con n8n y campañas pagadas).
  *
- * `href` con '#' es un marcador de posición: reemplácelo por la URL real del
- * perfil cuando la cuenta esté creada. Los enlaces con URL real abren en una
- * pestaña nueva; los marcadores quedan deshabilitados visualmente pero
- * presentes, para que el layout no cambie al integrarlos después.
+ * WhatsApp y Facebook apuntan a destinos reales de Plastilonas. El resto enlazan
+ * por ahora a la plataforma (marcador de posición): reemplace el `href` por la
+ * URL del perfil real cuando la cuenta exista — el patrón está en el TODO de cada
+ * línea. Los enlaces https abren la app nativa en móvil automáticamente
+ * (universal links de iOS/Android); en escritorio abren el sitio en pestaña nueva.
  *
- * WhatsApp y Facebook ya apuntan a destinos reales de Plastilonas.
+ * `ready`: true = perfil real ya configurado; false = marcador pendiente.
  */
 
 export interface SocialLink {
   name: string;
   href: string;
-  Icon: LucideIcon;
-  /** true = URL real; false = marcador de posición pendiente de integrar. */
+  Icon: IconType;
   ready: boolean;
 }
 
 export const SOCIAL_LINKS: SocialLink[] = [
-  {
-    name: 'WhatsApp',
-    href: 'https://wa.me/51946085270',
-    Icon: MessageCircle,
-    ready: true,
-  },
-  {
-    name: 'Facebook',
-    href: 'https://www.facebook.com/plastilonasperuanas',
-    Icon: Facebook,
-    ready: true,
-  },
-  {
-    name: 'Instagram',
-    href: '#', // TODO: https://instagram.com/USUARIO
-    Icon: Instagram,
-    ready: false,
-  },
-  {
-    name: 'TikTok',
-    href: '#', // TODO: https://tiktok.com/@USUARIO
-    Icon: Music2,
-    ready: false,
-  },
-  {
-    name: 'YouTube',
-    href: '#', // TODO: https://youtube.com/@CANAL
-    Icon: Youtube,
-    ready: false,
-  },
-  {
-    name: 'LinkedIn',
-    href: '#', // TODO: https://linkedin.com/company/EMPRESA
-    Icon: Linkedin,
-    ready: false,
-  },
-  {
-    name: 'X',
-    href: '#', // TODO: https://x.com/USUARIO
-    Icon: AtSign,
-    ready: false,
-  },
-  {
-    name: 'Telegram',
-    href: '#', // TODO: https://t.me/USUARIO
-    Icon: Send,
-    ready: false,
-  },
-  {
-    name: 'Kwai',
-    href: '#', // TODO: https://kwai.com/@USUARIO
-    Icon: Video,
-    ready: false,
-  },
+  { name: 'WhatsApp',  href: 'https://wa.me/51946085270',                    Icon: SiWhatsapp,  ready: true  },
+  { name: 'Facebook',  href: 'https://www.facebook.com/plastilonasperuanas', Icon: SiFacebook,  ready: true  },
+  // TODO perfil real: https://www.instagram.com/USUARIO
+  { name: 'Instagram', href: 'https://www.instagram.com/',                   Icon: SiInstagram, ready: false },
+  // TODO perfil real: https://www.tiktok.com/@USUARIO
+  { name: 'TikTok',    href: 'https://www.tiktok.com/',                      Icon: SiTiktok,    ready: false },
+  // TODO perfil real: https://www.youtube.com/@CANAL
+  { name: 'YouTube',   href: 'https://www.youtube.com/',                     Icon: SiYoutube,   ready: false },
+  // TODO perfil real: https://www.linkedin.com/company/EMPRESA
+  { name: 'LinkedIn',  href: 'https://www.linkedin.com/',                    Icon: FaLinkedin,  ready: false },
+  // TODO perfil real: https://x.com/USUARIO
+  { name: 'X',         href: 'https://x.com/',                               Icon: SiX,         ready: false },
+  // TODO perfil real: https://t.me/USUARIO
+  { name: 'Telegram',  href: 'https://telegram.org/',                        Icon: SiTelegram,  ready: false },
+  // TODO perfil real: https://www.pinterest.com/USUARIO
+  { name: 'Pinterest', href: 'https://www.pinterest.com/',                   Icon: SiPinterest, ready: false },
+  // TODO perfil real: https://www.snapchat.com/add/USUARIO
+  { name: 'Snapchat',  href: 'https://www.snapchat.com/',                    Icon: SiSnapchat,  ready: false },
 ];
