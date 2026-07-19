@@ -3,7 +3,6 @@
 import { SOCIAL_LINKS } from '@/lib/social';
 
 interface Props {
-  /** Estilo de color: 'dark' para fondos oscuros (footer), 'light' para claros. */
   variant?: 'dark' | 'light';
   className?: string;
 }
@@ -18,6 +17,7 @@ export default function SocialIcons({ variant = 'dark', className = '' }: Props)
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
       {SOCIAL_LINKS.map(({ name, href, Icon }) => (
         
+            <a
           key={name}
           href={href}
           target="_blank"
