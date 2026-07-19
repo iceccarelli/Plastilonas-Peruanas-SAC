@@ -1,0 +1,150 @@
+diff --git a/.gitignore b/.gitignore
+index 6590f35..728d20b 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -33,3 +33,7 @@ Thumbs.db
+ 
+ # patch delivery artifacts
+ *.patch
++
++# macOS AppleDouble junk (33 ._*.jpg were committed under public/images)
++._*
++.DS_Store
+diff --git a/app/layout.tsx b/app/layout.tsx
+index 6092877..d022e71 100644
+--- a/app/layout.tsx
++++ b/app/layout.tsx
+@@ -58,8 +58,8 @@ export const metadata: Metadata = {
+   },
+   metadataBase: new URL('https://www.plastilonas.com'),
+   openGraph: {
+-    title: 'Plastilonas Peruanas SAC | Líder en Soluciones Textiles Industriales',
+-    description: 'El portafolio industrial más completo del Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
++    title: 'Plastilonas Peruanas SAC | Soluciones Textiles Industriales — Fabricación e Importación Directa',
++    description: 'Portafolio integral de soluciones textiles industriales en el Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
+     // og:image lo genera app/opengraph-image.tsx (antes apuntaba a un archivo
+     // inexistente /images/og-image.jpg y las vistas previas salían en blanco).
+     locale: 'es_PE',
+diff --git a/app/nosotros/page.tsx b/app/nosotros/page.tsx
+index 8a46a97..4a2c711 100644
+--- a/app/nosotros/page.tsx
++++ b/app/nosotros/page.tsx
+@@ -16,7 +16,7 @@ export default function NosotrosPage() {
+ 
+       <div className="mt-14 grid md:grid-cols-3 gap-6">
+         {[
+-          { title: "Misión", text: "Fabricar y comercializar soluciones textiles industriales de alta calidad que contribuyan al desarrollo productivo de nuestros clientes, ofreciendo siempre el mejor balance entre calidad, precio y servicio." },
++          { title: "Misión", text: "Fabricar y comercializar soluciones textiles industriales de alta calidad que contribuyan al desarrollo productivo de nuestros clientes, buscando siempre el equilibrio entre calidad, precio y plazo de entrega." },
+           { title: "Visión", text: "Ser el proveedor de referencia en soluciones textiles e industriales del Perú, respondiendo por cada pieza que fabricamos e instalamos." },
+           { title: "Valores", text: "Calidad sin concesiones • Transparencia y honestidad • Compromiso con el cliente • Mejora continua • Responsabilidad social y ambiental." },
+         ].map((v, i) => (
+diff --git a/components/Footer.tsx b/components/Footer.tsx
+index 0d5412d..9addb7d 100644
+--- a/components/Footer.tsx
++++ b/components/Footer.tsx
+@@ -59,7 +59,7 @@ export default function Footer() {
+               <div className="font-semibold text-2xl tracking-tight text-white">Plastilonas Peruanas SAC</div>
+             </div>
+             <p className="text-white/70 max-w-md leading-relaxed t-body">
+-              Más de 15 años fabricando soluciones textiles industriales de la más alta calidad para los sectores más exigentes del Perú. Compromiso, calidad y precio justo.
++              Más de 15 años fabricando e instalando soluciones textiles industriales para los sectores más exigentes del Perú. Fabricación propia, importación directa y respaldo técnico en cada proyecto.
+             </p>
+             <div className="flex flex-wrap items-center gap-4 mt-6">
+               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">
+diff --git a/components/SwipeDeck.tsx b/components/SwipeDeck.tsx
+index ff33e1f..4f8d74c 100644
+--- a/components/SwipeDeck.tsx
++++ b/components/SwipeDeck.tsx
+@@ -16,7 +16,7 @@ export interface DeckCard {
+ // Soft tints so each stacked card is visibly distinct (the "deck" cue).
+ // Cycles by card index; face + peeking edge both show the hue.
+ const TINTS = [
+-  { bg: '#ECFDF5', ring: '#A7F3D0', ink: '#059669' }, // emerald
++  { bg: '#ECFDF5', ring: '#A7F3D0', ink: '#047857' }, // emerald
+   { bg: '#FEF3C7', ring: '#FDE68A', ink: '#D97706' }, // amber
+   { bg: '#E0F2FE', ring: '#BAE6FD', ink: '#0284C7' }, // sky
+   { bg: '#EEF2FF', ring: '#C7D2FE', ink: '#4F46E5' }, // indigo
+diff --git a/eslint.config.mjs b/eslint.config.mjs
+new file mode 100644
+index 0000000..3fa0bfe
+--- /dev/null
++++ b/eslint.config.mjs
+@@ -0,0 +1,26 @@
++import { dirname } from 'path';
++import { fileURLToPath } from 'url';
++import { FlatCompat } from '@eslint/eslintrc';
++
++const __filename = fileURLToPath(import.meta.url);
++const __dirname = dirname(__filename);
++const compat = new FlatCompat({ baseDirectory: __dirname });
++
++// Antes no existía configuración de ESLint: `next lint` caía en el asistente
++// interactivo y no se ejecutaba en CI. Esta config activa las reglas de
++// Next.js. Las reglas estilísticas que podrían romper `next build` se degradan
++// a "warn" para que la compilación nunca falle por lint, pero sigan visibles.
++const eslintConfig = [
++  ...compat.extends('next/core-web-vitals'),
++  {
++    ignores: ['.next/**', 'node_modules/**', 'public/**', 'next-env.d.ts', '*.sh'],
++  },
++  {
++    rules: {
++      'react/no-unescaped-entities': 'warn',
++      '@next/next/no-img-element': 'warn',
++    },
++  },
++];
++
++export default eslintConfig;
+diff --git a/lib/products.ts b/lib/products.ts
+index 54279ef..1087309 100644
+--- a/lib/products.ts
++++ b/lib/products.ts
+@@ -60,10 +60,11 @@ export const products: Product[] = [
+     popular: true,
+     sourcing: 'fabricacion_propia',
+     availability: 'a_medida',
+-    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
+-    price: 45.0,
+-    priceUnit: 'unidad',
+-    purchasable: true
++    // PRECIO PENDIENTE DE VERIFICACIÓN — producto en modo cotización hasta fijar el precio de lista real.
++    // Reactivar compra en línea: descomentar price + priceUnit y restaurar `purchasable: true`.
++    // price: 45.0,
++    // priceUnit: 'unidad',
++    // purchasable: true,
+   },
+   {
+     id: '12',
+@@ -646,10 +647,11 @@ export const products: Product[] = [
+     popular: false,
+     sourcing: 'importacion_directa',
+     availability: 'stock',
+-    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
+-    price: 8.5,
+-    priceUnit: 'm²',
+-    purchasable: true
++    // PRECIO PENDIENTE DE VERIFICACIÓN — producto en modo cotización hasta fijar el precio de lista real.
++    // Reactivar compra en línea: descomentar price + priceUnit y restaurar `purchasable: true`.
++    // price: 8.5,
++    // priceUnit: 'm²',
++    // purchasable: true,
+   },
+   {
+     id: '22',
+@@ -1292,10 +1294,11 @@ export const products: Product[] = [
+     popular: false,
+     sourcing: 'fabricacion_propia',
+     availability: 'stock',
+-    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
+-    price: 25.0,
+-    priceUnit: 'saco 50L',
+-    purchasable: true
++    // PRECIO PENDIENTE DE VERIFICACIÓN — producto en modo cotización hasta fijar el precio de lista real.
++    // Reactivar compra en línea: descomentar price + priceUnit y restaurar `purchasable: true`.
++    // price: 25.0,
++    // priceUnit: 'saco 50L',
++    // purchasable: true,
+   }
+ ];
+ 
