@@ -77,8 +77,8 @@ export default function Navbar() {
             <div className="flex items-center justify-between gap-4 h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group shrink-0">
-              <div className="w-11 h-11 shrink-0 rounded-xl overflow-hidden ring-1 ring-black/5 dark:ring-white/10 transition-transform group-hover:scale-[1.04]">
-                <Image src="/logo.png" alt="Plastilonas Peruanas SAC" width={44} height={44} priority className="w-full h-full object-cover" />
+              <div className="w-9 h-9 shrink-0 rounded-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/10 transition-transform group-hover:scale-[1.04]">
+                <Image src="/logo.png" alt="Plastilonas Peruanas SAC" width={36} height={36} priority className="w-full h-full object-cover" />
               </div>
               <div className="hidden sm:block">
                 <div className="font-semibold text-xl tracking-tight whitespace-nowrap text-[#0A2540] dark:text-[var(--text)]">Plastilonas Peruanas</div>

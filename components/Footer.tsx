@@ -35,7 +35,7 @@ export default function Footer() {
         {/* ── Mobile: marca compacta + CTA + acordeón (patrón AWS) ── */}
         <div className="md:hidden">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-white/10">
+            <div className="w-9 h-9 rounded-2xl overflow-hidden ring-1 ring-white/10">
               <Image src="/logo.png" alt="Plastilonas Peruanas SAC" width={36} height={36} className="w-full h-full object-cover" />
             </div>
             <div className="font-semibold text-lg tracking-tight text-white">Plastilonas Peruanas SAC</div>
@@ -54,8 +54,8 @@ export default function Footer() {
         <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-12">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-xl tracking-tighter">PP</span>
+              <div className="w-9 h-9 rounded-2xl overflow-hidden ring-1 ring-white/10">
+                <Image src="/logo.png" alt="Plastilonas Peruanas SAC" width={36} height={36} className="w-full h-full object-cover" />
               </div>
               <div className="font-semibold text-2xl tracking-tight text-white">Plastilonas Peruanas SAC</div>
             </div>
