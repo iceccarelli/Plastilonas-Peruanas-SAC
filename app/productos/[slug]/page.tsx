@@ -6,6 +6,7 @@ import CotizacionModal from '@/components/CotizacionModal';
 import ProductImage from '@/components/ProductImage';
 import ProductBuyBox from '@/components/ProductBuyBox';
 import ProductAvailability from '@/components/ProductAvailability';
+import ProductStructuredData from '@/components/ProductStructuredData';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -26,9 +27,15 @@ export async function generateMetadata({ params }: Props) {
   // No se declara openGraph.images: product.image apunta a archivos aún
   // inexistentes (/images/*.jpg), así que la página hereda la imagen OG del
   // sitio (app/opengraph-image.tsx) en lugar de romper la vista previa.
+  const canonical = `/productos/${product.slug}`;
+  const ogTitle = `${product.name} — Plastilonas Peruanas SAC`;
   return {
     title: product.name,
     description: product.shortDescription,
+    keywords: [product.name, product.category, ...product.sector, 'Perú', 'proveedor', 'fabricante'],
+    alternates: { canonical },
+    openGraph: { title: ogTitle, description: product.shortDescription, url: canonical, type: 'website' },
+    twitter: { card: 'summary_large_image', title: ogTitle, description: product.shortDescription },
   };
 }
 
@@ -46,6 +53,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
+      <ProductStructuredData product={product} />
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm mb-8 text-gray-500">
         <Link href="/productos" className="hover:text-[#059669]">Productos</Link>
