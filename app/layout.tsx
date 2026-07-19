@@ -1,3 +1,4 @@
+import ExitIntentModal from '@/components/ExitIntentModal';
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
@@ -100,6 +101,7 @@ export default function RootLayout({
           <CartDrawer />
           <Toaster position="top-center" richColors closeButton />
         </AuthProvider>
+              <ExitIntentModal />
       </body>
     </html>
   );

@@ -90,7 +90,7 @@ export default function Home() {
       </section>
 
       {/* ===== 2 · CATÁLOGO ===== */}
-      <section className="bg-white py-20 md:py-24 section-lift">
+      <section className="bg-white section-pad section-lift">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
             <SectionHeading eyebrow="Todo lo que necesita, en un solo lugar" title="Explore el catálogo por familia" className="mb-6" action={<Link href="/productos" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el catálogo <ArrowRight className="w-4 h-4" /></Link>} />
@@ -113,7 +113,7 @@ export default function Home() {
       </section>
 
       {/* ===== 3 · POR QUÉ — banda oscura de alto contraste ===== */}
-      <section className="bg-[#0A2540] text-white py-20 md:py-24">
+      <section className="bg-[#0A2540] text-white section-pad">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
             <div className="text-xs tracking-[2px] text-[#10B981] font-semibold mb-3">POR QUÉ ELEGIRNOS</div>
@@ -141,7 +141,7 @@ export default function Home() {
       </section>
 
       {/* ===== 4 · SERVICIOS — explorador por pestañas (patrón AWS) ===== */}
-      <section className="bg-white py-20 md:py-24">
+      <section className="bg-white section-pad">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
             <SectionHeading eyebrow="Más que fabricación" title="Servicios integrales, de principio a fin" className="mb-10" />
