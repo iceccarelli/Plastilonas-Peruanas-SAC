@@ -6,7 +6,7 @@ export default function ServiciosPage() {
     {
       title: "Fabricación a Medida",
       description: "Diseñamos y fabricamos productos textiles industriales exactamente según sus especificaciones técnicas, medidas y requerimientos de resistencia.",
-      features: ["Asesoría técnica especializada", "Diseño CAD y prototipos", "Materiales premium importados", "Control de calidad riguroso", "Entrega en todo el Perú"],
+      features: ["Asesoría técnica especializada", "Diseño CAD y prototipos", "Materiales importados con ficha técnica", "Control de calidad en cada lote", "Entrega en todo el Perú"],
       icon: "🛠️"
     },
     {
@@ -34,7 +34,7 @@ export default function ServiciosPage() {
       <div className="bg-[#0A2540] text-white py-16">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <div className="text-xs tracking-[0.15em] text-white/50 mb-2">MÁS ALLÁ DE LA FABRICACIÓN</div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl tracking-tighter font-semibold">Servicios integrales de nivel premium</h1>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl tracking-tighter font-semibold">Fabricación e instalación, de principio a fin</h1>
           <p className="mt-5 text-xl text-white/80 max-w-lg mx-auto">Acompañamos su proyecto desde la idea hasta la entrega final con estándares de clase mundial.</p>
         </div>
       </div>

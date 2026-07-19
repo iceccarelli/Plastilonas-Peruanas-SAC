@@ -9,15 +9,15 @@ export default function NosotrosPage() {
       </div>
 
       <div className="prose prose-lg max-w-3xl mt-10 text-gray-700">
-        <p>Plastilonas Peruanas SAC nació en 2009 con una misión clara: ofrecer al mercado peruano productos textiles industriales de la más alta calidad, con precios justos y un servicio que realmente haga la diferencia.</p>
+        <p>Plastilonas Peruanas SAC nació en 2009 con una misión clara: fabricar productos textiles industriales a la medida exacta de cada proyecto, con precio directo de fabricante y respaldo técnico real.</p>
         
-        <p>Hoy, más de 15 años después, nos hemos consolidado como uno de los proveedores de referencia para los sectores de minería, agricultura, construcción, transporte e industria en todo el país. Nuestra capacidad de fabricación a medida, combinada con un profundo conocimiento técnico, nos permite entregar soluciones que superan las expectativas de nuestros clientes más exigentes.</p>
+        <p>Hoy, con 34 soluciones en 11 líneas de producto, abastecemos a minería, agricultura, construcción, transporte e industria en todo el Perú. Fabricamos e instalamos con equipo propio: una sola responsabilidad, del diseño técnico a la obra.</p>
       </div>
 
       <div className="mt-14 grid md:grid-cols-3 gap-6">
         {[
           { title: "Misión", text: "Fabricar y comercializar soluciones textiles industriales de alta calidad que contribuyan al desarrollo productivo de nuestros clientes, ofreciendo siempre el mejor balance entre calidad, precio y servicio." },
-          { title: "Visión", text: "Ser reconocidos como el proveedor líder de soluciones textiles industriales en el Perú, distinguiéndonos por nuestra innovación, confiabilidad y compromiso con la satisfacción total del cliente." },
+          { title: "Visión", text: "Ser el proveedor de referencia en soluciones textiles e industriales del Perú, respondiendo por cada pieza que fabricamos e instalamos." },
           { title: "Valores", text: "Calidad sin concesiones • Transparencia y honestidad • Compromiso con el cliente • Mejora continua • Responsabilidad social y ambiental." },
         ].map((v, i) => (
           <div key={i} className="bg-white border border-gray-100 p-8 rounded-3xl">

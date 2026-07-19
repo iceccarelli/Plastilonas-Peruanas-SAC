@@ -43,7 +43,7 @@ export default function Home() {
   const services = [
     { title: 'Fabricación a Medida', desc: 'Diseñamos y confeccionamos según sus especificaciones técnicas, dimensiones y acabados exactos.' },
     { title: 'Instalación Propia', desc: 'Equipo técnico propio para instalar carpas, geomembranas, estructuras y sistemas completos en obra.' },
-    { title: 'Importación Directa', desc: 'Acceso a materiales premium y líneas especializadas internacionales, con respaldo técnico y ficha en cotización.' },
+    { title: 'Importación Directa', desc: 'Materiales y líneas especializadas importadas directamente, con ficha técnica del fabricante en cada cotización.' },
     { title: 'Asesoría Técnica', desc: 'Hable directamente con quienes fabrican su producto y decida con criterio de ingeniería.' },
   ];
 
@@ -60,7 +60,7 @@ export default function Home() {
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-semibold tracking-tighter leading-[1.08] md:leading-[1.05] mb-6">Fabricación 100% a medida.<br />Instalación propia.<br />Un solo proveedor.</h1>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">Big Bags, geomembranas, estructuras, mallas, ventilación y geosintéticos: el portafolio industrial más completo del Perú, fabricado e instalado por nuestro propio equipo.</p>
+            <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">Big Bags, geomembranas, estructuras, mallas, ventilación y geosintéticos: 34 soluciones en 11 líneas de producto, fabricadas e instaladas por nuestro propio equipo en el Perú.</p>
           </Reveal>
           <Reveal delay={0.15}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
