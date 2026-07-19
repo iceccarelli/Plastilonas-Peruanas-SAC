@@ -1,0 +1,25 @@
+import fs from 'fs';
+// #3 — Lead → n8n. Ruta /api/lead (guarda el webhook en el servidor) + wiring
+// del modal de cotización. Inerte hasta definir N8N_WEBHOOK_URL en Vercel.
+fs.mkdirSync('app/api/lead', { recursive: true });
+fs.writeFileSync('app/api/lead/route.ts', Buffer.from('aW1wb3J0IHsgTmV4dFJlcXVlc3QsIE5leHRSZXNwb25zZSB9IGZyb20gJ25leHQvc2VydmVyJzsKCi8qKgogKiBSZWNpYmUgdW4gbGVhZCBkZSBjb3RpemFjacOzbiB5IGxvIHJlZW52w61hIGFsIHdlYmhvb2sgZGUgbjhuLgogKgogKiBBcnF1aXRlY3R1cmEgZGUgc2VndXJpZGFkOiBlbCBuYXZlZ2Fkb3IgTlVOQ0EgdmUgbGEgVVJMIGRlIG44bi4gRWwgY2xpZW50ZQogKiBoYWNlIFBPU1QgYSBlc3RhIHJ1dGEgaW50ZXJuYTsgZWwgc2VjcmV0byB2aXZlIGVuIGVsIHNlcnZpZG9yIChOOE5fV0VCSE9PS19VUkwsCiAqIHNpbiBwcmVmaWpvIE5FWFRfUFVCTElDXykuIEJlc3QtZWZmb3J0OiBlbCBjYW5hbCBwcmltYXJpbyBlcyBXaGF0c0FwcCwgYXPDrSBxdWUKICogc2kgbjhuIG5vIGVzdMOhIGNvbmZpZ3VyYWRvIG8gZmFsbGEsIHJlc3BvbmRlbW9zIDIwMCB5IG5vIHJvbXBlbW9zIGxhIFVYLgogKi8KCmV4cG9ydCBhc3luYyBmdW5jdGlvbiBQT1NUKHJlcTogTmV4dFJlcXVlc3QpIHsKICBsZXQgbGVhZDogUmVjb3JkPHN0cmluZywgdW5rbm93bj47CiAgdHJ5IHsKICAgIGxlYWQgPSBhd2FpdCByZXEuanNvbigpOwogIH0gY2F0Y2ggewogICAgcmV0dXJuIE5leHRSZXNwb25zZS5qc29uKHsgb2s6IGZhbHNlLCBlcnJvcjogJ2ludmFsaWRfanNvbicgfSwgeyBzdGF0dXM6IDQwMCB9KTsKICB9CgogIGlmICghbGVhZCB8fCB0eXBlb2YgbGVhZCAhPT0gJ29iamVjdCcgfHwgIWxlYWQuZW1haWwgfHwgIWxlYWQudGVsZWZvbm8pIHsKICAgIHJldHVybiBOZXh0UmVzcG9uc2UuanNvbih7IG9rOiBmYWxzZSwgZXJyb3I6ICdtaXNzaW5nX2ZpZWxkcycgfSwgeyBzdGF0dXM6IDQwMCB9KTsKICB9CgogIGNvbnN0IHdlYmhvb2sgPSBwcm9jZXNzLmVudi5OOE5fV0VCSE9PS19VUkw7CiAgaWYgKCF3ZWJob29rKSB7CiAgICAvLyBTaW4gd2ViaG9vayBjb25maWd1cmFkbzogbm8gZXMgZXJyb3IuIEVsIGxlYWQgeWEgZnVlIHBvciBXaGF0c0FwcC4KICAgIHJldHVybiBOZXh0UmVzcG9uc2UuanNvbih7IG9rOiB0cnVlLCBmb3J3YXJkZWQ6IGZhbHNlIH0pOwogIH0KCiAgY29uc3QgcGF5bG9hZCA9IHsKICAgIC4uLmxlYWQsCiAgICBzb3VyY2U6ICdwbGFzdGlsb25hcy5jb20vY290aXphY2lvbicsCiAgICByZWNlaXZlZEF0OiBuZXcgRGF0ZSgpLnRvSVNPU3RyaW5nKCksCiAgfTsKCiAgdHJ5IHsKICAgIGNvbnN0IHJlcyA9IGF3YWl0IGZldGNoKHdlYmhvb2ssIHsKICAgICAgbWV0aG9kOiAnUE9TVCcsCiAgICAgIGhlYWRlcnM6IHsgJ0NvbnRlbnQtVHlwZSc6ICdhcHBsaWNhdGlvbi9qc29uJyB9LAogICAgICBib2R5OiBKU09OLnN0cmluZ2lmeShwYXlsb2FkKSwKICAgIH0pOwogICAgcmV0dXJuIE5leHRSZXNwb25zZS5qc29uKHsgb2s6IHJlcy5vaywgZm9yd2FyZGVkOiByZXMub2sgfSk7CiAgfSBjYXRjaCB7CiAgICAvLyBuOG4gY2HDrWRvOiBubyByb21wZW1vcyBsYSBleHBlcmllbmNpYSBkZWwgY2xpZW50ZS4KICAgIHJldHVybiBOZXh0UmVzcG9uc2UuanNvbih7IG9rOiBmYWxzZSwgZm9yd2FyZGVkOiBmYWxzZSwgZXJyb3I6ICd3ZWJob29rX2ZhaWxlZCcgfSk7CiAgfQp9Cg==','base64').toString('utf8'));
+fs.writeFileSync('lib/lead.ts', Buffer.from('LyoqCiAqIFJlZW52w61hIGVsIGxlYWQgYSBudWVzdHJvIGVuZHBvaW50IGludGVybm8gKC9hcGkvbGVhZCksIHF1ZSBhIHN1IHZleiBsbwogKiBtYW5kYSBhIG44biBzaSBlc3TDoSBjb25maWd1cmFkby4gQmVzdC1lZmZvcnQ6IG51bmNhIGJsb3F1ZWEgbmkgbGFuemEg4oCUIGVsCiAqIGxlYWQgeWEgdmlhasOzIHBvciBXaGF0c0FwcC4gYGtlZXBhbGl2ZWAgcGVybWl0ZSBxdWUgbGEgcGV0aWNpw7NuIHRlcm1pbmUKICogYXVucXVlIGxhIHBlc3Rhw7FhIG5hdmVndWUgYSBXaGF0c0FwcCBqdXN0byBkZXNwdcOpcy4KICovCgpleHBvcnQgaW50ZXJmYWNlIExlYWRQYXlsb2FkIHsKICBub21icmU6IHN0cmluZzsKICBlbXByZXNhPzogc3RyaW5nOwogIGVtYWlsOiBzdHJpbmc7CiAgdGVsZWZvbm86IHN0cmluZzsKICBwcm9kdWN0bz86IHN0cmluZzsKICBjYW50aWRhZD86IHN0cmluZzsKICBmZWNoYU5lY2VzYXJpYT86IHN0cmluZzsKICBtZW5zYWplPzogc3RyaW5nOwp9CgpleHBvcnQgYXN5bmMgZnVuY3Rpb24gcG9zdExlYWQobGVhZDogTGVhZFBheWxvYWQpOiBQcm9taXNlPHZvaWQ+IHsKICB0cnkgewogICAgYXdhaXQgZmV0Y2goJy9hcGkvbGVhZCcsIHsKICAgICAgbWV0aG9kOiAnUE9TVCcsCiAgICAgIGhlYWRlcnM6IHsgJ0NvbnRlbnQtVHlwZSc6ICdhcHBsaWNhdGlvbi9qc29uJyB9LAogICAgICBib2R5OiBKU09OLnN0cmluZ2lmeShsZWFkKSwKICAgICAga2VlcGFsaXZlOiB0cnVlLAogICAgfSk7CiAgfSBjYXRjaCB7CiAgICAvKiBiZXN0LWVmZm9ydDogZWwgbGVhZCB5YSBmdWUgYSBXaGF0c0FwcCAqLwogIH0KfQo=','base64').toString('utf8'));
+console.log('  escrito app/api/lead/route.ts + lib/lead.ts');
+
+let C = fs.readFileSync('components/CotizacionModal.tsx','utf8');
+if (!C.includes('postLead')) {
+  C = C.replace("import { trackQuoteRequest } from '@/lib/analytics';",
+    "import { trackQuoteRequest } from '@/lib/analytics';\nimport { postLead } from '@/lib/lead';");
+  C = C.replace("    openWhatsApp(message);\n    trackQuoteRequest(data.producto);\n",
+    "    void postLead({\n      nombre: data.nombre,\n      empresa: data.empresa,\n      email: data.email,\n      telefono: data.telefono,\n      producto: data.producto,\n      cantidad: data.cantidad,\n      fechaNecesaria: data.fechaNecesaria,\n      mensaje: data.mensaje,\n    });\n\n    openWhatsApp(message);\n    trackQuoteRequest(data.producto);\n");
+  fs.writeFileSync('components/CotizacionModal.tsx', C);
+  console.log('  wired postLead en CotizacionModal');
+} else console.log('  CotizacionModal ya conectado — omitido');
+
+let E = fs.readFileSync('.env.example','utf8');
+if (!E.includes('N8N_WEBHOOK_URL')) {
+  E += "\n# --- Automatizacion de leads (n8n) ---\n# URL del webhook de n8n. SERVIDOR ONLY (sin NEXT_PUBLIC_): el navegador no la ve.\n# Sin esta variable, /api/lead responde 200 y no reenvia — el lead sigue por WhatsApp.\nN8N_WEBHOOK_URL=\n";
+  fs.writeFileSync('.env.example', E);
+  console.log('  .env.example actualizado');
+} else console.log('  .env.example ya tenía la var — omitido');
+console.log('LISTO: lead -> n8n (via /api/lead)');
