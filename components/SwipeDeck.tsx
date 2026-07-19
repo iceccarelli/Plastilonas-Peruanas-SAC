@@ -16,7 +16,7 @@ export interface DeckCard {
 // Soft tints so each stacked card is visibly distinct (the "deck" cue).
 // Cycles by card index; face + peeking edge both show the hue.
 const TINTS = [
-  { bg: '#ECFDF5', ring: '#A7F3D0', ink: '#059669' }, // emerald
+  { bg: '#ECFDF5', ring: '#A7F3D0', ink: '#047857' }, // emerald
   { bg: '#FEF3C7', ring: '#FDE68A', ink: '#D97706' }, // amber
   { bg: '#E0F2FE', ring: '#BAE6FD', ink: '#0284C7' }, // sky
   { bg: '#EEF2FF', ring: '#C7D2FE', ink: '#4F46E5' }, // indigo

@@ -58,8 +58,8 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL('https://www.plastilonas.com'),
   openGraph: {
-    title: 'Plastilonas Peruanas SAC | Líder en Soluciones Textiles Industriales',
-    description: 'El portafolio industrial más completo del Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
+    title: 'Plastilonas Peruanas SAC | Soluciones Textiles Industriales — Fabricación e Importación Directa',
+    description: 'Portafolio integral de soluciones textiles industriales en el Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
     // og:image lo genera app/opengraph-image.tsx (antes apuntaba a un archivo
     // inexistente /images/og-image.jpg y las vistas previas salían en blanco).
     locale: 'es_PE',
