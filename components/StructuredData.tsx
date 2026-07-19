@@ -21,6 +21,7 @@ export default function StructuredData() {
       'Fabricación e instalación a medida de soluciones industriales en el Perú: big bags, lonas y cobertores, geosintéticos (geomembranas, geotextiles, geomallas), estructuras y arquitectura textil, mallas agrícolas, ventilación industrial y accesorios, para minería, agricultura, construcción, transporte e infraestructura.',
     url: 'https://www.plastilonas.com',
     image: 'https://www.plastilonas.com/opengraph-image',
+    logo: 'https://www.plastilonas.com/logo.png',
     telephone: `+${WHATSAPP_NUMBER}`,
     taxID: '20523135385',
     address: {

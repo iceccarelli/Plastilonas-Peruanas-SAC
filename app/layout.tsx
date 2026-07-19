@@ -65,7 +65,8 @@ export const metadata: Metadata = {
     locale: 'es_PE',
     type: 'website',
   },
-  // El favicon lo genera app/icon.tsx (antes /favicon.ico no existía).
+  // Favicon y apple-touch-icon estáticos: app/icon.png y app/apple-icon.png
+  // (Next los detecta automáticamente).
 };
 
 export default function RootLayout({
