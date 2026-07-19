@@ -60,10 +60,11 @@ export const products: Product[] = [
     popular: true,
     sourcing: 'fabricacion_propia',
     availability: 'a_medida',
-    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
-    price: 45.0,
-    priceUnit: 'unidad',
-    purchasable: true
+    // PRECIO PENDIENTE DE VERIFICACIÓN — producto en modo cotización hasta fijar el precio de lista real.
+    // Reactivar compra en línea: descomentar price + priceUnit y restaurar `purchasable: true`.
+    // price: 45.0,
+    // priceUnit: 'unidad',
+    // purchasable: true,
   },
   {
     id: '12',
@@ -646,10 +647,11 @@ export const products: Product[] = [
     popular: false,
     sourcing: 'importacion_directa',
     availability: 'stock',
-    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
-    price: 8.5,
-    priceUnit: 'm²',
-    purchasable: true
+    // PRECIO PENDIENTE DE VERIFICACIÓN — producto en modo cotización hasta fijar el precio de lista real.
+    // Reactivar compra en línea: descomentar price + priceUnit y restaurar `purchasable: true`.
+    // price: 8.5,
+    // priceUnit: 'm²',
+    // purchasable: true,
   },
   {
     id: '22',
@@ -1292,10 +1294,11 @@ export const products: Product[] = [
     popular: false,
     sourcing: 'fabricacion_propia',
     availability: 'stock',
-    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
-    price: 25.0,
-    priceUnit: 'saco 50L',
-    purchasable: true
+    // PRECIO PENDIENTE DE VERIFICACIÓN — producto en modo cotización hasta fijar el precio de lista real.
+    // Reactivar compra en línea: descomentar price + priceUnit y restaurar `purchasable: true`.
+    // price: 25.0,
+    // priceUnit: 'saco 50L',
+    // purchasable: true,
   }
 ];
 

@@ -33,3 +33,7 @@ Thumbs.db
 
 # patch delivery artifacts
 *.patch
+
+# macOS AppleDouble junk (33 ._*.jpg were committed under public/images)
+._*
+.DS_Store

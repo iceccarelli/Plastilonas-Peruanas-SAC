@@ -59,7 +59,7 @@ export default function Footer() {
               <div className="font-semibold text-2xl tracking-tight text-white">Plastilonas Peruanas SAC</div>
             </div>
             <p className="text-white/70 max-w-md leading-relaxed t-body">
-              Más de 15 años fabricando soluciones textiles industriales de la más alta calidad para los sectores más exigentes del Perú. Compromiso, calidad y precio justo.
+              Más de 15 años fabricando e instalando soluciones textiles industriales para los sectores más exigentes del Perú. Fabricación propia, importación directa y respaldo técnico en cada proyecto.
             </p>
             <div className="flex flex-wrap items-center gap-4 mt-6">
               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">

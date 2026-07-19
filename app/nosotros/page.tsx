@@ -16,7 +16,7 @@ export default function NosotrosPage() {
 
       <div className="mt-14 grid md:grid-cols-3 gap-6">
         {[
-          { title: "Misión", text: "Fabricar y comercializar soluciones textiles industriales de alta calidad que contribuyan al desarrollo productivo de nuestros clientes, ofreciendo siempre el mejor balance entre calidad, precio y servicio." },
+          { title: "Misión", text: "Fabricar y comercializar soluciones textiles industriales de alta calidad que contribuyan al desarrollo productivo de nuestros clientes, buscando siempre el equilibrio entre calidad, precio y plazo de entrega." },
           { title: "Visión", text: "Ser el proveedor de referencia en soluciones textiles e industriales del Perú, respondiendo por cada pieza que fabricamos e instalamos." },
           { title: "Valores", text: "Calidad sin concesiones • Transparencia y honestidad • Compromiso con el cliente • Mejora continua • Responsabilidad social y ambiental." },
         ].map((v, i) => (
