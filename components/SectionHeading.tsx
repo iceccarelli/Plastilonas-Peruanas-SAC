@@ -43,7 +43,7 @@ export default function SectionHeading({
           {eyebrow}
         </span>
       )}
-      <h2 className={`text-3xl md:text-4xl font-semibold tracking-tighter leading-tight ${titleColor}`}>
+      <h2 className={`t-h2 font-semibold ${titleColor}`}>
         {title}
       </h2>
       {description && (

@@ -57,7 +57,7 @@ export default function Home() {
             <div className="inline-flex items-center gap-2 bg-white/10 text-white/90 text-xs tracking-[2px] font-medium px-5 py-2 rounded-full mb-6 border border-white/20">SOLUCIONES TEXTILES E INDUSTRIALES INTEGRALES EN EL PERÚ</div>
           </Reveal>
           <Reveal delay={0.05}>
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-semibold tracking-tighter leading-[1.08] md:leading-[1.05] mb-6">Fabricación 100% a medida.<br />Instalación propia.<br />Un solo proveedor.</h1>
+            <h1 className="t-display font-semibold mb-6">Fabricación 100% a medida.<br />Instalación propia.<br />Un solo proveedor.</h1>
           </Reveal>
           <Reveal delay={0.1}>
             <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">Big Bags, geomembranas, estructuras, mallas, ventilación y geosintéticos: 34 soluciones en 11 líneas de producto, fabricadas e instaladas por nuestro propio equipo en el Perú.</p>
@@ -117,7 +117,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
             <div className="text-xs tracking-[2px] text-[#10B981] font-semibold mb-3">POR QUÉ ELEGIRNOS</div>
-            <h2 className="text-3xl md:text-5xl font-semibold tracking-tighter leading-tight max-w-3xl mb-4">La ventaja de un solo proveedor, sin intermediarios</h2>
+            <h2 className="t-h2 font-semibold leading-tight max-w-3xl mb-4">La ventaja de un solo proveedor, sin intermediarios</h2>
             <p className="text-white/60 max-w-2xl leading-relaxed mb-12">Desde 2009 fabricamos e instalamos con equipo propio. Una sola responsabilidad, del diseño a la obra.</p>
           </Reveal>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-9 md:gap-8">

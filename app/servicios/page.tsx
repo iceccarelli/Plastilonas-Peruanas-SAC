@@ -34,7 +34,7 @@ export default function ServiciosPage() {
       <div className="bg-[#0A2540] text-white py-16">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <div className="text-xs tracking-[0.15em] text-white/50 mb-2">MÁS ALLÁ DE LA FABRICACIÓN</div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl tracking-tighter font-semibold">Fabricación e instalación, de principio a fin</h1>
+          <h1 className="t-display font-semibold">Fabricación e instalación, de principio a fin</h1>
           <p className="mt-5 text-xl text-white/80 max-w-lg mx-auto">Acompañamos su proyecto desde la idea hasta la entrega final con estándares de clase mundial.</p>
         </div>
       </div>
@@ -63,7 +63,7 @@ export default function ServiciosPage() {
 
       <div className="bg-gray-50 py-16">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <h3 className="text-3xl tracking-tight font-semibold mb-4">¿Tiene un proyecto especial?</h3>
+          <h3 className="t-h2 font-semibold mb-4">¿Tiene un proyecto especial?</h3>
           <p className="text-gray-600 mb-8">Nuestro equipo de ingeniería está listo para desarrollar la solución perfecta para su operación.</p>
           <Link href="/cotizacion" className="btn btn-lg btn-primary hover:bg-[#047857]">Iniciar mi proyecto <ArrowRight className="w-4 h-4" /></Link>
         </div>
