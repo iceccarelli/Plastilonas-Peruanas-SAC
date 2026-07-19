@@ -242,7 +242,7 @@ export default function Navbar() {
               {/* Cotización Button - Primary CTA */}
               <button
                 onClick={() => setShowCotizacion(true)}
-                className="hidden md:flex items-center gap-2.5 whitespace-nowrap bg-[#0A2540] dark:bg-[#10B981] hover:bg-[#059669] dark:hover:bg-[#34D399] text-white dark:text-[#0A2540] px-5 xl:px-6 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-[0.985] shadow-sm"
+                className="hidden md:flex items-center gap-2.5 whitespace-nowrap bg-[#0A2540] dark:bg-[#10B981] hover:bg-[#059669] dark:hover:bg-[#34D399] text-white dark:text-[#0A2540] px-5 xl:btn btn-sm btn-primary text-sm font-semibold transition-all active:scale-[0.985] shadow-sm"
               >
                 <Award className="w-4 h-4" />
                 Solicitar Cotización

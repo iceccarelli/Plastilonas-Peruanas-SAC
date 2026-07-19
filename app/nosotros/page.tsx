@@ -31,7 +31,7 @@ export default function NosotrosPage() {
         <div className="max-w-md mx-auto">
           <h3 className="text-3xl tracking-tight font-semibold mb-4">¿Listo para trabajar con nosotros?</h3>
           <p className="text-white/80 mb-8">Únase a más de 500 empresas que ya confían en Plastilonas Peruanas para sus proyectos más importantes.</p>
-          <Link href="/contacto" className="inline-block bg-white text-[#0A2540] px-10 py-3.5 rounded-2xl font-semibold hover:bg-white/90 transition-all">Contáctenos hoy</Link>
+          <Link href="/contacto" className="inline-block bg-white text-[#0A2540] btn btn-lg btn-primary font-semibold hover:bg-white/90 transition-all">Contáctenos hoy</Link>
         </div>
       </div>
     </div>

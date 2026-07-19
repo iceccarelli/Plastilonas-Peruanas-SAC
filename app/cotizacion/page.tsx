@@ -17,7 +17,7 @@ export default function CotizacionPage() {
 
       <button 
         onClick={() => setShowModal(true)} 
-        className="mt-10 inline-flex items-center justify-center bg-[#0A2540] hover:bg-[#059669] text-white px-14 py-4 rounded-2xl font-semibold text-lg active:scale-[0.985] transition-all"
+        className="mt-10 inline-flex items-center justify-center bg-[#0A2540] hover:bg-[#059669] text-white btn btn-lg btn-accent w-full justify-center font-semibold text-lg active:scale-[0.985] transition-all"
       >
         Abrir Formulario de Cotización
       </button>

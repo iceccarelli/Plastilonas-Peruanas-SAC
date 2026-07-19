@@ -65,7 +65,7 @@ export default function ServiciosPage() {
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h3 className="text-3xl tracking-tight font-semibold mb-4">¿Tiene un proyecto especial?</h3>
           <p className="text-gray-600 mb-8">Nuestro equipo de ingeniería está listo para desarrollar la solución perfecta para su operación.</p>
-          <Link href="/cotizacion" className="inline-flex items-center gap-3 bg-[#0A2540] text-white px-10 py-4 rounded-2xl font-semibold hover:bg-[#059669] transition-all">Iniciar mi proyecto <ArrowRight /></Link>
+          <Link href="/cotizacion" className="btn btn-lg btn-primary hover:bg-[#047857]">Iniciar mi proyecto <ArrowRight className="w-4 h-4" /></Link>
         </div>
       </div>
     </div>
