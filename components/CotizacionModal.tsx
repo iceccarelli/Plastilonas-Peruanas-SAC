@@ -10,6 +10,7 @@ import { products } from '@/lib/products';
 import { toast } from 'sonner';
 import { buildQuoteMessage, openWhatsApp, saveQuoteLocally } from '@/lib/whatsapp';
 import { trackQuoteRequest } from '@/lib/analytics';
+import { postLead } from '@/lib/lead';
 
 const formSchema = z.object({
   nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
@@ -77,6 +78,17 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
       telefono: data.telefono,
       producto: data.producto,
       cantidad: data.cantidad,
+      mensaje: data.mensaje,
+    });
+
+    void postLead({
+      nombre: data.nombre,
+      empresa: data.empresa,
+      email: data.email,
+      telefono: data.telefono,
+      producto: data.producto,
+      cantidad: data.cantidad,
+      fechaNecesaria: data.fechaNecesaria,
       mensaje: data.mensaje,
     });
 
