@@ -1,0 +1,258 @@
+diff --git a/app/page.tsx b/app/page.tsx
+index 1dea317..f8d00a9 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -101,7 +101,7 @@ export default function Home() {
+           <Reveal delay={0.1}>
+             <FamilyCarousel families={productFamilies} />
+           </Reveal>
+-          <p className="text-xs text-gray-400 mt-6 text-center">Fabricación propia, importación directa y líneas especializadas bajo pedido — con ficha técnica y respaldo en cada cotización.</p>
++          <p className="text-xs text-gray-400 mt-6 text-center">Fabricación propia, importación directa y líneas especializadas por proyecto — con ficha técnica y respaldo en cada cotización.</p>
+ 
+           <Reveal className="mt-20">
+             <SectionHeading eyebrow="Nuestras soluciones estrella" title="Nuestras líneas insignia" className="mb-9" action={<Link href="/productos" className="text-sm font-medium flex items-center gap-1.5 text-[#059669] hover:underline">Ver catálogo completo <ArrowRight className="w-4 h-4" /></Link>} />
+diff --git a/lib/products.ts b/lib/products.ts
+index 1087309..fccaf06 100644
+--- a/lib/products.ts
++++ b/lib/products.ts
+@@ -476,13 +476,13 @@ export const products: Product[] = [
+     category: 'Estructuras y Arquitectura Textil',
+     sector: ['Industrial', 'Comercio', 'Construcción'],
+     shortDescription: 'Estructuras inflables de membrana para almacenamiento, espacios temporales y protección, con sistema de presión de aire.',
+-    description: 'Estructuras inflables de membrana textil sostenidas por presión de aire, para almacenamiento temporal, coberturas deportivas, espacios de evento y protección de instalaciones. Se dimensionan por proyecto e incluyen equipo de insuflado, esclusas de acceso y anclaje. Línea disponible bajo pedido: se define ingeniería, membrana y equipamiento según el requerimiento específico.',
++    description: 'Estructuras inflables de membrana textil sostenidas por presión de aire, para almacenamiento temporal, coberturas deportivas, espacios de evento y protección de instalaciones. Se dimensionan por proyecto e incluyen equipo de insuflado, esclusas de acceso y anclaje. Línea de suministro por proyecto: se define ingeniería, membrana y equipamiento según el requerimiento específico.',
+     specifications: [
+       { label: 'Sistema', value: 'Membrana sostenida por presión de aire (air-supported)' },
+       { label: 'Membrana', value: 'PVC/poliéster de alta resistencia, aditivado UV' },
+       { label: 'Equipamiento', value: 'Blowers, esclusa de acceso, sistema de anclaje' },
+       { label: 'Dimensiones', value: 'Según proyecto e ingeniería específica' },
+-      { label: 'Disponibilidad', value: 'Bajo pedido — ingeniería y ficha por proyecto' }
++      { label: 'Disponibilidad', value: 'Por proyecto — ingeniería y ficha técnica' }
+     ],
+     applications: [
+       'Almacenamiento y coberturas temporales',
+@@ -780,7 +780,7 @@ export const products: Product[] = [
+     specifications: [
+       { label: 'Material', value: 'PVC plastificado virgen de alta densidad' },
+       { label: 'Espesores', value: '0.5 mm, 0.75 mm, 1.0 mm, 1.5 mm, 2.0 mm' },
+-      { label: 'Ancho de rollo', value: 'Hasta 2.0 m estándar (anchos especiales bajo pedido)' },
++      { label: 'Ancho de rollo', value: 'Hasta 2.0 m estándar (anchos especiales por proyecto)' },
+       { label: 'Resistencia a la tracción', value: 'Alta resistencia; valores según ficha técnica del material en cotización' },
+       { label: 'Elongación a la rotura', value: '≥ 300%' },
+       { label: 'Resistencia a la perforación', value: 'Alta (reforzada con geotextil opcional)' },
+@@ -816,14 +816,14 @@ export const products: Product[] = [
+     category: 'Geosintéticos e Impermeabilización',
+     sector: ['Minería', 'Saneamiento', 'Agricultura', 'Infraestructura', 'Energía'],
+     shortDescription: 'Geomembrana de polietileno de alta densidad para impermeabilización de pozas, rellenos y obras hidráulicas de gran exigencia química y mecánica.',
+-    description: 'Geomembrana de polietileno de alta densidad (HDPE) para impermeabilización de pozas de proceso y relave, rellenos sanitarios, reservorios y obras hidráulicas donde se requiere alta resistencia química y mecánica. Se instala con soldadura por termofusión (cuña caliente / extrusión). Línea de importación directa disponible bajo pedido: los espesores, propiedades y el certificado de lote del fabricante se confirman y entregan en la cotización según el proyecto.',
++    description: 'Geomembrana de polietileno de alta densidad (HDPE) para impermeabilización de pozas de proceso y relave, rellenos sanitarios, reservorios y obras hidráulicas donde se requiere alta resistencia química y mecánica. Se instala con soldadura por termofusión (cuña caliente / extrusión). Línea de importación directa, suministrada por proyecto: los espesores, propiedades y el certificado de lote del fabricante se confirman y entregan en la cotización según el proyecto.',
+     specifications: [
+       { label: 'Material', value: 'Polietileno de alta densidad (HDPE)' },
+       { label: 'Espesores', value: 'Rango típico 0.75 – 2.5 mm (a confirmar por proyecto)' },
+       { label: 'Instalación', value: 'Termofusión: cuña caliente / extrusión' },
+       { label: 'Propiedades', value: 'Alta resistencia química y a la perforación' },
+       { label: 'Documentación', value: 'Ficha técnica y certificado de lote del fabricante en cotización' },
+-      { label: 'Disponibilidad', value: 'Importación directa — bajo pedido' }
++      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+     ],
+     applications: [
+       'Pozas de proceso y relave en minería',
+@@ -843,7 +843,7 @@ export const products: Product[] = [
+     popular: false,
+     sourcing: 'importacion_directa',
+     availability: 'bajo_pedido',
+-    leadTime: 'Bajo pedido — según proyecto',
++    leadTime: 'Por proyecto — según especificación',
+     documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+   },
+   {
+@@ -853,13 +853,13 @@ export const products: Product[] = [
+     category: 'Geosintéticos e Impermeabilización',
+     sector: ['Minería', 'Construcción', 'Infraestructura', 'Energía'],
+     shortDescription: 'Geomembrana de polietileno reforzada con inserto de refuerzo para mayor resistencia mecánica en condiciones exigentes.',
+-    description: 'Geomembrana de polietileno fortificada con inserto de refuerzo (scrim) para aplicaciones que requieren mayor resistencia al punzonamiento y a esfuerzos mecánicos, con menor peso por m² frente a espesores equivalentes. Línea de importación directa disponible bajo pedido; propiedades y certificado de lote se entregan según especificación del proyecto.',
++    description: 'Geomembrana de polietileno fortificada con inserto de refuerzo (scrim) para aplicaciones que requieren mayor resistencia al punzonamiento y a esfuerzos mecánicos, con menor peso por m² frente a espesores equivalentes. Línea de importación directa, suministrada por proyecto; propiedades y certificado de lote se entregan según especificación del proyecto.',
+     specifications: [
+       { label: 'Material', value: 'Polietileno con refuerzo interno (scrim)' },
+       { label: 'Ventaja', value: 'Mayor resistencia mecánica / punzonamiento por peso' },
+       { label: 'Instalación', value: 'Termofusión / según sistema del fabricante' },
+       { label: 'Documentación', value: 'Ficha técnica y certificado de lote en cotización' },
+-      { label: 'Disponibilidad', value: 'Importación directa — bajo pedido' }
++      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+     ],
+     applications: [
+       'Cubiertas flotantes y coberturas expuestas',
+@@ -879,7 +879,7 @@ export const products: Product[] = [
+     popular: false,
+     sourcing: 'importacion_directa',
+     availability: 'bajo_pedido',
+-    leadTime: 'Bajo pedido — según proyecto',
++    leadTime: 'Por proyecto — según especificación',
+     documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+   },
+   {
+@@ -889,13 +889,13 @@ export const products: Product[] = [
+     category: 'Geosintéticos e Impermeabilización',
+     sector: ['Infraestructura', 'Construcción', 'Saneamiento'],
+     shortDescription: 'Geomembrana bituminosa para impermeabilización de obras civiles e hidráulicas, con buena adaptación al terreno.',
+-    description: 'Geomembrana bituminosa para impermeabilización de túneles, obras civiles, canales y estructuras hidráulicas, con buena adaptación al sustrato y resistencia mecánica. Línea de importación directa disponible bajo pedido; ficha técnica y certificado de lote se entregan según el proyecto.',
++    description: 'Geomembrana bituminosa para impermeabilización de túneles, obras civiles, canales y estructuras hidráulicas, con buena adaptación al sustrato y resistencia mecánica. Línea de importación directa, suministrada por proyecto; ficha técnica y certificado de lote se entregan según el proyecto.',
+     specifications: [
+       { label: 'Material', value: 'Membrana bituminosa (asfáltica) reforzada' },
+       { label: 'Uso', value: 'Túneles, obras civiles, canales, estructuras hidráulicas' },
+       { label: 'Instalación', value: 'Según sistema del fabricante (soplete / adherida)' },
+       { label: 'Documentación', value: 'Ficha técnica y certificado de lote en cotización' },
+-      { label: 'Disponibilidad', value: 'Importación directa — bajo pedido' }
++      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+     ],
+     applications: [
+       'Impermeabilización de túneles y obras subterráneas',
+@@ -915,7 +915,7 @@ export const products: Product[] = [
+     popular: false,
+     sourcing: 'importacion_directa',
+     availability: 'bajo_pedido',
+-    leadTime: 'Bajo pedido — según proyecto',
++    leadTime: 'Por proyecto — según especificación',
+     documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+   },
+   {
+@@ -925,13 +925,13 @@ export const products: Product[] = [
+     category: 'Geosintéticos e Impermeabilización',
+     sector: ['Construcción', 'Minería', 'Infraestructura', 'Saneamiento'],
+     shortDescription: 'Geotextiles tejidos y no tejidos para separación, filtración, drenaje, refuerzo y protección de geomembranas.',
+-    description: 'Geotextiles tejidos (refuerzo) y no tejidos (separación, filtración, drenaje y protección de geomembranas) para obras de ingeniería civil, minería e infraestructura. Se seleccionan por gramaje y función. Línea de importación directa disponible bajo pedido; ficha técnica y certificado de lote se entregan según proyecto.',
++    description: 'Geotextiles tejidos (refuerzo) y no tejidos (separación, filtración, drenaje y protección de geomembranas) para obras de ingeniería civil, minería e infraestructura. Se seleccionan por gramaje y función. Línea de importación directa, suministrada por proyecto; ficha técnica y certificado de lote se entregan según proyecto.',
+     specifications: [
+       { label: 'Tipos', value: 'No tejido (punzonado) y tejido' },
+       { label: 'Función', value: 'Separación, filtración, drenaje, refuerzo, protección' },
+       { label: 'Gramaje', value: 'Rango según función (a confirmar por proyecto)' },
+       { label: 'Documentación', value: 'Ficha técnica y certificado de lote en cotización' },
+-      { label: 'Disponibilidad', value: 'Importación directa — bajo pedido' }
++      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+     ],
+     applications: [
+       'Separación de capas en terraplenes y vías',
+@@ -951,7 +951,7 @@ export const products: Product[] = [
+     popular: false,
+     sourcing: 'importacion_directa',
+     availability: 'bajo_pedido',
+-    leadTime: 'Bajo pedido — según proyecto',
++    leadTime: 'Por proyecto — según especificación',
+     documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+   },
+   {
+@@ -961,13 +961,13 @@ export const products: Product[] = [
+     category: 'Geosintéticos e Impermeabilización',
+     sector: ['Construcción', 'Minería', 'Infraestructura'],
+     shortDescription: 'Geomallas uniaxiales y biaxiales para refuerzo y estabilización de suelos, taludes, bases de vías y plataformas.',
+-    description: 'Geomallas (geogrids) uniaxiales y biaxiales para refuerzo de suelos, estabilización de taludes, bases de carreteras, plataformas y muros de suelo reforzado. Se seleccionan por resistencia a la tracción y geometría de apertura según el diseño geotécnico. Línea de importación directa disponible bajo pedido; ficha y certificado de lote se entregan según proyecto.',
++    description: 'Geomallas (geogrids) uniaxiales y biaxiales para refuerzo de suelos, estabilización de taludes, bases de carreteras, plataformas y muros de suelo reforzado. Se seleccionan por resistencia a la tracción y geometría de apertura según el diseño geotécnico. Línea de importación directa, suministrada por proyecto; ficha y certificado de lote se entregan según proyecto.',
+     specifications: [
+       { label: 'Tipos', value: 'Uniaxial y biaxial' },
+       { label: 'Función', value: 'Refuerzo y estabilización de suelos y taludes' },
+       { label: 'Resistencia', value: 'Según diseño geotécnico (a confirmar por proyecto)' },
+       { label: 'Documentación', value: 'Ficha técnica y certificado de lote en cotización' },
+-      { label: 'Disponibilidad', value: 'Importación directa — bajo pedido' }
++      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+     ],
+     applications: [
+       'Bases y sub-bases de carreteras y plataformas',
+@@ -987,7 +987,7 @@ export const products: Product[] = [
+     popular: false,
+     sourcing: 'importacion_directa',
+     availability: 'bajo_pedido',
+-    leadTime: 'Bajo pedido — según proyecto',
++    leadTime: 'Por proyecto — según especificación',
+     documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+   },
+ 
+@@ -1001,13 +1001,13 @@ export const products: Product[] = [
+     category: 'Soluciones Ambientales y Fluidos',
+     sector: ['Agricultura', 'Industrial', 'Minería', 'Saneamiento'],
+     shortDescription: 'Tanques flexibles plegables para almacenamiento de agua, efluentes y líquidos, de fácil transporte e instalación.',
+-    description: 'Tanques flexibles (bladders) de membrana técnica para almacenamiento de agua, efluentes y otros líquidos, plegables y de rápida instalación sin obra civil. Ideales para riego, reserva de agua, contingencia y campamentos. Línea disponible bajo pedido: capacidad, membrana y accesorios se definen según la aplicación, con ficha técnica en la cotización.',
++    description: 'Tanques flexibles (bladders) de membrana técnica para almacenamiento de agua, efluentes y otros líquidos, plegables y de rápida instalación sin obra civil. Ideales para riego, reserva de agua, contingencia y campamentos. Línea de suministro por proyecto: capacidad, membrana y accesorios se definen según la aplicación, con ficha técnica en la cotización.',
+     specifications: [
+       { label: 'Material', value: 'Membrana técnica (PVC/PU) resistente al líquido almacenado' },
+       { label: 'Capacidad', value: 'Según requerimiento (a definir por proyecto)' },
+       { label: 'Instalación', value: 'Sin obra civil, plegable y reubicable' },
+       { label: 'Accesorios', value: 'Válvulas, conexiones y kit de llenado/vaciado' },
+-      { label: 'Disponibilidad', value: 'Bajo pedido — ficha por proyecto' }
++      { label: 'Disponibilidad', value: 'Por proyecto — ficha técnica incluida' }
+     ],
+     applications: [
+       'Reserva de agua para riego y ganadería',
+@@ -1027,7 +1027,7 @@ export const products: Product[] = [
+     popular: false,
+     sourcing: 'importacion_directa',
+     availability: 'bajo_pedido',
+-    leadTime: 'Bajo pedido — según proyecto',
++    leadTime: 'Por proyecto — según especificación',
+     documentation: 'Ficha técnica del fabricante a solicitud, en cotización.'
+   },
+   {
+@@ -1037,13 +1037,13 @@ export const products: Product[] = [
+     category: 'Soluciones Ambientales y Fluidos',
+     sector: ['Agricultura', 'Industrial', 'Saneamiento'],
+     shortDescription: 'Biodigestores para tratamiento de residuos orgánicos y generación de biogás, mediante aliado técnico especializado.',
+-    description: 'Sistemas de biodigestión anaeróbica para el tratamiento de residuos orgánicos agroindustriales y la generación de biogás, provistos mediante aliado técnico especializado. Cada instalación se dimensiona por volumen de residuo, temperatura y objetivo (tratamiento y/o energía). Disponible bajo pedido con evaluación previa del caso.',
++    description: 'Sistemas de biodigestión anaeróbica para el tratamiento de residuos orgánicos agroindustriales y la generación de biogás, provistos mediante aliado técnico especializado. Cada instalación se dimensiona por volumen de residuo, temperatura y objetivo (tratamiento y/o energía). De suministro por proyecto, con evaluación previa del caso.',
+     specifications: [
+       { label: 'Sistema', value: 'Biodigestión anaeróbica (tubular / de membrana)' },
+       { label: 'Salida', value: 'Biol/biogás según diseño' },
+       { label: 'Provisión', value: 'Mediante aliado técnico especializado' },
+       { label: 'Dimensionamiento', value: 'Según volumen de residuo y objetivo' },
+-      { label: 'Disponibilidad', value: 'Bajo pedido — con evaluación previa' }
++      { label: 'Disponibilidad', value: 'Por proyecto — con evaluación previa' }
+     ],
+     applications: [
+       'Tratamiento de residuos ganaderos y agroindustriales',
+@@ -1063,7 +1063,7 @@ export const products: Product[] = [
+     popular: false,
+     sourcing: 'partner',
+     availability: 'bajo_pedido',
+-    leadTime: 'Bajo pedido — con evaluación previa',
++    leadTime: 'Por proyecto — con evaluación previa',
+     documentation: 'Memoria técnica del aliado a solicitud, tras evaluación del caso.'
+   },
+   {
+@@ -1073,13 +1073,13 @@ export const products: Product[] = [
+     category: 'Soluciones Ambientales y Fluidos',
+     sector: ['Minería', 'Saneamiento', 'Agricultura', 'Infraestructura'],
+     shortDescription: 'Tuberías de polietileno de alta densidad y accesorios para conducción de agua, relaves y fluidos, con termofusión.',
+-    description: 'Tuberías de polietileno de alta densidad (HDPE) y accesorios para conducción de agua, relaves, drenaje y fluidos industriales, unidas por termofusión o electrofusión. Se especifican por diámetro y clase de presión (SDR) según el diseño hidráulico. Línea de importación directa disponible bajo pedido; ficha y certificado de lote en cotización.',
++    description: 'Tuberías de polietileno de alta densidad (HDPE) y accesorios para conducción de agua, relaves, drenaje y fluidos industriales, unidas por termofusión o electrofusión. Se especifican por diámetro y clase de presión (SDR) según el diseño hidráulico. Línea de importación directa, suministrada por proyecto; ficha y certificado de lote en cotización.',
+     specifications: [
+       { label: 'Material', value: 'Polietileno de alta densidad (HDPE)' },
+       { label: 'Unión', value: 'Termofusión / electrofusión' },
+       { label: 'Especificación', value: 'Diámetro y clase de presión (SDR) por diseño' },
+       { label: 'Accesorios', value: 'Codos, tees, reducciones, bridas' },
+-      { label: 'Disponibilidad', value: 'Importación directa — bajo pedido' }
++      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+     ],
+     applications: [
+       'Conducción de agua y riego presurizado',
+@@ -1099,7 +1099,7 @@ export const products: Product[] = [
+     popular: false,
+     sourcing: 'importacion_directa',
+     availability: 'bajo_pedido',
+-    leadTime: 'Bajo pedido — según proyecto',
++    leadTime: 'Por proyecto — según especificación',
+     documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+   },
+ 
+@@ -1347,12 +1347,12 @@ export const sectors = [
+ export const sourcingLabels: Record<string, string> = {
+   fabricacion_propia: 'Fabricación propia',
+   importacion_directa: 'Importación directa',
+-  bajo_pedido: 'Bajo pedido',
++  bajo_pedido: 'Suministro especializado',
+   partner: 'Aliado técnico'
+ };
+ 
+ export const availabilityLabels: Record<string, string> = {
+   stock: 'Stock disponible',
+   a_medida: 'Fabricación a medida',
+-  bajo_pedido: 'Bajo pedido'
++  bajo_pedido: 'Suministro a proyecto'
+ };
