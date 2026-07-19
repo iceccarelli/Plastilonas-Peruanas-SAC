@@ -3,7 +3,6 @@
 import { SOCIAL_LINKS } from '@/lib/social';
 
 interface Props {
-  /** Estilo de color: 'dark' para fondos oscuros (footer), 'light' para claros. */
   variant?: 'dark' | 'light';
   className?: string;
 }
@@ -16,28 +15,21 @@ export default function SocialIcons({ variant = 'dark', className = '' }: Props)
 
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
-      {SOCIAL_LINKS.map(({ name, href, Icon, ready }) => {
-        const shared = `w-9 h-9 rounded-xl border flex items-center justify-center transition-all ${base}`;
-
-        // Marcador de posición: presente y visible, pero no navegable hasta
-        // que se integre la URL real. No rompe el layout.
-                // Solo mostramos redes con URL real configurada en lib/social.ts.
-        if (!ready) return null;
-
-        return (
-          <a
-            key={name}
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={shared}
-            title={name}
-            aria-label={name}
-          >
-            <Icon className="w-4 h-4" />
-          </a>
-        );
-      })}
+      {SOCIAL_LINKS.map(({ name, href, Icon }) => (
+        
+            <a
+          key={name}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-social={name.toLowerCase()}
+          className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all ${base}`}
+          title={name}
+          aria-label={name}
+        >
+          <Icon className="w-4 h-4" aria-hidden="true" />
+        </a>
+      ))}
     </div>
   );
 }
