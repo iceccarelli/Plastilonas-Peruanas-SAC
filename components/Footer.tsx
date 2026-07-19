@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
 import SocialIcons from '@/components/SocialIcons';
 import FooterAccordion, { type FSection } from '@/components/FooterAccordion';
@@ -34,8 +35,8 @@ export default function Footer() {
         {/* ── Mobile: marca compacta + CTA + acordeón (patrón AWS) ── */}
         <div className="md:hidden">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl tracking-tighter">PP</span>
+            <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-white/10">
+              <Image src="/logo.png" alt="Plastilonas Peruanas SAC" width={36} height={36} className="w-full h-full object-cover" />
             </div>
             <div className="font-semibold text-lg tracking-tight text-white">Plastilonas Peruanas SAC</div>
           </div>

@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useChat } from '@ai-sdk/react';
-import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import { X, Send, Bot, User } from 'lucide-react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { whatsappUrl, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 
@@ -49,7 +50,7 @@ export default function Chatbot() {
               <X className="w-7 h-7 text-white" />
             ) : (
               <div className="relative">
-                <MessageCircle className="w-7 h-7 text-white" />
+                <Image src="/logo.png" alt="Abrir asistente Plastilonas" width={40} height={40} className="w-10 h-10 rounded-xl object-cover" />
                 {/* Punto "en línea" con doble anillo para claridad */}
                 <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
                   <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
@@ -97,8 +98,8 @@ export default function Chatbot() {
               {/* Header */}
               <div className="bg-[#0A2540] text-white px-6 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-white/10 rounded-2xl flex items-center justify-center">
-                    <Bot className="w-5 h-5" />
+                  <div className="w-9 h-9 rounded-2xl overflow-hidden ring-1 ring-white/10">
+                    <Image src="/logo.png" alt="Plastilonas Peruanas SAC" width={36} height={36} className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <div className="font-semibold tracking-tight">Asistente Plastilonas</div>
