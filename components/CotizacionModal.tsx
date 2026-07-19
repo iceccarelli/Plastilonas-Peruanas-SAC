@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { products } from '@/lib/products';
 import { toast } from 'sonner';
 import { buildQuoteMessage, openWhatsApp, saveQuoteLocally } from '@/lib/whatsapp';
+import { trackQuoteRequest } from '@/lib/analytics';
 
 const formSchema = z.object({
   nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
@@ -80,6 +81,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
     });
 
     openWhatsApp(message);
+    trackQuoteRequest(data.producto);
 
     setIsSubmitting(false);
     setIsSuccess(true);

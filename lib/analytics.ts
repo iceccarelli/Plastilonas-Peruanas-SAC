@@ -17,8 +17,13 @@ declare global {
 
 type EventParams = Record<string, string | number | boolean | undefined>;
 
+const DEBUG =
+  process.env.NEXT_PUBLIC_ANALYTICS_DEBUG === 'true' ||
+  process.env.NODE_ENV === 'development';
+
 export function trackEvent(name: string, params: EventParams = {}): void {
   if (typeof window === 'undefined') return;
+  if (DEBUG) console.debug('[analytics]', name, params);
   window.gtag?.('event', name, params);
   window.fbq?.('trackCustom', name, params);
   window.dataLayer?.push({ event: name, ...params });
