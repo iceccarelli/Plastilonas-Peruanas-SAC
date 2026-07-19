@@ -10,6 +10,7 @@ import { Toaster } from 'sonner';
 import AuthProvider from '@/components/AuthProvider';
 import StructuredData from '@/components/StructuredData';
 import Analytics from '@/components/Analytics';
+import WebPush from '@/components/WebPush';
 import ConsentBanner from '@/components/ConsentBanner';
 
 const inter = Inter({
@@ -97,6 +98,7 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-[var(--surface)] text-[var(--text)]">
         <StructuredData />
         <Analytics />
+        <WebPush />
         <AuthProvider>
           <Navbar />
           <main className="min-h-screen">{children}</main>
