@@ -481,3 +481,25 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
 /* 4 · Ritmo de lectura: cuerpo más cómodo, títulos más ceñidos */
 main p { line-height: 1.6; }
 main h1, main h2, main h3 { letter-spacing: -0.02em; }
+
+/* ═══════════ KEN BURNS — fotos de producto "vivas" ═══════════
+   Zoom + paneo lento e infinito en alternancia. Cada tarjeta arranca con
+   un pequeño desfase para que no se muevan todas al unísono. Se detiene
+   por completo si el usuario prefiere menos movimiento. */
+.ken-burns {
+  animation: kenburns 22s ease-in-out infinite alternate;
+  transform-origin: center;
+  will-change: transform;
+}
+.ken-burns-wrap:nth-of-type(3n) .ken-burns   { animation-duration: 26s; animation-delay: -6s; transform-origin: top left; }
+.ken-burns-wrap:nth-of-type(3n+1) .ken-burns { animation-duration: 20s; animation-delay: -3s; transform-origin: bottom right; }
+@keyframes kenburns {
+  from { transform: scale(1.02) translate(0, 0); }
+  to   { transform: scale(1.14) translate(-1.5%, 1.5%); }
+}
+/* En hover intensifica un pelín la sensación de vida */
+.group:hover .ken-burns { animation-duration: 12s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ken-burns { animation: none !important; transform: scale(1.02); }
+}

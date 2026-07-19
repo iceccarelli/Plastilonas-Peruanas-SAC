@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
 import { products } from '@/lib/products';
 import CotizacionModal from '@/components/CotizacionModal';
-import ProductVisual from '@/components/ProductVisual';
+import ProductImage from '@/components/ProductImage';
 import ProductBuyBox from '@/components/ProductBuyBox';
 import ProductAvailability from '@/components/ProductAvailability';
 
@@ -57,7 +57,7 @@ export default async function ProductDetailPage({ params }: Props) {
         {/* Gallery / Image */}
         <div>
           <div className="aspect-[16/11] rounded-3xl overflow-hidden relative mb-4 border border-gray-100">
-            <ProductVisual product={product} variant="hero" />
+            <ProductImage product={product} variant="hero" priority />
           </div>
           <div className="text-xs text-center text-gray-400">Fotografías reales de este producto disponibles bajo solicitud por WhatsApp</div>
         </div>
