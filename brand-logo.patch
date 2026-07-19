@@ -1,0 +1,145 @@
+diff --git a/app/icon.tsx b/app/icon.tsx
+deleted file mode 100644
+index 5af826b..0000000
+--- a/app/icon.tsx
++++ /dev/null
+@@ -1,35 +0,0 @@
+-import { ImageResponse } from 'next/og';
+-
+-/**
+- * Favicon "PP" con la marca, generado por Next (reemplaza el /favicon.ico
+- * inexistente al que apuntaba layout.tsx). Detectado automáticamente y aplicado
+- * como icono del sitio en pestañas y accesos directos móviles.
+- */
+-
+-export const size = { width: 32, height: 32 };
+-export const contentType = 'image/png';
+-
+-export default function Icon() {
+-  return new ImageResponse(
+-    (
+-      <div
+-        style={{
+-          width: '100%',
+-          height: '100%',
+-          display: 'flex',
+-          alignItems: 'center',
+-          justifyContent: 'center',
+-          background: '#0A2540',
+-          color: '#10B981',
+-          fontSize: 18,
+-          fontWeight: 800,
+-          borderRadius: 6,
+-          fontFamily: 'sans-serif',
+-        }}
+-      >
+-        PP
+-      </div>
+-    ),
+-    { ...size }
+-  );
+-}
+diff --git a/app/layout.tsx b/app/layout.tsx
+index d022e71..0c50a3c 100644
+--- a/app/layout.tsx
++++ b/app/layout.tsx
+@@ -65,7 +65,8 @@ export const metadata: Metadata = {
+     locale: 'es_PE',
+     type: 'website',
+   },
+-  // El favicon lo genera app/icon.tsx (antes /favicon.ico no existía).
++  // Favicon y apple-touch-icon estáticos: app/icon.png y app/apple-icon.png
++  // (Next los detecta automáticamente).
+ };
+ 
+ export default function RootLayout({
+diff --git a/components/Chatbot.tsx b/components/Chatbot.tsx
+index 8564f7b..cc799df 100644
+--- a/components/Chatbot.tsx
++++ b/components/Chatbot.tsx
+@@ -2,7 +2,8 @@
+ 
+ import React, { useState } from 'react';
+ import { useChat } from '@ai-sdk/react';
+-import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
++import { X, Send, Bot, User } from 'lucide-react';
++import Image from 'next/image';
+ import { motion, AnimatePresence } from 'framer-motion';
+ import { whatsappUrl, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
+ 
+@@ -49,7 +50,7 @@ export default function Chatbot() {
+               <X className="w-7 h-7 text-white" />
+             ) : (
+               <div className="relative">
+-                <MessageCircle className="w-7 h-7 text-white" />
++                <Image src="/logo.png" alt="Abrir asistente Plastilonas" width={40} height={40} className="w-10 h-10 rounded-xl object-cover" />
+                 {/* Punto "en línea" con doble anillo para claridad */}
+                 <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
+                   <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+@@ -97,8 +98,8 @@ export default function Chatbot() {
+               {/* Header */}
+               <div className="bg-[#0A2540] text-white px-6 py-5 flex items-center justify-between">
+                 <div className="flex items-center gap-3">
+-                  <div className="w-9 h-9 bg-white/10 rounded-2xl flex items-center justify-center">
+-                    <Bot className="w-5 h-5" />
++                  <div className="w-9 h-9 rounded-2xl overflow-hidden ring-1 ring-white/10">
++                    <Image src="/logo.png" alt="Plastilonas Peruanas SAC" width={36} height={36} className="w-full h-full object-cover" />
+                   </div>
+                   <div>
+                     <div className="font-semibold tracking-tight">Asistente Plastilonas</div>
+diff --git a/components/Footer.tsx b/components/Footer.tsx
+index 9addb7d..13347e3 100644
+--- a/components/Footer.tsx
++++ b/components/Footer.tsx
+@@ -1,4 +1,5 @@
+ import Link from 'next/link';
++import Image from 'next/image';
+ import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
+ import SocialIcons from '@/components/SocialIcons';
+ import FooterAccordion, { type FSection } from '@/components/FooterAccordion';
+@@ -34,8 +35,8 @@ export default function Footer() {
+         {/* ── Mobile: marca compacta + CTA + acordeón (patrón AWS) ── */}
+         <div className="md:hidden">
+           <div className="flex items-center gap-3 mb-4">
+-            <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center">
+-              <span className="text-white font-bold text-xl tracking-tighter">PP</span>
++            <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-white/10">
++              <Image src="/logo.png" alt="Plastilonas Peruanas SAC" width={36} height={36} className="w-full h-full object-cover" />
+             </div>
+             <div className="font-semibold text-lg tracking-tight text-white">Plastilonas Peruanas SAC</div>
+           </div>
+diff --git a/components/Navbar.tsx b/components/Navbar.tsx
+index 204952f..52f78b0 100644
+--- a/components/Navbar.tsx
++++ b/components/Navbar.tsx
+@@ -2,6 +2,7 @@
+ 
+ import React, { useState } from 'react';
+ import Link from 'next/link';
++import Image from 'next/image';
+ import { usePathname } from 'next/navigation';
+ import { useSession } from 'next-auth/react';
+ import { useHideOnScroll } from '@/lib/useHideOnScroll';
+@@ -76,8 +77,8 @@ export default function Navbar() {
+             <div className="flex items-center justify-between gap-4 h-20">
+             {/* Logo */}
+             <Link href="/" className="flex items-center gap-3 group shrink-0">
+-              <div className="w-11 h-11 shrink-0 bg-[#0A2540] dark:bg-[#10B981] rounded-xl flex items-center justify-center group-hover:bg-[#059669] dark:group-hover:bg-[#34D399] transition-colors">
+-                <span className="text-white dark:text-[#0A2540] font-bold text-2xl tracking-tighter">PP</span>
++              <div className="w-11 h-11 shrink-0 rounded-xl overflow-hidden ring-1 ring-black/5 dark:ring-white/10 transition-transform group-hover:scale-[1.04]">
++                <Image src="/logo.png" alt="Plastilonas Peruanas SAC" width={44} height={44} priority className="w-full h-full object-cover" />
+               </div>
+               <div className="hidden sm:block">
+                 <div className="font-semibold text-xl tracking-tight whitespace-nowrap text-[#0A2540] dark:text-[var(--text)]">Plastilonas Peruanas</div>
+diff --git a/components/StructuredData.tsx b/components/StructuredData.tsx
+index e048dc7..7ed9aee 100644
+--- a/components/StructuredData.tsx
++++ b/components/StructuredData.tsx
+@@ -21,6 +21,7 @@ export default function StructuredData() {
+       'Fabricación e instalación a medida de soluciones industriales en el Perú: big bags, lonas y cobertores, geosintéticos (geomembranas, geotextiles, geomallas), estructuras y arquitectura textil, mallas agrícolas, ventilación industrial y accesorios, para minería, agricultura, construcción, transporte e infraestructura.',
+     url: 'https://www.plastilonas.com',
+     image: 'https://www.plastilonas.com/opengraph-image',
++    logo: 'https://www.plastilonas.com/logo.png',
+     telephone: `+${WHATSAPP_NUMBER}`,
+     taxID: '20523135385',
+     address: {
