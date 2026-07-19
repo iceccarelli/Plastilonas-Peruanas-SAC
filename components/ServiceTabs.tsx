@@ -116,7 +116,7 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
                 <Icon className="w-6 h-6" />
               </div>
               <h3 className="font-semibold text-2xl md:text-3xl tracking-tight text-white mb-3">{svc.title}</h3>
-              <p className="text-white/80 leading-relaxed text-[15px] md:text-base mb-6">{svc.desc}</p>
+              <p className="text-white/80 leading-relaxed t-body md:text-base mb-6">{svc.desc}</p>
               <div className="flex items-center gap-2 text-sm text-white/70 mb-8">
                 <Check className="w-4 h-4 text-[#10B981]" /> Incluido en todos nuestros proyectos
               </div>

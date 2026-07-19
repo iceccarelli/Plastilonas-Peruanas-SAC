@@ -107,7 +107,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
               </div>
             )}
 
-            <div className="px-4 pt-3 pb-2 text-[10px] text-gray-400 flex items-center justify-between border-t mt-2">
+            <div className="px-4 pt-3 pb-2 t-micro text-gray-400 flex items-center justify-between border-t mt-2">
               <div>Resultados de búsqueda en tiempo real</div>
               <div className="hidden sm:block">Presiona Enter para ver detalles</div>
             </div>

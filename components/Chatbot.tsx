@@ -190,7 +190,7 @@ export default function Chatbot() {
               </form>
 
               <div className="px-4 pb-3 text-center">
-                <p className="text-[10px] text-gray-400">Respuestas generadas por IA • Asesoría real disponible por WhatsApp</p>
+                <p className="t-micro text-gray-400">Respuestas generadas por IA • Asesoría real disponible por WhatsApp</p>
               </div>
             </div>
           </div>

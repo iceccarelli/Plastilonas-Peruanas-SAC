@@ -81,7 +81,7 @@ export default function Navbar() {
               </div>
               <div className="hidden sm:block">
                 <div className="font-semibold text-xl tracking-tight whitespace-nowrap text-[#0A2540] dark:text-[var(--text)]">Plastilonas Peruanas</div>
-                <div className="text-[10px] whitespace-nowrap text-gray-500 dark:text-[var(--text-muted)] -mt-1 font-medium">SAC • DESDE 2009</div>
+                <div className="t-micro whitespace-nowrap text-gray-500 dark:text-[var(--text-muted)] -mt-1 font-medium">SAC • DESDE 2009</div>
               </div>
             </Link>
 
@@ -211,7 +211,7 @@ export default function Navbar() {
               >
                 <Search className="w-4 h-4 shrink-0" />
                 <span className="hidden xl:inline whitespace-nowrap">Buscar productos</span>
-                <kbd className="hidden xl:block ml-1 px-1.5 py-0.5 text-[10px] font-mono bg-gray-100 dark:bg-[var(--surface-muted)] rounded">⌘K</kbd>
+                <kbd className="hidden xl:block ml-1 px-1.5 py-0.5 t-micro font-mono bg-gray-100 dark:bg-[var(--surface-muted)] rounded">⌘K</kbd>
               </button>
 
               <ThemeToggle />

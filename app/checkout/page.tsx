@@ -158,7 +158,7 @@ export default function CheckoutPage() {
               )}
             </button>
 
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-gray-400">
+            <p className="mt-3 flex items-center justify-center gap-1.5 t-micro text-gray-400">
               <ShieldCheck className="w-3.5 h-3.5" /> Pago seguro procesado por Stripe
             </p>
           </div>

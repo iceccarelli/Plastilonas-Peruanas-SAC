@@ -247,7 +247,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
                   </button>
                 </div>
 
-                <p className="text-center text-[10px] text-gray-400 pt-1">
+                <p className="text-center t-micro text-gray-400 pt-1">
                   Sus datos se envían directamente a nuestro equipo comercial por WhatsApp. No los compartimos con terceros.
                 </p>
               </form>

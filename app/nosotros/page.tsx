@@ -22,7 +22,7 @@ export default function NosotrosPage() {
         ].map((v, i) => (
           <div key={i} className="bg-white border border-gray-100 p-8 rounded-3xl">
             <div className="font-semibold text-xl tracking-tight mb-4 text-[#0A2540]">{v.title}</div>
-            <p className="text-gray-600 leading-relaxed text-[15px]">{v.text}</p>
+            <p className="text-gray-600 leading-relaxed t-body">{v.text}</p>
           </div>
         ))}
       </div>

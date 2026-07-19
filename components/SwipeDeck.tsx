@@ -85,7 +85,7 @@ export default function SwipeDeck({
                     {card.icon && ICONS[card.icon] ? (() => { const I = ICONS[card.icon!]; return <I className="w-5 h-5" />; })() : card.index}
                   </div>
                   <div className="font-semibold text-lg text-[#0A2540] mb-2 tracking-tight leading-snug">{card.title}</div>
-                  <p className="text-gray-600 leading-relaxed text-[15px]">{card.body}</p>
+                  <p className="text-gray-600 leading-relaxed t-body">{card.body}</p>
                 </div>
               </motion.div>
             );

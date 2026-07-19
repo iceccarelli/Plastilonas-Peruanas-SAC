@@ -33,7 +33,7 @@ export default function SectorTicker({
               <TrendingUp className="w-3 h-3" />
               {it.count}
             </span>
-            <span className="text-[10px] text-gray-400 whitespace-nowrap">soluciones</span>
+            <span className="t-micro text-gray-400 whitespace-nowrap">soluciones</span>
           </Link>
         ))}
       </div>

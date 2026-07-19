@@ -64,8 +64,8 @@ export default function Home() {
           </Reveal>
           <Reveal delay={0.15}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/productos" className="group inline-flex items-center justify-center gap-3 bg-white text-[#0A2540] hover:bg-[#059669] hover:text-white px-10 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 active:scale-[0.98] shadow-lg shadow-black/20">Explorar Catálogo <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></Link>
-              <Link href="/cotizacion" className="inline-flex items-center justify-center gap-3 border border-white/40 hover:bg-white/10 hover:border-white/60 px-9 py-4 rounded-2xl font-semibold text-lg transition-all duration-300">Solicitar Cotización</Link>
+              <Link href="/productos" className="group btn btn-lg bg-white text-[#0A2540] hover:bg-[#047857] hover:text-white shadow-lg shadow-black/20">Explorar Catálogo <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></Link>
+              <Link href="/cotizacion" className="btn btn-lg border border-white/40 text-white hover:bg-white/10 hover:border-white/60">Solicitar Cotización</Link>
             </div>
           </Reveal>
         </div>
@@ -77,7 +77,7 @@ export default function Home() {
                   <CountUp to={stat.to} suffix={stat.suffix} display={stat.display} />
                 </div>
                 <div className="text-xs text-white/85 mt-1.5 font-medium tracking-wide">{stat.label}</div>
-                <div className="text-[10px] text-white/45 mt-1 leading-snug">{stat.sub}</div>
+                <div className="t-micro text-white/45 mt-1 leading-snug">{stat.sub}</div>
               </div>
             ))}
           </div>
@@ -134,7 +134,7 @@ export default function Home() {
           <Reveal delay={0.1}>
             <div className="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
               <p className="text-white/70 text-sm max-w-xl">Compromiso real con la calidad y el cliente satisfecho — desde 2009 en el Perú.</p>
-              <Link href="/nosotros" className="inline-flex items-center justify-center gap-2 border border-white/30 hover:bg-white/10 px-7 py-3 rounded-2xl text-sm font-medium transition-all shrink-0">Conozca nuestra historia <ArrowRight className="w-4 h-4" /></Link>
+              <Link href="/nosotros" className="btn border border-white/30 text-white hover:bg-white/10 shrink-0">Conozca nuestra historia <ArrowRight className="w-4 h-4" /></Link>
             </div>
           </Reveal>
         </div>

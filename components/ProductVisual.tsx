@@ -77,7 +77,7 @@ export default function ProductVisual({
       />
       {variant === 'hero' && (
         <div className="relative z-10 mt-5 max-w-[80%] text-center">
-          <div className="text-[11px] font-semibold tracking-[3px] text-white/50 uppercase">
+          <div className="t-micro font-semibold tracking-[3px] text-white/50 uppercase">
             {product.category}
           </div>
           <div className="mt-1 text-lg font-semibold tracking-tight text-white/90">
@@ -86,7 +86,7 @@ export default function ProductVisual({
         </div>
       )}
       {variant === 'card' && (
-        <div className="relative z-10 mt-4 px-4 text-center text-[11px] font-semibold uppercase tracking-[2px] text-white/45">
+        <div className="relative z-10 mt-4 px-4 text-center t-micro font-semibold uppercase tracking-[2px] text-white/45">
           {product.category}
         </div>
       )}
