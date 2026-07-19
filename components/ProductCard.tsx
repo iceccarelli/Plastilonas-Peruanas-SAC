@@ -74,10 +74,10 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
           )}
         </div>
 
-        <div className="pt-5 mt-auto flex items-center justify-between border-t border-gray-100">
+        <div className="pt-5 mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-t border-gray-100">
           <Link 
             href={`/productos/${product.slug}`} 
-            className="inline-flex items-center text-sm font-medium text-[#059669] hover:underline"
+            className="inline-flex items-center text-sm font-medium text-[#047857] hover:underline whitespace-nowrap"
           >
             Ver especificaciones <ArrowRight className="ml-1.5 w-4 h-4" />
           </Link>
@@ -86,14 +86,14 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
             <button
               type="button"
               onClick={() => add(product)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-5 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded-full transition-colors active:scale-[0.985]"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 bg-[#047857] hover:bg-[#065F46] text-white rounded-full transition-colors active:scale-[0.985] whitespace-nowrap shrink-0"
             >
               <ShoppingCart className="w-3.5 h-3.5" /> Agregar
             </button>
           ) : (
             <Link
               href={`/cotizacion?producto=${encodeURIComponent(product.name)}`}
-              className="text-xs font-semibold px-5 py-2 bg-[#0A2540] hover:bg-[#059669] text-white rounded-full transition-colors active:scale-[0.985]"
+              className="text-xs font-semibold px-4 py-2 bg-[#0A2540] hover:bg-[#047857] text-white rounded-full transition-colors active:scale-[0.985] whitespace-nowrap shrink-0"
             >
               Cotizar
             </Link>

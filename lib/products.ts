@@ -803,7 +803,7 @@ export const products: Product[] = [
     image: '/images/geomembranas.jpg',
     gallery: ['/images/geomembranas.jpg'],
     featured: true,
-    popular: true,
+    popular: false,
     sourcing: 'fabricacion_propia',
     availability: 'a_medida'
   },
