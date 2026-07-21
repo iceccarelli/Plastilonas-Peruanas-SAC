@@ -35,6 +35,7 @@ export default function MachineryGallery() {
   const [failed, setFailed] = useState<Record<string, boolean>>({});
   const regionRef = useRef<HTMLDivElement>(null);
   const activeThumbRef = useRef<HTMLButtonElement>(null);
+  const didMountRef = useRef(false);
 
   const item = machinery[index];
   const views = item.views;
@@ -88,9 +89,20 @@ export default function MachineryGallery() {
     return () => node.removeEventListener('keydown', onKey);
   }, [paginate]);
 
-  // Autocentrar miniatura activa.
+  // Autocentrar miniatura activa — SOLO tras interacción del usuario, nunca en
+  // el montaje. Y el desplazamiento se limita al carril del filmstrip (eje X),
+  // para que jamás mueva la página en vertical al cargar.
   useEffect(() => {
-    activeThumbRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return; // no hacer scroll en la carga inicial
+    }
+    const thumb = activeThumbRef.current;
+    const strip = thumb?.parentElement;
+    if (!thumb || !strip) return;
+    const target =
+      thumb.offsetLeft - strip.clientWidth / 2 + thumb.clientWidth / 2;
+    strip.scrollTo({ left: target, behavior: 'smooth' });
   }, [index]);
 
   const onDragEnd = (_e: unknown, info: PanInfo) => {
