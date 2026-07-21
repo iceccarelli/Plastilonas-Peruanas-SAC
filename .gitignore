@@ -37,3 +37,10 @@ Thumbs.db
 # macOS AppleDouble junk (33 ._*.jpg were committed under public/images)
 ._*
 .DS_Store
+
+# delivery artifacts (never commit)
+*.zip
+install-gallery*.sh
+update-gallery.sh
+stage-images.sh
+gallery-code.patch

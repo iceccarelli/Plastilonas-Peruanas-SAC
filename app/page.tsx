@@ -8,6 +8,7 @@ import FamilyCarousel from '@/components/FamilyCarousel';
 import ServiceTabs from '@/components/ServiceTabs';
 import HeroCarousel from '@/components/HeroCarousel';
 import SectionHeading from '@/components/SectionHeading';
+import MachineryGallery from '@/components/MachineryGallery';
 import { Reveal } from '@/components/Reveal';
 import CountUp from '@/components/CountUp';
 
@@ -139,6 +140,9 @@ export default function Home() {
           </Reveal>
         </div>
       </section>
+
+      {/* CÓMO SE FABRICA — galería ilustrativa del proceso */}
+      <MachineryGallery />
 
       {/* ===== 4 · SERVICIOS — explorador por pestañas (patrón AWS) ===== */}
       <section className="bg-white section-pad">
