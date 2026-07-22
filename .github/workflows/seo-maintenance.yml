@@ -1,0 +1,32 @@
+name: SEO Maintenance
+on:
+  push: { branches: [main] }
+  schedule: [{ cron: "0 6 * * *" }]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Regenerate llms.txt
+        env: { SITE_URL: "${{ vars.SITE_URL }}" }
+        run: node scripts/generate-llms.mjs
+      - name: Commit llms updates if changed
+        run: |
+          if ! git diff --quiet -- public/llms.txt public/llms-full.txt; then
+            git config user.name "seo-bot"
+            git config user.email "seo-bot@users.noreply.github.com"
+            git add public/llms.txt public/llms-full.txt
+            git commit -m "chore(seo): refresh llms.txt"
+            git push
+          fi
+      - name: Submit key URLs to IndexNow (Bing/Yandex/etc — not Google)
+        if: ${{ vars.SITE_URL != '' }}
+        env:
+          INDEXNOW_KEY: "${{ secrets.INDEXNOW_KEY }}"
+          SITE_URL: "${{ vars.SITE_URL }}"
+        run: node scripts/submit-indexnow.mjs "${{ vars.SITE_URL }}/" "${{ vars.SITE_URL }}/productos"
