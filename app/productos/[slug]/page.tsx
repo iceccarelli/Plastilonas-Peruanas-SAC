@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
 import { products } from '@/lib/products';
 import CotizacionModal from '@/components/CotizacionModal';
-import ProductImage from '@/components/ProductImage';
+import ProductGallery from '@/components/ProductGallery';
 import ProductBuyBox from '@/components/ProductBuyBox';
 import ProductAvailability from '@/components/ProductAvailability';
 import ProductStructuredData from '@/components/ProductStructuredData';
@@ -24,18 +24,30 @@ export async function generateMetadata({ params }: Props) {
   
   if (!product) return { title: 'Producto no encontrado' };
 
-  // No se declara openGraph.images: product.image apunta a archivos aún
-  // inexistentes (/images/*.jpg), así que la página hereda la imagen OG del
-  // sitio (app/opengraph-image.tsx) en lugar de romper la vista previa.
+  // Las fotos reales ahora existen en /public/images: exponemos la imagen del
+  // producto en Open Graph / Twitter para que al compartir la página (WhatsApp,
+  // LinkedIn) se muestre la foto real del producto.
   const canonical = `/productos/${product.slug}`;
   const ogTitle = `${product.name} — Plastilonas Peruanas SAC`;
+  const ogImage = product.image ? `https://www.plastilonas.com${product.image}` : undefined;
   return {
     title: product.name,
     description: product.shortDescription,
     keywords: [product.name, product.category, ...product.sector, 'Perú', 'proveedor', 'fabricante'],
     alternates: { canonical },
-    openGraph: { title: ogTitle, description: product.shortDescription, url: canonical, type: 'website' },
-    twitter: { card: 'summary_large_image', title: ogTitle, description: product.shortDescription },
+    openGraph: {
+      title: ogTitle,
+      description: product.shortDescription,
+      url: canonical,
+      type: 'website',
+      ...(ogImage ? { images: [{ url: ogImage, alt: product.name }] } : {}),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: ogTitle,
+      description: product.shortDescription,
+      ...(ogImage ? { images: [ogImage] } : {}),
+    },
   };
 }
 
@@ -62,12 +74,9 @@ export default async function ProductDetailPage({ params }: Props) {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-x-14 gap-y-10">
-        {/* Gallery / Image */}
+        {/* Gallery */}
         <div>
-          <div className="aspect-[16/11] rounded-3xl overflow-hidden relative mb-4 border border-gray-100">
-            <ProductImage product={product} variant="hero" priority />
-          </div>
-          <div className="text-xs text-center text-gray-400">Fotografías reales de este producto disponibles bajo solicitud por WhatsApp</div>
+          <ProductGallery product={product} />
         </div>
 
         {/* Datos estructurados de producto (solo campos reales, sin precio inventado) */}

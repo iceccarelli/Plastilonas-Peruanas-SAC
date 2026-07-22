@@ -31,7 +31,7 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
       className="product-card group bg-white border border-gray-100 rounded-3xl overflow-hidden flex flex-col h-full"
     >
       <div className="relative h-56 overflow-hidden">
-        <ProductImage product={product} variant="card" />
+        <ProductImage product={product} variant="card" enableHover />
 
         <div
           className={`absolute top-4 left-4 t-micro font-bold tracking-wider px-3 py-1 rounded-full shadow-sm ${AVAILABILITY_STYLES[availability]}`}

@@ -463,7 +463,7 @@ export const products: Product[] = [
       'Alternativa ligera y de rápida ejecución'
     ],
     image: '/images/tensoestructuras.jpg',
-    gallery: ['/images/tensoestructuras.jpg'],
+    gallery: ['/images/tensoestructuras.jpg', '/images/toldos-cerramientos.jpg'],
     featured: true,
     popular: false,
     sourcing: 'fabricacion_propia',
