@@ -204,7 +204,7 @@ export const products: Product[] = [
       'Soporte post-venta y reposición de partes'
     ],
     image: '/images/lona-a-medida.jpg',
-    gallery: ['/images/lona-a-medida.jpg'],
+    gallery: ['/images/lona-a-medida.jpg', '/images/ojalillo-rafia.jpg'],
     featured: true,
     popular: true,
     sourcing: 'fabricacion_propia',
@@ -429,7 +429,7 @@ export const products: Product[] = [
       'Alta durabilidad (10+ años) con mantenimiento mínimo'
     ],
     image: '/images/carpas.jpg',
-    gallery: ['/images/carpas.jpg', '/images/carpas-2.jpg'],
+    gallery: ['/images/carpas.jpg', '/images/carpas-2.jpg', '/images/techos-escolares.jpg'],
     featured: true,
     popular: true,
     sourcing: 'fabricacion_propia',
@@ -757,7 +757,7 @@ export const products: Product[] = [
       'Cumplimiento de normas de seguridad minera (OIT, MINEM)'
     ],
     image: '/images/mangas-ventilacion.jpg',
-    gallery: ['/images/mangas-ventilacion.jpg'],
+    gallery: ['/images/mangas-ventilacion.jpg', '/images/mangas-ventilacion-y.jpg', '/images/mangas-produccion.jpg'],
     featured: false,
     popular: false,
     sourcing: 'fabricacion_propia',
@@ -1138,7 +1138,7 @@ export const products: Product[] = [
       'Cumplimiento de normas de seguridad y salud en el trabajo'
     ],
     image: '/images/biombos.jpg',
-    gallery: ['/images/biombos.jpg'],
+    gallery: ['/images/biombos.jpg', '/images/biombos-proteccion.jpg'],
     featured: true,
     popular: false,
     sourcing: 'fabricacion_propia',
@@ -1176,7 +1176,7 @@ export const products: Product[] = [
       'Asesoría para el kit correcto por aplicación'
     ],
     image: '/images/accesorios.jpg',
-    gallery: ['/images/accesorios.jpg'],
+    gallery: ['/images/accesorios.jpg', '/images/ojalillo-rafia.jpg'],
     featured: false,
     popular: false,
     sourcing: 'importacion_directa',
