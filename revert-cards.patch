@@ -1,0 +1,310 @@
+diff --git a/lib/products.ts b/lib/products.ts
+index 1f3ce2d..d0af81a 100644
+--- a/lib/products.ts
++++ b/lib/products.ts
+@@ -55,7 +55,7 @@ export const products: Product[] = [
+       'Reutilizables y reciclables, opción eco-friendly'
+     ],
+     image: '/images/big-bags.jpg',
+-    gallery: ['/images/big-bags.jpg', '/images/big-bags-2.jpg', '/images/big-bags-3.jpg', '/images/big-bags-4.jpg'],
++    gallery: ['/images/big-bags.jpg', '/images/big-bags-2.jpg'],
+     featured: true,
+     popular: true,
+     sourcing: 'fabricacion_propia',
+@@ -94,7 +94,7 @@ export const products: Product[] = [
+       'Abastecimiento ágil con respaldo técnico local'
+     ],
+     image: '/images/sacos-polytarp.jpg',
+-    gallery: ['/images/sacos-polytarp.jpg', '/images/sacos-polytarp-2.jpg', '/images/sacos-polytarp-3.jpg', '/images/sacos-polytarp-4.jpg'],
++    gallery: ['/images/sacos-polytarp.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -129,7 +129,7 @@ export const products: Product[] = [
+       'Producción nacional con tiempos de entrega competitivos'
+     ],
+     image: '/images/bolsas-laminas.jpg',
+-    gallery: ['/images/bolsas-laminas.jpg', '/images/bolsas-laminas-2.jpg', '/images/bolsas-laminas-3.jpg', '/images/bolsas-laminas-4.jpg'],
++    gallery: ['/images/bolsas-laminas.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'fabricacion_propia',
+@@ -163,7 +163,7 @@ export const products: Product[] = [
+       'Calibres a medida para cada tipo de carga'
+     ],
+     image: '/images/films-shrink.jpg',
+-    gallery: ['/images/films-shrink.jpg', '/images/films-shrink-2.jpg', '/images/films-shrink-3.jpg', '/images/films-shrink-4.jpg'],
++    gallery: ['/images/films-shrink.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -204,7 +204,7 @@ export const products: Product[] = [
+       'Soporte post-venta y reposición de partes'
+     ],
+     image: '/images/lona-a-medida.jpg',
+-    gallery: ['/images/lona-a-medida.jpg', '/images/ojalillo-rafia.jpg', '/images/lona-a-medida-3.jpg', '/images/lona-a-medida-4.jpg'],
++    gallery: ['/images/lona-a-medida.jpg', '/images/ojalillo-rafia.jpg'],
+     featured: true,
+     popular: true,
+     sourcing: 'fabricacion_propia',
+@@ -242,7 +242,7 @@ export const products: Product[] = [
+       'Opción de lona encerada tradicional de máxima impermeabilidad'
+     ],
+     image: '/images/mantas-camiones.jpg',
+-    gallery: ['/images/mantas-camiones.jpg', '/images/mantas-camiones-2.jpg', '/images/mantas-camiones-3.jpg', '/images/mantas-camiones-4.jpg'],
++    gallery: ['/images/mantas-camiones.jpg'],
+     featured: true,
+     popular: true,
+     sourcing: 'fabricacion_propia',
+@@ -276,7 +276,7 @@ export const products: Product[] = [
+       'Doble función: protección de carga + imagen de marca'
+     ],
+     image: '/images/siders-tolderas.jpg',
+-    gallery: ['/images/siders-tolderas.jpg', '/images/siders-tolderas-2.jpg', '/images/siders-tolderas-3.jpg', '/images/siders-tolderas-4.jpg'],
++    gallery: ['/images/siders-tolderas.jpg'],
+     featured: true,
+     popular: false,
+     sourcing: 'fabricacion_propia',
+@@ -310,7 +310,7 @@ export const products: Product[] = [
+       'Asesoría para elegir el material óptimo por clima y uso'
+     ],
+     image: '/images/cobertores-multimaterial.jpg',
+-    gallery: ['/images/cobertores-multimaterial.jpg', '/images/cobertores-multimaterial-2.jpg', '/images/cobertores-multimaterial-3.jpg', '/images/cobertores-multimaterial-4.jpg'],
++    gallery: ['/images/cobertores-multimaterial.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -347,7 +347,7 @@ export const products: Product[] = [
+       'Mejora el bienestar animal y reduce mortalidad'
+     ],
+     image: '/images/mantas-arpilleras.jpg',
+-    gallery: ['/images/mantas-arpilleras.jpg', '/images/mantas-arpilleras-2.jpg', '/images/mantas-arpilleras-3.jpg', '/images/mantas-arpilleras-4.jpg'],
++    gallery: ['/images/mantas-arpilleras.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -386,7 +386,7 @@ export const products: Product[] = [
+       'Larga vida útil y bajo mantenimiento'
+     ],
+     image: '/images/mantas-aislantes.jpg',
+-    gallery: ['/images/mantas-aislantes.jpg', '/images/mantas-aislantes-2.jpg', '/images/mantas-aislantes-3.jpg', '/images/mantas-aislantes-4.jpg'],
++    gallery: ['/images/mantas-aislantes.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'fabricacion_propia',
+@@ -429,7 +429,7 @@ export const products: Product[] = [
+       'Alta durabilidad (10+ años) con mantenimiento mínimo'
+     ],
+     image: '/images/carpas.jpg',
+-    gallery: ['/images/carpas.jpg', '/images/carpas-2.jpg', '/images/techos-escolares.jpg', '/images/carpas-4.jpg'],
++    gallery: ['/images/carpas.jpg', '/images/carpas-2.jpg', '/images/techos-escolares.jpg'],
+     featured: true,
+     popular: true,
+     sourcing: 'fabricacion_propia',
+@@ -463,7 +463,7 @@ export const products: Product[] = [
+       'Alternativa ligera y de rápida ejecución'
+     ],
+     image: '/images/tensoestructuras.jpg',
+-    gallery: ['/images/tensoestructuras.jpg', '/images/toldos-cerramientos.jpg', '/images/tensoestructuras-3.jpg', '/images/tensoestructuras-4.jpg'],
++    gallery: ['/images/tensoestructuras.jpg', '/images/toldos-cerramientos.jpg'],
+     featured: true,
+     popular: false,
+     sourcing: 'fabricacion_propia',
+@@ -497,7 +497,7 @@ export const products: Product[] = [
+       'Dimensionamiento y ficha técnica por proyecto'
+     ],
+     image: '/images/inflables.jpg',
+-    gallery: ['/images/inflables.jpg', '/images/inflables-2.jpg', '/images/inflables-3.jpg', '/images/inflables-4.jpg'],
++    gallery: ['/images/inflables.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'bajo_pedido',
+@@ -532,7 +532,7 @@ export const products: Product[] = [
+       'Configuración a medida del personal y la operación'
+     ],
+     image: '/images/modulos-campamentos.jpg',
+-    gallery: ['/images/modulos-campamentos.jpg', '/images/modulos-campamentos-2.jpg', '/images/modulos-campamentos-3.jpg', '/images/modulos-campamentos-4.jpg'],
++    gallery: ['/images/modulos-campamentos.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'fabricacion_propia',
+@@ -566,7 +566,7 @@ export const products: Product[] = [
+       'Integrable con nuestra línea de mallas agrícolas'
+     ],
+     image: '/images/invernaderos.jpg',
+-    gallery: ['/images/invernaderos.jpg', '/images/invernaderos-2.jpg', '/images/invernaderos-3.jpg', '/images/invernaderos-4.jpg'],
++    gallery: ['/images/invernaderos.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'fabricacion_propia',
+@@ -600,7 +600,7 @@ export const products: Product[] = [
+       'Instalación profesional y soporte'
+     ],
+     image: '/images/toldos-cerramientos.jpg',
+-    gallery: ['/images/toldos-cerramientos.jpg', '/images/toldos-cerramientos-2.jpg', '/images/toldos-cerramientos-3.jpg', '/images/toldos-cerramientos-4.jpg'],
++    gallery: ['/images/toldos-cerramientos.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'fabricacion_propia',
+@@ -642,7 +642,7 @@ export const products: Product[] = [
+       'Compatible con producción orgánica y exportación'
+     ],
+     image: '/images/mallas-antiafidas.jpg',
+-    gallery: ['/images/mallas-antiafidas.jpg', '/images/mallas-antiafidas-2.jpg', '/images/mallas-antiafidas-3.jpg', '/images/mallas-antiafidas-4.jpg'],
++    gallery: ['/images/mallas-antiafidas.jpg'],
+     featured: true,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -681,7 +681,7 @@ export const products: Product[] = [
+       'Confección con acabados a medida'
+     ],
+     image: '/images/malla-raschel.jpg',
+-    gallery: ['/images/malla-raschel.jpg', '/images/malla-raschel-2.jpg', '/images/malla-raschel-3.jpg', '/images/malla-raschel-4.jpg'],
++    gallery: ['/images/malla-raschel.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -715,7 +715,7 @@ export const products: Product[] = [
+       'Larga vida útil con tratamiento UV'
+     ],
+     image: '/images/malla-anti-pajaro.jpg',
+-    gallery: ['/images/malla-anti-pajaro.jpg', '/images/malla-anti-pajaro-2.jpg', '/images/malla-anti-pajaro-3.jpg', '/images/malla-anti-pajaro-4.jpg'],
++    gallery: ['/images/malla-anti-pajaro.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -757,7 +757,7 @@ export const products: Product[] = [
+       'Cumplimiento de normas de seguridad minera (OIT, MINEM)'
+     ],
+     image: '/images/mangas-ventilacion.jpg',
+-    gallery: ['/images/mangas-ventilacion.jpg', '/images/mangas-ventilacion-y.jpg', '/images/mangas-produccion.jpg', '/images/mangas-ventilacion-4.jpg'],
++    gallery: ['/images/mangas-ventilacion.jpg', '/images/mangas-ventilacion-y.jpg', '/images/mangas-produccion.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'fabricacion_propia',
+@@ -803,7 +803,7 @@ export const products: Product[] = [
+       'Cumplimiento de normas ambientales y de seguridad'
+     ],
+     image: '/images/geomembranas.jpg',
+-    gallery: ['/images/geomembranas.jpg', '/images/geomembranas-2.jpg', '/images/geomembranas-3.jpg', '/images/geomembranas-4.jpg'],
++    gallery: ['/images/geomembranas.jpg'],
+     featured: true,
+     popular: false,
+     sourcing: 'fabricacion_propia',
+@@ -838,7 +838,7 @@ export const products: Product[] = [
+       'Documentación de respaldo entregada en la cotización'
+     ],
+     image: '/images/geomembrana-hdpe.jpg',
+-    gallery: ['/images/geomembrana-hdpe.jpg', '/images/geomembrana-hdpe-2.jpg', '/images/geomembrana-hdpe-3.jpg', '/images/geomembrana-hdpe-4.jpg'],
++    gallery: ['/images/geomembrana-hdpe.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -874,7 +874,7 @@ export const products: Product[] = [
+       'Documentación técnica de respaldo en cotización'
+     ],
+     image: '/images/geomembrana-fortificada.jpg',
+-    gallery: ['/images/geomembrana-fortificada.jpg', '/images/geomembrana-fortificada-2.jpg', '/images/geomembrana-fortificada-3.jpg', '/images/geomembrana-fortificada-4.jpg'],
++    gallery: ['/images/geomembrana-fortificada.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -910,7 +910,7 @@ export const products: Product[] = [
+       'Documentación de respaldo en cotización'
+     ],
+     image: '/images/geomembrana-bituminosa.jpg',
+-    gallery: ['/images/geomembrana-bituminosa.jpg', '/images/geomembrana-bituminosa-2.jpg', '/images/geomembrana-bituminosa-3.jpg', '/images/geomembrana-bituminosa-4.jpg'],
++    gallery: ['/images/geomembrana-bituminosa.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -946,7 +946,7 @@ export const products: Product[] = [
+       'Documentación técnica en cotización'
+     ],
+     image: '/images/geotextiles.jpg',
+-    gallery: ['/images/geotextiles.jpg', '/images/geotextiles-2.jpg', '/images/geotextiles-3.jpg', '/images/geotextiles-4.jpg'],
++    gallery: ['/images/geotextiles.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -982,7 +982,7 @@ export const products: Product[] = [
+       'Documentación técnica en cotización'
+     ],
+     image: '/images/geomallas.jpg',
+-    gallery: ['/images/geomallas.jpg', '/images/geomallas-2.jpg', '/images/geomallas-3.jpg', '/images/geomallas-4.jpg'],
++    gallery: ['/images/geomallas.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -1022,7 +1022,7 @@ export const products: Product[] = [
+       'Ficha técnica entregada en cotización'
+     ],
+     image: '/images/tanques-flexibles.jpg',
+-    gallery: ['/images/tanques-flexibles.jpg', '/images/tanques-flexibles-2.jpg', '/images/tanques-flexibles-3.jpg', '/images/tanques-flexibles-4.jpg'],
++    gallery: ['/images/tanques-flexibles.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -1058,7 +1058,7 @@ export const products: Product[] = [
+       'Evaluación previa para asegurar viabilidad'
+     ],
+     image: '/images/biodigestores.jpg',
+-    gallery: ['/images/biodigestores.jpg', '/images/biodigestores-2.jpg', '/images/biodigestores-3.jpg', '/images/biodigestores-4.jpg'],
++    gallery: ['/images/biodigestores.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'partner',
+@@ -1094,7 +1094,7 @@ export const products: Product[] = [
+       'Documentación técnica en cotización'
+     ],
+     image: '/images/tuberias-hdpe.jpg',
+-    gallery: ['/images/tuberias-hdpe.jpg', '/images/tuberias-hdpe-2.jpg', '/images/tuberias-hdpe-3.jpg', '/images/tuberias-hdpe-4.jpg'],
++    gallery: ['/images/tuberias-hdpe.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -1138,7 +1138,7 @@ export const products: Product[] = [
+       'Cumplimiento de normas de seguridad y salud en el trabajo'
+     ],
+     image: '/images/biombos.jpg',
+-    gallery: ['/images/biombos.jpg', '/images/biombos-proteccion.jpg', '/images/biombos-3.jpg', '/images/biombos-4.jpg'],
++    gallery: ['/images/biombos.jpg', '/images/biombos-proteccion.jpg'],
+     featured: true,
+     popular: false,
+     sourcing: 'fabricacion_propia',
+@@ -1176,7 +1176,7 @@ export const products: Product[] = [
+       'Asesoría para el kit correcto por aplicación'
+     ],
+     image: '/images/accesorios.jpg',
+-    gallery: ['/images/accesorios.jpg', '/images/ojalillo-rafia.jpg', '/images/accesorios-3.jpg', '/images/accesorios-4.jpg'],
++    gallery: ['/images/accesorios.jpg', '/images/ojalillo-rafia.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'importacion_directa',
+@@ -1214,7 +1214,7 @@ export const products: Product[] = [
+       'Un proveedor para lona técnica y publicidad'
+     ],
+     image: '/images/gigantografias.jpg',
+-    gallery: ['/images/gigantografias.jpg', '/images/gigantografias-2.jpg', '/images/gigantografias-3.jpg', '/images/gigantografias-4.jpg'],
++    gallery: ['/images/gigantografias.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'fabricacion_propia',
+@@ -1248,7 +1248,7 @@ export const products: Product[] = [
+       'Sinergia con rotulado de siders/tolderas'
+     ],
+     image: '/images/revestimiento-vehicular.jpg',
+-    gallery: ['/images/revestimiento-vehicular.jpg', '/images/revestimiento-vehicular-2.jpg', '/images/revestimiento-vehicular-3.jpg', '/images/revestimiento-vehicular-4.jpg'],
++    gallery: ['/images/revestimiento-vehicular.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'fabricacion_propia',
+@@ -1289,7 +1289,7 @@ export const products: Product[] = [
+       'Estética profesional y natural'
+     ],
+     image: '/images/mulch.jpg',
+-    gallery: ['/images/mulch.jpg', '/images/mulch-2.jpg', '/images/mulch-3.jpg', '/images/mulch-4.jpg'],
++    gallery: ['/images/mulch.jpg'],
+     featured: false,
+     popular: false,
+     sourcing: 'fabricacion_propia',
