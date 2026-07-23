@@ -13,6 +13,9 @@ import {
 } from '@/lib/products';
 import type { Availability } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
+import ProductRotator from '@/components/ProductRotator';
+import FilterControls from '@/components/FilterControls';
+import FilterSheet from '@/components/FilterSheet';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Orden de los estados de disponibilidad para el filtro (estilo AWS: el estado
@@ -169,67 +172,23 @@ function ProductosContent() {
       </div>
 
       <div className="flex gap-8">
-        {/* Filters Sidebar */}
-        <div className={`lg:w-72 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+        {/* Filters Sidebar (desktop) */}
+        <div className="hidden lg:block lg:w-72 flex-shrink-0">
           <div className="sticky top-24 bg-white border border-gray-100 rounded-3xl p-7">
-            <div className="flex items-center justify-between mb-6">
-              <div className="font-semibold tracking-tight">Filtros</div>
-              {hasActiveFilters && (
-                <button onClick={clearFilters} className="text-xs flex items-center gap-1 text-[#059669] hover:underline">
-                  <X className="w-3 h-3" /> Limpiar
-                </button>
-              )}
-            </div>
-
-            {/* Categories */}
-            <div className="mb-8">
-              <div className="text-xs uppercase tracking-widest text-gray-500 font-medium mb-3">CATEGORÍA</div>
-              <div className="space-y-1.5">
-                {categories.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => toggleCategory(cat)}
-                    className={`w-full text-left px-4 py-2.5 text-sm rounded-2xl flex items-center justify-between transition-all ${selectedCategories.includes(cat) ? 'bg-[#059669] text-white font-medium' : 'hover:bg-gray-50 text-gray-700'}`}
-                  >
-                    {cat}
-                    {selectedCategories.includes(cat) && <span className="text-xs">✓</span>}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Availability (estado de la oferta) */}
-            <div className="mb-8">
-              <div className="text-xs uppercase tracking-widest text-gray-500 font-medium mb-3">DISPONIBILIDAD</div>
-              <div className="space-y-1.5">
-                {AVAILABILITY_ORDER.map(a => (
-                  <button
-                    key={a}
-                    onClick={() => toggleAvailability(a)}
-                    className={`w-full text-left px-4 py-2.5 text-sm rounded-2xl flex items-center justify-between transition-all ${selectedAvailability.includes(a) ? 'bg-[#0A2540] text-white font-medium' : 'hover:bg-gray-50 text-gray-700'}`}
-                  >
-                    {availabilityLabels[a]}
-                    {selectedAvailability.includes(a) && <span className="text-xs">✓</span>}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Sectors */}
-            <div>
-              <div className="text-xs uppercase tracking-widest text-gray-500 font-medium mb-3">SECTOR DE APLICACIÓN</div>
-              <div className="flex flex-wrap gap-2">
-                {sectors.map(sector => (
-                  <button
-                    key={sector}
-                    onClick={() => toggleSector(sector)}
-                    className={`px-4 py-1.5 text-xs font-medium rounded-full border transition-all ${selectedSectors.includes(sector) ? 'chip-selected' : 'border-gray-200 hover:border-gray-300 text-gray-600'}`}
-                  >
-                    {sector}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <FilterControls
+              categories={categories}
+              availabilityOrder={AVAILABILITY_ORDER}
+              sectors={sectors}
+              availabilityLabels={availabilityLabels}
+              selectedCategories={selectedCategories}
+              selectedAvailability={selectedAvailability}
+              selectedSectors={selectedSectors}
+              toggleCategory={toggleCategory}
+              toggleAvailability={toggleAvailability}
+              toggleSector={toggleSector}
+              clearFilters={clearFilters}
+              hasActiveFilters={!!hasActiveFilters}
+            />
           </div>
         </div>
 
@@ -243,7 +202,9 @@ function ProductosContent() {
                     <ProductCard key={product.id} product={product} />
                   ) : (
                     <div key={product.id} className="flex gap-6 bg-white border border-gray-100 p-6 rounded-3xl group">
-                      <div className="w-36 h-28 bg-gray-100 rounded-2xl flex-shrink-0" />
+                      <div className="relative w-36 h-28 rounded-2xl overflow-hidden flex-shrink-0">
+                        <ProductRotator product={product} />
+                      </div>
                       <div className="flex-1 min-w-0 pt-1">
                         <div className="flex items-center flex-wrap gap-2 mb-2">
                           <span className="badge bg-gray-100 text-gray-600 text-xs">{product.category}</span>
@@ -286,6 +247,30 @@ function ProductosContent() {
           </AnimatePresence>
         </div>
       </div>
+
+      <FilterSheet
+        open={showFilters}
+        onClose={() => setShowFilters(false)}
+        resultCount={filteredProducts.length}
+        hasActiveFilters={!!hasActiveFilters}
+        onClear={clearFilters}
+      >
+        <FilterControls
+          categories={categories}
+          availabilityOrder={AVAILABILITY_ORDER}
+          sectors={sectors}
+          availabilityLabels={availabilityLabels}
+          selectedCategories={selectedCategories}
+          selectedAvailability={selectedAvailability}
+          selectedSectors={selectedSectors}
+          toggleCategory={toggleCategory}
+          toggleAvailability={toggleAvailability}
+          toggleSector={toggleSector}
+          clearFilters={clearFilters}
+          hasActiveFilters={!!hasActiveFilters}
+          showHeader={false}
+        />
+      </FilterSheet>
     </div>
   );
 }

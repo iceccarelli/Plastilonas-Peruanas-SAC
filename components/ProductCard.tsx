@@ -7,6 +7,7 @@ import { Product } from '@/lib/types';
 import { availabilityLabels } from '@/lib/products';
 import { motion } from 'framer-motion';
 import ProductImage from '@/components/ProductImage';
+import ProductRotator from '@/components/ProductRotator';
 import { formatPEN } from '@/lib/format';
 
 interface ProductCardProps {
@@ -31,7 +32,7 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
       className="product-card group bg-white border border-gray-100 rounded-3xl overflow-hidden flex flex-col h-full"
     >
       <div className="relative h-56 overflow-hidden">
-        <ProductImage product={product} variant="card" enableHover />
+        <ProductRotator product={product} sizes="(max-width: 768px) 100vw, 380px" />
 
         <div
           className={`absolute top-4 left-4 t-micro font-bold tracking-wider px-3 py-1 rounded-full shadow-sm ${AVAILABILITY_STYLES[availability]}`}
