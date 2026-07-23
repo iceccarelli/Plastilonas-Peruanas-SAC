@@ -79,24 +79,6 @@ export default async function ProductDetailPage({ params }: Props) {
           <ProductGallery product={product} />
         </div>
 
-        {/* Datos estructurados de producto (solo campos reales, sin precio inventado) */}
-        <script
-          type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Product',
-              name: product.name,
-              description: product.shortDescription,
-              category: product.category,
-              image: 'https://www.plastilonas.com/opengraph-image',
-              brand: { '@type': 'Brand', name: 'Plastilonas Peruanas SAC' },
-              manufacturer: { '@type': 'Organization', name: 'Plastilonas Peruanas SAC' },
-              areaServed: 'Perú',
-            }),
-          }}
-        />
 
         {/* Info */}
         <div>
