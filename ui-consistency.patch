@@ -1,0 +1,537 @@
+diff --git a/.gitignore b/.gitignore
+index 8f63a65..017925e 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -29,9 +29,7 @@ Thumbs.db
+ # TypeScript incremental build info
+ *.tsbuildinfo
+ 
+-*.patch
+-
+-# patch delivery artifacts
++# patch delivery artifacts (never commit)
+ *.patch
+ 
+ # macOS AppleDouble junk (33 ._*.jpg were committed under public/images)
+diff --git a/audit-p0-integrity.patch b/audit-p0-integrity.patch
+deleted file mode 100644
+index 2f799ad..0000000
+--- a/audit-p0-integrity.patch
++++ /dev/null
+@@ -1,150 +0,0 @@
+-diff --git a/.gitignore b/.gitignore
+-index 6590f35..728d20b 100644
+---- a/.gitignore
+-+++ b/.gitignore
+-@@ -33,3 +33,7 @@ Thumbs.db
+- 
+- # patch delivery artifacts
+- *.patch
+-+
+-+# macOS AppleDouble junk (33 ._*.jpg were committed under public/images)
+-+._*
+-+.DS_Store
+-diff --git a/app/layout.tsx b/app/layout.tsx
+-index 6092877..d022e71 100644
+---- a/app/layout.tsx
+-+++ b/app/layout.tsx
+-@@ -58,8 +58,8 @@ export const metadata: Metadata = {
+-   },
+-   metadataBase: new URL('https://www.plastilonas.com'),
+-   openGraph: {
+--    title: 'Plastilonas Peruanas SAC | Líder en Soluciones Textiles Industriales',
+--    description: 'El portafolio industrial más completo del Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
+-+    title: 'Plastilonas Peruanas SAC | Soluciones Textiles Industriales — Fabricación e Importación Directa',
+-+    description: 'Portafolio integral de soluciones textiles industriales en el Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
+-     // og:image lo genera app/opengraph-image.tsx (antes apuntaba a un archivo
+-     // inexistente /images/og-image.jpg y las vistas previas salían en blanco).
+-     locale: 'es_PE',
+-diff --git a/app/nosotros/page.tsx b/app/nosotros/page.tsx
+-index 8a46a97..4a2c711 100644
+---- a/app/nosotros/page.tsx
+-+++ b/app/nosotros/page.tsx
+-@@ -16,7 +16,7 @@ export default function NosotrosPage() {
+- 
+-       <div className="mt-14 grid md:grid-cols-3 gap-6">
+-         {[
+--          { title: "Misión", text: "Fabricar y comercializar soluciones textiles industriales de alta calidad que contribuyan al desarrollo productivo de nuestros clientes, ofreciendo siempre el mejor balance entre calidad, precio y servicio." },
+-+          { title: "Misión", text: "Fabricar y comercializar soluciones textiles industriales de alta calidad que contribuyan al desarrollo productivo de nuestros clientes, buscando siempre el equilibrio entre calidad, precio y plazo de entrega." },
+-           { title: "Visión", text: "Ser el proveedor de referencia en soluciones textiles e industriales del Perú, respondiendo por cada pieza que fabricamos e instalamos." },
+-           { title: "Valores", text: "Calidad sin concesiones • Transparencia y honestidad • Compromiso con el cliente • Mejora continua • Responsabilidad social y ambiental." },
+-         ].map((v, i) => (
+-diff --git a/components/Footer.tsx b/components/Footer.tsx
+-index 0d5412d..9addb7d 100644
+---- a/components/Footer.tsx
+-+++ b/components/Footer.tsx
+-@@ -59,7 +59,7 @@ export default function Footer() {
+-               <div className="font-semibold text-2xl tracking-tight text-white">Plastilonas Peruanas SAC</div>
+-             </div>
+-             <p className="text-white/70 max-w-md leading-relaxed t-body">
+--              Más de 15 años fabricando soluciones textiles industriales de la más alta calidad para los sectores más exigentes del Perú. Compromiso, calidad y precio justo.
+-+              Más de 15 años fabricando e instalando soluciones textiles industriales para los sectores más exigentes del Perú. Fabricación propia, importación directa y respaldo técnico en cada proyecto.
+-             </p>
+-             <div className="flex flex-wrap items-center gap-4 mt-6">
+-               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">
+-diff --git a/components/SwipeDeck.tsx b/components/SwipeDeck.tsx
+-index ff33e1f..4f8d74c 100644
+---- a/components/SwipeDeck.tsx
+-+++ b/components/SwipeDeck.tsx
+-@@ -16,7 +16,7 @@ export interface DeckCard {
+- // Soft tints so each stacked card is visibly distinct (the "deck" cue).
+- // Cycles by card index; face + peeking edge both show the hue.
+- const TINTS = [
+--  { bg: '#ECFDF5', ring: '#A7F3D0', ink: '#059669' }, // emerald
+-+  { bg: '#ECFDF5', ring: '#A7F3D0', ink: '#047857' }, // emerald
+-   { bg: '#FEF3C7', ring: '#FDE68A', ink: '#D97706' }, // amber
+-   { bg: '#E0F2FE', ring: '#BAE6FD', ink: '#0284C7' }, // sky
+-   { bg: '#EEF2FF', ring: '#C7D2FE', ink: '#4F46E5' }, // indigo
+-diff --git a/eslint.config.mjs b/eslint.config.mjs
+-new file mode 100644
+-index 0000000..3fa0bfe
+---- /dev/null
+-+++ b/eslint.config.mjs
+-@@ -0,0 +1,26 @@
+-+import { dirname } from 'path';
+-+import { fileURLToPath } from 'url';
+-+import { FlatCompat } from '@eslint/eslintrc';
+-+
+-+const __filename = fileURLToPath(import.meta.url);
+-+const __dirname = dirname(__filename);
+-+const compat = new FlatCompat({ baseDirectory: __dirname });
+-+
+-+// Antes no existía configuración de ESLint: `next lint` caía en el asistente
+-+// interactivo y no se ejecutaba en CI. Esta config activa las reglas de
+-+// Next.js. Las reglas estilísticas que podrían romper `next build` se degradan
+-+// a "warn" para que la compilación nunca falle por lint, pero sigan visibles.
+-+const eslintConfig = [
+-+  ...compat.extends('next/core-web-vitals'),
+-+  {
+-+    ignores: ['.next/**', 'node_modules/**', 'public/**', 'next-env.d.ts', '*.sh'],
+-+  },
+-+  {
+-+    rules: {
+-+      'react/no-unescaped-entities': 'warn',
+-+      '@next/next/no-img-element': 'warn',
+-+    },
+-+  },
+-+];
+-+
+-+export default eslintConfig;
+-diff --git a/lib/products.ts b/lib/products.ts
+-index 54279ef..1087309 100644
+---- a/lib/products.ts
+-+++ b/lib/products.ts
+-@@ -60,10 +60,11 @@ export const products: Product[] = [
+-     popular: true,
+-     sourcing: 'fabricacion_propia',
+-     availability: 'a_medida',
+--    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
+--    price: 45.0,
+--    priceUnit: 'unidad',
+--    purchasable: true
+-+    // PRECIO PENDIENTE DE VERIFICACIÓN — producto en modo cotización hasta fijar el precio de lista real.
+-+    // Reactivar compra en línea: descomentar price + priceUnit y restaurar `purchasable: true`.
+-+    // price: 45.0,
+-+    // priceUnit: 'unidad',
+-+    // purchasable: true,
+-   },
+-   {
+-     id: '12',
+-@@ -646,10 +647,11 @@ export const products: Product[] = [
+-     popular: false,
+-     sourcing: 'importacion_directa',
+-     availability: 'stock',
+--    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
+--    price: 8.5,
+--    priceUnit: 'm²',
+--    purchasable: true
+-+    // PRECIO PENDIENTE DE VERIFICACIÓN — producto en modo cotización hasta fijar el precio de lista real.
+-+    // Reactivar compra en línea: descomentar price + priceUnit y restaurar `purchasable: true`.
+-+    // price: 8.5,
+-+    // priceUnit: 'm²',
+-+    // purchasable: true,
+-   },
+-   {
+-     id: '22',
+-@@ -1292,10 +1294,11 @@ export const products: Product[] = [
+-     popular: false,
+-     sourcing: 'fabricacion_propia',
+-     availability: 'stock',
+--    // PLACEHOLDER: reemplazar por el precio de lista real antes de producción.
+--    price: 25.0,
+--    priceUnit: 'saco 50L',
+--    purchasable: true
+-+    // PRECIO PENDIENTE DE VERIFICACIÓN — producto en modo cotización hasta fijar el precio de lista real.
+-+    // Reactivar compra en línea: descomentar price + priceUnit y restaurar `purchasable: true`.
+-+    // price: 25.0,
+-+    // priceUnit: 'saco 50L',
+-+    // purchasable: true,
+-   }
+- ];
+- 
+diff --git a/components/CommandPalette.tsx b/components/CommandPalette.tsx
+index 3a7fc95..be15a46 100644
+--- a/components/CommandPalette.tsx
++++ b/components/CommandPalette.tsx
+@@ -94,7 +94,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
+               ))
+             ) : (
+               <div className="px-5 py-12 text-center">
+-                <p className="text-gray-500">No se encontraron productos para "{search}"</p>
++                <p className="text-gray-500">No se encontraron productos para &ldquo;{search}&rdquo;</p>
+                 <button 
+                   onClick={() => {
+                     onOpenChange(false);
+diff --git a/components/CotizacionModal.tsx b/components/CotizacionModal.tsx
+index bb6d9db..b956edd 100644
+--- a/components/CotizacionModal.tsx
++++ b/components/CotizacionModal.tsx
+@@ -120,6 +120,17 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
+     }
+   };
+ 
++  // Cerrar con Escape: paridad de teclado con el resto de overlays del sitio.
++  React.useEffect(() => {
++    if (!open) return;
++    const onKey = (e: KeyboardEvent) => {
++      if (e.key === 'Escape') handleClose();
++    };
++    window.addEventListener('keydown', onKey);
++    return () => window.removeEventListener('keydown', onKey);
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++  }, [open, isSubmitting]);
++
+   return (
+     <AnimatePresence>
+       {open && (
+@@ -131,14 +142,17 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
+             transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+             className="bg-white w-full max-w-[620px] max-h-[calc(100dvh-2rem)] rounded-3xl shadow-2xl overflow-y-auto"
+             onClick={e => e.stopPropagation()}
++            role="dialog"
++            aria-modal="true"
++            aria-labelledby="cotizacion-title"
+           >
+             {/* Header */}
+             <div className="flex items-center justify-between px-8 py-6 border-b">
+               <div>
+-                <h2 className="text-2xl font-semibold tracking-tight text-[#0A2540]">Solicitar Cotización</h2>
++                <h2 id="cotizacion-title" className="text-2xl font-semibold tracking-tight text-navy">Solicitar Cotización</h2>
+                 <p className="text-sm text-gray-500 mt-0.5">Atención directa por WhatsApp en horario comercial</p>
+               </div>
+-              <button onClick={handleClose} className="p-2 text-gray-400 hover:text-gray-600 transition-colors" disabled={isSubmitting}>
++              <button onClick={handleClose} aria-label="Cerrar" className="p-2 text-gray-400 hover:text-gray-600 transition-colors" disabled={isSubmitting}>
+                 <X className="w-5 h-5" />
+               </button>
+             </div>
+@@ -148,7 +162,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
+                 <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
+                   <CheckCircle className="w-10 h-10 text-[#059669]" />
+                 </div>
+-                <h3 className="text-2xl font-semibold text-[#0A2540] mb-3">¡Gracias por confiar en nosotros!</h3>
++                <h3 className="text-2xl font-semibold text-navy mb-3">¡Gracias por confiar en nosotros!</h3>
+                 <p className="text-gray-600 max-w-sm mx-auto">Su solicitud quedó lista en WhatsApp: pulse enviar en esa ventana y un especialista de Plastilonas Peruanas le responderá.</p>
+               </div>
+             ) : (
+diff --git a/components/StructuredData.tsx b/components/StructuredData.tsx
+index 7ed9aee..a78c007 100644
+--- a/components/StructuredData.tsx
++++ b/components/StructuredData.tsx
+@@ -54,7 +54,6 @@ export default function StructuredData() {
+   return (
+     <script
+       type="application/ld+json"
+-      // eslint-disable-next-line react/no-danger
+       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+     />
+   );
+diff --git a/reframe-availability.patch b/reframe-availability.patch
+deleted file mode 100644
+index 89894f8..0000000
+--- a/reframe-availability.patch
++++ /dev/null
+@@ -1,258 +0,0 @@
+-diff --git a/app/page.tsx b/app/page.tsx
+-index 1dea317..f8d00a9 100644
+---- a/app/page.tsx
+-+++ b/app/page.tsx
+-@@ -101,7 +101,7 @@ export default function Home() {
+-           <Reveal delay={0.1}>
+-             <FamilyCarousel families={productFamilies} />
+-           </Reveal>
+--          <p className="text-xs text-gray-400 mt-6 text-center">Fabricación propia, importación directa y líneas especializadas bajo pedido — con ficha técnica y respaldo en cada cotización.</p>
+-+          <p className="text-xs text-gray-400 mt-6 text-center">Fabricación propia, importación directa y líneas especializadas por proyecto — con ficha técnica y respaldo en cada cotización.</p>
+- 
+-           <Reveal className="mt-20">
+-             <SectionHeading eyebrow="Nuestras soluciones estrella" title="Nuestras líneas insignia" className="mb-9" action={<Link href="/productos" className="text-sm font-medium flex items-center gap-1.5 text-[#059669] hover:underline">Ver catálogo completo <ArrowRight className="w-4 h-4" /></Link>} />
+-diff --git a/lib/products.ts b/lib/products.ts
+-index 1087309..fccaf06 100644
+---- a/lib/products.ts
+-+++ b/lib/products.ts
+-@@ -476,13 +476,13 @@ export const products: Product[] = [
+-     category: 'Estructuras y Arquitectura Textil',
+-     sector: ['Industrial', 'Comercio', 'Construcción'],
+-     shortDescription: 'Estructuras inflables de membrana para almacenamiento, espacios temporales y protección, con sistema de presión de aire.',
+--    description: 'Estructuras inflables de membrana textil sostenidas por presión de aire, para almacenamiento temporal, coberturas deportivas, espacios de evento y protección de instalaciones. Se dimensionan por proyecto e incluyen equipo de insuflado, esclusas de acceso y anclaje. Línea disponible bajo pedido: se define ingeniería, membrana y equipamiento según el requerimiento específico.',
+-+    description: 'Estructuras inflables de membrana textil sostenidas por presión de aire, para almacenamiento temporal, coberturas deportivas, espacios de evento y protección de instalaciones. Se dimensionan por proyecto e incluyen equipo de insuflado, esclusas de acceso y anclaje. Línea de suministro por proyecto: se define ingeniería, membrana y equipamiento según el requerimiento específico.',
+-     specifications: [
+-       { label: 'Sistema', value: 'Membrana sostenida por presión de aire (air-supported)' },
+-       { label: 'Membrana', value: 'PVC/poliéster de alta resistencia, aditivado UV' },
+-       { label: 'Equipamiento', value: 'Blowers, esclusa de acceso, sistema de anclaje' },
+-       { label: 'Dimensiones', value: 'Según proyecto e ingeniería específica' },
+--      { label: 'Disponibilidad', value: 'Bajo pedido — ingeniería y ficha por proyecto' }
+-+      { label: 'Disponibilidad', value: 'Por proyecto — ingeniería y ficha técnica' }
+-     ],
+-     applications: [
+-       'Almacenamiento y coberturas temporales',
+-@@ -780,7 +780,7 @@ export const products: Product[] = [
+-     specifications: [
+-       { label: 'Material', value: 'PVC plastificado virgen de alta densidad' },
+-       { label: 'Espesores', value: '0.5 mm, 0.75 mm, 1.0 mm, 1.5 mm, 2.0 mm' },
+--      { label: 'Ancho de rollo', value: 'Hasta 2.0 m estándar (anchos especiales bajo pedido)' },
+-+      { label: 'Ancho de rollo', value: 'Hasta 2.0 m estándar (anchos especiales por proyecto)' },
+-       { label: 'Resistencia a la tracción', value: 'Alta resistencia; valores según ficha técnica del material en cotización' },
+-       { label: 'Elongación a la rotura', value: '≥ 300%' },
+-       { label: 'Resistencia a la perforación', value: 'Alta (reforzada con geotextil opcional)' },
+-@@ -816,14 +816,14 @@ export const products: Product[] = [
+-     category: 'Geosintéticos e Impermeabilización',
+-     sector: ['Minería', 'Saneamiento', 'Agricultura', 'Infraestructura', 'Energía'],
+-     shortDescription: 'Geomembrana de polietileno de alta densidad para impermeabilización de pozas, rellenos y obras hidráulicas de gran exigencia química y mecánica.',
+--    description: 'Geomembrana de polietileno de alta densidad (HDPE) para impermeabilización de pozas de proceso y relave, rellenos sanitarios, reservorios y obras hidráulicas donde se requiere alta resistencia química y mecánica. Se instala con soldadura por termofusión (cuña caliente / extrusión). Línea de importación directa disponible bajo pedido: los espesores, propiedades y el certificado de lote del fabricante se confirman y entregan en la cotización según el proyecto.',
+-+    description: 'Geomembrana de polietileno de alta densidad (HDPE) para impermeabilización de pozas de proceso y relave, rellenos sanitarios, reservorios y obras hidráulicas donde se requiere alta resistencia química y mecánica. Se instala con soldadura por termofusión (cuña caliente / extrusión). Línea de importación directa, suministrada por proyecto: los espesores, propiedades y el certificado de lote del fabricante se confirman y entregan en la cotización según el proyecto.',
+-     specifications: [
+-       { label: 'Material', value: 'Polietileno de alta densidad (HDPE)' },
+-       { label: 'Espesores', value: 'Rango típico 0.75 – 2.5 mm (a confirmar por proyecto)' },
+-       { label: 'Instalación', value: 'Termofusión: cuña caliente / extrusión' },
+-       { label: 'Propiedades', value: 'Alta resistencia química y a la perforación' },
+-       { label: 'Documentación', value: 'Ficha técnica y certificado de lote del fabricante en cotización' },
+--      { label: 'Disponibilidad', value: 'Importación directa — bajo pedido' }
+-+      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+-     ],
+-     applications: [
+-       'Pozas de proceso y relave en minería',
+-@@ -843,7 +843,7 @@ export const products: Product[] = [
+-     popular: false,
+-     sourcing: 'importacion_directa',
+-     availability: 'bajo_pedido',
+--    leadTime: 'Bajo pedido — según proyecto',
+-+    leadTime: 'Por proyecto — según especificación',
+-     documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+-   },
+-   {
+-@@ -853,13 +853,13 @@ export const products: Product[] = [
+-     category: 'Geosintéticos e Impermeabilización',
+-     sector: ['Minería', 'Construcción', 'Infraestructura', 'Energía'],
+-     shortDescription: 'Geomembrana de polietileno reforzada con inserto de refuerzo para mayor resistencia mecánica en condiciones exigentes.',
+--    description: 'Geomembrana de polietileno fortificada con inserto de refuerzo (scrim) para aplicaciones que requieren mayor resistencia al punzonamiento y a esfuerzos mecánicos, con menor peso por m² frente a espesores equivalentes. Línea de importación directa disponible bajo pedido; propiedades y certificado de lote se entregan según especificación del proyecto.',
+-+    description: 'Geomembrana de polietileno fortificada con inserto de refuerzo (scrim) para aplicaciones que requieren mayor resistencia al punzonamiento y a esfuerzos mecánicos, con menor peso por m² frente a espesores equivalentes. Línea de importación directa, suministrada por proyecto; propiedades y certificado de lote se entregan según especificación del proyecto.',
+-     specifications: [
+-       { label: 'Material', value: 'Polietileno con refuerzo interno (scrim)' },
+-       { label: 'Ventaja', value: 'Mayor resistencia mecánica / punzonamiento por peso' },
+-       { label: 'Instalación', value: 'Termofusión / según sistema del fabricante' },
+-       { label: 'Documentación', value: 'Ficha técnica y certificado de lote en cotización' },
+--      { label: 'Disponibilidad', value: 'Importación directa — bajo pedido' }
+-+      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+-     ],
+-     applications: [
+-       'Cubiertas flotantes y coberturas expuestas',
+-@@ -879,7 +879,7 @@ export const products: Product[] = [
+-     popular: false,
+-     sourcing: 'importacion_directa',
+-     availability: 'bajo_pedido',
+--    leadTime: 'Bajo pedido — según proyecto',
+-+    leadTime: 'Por proyecto — según especificación',
+-     documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+-   },
+-   {
+-@@ -889,13 +889,13 @@ export const products: Product[] = [
+-     category: 'Geosintéticos e Impermeabilización',
+-     sector: ['Infraestructura', 'Construcción', 'Saneamiento'],
+-     shortDescription: 'Geomembrana bituminosa para impermeabilización de obras civiles e hidráulicas, con buena adaptación al terreno.',
+--    description: 'Geomembrana bituminosa para impermeabilización de túneles, obras civiles, canales y estructuras hidráulicas, con buena adaptación al sustrato y resistencia mecánica. Línea de importación directa disponible bajo pedido; ficha técnica y certificado de lote se entregan según el proyecto.',
+-+    description: 'Geomembrana bituminosa para impermeabilización de túneles, obras civiles, canales y estructuras hidráulicas, con buena adaptación al sustrato y resistencia mecánica. Línea de importación directa, suministrada por proyecto; ficha técnica y certificado de lote se entregan según el proyecto.',
+-     specifications: [
+-       { label: 'Material', value: 'Membrana bituminosa (asfáltica) reforzada' },
+-       { label: 'Uso', value: 'Túneles, obras civiles, canales, estructuras hidráulicas' },
+-       { label: 'Instalación', value: 'Según sistema del fabricante (soplete / adherida)' },
+-       { label: 'Documentación', value: 'Ficha técnica y certificado de lote en cotización' },
+--      { label: 'Disponibilidad', value: 'Importación directa — bajo pedido' }
+-+      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+-     ],
+-     applications: [
+-       'Impermeabilización de túneles y obras subterráneas',
+-@@ -915,7 +915,7 @@ export const products: Product[] = [
+-     popular: false,
+-     sourcing: 'importacion_directa',
+-     availability: 'bajo_pedido',
+--    leadTime: 'Bajo pedido — según proyecto',
+-+    leadTime: 'Por proyecto — según especificación',
+-     documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+-   },
+-   {
+-@@ -925,13 +925,13 @@ export const products: Product[] = [
+-     category: 'Geosintéticos e Impermeabilización',
+-     sector: ['Construcción', 'Minería', 'Infraestructura', 'Saneamiento'],
+-     shortDescription: 'Geotextiles tejidos y no tejidos para separación, filtración, drenaje, refuerzo y protección de geomembranas.',
+--    description: 'Geotextiles tejidos (refuerzo) y no tejidos (separación, filtración, drenaje y protección de geomembranas) para obras de ingeniería civil, minería e infraestructura. Se seleccionan por gramaje y función. Línea de importación directa disponible bajo pedido; ficha técnica y certificado de lote se entregan según proyecto.',
+-+    description: 'Geotextiles tejidos (refuerzo) y no tejidos (separación, filtración, drenaje y protección de geomembranas) para obras de ingeniería civil, minería e infraestructura. Se seleccionan por gramaje y función. Línea de importación directa, suministrada por proyecto; ficha técnica y certificado de lote se entregan según proyecto.',
+-     specifications: [
+-       { label: 'Tipos', value: 'No tejido (punzonado) y tejido' },
+-       { label: 'Función', value: 'Separación, filtración, drenaje, refuerzo, protección' },
+-       { label: 'Gramaje', value: 'Rango según función (a confirmar por proyecto)' },
+-       { label: 'Documentación', value: 'Ficha técnica y certificado de lote en cotización' },
+--      { label: 'Disponibilidad', value: 'Importación directa — bajo pedido' }
+-+      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+-     ],
+-     applications: [
+-       'Separación de capas en terraplenes y vías',
+-@@ -951,7 +951,7 @@ export const products: Product[] = [
+-     popular: false,
+-     sourcing: 'importacion_directa',
+-     availability: 'bajo_pedido',
+--    leadTime: 'Bajo pedido — según proyecto',
+-+    leadTime: 'Por proyecto — según especificación',
+-     documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+-   },
+-   {
+-@@ -961,13 +961,13 @@ export const products: Product[] = [
+-     category: 'Geosintéticos e Impermeabilización',
+-     sector: ['Construcción', 'Minería', 'Infraestructura'],
+-     shortDescription: 'Geomallas uniaxiales y biaxiales para refuerzo y estabilización de suelos, taludes, bases de vías y plataformas.',
+--    description: 'Geomallas (geogrids) uniaxiales y biaxiales para refuerzo de suelos, estabilización de taludes, bases de carreteras, plataformas y muros de suelo reforzado. Se seleccionan por resistencia a la tracción y geometría de apertura según el diseño geotécnico. Línea de importación directa disponible bajo pedido; ficha y certificado de lote se entregan según proyecto.',
+-+    description: 'Geomallas (geogrids) uniaxiales y biaxiales para refuerzo de suelos, estabilización de taludes, bases de carreteras, plataformas y muros de suelo reforzado. Se seleccionan por resistencia a la tracción y geometría de apertura según el diseño geotécnico. Línea de importación directa, suministrada por proyecto; ficha y certificado de lote se entregan según proyecto.',
+-     specifications: [
+-       { label: 'Tipos', value: 'Uniaxial y biaxial' },
+-       { label: 'Función', value: 'Refuerzo y estabilización de suelos y taludes' },
+-       { label: 'Resistencia', value: 'Según diseño geotécnico (a confirmar por proyecto)' },
+-       { label: 'Documentación', value: 'Ficha técnica y certificado de lote en cotización' },
+--      { label: 'Disponibilidad', value: 'Importación directa — bajo pedido' }
+-+      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+-     ],
+-     applications: [
+-       'Bases y sub-bases de carreteras y plataformas',
+-@@ -987,7 +987,7 @@ export const products: Product[] = [
+-     popular: false,
+-     sourcing: 'importacion_directa',
+-     availability: 'bajo_pedido',
+--    leadTime: 'Bajo pedido — según proyecto',
+-+    leadTime: 'Por proyecto — según especificación',
+-     documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+-   },
+- 
+-@@ -1001,13 +1001,13 @@ export const products: Product[] = [
+-     category: 'Soluciones Ambientales y Fluidos',
+-     sector: ['Agricultura', 'Industrial', 'Minería', 'Saneamiento'],
+-     shortDescription: 'Tanques flexibles plegables para almacenamiento de agua, efluentes y líquidos, de fácil transporte e instalación.',
+--    description: 'Tanques flexibles (bladders) de membrana técnica para almacenamiento de agua, efluentes y otros líquidos, plegables y de rápida instalación sin obra civil. Ideales para riego, reserva de agua, contingencia y campamentos. Línea disponible bajo pedido: capacidad, membrana y accesorios se definen según la aplicación, con ficha técnica en la cotización.',
+-+    description: 'Tanques flexibles (bladders) de membrana técnica para almacenamiento de agua, efluentes y otros líquidos, plegables y de rápida instalación sin obra civil. Ideales para riego, reserva de agua, contingencia y campamentos. Línea de suministro por proyecto: capacidad, membrana y accesorios se definen según la aplicación, con ficha técnica en la cotización.',
+-     specifications: [
+-       { label: 'Material', value: 'Membrana técnica (PVC/PU) resistente al líquido almacenado' },
+-       { label: 'Capacidad', value: 'Según requerimiento (a definir por proyecto)' },
+-       { label: 'Instalación', value: 'Sin obra civil, plegable y reubicable' },
+-       { label: 'Accesorios', value: 'Válvulas, conexiones y kit de llenado/vaciado' },
+--      { label: 'Disponibilidad', value: 'Bajo pedido — ficha por proyecto' }
+-+      { label: 'Disponibilidad', value: 'Por proyecto — ficha técnica incluida' }
+-     ],
+-     applications: [
+-       'Reserva de agua para riego y ganadería',
+-@@ -1027,7 +1027,7 @@ export const products: Product[] = [
+-     popular: false,
+-     sourcing: 'importacion_directa',
+-     availability: 'bajo_pedido',
+--    leadTime: 'Bajo pedido — según proyecto',
+-+    leadTime: 'Por proyecto — según especificación',
+-     documentation: 'Ficha técnica del fabricante a solicitud, en cotización.'
+-   },
+-   {
+-@@ -1037,13 +1037,13 @@ export const products: Product[] = [
+-     category: 'Soluciones Ambientales y Fluidos',
+-     sector: ['Agricultura', 'Industrial', 'Saneamiento'],
+-     shortDescription: 'Biodigestores para tratamiento de residuos orgánicos y generación de biogás, mediante aliado técnico especializado.',
+--    description: 'Sistemas de biodigestión anaeróbica para el tratamiento de residuos orgánicos agroindustriales y la generación de biogás, provistos mediante aliado técnico especializado. Cada instalación se dimensiona por volumen de residuo, temperatura y objetivo (tratamiento y/o energía). Disponible bajo pedido con evaluación previa del caso.',
+-+    description: 'Sistemas de biodigestión anaeróbica para el tratamiento de residuos orgánicos agroindustriales y la generación de biogás, provistos mediante aliado técnico especializado. Cada instalación se dimensiona por volumen de residuo, temperatura y objetivo (tratamiento y/o energía). De suministro por proyecto, con evaluación previa del caso.',
+-     specifications: [
+-       { label: 'Sistema', value: 'Biodigestión anaeróbica (tubular / de membrana)' },
+-       { label: 'Salida', value: 'Biol/biogás según diseño' },
+-       { label: 'Provisión', value: 'Mediante aliado técnico especializado' },
+-       { label: 'Dimensionamiento', value: 'Según volumen de residuo y objetivo' },
+--      { label: 'Disponibilidad', value: 'Bajo pedido — con evaluación previa' }
+-+      { label: 'Disponibilidad', value: 'Por proyecto — con evaluación previa' }
+-     ],
+-     applications: [
+-       'Tratamiento de residuos ganaderos y agroindustriales',
+-@@ -1063,7 +1063,7 @@ export const products: Product[] = [
+-     popular: false,
+-     sourcing: 'partner',
+-     availability: 'bajo_pedido',
+--    leadTime: 'Bajo pedido — con evaluación previa',
+-+    leadTime: 'Por proyecto — con evaluación previa',
+-     documentation: 'Memoria técnica del aliado a solicitud, tras evaluación del caso.'
+-   },
+-   {
+-@@ -1073,13 +1073,13 @@ export const products: Product[] = [
+-     category: 'Soluciones Ambientales y Fluidos',
+-     sector: ['Minería', 'Saneamiento', 'Agricultura', 'Infraestructura'],
+-     shortDescription: 'Tuberías de polietileno de alta densidad y accesorios para conducción de agua, relaves y fluidos, con termofusión.',
+--    description: 'Tuberías de polietileno de alta densidad (HDPE) y accesorios para conducción de agua, relaves, drenaje y fluidos industriales, unidas por termofusión o electrofusión. Se especifican por diámetro y clase de presión (SDR) según el diseño hidráulico. Línea de importación directa disponible bajo pedido; ficha y certificado de lote en cotización.',
+-+    description: 'Tuberías de polietileno de alta densidad (HDPE) y accesorios para conducción de agua, relaves, drenaje y fluidos industriales, unidas por termofusión o electrofusión. Se especifican por diámetro y clase de presión (SDR) según el diseño hidráulico. Línea de importación directa, suministrada por proyecto; ficha y certificado de lote en cotización.',
+-     specifications: [
+-       { label: 'Material', value: 'Polietileno de alta densidad (HDPE)' },
+-       { label: 'Unión', value: 'Termofusión / electrofusión' },
+-       { label: 'Especificación', value: 'Diámetro y clase de presión (SDR) por diseño' },
+-       { label: 'Accesorios', value: 'Codos, tees, reducciones, bridas' },
+--      { label: 'Disponibilidad', value: 'Importación directa — bajo pedido' }
+-+      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+-     ],
+-     applications: [
+-       'Conducción de agua y riego presurizado',
+-@@ -1099,7 +1099,7 @@ export const products: Product[] = [
+-     popular: false,
+-     sourcing: 'importacion_directa',
+-     availability: 'bajo_pedido',
+--    leadTime: 'Bajo pedido — según proyecto',
+-+    leadTime: 'Por proyecto — según especificación',
+-     documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+-   },
+- 
+-@@ -1347,12 +1347,12 @@ export const sectors = [
+- export const sourcingLabels: Record<string, string> = {
+-   fabricacion_propia: 'Fabricación propia',
+-   importacion_directa: 'Importación directa',
+--  bajo_pedido: 'Bajo pedido',
+-+  bajo_pedido: 'Suministro especializado',
+-   partner: 'Aliado técnico'
+- };
+- 
+- export const availabilityLabels: Record<string, string> = {
+-   stock: 'Stock disponible',
+-   a_medida: 'Fabricación a medida',
+--  bajo_pedido: 'Bajo pedido'
+-+  bajo_pedido: 'Suministro a proyecto'
+- };
+diff --git a/test/catalog.test.ts b/test/catalog.test.ts
+index 13641f5..770a51c 100644
+--- a/test/catalog.test.ts
++++ b/test/catalog.test.ts
+@@ -21,13 +21,17 @@ describe('catálogo: integridad de datos', () => {
+     }
+   });
+ 
+-  it('los 3 SKUs estandarizados están marcados como comprables', () => {
++  // Reencuadre de disponibilidad: los 3 SKUs antes comprables en línea pasaron a
++  // "solo cotización" (ver `// purchasable: true` comentado en lib/products.ts).
++  // Este test refleja el estado DESPLEGADO. Si se reactiva la compra en línea,
++  // restaurar `purchasable: true` en products.ts y volver a `.toBe(true)` aquí.
++  it('los 3 SKUs estandarizados están en modo cotización (compra en línea desactivada)', () => {
+     const purchasable = new Set(
+       products.filter((p) => p.purchasable).map((p) => p.slug)
+     );
+-    expect(purchasable.has('big-bags-bolsones-polipropileno')).toBe(true);
+-    expect(purchasable.has('mallas-antiafidas')).toBe(true);
+-    expect(purchasable.has('mulch-madera-picada')).toBe(true);
++    expect(purchasable.has('big-bags-bolsones-polipropileno')).toBe(false);
++    expect(purchasable.has('mallas-antiafidas')).toBe(false);
++    expect(purchasable.has('mulch-madera-picada')).toBe(false);
+   });
+ 
+   it('los productos a medida siguen siendo cotizar (no comprables)', () => {
