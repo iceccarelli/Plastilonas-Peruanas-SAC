@@ -21,13 +21,17 @@ describe('catálogo: integridad de datos', () => {
     }
   });
 
-  it('los 3 SKUs estandarizados están marcados como comprables', () => {
+  // Reencuadre de disponibilidad: los 3 SKUs antes comprables en línea pasaron a
+  // "solo cotización" (ver `// purchasable: true` comentado en lib/products.ts).
+  // Este test refleja el estado DESPLEGADO. Si se reactiva la compra en línea,
+  // restaurar `purchasable: true` en products.ts y volver a `.toBe(true)` aquí.
+  it('los 3 SKUs estandarizados están en modo cotización (compra en línea desactivada)', () => {
     const purchasable = new Set(
       products.filter((p) => p.purchasable).map((p) => p.slug)
     );
-    expect(purchasable.has('big-bags-bolsones-polipropileno')).toBe(true);
-    expect(purchasable.has('mallas-antiafidas')).toBe(true);
-    expect(purchasable.has('mulch-madera-picada')).toBe(true);
+    expect(purchasable.has('big-bags-bolsones-polipropileno')).toBe(false);
+    expect(purchasable.has('mallas-antiafidas')).toBe(false);
+    expect(purchasable.has('mulch-madera-picada')).toBe(false);
   });
 
   it('los productos a medida siguen siendo cotizar (no comprables)', () => {

@@ -29,9 +29,7 @@ Thumbs.db
 # TypeScript incremental build info
 *.tsbuildinfo
 
-*.patch
-
-# patch delivery artifacts
+# patch delivery artifacts (never commit)
 *.patch
 
 # macOS AppleDouble junk (33 ._*.jpg were committed under public/images)

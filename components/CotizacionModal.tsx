@@ -120,6 +120,17 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
     }
   };
 
+  // Cerrar con Escape: paridad de teclado con el resto de overlays del sitio.
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, isSubmitting]);
+
   return (
     <AnimatePresence>
       {open && (
@@ -131,14 +142,17 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
             transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
             className="bg-white w-full max-w-[620px] max-h-[calc(100dvh-2rem)] rounded-3xl shadow-2xl overflow-y-auto"
             onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cotizacion-title"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-8 py-6 border-b">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-[#0A2540]">Solicitar Cotización</h2>
+                <h2 id="cotizacion-title" className="text-2xl font-semibold tracking-tight text-navy">Solicitar Cotización</h2>
                 <p className="text-sm text-gray-500 mt-0.5">Atención directa por WhatsApp en horario comercial</p>
               </div>
-              <button onClick={handleClose} className="p-2 text-gray-400 hover:text-gray-600 transition-colors" disabled={isSubmitting}>
+              <button onClick={handleClose} aria-label="Cerrar" className="p-2 text-gray-400 hover:text-gray-600 transition-colors" disabled={isSubmitting}>
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -148,7 +162,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
                 <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
                   <CheckCircle className="w-10 h-10 text-[#059669]" />
                 </div>
-                <h3 className="text-2xl font-semibold text-[#0A2540] mb-3">¡Gracias por confiar en nosotros!</h3>
+                <h3 className="text-2xl font-semibold text-navy mb-3">¡Gracias por confiar en nosotros!</h3>
                 <p className="text-gray-600 max-w-sm mx-auto">Su solicitud quedó lista en WhatsApp: pulse enviar en esa ventana y un especialista de Plastilonas Peruanas le responderá.</p>
               </div>
             ) : (

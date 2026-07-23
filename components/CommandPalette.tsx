@@ -94,7 +94,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
               ))
             ) : (
               <div className="px-5 py-12 text-center">
-                <p className="text-gray-500">No se encontraron productos para "{search}"</p>
+                <p className="text-gray-500">No se encontraron productos para &ldquo;{search}&rdquo;</p>
                 <button 
                   onClick={() => {
                     onOpenChange(false);
