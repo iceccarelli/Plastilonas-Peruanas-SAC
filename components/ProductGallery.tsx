@@ -21,6 +21,20 @@ const VIEW_CAPTIONS: Record<string, string> = {
   escala: 'Referencia de escala y dimensiones',
 };
 
+// Etiqueta corta para la miniatura, para que el cliente sepa QUÉ vista es
+// antes de hacer clic (mejor comprensión y recorrido de la galería).
+const VIEW_SHORT: Record<string, string> = {
+  general: 'General',
+  detalle: 'Detalle',
+  instalacion: 'En obra',
+  escala: 'Escala',
+};
+
+function shortLabel(src: string): string | null {
+  const k = viewKey(src);
+  return k ? VIEW_SHORT[k] : null;
+}
+
 function viewKey(src: string): string | null {
   const base = src.split('/').pop()?.replace(/\.[a-z0-9]+$/i, '') ?? '';
   const suffix = base.split('-').pop() ?? '';
@@ -124,23 +138,36 @@ export default function ProductGallery({ product }: { product: Product }) {
           role="listbox"
           aria-label={`Galería de fotos de ${product.name}`}
         >
-          {images.map((src, i) => (
-            <button
-              key={`${src}-${i}`}
-              type="button"
-              onClick={() => setActive(i)}
-              role="option"
-              aria-selected={i === active}
-              aria-label={`Ver foto ${i + 1} de ${images.length} — ${product.name}`}
-              className={`relative h-16 w-24 shrink-0 rounded-xl overflow-hidden border transition-all ${
-                i === active
-                  ? 'border-[#059669] ring-2 ring-[#059669]/30'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <Image src={src} alt="" fill sizes="96px" className="object-cover" />
-            </button>
-          ))}
+          {images.map((src, i) => {
+            const label = shortLabel(src);
+            return (
+              <button
+                key={`${src}-${i}`}
+                type="button"
+                onClick={() => setActive(i)}
+                role="option"
+                aria-selected={i === active}
+                aria-label={
+                  label
+                    ? `Ver ${captionFor(src)} — foto ${i + 1} de ${images.length}, ${product.name}`
+                    : `Ver foto ${i + 1} de ${images.length} — ${product.name}`
+                }
+                title={label ?? undefined}
+                className={`relative h-16 w-24 shrink-0 rounded-xl overflow-hidden border transition-all ${
+                  i === active
+                    ? 'border-[#059669] ring-2 ring-[#059669]/30'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <Image src={src} alt="" fill sizes="96px" className="object-cover" />
+                {label && (
+                  <span className="absolute inset-x-0 bottom-0 bg-black/55 text-white text-[10px] leading-none py-1 text-center font-medium tracking-wide">
+                    {label}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 

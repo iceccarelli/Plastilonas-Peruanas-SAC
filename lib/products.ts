@@ -1470,6 +1470,102 @@ export const products: Product[] = [
     // price: 25.0,
     // priceUnit: 'saco 50L',
     // purchasable: true,
+  },
+
+  // ===========================================================================
+  // 35) GEOCOMPUESTOS DE DRENAJE  (Geosintéticos e Impermeabilización)
+  // ===========================================================================
+  {
+    id: '35',
+    slug: 'geocompuestos-drenaje',
+    name: 'Geocompuestos de Drenaje',
+    category: 'Geosintéticos e Impermeabilización',
+    sector: ['Minería', 'Construcción', 'Infraestructura', 'Saneamiento'],
+    shortDescription: 'Geocompuestos drenantes (geored + geotextil) para captación y conducción de fluidos en obras de tierra, muros, rellenos sanitarios y minería.',
+    description: 'Geocompuesto de drenaje formado por un núcleo drenante (geored / geonet) termounido a uno o dos geotextiles no tejidos que actúan como filtro. Reemplaza capas de grava en sistemas de drenaje, reduciendo espesores, peso y tiempos de obra. Se selecciona por capacidad de flujo, resistencia a la compresión y compatibilidad química según el proyecto. Línea de importación directa, suministrada por proyecto; ficha técnica y certificado de lote del fabricante se entregan en la cotización.',
+    specifications: [
+      { label: 'Estructura', value: 'Núcleo drenante (geored) + geotextil no tejido en una o ambas caras' },
+      { label: 'Función', value: 'Captación, filtración y conducción de fluidos' },
+      { label: 'Capacidad de flujo', value: 'Según gradiente y confinamiento (a confirmar por proyecto)' },
+      { label: 'Aplicación típica', value: 'Muros, rellenos sanitarios, taludes, pilas de lixiviación, cubiertas verdes' },
+      { label: 'Documentación', value: 'Ficha técnica y certificado de lote en cotización' },
+      { label: 'Disponibilidad', value: 'Importación directa — por proyecto' }
+    ],
+    applications: [
+      'Drenaje detrás de muros de contención y estructuras enterradas',
+      'Sistemas de drenaje en rellenos sanitarios y celdas de residuos',
+      'Drenaje de taludes, terraplenes y obras viales',
+      'Captación en pilas de lixiviación y plataformas mineras',
+      'Cubiertas verdes y jardineras sobre losa'
+    ],
+    benefits: [
+      'Sustituye capas de grava: menos espesor, peso y excavación',
+      'Instalación más rápida y limpia que el drenaje granular',
+      'Complemento directo de geomembranas y geotextiles del catálogo',
+      'Sistema de drenaje integrado de un solo proveedor',
+      'Documentación técnica del fabricante en cotización'
+    ],
+    image: '/images/galeria/geocompuestos-drenaje-general.jpg',
+    gallery: [
+      '/images/galeria/geocompuestos-drenaje-general.jpg',
+      '/images/galeria/geocompuestos-drenaje-detalle.jpg',
+      '/images/galeria/geocompuestos-drenaje-instalacion.jpg',
+      '/images/galeria/geocompuestos-drenaje-escala.jpg',
+    ],
+    featured: false,
+    popular: false,
+    sourcing: 'importacion_directa',
+    availability: 'bajo_pedido',
+    leadTime: 'Por proyecto — según especificación',
+    documentation: 'Ficha técnica y certificado de lote del fabricante a solicitud, en cotización.'
+  },
+
+  // ===========================================================================
+  // 36) BARRERAS ACÚSTICAS  (Protección y Seguridad Industrial)
+  // ===========================================================================
+  {
+    id: '36',
+    slug: 'barreras-acusticas',
+    name: 'Barreras Acústicas / Cortinas Antirruido',
+    category: 'Protección y Seguridad Industrial',
+    sector: ['Construcción', 'Industrial', 'Minería', 'Infraestructura'],
+    shortDescription: 'Barreras y cortinas acústicas de material flexible para atenuar ruido en obras, plantas y equipos, apoyando el cumplimiento ambiental y de seguridad.',
+    description: 'Barreras acústicas flexibles (cortinas y mantas antirruido) para reducir la propagación de ruido en frentes de obra, plantas industriales, generadores y equipos. Se confeccionan a medida en composición mono o multicapa —lámina másica insonorizante con capa absorbente— y se montan sobre cercos, andamios o estructuras existentes. Solución a medida; la atenuación referencial y la composición se definen por aplicación, y la documentación técnica se entrega en la cotización.',
+    specifications: [
+      { label: 'Configuración', value: 'Cortina / manta flexible, mono o multicapa (a medida)' },
+      { label: 'Función', value: 'Atenuación y absorción de ruido en la fuente o el perímetro' },
+      { label: 'Montaje', value: 'Sobre cerco de obra, andamio, malla o estructura metálica' },
+      { label: 'Acabados', value: 'Ojalillos, refuerzos perimetrales y cierres según montaje' },
+      { label: 'Atenuación referencial', value: 'Según composición y aplicación (a confirmar por proyecto)' },
+      { label: 'Documentación', value: 'Ficha técnica del material a solicitud, en cotización' }
+    ],
+    applications: [
+      'Cerramiento acústico de frentes de obra en zonas urbanas',
+      'Encierro de generadores, compresores y equipos ruidosos',
+      'Perímetros de plantas industriales y canteras',
+      'Barreras temporales para cumplimiento de límites de ruido',
+      'Separación acústica en talleres y naves'
+    ],
+    benefits: [
+      'Reduce el ruido percibido en vecindario y personal de obra',
+      'Apoya el cumplimiento de normativa ambiental y de seguridad',
+      'Confección a medida y reposicionable entre frentes de trabajo',
+      'Se integra con biombos y protecciones de obra del catálogo',
+      'Documentación técnica del material en cotización'
+    ],
+    image: '/images/galeria/barreras-acusticas-general.jpg',
+    gallery: [
+      '/images/galeria/barreras-acusticas-general.jpg',
+      '/images/galeria/barreras-acusticas-detalle.jpg',
+      '/images/galeria/barreras-acusticas-instalacion.jpg',
+      '/images/galeria/barreras-acusticas-escala.jpg',
+    ],
+    featured: false,
+    popular: false,
+    sourcing: 'fabricacion_propia',
+    availability: 'bajo_pedido',
+    leadTime: 'A medida — según proyecto',
+    documentation: 'Ficha técnica del material a solicitud, en cotización.'
   }
 ];
 
