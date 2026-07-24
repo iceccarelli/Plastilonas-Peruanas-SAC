@@ -216,7 +216,7 @@ export default function MachineryGallery() {
                     <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-[#0A2540] via-[#0A2540]/70 to-transparent pointer-events-none" />
 
                     <div className="absolute inset-x-0 bottom-0 p-5 md:p-8 pointer-events-none">
-                      <span className="inline-block text-[11px] uppercase tracking-[0.15em] text-[#34d399] font-semibold mb-2">
+                      <span className="inline-block text-[11px] uppercase tracking-[0.15em] text-[#34D399] font-semibold mb-2">
                         Paso {item.orden} de {total} · {item.linea}
                       </span>
                       <h3 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">
@@ -232,7 +232,7 @@ export default function MachineryGallery() {
                             <span
                               key={vi}
                               className={`h-1 rounded-full transition-all duration-300 ${
-                                vi === view % views.length ? 'w-5 bg-[#34d399]' : 'w-1.5 bg-white/40'
+                                vi === view % views.length ? 'w-5 bg-[#34D399]' : 'w-1.5 bg-white/40'
                               }`}
                             />
                           ))}
