@@ -11,6 +11,27 @@ function prettify(src: string): string {
   return base.replace(/[-_]/g, ' ').trim();
 }
 
+// Etiqueta legible por vista, derivada del sufijo del archivo de galería
+// (`-general` | `-detalle` | `-instalacion` | `-escala`). Ayuda a que el
+// cliente entienda QUÉ muestra cada foto. Devuelve null si no aplica.
+const VIEW_CAPTIONS: Record<string, string> = {
+  general: 'Vista general del producto',
+  detalle: 'Detalle del material y acabado',
+  instalacion: 'Instalación / aplicación en obra',
+  escala: 'Referencia de escala y dimensiones',
+};
+
+function viewKey(src: string): string | null {
+  const base = src.split('/').pop()?.replace(/\.[a-z0-9]+$/i, '') ?? '';
+  const suffix = base.split('-').pop() ?? '';
+  return VIEW_CAPTIONS[suffix] ? suffix : null;
+}
+
+function captionFor(src: string): string | null {
+  const k = viewKey(src);
+  return k ? VIEW_CAPTIONS[k] : null;
+}
+
 export default function ProductGallery({ product }: { product: Product }) {
   const images = (
     product.gallery && product.gallery.length > 0
@@ -51,8 +72,12 @@ export default function ProductGallery({ product }: { product: Product }) {
   }
 
   const activeSrc = images[active];
-  const altFor = (i: number, src: string) =>
-    i === 0 ? product.name : `${product.name} — ${prettify(src)}`;
+  const altFor = (i: number, src: string) => {
+    const caption = captionFor(src);
+    if (caption) return `${product.name} — ${caption}`;
+    return i === 0 ? product.name : `${product.name} — ${prettify(src)}`;
+  };
+  const activeCaption = captionFor(activeSrc);
 
   return (
     <div>
@@ -82,6 +107,16 @@ export default function ProductGallery({ product }: { product: Product }) {
           </button>
         )}
       </div>
+
+      {activeCaption && (
+        <p
+          className="mt-3 text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2"
+          aria-live="polite"
+        >
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#059669]" aria-hidden="true" />
+          {activeCaption}
+        </p>
+      )}
 
       {hasMultiple && (
         <div
@@ -160,11 +195,10 @@ export default function ProductGallery({ product }: { product: Product }) {
             />
           </div>
 
-          {hasMultiple && (
-            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white/70 text-sm">
-              {active + 1} / {images.length}
-            </div>
-          )}
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/80 text-sm">
+            {activeCaption && <span className="text-white/90">{activeCaption}</span>}
+            {hasMultiple && <span className="text-white/60">{active + 1} / {images.length}</span>}
+          </div>
         </div>
       )}
     </div>
