@@ -1,0 +1,168 @@
+diff --git a/DESIGN-CONSISTENCY-AUDIT.md b/DESIGN-CONSISTENCY-AUDIT.md
+new file mode 100644
+index 0000000..a0affbf
+--- /dev/null
++++ b/DESIGN-CONSISTENCY-AUDIT.md
+@@ -0,0 +1,84 @@
++# Auditoría de Consistencia de Diseño — Plastilonas Peruanas SAC
++
++Análisis medido del sistema visual del sitio, con un plan de remediación por
++fases y calificado por riesgo. El objetivo es una interfaz perfectamente
++alineada (botones, encabezados, colores, espaciado, footer) en móvil y web —
++sin romper el trabajo de accesibilidad y modo oscuro ya logrado.
++
++---
++
++## 1. Hallazgos (medidos, no estimados)
++
++| # | Inconsistencia | Magnitud | Qué ve el cliente |
++|---|----------------|----------|-------------------|
++| 1 | **Literales de color hex** en vez de tokens | **298 usos en 39 archivos** | Nada visible hoy (una capa `!important` los normaliza), pero el color puede desviarse en cada edición |
++| 2 | **Padding de botones** ad-hoc | **12+ combinaciones** (`px-4 py-3`, `px-6 py-3`, `px-8 py-3`, `px-9 py-4`…) | Botones de distinta altura/ancho entre secciones |
++| 3 | **Ritmo vertical de sección** | **4 valores** (`py-20` ×7, `py-16` ×7, `py-24` ×5, `py-12` ×2) | Espaciado desigual entre bloques |
++| 4 | **Radio de esquinas** | **5 valores** (`rounded-2xl` ×68, `rounded-3xl` ×32, `rounded-xl` ×11, `rounded-lg` ×2, `rounded-full` ×50) | Tarjetas con esquinas que no combinan |
++| 5 | **`globals.css` por acumulación** | 542 líneas, bloques `@media` duplicados | Mantenimiento frágil; reglas que se pisan |
++| 6 | **Bug de mayúsculas en color** | `#34d399` vs `#34D399` | Dos clases CSS para el mismo color |
++
++## 2. La restricción crítica (por esto NO se migra a ciegas)
++
++Los literales de color **son estructurales**. La capa de overrides en
++`globals.css` se ancla a los nombres de clase literales exactos:
++
++```css
++.text-\[\#059669\] { color: #047857 !important; }         /* corrige contraste WCAG AA */
++.dark main .text-\[\#0A2540\] { color: var(--text); }      /* adapta a modo oscuro */
++```
++
++Consecuencia: cambiar `text-[#059669]` → `text-brand` en un componente
++**revierte silenciosamente la corrección de contraste** (vuelve a 3.77:1, falla
++AA) y `text-[#0A2540]` → `text-navy` dentro de `<main>` **rompe el modo
++oscuro** (texto navy sobre fondo oscuro). Una refactorización masiva y a ciegas
++dañaría el sitio. La migración debe hacerse por componente, retirando el
++override correspondiente en el mismo paso, y verificando en `dev`.
++
++## 3. Lo que ya se corrigió (en este parche — seguro y verificado)
++
++- **Deduplicado `globals.css`**: eliminado el bloque `@media (max-width:640px)`
++  duplicado y el trío `.product-card` repetido. Las reglas sobreviven en su
++  primera aparición → **cero cambio visual** (542 → 526 líneas).
++- **Bug de mayúsculas**: `#34d399` → `#34D399` en `MachineryGallery.tsx`.
++- **Paleta de tokens completa** en `tailwind.config.ts` (aditivo, sin riesgo):
++  `navy`, `brand` (+`brand.text` = `#047857` con contraste AA verificado,
++  +`brand.emerald`), `amber`, `whatsapp`. Es el **destino** de la migración.
++- Verificado: `tsc` limpio, 27 tests pasan, `next build` exit 0, 69 páginas.
++
++## 4. Plan de remediación por fases (calificado por riesgo)
++
++### Fase 1 — Fundación de tokens · RIESGO BAJO · *hecho en este parche*
++Paleta en config + `brand.text` accesible. No cambia nada renderizado; da a los
++componentes un token correcto al cual migrar.
++
++### Fase 2 — Migración de color por componente · RIESGO MEDIO · *siguiente*
++Por cada componente, en un solo paso atómico y verificado en `dev`:
++1. `text-[#0A2540]` → `text-navy dark:text-white`
++2. `text-[#059669]` → `text-brand-text` (ya es `#047857`, retira el override)
++3. `bg-[#0A2540]` → `bg-navy`, etc.
++4. Retirar la regla `!important`/`dark main` correspondiente de `globals.css`.
++5. Comparar en `dev` claro y oscuro antes de pasar al siguiente.
++
++Orden sugerido (de menor a mayor riesgo): `SectionHeading` (2 literales, es el
++encabezado unificado) → `Footer` → `ProductCard` → `Navbar` → `page.tsx`.
++
++### Fase 3 — Unificación de forma · RIESGO MEDIO
++- Botones: migrar los 12+ patrones a `.btn` / `.btn-sm` / `.btn-lg`
++  (una definición, altura táctil 44px uniforme). Migrar por página, revisando
++  que ningún tamaño intencional se rompa.
++- Secciones: `py-16/20/24` → `.section-pad` (2 valores: desktop 5rem, móvil 3rem).
++- Radios: estandarizar a 2 valores — tarjetas `rounded-2xl`, acciones `rounded-full`.
++
++### Fase 4 — Cumplimiento automático · RIESGO BAJO
++Regla ESLint que prohíbe nuevos literales `-[#...]` en `className`, para que la
++consistencia no se vuelva a erosionar. Convierte la disciplina en garantía de CI.
++
++## 5. Por qué este orden gana el mercado
++
++La capa `!important` de hoy funciona pero es deuda: cada nueva página exige otro
++override. Al mover la verdad a tokens, el modo oscuro, el contraste AA y la
++identidad de marca quedan garantizados por construcción — el sitio se ve
++impecable en móvil y web, y **escala** sin volver a introducir inconsistencias.
++La consistencia deja de ser una tarea de limpieza recurrente y pasa a ser una
++propiedad del sistema.
+diff --git a/app/globals.css b/app/globals.css
+index 13b0fc0..a0aebcb 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -314,19 +314,6 @@ button[aria-pressed="true"] {
+ .product-card:hover .h-56,
+ .product-card:active .h-56 { filter: brightness(1.12) saturate(1.08); }
+ 
+-/* ═══════════ MOBILE POLISH LAYER (≤640px) — desktop untouched ═══════════ */
+-@media (max-width: 640px) {
+-  html, body { max-width: 100%; overflow-x: hidden; }
+-  section.py-20, section.py-24 { padding-top: 3rem; padding-bottom: 3rem; }
+-  .mt-20 { margin-top: 3rem !important; }
+-  .mt-16 { margin-top: 2.5rem !important; }
+-  section.min-h-\[92vh\] { min-height: 78vh; }
+-  section.min-h-\[92vh\] h1 { font-size: 2.15rem !important; line-height: 1.12 !important; }
+-  .product-card .h-56 { height: 11rem; }
+-  .badge { font-size: 0.7rem; padding: 0.2rem 0.6rem; }
+-  a, button { -webkit-tap-highlight-color: transparent; }
+-}
+-
+ /* ── Bright gradient selected/active state (AWS "North America" style) ── */
+ .chip-selected {
+   background-image: linear-gradient(120deg, #047857, #065F46 70%, #0F766E) !important;
+@@ -335,9 +322,6 @@ button[aria-pressed="true"] {
+   border-color: transparent !important;
+   box-shadow: 0 4px 14px -2px rgba(5, 150, 105, 0.5);
+ }
+-.product-card:active { transform: scale(0.985); }
+-.product-card .h-56 { transition: filter 0.25s ease; }
+-.product-card:hover .h-56, .product-card:active .h-56 { filter: brightness(1.12) saturate(1.08); }
+ 
+ /* Hide scrollbar on horizontal scroll rows but keep swipe */
+ .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+diff --git a/components/MachineryGallery.tsx b/components/MachineryGallery.tsx
+index 6019bcd..1702e05 100644
+--- a/components/MachineryGallery.tsx
++++ b/components/MachineryGallery.tsx
+@@ -216,7 +216,7 @@ export default function MachineryGallery() {
+                     <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-[#0A2540] via-[#0A2540]/70 to-transparent pointer-events-none" />
+ 
+                     <div className="absolute inset-x-0 bottom-0 p-5 md:p-8 pointer-events-none">
+-                      <span className="inline-block text-[11px] uppercase tracking-[0.15em] text-[#34d399] font-semibold mb-2">
++                      <span className="inline-block text-[11px] uppercase tracking-[0.15em] text-[#34D399] font-semibold mb-2">
+                         Paso {item.orden} de {total} · {item.linea}
+                       </span>
+                       <h3 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">
+@@ -232,7 +232,7 @@ export default function MachineryGallery() {
+                             <span
+                               key={vi}
+                               className={`h-1 rounded-full transition-all duration-300 ${
+-                                vi === view % views.length ? 'w-5 bg-[#34d399]' : 'w-1.5 bg-white/40'
++                                vi === view % views.length ? 'w-5 bg-[#34D399]' : 'w-1.5 bg-white/40'
+                               }`}
+                             />
+                           ))}
+diff --git a/tailwind.config.ts b/tailwind.config.ts
+index b667876..f1add77 100644
+--- a/tailwind.config.ts
++++ b/tailwind.config.ts
+@@ -17,7 +17,17 @@ const config: Config = {
+         brand: {
+           DEFAULT: '#059669',
+           dark: '#047857',
++          // Variante con contraste AA verificado sobre blanco (5.48:1).
++          // Migrar `text-[#059669]` -> `text-brand-text` para retirar el
++          // override !important de globals.css sin perder accesibilidad.
++          text: '#047857',
++          emerald: '#10B981',
+         },
++        amber: {
++          DEFAULT: '#F59E0B',
++          dark: '#D97706',
++        },
++        whatsapp: '#25D366',
+       },
+       fontFamily: {
+         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
