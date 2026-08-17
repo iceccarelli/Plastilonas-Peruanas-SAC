@@ -141,25 +141,3 @@ lib/
 ├── types.ts
 public/images/              # Imágenes del sitio
 ```
-
-## ✅ Checklist de Producción
-
-- [ ] Agregar `OPENAI_API_KEY` en Vercel
-- [ ] Reemplazar imágenes placeholder por fotos reales
-- [ ] Personalizar textos de testimonios (si se tienen reales)
-- [ ] Configurar dominio personalizado en Vercel
-- [ ] Verificar sitemap y robots.txt (Next.js los genera automáticamente)
-- [ ] Probar flujo completo de cotización + chatbot
-- [ ] Configurar Google Analytics / Meta Pixel (opcional)
-
-## 📞 Soporte y Personalización
-
-Este sitio fue diseñado y desarrollado como una experiencia digital **premium de nivel billonario** para Plastilonas Peruanas SAC.
-
-¿Necesitas ajustes, nuevas secciones, integración con CRM, WhatsApp Business API o pasarela de pagos? Contáctame.
-
----
-
-**WE WILL TAKE OVER THIS NICHE MARKET**
-
-Sitio listo para convertir visitantes en clientes de alto valor.
