@@ -175,6 +175,77 @@ export function itemListSchema(list: {
 }
 
 /**
+ * Artículo técnico del silo /recursos. Se ancla al WebPage de su propia URL y
+ * declara autoría organizacional: la autoridad la sostiene la empresa, no una
+ * firma personal inventada.
+ */
+export function articleSchema(a: {
+  url: string;
+  headline: string;
+  description: string;
+  datePublished: string;
+  dateModified: string;
+  section: string;
+  keywords?: string[];
+  wordCount?: number;
+  /** Fuentes externas que respaldan las cifras del artículo. */
+  citations?: { label: string; url: string }[];
+}): Dict {
+  return {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "@id": `${a.url}#article`,
+    headline: a.headline,
+    description: a.description,
+    url: a.url,
+    mainEntityOfPage: { "@id": `${a.url}#webpage` },
+    datePublished: a.datePublished,
+    dateModified: a.dateModified,
+    articleSection: a.section,
+    inLanguage: SITE.language,
+    author: organizationRef(),
+    publisher: organizationRef(),
+    ...(a.keywords?.length ? { keywords: a.keywords.join(", ") } : {}),
+    ...(a.wordCount ? { wordCount: a.wordCount } : {}),
+    ...(a.citations?.length
+      ? {
+          citation: a.citations.map((c) => ({
+            "@type": "CreativeWork",
+            name: c.label,
+            url: c.url,
+          })),
+        }
+      : {}),
+  };
+}
+
+/** Procedimiento paso a paso. Solo para secuencias reales y verificables. */
+export function howToSchema(h: {
+  url: string;
+  name: string;
+  description: string;
+  totalTime?: string;
+  steps: { name: string; text: string }[];
+}): Dict {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "@id": `${h.url}#howto`,
+    name: h.name,
+    description: h.description,
+    inLanguage: SITE.language,
+    ...(h.totalTime ? { totalTime: h.totalTime } : {}),
+    step: h.steps.map((s, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+      url: `${h.url}#paso-${i + 1}`,
+    })),
+  };
+}
+
+/**
  * @deprecated Redeclaraba un LocalBusiness con @id propio, fragmentando la
  * entidad frente al nodo global de components/StructuredData.tsx. Usa
  * businessRef() dentro de about/provider, o webPageSchema() para la página.

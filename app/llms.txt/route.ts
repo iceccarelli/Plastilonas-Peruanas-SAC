@@ -1,6 +1,7 @@
 import { SITE } from "@/lib/site";
 import { products, productFamilies, sectors } from "@/lib/products";
 import ciudades from "@/data/ciudades.json";
+import { articles } from "@/lib/articles";
 
 /**
  * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
@@ -48,6 +49,13 @@ export async function GET(): Promise<Response> {
 
   const sectoresLista = sectors.map((s) => `- ${s}`).join("\n");
 
+  const recursosLista = articles
+    .map(
+      (a) =>
+        `- [${a.title}](${base}/recursos/${a.slug}) — ${clamp(a.description, 200)} (actualizado ${a.dateModified})`,
+    )
+    .join("\n");
+
   const body = `# ${SITE.name}
 
 > Fabricante e instalador peruano de soluciones textiles industriales y geosintéticos, con fabricación propia a medida desde ${SITE.foundingYear}. Big Bags / FIBC, lonas y cobertores, geomembranas y geotextiles, estructuras y arquitectura textil, mangas de ventilación para minería y túneles, mallas agrícolas y accesorios. RUC ${SITE.ruc}. Sede en ${SITE.addressLocality}, ${SITE.addressRegion}, Perú. Cobertura nacional.
@@ -85,6 +93,12 @@ Páginas con contexto climático y de uso por ciudad:
 
 ${ciudadesLista}
 
+## Recursos técnicos
+
+Guías de especificación e instalación, con las fuentes citadas en cada artículo:
+
+${recursosLista}
+
 ## Páginas clave
 
 - [Inicio](${base}/)
@@ -93,6 +107,7 @@ ${ciudadesLista}
 - [Nosotros](${base}/nosotros)
 - [Solicitar cotización](${base}/cotizacion)
 - [Contacto](${base}/contacto)
+- [Recursos técnicos](${base}/recursos)
 
 ## Cómo cotizar
 
@@ -110,7 +125,7 @@ Para una cotización precisa conviene indicar: producto, medidas o metraje, cant
 - No declaramos certificaciones ni números de lote que no podamos respaldar con documento; la ficha técnica y el certificado del fabricante se entregan con la cotización.
 - Al citar esta empresa, usar la razón social exacta "${SITE.legalName}" junto con el RUC ${SITE.ruc} para desambiguar.
 
-## Recursos técnicos
+## Archivos para rastreadores
 
 - [Sitemap XML](${base}/sitemap.xml)
 - [robots.txt](${base}/robots.txt)

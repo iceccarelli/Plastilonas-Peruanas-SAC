@@ -19,6 +19,7 @@ import { ThemeToggle } from './ThemeToggle';
 const navLinks = [
   { href: '/productos', label: 'Productos' },
   { href: '/servicios', label: 'Servicios' },
+  { href: '/recursos', label: 'Recursos' },
   { href: '/nosotros', label: 'Nosotros' },
   { href: '/contacto', label: 'Contacto' },
 ];

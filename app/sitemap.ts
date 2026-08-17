@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/site";
 import { products } from "@/lib/products";
 import ciudades from "@/data/ciudades.json";
+import { articles } from "@/lib/articles";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -14,6 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE.url}/contacto`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
     { url: `${SITE.url}/cotizacion`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE.url}/local`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE.url}/recursos`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
   ];
 
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
@@ -26,5 +28,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: now, changeFrequency: "monthly", priority: 0.7,
   }));
 
-  return [...staticRoutes, ...productRoutes, ...localRoutes];
+  // Los artículos declaran su propia fecha de modificación: un lastModified
+  // honesto vale más que "hoy" en cada deploy, que enseña a Google a ignorarlo.
+  const articleRoutes: MetadataRoute.Sitemap = articles.map((a) => ({
+    url: `${SITE.url}/recursos/${a.slug}`,
+    lastModified: new Date(a.dateModified), changeFrequency: "monthly", priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...productRoutes, ...localRoutes, ...articleRoutes];
 }

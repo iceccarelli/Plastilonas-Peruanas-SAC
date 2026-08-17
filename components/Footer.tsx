@@ -17,6 +17,7 @@ export default function Footer() {
       { label: 'Ver catálogo completo →', href: '/productos' },
     ]},
     { title: 'EMPRESA', links: [
+      { label: 'Recursos técnicos', href: '/recursos' },
       { label: 'Sobre Nosotros', href: '/nosotros' },
       { label: 'Nuestros Servicios', href: '/servicios' },
       { label: 'Contacto', href: '/contacto' },
@@ -91,9 +92,11 @@ export default function Footer() {
           <div>
             <div className="font-semibold text-white mb-4 tracking-wide text-sm">EMPRESA</div>
             <ul className="space-y-[13px] text-sm">
+              <li><Link href="/recursos" className="hover:text-white transition-colors">Recursos técnicos</Link></li>
               <li><Link href="/nosotros" className="hover:text-white transition-colors">Sobre Nosotros</Link></li>
               <li><Link href="/servicios" className="hover:text-white transition-colors">Nuestros Servicios</Link></li>
               <li><Link href="/contacto" className="hover:text-white transition-colors">Contacto</Link></li>
+              <li><Link href="/local" className="hover:text-white transition-colors">Cobertura local</Link></li>
               <li><a href="https://wa.me/51946085270" target="_blank" className="hover:text-white transition-colors">WhatsApp Directo</a></li>
               <li><Link href="/cotizacion" className="hover:text-white transition-colors">Solicitar Cotización</Link></li>
             </ul>
