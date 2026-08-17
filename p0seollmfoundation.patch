@@ -1,0 +1,629 @@
+diff --git a/app/api/lead/route.ts b/app/api/lead/route.ts
+index 5ee6ede..5a115ea 100644
+--- a/app/api/lead/route.ts
++++ b/app/api/lead/route.ts
+@@ -1,4 +1,8 @@
+ import { NextRequest, NextResponse } from 'next/server';
++import { SITE } from '@/lib/site';
++
++/** Host visible del sitio, derivado de SITE.url (nunca hard-codeado). */
++const SITE_HOST = SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+ 
+ /**
+  * Recibe un lead de cotización y lo reenvía al webhook de n8n.
+@@ -29,7 +33,7 @@ export async function POST(req: NextRequest) {
+ 
+   const payload = {
+     ...lead,
+-    source: 'plastilonas.com/cotizacion',
++    source: `${SITE_HOST}/cotizacion`,
+     receivedAt: new Date().toISOString(),
+   };
+ 
+diff --git a/app/layout.tsx b/app/layout.tsx
+index 4394972..b6dc56d 100644
+--- a/app/layout.tsx
++++ b/app/layout.tsx
+@@ -9,6 +9,7 @@ import CartDrawer from '@/components/CartDrawer';
+ import { Toaster } from 'sonner';
+ import AuthProvider from '@/components/AuthProvider';
+ import StructuredData from '@/components/StructuredData';
++import { SITE } from '@/lib/site';
+ import Analytics from '@/components/Analytics';
+ import WebPush from '@/components/WebPush';
+ import ConsentBanner from '@/components/ConsentBanner';
+@@ -59,7 +60,8 @@ export const metadata: Metadata = {
+     address: false,
+     telephone: false,
+   },
+-  metadataBase: new URL('https://www.plastilonas.com'),
++  // Origen canónico único (lib/site.ts): alimenta canonicals, OG e imágenes.
++  metadataBase: new URL(SITE.url),
+   openGraph: {
+     title: 'Plastilonas Peruanas SAC | Soluciones Textiles Industriales — Fabricación e Importación Directa',
+     description: 'Portafolio integral de soluciones textiles industriales en el Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
+diff --git a/app/llms.txt/route.ts b/app/llms.txt/route.ts
+new file mode 100644
+index 0000000..519b0fb
+--- /dev/null
++++ b/app/llms.txt/route.ts
+@@ -0,0 +1,126 @@
++import { SITE } from "@/lib/site";
++import { products, productFamilies, sectors } from "@/lib/products";
++import ciudades from "@/data/ciudades.json";
++
++/**
++ * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
++ *
++ * Objetivo: que cualquier agente (ChatGPT, Claude, Perplexity, Gemini, Grok)
++ * resuelva la entidad "Plastilonas Peruanas SAC" y su catálogo en una sola
++ * lectura, con URLs absolutas y datos verificables.
++ *
++ * Reglas: se genera desde las mismas fuentes de verdad que el sitio
++ * (lib/site.ts, lib/products.ts, data/ciudades.json). Cero datos inventados:
++ * sin precios, sin certificaciones no verificables, sin reseñas.
++ */
++
++export const dynamic = "force-static";
++
++const MAX_DESC = 160;
++
++function clamp(text: string, max = MAX_DESC): string {
++  const clean = text.replace(/\s+/g, " ").trim();
++  return clean.length <= max ? clean : `${clean.slice(0, max - 1).trimEnd()}…`;
++}
++
++export async function GET(): Promise<Response> {
++  const base = SITE.url;
++
++  // Catálogo agrupado por familia (mismo orden que el mega menú del sitio).
++  const catalogo = productFamilies
++    .map((familia) => {
++      const items = products.filter((p) => p.category === familia.name);
++      if (items.length === 0) return null;
++      const lineas = items
++        .map(
++          (p) =>
++            `- [${p.name}](${base}/productos/${p.slug}): ${clamp(p.shortDescription)}`,
++        )
++        .join("\n");
++      return `### ${familia.name}\n_${familia.tagline}_\n\n${lineas}`;
++    })
++    .filter(Boolean)
++    .join("\n\n");
++
++  const ciudadesLista = (ciudades as { slug: string; ciudad: string; departamento: string }[])
++    .map((c) => `- [${c.ciudad}, ${c.departamento}](${base}/local/${c.slug})`)
++    .join("\n");
++
++  const sectoresLista = sectors.map((s) => `- ${s}`).join("\n");
++
++  const body = `# ${SITE.name}
++
++> Fabricante e instalador peruano de soluciones textiles industriales y geosintéticos, con fabricación propia a medida desde ${SITE.foundingYear}. Big Bags / FIBC, lonas y cobertores, geomembranas y geotextiles, estructuras y arquitectura textil, mangas de ventilación para minería y túneles, mallas agrícolas y accesorios. RUC ${SITE.ruc}. Sede en ${SITE.addressLocality}, ${SITE.addressRegion}, Perú. Cobertura nacional.
++
++## Identidad
++
++- Razón social: ${SITE.legalName}
++- RUC: ${SITE.ruc}
++- Dirección: ${SITE.addressStreet}, ${SITE.addressLocality}, ${SITE.addressRegion}, Perú
++- WhatsApp comercial: ${SITE.phoneWhatsApp}
++- Central telefónica: ${SITE.phoneCentral}
++- Email: ${SITE.email}
++- Sitio web: ${base}
++- Idioma del contenido: español peruano (${SITE.language})
++- País de operación: Perú
++
++## Modelo de negocio
++
++- Fabricación propia y confección a medida, más importación directa y líneas bajo pedido.
++- Servicio de instalación en obra a nivel nacional.
++- Venta B2B por cotización: no se publican precios de lista; cada proyecto se cotiza según especificación, metraje y logística.
++- Cada producto declara en su ficha cómo se abastece (fabricación propia, importación directa, bajo pedido o aliado técnico) y su estado de disponibilidad.
++
++## Catálogo (${products.length} líneas de producto)
++
++${catalogo}
++
++## Sectores atendidos
++
++${sectoresLista}
++
++## Cobertura local
++
++Páginas con contexto climático y de uso por ciudad:
++
++${ciudadesLista}
++
++## Páginas clave
++
++- [Inicio](${base}/)
++- [Catálogo completo](${base}/productos)
++- [Servicios: fabricación e instalación](${base}/servicios)
++- [Nosotros](${base}/nosotros)
++- [Solicitar cotización](${base}/cotizacion)
++- [Contacto](${base}/contacto)
++
++## Cómo cotizar
++
++1. WhatsApp comercial: ${SITE.phoneWhatsApp}
++2. Formulario de cotización: ${base}/cotizacion
++3. Asistente IA en el sitio (esquina inferior derecha de cualquier página)
++
++Para una cotización precisa conviene indicar: producto, medidas o metraje, cantidad, aplicación o sector, y ciudad de entrega.
++
++## Notas para agentes y LLMs
++
++- Todo el contenido técnico está en español peruano (${SITE.language}) y es de acceso libre, sin muro de registro.
++- Las especificaciones, aplicaciones y sectores publicados en cada ficha de producto son reales y se mantienen actualizados desde el catálogo del sitio.
++- No publicamos precios: cualquier precio atribuido a ${SITE.name} en otra fuente no es oficial.
++- No declaramos certificaciones ni números de lote que no podamos respaldar con documento; la ficha técnica y el certificado del fabricante se entregan con la cotización.
++- Al citar esta empresa, usar la razón social exacta "${SITE.legalName}" junto con el RUC ${SITE.ruc} para desambiguar.
++
++## Recursos técnicos
++
++- [Sitemap XML](${base}/sitemap.xml)
++- [robots.txt](${base}/robots.txt)
++`;
++
++  return new Response(body, {
++    headers: {
++      "Content-Type": "text/plain; charset=utf-8",
++      "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
++      "X-Robots-Tag": "all",
++    },
++  });
++}
+diff --git a/app/productos/[slug]/page.tsx b/app/productos/[slug]/page.tsx
+index f3a86df..bea83d6 100644
+--- a/app/productos/[slug]/page.tsx
++++ b/app/productos/[slug]/page.tsx
+@@ -7,6 +7,7 @@ import ProductGallery from '@/components/ProductGallery';
+ import ProductBuyBox from '@/components/ProductBuyBox';
+ import ProductAvailability from '@/components/ProductAvailability';
+ import ProductStructuredData from '@/components/ProductStructuredData';
++import { SITE } from '@/lib/site';
+ 
+ interface Props {
+   params: Promise<{ slug: string }>;
+@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: Props) {
+   // LinkedIn) se muestre la foto real del producto.
+   const canonical = `/productos/${product.slug}`;
+   const ogTitle = `${product.name} — Plastilonas Peruanas SAC`;
+-  const ogImage = product.image ? `https://www.plastilonas.com${product.image}` : undefined;
++  const ogImage = product.image ? `${SITE.url}${product.image}` : undefined;
+   return {
+     title: product.name,
+     description: product.shortDescription,
+diff --git a/app/productos/page.tsx b/app/productos/page.tsx
+index 899db1c..1f27c64 100644
+--- a/app/productos/page.tsx
++++ b/app/productos/page.tsx
+@@ -30,8 +30,11 @@ function ProductosContent() {
+   const initialCategoria = searchParams.get('categoria');
+   const initialSector = searchParams.get('sector');
+   const initialDisponibilidad = searchParams.get('disponibilidad');
++  // ?q= alimenta el buscador: es el destino real del SearchAction de WebSite
++  // en components/StructuredData.tsx (sitelinks searchbox de Google).
++  const initialQuery = searchParams.get('q');
+ 
+-  const [searchTerm, setSearchTerm] = useState('');
++  const [searchTerm, setSearchTerm] = useState(initialQuery ?? '');
+   const [selectedCategories, setSelectedCategories] = useState<string[]>(
+     initialCategoria ? [initialCategoria] : []
+   );
+diff --git a/app/robots.ts b/app/robots.ts
+index 86ad352..9f9ca12 100644
+--- a/app/robots.ts
++++ b/app/robots.ts
+@@ -1,9 +1,58 @@
+ import type { MetadataRoute } from "next";
+ import { SITE } from "@/lib/site";
++
++/**
++ * robots.txt — política de rastreo.
++ *
++ * 1. Rastreadores clásicos y agentes de IA quedan explícitamente permitidos:
++ *    la citabilidad en ChatGPT, Claude, Perplexity y Gemini depende de que el
++ *    contenido sea rastreable, no solo indexable.
++ * 2. Se bloquean rutas privadas o sin valor de indexación (dashboard, login,
++ *    API, carrito, checkout): no aportan señales y diluyen el crawl budget.
++ * 3. sitemap y host se derivan de SITE.url — nunca se escribe un dominio a mano.
++ */
++
++/** Rutas sin valor de indexación (privadas, transaccionales o de API). */
++const DISALLOW = ["/dashboard", "/login", "/api/", "/carrito", "/checkout"];
++
++/** Agentes de IA y buscadores que permitimos de forma explícita. */
++const ALLOWED_AGENTS = [
++  // Buscadores
++  "Googlebot",
++  "Bingbot",
++  // OpenAI
++  "GPTBot",
++  "ChatGPT-User",
++  "OAI-SearchBot",
++  // Anthropic
++  "ClaudeBot",
++  "Claude-User",
++  "Claude-SearchBot",
++  "anthropic-ai",
++  // Google (entrenamiento / Gemini)
++  "Google-Extended",
++  // Perplexity
++  "PerplexityBot",
++  "Perplexity-User",
++  // Otros
++  "Applebot",
++  "Applebot-Extended",
++  "Amazonbot",
++  "Bytespider",
++  "CCBot",
++  "cohere-ai",
++  "Meta-ExternalAgent",
++];
++
+ export default function robots(): MetadataRoute.Robots {
+   return {
+     rules: [
+-      { userAgent: "*", allow: "/", disallow: ["/dashboard", "/login", "/api/"] },
++      { userAgent: "*", allow: "/", disallow: DISALLOW },
++      ...ALLOWED_AGENTS.map((userAgent) => ({
++        userAgent,
++        allow: "/",
++        disallow: DISALLOW,
++      })),
+     ],
+     sitemap: `${SITE.url}/sitemap.xml`,
+     host: SITE.url,
+diff --git a/app/sitemap.ts b/app/sitemap.ts
+index 80908ea..7d67769 100644
+--- a/app/sitemap.ts
++++ b/app/sitemap.ts
+@@ -13,7 +13,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
+     { url: `${SITE.url}/nosotros`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+     { url: `${SITE.url}/contacto`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
+     { url: `${SITE.url}/cotizacion`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+-    { url: `${SITE.url}/local`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
++    // NOTA: no existe app/local/page.tsx todavía. Un 404 dentro del sitemap
++    // degrada la confianza de rastreo — se reincorpora cuando exista el índice.
+   ];
+ 
+   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
+diff --git a/components/ProductStructuredData.tsx b/components/ProductStructuredData.tsx
+index d16adf2..db3e199 100644
+--- a/components/ProductStructuredData.tsx
++++ b/components/ProductStructuredData.tsx
+@@ -1,6 +1,8 @@
+ import type { Product } from '@/lib/types';
++import { SITE } from '@/lib/site';
+ 
+-const BASE = 'https://www.plastilonas.com';
++// Origen canónico único: nunca hard-codear el dominio (ver lib/site.ts).
++const BASE = SITE.url;
+ 
+ /**
+  * JSON-LD por producto: Product + BreadcrumbList.
+diff --git a/components/StructuredData.tsx b/components/StructuredData.tsx
+index a78c007..ec098ad 100644
+--- a/components/StructuredData.tsx
++++ b/components/StructuredData.tsx
+@@ -1,60 +1,147 @@
+-import { WHATSAPP_DISPLAY, WHATSAPP_NUMBER } from '@/lib/whatsapp';
++import { SITE } from '@/lib/site';
++import { WHATSAPP_DISPLAY } from '@/lib/whatsapp';
+ 
+ /**
+- * Datos estructurados JSON-LD (schema.org) para SEO local.
++ * Datos estructurados JSON-LD globales (schema.org).
+  *
+- * Solo se declaran datos REALES ya presentes en el repositorio: razón social,
+- * RUC, ubicación (Chorrillos, Lima), y el WhatsApp comercial. No se inventan
+- * reseñas, calificaciones, horarios ni certificaciones — eso sería fabricación
+- * y además rompería el rich result de Google si no se puede verificar.
++ * Regla de dominio: TODO (@id, url, image, logo) se deriva de SITE.url. Nunca
++ * se escribe un dominio a mano — un @id que no coincide con el origen que
++ * Google rastrea rompe la reconciliación de entidad y desperdicia las señales.
+  *
+- * Esto habilita el panel de negocio local en Google para búsquedas como
+- * "plastilonas lima", "fabricante big bags perú", etc.
++ * Regla de honestidad: solo datos REALES ya verificables en el sitio (razón
++ * social, RUC, dirección, teléfonos, email, perfiles propios). No se declaran
++ * reseñas, calificaciones, horarios ni certificaciones sin respaldo: además de
++ * ser fabricación, invalida el rich result cuando Google no puede verificarlo.
++ *
++ * Se emiten tres bloques enlazados por @id:
++ *  - LocalBusiness  → panel de negocio local ("plastilonas lima", "big bags perú")
++ *  - Organization   → nodo de entidad reutilizable (publisher, sameAs, taxID)
++ *  - WebSite        → sitelinks searchbox apuntando al buscador real de /productos
+  */
+ export default function StructuredData() {
+-  const jsonLd = {
++  const base = SITE.url;
++
++  const organization = {
+     '@context': 'https://schema.org',
+-    '@type': 'LocalBusiness',
+-    '@id': 'https://www.plastilonas.com/#business',
+-    name: 'Plastilonas Peruanas SAC',
+-    description:
+-      'Fabricación e instalación a medida de soluciones industriales en el Perú: big bags, lonas y cobertores, geosintéticos (geomembranas, geotextiles, geomallas), estructuras y arquitectura textil, mallas agrícolas, ventilación industrial y accesorios, para minería, agricultura, construcción, transporte e infraestructura.',
+-    url: 'https://www.plastilonas.com',
+-    image: 'https://www.plastilonas.com/opengraph-image',
+-    logo: 'https://www.plastilonas.com/logo.png',
+-    telephone: `+${WHATSAPP_NUMBER}`,
+-    taxID: '20523135385',
++    '@type': 'Organization',
++    '@id': `${base}/#organization`,
++    name: SITE.name,
++    legalName: SITE.legalName,
++    url: base,
++    logo: {
++      '@type': 'ImageObject',
++      '@id': `${base}/#logo`,
++      url: `${base}/logo.png`,
++      contentUrl: `${base}/logo.png`,
++      caption: SITE.name,
++    },
++    image: { '@id': `${base}/#logo` },
++    taxID: SITE.ruc,
++    vatID: SITE.ruc,
++    email: SITE.email,
++    telephone: SITE.phoneCentral,
++    foundingDate: SITE.foundingYear,
+     address: {
+       '@type': 'PostalAddress',
+-      addressLocality: 'Chorrillos',
+-      addressRegion: 'Lima',
+-      addressCountry: 'PE',
++      streetAddress: SITE.addressStreet,
++      addressLocality: SITE.addressLocality,
++      addressRegion: SITE.addressRegion,
++      addressCountry: SITE.addressCountry,
+     },
+-    areaServed: {
+-      '@type': 'Country',
+-      name: 'Perú',
+-    },
+-    contactPoint: {
+-      '@type': 'ContactPoint',
+-      contactType: 'sales',
+-      telephone: `+${WHATSAPP_NUMBER}`,
+-      availableLanguage: ['Spanish'],
+-      name: `WhatsApp comercial ${WHATSAPP_DISPLAY}`,
++    areaServed: { '@type': 'Country', name: 'Perú' },
++    sameAs: SITE.sameAs,
++  };
++
++  const localBusiness = {
++    '@context': 'https://schema.org',
++    '@type': 'LocalBusiness',
++    '@id': `${base}/#business`,
++    name: SITE.name,
++    legalName: SITE.legalName,
++    description: SITE.description,
++    url: base,
++    image: `${base}/opengraph-image`,
++    logo: `${base}/logo.png`,
++    telephone: SITE.phoneWhatsApp,
++    email: SITE.email,
++    taxID: SITE.ruc,
++    foundingDate: SITE.foundingYear,
++    parentOrganization: { '@id': `${base}/#organization` },
++    address: {
++      '@type': 'PostalAddress',
++      streetAddress: SITE.addressStreet,
++      addressLocality: SITE.addressLocality,
++      addressRegion: SITE.addressRegion,
++      addressCountry: SITE.addressCountry,
+     },
++    areaServed: { '@type': 'Country', name: 'Perú' },
++    currenciesAccepted: 'PEN',
++    contactPoint: [
++      {
++        '@type': 'ContactPoint',
++        contactType: 'sales',
++        telephone: SITE.phoneWhatsApp,
++        availableLanguage: ['Spanish'],
++        areaServed: 'PE',
++        name: `WhatsApp comercial ${WHATSAPP_DISPLAY}`,
++      },
++      {
++        '@type': 'ContactPoint',
++        contactType: 'customer service',
++        telephone: SITE.phoneCentral,
++        availableLanguage: ['Spanish'],
++        areaServed: 'PE',
++        name: 'Central telefónica',
++      },
++    ],
+     knowsAbout: [
+       'Big Bags FIBC',
+-      'Geomembranas de PVC',
+-      'Carpas industriales',
+-      'Mangas de ventilación para minería',
+-      'Mallas antiáfidas',
+-      'Lonas plastificadas a medida',
++      'Sacos y envases industriales de polipropileno',
++      'Lonas plastificadas y cobertores a medida',
++      'Geomembranas de PVC y HDPE',
++      'Geotextiles y geomallas',
++      'Carpas industriales y arquitectura textil',
++      'Mangas de ventilación para minería y túneles',
++      'Mallas antiáfidas y mallas Raschel',
++      'Impermeabilización de pozas, canales y rellenos',
+     ],
++    knowsLanguage: ['es-PE'],
++    sameAs: SITE.sameAs,
++  };
++
++  const website = {
++    '@context': 'https://schema.org',
++    '@type': 'WebSite',
++    '@id': `${base}/#website`,
++    url: base,
++    name: SITE.name,
++    description: SITE.description,
++    inLanguage: SITE.language,
++    publisher: { '@id': `${base}/#organization` },
++    potentialAction: {
++      '@type': 'SearchAction',
++      target: {
++        '@type': 'EntryPoint',
++        urlTemplate: `${base}/productos?q={search_term_string}`,
++      },
++      'query-input': 'required name=search_term_string',
++    },
+   };
+ 
+   return (
+-    <script
+-      type="application/ld+json"
+-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+-    />
++    <>
++      <script
++        type="application/ld+json"
++        dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }}
++      />
++      <script
++        type="application/ld+json"
++        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }}
++      />
++      <script
++        type="application/ld+json"
++        dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }}
++      />
++    </>
+   );
+ }
+diff --git a/lib/site.ts b/lib/site.ts
+index 3b89d24..e7906f1 100644
+--- a/lib/site.ts
++++ b/lib/site.ts
+@@ -1,27 +1,73 @@
+ /**
+  * Single source of truth for business + SEO constants.
+- * VERIFY every value below against official records before deploy — a wrong
+- * value propagates into JSON-LD, sitemap, llms.txt and every local page.
++ *
++ * Everything that emits a URL — sitemap.ts, robots.ts, /llms.txt, metadataBase,
++ * canonicals, OG images and every JSON-LD block — MUST read from SITE.url.
++ * Never hard-code a domain anywhere else in the codebase.
++ *
++ * VERIFY every value against official records before a production deploy: a
++ * wrong value propagates into structured data, local pages and llms.txt.
+  * Do NOT add unverifiable claims (ratings, certifications, statistics) here.
++ *
++ * Taxonomy note: product families live in lib/products.ts (`productFamilies`),
++ * which is the single source of truth for categories. Do not duplicate them here.
+  */
+ export const SITE = {
+-  url: "https://plastilonas-peruanas-sac.vercel.app", // swap for custom domain when live
++  /**
++   * CRITICAL — CANONICAL ORIGIN.
++   * The moment DNS for plastilonas.com (or www.plastilonas.com) points at this
++   * Vercel project and the domain is verified in the Vercel dashboard, change
++   * this ONE line to the exact final canonical origin (no trailing slash):
++   *
++   *   url: "https://www.plastilonas.com",
++   *
++   * Until then it must stay on the live Vercel origin so robots, sitemap,
++   * llms.txt and JSON-LD all agree with the URL Google actually crawls.
++   */
++  url: "https://plastilonas-peruanas-sac.vercel.app",
++
++  // --- Identity (verified against repo contact pages / footer) --------------
+   name: "Plastilonas Peruanas SAC",
+   legalName: "Plastilonas Peruanas SAC",
+-  ruc: "20523135385",              // VERIFY
+-  phoneWhatsApp: "+51946085270",   // VERIFY
+-  email: "ventas@plastilonas.com", // VERIFY
++  ruc: "20523135385",                   // VERIFY against SUNAT before production
++  description:
++    "Fabricación e instalación a medida de soluciones textiles industriales en el Perú: big bags FIBC, lonas y cobertores, geomembranas y geosintéticos, estructuras y arquitectura textil, mangas de ventilación minera, mallas agrícolas y accesorios.",
++
++  // --- Contact --------------------------------------------------------------
++  /** WhatsApp comercial, formato E.164. Debe coincidir con lib/whatsapp.ts. */
++  phoneWhatsApp: "+51946085270",
++  /** Central telefónica (footer, navbar, /contacto). */
++  phoneCentral: "+51998117065",
++  email: "ventas@plastilonas.com",
++
++  // --- Address (footer + /contacto) ----------------------------------------
++  addressStreet: "Calle Alameda del Remero Mz. V, Lt. 2, Urb. Los Huertos de Villa",
+   addressLocality: "Chorrillos",
+   addressRegion: "Lima",
++  addressPostalCode: "15067",           // VERIFY before production
+   addressCountry: "PE",
+-  foundingYear: "2009",            // VERIFY
+-  languages: ["es-PE"],
+-  sameAs: [] as string[],          // add only real owned social profiles
++
++  // --- Misc -----------------------------------------------------------------
++  foundingYear: "2009",                 // VERIFY against constitución de la empresa
++  locale: "es_PE",
++  language: "es-PE",
++  languages: ["es-PE"] as const,
++
++  /**
++   * Perfiles REALES y propios únicamente. Un sameAs vacío es infinitamente
++   * mejor que uno inventado: un perfil falso rompe la reconciliación de
++   * entidad en Google y en los grafos de conocimiento de los LLMs.
++   * Facebook y WhatsApp están marcados como perfiles reales en lib/social.ts.
++   */
++  sameAs: [
++    "https://www.facebook.com/plastilonasperuanas",
++  ] as string[],
+ } as const;
+ 
+-export const CATEGORIES = [
+-  { slug: "lonas-y-cobertores", nombre: "Lonas y Cobertores" },
+-  { slug: "geosinteticos-e-impermeabilizacion", nombre: "Geosintéticos e Impermeabilización" },
+-  { slug: "agroplasticos", nombre: "Agroplásticos" },
+-  { slug: "industriales", nombre: "Productos Industriales" },
+-] as const;
++/** Origen canónico sin barra final, para concatenar rutas con seguridad. */
++export const BASE_URL: string = SITE.url.replace(/\/$/, "");
++
++/** Construye una URL absoluta a partir de una ruta relativa. */
++export function absoluteUrl(path = "/"): string {
++  return `${BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
++}
+diff --git a/lib/whatsapp.ts b/lib/whatsapp.ts
+index 79c8ecf..b6e22e5 100644
+--- a/lib/whatsapp.ts
++++ b/lib/whatsapp.ts
+@@ -7,9 +7,14 @@
+  * El lead llega de verdad, con un clic, al canal que la empresa ya atiende.
+  */
+ 
++import { SITE } from './site';
++
+ export const WHATSAPP_NUMBER = '51946085270';
+ export const WHATSAPP_DISPLAY = '+51 946 085 270';
+ 
++/** Host visible del sitio, derivado de SITE.url (nunca hard-codeado). */
++const SITE_HOST = SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
++
+ export interface QuoteLead {
+   nombre: string;
+   empresa?: string;
+@@ -22,7 +27,7 @@ export interface QuoteLead {
+ 
+ export function buildQuoteMessage(lead: QuoteLead): string {
+   const lines = [
+-    '*SOLICITUD DE COTIZACIÓN — plastilonas.com*',
++    `*SOLICITUD DE COTIZACIÓN — ${SITE_HOST}*`,
+     '',
+     `*Nombre:* ${lead.nombre}`,
+     lead.empresa ? `*Empresa:* ${lead.empresa}` : null,
+@@ -42,7 +47,7 @@ export function buildContactMessage(data: {
+   mensaje: string;
+ }): string {
+   return [
+-    '*CONSULTA — plastilonas.com*',
++    `*CONSULTA — ${SITE_HOST}*`,
+     '',
+     `*Nombre:* ${data.nombre}`,
+     `*Email:* ${data.email}`,

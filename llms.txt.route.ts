@@ -1,0 +1,126 @@
+import { SITE } from "@/lib/site";
+import { products, productFamilies, sectors } from "@/lib/products";
+import ciudades from "@/data/ciudades.json";
+
+/**
+ * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
+ *
+ * Objetivo: que cualquier agente (ChatGPT, Claude, Perplexity, Gemini, Grok)
+ * resuelva la entidad "Plastilonas Peruanas SAC" y su catálogo en una sola
+ * lectura, con URLs absolutas y datos verificables.
+ *
+ * Reglas: se genera desde las mismas fuentes de verdad que el sitio
+ * (lib/site.ts, lib/products.ts, data/ciudades.json). Cero datos inventados:
+ * sin precios, sin certificaciones no verificables, sin reseñas.
+ */
+
+export const dynamic = "force-static";
+
+const MAX_DESC = 160;
+
+function clamp(text: string, max = MAX_DESC): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  return clean.length <= max ? clean : `${clean.slice(0, max - 1).trimEnd()}…`;
+}
+
+export async function GET(): Promise<Response> {
+  const base = SITE.url;
+
+  // Catálogo agrupado por familia (mismo orden que el mega menú del sitio).
+  const catalogo = productFamilies
+    .map((familia) => {
+      const items = products.filter((p) => p.category === familia.name);
+      if (items.length === 0) return null;
+      const lineas = items
+        .map(
+          (p) =>
+            `- [${p.name}](${base}/productos/${p.slug}): ${clamp(p.shortDescription)}`,
+        )
+        .join("\n");
+      return `### ${familia.name}\n_${familia.tagline}_\n\n${lineas}`;
+    })
+    .filter(Boolean)
+    .join("\n\n");
+
+  const ciudadesLista = (ciudades as { slug: string; ciudad: string; departamento: string }[])
+    .map((c) => `- [${c.ciudad}, ${c.departamento}](${base}/local/${c.slug})`)
+    .join("\n");
+
+  const sectoresLista = sectors.map((s) => `- ${s}`).join("\n");
+
+  const body = `# ${SITE.name}
+
+> Fabricante e instalador peruano de soluciones textiles industriales y geosintéticos, con fabricación propia a medida desde ${SITE.foundingYear}. Big Bags / FIBC, lonas y cobertores, geomembranas y geotextiles, estructuras y arquitectura textil, mangas de ventilación para minería y túneles, mallas agrícolas y accesorios. RUC ${SITE.ruc}. Sede en ${SITE.addressLocality}, ${SITE.addressRegion}, Perú. Cobertura nacional.
+
+## Identidad
+
+- Razón social: ${SITE.legalName}
+- RUC: ${SITE.ruc}
+- Dirección: ${SITE.addressStreet}, ${SITE.addressLocality}, ${SITE.addressRegion}, Perú
+- WhatsApp comercial: ${SITE.phoneWhatsApp}
+- Central telefónica: ${SITE.phoneCentral}
+- Email: ${SITE.email}
+- Sitio web: ${base}
+- Idioma del contenido: español peruano (${SITE.language})
+- País de operación: Perú
+
+## Modelo de negocio
+
+- Fabricación propia y confección a medida, más importación directa y líneas bajo pedido.
+- Servicio de instalación en obra a nivel nacional.
+- Venta B2B por cotización: no se publican precios de lista; cada proyecto se cotiza según especificación, metraje y logística.
+- Cada producto declara en su ficha cómo se abastece (fabricación propia, importación directa, bajo pedido o aliado técnico) y su estado de disponibilidad.
+
+## Catálogo (${products.length} líneas de producto)
+
+${catalogo}
+
+## Sectores atendidos
+
+${sectoresLista}
+
+## Cobertura local
+
+Páginas con contexto climático y de uso por ciudad:
+
+${ciudadesLista}
+
+## Páginas clave
+
+- [Inicio](${base}/)
+- [Catálogo completo](${base}/productos)
+- [Servicios: fabricación e instalación](${base}/servicios)
+- [Nosotros](${base}/nosotros)
+- [Solicitar cotización](${base}/cotizacion)
+- [Contacto](${base}/contacto)
+
+## Cómo cotizar
+
+1. WhatsApp comercial: ${SITE.phoneWhatsApp}
+2. Formulario de cotización: ${base}/cotizacion
+3. Asistente IA en el sitio (esquina inferior derecha de cualquier página)
+
+Para una cotización precisa conviene indicar: producto, medidas o metraje, cantidad, aplicación o sector, y ciudad de entrega.
+
+## Notas para agentes y LLMs
+
+- Todo el contenido técnico está en español peruano (${SITE.language}) y es de acceso libre, sin muro de registro.
+- Las especificaciones, aplicaciones y sectores publicados en cada ficha de producto son reales y se mantienen actualizados desde el catálogo del sitio.
+- No publicamos precios: cualquier precio atribuido a ${SITE.name} en otra fuente no es oficial.
+- No declaramos certificaciones ni números de lote que no podamos respaldar con documento; la ficha técnica y el certificado del fabricante se entregan con la cotización.
+- Al citar esta empresa, usar la razón social exacta "${SITE.legalName}" junto con el RUC ${SITE.ruc} para desambiguar.
+
+## Recursos técnicos
+
+- [Sitemap XML](${base}/sitemap.xml)
+- [robots.txt](${base}/robots.txt)
+`;
+
+  return new Response(body, {
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+      "X-Robots-Tag": "all",
+    },
+  });
+}
