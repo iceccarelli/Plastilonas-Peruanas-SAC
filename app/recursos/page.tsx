@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowRight, Clock } from 'lucide-react';
 import { SITE } from '@/lib/site';
 import { articles, articleCategories } from '@/lib/articles';
+import { familyHrefByName } from '@/lib/families';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 
@@ -81,14 +82,17 @@ export default function RecursosIndexPage() {
         texto oficial, se dice explícitamente en lugar de publicarlo como certeza.
       </p>
 
+      {/* Los chips enlazan a la página de familia: el silo de contenido y el
+          silo de catálogo deben alimentarse mutuamente, no vivir separados. */}
       <div className="mb-10 flex flex-wrap gap-2">
         {articleCategories.map((cat) => (
-          <span
+          <Link
             key={cat}
-            className="rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-600"
+            href={familyHrefByName(cat)}
+            className="rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-600 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
           >
             {cat}
-          </span>
+          </Link>
         ))}
       </div>
 
@@ -99,9 +103,12 @@ export default function RecursosIndexPage() {
             className="group rounded-3xl border border-gray-100 p-7 transition-all hover:border-[#059669]/40"
           >
             <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-              <span className="font-medium uppercase tracking-[0.12em] text-[#059669]">
+              <Link
+                href={familyHrefByName(a.category)}
+                className="font-medium uppercase tracking-[0.12em] text-[#059669] hover:underline"
+              >
                 {a.category}
-              </span>
+              </Link>
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 {a.readingMinutes} min

@@ -32,6 +32,19 @@ describe('silo /recursos: integridad', () => {
     }
   });
 
+  it('los metaTitle y las descripciones son únicos: nada de canibalizar', () => {
+    const titles = articles.map((a) => a.metaTitle);
+    const descs = articles.map((a) => a.description);
+    expect(new Set(titles).size, 'metaTitle duplicado').toBe(titles.length);
+    expect(new Set(descs).size, 'description duplicada').toBe(descs.length);
+  });
+
+  it('cada artículo enlaza al menos un producto: el contenido debe vender', () => {
+    for (const a of articles) {
+      expect(a.relatedProducts.length, a.slug).toBeGreaterThanOrEqual(1);
+    }
+  });
+
   it('las fechas son ISO y dateModified nunca es anterior a datePublished', () => {
     for (const a of articles) {
       expect(a.datePublished).toMatch(/^\d{4}-\d{2}-\d{2}$/);
