@@ -51,7 +51,7 @@ export default function FamilyCarousel({ families }: { families: Fam[] }) {
           <Link
             key={fam.slug}
             data-card
-            href={`/productos?categoria=${encodeURIComponent(fam.name)}`}
+            href={`/productos/familia/${fam.slug}`}
             className="group shrink-0 basis-[82%] sm:basis-[46%] lg:basis-[31%] bg-white border border-gray-100 hover:border-[#059669] hover:shadow-lg rounded-3xl p-6 flex items-center justify-between gap-4 transition-all duration-300"
             style={{ scrollSnapAlign: 'start' }}
           >

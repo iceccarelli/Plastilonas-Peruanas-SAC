@@ -38,7 +38,7 @@ export async function GET(): Promise<Response> {
             `- [${p.name}](${base}/productos/${p.slug}): ${clamp(p.shortDescription)}`,
         )
         .join("\n");
-      return `### ${familia.name}\n_${familia.tagline}_\n\n${lineas}`;
+      return `### [${familia.name}](${base}/productos/familia/${familia.slug})\n_${familia.tagline}_\n\n${lineas}`;
     })
     .filter(Boolean)
     .join("\n\n");

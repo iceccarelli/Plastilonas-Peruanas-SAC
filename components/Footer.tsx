@@ -9,11 +9,11 @@ export default function Footer() {
 
   const sections: FSection[] = [
     { title: 'PRODUCTOS', links: [
-      { label: 'Envases y Embalaje', href: '/productos?categoria=Envases%20y%20Embalaje' },
-      { label: 'Lonas y Cobertores', href: '/productos?categoria=Lonas%20y%20Cobertores' },
-      { label: 'Geosintéticos e Impermeabilización', href: '/productos?categoria=Geosint%C3%A9ticos%20e%20Impermeabilizaci%C3%B3n' },
-      { label: 'Estructuras y Arquitectura Textil', href: '/productos?categoria=Estructuras%20y%20Arquitectura%20Textil' },
-      { label: 'Ventilación Industrial', href: '/productos?categoria=Ventilaci%C3%B3n%20Industrial' },
+      { label: 'Envases y Embalaje', href: '/productos/familia/envases-embalaje' },
+      { label: 'Lonas y Cobertores', href: '/productos/familia/lonas-cobertores' },
+      { label: 'Geosintéticos e Impermeabilización', href: '/productos/familia/geosinteticos' },
+      { label: 'Estructuras y Arquitectura Textil', href: '/productos/familia/estructuras-arquitectura-textil' },
+      { label: 'Ventilación Industrial', href: '/productos/familia/ventilacion-industrial' },
       { label: 'Ver catálogo completo →', href: '/productos' },
     ]},
     { title: 'EMPRESA', links: [
@@ -80,11 +80,11 @@ export default function Footer() {
           <div>
             <div className="font-semibold text-white mb-4 tracking-wide text-sm">PRODUCTOS</div>
             <ul className="space-y-[13px] text-sm">
-              <li><Link href="/productos?categoria=Envases%20y%20Embalaje" className="hover:text-white transition-colors">Envases y Embalaje</Link></li>
-              <li><Link href="/productos?categoria=Lonas%20y%20Cobertores" className="hover:text-white transition-colors">Lonas y Cobertores</Link></li>
-              <li><Link href="/productos?categoria=Geosint%C3%A9ticos%20e%20Impermeabilizaci%C3%B3n" className="hover:text-white transition-colors">Geosintéticos e Impermeabilización</Link></li>
-              <li><Link href="/productos?categoria=Estructuras%20y%20Arquitectura%20Textil" className="hover:text-white transition-colors">Estructuras y Arquitectura Textil</Link></li>
-              <li><Link href="/productos?categoria=Ventilaci%C3%B3n%20Industrial" className="hover:text-white transition-colors">Ventilación Industrial</Link></li>
+              <li><Link href="/productos/familia/envases-embalaje" className="hover:text-white transition-colors">Envases y Embalaje</Link></li>
+              <li><Link href="/productos/familia/lonas-cobertores" className="hover:text-white transition-colors">Lonas y Cobertores</Link></li>
+              <li><Link href="/productos/familia/geosinteticos" className="hover:text-white transition-colors">Geosintéticos e Impermeabilización</Link></li>
+              <li><Link href="/productos/familia/estructuras-arquitectura-textil" className="hover:text-white transition-colors">Estructuras y Arquitectura Textil</Link></li>
+              <li><Link href="/productos/familia/ventilacion-industrial" className="hover:text-white transition-colors">Ventilación Industrial</Link></li>
               <li><Link href="/productos" className="hover:text-white transition-colors text-white/60">Ver catálogo completo →</Link></li>
             </ul>
           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { familyHrefByName } from '@/lib/families';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -27,7 +28,7 @@ const navLinks = [
 // Eje 1 (por categoría) y Eje 2 (por sector) se derivan del catálogo, de modo
 // que agregar una familia o un sector en lib/products.ts actualiza el menú.
 const familyHref = (name: string) =>
-  `/productos?categoria=${encodeURIComponent(name)}`;
+  familyHrefByName(name);
 const sectorHref = (name: string) =>
   `/productos?sector=${encodeURIComponent(name)}`;
 

@@ -180,7 +180,7 @@ export default function LocalIndexPage() {
           {productFamilies.map((f) => (
             <Link
               key={f.slug}
-              href={`/productos?categoria=${encodeURIComponent(f.name)}`}
+              href={`/productos/familia/${f.slug}`}
               className="rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-700 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
             >
               {f.name}
