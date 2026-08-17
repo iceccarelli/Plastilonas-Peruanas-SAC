@@ -1,4 +1,22 @@
+import type { Metadata } from 'next';
+import { SITE } from '@/lib/site';
 import Link from 'next/link';
+
+const TITLE = `Nosotros: fabricantes peruanos desde ${SITE.foundingYear}`;
+const DESCRIPTION = `${SITE.legalName} (RUC ${SITE.ruc}) fabrica e instala soluciones textiles industriales desde su planta en ${SITE.addressLocality}, ${SITE.addressRegion}. Historia, capacidad de fabricación propia y forma de trabajo.`;
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: '/nosotros' },
+  openGraph: {
+    title: `${TITLE} | ${SITE.name}`,
+    description: DESCRIPTION,
+    url: `${SITE.url}/nosotros`,
+    locale: SITE.locale,
+    type: 'website',
+  },
+};
 
 export default function NosotrosPage() {
   return (

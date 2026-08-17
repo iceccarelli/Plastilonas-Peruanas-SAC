@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+import { SITE } from '@/lib/site';
 import Link from 'next/link';
 import { ArrowRight, Phone, ShieldCheck, MapPin, Truck, FileText } from 'lucide-react';
 import { products, productFamilies, sectors } from '@/lib/products';
@@ -11,6 +13,25 @@ import SectionHeading from '@/components/SectionHeading';
 import MachineryGallery from '@/components/MachineryGallery';
 import { Reveal } from '@/components/Reveal';
 import CountUp from '@/components/CountUp';
+
+/**
+ * Metadata propia de la home. Sin esto heredaba el title/description por
+ * defecto del layout y no declaraba canonical — dos páginas con la misma
+ * descripción compiten entre sí y el canonical queda a criterio de Google.
+ */
+export const metadata: Metadata = {
+  title: 'Fabricante de big bags, lonas, geomembranas y mallas en Perú',
+  description:
+    `${SITE.name} fabrica e instala a medida soluciones textiles industriales en el Perú desde ${SITE.foundingYear}: big bags FIBC, lonas y cobertores, geomembranas y geotextiles, carpas, mangas de ventilación minera y mallas agrícolas. Un solo proveedor, despacho nacional.`,
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: `${SITE.name} | Fabricante de soluciones textiles industriales en el Perú`,
+    description: SITE.description,
+    url: SITE.url,
+    locale: SITE.locale,
+    type: 'website',
+  },
+};
 
 export default function Home() {
   const featuredProducts = [...products].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));

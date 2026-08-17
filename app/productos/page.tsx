@@ -17,6 +17,9 @@ import ProductRotator from '@/components/ProductRotator';
 import FilterControls from '@/components/FilterControls';
 import FilterSheet from '@/components/FilterSheet';
 import { motion, AnimatePresence } from 'framer-motion';
+import { JsonLd } from '@/components/JsonLd';
+import { SITE } from '@/lib/site';
+import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 
 // Orden de los estados de disponibilidad para el filtro (estilo AWS: el estado
 // de la oferta es un eje de navegación de primera clase).
@@ -278,10 +281,44 @@ function ProductosContent() {
   );
 }
 
+// JSON-LD del catálogo. Va fuera del Suspense para que esté siempre en el HTML
+// inicial: un ItemList de las 36 fichas le da a los buscadores y a los agentes
+// el mapa completo del portafolio desde una sola URL. Se emite aquí y no en
+// app/productos/layout.tsx porque ese layout también envuelve /productos/[slug],
+// donde este bloque sería ruido duplicado.
+const CATALOGO_URL = `${SITE.url}/productos`;
+
 export default function ProductosPage() {
   return (
-    <Suspense fallback={<div className="max-w-7xl mx-auto px-6 py-20 text-gray-400">Cargando catálogo…</div>}>
-      <ProductosContent />
-    </Suspense>
+    <>
+      <JsonLd
+        data={[
+          webPageSchema({
+            url: CATALOGO_URL,
+            name: `Catálogo de ${products.length} soluciones textiles industriales`,
+            type: 'CollectionPage',
+            breadcrumbId: `${CATALOGO_URL}#breadcrumb`,
+          }),
+          breadcrumbSchema(
+            [
+              { name: 'Inicio', url: `${SITE.url}/` },
+              { name: 'Catálogo', url: CATALOGO_URL },
+            ],
+            `${CATALOGO_URL}#breadcrumb`,
+          ),
+          itemListSchema({
+            url: CATALOGO_URL,
+            name: 'Catálogo Plastilonas Peruanas SAC',
+            items: products.map((p) => ({
+              name: p.name,
+              url: `${SITE.url}/productos/${p.slug}`,
+            })),
+          }),
+        ]}
+      />
+      <Suspense fallback={<div className="max-w-7xl mx-auto px-6 py-20 text-gray-400">Cargando catálogo…</div>}>
+        <ProductosContent />
+      </Suspense>
+    </>
   );
 }

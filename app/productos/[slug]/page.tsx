@@ -8,6 +8,9 @@ import ProductBuyBox from '@/components/ProductBuyBox';
 import ProductAvailability from '@/components/ProductAvailability';
 import ProductStructuredData from '@/components/ProductStructuredData';
 import { SITE } from '@/lib/site';
+import { productFaqs } from '@/lib/product-faq';
+import { JsonLd } from '@/components/JsonLd';
+import { faqSchema } from '@/lib/schema';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -60,6 +63,7 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
+  const faqs = productFaqs(product);
   const relatedProducts = products
     .filter(p => p.id !== product.id && (p.category === product.category || p.sector.some(s => product.sector.includes(s))))
     .slice(0, 3);
@@ -67,6 +71,9 @@ export default async function ProductDetailPage({ params }: Props) {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <ProductStructuredData product={product} />
+      {/* FAQPage derivado del catálogo (lib/product-faq.ts): cero respuestas
+          inventadas — cada una sale de un campo real del producto. */}
+      <JsonLd data={faqSchema(faqs, `${SITE.url}/productos/${product.slug}`)} />
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm mb-8 text-gray-500">
         <Link href="/productos" className="hover:text-[#059669]">Productos</Link>
@@ -163,6 +170,20 @@ export default async function ProductDetailPage({ params }: Props) {
             ))}
           </ul>
         </div>
+      </div>
+
+      {/* Preguntas frecuentes — el contenido visible debe coincidir con el
+          FAQPage emitido arriba; Google penaliza el schema sin contraparte visible. */}
+      <div className="mt-16 pt-10 border-t">
+        <h2 className="font-semibold tracking-tight text-2xl mb-6">Preguntas frecuentes sobre {product.name}</h2>
+        <dl className="space-y-6 max-w-3xl">
+          {faqs.map((f) => (
+            <div key={f.q}>
+              <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
+              <dd className="mt-1 text-gray-700">{f.a}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
 
       {/* Related Products */}

@@ -13,8 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE.url}/nosotros`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE.url}/contacto`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
     { url: `${SITE.url}/cotizacion`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    // NOTA: no existe app/local/page.tsx todavía. Un 404 dentro del sitemap
-    // degrada la confianza de rastreo — se reincorpora cuando exista el índice.
+    { url: `${SITE.url}/local`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
   ];
 
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
