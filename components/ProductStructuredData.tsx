@@ -1,6 +1,8 @@
 import type { Product } from '@/lib/types';
+import { SITE } from '@/lib/site';
 
-const BASE = 'https://www.plastilonas.com';
+// Origen canónico único: nunca hard-codear el dominio (ver lib/site.ts).
+const BASE = SITE.url;
 
 /**
  * JSON-LD por producto: Product + BreadcrumbList.

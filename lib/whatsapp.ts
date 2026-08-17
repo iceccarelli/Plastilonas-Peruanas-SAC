@@ -7,8 +7,13 @@
  * El lead llega de verdad, con un clic, al canal que la empresa ya atiende.
  */
 
+import { SITE } from './site';
+
 export const WHATSAPP_NUMBER = '51946085270';
 export const WHATSAPP_DISPLAY = '+51 946 085 270';
+
+/** Host visible del sitio, derivado de SITE.url (nunca hard-codeado). */
+const SITE_HOST = SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
 export interface QuoteLead {
   nombre: string;
@@ -22,7 +27,7 @@ export interface QuoteLead {
 
 export function buildQuoteMessage(lead: QuoteLead): string {
   const lines = [
-    '*SOLICITUD DE COTIZACIÓN — plastilonas.com*',
+    `*SOLICITUD DE COTIZACIÓN — ${SITE_HOST}*`,
     '',
     `*Nombre:* ${lead.nombre}`,
     lead.empresa ? `*Empresa:* ${lead.empresa}` : null,
@@ -42,7 +47,7 @@ export function buildContactMessage(data: {
   mensaje: string;
 }): string {
   return [
-    '*CONSULTA — plastilonas.com*',
+    `*CONSULTA — ${SITE_HOST}*`,
     '',
     `*Nombre:* ${data.nombre}`,
     `*Email:* ${data.email}`,

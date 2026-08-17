@@ -30,8 +30,11 @@ function ProductosContent() {
   const initialCategoria = searchParams.get('categoria');
   const initialSector = searchParams.get('sector');
   const initialDisponibilidad = searchParams.get('disponibilidad');
+  // ?q= alimenta el buscador: es el destino real del SearchAction de WebSite
+  // en components/StructuredData.tsx (sitelinks searchbox de Google).
+  const initialQuery = searchParams.get('q');
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialQuery ?? '');
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     initialCategoria ? [initialCategoria] : []
   );

@@ -7,6 +7,7 @@ import ProductGallery from '@/components/ProductGallery';
 import ProductBuyBox from '@/components/ProductBuyBox';
 import ProductAvailability from '@/components/ProductAvailability';
 import ProductStructuredData from '@/components/ProductStructuredData';
+import { SITE } from '@/lib/site';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: Props) {
   // LinkedIn) se muestre la foto real del producto.
   const canonical = `/productos/${product.slug}`;
   const ogTitle = `${product.name} — Plastilonas Peruanas SAC`;
-  const ogImage = product.image ? `https://www.plastilonas.com${product.image}` : undefined;
+  const ogImage = product.image ? `${SITE.url}${product.image}` : undefined;
   return {
     title: product.name,
     description: product.shortDescription,

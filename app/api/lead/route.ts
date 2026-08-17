@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { SITE } from '@/lib/site';
+
+/** Host visible del sitio, derivado de SITE.url (nunca hard-codeado). */
+const SITE_HOST = SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
 /**
  * Recibe un lead de cotización y lo reenvía al webhook de n8n.
@@ -29,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   const payload = {
     ...lead,
-    source: 'plastilonas.com/cotizacion',
+    source: `${SITE_HOST}/cotizacion`,
     receivedAt: new Date().toISOString(),
   };
 

@@ -9,6 +9,7 @@ import CartDrawer from '@/components/CartDrawer';
 import { Toaster } from 'sonner';
 import AuthProvider from '@/components/AuthProvider';
 import StructuredData from '@/components/StructuredData';
+import { SITE } from '@/lib/site';
 import Analytics from '@/components/Analytics';
 import WebPush from '@/components/WebPush';
 import ConsentBanner from '@/components/ConsentBanner';
@@ -59,7 +60,8 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://www.plastilonas.com'),
+  // Origen canónico único (lib/site.ts): alimenta canonicals, OG e imágenes.
+  metadataBase: new URL(SITE.url),
   openGraph: {
     title: 'Plastilonas Peruanas SAC | Soluciones Textiles Industriales — Fabricación e Importación Directa',
     description: 'Portafolio integral de soluciones textiles industriales en el Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
