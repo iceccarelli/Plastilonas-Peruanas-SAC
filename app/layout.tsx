@@ -62,6 +62,17 @@ export const metadata: Metadata = {
   },
   // Origen canónico único (lib/site.ts): alimenta canonicals, OG e imágenes.
   metadataBase: new URL(SITE.url),
+  // Verificación de propiedad en Search Console y Bing Webmaster Tools.
+  // Se emiten SOLO si la variable existe: una meta de verificación vacía o
+  // inventada no verifica nada y ensucia el <head>.
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+      : {}),
+    ...(process.env.BING_SITE_VERIFICATION
+      ? { other: { 'msvalidate.01': process.env.BING_SITE_VERIFICATION } }
+      : {}),
+  },
   openGraph: {
     title: 'Plastilonas Peruanas SAC | Soluciones Textiles Industriales — Fabricación e Importación Directa',
     description: 'Portafolio integral de soluciones textiles industriales en el Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
