@@ -150,8 +150,8 @@ export default function Footer() {
         <div className="mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-y-4 text-xs text-white/50">
           <div>© {currentYear} Plastilonas Peruanas SAC. Todos los derechos reservados. RUC: 20523135385</div>
           <div className="flex items-center gap-x-6">
-            <Link href="/contacto" className="hover:text-white transition-colors">Política de Privacidad</Link>
-            <Link href="/contacto" className="hover:text-white transition-colors">Términos y Condiciones</Link>
+            <Link href="/privacidad" className="hover:text-white transition-colors">Política de Privacidad</Link>
+            <Link href="/terminos" className="hover:text-white transition-colors">Términos y Condiciones</Link>
             <span className="hidden md:inline">Hecho en Perú</span>
           </div>
         </div>

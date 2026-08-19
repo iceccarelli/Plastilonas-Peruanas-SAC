@@ -7,6 +7,7 @@ import { familyContent, comparableFamilies } from "@/lib/families";
 import { FRAMEWORK_UPDATED } from "@/lib/framework";
 import { solutions } from "@/lib/solutions";
 import { novedades, NOVEDADES_UPDATED } from "@/lib/novedades";
+import { LEGAL_UPDATED } from "@/lib/legal";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -20,6 +21,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE.url}/cotizacion`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE.url}/local`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE.url}/recursos`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    // Avisos legales: prioridad baja pero indexables. Sin ellos, el pie
+    // enlazaba las dos páginas legales a /contacto.
+    { url: `${SITE.url}/privacidad`, lastModified: new Date(LEGAL_UPDATED),
+      changeFrequency: "yearly", priority: 0.3 },
+    { url: `${SITE.url}/terminos`, lastModified: new Date(LEGAL_UPDATED),
+      changeFrequency: "yearly", priority: 0.3 },
   ];
 
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({

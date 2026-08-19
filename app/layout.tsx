@@ -119,6 +119,9 @@ export default function RootLayout({
       {/* bg/text salen de los tokens de globals.css: las utilidades de Tailwind
           (0,1,0) ganaban al selector body (0,0,1) y anulaban .dark */}
       <body className="font-sans antialiased bg-[var(--surface)] text-[var(--text)]">
+        {/* Destino del enlace "Volver arriba" del pie: apuntaba a #top y no
+            existía ningún elemento con ese id, de modo que no hacía nada. */}
+        <span id="top" aria-hidden="true" />
         <StructuredData />
         <Analytics />
         <WebPush />

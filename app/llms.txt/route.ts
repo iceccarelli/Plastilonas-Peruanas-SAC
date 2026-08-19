@@ -142,6 +142,8 @@ ${recursosLista}
 - [Solicitar cotización](${base}/cotizacion)
 - [Contacto](${base}/contacto)
 - [Recursos técnicos](${base}/recursos)
+- [Política de privacidad](${base}/privacidad)
+- [Términos y condiciones](${base}/terminos)
 - [Novedades](${base}/novedades)
 
 ## Cómo cotizar

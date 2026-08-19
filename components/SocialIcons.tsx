@@ -1,6 +1,6 @@
 "use client";
 
-import { SOCIAL_LINKS } from "@/lib/social";
+import { readySocialLinks } from "@/lib/social";
 import { trackSocialClick } from "@/lib/analytics";
 
 interface Props {
@@ -14,9 +14,14 @@ export default function SocialIcons({ variant = "dark", className = "" }: Props)
       ? "text-white/50 hover:text-white hover:bg-white/10 border-white/10"
       : "text-gray-400 hover:text-[#0A2540] hover:bg-gray-100 border-gray-200";
 
+  const links = readySocialLinks();
+  // Sin ningún perfil real no se pinta el contenedor: una fila de iconos vacía
+  // deja un hueco en el pie que parece un fallo de carga.
+  if (links.length === 0) return null;
+
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
-      {SOCIAL_LINKS.map(({ name, href, Icon }) => (
+      {links.map(({ name, href, Icon }) => (
         <a
           key={name}
           href={href}

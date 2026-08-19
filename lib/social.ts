@@ -14,16 +14,25 @@ import { FaLinkedin } from 'react-icons/fa';
 import { WHATSAPP_NUMBER } from './whatsapp';
 
 /**
- * Las 10 plataformas sociales más usadas, en orden de prioridad para el mercado
- * peruano B2B. Se muestran TODAS (base para wiring con n8n y campañas pagadas).
+ * Perfiles sociales. SOLO se renderizan los que apuntan a una cuenta real.
  *
- * WhatsApp y Facebook apuntan a destinos reales de Plastilonas. El resto enlazan
- * por ahora a la plataforma (marcador de posición): reemplace el `href` por la
- * URL del perfil real cuando la cuenta exista — el patrón está en el TODO de cada
- * línea. Los enlaces https abren la app nativa en móvil automáticamente
- * (universal links de iOS/Android); en escritorio abren el sitio en pestaña nueva.
+ * Por qué. Esta lista se mostraba entera, incluidos ocho marcadores que
+ * enlazaban a la portada de la plataforma: quien hacía clic en "LinkedIn"
+ * aterrizaba en linkedin.com, no en la empresa. Eso es tres defectos a la vez —
+ * rompe la confianza del comprador justo en el pie de página, manda ocho
+ * enlaces salientes a portadas genéricas desde las 157 páginas del sitio, y
+ * emite eventos `social_click` que no significan nada.
  *
- * `ready`: true = perfil real ya configurado; false = marcador pendiente.
+ * Es la misma regla que ya gobierna `SITE.sameAs`: un perfil ausente es
+ * infinitamente mejor que uno falso. La lista de marcadores se conserva como
+ * dato — con el patrón de URL real en cada TODO — para que el día que exista
+ * la cuenta baste cambiar el href y poner `ready: true`. Un test impide que
+ * un marcador vuelva a renderizarse.
+ *
+ * Los enlaces https abren la app nativa en móvil (universal links de
+ * iOS/Android); en escritorio abren el sitio en pestaña nueva.
+ *
+ * `ready`: true = perfil real verificado; false = marcador, NO se renderiza.
  */
 
 export interface SocialLink {
@@ -53,3 +62,12 @@ export const SOCIAL_LINKS: SocialLink[] = [
   // TODO perfil real: https://www.snapchat.com/add/USUARIO
   { name: 'Snapchat',  href: 'https://www.snapchat.com/',                    Icon: SiSnapchat,  ready: false },
 ];
+
+/**
+ * Los únicos enlaces que el sitio puede mostrar. Toda superficie que pinte
+ * iconos sociales debe consumir ESTA función, nunca SOCIAL_LINKS directamente.
+ */
+export const readySocialLinks = (): SocialLink[] => SOCIAL_LINKS.filter((l) => l.ready);
+
+/** Marcadores pendientes de cuenta real. Existe para que los tests los vigilen. */
+export const pendingSocialLinks = (): SocialLink[] => SOCIAL_LINKS.filter((l) => !l.ready);
