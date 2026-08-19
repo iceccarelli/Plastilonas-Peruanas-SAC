@@ -3,7 +3,7 @@ import { SITE } from "@/lib/site";
 import { products } from "@/lib/products";
 import ciudades from "@/data/ciudades.json";
 import { articles } from "@/lib/articles";
-import { familyContent } from "@/lib/families";
+import { familyContent, comparableFamilies } from "@/lib/families";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -41,5 +41,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: now, changeFrequency: "monthly", priority: 0.85,
   }));
 
-  return [...staticRoutes, ...familyRoutes, ...productRoutes, ...localRoutes, ...articleRoutes];
+  const compareRoutes: MetadataRoute.Sitemap = comparableFamilies().map((f) => ({
+    url: `${SITE.url}/productos/familia/${f.slug}/comparar`,
+    lastModified: now, changeFrequency: "monthly", priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
+    ...localRoutes, ...articleRoutes];
 }

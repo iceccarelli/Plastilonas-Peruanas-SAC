@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import {
   trackArticleView,
   trackCityPageView,
+  trackComparisonView,
   trackFamilyView,
   trackProductView,
 } from '@/lib/analytics';
@@ -21,7 +22,8 @@ type Props =
   | { kind: 'product'; slug: string; categoria: string }
   | { kind: 'family'; slug: string }
   | { kind: 'city'; ciudad: string }
-  | { kind: 'article'; slug: string; categoria: string };
+  | { kind: 'article'; slug: string; categoria: string }
+  | { kind: 'comparison'; slug: string };
 
 export default function TrackView(props: Props) {
   const fired = useRef(false);
@@ -44,6 +46,9 @@ export default function TrackView(props: Props) {
         break;
       case 'article':
         trackArticleView(props.slug, props.categoria);
+        break;
+      case 'comparison':
+        trackComparisonView(props.slug);
         break;
     }
   }, [props]);

@@ -97,3 +97,12 @@ export function trackCityPageView(ciudad: string): void {
 export function trackArticleView(slug: string, categoria: string): void {
   trackEvent('article_view', { slug, categoria });
 }
+
+/**
+ * Vista de una tabla comparativa. Es la señal de intención más avanzada del
+ * catálogo: quien compara especificación por especificación ya está eligiendo
+ * proveedor, no explorando.
+ */
+export function trackComparisonView(familia: string): void {
+  trackEvent('comparison_view', { familia });
+}

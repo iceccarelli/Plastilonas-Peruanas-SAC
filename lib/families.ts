@@ -1,4 +1,4 @@
-import { productFamilies } from './products';
+import { productFamilies, products } from './products';
 
 /**
  * CONTENIDO EDITORIAL POR FAMILIA (/productos/familia/[slug]).
@@ -558,4 +558,15 @@ export function resolveFamily(slug: string) {
 export function familyHrefByName(name: string): string {
   const family = productFamilies.find((f) => f.name === name);
   return family ? `/productos/familia/${family.slug}` : '/productos';
+}
+
+/**
+ * Familias con dos o más productos: las únicas donde una comparativa tiene
+ * sentido. Una tabla de un solo elemento es una página vacía que no debe
+ * generarse ni indexarse.
+ */
+export function comparableFamilies() {
+  return productFamilies.filter(
+    (f) => products.filter((p) => p.category === f.name).length >= 2,
+  );
 }

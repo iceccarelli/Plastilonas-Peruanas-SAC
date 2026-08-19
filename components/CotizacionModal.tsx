@@ -29,9 +29,11 @@ interface CotizacionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   preselectedProduct?: string;
+  /** Texto inicial del campo "mensaje" (p. ej. una comparativa de productos). */
+  preselectedMessage?: string;
 }
 
-export default function CotizacionModal({ open, onOpenChange, preselectedProduct }: CotizacionModalProps) {
+export default function CotizacionModal({ open, onOpenChange, preselectedProduct, preselectedMessage }: CotizacionModalProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
 
@@ -45,6 +47,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
     resolver: zodResolver(formSchema),
     defaultValues: {
       producto: preselectedProduct || '',
+      mensaje: preselectedMessage || '',
     },
   });
 
@@ -53,6 +56,12 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
       setValue('producto', preselectedProduct);
     }
   }, [preselectedProduct, setValue]);
+
+  React.useEffect(() => {
+    if (preselectedMessage) {
+      setValue('mensaje', preselectedMessage);
+    }
+  }, [preselectedMessage, setValue]);
 
   // El formulario ABIERTO es un evento distinto del formulario ENVIADO: la
   // diferencia entre ambos es la tasa de abandono, que es lo que dice si el

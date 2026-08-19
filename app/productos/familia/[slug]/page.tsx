@@ -168,6 +168,21 @@ export default async function FamilyPage({ params }: Props) {
         </div>
       </section>
 
+      {items.length >= 2 && (
+        <div className="mb-14 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-[#059669]/20 bg-[#059669]/5 p-6">
+          <p className="text-gray-800">
+            ¿Está eligiendo entre varias de estas {items.length} alternativas? Véalas con
+            sus especificaciones lado a lado.
+          </p>
+          <Link
+            href={`/productos/familia/${slug}/comparar`}
+            className="inline-flex items-center gap-1 rounded-2xl bg-[#0A2540] px-6 py-3 font-semibold text-white hover:bg-[#059669]"
+          >
+            Comparar las {items.length} <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
+
       <section className="mb-14">
         <h2 className="mb-6 text-2xl font-semibold tracking-tight text-[#0A2540]">
           Qué define la especificación
