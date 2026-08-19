@@ -3,6 +3,7 @@ import { products, productFamilies, sectors } from "@/lib/products";
 import ciudades from "@/data/ciudades.json";
 import { articles } from "@/lib/articles";
 import { pillars, totalCriteria, FRAMEWORK_VERSION } from "@/lib/framework";
+import { solutions } from "@/lib/solutions";
 
 /**
  * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
@@ -93,6 +94,14 @@ ${sectoresLista}
 Páginas con contexto climático y de uso por ciudad:
 
 ${ciudadesLista}
+
+## Arquitecturas de referencia
+
+Configuraciones completas: qué componentes forman el conjunto, en qué orden se
+ejecutan y qué falla al comprar por piezas sueltas. No son casos de estudio: no
+declaran obras ejecutadas ni clientes.
+
+${solutions.map((s) => `- [${s.titulo}](${base}/soluciones/${s.slug}) — ${s.componentes.length} componentes · ${s.sectores.join(", ")}`).join("\n")}
 
 ## Marco de Especificación (referencia del rubro)
 

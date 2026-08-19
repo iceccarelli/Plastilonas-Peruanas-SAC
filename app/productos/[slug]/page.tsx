@@ -11,6 +11,7 @@ import { SITE } from '@/lib/site';
 import WhatsAppLink from '@/components/WhatsAppLink';
 import TrackView from '@/components/TrackView';
 import DatasheetButton from '@/components/DatasheetButton';
+import { solutionsForProduct } from '@/lib/solutions';
 import { productFaqs } from '@/lib/product-faq';
 import { JsonLd } from '@/components/JsonLd';
 import { faqSchema } from '@/lib/schema';
@@ -67,6 +68,7 @@ export default async function ProductDetailPage({ params }: Props) {
   }
 
   const faqs = productFaqs(product);
+  const arquitecturas = solutionsForProduct(product.slug);
   const relatedProducts = products
     .filter(p => p.id !== product.id && (p.category === product.category || p.sector.some(s => product.sector.includes(s))))
     .slice(0, 3);
@@ -194,6 +196,32 @@ export default async function ProductDetailPage({ params }: Props) {
           ))}
         </dl>
       </div>
+
+      {arquitecturas.length > 0 && (
+        <div className="mt-16 pt-10 border-t">
+          <h2 className="font-semibold tracking-tight text-2xl mb-2">
+            Dónde encaja este producto
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Rara vez se compra solo. Estas configuraciones muestran el conjunto completo
+            del que forma parte, con su secuencia de ejecución.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {arquitecturas.map((s) => (
+              <Link
+                key={s.slug}
+                href={`/soluciones/${s.slug}`}
+                className="group block rounded-2xl border border-gray-100 p-5 transition-colors hover:border-[#059669]/40"
+              >
+                <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669]">
+                  {s.titulo}
+                </span>
+                <span className="mt-1 block text-sm text-gray-600">{s.escenario}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (

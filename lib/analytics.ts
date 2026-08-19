@@ -107,6 +107,11 @@ export function trackComparisonView(familia: string): void {
   trackEvent('comparison_view', { familia });
 }
 
+/** Vista de una arquitectura de referencia: intención de proyecto completo. */
+export function trackSolutionView(slug: string): void {
+  trackEvent('solution_view', { slug });
+}
+
 /* ------------------------------------------------------------------ */
 /* Marco de Especificación — el embudo de mayor intención del sitio.   */
 /* ------------------------------------------------------------------ */

@@ -279,6 +279,23 @@ a:hover, button:hover {
 /* La escala `neutral-*` de Tailwind no estaba cubierta. Las 12 paginas de
    ciudad la usan para todo su cuerpo de texto: en oscuro quedaban en 1.81:1,
    practicamente invisibles. Mismo remapeo que la escala `gray-*`. */
+/* Fondos semanticos claros (avisos, notas, alertas). No estaban mapeados: los
+   cuadros de riesgo de las arquitecturas de referencia se quedaban en ambar
+   claro mientras su tinta pasaba a la paleta oscura -> 1.13:1. El acento se
+   conserva en el borde y el icono, que si son legibles sobre superficie
+   oscura. Lo detecto la auditoria visual automatica, no una revision a ojo. */
+.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label, a, button):is(.bg-amber-50, .bg-amber-100, .bg-red-50, .bg-red-100, .bg-green-50, .bg-green-100, .bg-emerald-50, .bg-emerald-100, .bg-blue-50, .bg-blue-100, .bg-yellow-50) {
+  background-color: var(--surface-muted);
+}
+
+/* Si la superficie semantica se oscurece, su tinta debe aclararse en el mismo
+   paso. Oscurecer solo el fondo dejaba las insignias ambar del catalogo en
+   3.4:1: una correccion a medias es una regresion. */
+.dark main :is(.text-amber-700, .text-amber-800) { color: #FCD34D !important; }
+.dark main :is(.text-red-700, .text-red-800) { color: #FCA5A5 !important; }
+.dark main :is(.text-green-700, .text-green-800, .text-emerald-700) { color: var(--brand-hover) !important; }
+.dark main :is(.text-blue-700, .text-blue-800) { color: #93C5FD !important; }
+
 .dark main :is(.text-neutral-800, .text-neutral-900) { color: var(--text) !important; }
 .dark main :is(.text-neutral-500, .text-neutral-600, .text-neutral-700) { color: var(--text-muted) !important; }
 .dark main :is(.border-neutral-100, .border-neutral-200, .border-neutral-300) { border-color: var(--border); }

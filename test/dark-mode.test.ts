@@ -41,6 +41,11 @@ describe('modo oscuro: cobertura de la capa de compatibilidad', () => {
     expect(css).toMatch(/\.dark main :is\(\.text-gray-400, \.text-neutral-400\)/);
   });
 
+  it('los fondos semánticos de aviso también siguen al tema', () => {
+    // Los cuadros de riesgo en ámbar quedaban claros con tinta clara encima.
+    expect(css).toMatch(/\.bg-amber-50, \.bg-amber-100, \.bg-red-50/);
+  });
+
   it('la escala neutral está cubierta igual que la gray', () => {
     // Las 12 páginas de ciudad usan neutral-*: sin esto, su cuerpo de texto
     // quedaba en 1.81:1 sobre fondo oscuro.

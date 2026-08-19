@@ -5,6 +5,7 @@ import ciudades from "@/data/ciudades.json";
 import { articles } from "@/lib/articles";
 import { familyContent, comparableFamilies } from "@/lib/families";
 import { FRAMEWORK_UPDATED } from "@/lib/framework";
+import { solutions } from "@/lib/solutions";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -55,6 +56,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly", priority: 0.8 },
   ];
 
-  return [...staticRoutes, ...marcoRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
+  // Arquitecturas de referencia: el peldaño "muéstrenme el conjunto armado".
+  const solucionRoutes: MetadataRoute.Sitemap = [
+    { url: `${SITE.url}/soluciones`, lastModified: now, changeFrequency: "monthly", priority: 0.85 },
+    ...solutions.map((s) => ({
+      url: `${SITE.url}/soluciones/${s.slug}`,
+      lastModified: now, changeFrequency: "monthly" as const, priority: 0.8,
+    })),
+  ];
+
+  return [...staticRoutes, ...marcoRoutes, ...solucionRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
     ...localRoutes, ...articleRoutes];
 }

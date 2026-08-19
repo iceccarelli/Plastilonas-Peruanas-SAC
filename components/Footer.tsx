@@ -20,6 +20,7 @@ export default function Footer() {
     ]},
     { title: 'EMPRESA', links: [
       { label: 'Recursos técnicos', href: '/recursos' },
+      { label: 'Arquitecturas de referencia', href: '/soluciones' },
       { label: 'Marco de Especificación', href: '/marco' },
       { label: 'Sobre Nosotros', href: '/nosotros' },
       { label: 'Nuestros Servicios', href: '/servicios' },
@@ -96,6 +97,7 @@ export default function Footer() {
             <div className="font-semibold text-white mb-4 tracking-wide text-sm">EMPRESA</div>
             <ul className="space-y-[13px] text-sm">
               <li><Link href="/recursos" className="hover:text-white transition-colors">Recursos técnicos</Link></li>
+              <li><Link href="/soluciones" className="hover:text-white transition-colors">Arquitecturas de referencia</Link></li>
               <li><Link href="/marco" className="hover:text-white transition-colors">Marco de Especificación</Link></li>
               <li><Link href="/nosotros" className="hover:text-white transition-colors">Sobre Nosotros</Link></li>
               <li><Link href="/servicios" className="hover:text-white transition-colors">Nuestros Servicios</Link></li>
