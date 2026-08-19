@@ -10,6 +10,7 @@ import ProductStructuredData from '@/components/ProductStructuredData';
 import { SITE } from '@/lib/site';
 import WhatsAppLink from '@/components/WhatsAppLink';
 import TrackView from '@/components/TrackView';
+import DatasheetButton from '@/components/DatasheetButton';
 import { productFaqs } from '@/lib/product-faq';
 import { JsonLd } from '@/components/JsonLd';
 import { faqSchema } from '@/lib/schema';
@@ -117,6 +118,7 @@ export default async function ProductDetailPage({ params }: Props) {
             >
               <Phone className="w-4 h-4" /> Consultar por WhatsApp
             </WhatsAppLink>
+            <DatasheetButton slug={product.slug} nombre={product.name} />
           </div>
 
           {/* Quick Specs */}
