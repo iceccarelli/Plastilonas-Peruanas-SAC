@@ -106,3 +106,30 @@ export function trackArticleView(slug: string, categoria: string): void {
 export function trackComparisonView(familia: string): void {
   trackEvent('comparison_view', { familia });
 }
+
+/* ------------------------------------------------------------------ */
+/* Marco de Especificación — el embudo de mayor intención del sitio.   */
+/* ------------------------------------------------------------------ */
+
+/** Vista del marco publicado o de la autoevaluación. */
+export function trackFrameworkView(seccion: string): void {
+  trackEvent('framework_view', { seccion });
+}
+
+/** El usuario respondió el primer criterio: empezó de verdad. */
+export function trackFrameworkStarted(): void {
+  trackEvent('framework_started');
+}
+
+/**
+ * Autoevaluación completada. El porcentaje es la señal comercial: un proyecto
+ * "Definido" está listo para cotizar; uno "Exploratorio" necesita asesoría.
+ */
+export function trackFrameworkCompleted(porcentaje: number, nivel: string): void {
+  trackEvent('framework_completed', { porcentaje, nivel });
+}
+
+/** Descarga del brief técnico generado por la autoevaluación. */
+export function trackBriefDownload(nivel: string): void {
+  trackEvent('brief_download', { nivel });
+}

@@ -4,6 +4,7 @@ import { products } from "@/lib/products";
 import ciudades from "@/data/ciudades.json";
 import { articles } from "@/lib/articles";
 import { familyContent, comparableFamilies } from "@/lib/families";
+import { FRAMEWORK_UPDATED } from "@/lib/framework";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -46,6 +47,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: now, changeFrequency: "monthly", priority: 0.7,
   }));
 
-  return [...staticRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
+  // El marco es contenido de referencia: cambia poco pero pesa mucho.
+  const marcoRoutes: MetadataRoute.Sitemap = [
+    { url: `${SITE.url}/marco`, lastModified: new Date(FRAMEWORK_UPDATED),
+      changeFrequency: "monthly", priority: 0.9 },
+    { url: `${SITE.url}/marco/evaluacion`, lastModified: new Date(FRAMEWORK_UPDATED),
+      changeFrequency: "monthly", priority: 0.8 },
+  ];
+
+  return [...staticRoutes, ...marcoRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
     ...localRoutes, ...articleRoutes];
 }

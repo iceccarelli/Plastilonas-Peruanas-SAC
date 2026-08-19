@@ -6,6 +6,7 @@ import {
   trackCityPageView,
   trackComparisonView,
   trackFamilyView,
+  trackFrameworkView,
   trackProductView,
 } from '@/lib/analytics';
 
@@ -23,7 +24,8 @@ type Props =
   | { kind: 'family'; slug: string }
   | { kind: 'city'; ciudad: string }
   | { kind: 'article'; slug: string; categoria: string }
-  | { kind: 'comparison'; slug: string };
+  | { kind: 'comparison'; slug: string }
+  | { kind: 'framework'; slug: string };
 
 export default function TrackView(props: Props) {
   const fired = useRef(false);
@@ -49,6 +51,9 @@ export default function TrackView(props: Props) {
         break;
       case 'comparison':
         trackComparisonView(props.slug);
+        break;
+      case 'framework':
+        trackFrameworkView(props.slug);
         break;
     }
   }, [props]);

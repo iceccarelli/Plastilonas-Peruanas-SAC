@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { products } from '@/lib/products';
-import { buildDatasheetPdf, toWinAnsi } from '@/lib/datasheet';
+import { buildDatasheetPdf } from '@/lib/datasheet';
+import { toWinAnsi } from '@/lib/pdf-text';
 import { generateStaticParams } from '@/app/productos/[slug]/ficha-tecnica.pdf/route';
 
 const FECHA = '2026-08-18';

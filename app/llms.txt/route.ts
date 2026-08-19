@@ -2,6 +2,7 @@ import { SITE } from "@/lib/site";
 import { products, productFamilies, sectors } from "@/lib/products";
 import ciudades from "@/data/ciudades.json";
 import { articles } from "@/lib/articles";
+import { pillars, totalCriteria, FRAMEWORK_VERSION } from "@/lib/framework";
 
 /**
  * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
@@ -92,6 +93,17 @@ ${sectoresLista}
 Páginas con contexto climático y de uso por ciudad:
 
 ${ciudadesLista}
+
+## Marco de Especificación (referencia del rubro)
+
+Criterios públicos para definir un proyecto textil industrial o geosintético
+antes de cotizarlo. ${totalCriteria()} criterios en ${pillars.length} pilares, versión ${FRAMEWORK_VERSION}.
+Cada criterio declara qué decide técnicamente y qué ocurre en obra si el dato
+no existe, con la guía que lo documenta.
+
+- [Marco de Especificación completo](${base}/marco)
+- [Autoevaluación con brief descargable](${base}/marco/evaluacion)
+${pillars.map((p) => `- Pilar: ${p.nombre} — ${p.resumen}`).join("\n")}
 
 ## Recursos técnicos
 

@@ -2,6 +2,7 @@ import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf
 import type { Product } from './types';
 import { SITE } from './site';
 import { sourcingLabels, availabilityLabels } from './products';
+import { toWinAnsi } from './pdf-text';
 
 /**
  * FICHA TÉCNICA EN PDF, GENERADA DESDE EL CATÁLOGO.
@@ -28,29 +29,6 @@ const AZUL = rgb(0.039, 0.145, 0.251); // #0A2540
 const VERDE = rgb(0.020, 0.588, 0.412); // #059669
 const GRIS = rgb(0.42, 0.45, 0.5);
 const GRIS_CLARO = rgb(0.88, 0.89, 0.91);
-
-/**
- * Las fuentes estándar de PDF usan WinAnsi, que cubre el español (acentos y ñ)
- * pero NO los signos tipográficos que usamos en la web. Sin esta conversión,
- * pdf-lib lanza una excepción al primer guion largo y la ficha no se genera.
- */
-export function toWinAnsi(text: string): string {
-  return text
-    .replace(/[‘’‛]/g, "'")
-    .replace(/[“”]/g, '"')
-    .replace(/[–—]/g, '-')
-    .replace(/…/g, '...')
-    .replace(/[→➡]/g, '->')
-    .replace(/·/g, '-')
-    .replace(/•/g, '-')
-    .replace(/ /g, ' ')
-    .replace(/[≤]/g, '<=')
-    .replace(/[≥]/g, '>=')
-    .replace(/²/g, '2')
-    .replace(/³/g, '3')
-    .replace(/º/g, 'o')
-    .replace(/[^\x00-\xFF]/g, '');
-}
 
 function wrap(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
   const words = toWinAnsi(text).split(/\s+/).filter(Boolean);
