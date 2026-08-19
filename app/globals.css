@@ -243,12 +243,19 @@ a:hover, button:hover {
    ES UN PARCHE. Lo correcto es migrar los literales de page.tsx,
    SectionHeading.tsx y ProductCard.tsx a los tokens directamente.  */
 
-/* Superficies: la tarjeta sube un escalon respecto de la pagina. */
-.dark main :is(div, section, article, aside, li).bg-white {
+/* Superficies: la tarjeta sube un escalon respecto de la pagina.
+
+   AMPLIADO: la lista original cubria solo contenedores de bloque. Las paginas
+   de familia, comparativa, recursos y cobertura local introdujeron tablas
+   (th/td), chips (span) y callouts (p) con las mismas utilidades. En oscuro
+   esos elementos quedaban como bloques BLANCOS con tinta clara encima -> el
+   encabezado y la primera columna de la tabla comparativa eran ilegibles.
+   Ampliar el selector es aditivo y arregla tambien cualquier pagina futura. */
+.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label).bg-white {
   background-color: var(--surface-raised);
 }
-.dark main :is(div, section, article, aside).bg-gray-50,
-.dark main :is(div, section, article, aside).bg-gray-100 {
+.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label).bg-gray-50,
+.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label).bg-gray-100 {
   background-color: var(--surface-muted);
 }
 
@@ -260,7 +267,13 @@ a:hover, button:hover {
 
 /* Tinta */
 .dark main .text-\[\#0A2540\] { color: var(--text); }
+/* gray-800 es tinta principal, no secundaria: mapearla a --text-muted dejaba
+   el bloque "En resumen" de cada guia casi ilegible sobre fondo oscuro. */
+.dark main :is(.text-gray-800, .text-gray-900) { color: var(--text); }
 .dark main :is(.text-gray-500, .text-gray-600, .text-gray-700) { color: var(--text-muted); }
+/* gray-400 marca dato ausente ("No declarado"): debe seguir siendo tenue,
+   pero legible. */
+.dark main .text-gray-400 { color: var(--text-muted); opacity: 0.75; }
 .dark main :is(.border-gray-100, .border-gray-200) { border-color: var(--border); }
 
 /* Los CTA blancos del hero viven sobre imagen oscura: siguen blancos con
