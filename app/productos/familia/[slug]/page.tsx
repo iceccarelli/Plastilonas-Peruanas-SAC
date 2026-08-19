@@ -7,6 +7,7 @@ import { familyContent, resolveFamily } from '@/lib/families';
 import { articles } from '@/lib/articles';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
+import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, faqSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 
 /**
@@ -65,6 +66,7 @@ export default async function FamilyPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
+      <TrackView kind="family" slug={slug} />
       <JsonLd
         data={[
           webPageSchema({

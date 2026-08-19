@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useChat } from '@ai-sdk/react';
+import { trackChatbotEngaged } from '@/lib/analytics';
 import { X, Send, Bot, User } from 'lucide-react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,6 +11,7 @@ import { whatsappUrl, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
 
+  const engaged = useRef(false);
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
     api: '/api/chat',
     initialMessages: [
@@ -173,7 +175,18 @@ export default function Chatbot() {
               </div>
 
               {/* Input */}
-              <form onSubmit={handleSubmit} className="p-4 border-t bg-white flex gap-2">
+              <form
+                onSubmit={(e) => {
+                  // Abrir el widget no es interés; escribir sí. Se mide el
+                  // primer envío real, una sola vez por sesión de chat.
+                  if (!engaged.current) {
+                    engaged.current = true;
+                    trackChatbotEngaged();
+                  }
+                  handleSubmit(e);
+                }}
+                className="p-4 border-t bg-white flex gap-2"
+              >
                 <input
                   value={input}
                   onChange={handleInputChange}

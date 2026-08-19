@@ -7,6 +7,7 @@ import { products } from '@/lib/products';
 import ciudades from '@/data/ciudades.json';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
+import TrackView from '@/components/TrackView';
 import {
   articleSchema,
   breadcrumbSchema,
@@ -88,6 +89,7 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-14">
+      <TrackView kind="article" slug={a.slug} categoria={a.category} />
       <JsonLd
         data={[
           webPageSchema({

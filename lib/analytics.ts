@@ -2,9 +2,15 @@
  * Capa de analítica y conversiones (GA4 + Meta Pixel + GTM).
  *
  * `trackEvent` envía UN evento semántico a todos los proveedores cargados.
- * Los helpers de conversión (cotización, WhatsApp) son lo que de verdad importa
- * para optimizar los anuncios: miden intención de compra, no vanidad. Nada se
- * ejecuta si el proveedor no está cargado (IDs ausentes o sin consentimiento).
+ * Nada se ejecuta si el proveedor no está presente (IDs ausentes o sin
+ * consentimiento), de modo que llamar a estas funciones siempre es seguro.
+ *
+ * POR QUÉ IMPORTA: en el Perú B2B el canal de leads es WhatsApp. Si los clics a
+ * WhatsApp no se miden, no se puede saber qué página, qué familia o qué ciudad
+ * produce negocio — y toda inversión publicitaria se hace a ciegas. Por eso
+ * TODO punto de salida a WhatsApp debe pasar por `components/WhatsAppLink.tsx`,
+ * que dispara `whatsapp_click` con el contexto de origen. Hay un test que falla
+ * si alguien vuelve a escribir un enlace `wa.me` a mano.
  */
 
 declare global {
@@ -24,7 +30,19 @@ export function trackEvent(name: string, params: EventParams = {}): void {
   window.dataLayer?.push({ event: name, ...params });
 }
 
-/** Solicitud de cotización — la conversión principal del negocio. */
+/* ------------------------------------------------------------------ */
+/* Conversiones — miden intención de compra, no vanidad.               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * El formulario de cotización se ABRIÓ. Junto con `quote_request` da la tasa
+ * de abandono del formulario, que es lo que dice si el formulario pide de más.
+ */
+export function trackQuoteStarted(context: string, producto?: string): void {
+  trackEvent('quote_started', { context, producto: producto ?? 'general' });
+}
+
+/** Solicitud de cotización enviada — la conversión principal del negocio. */
 export function trackQuoteRequest(producto?: string): void {
   const content = producto ?? 'general';
   trackEvent('quote_request', { producto: content });
@@ -33,7 +51,11 @@ export function trackQuoteRequest(producto?: string): void {
   }
 }
 
-/** Clic para contactar por WhatsApp — canal #1 de leads en Perú. */
+/**
+ * Clic para contactar por WhatsApp — canal #1 de leads en Perú.
+ * `context` identifica el punto de salida (footer, ficha de producto, ciudad…)
+ * para poder atribuir el lead a la página que lo generó.
+ */
 export function trackWhatsAppClick(context?: string): void {
   trackEvent('whatsapp_click', { context: context ?? 'general' });
   if (typeof window !== 'undefined') {
@@ -41,7 +63,37 @@ export function trackWhatsAppClick(context?: string): void {
   }
 }
 
+/** Primer mensaje enviado al asistente: intención real, no apertura del widget. */
+export function trackChatbotEngaged(): void {
+  trackEvent('chatbot_engaged');
+}
+
+/** Descarga de ficha técnica u otro documento. */
+export function trackDocumentDownload(documento: string, producto?: string): void {
+  trackEvent('document_download', { documento, producto: producto ?? 'general' });
+}
+
 /** Clic en un ícono de red social. */
 export function trackSocialClick(network: string): void {
   trackEvent('social_click', { network });
+}
+
+/* ------------------------------------------------------------------ */
+/* Vistas de contenido — qué silo produce demanda.                     */
+/* ------------------------------------------------------------------ */
+
+export function trackProductView(slug: string, categoria: string): void {
+  trackEvent('product_view', { slug, categoria });
+}
+
+export function trackFamilyView(slug: string): void {
+  trackEvent('family_view', { slug });
+}
+
+export function trackCityPageView(ciudad: string): void {
+  trackEvent('city_page_view', { ciudad });
+}
+
+export function trackArticleView(slug: string, categoria: string): void {
+  trackEvent('article_view', { slug, categoria });
 }

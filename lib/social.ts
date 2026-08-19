@@ -11,6 +11,7 @@ import {
   SiSnapchat,
 } from 'react-icons/si';
 import { FaLinkedin } from 'react-icons/fa';
+import { WHATSAPP_NUMBER } from './whatsapp';
 
 /**
  * Las 10 plataformas sociales más usadas, en orden de prioridad para el mercado
@@ -33,7 +34,7 @@ export interface SocialLink {
 }
 
 export const SOCIAL_LINKS: SocialLink[] = [
-  { name: 'WhatsApp',  href: 'https://wa.me/51946085270',                    Icon: SiWhatsapp,  ready: true  },
+  { name: 'WhatsApp',  href: `https://wa.me/${WHATSAPP_NUMBER}`,             Icon: SiWhatsapp,  ready: true  },
   { name: 'Facebook',  href: 'https://www.facebook.com/plastilonasperuanas', Icon: SiFacebook,  ready: true  },
   // TODO perfil real: https://www.instagram.com/USUARIO
   { name: 'Instagram', href: 'https://www.instagram.com/',                   Icon: SiInstagram, ready: false },

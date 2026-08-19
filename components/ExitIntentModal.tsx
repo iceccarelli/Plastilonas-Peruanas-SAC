@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import WhatsAppLink from './WhatsAppLink';
 import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, ArrowRight, Phone } from 'lucide-react';
@@ -76,9 +77,9 @@ export default function ExitIntentModal() {
               <Link href="/cotizacion" onClick={close} className="btn btn-accent w-full justify-center">
                 Cotización en 1 minuto <ArrowRight className="w-4 h-4" />
               </Link>
-              <a href="https://wa.me/51946085270" target="_blank" rel="noopener noreferrer" onClick={close} className="btn btn-ghost w-full justify-center">
+              <WhatsAppLink context="exit-intent" message="Hola, quisiera una cotización." className="btn btn-ghost w-full justify-center">
                 Hablar por WhatsApp
-              </a>
+              </WhatsAppLink>
             </div>
 
             <p className="text-center text-sm text-gray-500 mt-6">

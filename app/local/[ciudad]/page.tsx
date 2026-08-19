@@ -6,6 +6,8 @@ import { SITE } from "@/lib/site";
 import { products } from "@/lib/products";
 import { breadcrumbSchema, faqSchema, serviceSchema, webPageSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
+import WhatsAppLink from "@/components/WhatsAppLink";
+import TrackView from "@/components/TrackView";
 
 type Ciudad = { slug: string; ciudad: string; departamento: string; region: string;
   clima: string; contextoLocal: string; usosPrincipales: string[]; sectoresDemanda: string[]; };
@@ -44,9 +46,9 @@ export default async function CiudadPage({ params }: { params: Promise<{ ciudad:
   // documentada de la ciudad. Sin coincidencia se cae a los destacados.
   const porSector = products.filter((p) => p.sector.some((s) => c.sectoresDemanda.includes(s)));
   const relacionados = (porSector.length ? porSector : products.filter((p) => p.featured)).slice(0, 6);
-  const wa = `https://wa.me/${SITE.phoneWhatsApp.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hola, necesito una cotización de plastilonas en ${c.ciudad}.`)}`;
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
+      <TrackView kind="city" ciudad={c.ciudad} />
       <JsonLd data={[
         // Un solo nodo LocalBusiness vive en components/StructuredData.tsx; aquí
         // se referencia. Antes se redeclaraba con @id propio (#localbusiness),
@@ -101,7 +103,11 @@ export default async function CiudadPage({ params }: { params: Promise<{ ciudad:
         </section>
       )}
       <div className="flex flex-wrap gap-3">
-        <a href={wa} className="inline-block rounded-lg bg-green-600 px-6 py-3 font-semibold text-white">Cotizar por WhatsApp</a>
+        <WhatsAppLink context={`ciudad:${c.slug}`}
+          message={`Hola, necesito una cotización de plastilonas en ${c.ciudad}.`}
+          className="inline-block rounded-lg bg-green-600 px-6 py-3 font-semibold text-white">
+          Cotizar por WhatsApp
+        </WhatsAppLink>
         <Link href="/local" className="inline-block rounded-lg border border-neutral-300 px-6 py-3 font-medium text-neutral-700 hover:border-[#059669]/40 hover:text-[#059669]">
           Ver las {CIUDADES.length} ciudades
         </Link>

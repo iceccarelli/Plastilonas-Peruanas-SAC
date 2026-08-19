@@ -8,6 +8,8 @@ import ProductBuyBox from '@/components/ProductBuyBox';
 import ProductAvailability from '@/components/ProductAvailability';
 import ProductStructuredData from '@/components/ProductStructuredData';
 import { SITE } from '@/lib/site';
+import WhatsAppLink from '@/components/WhatsAppLink';
+import TrackView from '@/components/TrackView';
 import { productFaqs } from '@/lib/product-faq';
 import { JsonLd } from '@/components/JsonLd';
 import { faqSchema } from '@/lib/schema';
@@ -70,6 +72,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
+      <TrackView kind="product" slug={product.slug} categoria={product.category} />
       <ProductStructuredData product={product} />
       {/* FAQPage derivado del catálogo (lib/product-faq.ts): cero respuestas
           inventadas — cada una sale de un campo real del producto. */}
@@ -107,9 +110,13 @@ export default async function ProductDetailPage({ params }: Props) {
             <Link href={`/cotizacion?producto=${encodeURIComponent(product.name)}`} className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 bg-[#0A2540] hover:bg-[#059669] text-white px-9 py-4 rounded-2xl font-semibold text-sm transition-all active:scale-[0.985]">
               Solicitar Cotización para este producto <ArrowRight className="w-4 h-4" />
             </Link>
-            <a href="https://wa.me/51946085270" target="_blank" className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 border border-gray-200 hover:bg-gray-50 px-7 py-4 rounded-2xl font-medium text-sm">
+            <WhatsAppLink
+              context={`producto:${product.slug}`}
+              message={`Hola, necesito una cotización de ${product.name}.`}
+              className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 border border-gray-200 hover:bg-gray-50 px-7 py-4 rounded-2xl font-medium text-sm"
+            >
               <Phone className="w-4 h-4" /> Consultar por WhatsApp
-            </a>
+            </WhatsAppLink>
           </div>
 
           {/* Quick Specs */}
@@ -210,7 +217,7 @@ export default async function ProductDetailPage({ params }: Props) {
         <p className="text-white/80 mb-7 max-w-md mx-auto">Nuestro equipo técnico está listo para asesorarlo y entregarle una cotización personalizada para su proyecto.</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href={`/cotizacion?producto=${encodeURIComponent(product.name)}`} className="inline-flex items-center justify-center bg-white text-[#0A2540] hover:bg-white/90 px-10 py-3.5 rounded-2xl font-semibold">Solicitar Cotización Personalizada</Link>
-          <a href="https://wa.me/51946085270" target="_blank" className="inline-flex items-center justify-center border border-white/30 hover:bg-white/10 px-8 py-3.5 rounded-2xl font-medium">Hablar con un especialista</a>
+          <WhatsAppLink context={`producto-cta:${product.slug}`} message={`Hola, quisiera asesoría técnica sobre ${product.name}.`} className="inline-flex items-center justify-center border border-white/30 hover:bg-white/10 px-8 py-3.5 rounded-2xl font-medium">Hablar con un especialista</WhatsAppLink>
         </div>
       </div>
     </div>

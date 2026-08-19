@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import WhatsAppLink from './WhatsAppLink';
+import { WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 import Image from 'next/image';
 import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
 import SocialIcons from '@/components/SocialIcons';
@@ -42,9 +44,9 @@ export default function Footer() {
             <div className="font-semibold text-lg tracking-tight text-white">Plastilonas Peruanas SAC</div>
           </div>
           <p className="text-white/60 text-sm leading-relaxed mb-5">Fabricación e instalación propias. +15 años entregando a todo el Perú.</p>
-          <a href="https://wa.me/51946085270" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-[#0A2540] font-semibold py-3.5 rounded-2xl mb-6 active:scale-[0.99] transition">
-            <Phone className="w-4 h-4" /> WhatsApp 24/7 · +51 946 085 270
-          </a>
+          <WhatsAppLink context="footer-cta" message="Hola, quisiera información sobre sus productos." className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-[#0A2540] font-semibold py-3.5 rounded-2xl mb-6 active:scale-[0.99] transition">
+            <Phone className="w-4 h-4" /> WhatsApp 24/7 · {WHATSAPP_DISPLAY}
+          </WhatsAppLink>
           <FooterAccordion sections={sections} />
           <div className="py-6">
             <div className="text-xs text-white/40 mb-3 tracking-wide">SÍGANOS</div>
@@ -97,7 +99,7 @@ export default function Footer() {
               <li><Link href="/servicios" className="hover:text-white transition-colors">Nuestros Servicios</Link></li>
               <li><Link href="/contacto" className="hover:text-white transition-colors">Contacto</Link></li>
               <li><Link href="/local" className="hover:text-white transition-colors">Cobertura local</Link></li>
-              <li><a href="https://wa.me/51946085270" target="_blank" className="hover:text-white transition-colors">WhatsApp Directo</a></li>
+              <li><WhatsAppLink context="footer-enlaces" message="Hola, quisiera información sobre sus productos." className="hover:text-white transition-colors">WhatsApp Directo</WhatsAppLink></li>
               <li><Link href="/cotizacion" className="hover:text-white transition-colors">Solicitar Cotización</Link></li>
             </ul>
           </div>
@@ -112,13 +114,13 @@ export default function Footer() {
                   <div className="text-xs text-white/50">Central</div>
                 </div>
               </a>
-              <a href="https://wa.me/51946085270" target="_blank" className="flex items-start gap-3 group">
+              <WhatsAppLink context="footer-contacto" message="Hola, quisiera información sobre sus productos." className="flex items-start gap-3 group">
                 <Phone className="w-4 h-4 mt-0.5 text-[#25D366] group-hover:text-[#059669]" />
                 <div>
                   <div className="text-[#25D366]">+51 946 085 270</div>
                   <div className="text-xs text-white/50">WhatsApp 24/7</div>
                 </div>
-              </a>
+              </WhatsAppLink>
               <a href="mailto:ventas@plastilonas.com" className="flex items-start gap-3 group">
                 <Mail className="w-4 h-4 mt-0.5 text-white/50 group-hover:text-[#059669]" />
                 <div>ventas@plastilonas.com</div>

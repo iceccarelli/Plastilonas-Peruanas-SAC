@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { products } from '@/lib/products';
 import { toast } from 'sonner';
 import { buildQuoteMessage, openWhatsApp, saveQuoteLocally } from '@/lib/whatsapp';
-import { trackQuoteRequest } from '@/lib/analytics';
+import { trackQuoteRequest, trackQuoteStarted } from '@/lib/analytics';
 import { postLead } from '@/lib/lead';
 
 const formSchema = z.object({
@@ -53,6 +53,13 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
       setValue('producto', preselectedProduct);
     }
   }, [preselectedProduct, setValue]);
+
+  // El formulario ABIERTO es un evento distinto del formulario ENVIADO: la
+  // diferencia entre ambos es la tasa de abandono, que es lo que dice si el
+  // formulario está pidiendo más datos de los que el comprador quiere dar.
+  React.useEffect(() => {
+    if (open) trackQuoteStarted('modal', preselectedProduct);
+  }, [open, preselectedProduct]);
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);

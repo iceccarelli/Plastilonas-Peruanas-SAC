@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { productFamilies, sectors } from '@/lib/products';
 import CommandPalette from './CommandPalette';
 import CotizacionModal from './CotizacionModal';
+import WhatsAppLink from './WhatsAppLink';
 import CartButton from './CartButton';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -60,14 +61,13 @@ export default function Navbar() {
             <a href="tel:+51998117065" className="hover:text-white transition-colors">
               +51 998 117 065
             </a>
-            <a
-              href="https://wa.me/51946085270"
-              target="_blank"
-              rel="noopener noreferrer"
+            <WhatsAppLink
+              context="navbar-topbar"
+              message="Hola, quisiera información sobre sus productos."
               className="hover:text-white transition-colors"
             >
               WhatsApp
-            </a>
+            </WhatsAppLink>
             <Link href="/contacto" className="hover:text-white transition-colors">
               Contáctenos
             </Link>
@@ -350,9 +350,9 @@ export default function Navbar() {
                   <LayoutDashboard className="w-4 h-4" />
                   {user ? 'Mi Cuenta' : 'Iniciar sesión'}
                 </Link>
-                <a href="https://wa.me/51946085270" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#059669]">
+                <WhatsAppLink context="navbar-movil" message="Hola, quisiera información sobre sus productos." className="flex items-center gap-2 text-[#059669]">
                   <Phone className="w-4 h-4" /> WhatsApp: +51 946 085 270
-                </a>
+                </WhatsAppLink>
                 <div className="pt-2"><ThemeToggle /></div>
               </div>
             </motion.div>

@@ -1,6 +1,7 @@
 'use client';
 
 import CotizacionModal from '@/components/CotizacionModal';
+import WhatsAppLink from '@/components/WhatsAppLink';
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -23,7 +24,7 @@ export default function CotizacionPage() {
       </button>
 
       <div className="mt-16 text-xs text-gray-400 max-w-xs mx-auto">
-        También puede contactarnos directamente por WhatsApp al <a href="https://wa.me/51946085270" className="underline">+51 946 085 270</a> para una atención inmediata.
+        También puede contactarnos directamente por WhatsApp al <WhatsAppLink context="cotizacion-nota" message="Hola, quisiera una cotización." className="underline">+51 946 085 270</WhatsAppLink> para una atención inmediata.
       </div>
 
       <CotizacionModal open={showModal} onOpenChange={setShowModal} />

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import WhatsAppLink from '@/components/WhatsAppLink';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -96,13 +97,13 @@ export default function ContactoPage() {
                   <div className="text-xs text-gray-500">Central telefónica</div>
                 </div>
               </a>
-              <a href="https://wa.me/51946085270" target="_blank" className="flex gap-4 group">
+              <WhatsAppLink context="contacto" message="Hola, quisiera información sobre sus productos." className="flex gap-4 group">
                 <Phone className="mt-0.5 text-[#25D366]" /> 
                 <div>
                   <div className="font-medium text-[#25D366]">+51 946 085 270 (WhatsApp)</div>
                   <div className="text-xs text-gray-500">Atención inmediata 24/7</div>
                 </div>
-              </a>
+              </WhatsAppLink>
               <a href="mailto:ventas@plastilonas.com" className="flex gap-4 group">
                 <Mail className="mt-0.5 text-[#059669]" /> 
                 <div>ventas@plastilonas.com</div>
