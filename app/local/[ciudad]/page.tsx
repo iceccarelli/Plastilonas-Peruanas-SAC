@@ -105,10 +105,10 @@ export default async function CiudadPage({ params }: { params: Promise<{ ciudad:
       <div className="flex flex-wrap gap-3">
         <WhatsAppLink context={`ciudad:${c.slug}`}
           message={`Hola, necesito una cotización de plastilonas en ${c.ciudad}.`}
-          className="inline-block rounded-lg bg-green-600 px-6 py-3 font-semibold text-white">
+          className="inline-flex items-center justify-center rounded-2xl bg-[#0A2540] px-6 py-3 font-semibold text-white hover:bg-[#059669]">
           Cotizar por WhatsApp
         </WhatsAppLink>
-        <Link href="/local" className="inline-block rounded-lg border border-neutral-300 px-6 py-3 font-medium text-neutral-700 hover:border-[#059669]/40 hover:text-[#059669]">
+        <Link href="/local" className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-6 py-3 font-medium text-gray-700 hover:border-[#059669]/40 hover:text-[#059669]">
           Ver las {CIUDADES.length} ciudades
         </Link>
       </div>

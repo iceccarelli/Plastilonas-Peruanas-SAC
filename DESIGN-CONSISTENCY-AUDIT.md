@@ -82,3 +82,48 @@ identidad de marca quedan garantizados por construcción — el sitio se ve
 impecable en móvil y web, y **escala** sin volver a introducir inconsistencias.
 La consistencia deja de ser una tarea de limpieza recurrente y pasa a ser una
 propiedad del sistema.
+
+---
+
+## 6. Auditoría automática de interfaz (añadido)
+
+Los fallos visuales no los detectan TypeScript, el linter ni los tests
+unitarios: se detectan mirando. `scripts/audit-ui.mjs` mira por nosotros.
+
+Recorre 13 rutas representativas en **claro y oscuro**, en **escritorio y
+móvil** (52 vistas), y en cada una mide el contraste WCAG real de cada nodo de
+texto contra su fondo efectivo, además de desbordamiento horizontal, objetivos
+táctiles diminutos e imágenes sin `alt`.
+
+```bash
+npm i -D playwright && npx playwright install chromium   # una sola vez
+npm run build && npx next start -p 3100 &
+BASE=http://localhost:3100 npm run audit:ui
+```
+
+`docs/ui-audit-baseline.json` guarda la línea base. El script **falla** si el
+número de clases con fallo sube por encima de ella: es un trinquete, la
+interfaz solo puede mejorar. Para bajar la línea base tras una corrección:
+`npm run audit:ui -- --update`.
+
+### Lo que encontró en su primera ejecución
+
+| Hallazgo | Medida | Dónde |
+|---|---|---|
+| Cuerpo de texto en `neutral-*` sin mapear en oscuro | **1.81:1** | 12 páginas de ciudad |
+| Título del formulario de cotización (`text-navy`) | **1.01:1** | /cotizacion, oscuro |
+| Verde de marca oscurecido también en tema oscuro | **2.87:1** | home, catálogo |
+| Tarjetas-enlace blancas con tinta clara dentro | **2.54:1** | home, oscuro |
+| WhatsApp `#25D366` como color de texto | **1.98:1** | /contacto, claro |
+| CTA de ciudad en `bg-green-600` | **3.30:1** | 12 páginas de ciudad |
+
+Resultado tras la corrección: **claro 4 → 1 clases, oscuro 35 → 1**, sin
+desbordamiento horizontal y sin imágenes sin `alt` en ninguna de las 52 vistas.
+
+### La lección que dejó
+
+La capa AA de modo claro usa `!important`. Cualquier regla del tema oscuro que
+la contradiga **debe llevar `!important` también**, o pierde en silencio: el
+texto conserva el color calculado para fondo blanco. Y la excepción del CTA
+blanco debe exigir la tinta navy en el **propio** elemento; con selector por
+descendencia arrastra a las tarjetas-enlace y las rompe.

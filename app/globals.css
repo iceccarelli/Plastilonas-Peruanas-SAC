@@ -251,7 +251,7 @@ a:hover, button:hover {
    esos elementos quedaban como bloques BLANCOS con tinta clara encima -> el
    encabezado y la primera columna de la tabla comparativa eran ilegibles.
    Ampliar el selector es aditivo y arregla tambien cualquier pagina futura. */
-.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label).bg-white {
+.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label, a, button).bg-white {
   background-color: var(--surface-raised);
 }
 .dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label).bg-gray-50,
@@ -266,21 +266,55 @@ a:hover, button:hover {
 }
 
 /* Tinta */
-.dark main .text-\[\#0A2540\] { color: var(--text); }
+.dark main .text-\[\#0A2540\] { color: var(--text) !important; }
 /* gray-800 es tinta principal, no secundaria: mapearla a --text-muted dejaba
    el bloque "En resumen" de cada guia casi ilegible sobre fondo oscuro. */
-.dark main :is(.text-gray-800, .text-gray-900) { color: var(--text); }
-.dark main :is(.text-gray-500, .text-gray-600, .text-gray-700) { color: var(--text-muted); }
+.dark main :is(.text-gray-800, .text-gray-900) { color: var(--text) !important; }
+.dark main :is(.text-gray-500, .text-gray-600, .text-gray-700) { color: var(--text-muted) !important; }
 /* gray-400 marca dato ausente ("No declarado"): debe seguir siendo tenue,
    pero legible. */
-.dark main .text-gray-400 { color: var(--text-muted); opacity: 0.75; }
+.dark main :is(.text-gray-400, .text-neutral-400) { color: var(--text-muted) !important; }
 .dark main :is(.border-gray-100, .border-gray-200) { border-color: var(--border); }
+
+/* La escala `neutral-*` de Tailwind no estaba cubierta. Las 12 paginas de
+   ciudad la usan para todo su cuerpo de texto: en oscuro quedaban en 1.81:1,
+   practicamente invisibles. Mismo remapeo que la escala `gray-*`. */
+.dark main :is(.text-neutral-800, .text-neutral-900) { color: var(--text) !important; }
+.dark main :is(.text-neutral-500, .text-neutral-600, .text-neutral-700) { color: var(--text-muted) !important; }
+.dark main :is(.border-neutral-100, .border-neutral-200, .border-neutral-300) { border-color: var(--border); }
+.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label):is(.bg-neutral-50, .bg-neutral-100) {
+  background-color: var(--surface-muted);
+}
+
+/* `text-navy` es el token equivalente al literal #0A2540 y aparece en el
+   modal de cotizacion. Sin mapear, el titulo del formulario quedaba en 1.01:1. */
+.dark main .text-navy { color: var(--text) !important; }
+
+/* Verde de marca: en claro se oscurece a #047857 para cumplir AA sobre blanco.
+   En oscuro esa misma correccion lo hunde a 2.87:1 sobre la pagina. El verde
+   claro del tema (--brand-hover, #34D399) da ~9:1 sobre #0B1220. */
+.dark main :is(.text-\[\#059669\], .text-\[\#047857\], .text-brand, .text-\[\#25D366\]) {
+  color: var(--brand-hover) !important;
+}
 
 /* Los CTA blancos del hero viven sobre imagen oscura: siguen blancos con
    tinta navy (15.54:1). Deben ir DESPUES de las reglas de arriba. */
-.dark main :is(a, button).bg-white { background-color: #FFFFFF; box-shadow: none; }
+/* ACOTADO con :has(). Antes cubria CUALQUIER enlace con fondo blanco, lo que
+   incluia las TARJETAS del carrusel de familias y del catalogo: la tarjeta se
+   quedaba blanca mientras su texto interior se remapeaba a la paleta oscura
+   -> gris claro sobre blanco (2.54:1). Solo el CTA real —el que lleva tinta
+   navy— debe seguir siendo blanco. */
+.dark main :is(a, button).bg-white:is(.text-\[\#0A2540\], .text-navy) {
+  background-color: #FFFFFF;
+  box-shadow: none;
+}
+/* Con !important, porque la regla de tinta oscura de arriba tambien lo lleva:
+   sin esto el CTA blanco recibia tinta clara sobre blanco (1.17:1). */
+/* Solo cuando la tinta navy esta en el PROPIO enlace/boton. La variante por
+   descendencia hacia que las tarjetas-enlace (ya convertidas en superficie
+   oscura) forzaran su titulo a navy sobre fondo oscuro: 1.01:1. */
 .dark main :is(a, button).bg-white.text-\[\#0A2540\],
-.dark main :is(a, button).bg-white .text-\[\#0A2540\] { color: #0A2540; }
+.dark main :is(a, button).bg-white.text-navy { color: #0A2540 !important; }
 
 
 /* ═══════════════════════════════════════════════════════════════════

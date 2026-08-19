@@ -98,9 +98,9 @@ export default function ContactoPage() {
                 </div>
               </a>
               <WhatsAppLink context="contacto" message="Hola, quisiera información sobre sus productos." className="flex gap-4 group">
-                <Phone className="mt-0.5 text-[#25D366]" /> 
+                <Phone className="mt-0.5 text-[#047857]" /> 
                 <div>
-                  <div className="font-medium text-[#25D366]">+51 946 085 270 (WhatsApp)</div>
+                  <div className="font-medium text-[#047857]">+51 946 085 270 (WhatsApp)</div>
                   <div className="text-xs text-gray-500">Atención inmediata 24/7</div>
                 </div>
               </WhatsAppLink>
