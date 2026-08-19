@@ -1,0 +1,653 @@
+#!/usr/bin/env bash
+# =============================================================================
+# P8 — MODO OSCURO: LAS PÁGINAS NUEVAS ERAN ILEGIBLES
+#
+# Plastilonas Peruanas SAC. Aplica sobre main en 13edecd o posterior.
+#
+# Verificado con capturas reales del sitio construido, en modo oscuro:
+#
+#   * Tabla comparativa: el encabezado (nombres de los productos) y la primera
+#     columna (nombres de las especificaciones) se pintaban BLANCOS con tinta
+#     clara encima. Ilegibles. Justo las dos referencias que el comprador
+#     necesita para saber qué columna es cuál.
+#   * Guías técnicas: el bloque "En resumen" —lo primero que lee un comprador
+#     y lo primero que extrae un motor de búsqueda— usaba text-gray-800, que no
+#     estaba mapeado: gris oscuro sobre fondo oscuro.
+#   * Páginas de familia: los chips de sector salían como píldoras blancas.
+#
+# Causa: la capa de compatibilidad de modo oscuro de globals.css cubría solo
+# contenedores de bloque (div, section, article, aside, li). Las páginas nuevas
+# introdujeron tablas, chips y párrafos con las mismas utilidades.
+#
+# La corrección es ADITIVA: amplía el selector en lugar de migrar literales,
+# que es justo lo que DESIGN-CONSISTENCY-AUDIT.md advierte que no se haga a
+# ciegas. Arregla además cualquier página futura que use esas utilidades.
+#
+# Uso:   bash apply-p8-modo-oscuro.sh
+# =============================================================================
+set -euo pipefail
+
+if [ ! -f package.json ] || [ ! -f app/globals.css ]; then
+  echo "ERROR: ejecute este script desde la raíz del repo." >&2
+  exit 1
+fi
+
+echo "==> Escribiendo app/globals.css"
+cat > 'app/globals.css' <<'PP_EOF'
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-playfair);
+  
+  /* Premium Color Palette - AWS Level + Industrial Warmth */
+  --color-navy: #0A2540;
+  --color-navy-light: #1A3A5C;
+  --color-emerald: #059669;
+  --color-emerald-dark: #047857;
+  --color-amber: #F59E0B;
+  --color-amber-dark: #D97706;
+  --color-gray-50: #F8FAFC;
+  --color-gray-100: #F1F5F9;
+  --color-gray-200: #E2E8F0;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1E293B;
+
+  /* Semantic surface tokens — light (default) */
+  --surface: #FFFFFF;
+  --surface-muted: var(--color-gray-50);
+  --surface-raised: #FFFFFF;
+  --border: var(--color-gray-200);
+  --text: var(--color-navy);
+  --text-muted: var(--color-gray-600);
+  --brand: var(--color-emerald);
+  --brand-hover: var(--color-emerald-dark);
+}
+
+/* Dark theme — token overrides only. Existing rules that consume the
+   variables above (product-card, form-input, specs-table, focus-visible)
+   invert automatically. No component markup changes required. */
+.dark {
+  --surface: #0B1220;
+  --surface-muted: #111C2E;
+  --surface-raised: #16233A;
+  /* Escalera de elevacion, pasos medidos ~1.35:1 entre superficies
+     adyacentes, igual que AWS. No usar gradientes: bandas solidas. */
+  --surface-nav: #1C2C46;
+  --surface-deep: #060D18;
+  --border: #24354F;
+  --text: #E8EEF6;
+  --text-muted: #93A4BC;
+  --brand: #10B981;
+  --brand-hover: #34D399;
+
+  --color-gray-50: #111C2E;
+  --color-gray-100: #16233A;
+  --color-gray-200: #24354F;
+  --color-gray-600: #93A4BC;
+}
+
+html { color-scheme: light; }
+html.dark { color-scheme: dark; }
+
+body {
+  background-color: var(--surface);
+  color: var(--text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Respect OS-level motion preferences. Required for WCAG 2.1 AA (2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  font-feature-settings: "kern" "tnum" "liga" "kern";
+}
+
+/* Premium Typography */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-feature-settings: "kern" "tnum" "liga" "kern";
+}
+
+/* Smooth micro-interactions */
+a, button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a:hover, button:hover {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Premium Card Styles */
+.product-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  border-color: var(--color-emerald);
+}
+
+/* Mega Menu Styles */
+.mega-menu {
+  animation: fadeInScale 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Command Palette */
+.command-palette {
+  animation: commandEnter 0.15s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes commandEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Chatbot Styles */
+.chatbot-window {
+  animation: slideUp 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Form Styles - Premium */
+.form-input {
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: var(--color-emerald);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+  outline: none;
+}
+
+/* Table Styles */
+.specs-table tr {
+  transition: background-color 0.1s ease;
+}
+
+.specs-table tr:hover {
+  background-color: var(--color-gray-50);
+}
+
+/* Filter Active States */
+.filter-active {
+  background-color: var(--color-emerald);
+  color: white;
+  border-color: var(--color-emerald);
+}
+
+/* WhatsApp Floating Button */
+.whatsapp-float {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.whatsapp-float:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 10px 15px -3px rgb(37 211 102 / 0.3);
+}
+
+/* Professional Badge */
+.badge {
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+/* Section Dividers */
+.section-divider {
+  background: linear-gradient(to right, transparent, var(--color-gray-200), transparent);
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.25rem !important;
+    line-height: 2.5rem !important;
+  }
+}
+
+/* Accessibility Focus */
+:focus-visible {
+  outline: 2px solid var(--color-emerald);
+  outline-offset: 2px;
+}
+
+/* Loading States */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-gray-100) 25%, var(--color-gray-200) 50%, var(--color-gray-100) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Capa de compatibilidad de tema ────────────────────────────────────
+   Los contenedores usan literales (.bg-white, .text-[#0A2540]). Al volver
+   <body> dependiente de tokens, los <h3> sin clase de color heredaban
+   --text (claro) sobre tarjetas blancas -> 1.17:1. Y los <h2> con
+   text-[#0A2540] quedaban sobre la pagina oscura -> 1.21:1.
+
+   Esta capa hace que los contenedores sigan al tema. Va limitada a <main>
+   para no tocar Navbar ni Footer, que ya manejan su propio dark:.
+
+   ES UN PARCHE. Lo correcto es migrar los literales de page.tsx,
+   SectionHeading.tsx y ProductCard.tsx a los tokens directamente.  */
+
+/* Superficies: la tarjeta sube un escalon respecto de la pagina.
+
+   AMPLIADO: la lista original cubria solo contenedores de bloque. Las paginas
+   de familia, comparativa, recursos y cobertura local introdujeron tablas
+   (th/td), chips (span) y callouts (p) con las mismas utilidades. En oscuro
+   esos elementos quedaban como bloques BLANCOS con tinta clara encima -> el
+   encabezado y la primera columna de la tabla comparativa eran ilegibles.
+   Ampliar el selector es aditivo y arregla tambien cualquier pagina futura. */
+.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label).bg-white {
+  background-color: var(--surface-raised);
+}
+.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label).bg-gray-50,
+.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label).bg-gray-100 {
+  background-color: var(--surface-muted);
+}
+
+/* 1.4.11: tarjeta #16233A vs pagina #0B1220 = 1.19:1, por debajo de 3.0.
+   box-shadow en vez de border: no desplaza el layout. */
+.dark main :is(div, section, article).bg-white {
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+/* Tinta */
+.dark main .text-\[\#0A2540\] { color: var(--text); }
+/* gray-800 es tinta principal, no secundaria: mapearla a --text-muted dejaba
+   el bloque "En resumen" de cada guia casi ilegible sobre fondo oscuro. */
+.dark main :is(.text-gray-800, .text-gray-900) { color: var(--text); }
+.dark main :is(.text-gray-500, .text-gray-600, .text-gray-700) { color: var(--text-muted); }
+/* gray-400 marca dato ausente ("No declarado"): debe seguir siendo tenue,
+   pero legible. */
+.dark main .text-gray-400 { color: var(--text-muted); opacity: 0.75; }
+.dark main :is(.border-gray-100, .border-gray-200) { border-color: var(--border); }
+
+/* Los CTA blancos del hero viven sobre imagen oscura: siguen blancos con
+   tinta navy (15.54:1). Deben ir DESPUES de las reglas de arriba. */
+.dark main :is(a, button).bg-white { background-color: #FFFFFF; box-shadow: none; }
+.dark main :is(a, button).bg-white.text-\[\#0A2540\],
+.dark main :is(a, button).bg-white .text-\[\#0A2540\] { color: #0A2540; }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE POLISH LAYER  (≤640px)  — tightens spacing & sizing site-wide.
+   Purely responsive: desktop is untouched. Mirrors AWS/Square density.
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* 1. Kill any accidental horizontal scroll */
+  html, body { max-width: 100%; overflow-x: hidden; }
+
+  /* 2. Section vertical rhythm: 80px -> 48px. Reclaims dead space. */
+  section.py-20, section.py-24 { padding-top: 3rem; padding-bottom: 3rem; }
+  .mt-20 { margin-top: 3rem !important; }
+  .mt-16 { margin-top: 2.5rem !important; }
+
+  /* 3. Hero: shorter, tighter, not a full screen of navy */
+  section.min-h-\[92vh\] { min-height: 78vh; }
+  section.min-h-\[92vh\] h1 { font-size: 2.15rem !important; line-height: 1.12 !important; }
+  section.min-h-\[92vh\] .mt-16 { margin-top: 2rem !important; }
+
+  /* 4. Product visual placards: 224px -> 176px, lighter feel */
+  .product-card .h-56 { height: 11rem; }
+
+  /* 5. Badges/labels breathe less loudly on tiny screens */
+  .badge { font-size: 0.7rem; padding: 0.2rem 0.6rem; }
+
+  /* 6. Comfortable tap targets (Apple/Google min 44px) for pills & icons */
+  a, button { -webkit-tap-highlight-color: transparent; }
+}
+
+/* ── Bright selected / active states (all breakpoints) ─────────────
+   Tapped filter chips and cards get a clear brand highlight + lift. */
+.chip-selected,
+button[aria-pressed="true"] {
+  background-color: var(--color-emerald) !important;
+  color: #fff !important;
+  border-color: var(--color-emerald) !important;
+  box-shadow: 0 4px 14px -2px rgba(5, 150, 105, 0.45);
+}
+.product-card:active { transform: scale(0.985); }
+
+/* Card image brightens on tap/hover (the "brighten when selected" ask) */
+.product-card .h-56 { transition: filter 0.25s ease; }
+.product-card:hover .h-56,
+.product-card:active .h-56 { filter: brightness(1.12) saturate(1.08); }
+
+/* ── Bright gradient selected/active state (AWS "North America" style) ── */
+.chip-selected {
+  background-image: linear-gradient(120deg, #047857, #065F46 70%, #0F766E) !important;
+  background-color: #047857 !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 14px -2px rgba(5, 150, 105, 0.5);
+}
+
+/* Hide scrollbar on horizontal scroll rows but keep swipe */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ═══════════ MOBILE SECTION POLISH (≤640px) ═══════════ */
+@media (max-width: 640px) {
+  /* 1+3. Content cards: less inner padding so they stop eating the screen.
+     Targets the rounded-3xl p-8 cards in Servicios / Por qué / Family. */
+  main .rounded-3xl.p-8 { padding: 1.35rem !important; }
+  /* Tighten vertical gaps between stacked cards */
+  main .gap-6 { gap: 0.85rem !important; }
+  /* Service/why headings a touch smaller so cards shrink */
+  main .rounded-3xl .text-xl { font-size: 1.05rem !important; line-height: 1.4 !important; }
+
+  /* 5. Chat button: smaller + higher so it never sits over card text.
+     Overrides the w-16 h-16 bottom-6 float. */
+  .fixed.bottom-6.right-6 { bottom: 1rem !important; right: 1rem !important; }
+  .fixed.bottom-6.right-6 > button { width: 3.25rem !important; height: 3.25rem !important; }
+  /* Lift the open chat window origin to match */
+  .fixed.bottom-24.right-6 { bottom: 4.75rem !important; }
+}
+
+/* ── 2. Sectores: peek-scroll row (one line, swipeable, next chip peeks) ── */
+.sector-scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.25rem;
+  flex-wrap: nowrap;
+}
+.sector-scroll > * { scroll-snap-align: start; flex: 0 0 auto; }
+
+/* ═══════════ MOBILE DENSITY (≤640px) — end the endless scroll ═══════════ */
+@media (max-width: 640px) {
+  /* Servicios + Por qué: 1-col -> 2-col so all items fit with minimal scroll */
+  main section .grid.md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 0.6rem !important; }
+  /* Compact those cards so 2-up reads cleanly */
+  main section .grid.md\:grid-cols-2 > div { padding: 1rem !important; border-radius: 1.25rem !important; }
+  main section .grid.md\:grid-cols-2 .text-xl { font-size: 0.95rem !important; line-height: 1.3 !important; }
+  main section .grid.md\:grid-cols-2 .text-lg { font-size: 0.95rem !important; }
+  main section .grid.md\:grid-cols-2 p { font-size: 0.8rem !important; line-height: 1.35 !important; }
+  main section .grid.md\:grid-cols-2 .w-10.h-10 { width: 2rem !important; height: 2rem !important; margin-bottom: 0.6rem !important; }
+
+  /* Family catalog: vertical list -> horizontal peek-carousel (swipe, 2.2 cards) */
+  .family-scroll { display: flex !important; gap: 0.7rem; overflow-x: auto; scroll-snap-type: x mandatory; grid-template-columns: none !important; }
+  .family-scroll > a { flex: 0 0 82%; scroll-snap-align: start; }
+
+  /* Kill stray off-canvas carousel arrow bleeding at screen edge */
+  .hero-arrow-left, [class*="carousel"] button.absolute.left-0 { display: none !important; }
+}
+
+/* ── Ticker de sectores: flujo continuo derecha -> izquierda ── */
+.ticker-wrap { overflow: hidden; position: relative; }
+.ticker-track {
+  display: flex;
+  gap: 0.5rem;
+  width: max-content;
+  animation: ticker-scroll 38s linear infinite;
+}
+.ticker-wrap:hover .ticker-track,
+.ticker-wrap:focus-within .ticker-track { animation-play-state: paused; }
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { animation: none; flex-wrap: wrap; width: auto; }
+}
+
+/* ═══════════ CONTRASTE WCAG AA — verificado por medición ═══════════
+   #059669 sobre blanco = 3.77 (FALLA AA 4.5) -> #047857 = 5.48 (PASA).
+   #10B981 + texto blanco = 2.54 (FALLA) -> emerald-700 = 5.48 (PASA).
+   gray-400 = 2.54 (FALLA) -> gray-500 = 4.83 (PASA).
+   #10B981 sobre navy = 6.13 (PASA) -> se conserva.
+   Razón comercial: se lee a pleno sol en mina, obra y campo. ══════ */
+:root { --color-emerald-text: #047857; }
+.text-\[\#059669\] { color: #047857 !important; }
+.bg-\[\#059669\] { background-color: #047857 !important; }
+.hover\:bg-\[\#059669\]:hover { background-color: #047857 !important; }
+.hover\:text-\[\#059669\]:hover { color: #047857 !important; }
+.text-gray-400 { color: #6B7280 !important; }
+.bg-\[\#0A2540\] .text-\[\#10B981\],
+section.bg-\[\#0A2540\] .text-\[\#10B981\] { color: #10B981 !important; }
+
+/* Foco visible para teclado (AWS/Square: accesibilidad primero) */
+a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid #047857;
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SISTEMA DE DISEÑO — jerarquía de forma y tipografía
+   Patrón AWS observado:
+     · Monoespaciada = metadato técnico (specs, estados, conteos).
+     · Radio PEQUEÑO = etiqueta informativa (no se toca).
+     · Radio PÍLDORA = acción (se toca).
+     · Panel/tarjeta = radio medio.
+   Antes: badges y botones compartían forma píldora -> el usuario
+   intentaba tocar etiquetas. La forma ahora codifica la función.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* 1 · Metadatos técnicos en monoespaciada */
+.badge,
+.tech-meta,
+.spec-label,
+.tabular-nums {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 2 · Jerarquía de radios */
+.badge {
+  border-radius: 0.375rem;      /* etiqueta: NO es un botón */
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  padding: 0.22rem 0.5rem;
+  text-transform: uppercase;
+}
+/* Los estados de producto también son etiquetas, no acciones */
+.product-card .absolute.top-4.left-4,
+.product-card .absolute.top-4.right-4 {
+  border-radius: 0.375rem !important;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.04em;
+}
+
+/* 3 · Transición de sección con solape redondeado (patrón AWS) */
+.section-lift {
+  position: relative;
+  z-index: 1;
+  border-top-left-radius: 2rem;
+  border-top-right-radius: 2rem;
+  margin-top: -2rem;
+}
+
+/* 4 · Ritmo de lectura: cuerpo más cómodo, títulos más ceñidos */
+main p { line-height: 1.6; }
+main h1, main h2, main h3 { letter-spacing: -0.02em; }
+
+/* ═══════════ KEN BURNS — fotos de producto "vivas" ═══════════
+   Zoom + paneo lento e infinito en alternancia. Cada tarjeta arranca con
+   un pequeño desfase para que no se muevan todas al unísono. Se detiene
+   por completo si el usuario prefiere menos movimiento. */
+.ken-burns {
+  animation: kenburns 22s ease-in-out infinite alternate;
+  transform-origin: center;
+  will-change: transform;
+}
+.ken-burns-wrap:nth-of-type(3n) .ken-burns   { animation-duration: 26s; animation-delay: -6s; transform-origin: top left; }
+.ken-burns-wrap:nth-of-type(3n+1) .ken-burns { animation-duration: 20s; animation-delay: -3s; transform-origin: bottom right; }
+@keyframes kenburns {
+  from { transform: scale(1.02) translate(0, 0); }
+  to   { transform: scale(1.14) translate(-1.5%, 1.5%); }
+}
+/* En hover intensifica un pelín la sensación de vida */
+.group:hover .ken-burns { animation-duration: 12s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ken-burns { animation: none !important; transform: scale(1.02); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOKENS DE DISEÑO — fuente única de verdad para tipografía, botones,
+   secciones y radios. Reemplaza los tamaños sueltos (t-body,
+   px-9 py-4, etc.) por clases semánticas. Patrón AWS/Stripe/Siemens.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Escala tipográfica (usar estas, no píxeles sueltos) ── */
+.t-display { font-size: clamp(2.25rem, 5vw, 3.5rem); line-height: 1.05; letter-spacing: -0.03em; }
+.t-h2      { font-size: clamp(1.75rem, 3.5vw, 2.5rem); line-height: 1.1; letter-spacing: -0.02em; }
+.t-h3      { font-size: 1.25rem; line-height: 1.3; letter-spacing: -0.01em; }
+.t-body    { font-size: 0.9375rem; line-height: 1.6; }   /* = 15px, ahora tokenizado */
+.t-caption { font-size: 0.8125rem; line-height: 1.5; }   /* = 13px */
+.t-micro   { font-size: 0.6875rem; line-height: 1.4; letter-spacing: 0.04em; } /* = 11px, badges/meta */
+
+/* ── Sistema de botones: UNA definición, tres tamaños ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-weight: 600; font-size: 0.875rem; line-height: 1;
+  padding: 0.75rem 1.5rem;            /* alto uniforme = 44px táctil */
+  border-radius: 9999px;
+  transition: background-color .2s, color .2s, transform .1s;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.985); }
+.btn-sm { padding: 0.5rem 1rem; font-size: 0.8125rem; }
+.btn-lg { padding: 0.9rem 2rem; font-size: 0.95rem; }
+.btn-primary   { background: #0A2540; color: #fff; }
+.btn-primary:hover   { background: #047857; }
+.btn-accent    { background: #047857; color: #fff; }
+.btn-accent:hover    { background: #065F46; }
+.btn-ghost     { background: #fff; color: #0A2540; border: 1px solid #E5E7EB; }
+.btn-ghost:hover     { border-color: #047857; color: #047857; }
+
+/* ── Ritmo de sección: 2 valores, no 6 ── */
+.section-pad { padding-top: 5rem; padding-bottom: 5rem; }
+@media (max-width: 640px) { .section-pad { padding-top: 3rem; padding-bottom: 3rem; } }
+PP_EOF
+
+echo "==> Escribiendo test/dark-mode.test.ts"
+cat > 'test/dark-mode.test.ts' <<'PP_EOF'
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const css = readFileSync(join(process.cwd(), 'app/globals.css'), 'utf8');
+
+/**
+ * El modo oscuro del sitio funciona con una capa de compatibilidad en
+ * globals.css: los componentes escriben utilidades literales (bg-white,
+ * text-gray-800…) y esa capa las remapea a los tokens del tema dentro de
+ * <main>. Si la capa no cubre un tipo de elemento, ese elemento se queda
+ * BLANCO sobre página oscura y su texto desaparece.
+ *
+ * Ocurrió de verdad: el encabezado y la primera columna de las tablas
+ * comparativas (th) y el bloque "En resumen" de las guías (text-gray-800)
+ * quedaban ilegibles. Estos tests fijan la cobertura.
+ */
+describe('modo oscuro: cobertura de la capa de compatibilidad', () => {
+  const surfaceRule =
+    css.match(/\.dark main :is\(([^)]*)\)\.bg-white \{/)?.[1] ?? '';
+
+  it('la regla de superficie cubre tablas, celdas, chips y párrafos', () => {
+    for (const tag of ['div', 'section', 'article', 'li', 'p', 'span', 'th', 'td', 'table', 'tr']) {
+      expect(surfaceRule, `falta ${tag} en la capa oscura`).toContain(tag);
+    }
+  });
+
+  it('bg-gray-50 y bg-gray-100 tienen la misma cobertura que bg-white', () => {
+    const grayRule = css.match(/\.dark main :is\(([^)]*)\)\.bg-gray-50/)?.[1] ?? '';
+    for (const tag of ['th', 'td', 'span', 'p']) {
+      expect(grayRule, `falta ${tag} en bg-gray-50`).toContain(tag);
+    }
+  });
+
+  it('text-gray-800 es tinta principal, no secundaria', () => {
+    // Mapearla a --text-muted dejaba el resumen de cada guía casi ilegible.
+    expect(css).toMatch(/\.dark main :is\(\.text-gray-800, \.text-gray-900\) \{ color: var\(--text\); \}/);
+  });
+
+  it('text-gray-400 sigue siendo tenue pero legible', () => {
+    expect(css).toContain('.dark main .text-gray-400');
+  });
+
+  it('los CTA blancos sobre bloques oscuros siguen siendo blancos', () => {
+    // Esta excepción debe ir DESPUÉS de la regla general o el botón blanco
+    // del hero y de los CTA se volvería una superficie oscura.
+    const generic = css.indexOf('.dark main :is(div, section, article, aside, li, p, span');
+    const exception = css.indexOf('.dark main :is(a, button).bg-white');
+    expect(generic).toBeGreaterThan(-1);
+    expect(exception).toBeGreaterThan(generic);
+  });
+});
+PP_EOF
+
+echo ""
+echo "==> Puertas de calidad"
+npx tsc --noEmit
+npx next lint
+npm test
+npm run build
+
+echo ""
+echo "=============================================================="
+echo " LISTO. Esperado: 12 test files / 129 tests."
+echo ""
+echo " Compruébelo: npm run start, active el modo oscuro y visite"
+echo "   /productos/familia/geosinteticos/comparar"
+echo "   /recursos/carpas-industriales-carga-viento-norma-e020"
+echo ""
+echo " Siguiente:"
+echo "   git add -A"
+echo "   git commit -m 'fix(ui): modo oscuro en tablas, chips y resumenes de guia'"
+echo "   git push origin main"
+echo "=============================================================="
