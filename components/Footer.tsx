@@ -22,6 +22,7 @@ export default function Footer() {
       { label: 'Recursos técnicos', href: '/recursos' },
       { label: 'Arquitecturas de referencia', href: '/soluciones' },
       { label: 'Marco de Especificación', href: '/marco' },
+      { label: 'Novedades', href: '/novedades' },
       { label: 'Sobre Nosotros', href: '/nosotros' },
       { label: 'Nuestros Servicios', href: '/servicios' },
       { label: 'Contacto', href: '/contacto' },
@@ -99,6 +100,7 @@ export default function Footer() {
               <li><Link href="/recursos" className="hover:text-white transition-colors">Recursos técnicos</Link></li>
               <li><Link href="/soluciones" className="hover:text-white transition-colors">Arquitecturas de referencia</Link></li>
               <li><Link href="/marco" className="hover:text-white transition-colors">Marco de Especificación</Link></li>
+              <li><Link href="/novedades" className="hover:text-white transition-colors">Novedades</Link></li>
               <li><Link href="/nosotros" className="hover:text-white transition-colors">Sobre Nosotros</Link></li>
               <li><Link href="/servicios" className="hover:text-white transition-colors">Nuestros Servicios</Link></li>
               <li><Link href="/contacto" className="hover:text-white transition-colors">Contacto</Link></li>

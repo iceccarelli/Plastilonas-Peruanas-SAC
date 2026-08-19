@@ -97,6 +97,16 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Feed del registro fechado, declarado en TODO el sitio. Va como JSX
+            y no en `metadata.alternates`: cada página declara su propio
+            `alternates.canonical`, y Next reemplaza el objeto entero, de modo
+            que el enlace del feed desaparecía en todas menos en /novedades. */}
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title={`Novedades — ${SITE.name}`}
+          href={`${SITE.url}/novedades/rss.xml`}
+        />
         {/* Aplica el tema antes del primer pintado: sin esto, una carga en
             modo oscuro parpadea en blanco. Debe ser sincrono y estar en <head>. */}
         <script

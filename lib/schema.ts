@@ -190,10 +190,16 @@ export function articleSchema(a: {
   wordCount?: number;
   /** Fuentes externas que respaldan las cifras del artículo. */
   citations?: { label: string; url: string }[];
+  /**
+   * TechArticle es lo correcto para una guía de especificación. Un anuncio
+   * fechado del registro de novedades NO es documentación técnica: declararlo
+   * TechArticle degrada la señal de todo el silo /recursos.
+   */
+  articleType?: "TechArticle" | "Article";
 }): Dict {
   return {
     "@context": "https://schema.org",
-    "@type": "TechArticle",
+    "@type": a.articleType ?? "TechArticle",
     "@id": `${a.url}#article`,
     headline: a.headline,
     description: a.description,

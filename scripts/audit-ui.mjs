@@ -51,6 +51,8 @@ const ROUTES = [
   ['marco', '/marco'],
   ['marco-evaluacion', '/marco/evaluacion'],
   ['soluciones', '/soluciones'],
+  ['novedades', '/novedades'],
+  ['novedad', '/novedades/marco-de-especificacion-v1'],
   ['solucion', '/soluciones/poza-revestida-impermeabilizacion'],
   ['local-hub', '/local'],
   ['ciudad', '/local/arequipa'],

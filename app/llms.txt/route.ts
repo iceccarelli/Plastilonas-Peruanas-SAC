@@ -4,6 +4,7 @@ import ciudades from "@/data/ciudades.json";
 import { articles } from "@/lib/articles";
 import { pillars, totalCriteria, FRAMEWORK_VERSION } from "@/lib/framework";
 import { solutions } from "@/lib/solutions";
+import { novedades, tipoLabels, NOVEDADES_UPDATED } from "@/lib/novedades";
 
 /**
  * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
@@ -103,6 +104,18 @@ declaran obras ejecutadas ni clientes.
 
 ${solutions.map((s) => `- [${s.titulo}](${base}/soluciones/${s.slug}) — ${s.componentes.length} componentes · ${s.sectores.join(", ")}`).join("\n")}
 
+## Novedades (registro fechado)
+
+Cambios publicados, con fecha real y enlace a lo que cambió. Última
+actualización: ${NOVEDADES_UPDATED}. Feeds: ${base}/novedades/rss.xml (RSS 2.0)
+y ${base}/novedades/feed.json (JSON Feed 1.1). Solo se registran cambios en el
+catálogo, las guías, las herramientas y los criterios publicados: no hay
+anuncios de intenciones ni contenido promocional.
+
+${novedades
+  .map((n) => `- ${n.fecha} · ${tipoLabels[n.tipo]} — [${n.titulo}](${base}/novedades/${n.slug}): ${clamp(n.resumen, 200)}`)
+  .join("\n")}
+
 ## Marco de Especificación (referencia del rubro)
 
 Criterios públicos para definir un proyecto textil industrial o geosintético
@@ -129,6 +142,7 @@ ${recursosLista}
 - [Solicitar cotización](${base}/cotizacion)
 - [Contacto](${base}/contacto)
 - [Recursos técnicos](${base}/recursos)
+- [Novedades](${base}/novedades)
 
 ## Cómo cotizar
 
@@ -150,6 +164,8 @@ Para una cotización precisa conviene indicar: producto, medidas o metraje, cant
 
 - [Sitemap XML](${base}/sitemap.xml)
 - [robots.txt](${base}/robots.txt)
+- [Feed RSS de novedades](${base}/novedades/rss.xml)
+- [JSON Feed de novedades](${base}/novedades/feed.json)
 `;
 
   return new Response(body, {

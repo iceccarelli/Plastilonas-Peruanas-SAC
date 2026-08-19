@@ -6,6 +6,7 @@ import { articles } from "@/lib/articles";
 import { familyContent, comparableFamilies } from "@/lib/families";
 import { FRAMEWORK_UPDATED } from "@/lib/framework";
 import { solutions } from "@/lib/solutions";
+import { novedades, NOVEDADES_UPDATED } from "@/lib/novedades";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -65,6 +66,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
-  return [...staticRoutes, ...marcoRoutes, ...solucionRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
+  // Registro fechado: es la única sección donde lastModified es un dato real
+  // y no "hoy". Cada entrada declara su fecha de publicación.
+  const novedadRoutes: MetadataRoute.Sitemap = [
+    { url: `${SITE.url}/novedades`, lastModified: new Date(NOVEDADES_UPDATED),
+      changeFrequency: "weekly", priority: 0.8 },
+    ...novedades.map((n) => ({
+      url: `${SITE.url}/novedades/${n.slug}`,
+      lastModified: new Date(n.fecha), changeFrequency: "yearly" as const, priority: 0.5,
+    })),
+  ];
+
+  return [...staticRoutes, ...marcoRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
     ...localRoutes, ...articleRoutes];
 }

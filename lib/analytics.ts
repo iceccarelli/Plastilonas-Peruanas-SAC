@@ -112,6 +112,14 @@ export function trackSolutionView(slug: string): void {
   trackEvent('solution_view', { slug });
 }
 
+/**
+ * Vista del registro fechado. Mide lo que ninguna otra métrica del sitio mide:
+ * si la frescura sostiene el retorno de un comprador que ya nos conoce.
+ */
+export function trackNovedadView(slug: string): void {
+  trackEvent('novedad_view', { slug });
+}
+
 /* ------------------------------------------------------------------ */
 /* Marco de Especificación — el embudo de mayor intención del sitio.   */
 /* ------------------------------------------------------------------ */

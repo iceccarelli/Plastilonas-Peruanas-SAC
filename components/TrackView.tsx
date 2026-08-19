@@ -8,6 +8,7 @@ import {
   trackFamilyView,
   trackFrameworkView,
   trackSolutionView,
+  trackNovedadView,
   trackProductView,
 } from '@/lib/analytics';
 
@@ -27,7 +28,8 @@ type Props =
   | { kind: 'article'; slug: string; categoria: string }
   | { kind: 'comparison'; slug: string }
   | { kind: 'framework'; slug: string }
-  | { kind: 'solution'; slug: string };
+  | { kind: 'solution'; slug: string }
+  | { kind: 'novedades'; slug: string };
 
 export default function TrackView(props: Props) {
   const fired = useRef(false);
@@ -59,6 +61,9 @@ export default function TrackView(props: Props) {
         break;
       case 'solution':
         trackSolutionView(props.slug);
+        break;
+      case 'novedades':
+        trackNovedadView(props.slug);
         break;
     }
   }, [props]);
