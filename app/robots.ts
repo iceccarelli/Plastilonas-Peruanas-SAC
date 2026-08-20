@@ -13,7 +13,9 @@ import { SITE } from "@/lib/site";
  */
 
 /** Rutas sin valor de indexación (privadas, transaccionales o de API). */
-const DISALLOW = ["/dashboard", "/login", "/api/", "/carrito", "/checkout"];
+// /version.json es un endpoint de operación (qué commit sirve el sitio):
+// ya va con X-Robots-Tag: noindex, y aquí se evita además el rastreo.
+const DISALLOW = ["/dashboard", "/login", "/api/", "/carrito", "/checkout", "/version.json"];
 
 /** Agentes de IA y buscadores que permitimos de forma explícita. */
 const ALLOWED_AGENTS = [
