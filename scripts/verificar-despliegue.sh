@@ -170,6 +170,7 @@ fi
 
 # El informe debe declarar sus límites en la página, no solo en el PDF.
 contiene "/informes/sectores-compradores-textiles-industriales-peru" 'NO afirma' "el informe declara qué no afirma"
+contiene "/informes/formacion-de-precio-y-volatilidad-textiles-industriales" 'no publicamos lista de precios' "el informe de precios explica por qué no hay lista"
 home=$(cuerpo "/")
 n=$(grep -o 'data-social="[a-z]*"' <<< "$home" | sort -u | wc -l)
 if [ "$n" -le 2 ]; then ok "sólo perfiles sociales reales ($n)"; else

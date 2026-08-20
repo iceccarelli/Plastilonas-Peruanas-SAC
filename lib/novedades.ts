@@ -299,6 +299,30 @@ const registro: Novedad[] = [
       { label: 'Centro de documentación', href: '/descargas' },
     ],
   },
+  {
+    slug: 'por-que-cambia-el-precio-de-una-plastilona',
+    fecha: '2026-08-20',
+    tipo: 'referencia',
+    titulo: 'Publicamos nuestra propia cadena de formación de precio',
+    resumen:
+      'Del petróleo a la lona terminada: nafta, resina, flete y tipo de cambio, con el dato verificable de cada eslabón y qué indicador público mirar para anticiparlo.',
+    queCambia:
+      'La pregunta "¿por qué me subió la cotización?" pasa a tener una respuesta con fuente, y el comprador puede seguir por su cuenta los indicadores que la mueven.',
+    detalle: [
+      'Una plastilona es, en su mayor parte, resina de polipropileno: su precio se forma tres eslabones más arriba. La nafta que la origina pasó de 559 a 852 dólares por tonelada entre febrero y marzo de 2026, un 52 % en un mes, y volvió a 652 en junio. El polipropileno grado rafia —el que se teje para big bags— acumuló 449 dólares por tonelada de alza en tres meses y luego cedió.',
+      'El informe explica también por qué la bajada del petróleo tarda en llegar a una cotización: el material que se fabrica hoy se compró hace semanas. Ese desfase corre en los dos sentidos y con la misma duración.',
+      'Incluye la capa peruana que nadie publica: el sol se apreció cerca de un 9 % entre enero de 2025 y julio de 2026, según la serie del BCRP, lo que amortigua parte del alza en dólares.',
+      'No publicamos precios de resina en vivo ni una lista propia, y el informe explica por qué: con una materia prima que se mueve la mitad de su valor en un mes, una lista publicada estaría equivocada la mayor parte del tiempo. En su lugar se indica qué indicador público y gratuito consultar en cada eslabón.',
+    ],
+    enlaces: [
+      {
+        label: 'Por qué cambia el precio de una plastilona',
+        href: '/informes/formacion-de-precio-y-volatilidad-textiles-industriales',
+      },
+      { label: 'Informes del sector', href: '/informes' },
+      { label: 'Términos y condiciones', href: '/terminos' },
+    ],
+  },
 ];
 
 /** Novedades de la más reciente a la más antigua. */

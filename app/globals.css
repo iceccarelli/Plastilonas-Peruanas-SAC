@@ -622,6 +622,10 @@ main h1, main h2, main h3 { letter-spacing: -0.02em; }
 }
 
 .viz-barra { fill: var(--viz-serie); }
+.viz-linea { stroke: var(--viz-serie); }
+/* Anillo del color de la superficie: el marcador sigue legible donde cruza
+   la línea o se solapa con otro. */
+.viz-punto { fill: var(--viz-serie); stroke: var(--surface); }
 .viz-barra-pos { fill: var(--viz-pos); }
 .viz-barra-neg { fill: var(--viz-neg); }
 .viz-eje { stroke: var(--viz-eje); }

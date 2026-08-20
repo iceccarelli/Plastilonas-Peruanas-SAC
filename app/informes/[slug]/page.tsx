@@ -7,6 +7,7 @@ import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import BarChart from '@/components/BarChart';
+import LineChart from '@/components/LineChart';
 import { numeroConSigno } from '@/lib/format';
 import { articleSchema, breadcrumbSchema, datasetSchema, webPageSchema } from '@/lib/schema';
 
@@ -197,7 +198,14 @@ export default async function InformePage({ params }: Props) {
             </dl>
           )}
 
-          {s.grafico && <BarChart grafico={s.grafico} />}
+          {/* La forma la decide el trabajo del dato: trayectoria en el tiempo
+              pide línea; comparación de magnitudes pide barras. */}
+          {s.grafico &&
+            (s.grafico.tipo === 'serie-temporal' ? (
+              <LineChart grafico={s.grafico} />
+            ) : (
+              <BarChart grafico={s.grafico} />
+            ))}
 
           {s.implicacion && (
             <div className="mt-8 rounded-3xl bg-gray-50 p-6">

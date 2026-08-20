@@ -53,6 +53,7 @@ const ROUTES = [
   ['soluciones', '/soluciones'],
   ['informes', '/informes'],
   ['informe', '/informes/sectores-compradores-textiles-industriales-peru'],
+  ['informe-precio', '/informes/formacion-de-precio-y-volatilidad-textiles-industriales'],
   ['glosario', '/glosario'],
   ['descargas', '/descargas'],
   ['termino', '/glosario/geotextil'],

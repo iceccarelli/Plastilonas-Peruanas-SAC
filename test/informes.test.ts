@@ -50,6 +50,20 @@ describe('informes: toda cifra tiene procedencia', () => {
     }
   });
 
+  it('ninguna verificación está fechada en el futuro', () => {
+    // Se coló: dos fuentes decían haberse verificado "mañana", y el reporte de
+    // vigilancia lo delató imprimiendo "verificada hace -1 días". Afirmar una
+    // comprobación que todavía no ocurrió es pequeño y es exactamente el tipo
+    // de imprecisión que este archivo entero existe para impedir.
+    const hoy = new Date().toISOString().slice(0, 10);
+    for (const i of informes) {
+      for (const f of i.fuentes) {
+        expect(f.consultado <= hoy, `${f.id}: consultado ${f.consultado} > hoy ${hoy}`).toBe(true);
+      }
+      expect(i.fecha <= hoy, `${i.slug} fechado ${i.fecha}`).toBe(true);
+    }
+  });
+
   it('no se verifica una fuente antes de que exista', () => {
     for (const i of informes) {
       for (const f of i.fuentes) {
@@ -86,6 +100,33 @@ describe('informes: honestidad declarada', () => {
       const texto = i.limitaciones.join(' ').toLowerCase();
       expect(texto, i.slug).toMatch(/no estima|no cuantifica/);
       expect(texto, i.slug).toContain('mercado');
+    }
+  });
+
+  it('no se publica un precio como si fuera vigente ni una lista propia', () => {
+    // Un precio publicado que se queda viejo es peor que ninguno: el comprador
+    // cotiza contra él, se equivoca, y nos lo atribuye con razón.
+    for (const i of informes) {
+      const texto = i.limitaciones.join(' ').toLowerCase();
+      const hablaDePrecios = [...i.resumenEjecutivo, ...i.secciones.map((x) => x.heading)]
+        .join(' ')
+        .toLowerCase()
+        .includes('precio');
+      if (hablaDePrecios) {
+        expect(texto, `${i.slug}: debe declarar que no publica precios vigentes`).toMatch(
+          /no publica precios|no las use para cotizar|no publica.*lista/,
+        );
+      }
+    }
+  });
+
+  it('las series de terceros se citan, no se redistribuyen', () => {
+    // Las series de precios de resina son producto comercial de agencias.
+    const conIcis = informes.filter((i) => i.fuentes.some((f) => /ICIS/i.test(f.organismo)));
+    for (const i of conIcis) {
+      expect(i.limitaciones.join(' ').toLowerCase(), i.slug).toMatch(
+        /no se redistribuyen|producto comercial/,
+      );
     }
   });
 
@@ -135,6 +176,29 @@ describe('informes: gráficos', () => {
       expect(g!.nota.length).toBeGreaterThan(60);
       expect(g!.datos.length).toBeGreaterThan(1);
     }
+  });
+
+  it('la serie temporal usa el componente de línea, no barras', () => {
+    // La forma la decide el trabajo del dato: una trayectoria en barras obliga
+    // a comparar alturas contiguas en vez de leer hacia dónde va.
+    const page = readFileSync(join(process.cwd(), 'app/informes/[slug]/page.tsx'), 'utf8');
+    expect(page).toMatch(/tipo === 'serie-temporal'/);
+    expect(page).toMatch(/LineChart/);
+  });
+
+  it('la serie temporal declara en su nota que el eje no arranca en cero', () => {
+    // Truncar el eje es correcto en una trayectoria y engañoso si no se dice.
+    for (const g of graficos.filter((x) => x!.tipo === 'serie-temporal')) {
+      expect(g!.nota.toLowerCase(), g!.titulo).toMatch(/no arranca en cero|no empieza en cero/);
+    }
+  });
+
+  it('el gráfico de línea se renderiza en el servidor y trae tabla', () => {
+    const src = readFileSync(join(process.cwd(), 'components/LineChart.tsx'), 'utf8');
+    expect(src).not.toMatch(/^'use client'/m);
+    expect(src).toMatch(/<table/);
+    // Etiquetas sólo en los extremos: un número por punto es una tabla mal hecha.
+    expect(src).toMatch(/datos\.length - 1/);
   });
 
   it('los gráficos de magnitud no llevan valores negativos', () => {
