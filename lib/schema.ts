@@ -393,3 +393,52 @@ export function definedTermSchema(t: {
     ...(t.alternateNames?.length ? { alternateName: t.alternateNames } : {}),
   };
 }
+
+/**
+ * Centro de documentación como catálogo de datos.
+ *
+ * DataCatalog + DataDownload declara en lenguaje de máquina que este sitio
+ * publica documentos y datos descargables, con su formato y su URL. Es la
+ * diferencia entre que un agente encuentre los archivos rastreando enlaces y
+ * que sepa de antemano qué hay disponible y en qué formato.
+ */
+export function dataCatalogSchema(cat: {
+  url: string;
+  name: string;
+  description: string;
+  downloads: { name: string; description: string; href: string; formato: string }[];
+}): Dict {
+  const mime: Record<string, string> = {
+    pdf: "application/pdf",
+    json: "application/json",
+    rss: "application/rss+xml",
+    txt: "text/plain",
+    xml: "application/xml",
+  };
+  return {
+    "@context": "https://schema.org",
+    "@type": "DataCatalog",
+    "@id": `${cat.url}#catalogo-documentos`,
+    name: cat.name,
+    description: cat.description,
+    url: cat.url,
+    inLanguage: SITE.language,
+    publisher: organizationRef(),
+    // isAccessibleForFree es el dato que decide si un agente se molesta en
+    // intentar la descarga: sin muro de registro, se intenta.
+    isAccessibleForFree: true,
+    dataset: cat.downloads.map((d) => ({
+      "@type": "Dataset",
+      name: d.name,
+      description: d.description,
+      url: `${SITE.url}${d.href}`,
+      isAccessibleForFree: true,
+      creator: organizationRef(),
+      distribution: {
+        "@type": "DataDownload",
+        contentUrl: `${SITE.url}${d.href}`,
+        encodingFormat: mime[d.formato] ?? d.formato,
+      },
+    })),
+  };
+}

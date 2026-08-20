@@ -129,6 +129,11 @@ export function trackGlosarioView(slug: string): void {
   trackEvent('glosario_view', { slug });
 }
 
+/** Vista del centro de documentación: intención de armar expediente técnico. */
+export function trackDescargasView(slug: string): void {
+  trackEvent('descargas_view', { slug });
+}
+
 /* ------------------------------------------------------------------ */
 /* Marco de Especificación — el embudo de mayor intención del sitio.   */
 /* ------------------------------------------------------------------ */

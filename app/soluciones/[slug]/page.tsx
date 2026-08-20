@@ -116,6 +116,14 @@ export default async function SolucionPage({ params }: Props) {
         {s.titulo}
       </h1>
 
+      {/* Documento para pedir presupuesto interno: lista de materiales completa. */}
+      <a
+        href={`/soluciones/${s.slug}/arquitectura.pdf`}
+        className="mb-8 inline-flex items-center gap-2 rounded-2xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
+      >
+        Descargar en PDF: lista de materiales y secuencia
+      </a>
+
       <p className="speakable-intro mb-8 text-lg text-gray-700">{s.escenario}</p>
 
       <section className="mb-12 rounded-3xl border border-[#059669]/20 bg-[#059669]/5 p-7">

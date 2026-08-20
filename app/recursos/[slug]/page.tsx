@@ -292,6 +292,21 @@ export default async function ArticlePage({ params }: Props) {
           ))}
         </dl>
       </section>
+      {/* El PDF es lo que entra al expediente y llega al frente de obra, donde
+          no hay señal. Va arriba de las fuentes, no escondido al final. */}
+      <div className="mb-12 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-[#059669]/20 bg-[#059669]/5 p-6">
+        <p className="text-gray-800">
+          Llévese esta guía completa —con sus tablas, preguntas frecuentes y fuentes— en
+          un solo documento.
+        </p>
+        <a
+          href={`/recursos/${a.slug}/guia.pdf`}
+          className="inline-flex items-center gap-2 rounded-2xl bg-[#0A2540] px-6 py-3 font-semibold text-white hover:bg-[#059669]"
+        >
+          Descargar la guía en PDF
+        </a>
+      </div>
+
 
       <section className="mb-12 border-t pt-10">
         <h2 className="mb-4 text-2xl font-semibold tracking-tight text-[#0A2540]">Fuentes</h2>

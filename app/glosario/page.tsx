@@ -94,6 +94,10 @@ export default function GlosarioPage() {
 
       <p className="mb-10 font-mono text-sm text-gray-500">
         {terminos.length} términos · {categoriasPresentes().length} áreas ·{' '}
+        <a href="/glosario/glosario.pdf" className="underline hover:text-[#059669]">
+          descargar en PDF
+        </a>{' '}
+        ·{' '}
         <a href="/glosario/terminos.json" className="underline hover:text-[#059669]">
           versión legible por máquina
         </a>

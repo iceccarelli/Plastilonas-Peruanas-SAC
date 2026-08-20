@@ -101,7 +101,7 @@ cuenta() { # <ruta> <patrón> <mínimo> <descripción>
 echo "— Rutas —"
 for r in / /productos /servicios /nosotros /contacto /cotizacion /recursos \
          /local /marco /marco/evaluacion /soluciones /novedades /glosario \
-         /privacidad /terminos; do
+         /descargas /privacidad /terminos; do
   ruta "$r"
 done
 
@@ -112,7 +112,23 @@ ruta /llms.txt
 ruta /novedades/rss.xml
 ruta /novedades/feed.json
 ruta /glosario/terminos.json
+ruta /productos/catalogo.json
 ruta /version.json
+
+echo "— Documentos descargables —"
+# Un PDF que responde 200 pero devuelve HTML es un enlace roto que no lo parece.
+pdf() { # <ruta>
+  local ct; ct=$(curl -s -o /dev/null -w '%{content_type}' "$BASE_URL$1")
+  case "$ct" in
+    application/pdf*) ok "$1 → application/pdf" ;;
+    *) bad "$1 → $ct (esperado application/pdf)" ;;
+  esac
+}
+pdf /marco/marco.pdf
+pdf /glosario/glosario.pdf
+pdf /productos/big-bags-bolsones-polipropileno/ficha-tecnica.pdf
+pdf /recursos/instalacion-geomembranas-hdpe-pozas-canales/guia.pdf
+pdf /soluciones/poza-revestida-impermeabilizacion/arquitectura.pdf
 
 echo "— Entidad y datos estructurados —"
 contiene "/" '"@id":"[^"]*#organization"' "grafo de entidad con @id estable"
@@ -136,8 +152,18 @@ contiene "/llms.txt" 'Arquitecturas de referencia' "llms.txt declara arquitectur
 contiene "/llms.txt" 'Novedades (registro fechado)' "llms.txt declara el registro"
 contiene "/llms.txt" 'Glosario técnico' "llms.txt declara el glosario"
 contiene "/glosario/terminos.json" 'atribucionSugerida' "el volcado declara cómo citarlo"
+contiene "/descargas" '"@type":"DataCatalog"' "el centro de documentación emite DataCatalog"
+contiene "/productos/catalogo.json" 'atribucionSugerida' "el catálogo declara cómo citarlo"
+contiene "/llms.txt" 'Documentos descargables' "llms.txt declara los documentos"
 
 echo "— Ningún dato inventado a la vista —"
+# El catálogo abierto no debe publicar precios: lo que no se sostiene en la
+# cotización no se publica en datos.
+if grep -qE '"(precio|price|offers|stock)"' <<< "$(cuerpo /productos/catalogo.json)"; then
+  bad "el catálogo en JSON expone precios o existencias"
+else
+  ok "el catálogo en JSON no publica precios ni existencias"
+fi
 home=$(cuerpo "/")
 n=$(grep -o 'data-social="[a-z]*"' <<< "$home" | sort -u | wc -l)
 if [ "$n" -le 2 ]; then ok "sólo perfiles sociales reales ($n)"; else

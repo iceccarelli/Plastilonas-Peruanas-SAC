@@ -102,6 +102,16 @@ export default function MarcoPage() {
         Marco de Especificación: seis pilares para definir un proyecto antes de cotizarlo
       </h1>
 
+      {/* El marco solo cambia la posición de quien lo publica si CIRCULA, y los
+          estándares circulan en PDF: se adjuntan a un requerimiento y se usan
+          para evaluar tres propuestas a la vez. */}
+      <a
+        href="/marco/marco.pdf"
+        className="mb-8 inline-flex items-center gap-2 rounded-2xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
+      >
+        Descargar el Marco completo en PDF
+      </a>
+
       <div className="speakable-intro mb-8 space-y-4 text-lg text-gray-700">
         <p>
           Los proyectos de esta industria rara vez fallan por el material. Fallan por lo

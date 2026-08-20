@@ -45,6 +45,7 @@ const rutasValidas = new Set<string>([
   '/soluciones',
   '/novedades',
   '/glosario',
+  '/descargas',
   ...products.map((p) => `/productos/${p.slug}`),
   ...articles.map((a) => `/recursos/${a.slug}`),
   ...solutions.map((s) => `/soluciones/${s.slug}`),

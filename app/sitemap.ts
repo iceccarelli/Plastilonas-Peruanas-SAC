@@ -22,6 +22,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE.url}/cotizacion`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE.url}/local`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE.url}/recursos`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    // Centro de documentación: la puerta de "necesito papeles para el expediente".
+    { url: `${SITE.url}/descargas`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     // Avisos legales: prioridad baja pero indexables. Sin ellos, el pie
     // enlazaba las dos páginas legales a /contacto.
     { url: `${SITE.url}/privacidad`, lastModified: new Date(LEGAL_UPDATED),

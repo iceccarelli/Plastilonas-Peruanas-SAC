@@ -10,6 +10,7 @@ import {
   trackSolutionView,
   trackNovedadView,
   trackGlosarioView,
+  trackDescargasView,
   trackProductView,
 } from '@/lib/analytics';
 
@@ -31,7 +32,8 @@ type Props =
   | { kind: 'framework'; slug: string }
   | { kind: 'solution'; slug: string }
   | { kind: 'novedades'; slug: string }
-  | { kind: 'glosario'; slug: string };
+  | { kind: 'glosario'; slug: string }
+  | { kind: 'descargas'; slug: string };
 
 export default function TrackView(props: Props) {
   const fired = useRef(false);
@@ -69,6 +71,9 @@ export default function TrackView(props: Props) {
         break;
       case 'glosario':
         trackGlosarioView(props.slug);
+        break;
+      case 'descargas':
+        trackDescargasView(props.slug);
         break;
     }
   }, [props]);

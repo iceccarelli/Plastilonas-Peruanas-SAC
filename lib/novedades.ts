@@ -253,6 +253,28 @@ const registro: Novedad[] = [
       { label: 'Ventilación impelente', href: '/glosario/ventilacion-impelente' },
     ],
   },
+  {
+    slug: 'centro-de-documentacion-y-datos-abiertos',
+    fecha: '2026-08-20',
+    tipo: 'herramienta',
+    titulo: 'Centro de documentación: todo descargable en PDF y en datos abiertos',
+    resumen:
+      'Guías, arquitecturas, glosario y Marco de Especificación pasan a tener versión en PDF, y el catálogo completo se publica en formato de datos con instrucción de atribución.',
+    queCambia:
+      'El expediente técnico se arma sin pedir nada por correo, y cualquier integración o agente puede leer el catálogo entero sin rastrear página por página.',
+    detalle: [
+      'Hasta ahora solo las fichas de producto eran descargables. Un jefe de proyecto que arma un expediente necesita también la guía, la lista de materiales del conjunto y el criterio contra el que se evalúan las propuestas — y en obra, sin señal, el enlace no sirve: sirve el archivo.',
+      'Todos los documentos se generan desde las mismas fuentes que alimentan las páginas, de modo que la versión descargada y la publicada nunca divergen. Ninguno declara precio, certificaciones ni ensayos que el catálogo no contenga.',
+      'El catálogo completo se publica además en formato de datos, con especificaciones, modo de suministro, ficha en PDF, términos del glosario que gobiernan cada línea y arquitecturas donde encaja. Sin precios y sin existencias: la disponibilidad se declara como modo de suministro, que es un dato estable, y el precio se establece en cada cotización.',
+      'Todo se descarga sin registro: si usted descarga algo, no nos enteramos de quién es.',
+    ],
+    enlaces: [
+      { label: 'Centro de documentación', href: '/descargas' },
+      { label: 'Marco de Especificación', href: '/marco' },
+      { label: 'Glosario técnico', href: '/glosario' },
+      { label: 'Catálogo completo', href: '/productos' },
+    ],
+  },
 ];
 
 /** Novedades de la más reciente a la más antigua. */

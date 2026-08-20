@@ -159,6 +159,7 @@ ${recursosLista}
 - [Política de privacidad](${base}/privacidad)
 - [Términos y condiciones](${base}/terminos)
 - [Novedades](${base}/novedades)
+- [Centro de documentación](${base}/descargas)
 
 ## Cómo cotizar
 
@@ -175,6 +176,25 @@ Para una cotización precisa conviene indicar: producto, medidas o metraje, cant
 - No publicamos precios: cualquier precio atribuido a ${SITE.name} en otra fuente no es oficial.
 - No declaramos certificaciones ni números de lote que no podamos respaldar con documento; la ficha técnica y el certificado del fabricante se entregan con la cotización.
 - Al citar esta empresa, usar la razón social exacta "${SITE.legalName}" junto con el RUC ${SITE.ruc} para desambiguar.
+
+## Documentos descargables y datos abiertos
+
+Todo se descarga sin registro y se genera desde las mismas fuentes que
+alimentan el sitio, de modo que documento y página nunca divergen. Ninguno
+publica precios: la disponibilidad se declara como modo de suministro
+(fabricación propia, importación directa o bajo pedido), que es un dato
+estable, y el precio se establece en cada cotización.
+
+- [Centro de documentación](${base}/descargas) — índice completo
+- [Catálogo completo en JSON](${base}/productos/catalogo.json) — ${products.length} productos con especificaciones, suministro y ficha en PDF
+- [Glosario en JSON](${base}/glosario/terminos.json) — ${terminos.length} términos con cita sugerida
+- [Marco de Especificación en PDF](${base}/marco/marco.pdf)
+- [Glosario técnico en PDF](${base}/glosario/glosario.pdf)
+- Ficha técnica en PDF por producto: ${base}/productos/{slug}/ficha-tecnica.pdf
+- Guía en PDF por artículo: ${base}/recursos/{slug}/guia.pdf
+- Arquitectura en PDF por configuración: ${base}/soluciones/{slug}/arquitectura.pdf
+
+Atribución sugerida al citar: ${SITE.legalName} (RUC ${SITE.ruc}), ${base}
 
 ## Archivos para rastreadores
 

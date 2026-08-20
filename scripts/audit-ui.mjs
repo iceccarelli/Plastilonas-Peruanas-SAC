@@ -52,6 +52,7 @@ const ROUTES = [
   ['marco-evaluacion', '/marco/evaluacion'],
   ['soluciones', '/soluciones'],
   ['glosario', '/glosario'],
+  ['descargas', '/descargas'],
   ['termino', '/glosario/geotextil'],
   ['novedades', '/novedades'],
   ['privacidad', '/privacidad'],
