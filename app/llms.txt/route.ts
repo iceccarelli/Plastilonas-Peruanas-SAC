@@ -5,6 +5,7 @@ import { articles } from "@/lib/articles";
 import { pillars, totalCriteria, FRAMEWORK_VERSION } from "@/lib/framework";
 import { solutions } from "@/lib/solutions";
 import { novedades, tipoLabels, NOVEDADES_UPDATED } from "@/lib/novedades";
+import { terminos, categoriaLabels, categoriasPresentes, terminosPorCategoria } from "@/lib/glosario";
 
 /**
  * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
@@ -116,6 +117,19 @@ ${novedades
   .map((n) => `- ${n.fecha} · ${tipoLabels[n.tipo]} — [${n.titulo}](${base}/novedades/${n.slug}): ${clamp(n.resumen, 200)}`)
   .join("\n")}
 
+## Glosario técnico (vocabulario del rubro)
+
+${terminos.length} términos con URL canónica por concepto: qué significa cada uno, en
+qué unidad se mide y qué decide en obra. Las definiciones describen el término
+en el rubro, no nuestros productos, y son útiles con independencia del
+proveedor. Versión legible por máquina, con instrucción de atribución
+incluida: ${base}/glosario/terminos.json
+
+- [Glosario completo](${base}/glosario)
+${categoriasPresentes()
+  .map((c) => `- ${categoriaLabels[c]}: ${terminosPorCategoria(c).map((t) => `[${t.termino}](${base}/glosario/${t.slug})`).join(", ")}`)
+  .join("\n")}
+
 ## Marco de Especificación (referencia del rubro)
 
 Criterios públicos para definir un proyecto textil industrial o geosintético
@@ -166,6 +180,7 @@ Para una cotización precisa conviene indicar: producto, medidas o metraje, cant
 
 - [Sitemap XML](${base}/sitemap.xml)
 - [robots.txt](${base}/robots.txt)
+- [Glosario en JSON](${base}/glosario/terminos.json)
 - [Feed RSS de novedades](${base}/novedades/rss.xml)
 - [JSON Feed de novedades](${base}/novedades/feed.json)
 `;

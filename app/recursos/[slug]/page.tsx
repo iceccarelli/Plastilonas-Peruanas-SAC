@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, Clock, ExternalLink } from 'lucide-react';
 import { articles, articleBySlug } from '@/lib/articles';
+import { terminosParaGuia } from '@/lib/glosario';
 import { products } from '@/lib/products';
 import ciudades from '@/data/ciudades.json';
 import { SITE } from '@/lib/site';
@@ -73,6 +74,7 @@ export default async function ArticlePage({ params }: Props) {
   const relatedProducts = a.relatedProducts
     .map((s) => products.find((p) => p.slug === s))
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
+  const glosarioRel = terminosParaGuia(slug);
   const relatedCities = (a.relatedCities ?? [])
     .map((s) => (ciudades as { slug: string; ciudad: string }[]).find((c) => c.slug === s))
     .filter((c): c is { slug: string; ciudad: string } => Boolean(c));
@@ -314,6 +316,37 @@ export default async function ArticlePage({ params }: Props) {
           ))}
         </ol>
       </section>
+
+      {/* Vocabulario de la guía: la definición canónica de cada término que el
+          artículo usa, para que no haya que deducirla del contexto. */}
+      {glosarioRel.length > 0 && (
+        <section className="mb-12 border-t pt-10">
+          <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#0A2540]">
+            Términos de esta guía
+          </h2>
+          <p className="mb-5 text-sm text-gray-600">
+            Cada uno tiene su definición canónica, con la unidad en que se mide y lo
+            que decide en obra.
+          </p>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {glosarioRel.map((t) => (
+              <li key={t.slug}>
+                <Link
+                  href={`/glosario/${t.slug}`}
+                  className="group block rounded-2xl border border-gray-100 p-4 transition-colors hover:border-[#059669]/40"
+                >
+                  <span className="block font-medium text-[#0A2540] group-hover:text-[#059669]">
+                    {t.termino}
+                  </span>
+                  <span className="mt-1 line-clamp-2 block text-sm text-gray-600">
+                    {t.definicionCorta}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {relatedProducts.length > 0 && (
         <section className="mb-12 border-t pt-10">

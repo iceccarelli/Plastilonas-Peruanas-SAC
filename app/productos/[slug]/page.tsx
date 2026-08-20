@@ -12,6 +12,7 @@ import WhatsAppLink from '@/components/WhatsAppLink';
 import TrackView from '@/components/TrackView';
 import DatasheetButton from '@/components/DatasheetButton';
 import { solutionsForProduct } from '@/lib/solutions';
+import { terminosParaProducto } from '@/lib/glosario';
 import { productFaqs } from '@/lib/product-faq';
 import { JsonLd } from '@/components/JsonLd';
 import { faqSchema } from '@/lib/schema';
@@ -69,6 +70,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   const faqs = productFaqs(product);
   const arquitecturas = solutionsForProduct(product.slug);
+  const glosarioRel = terminosParaProducto(product.slug);
   const relatedProducts = products
     .filter(p => p.id !== product.id && (p.category === product.category || p.sector.some(s => product.sector.includes(s))))
     .slice(0, 3);
@@ -196,6 +198,38 @@ export default async function ProductDetailPage({ params }: Props) {
           ))}
         </dl>
       </div>
+
+      {/* Capa definicional: los términos que gobiernan esta especificación.
+          Un comprador que no sabe qué es "factor de seguridad" no puede
+          evaluar la ficha, por completa que esté. */}
+      {glosarioRel.length > 0 && (
+        <div className="mt-16 pt-10 border-t">
+          <h2 className="font-semibold tracking-tight text-2xl mb-2">
+            Qué hay que entender antes de especificarlo
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Los términos que deciden esta compra, definidos con precisión y sin
+            promoción. Sirven igual si termina comprándolo en otra parte.
+          </p>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {glosarioRel.map((t) => (
+              <li key={t.slug}>
+                <Link
+                  href={`/glosario/${t.slug}`}
+                  className="group block rounded-2xl border border-gray-100 p-4 transition-colors hover:border-[#059669]/40"
+                >
+                  <span className="block font-medium text-[#0A2540] group-hover:text-[#059669]">
+                    {t.termino}
+                  </span>
+                  <span className="mt-1 line-clamp-2 block text-sm text-gray-600">
+                    {t.definicionCorta}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {arquitecturas.length > 0 && (
         <div className="mt-16 pt-10 border-t">

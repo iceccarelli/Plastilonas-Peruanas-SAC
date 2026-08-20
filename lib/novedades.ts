@@ -231,6 +231,28 @@ const registro: Novedad[] = [
       { label: 'Frente de avance ventilado', href: '/soluciones/frente-avance-ventilado' },
     ],
   },
+  {
+    slug: 'glosario-tecnico-del-rubro',
+    fecha: '2026-08-20',
+    tipo: 'referencia',
+    titulo: 'Publicamos el glosario técnico: 43 términos con URL propia',
+    resumen:
+      'Vocabulario del rubro definido con precisión —qué significa cada término, en qué unidad se mide y qué decide en obra— con versión legible por máquina.',
+    queCambia:
+      'Deja de hacer falta deducir el vocabulario del contexto: cada término tiene su definición canónica, su unidad de medida y el enlace a las guías y productos donde manda.',
+    detalle: [
+      'El sitio respondía qué vendemos, qué línea sirve, cómo se especifica, cómo se arma el conjunto y qué cambió. No respondía la pregunta anterior a todas: qué significa esta palabra. Es la que alguien escribe en un buscador antes de poder pedir nada.',
+      'Cada término declara su definición en una sola frase autosuficiente, su desarrollo, la magnitud y unidad con que se expresa, qué decide en obra y el error frecuente que resuelve. Los términos se enlazan entre sí, con las guías que los desarrollan y con los productos donde gobiernan la especificación.',
+      'Las definiciones describen el término en el rubro, no nuestros productos: son útiles aunque el proyecto se compre a otro proveedor. Ninguna incluye cifras normativas — para eso están las guías, que citan su fuente.',
+      'Se publica además en formato de datos, con instrucción explícita de atribución, para que citarlo correctamente sea el camino de menor resistencia.',
+    ],
+    enlaces: [
+      { label: 'Glosario técnico', href: '/glosario' },
+      { label: 'Geotextil', href: '/glosario/geotextil' },
+      { label: 'Tipos electrostáticos de FIBC', href: '/glosario/tipo-electrostatico-fibc' },
+      { label: 'Ventilación impelente', href: '/glosario/ventilacion-impelente' },
+    ],
+  },
 ];
 
 /** Novedades de la más reciente a la más antigua. */

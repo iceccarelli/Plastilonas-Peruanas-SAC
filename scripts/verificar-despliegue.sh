@@ -100,7 +100,8 @@ cuenta() { # <ruta> <patrón> <mínimo> <descripción>
 
 echo "— Rutas —"
 for r in / /productos /servicios /nosotros /contacto /cotizacion /recursos \
-         /local /marco /marco/evaluacion /soluciones /novedades /privacidad /terminos; do
+         /local /marco /marco/evaluacion /soluciones /novedades /glosario \
+         /privacidad /terminos; do
   ruta "$r"
 done
 
@@ -110,6 +111,7 @@ ruta /sitemap.xml
 ruta /llms.txt
 ruta /novedades/rss.xml
 ruta /novedades/feed.json
+ruta /glosario/terminos.json
 ruta /version.json
 
 echo "— Entidad y datos estructurados —"
@@ -119,6 +121,8 @@ contiene "/marco" '"@type":"FAQPage"' "el marco emite FAQPage"
 # En expresión regular básica el + es literal: escribirlo como \+ lo convierte
 # en cuantificador y el patrón pasa a buscar "application/rssxml".
 contiene "/" 'application/rss+xml' "feed declarado en toda página"
+contiene "/glosario" '"@type":"DefinedTermSet"' "el glosario emite DefinedTermSet"
+contiene "/glosario/geotextil" '"@type":"DefinedTerm"' "cada término emite DefinedTerm"
 
 echo "— Contenido esperado —"
 # Los mínimos son cotas inferiores medidas, no cifras exactas: el sitemap
@@ -130,6 +134,8 @@ cuenta "/sitemap.xml" 'novedades'     8 "novedades en el sitemap"
 cuenta "/novedades/rss.xml" '<item>'  7 "entradas en el feed RSS"
 contiene "/llms.txt" 'Arquitecturas de referencia' "llms.txt declara arquitecturas"
 contiene "/llms.txt" 'Novedades (registro fechado)' "llms.txt declara el registro"
+contiene "/llms.txt" 'Glosario técnico' "llms.txt declara el glosario"
+contiene "/glosario/terminos.json" 'atribucionSugerida' "el volcado declara cómo citarlo"
 
 echo "— Ningún dato inventado a la vista —"
 home=$(cuerpo "/")

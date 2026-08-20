@@ -120,6 +120,15 @@ export function trackNovedadView(slug: string): void {
   trackEvent('novedad_view', { slug });
 }
 
+/**
+ * Vista de un término del glosario. Es el evento que revela intención
+ * temprana: quien busca qué significa "geotextil" está especificando, no
+ * comparando precios todavía.
+ */
+export function trackGlosarioView(slug: string): void {
+  trackEvent('glosario_view', { slug });
+}
+
 /* ------------------------------------------------------------------ */
 /* Marco de Especificación — el embudo de mayor intención del sitio.   */
 /* ------------------------------------------------------------------ */

@@ -333,3 +333,63 @@ export function productSchema(p: {
     ...(offers ? { offers } : {}),
   };
 }
+
+/**
+ * Glosario como conjunto de términos definidos.
+ *
+ * DefinedTermSet + DefinedTerm es el tipo que schema.org previó exactamente
+ * para esto y que casi nadie usa. Declara que el sitio publica un vocabulario
+ * del rubro con una URL estable por concepto: es la forma legible por máquina
+ * de decir "acá se define este término", que es justo lo que un agente
+ * necesita resolver antes de poder citar a alguien.
+ */
+export function definedTermSetSchema(set: {
+  url: string;
+  name: string;
+  description: string;
+  terms: { slug: string; termino: string; definicionCorta: string }[];
+}): Dict {
+  return {
+    "@context": "https://schema.org",
+    "@type": "DefinedTermSet",
+    "@id": `${set.url}#glosario`,
+    name: set.name,
+    description: set.description,
+    url: set.url,
+    inLanguage: SITE.language,
+    publisher: organizationRef(),
+    hasDefinedTerm: set.terms.map((t) => ({
+      "@type": "DefinedTerm",
+      "@id": `${set.url}/${t.slug}#termino`,
+      name: t.termino,
+      description: t.definicionCorta,
+      url: `${set.url}/${t.slug}`,
+      termCode: t.slug,
+      inDefinedTermSet: { "@id": `${set.url}#glosario` },
+    })),
+  };
+}
+
+/** Un término del glosario, citable por sí solo. */
+export function definedTermSchema(t: {
+  url: string;
+  setUrl: string;
+  termino: string;
+  definicionCorta: string;
+  termCode: string;
+  /** Sigla y otras formas de nombrarlo: ayudan a resolver la desambiguación. */
+  alternateNames?: string[];
+}): Dict {
+  return {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    "@id": `${t.url}#termino`,
+    name: t.termino,
+    description: t.definicionCorta,
+    url: t.url,
+    termCode: t.termCode,
+    inLanguage: SITE.language,
+    inDefinedTermSet: { "@id": `${t.setUrl}#glosario` },
+    ...(t.alternateNames?.length ? { alternateName: t.alternateNames } : {}),
+  };
+}

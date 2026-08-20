@@ -8,6 +8,7 @@ import { FRAMEWORK_UPDATED } from "@/lib/framework";
 import { solutions } from "@/lib/solutions";
 import { novedades, NOVEDADES_UPDATED } from "@/lib/novedades";
 import { LEGAL_UPDATED } from "@/lib/legal";
+import { terminos } from "@/lib/glosario";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -84,6 +85,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
-  return [...staticRoutes, ...marcoRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
+  // Glosario: la capa definicional. Prioridad alta en el índice porque es la
+  // puerta de entrada de las búsquedas de definición, y media en cada término.
+  const glosarioRoutes: MetadataRoute.Sitemap = [
+    { url: `${SITE.url}/glosario`, lastModified: now, changeFrequency: "monthly", priority: 0.85 },
+    ...terminos.map((t) => ({
+      url: `${SITE.url}/glosario/${t.slug}`,
+      lastModified: now, changeFrequency: "yearly" as const, priority: 0.6,
+    })),
+  ];
+
+  return [...staticRoutes, ...marcoRoutes, ...glosarioRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
     ...localRoutes, ...articleRoutes];
 }
