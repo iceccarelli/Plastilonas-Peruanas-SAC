@@ -25,10 +25,10 @@
  *   npm run vigilancia            # comprueba y reporta
  *   MAX_DIAS=120 npm run vigilancia
  *
- * Sale con código 1 SOLO si alguna fuente devolvió 404, 410, error de servidor
- * o fallo de red. Un 403 o un 429 no son fallo: son un cortafuegos rechazando a
- * un cliente automatizado, y contarlos como caídas llenaría el reporte de
- * falsos positivos hasta que nadie lo lea. Apto para una tarea programada.
+ * Sale con código 1 SOLO si alguna cita devolvió 404 o 410, las dos únicas
+ * respuestas en que el servidor AFIRMA que el recurso no existe. Todo lo demás
+ * —cortafuegos, límites de tasa, errores de red— se informa sin hacer fallar
+ * el proceso. Apto para una tarea programada.
  */
 
 import { readFileSync } from 'node:fs';
@@ -80,23 +80,35 @@ const CABECERAS = {
 };
 
 /**
- * Clasificación en TRES estados y no en dos. Es la decisión que decide si este
- * script sirve para algo.
+ * Clasificación en CUATRO estados. Es la decisión que decide si este script
+ * sirve para algo, y hubo que corregirla dos veces con datos reales.
  *
- * Un 403 o un 429 no significan "el enlace murió": significan que un
- * cortafuegos, un proxy corporativo o un límite de tasa rechazaron a un
- * cliente automatizado. La página puede estar perfectamente viva en un
- * navegador. Contarlos como fallo llena el reporte de falsos positivos, y un
- * reporte que grita cuando no pasa nada se deja de leer a la tercera vez —
- * momento en el que el mecanismo dejó de existir.
+ * El principio: solo se declara ROTA una cita cuando la respuesta lo DEMUESTRA.
+ * Un reporte que grita cuando no pasa nada se deja de leer a la tercera vez, y
+ * ahí el mecanismo dejó de existir. Falso negativo caro, falso positivo fatal.
  *
- * Solo 404, 410, los errores del servidor y los fallos de red son fallos
- * reales: ahí la cita efectivamente dejó de respaldar nada.
+ *  ok         2xx y 3xx. La cita responde.
+ *
+ *  caida      404 y 410, y NADA MÁS. Son las dos únicas respuestas en que el
+ *             servidor afirma que el recurso no existe. Es lo único que hace
+ *             fallar el proceso.
+ *
+ *  bloqueado  401, 403, 429. Un cortafuegos o un límite de tasa rechazó a un
+ *             cliente automatizado; la página puede estar perfectamente viva
+ *             en un navegador. Se comprobó: gob.pe responde 418 a un fetcher
+ *             y 200 a un navegador.
+ *
+ *  revisar    5xx y fallos de red (DNS, TLS, conexión rechazada, tiempo
+ *             agotado). NO prueban nada sobre la cita: un dominio muerto y una
+ *             red que no llega producen exactamente el mismo error. Se
+ *             descubrió con revistaseguridadminera.com, que falló desde una
+ *             red y cargó perfectamente desde otra. Se avisa, no se falla.
  */
 function clasificar(estado) {
   if (estado >= 200 && estado < 400) return 'ok';
-  if (estado === 403 || estado === 401 || estado === 429) return 'bloqueado';
-  return 'caida';
+  if (estado === 404 || estado === 410) return 'caida';
+  if (estado === 401 || estado === 403 || estado === 429) return 'bloqueado';
+  return 'revisar';
 }
 
 async function comprobar(fuente) {
@@ -115,7 +127,7 @@ async function comprobar(fuente) {
     }
     return { ...fuente, estado: res.status, clase: clasificar(res.status) };
   } catch (e) {
-    return { ...fuente, estado: 0, clase: 'caida', error: String(e?.message ?? e) };
+    return { ...fuente, estado: 0, clase: 'revisar', error: String(e?.message ?? e) };
   } finally {
     clearTimeout(temporizador);
   }
@@ -129,27 +141,43 @@ const fuentes = [
   ...leerFuentes('lib/articles.ts', 'guía'),
 ];
 
+// Dos guías que citan la misma norma no son dos problemas: son uno. Sin esto
+// el reporte repite la misma línea y aparenta más incidencias de las que hay.
+const porUrl = new Map();
+for (const f of fuentes) {
+  const previa = porUrl.get(f.url);
+  if (previa) previa.origenes.add(f.origen);
+  else porUrl.set(f.url, { ...f, origenes: new Set([f.origen]) });
+}
+const unicas = [...porUrl.values()];
+
 if (fuentes.length === 0) {
   console.error('No se encontró ninguna fuente. ¿Se ejecuta desde la raíz del repositorio?');
   process.exit(1);
 }
 
-console.log(`\nVigilancia de fuentes — ${fuentes.length} citas declaradas\n`);
+console.log(
+  `\nVigilancia de fuentes — ${unicas.length} URLs distintas en ${fuentes.length} citas\n`,
+);
 
 const resultados = [];
-for (const f of fuentes) resultados.push(await comprobar(f));
+for (const f of unicas) resultados.push(await comprobar(f));
 
 let caidas = 0;
 let bloqueadas = 0;
+let revisar = 0;
 let vencidas = 0;
 
-const MARCA = { ok: verde('✓'), bloqueado: ambar('~'), caida: rojo('✗') };
+const MARCA = {
+  ok: verde('✓'), bloqueado: ambar('~'), revisar: ambar('?'), caida: rojo('✗'),
+};
 
 for (const r of resultados) {
   const dias = r.consultado ? diasDesde(r.consultado) : null;
   const antigua = dias !== null && dias > MAX_DIAS;
   if (r.clase === 'caida') caidas++;
   if (r.clase === 'bloqueado') bloqueadas++;
+  if (r.clase === 'revisar') revisar++;
   if (antigua) vencidas++;
 
   const edad =
@@ -158,15 +186,20 @@ for (const r of resultados) {
       : antigua
         ? ambar(` · verificada hace ${dias} días`)
         : ` · verificada hace ${dias} días`;
-  console.log(`  ${MARCA[r.clase]} [${r.origen}] ${r.organismo} — ${r.estado || r.error}${edad}`);
+  console.log(`  ${MARCA[r.clase]} [${[...r.origenes].join(', ')}] ${r.organismo} — ${r.estado || r.error}${edad}`);
   console.log(`      ${r.url}`);
 }
 
 console.log('');
 if (caidas) {
-  console.log(rojo(`${caidas} fuente(s) no responden.`));
+  console.log(rojo(`${caidas} cita(s) devolvieron 404 o 410: el recurso ya no existe.`));
   console.log('  Una cita con enlace roto es una cita que ya no respalda nada.');
   console.log('  Busque la publicación vigente del organismo y actualice la URL.');
+}
+if (revisar) {
+  console.log(ambar(`${revisar} cita(s) fallaron por red o error del servidor: no concluyente.`));
+  console.log('  Un DNS que no resuelve y un dominio muerto dan el mismo error.');
+  console.log('  Ábralas en un navegador; si cargan, no hay nada que corregir.');
 }
 if (vencidas) {
   console.log(ambar(`${vencidas} fuente(s) llevan más de ${MAX_DIAS} días sin verificarse.`));
@@ -179,7 +212,7 @@ if (bloqueadas) {
   console.log('  Ábralas en un navegador antes de tocar nada; NO cuentan como fallo.');
   console.log('  (Si TODAS salen así, el bloqueo está en su red, no en las fuentes.)');
 }
-if (!caidas && !bloqueadas && !vencidas) {
+if (!caidas && !bloqueadas && !revisar && !vencidas) {
   console.log(verde('Todas las fuentes responden y están dentro del plazo de verificación.'));
 }
 

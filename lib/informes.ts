@@ -232,7 +232,7 @@ const sectoresCompradores: Informe = {
           valor: '12 798',
           unidad: 'millones de US$',
           periodo: '2024 (año completo)',
-          fuenteId: 'midagri-agroexport-2025',
+          fuenteId: 'midagri-cuatrimestre-2025',
         },
         {
           etiqueta: 'Enero–abril 2025',
@@ -240,14 +240,14 @@ const sectoresCompradores: Informe = {
           unidad: 'millones de US$',
           periodo: 'Ene–abr 2025',
           variacion: { pct: 23.6, base: 'ene–abr 2024' },
-          fuenteId: 'midagri-agroexport-2025',
+          fuenteId: 'midagri-cuatrimestre-2025',
         },
       ],
       grafico: {
         titulo: 'Principales productos agroexportados, enero–abril de 2025',
         unidad: 'millones de US$',
         tipo: 'magnitud',
-        fuenteId: 'midagri-agroexport-2025',
+        fuenteId: 'midagri-cuatrimestre-2025',
         nota: 'Valor exportado en el primer cuatrimestre de 2025, ordenado de mayor a menor. Es un corte cuatrimestral, no el cierre del año: la estacionalidad de cada cultivo cambia el orden según el periodo que se mire.',
         datos: [
           { etiqueta: 'Uva fresca', valor: 742 },
@@ -281,7 +281,7 @@ const sectoresCompradores: Informe = {
   limitaciones: [
     'Este informe NO estima el tamaño del mercado peruano de textiles industriales ni de geosintéticos. No existe una estadística pública verificable de ese mercado y no publicamos estimaciones propias presentadas como datos.',
     'No cuantifica qué proporción de la inversión minera o agroexportadora se traduce en compra de estos productos. La relación es real y técnicamente demostrable, pero su magnitud no está medida en ninguna fuente pública que podamos citar.',
-    'Las cifras de agroexportación por producto corresponden al primer cuatrimestre de 2025, no al cierre del año. La estacionalidad de cada cultivo cambia el orden según el periodo que se observe.',
+    'Las cifras de agroexportación por producto corresponden al primer cuatrimestre de 2025 y no al cierre del año: proceden de una fuente distinta de la del total anual, y están declaradas por separado. La estacionalidad de cada cultivo cambia el orden según el periodo que se observe.',
     'El episodio de radiación ultravioleta reportado por SENAMHI corresponde a un pronóstico de días concretos de julio de 2026, no a un promedio anual. Sirve para ilustrar el orden de magnitud al que se expone un material en altura, no para dimensionar una vida útil.',
     'Las cifras se verificaron contra sus fuentes en la fecha de consulta indicada en cada una. Los organismos revisan sus series: antes de usar un número en un expediente técnico, confírmelo contra la publicación vigente.',
     'Ninguna sección de este informe constituye una recomendación de inversión ni una previsión de mercado propia.',
@@ -309,13 +309,23 @@ const sectoresCompradores: Informe = {
     },
     {
       id: 'midagri-agroexport-2025',
-      organismo: 'Ministerio de Desarrollo Agrario y Riego (MIDAGRI)',
-      titulo: 'Agroexportaciones peruanas 2025',
-      url: 'https://www.gob.pe/institucion/midagri',
-      publicado: '2025-06-20',
-      consultado: '2026-08-20',
+      organismo: 'Ministerio de Desarrollo Agrario y Riego (MIDAGRI), vía Agencia Peruana de Noticias Andina',
+      titulo: 'Agroexportaciones peruanas: cierre proyectado de 2025',
+      url: 'https://andina.pe/agencia/noticia-midagri-agroexportaciones-superarian-los-15000-millones-2025-1058126.aspx',
+      publicado: '2026-01-05',
+      consultado: '2026-08-21',
       respalda:
-        'Agroexportaciones 2025 por encima de 15 000 millones de dólares, base 2024 de 12 798 millones, 3 740 millones en enero–abril de 2025 (+23,6 %) y valores por producto del mismo cuatrimestre.',
+        'Agroexportaciones peruanas de 2025 por encima de 15 000 millones de dólares, según MIDAGRI.',
+    },
+    {
+      id: 'midagri-cuatrimestre-2025',
+      organismo: 'Ministerio de Desarrollo Agrario y Riego (MIDAGRI), declaraciones del ministro recogidas por Agraria.pe',
+      titulo: 'Agroexportaciones peruanas: primer cuatrimestre de 2025 y base 2024',
+      url: 'https://agraria.pe/noticias/agroexportaciones-peruanas-alcanzarian-los-us-15-000-millone-39842',
+      publicado: '2025-06-20',
+      consultado: '2026-08-21',
+      respalda:
+        'Base 2024 de 12 798 millones de dólares, 3 740 millones en enero–abril de 2025 (+23,6 % frente al mismo periodo de 2024) y valor exportado por producto en ese cuatrimestre.',
     },
     {
       id: 'senamhi-uv-2026',

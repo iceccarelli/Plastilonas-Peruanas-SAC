@@ -207,13 +207,44 @@ describe('vigilancia de fuentes: informa, no publica', () => {
     expect(src).not.toMatch(/writeFileSync|appendFileSync|createWriteStream/);
   });
 
-  it('distingue caída real de bloqueo por cortafuegos', () => {
-    // Un 403 no es un enlace muerto: es un WAF rechazando a un cliente
-    // automatizado. Contarlo como fallo llena el reporte de falsos positivos
-    // hasta que nadie lo lee, que es cuando el mecanismo deja de existir.
-    expect(src).toMatch(/bloqueado/);
-    expect(src).toMatch(/403/);
-    expect(src).toMatch(/clasificar/);
+  it('clasifica en cuatro estados, no en dos', () => {
+    // Corregido dos veces con datos reales. Un 403 es un cortafuegos y un
+    // fallo de red es indistinguible de una red local rota: ninguno prueba
+    // que la cita murió. Contarlos como fallo llena el reporte de falsos
+    // positivos hasta que nadie lo lee, que es cuando el mecanismo deja de
+    // existir.
+    for (const estado of ['ok', 'caida', 'bloqueado', 'revisar']) {
+      expect(src, estado).toMatch(new RegExp(`'${estado}'`));
+    }
+  });
+
+  it('solo 404 y 410 cuentan como cita rota', () => {
+    // Son las dos únicas respuestas en que el servidor AFIRMA que el recurso
+    // no existe. Todo lo demás es una conjetura sobre el estado de la cita.
+    const fn = src.slice(src.indexOf('function clasificar'), src.indexOf('async function comprobar'));
+    expect(fn).toMatch(/estado === 404 \|\| estado === 410\) return 'caida'/);
+    expect(fn).not.toMatch(/return 'caida';\s*\n\}/);
+  });
+
+  it('un fallo de red no se declara caída', () => {
+    // Un DNS que no resuelve y un dominio muerto dan exactamente el mismo
+    // error. Se descubrió con una fuente que falló desde una red y cargó
+    // desde otra.
+    const captura = src.slice(src.indexOf('} catch (e)'), src.indexOf('} finally'));
+    expect(captura).toMatch(/clase: 'revisar'/);
+    expect(captura).not.toMatch(/clase: 'caida'/);
+  });
+
+  it('deduplica por URL antes de comprobar', () => {
+    // Dos guías que citan la misma norma no son dos problemas: son uno.
+    expect(src).toMatch(/porUrl/);
+    expect(src).toMatch(/unicas/);
+  });
+
+  it('envía cabecera de navegador', () => {
+    // Sin User-Agent, casi cualquier portal con cortafuegos responde 403 y el
+    // reporte entero se vuelve ruido.
+    expect(src).toMatch(/'User-Agent'/);
   });
 
   it('solo falla el proceso por caídas reales', () => {
