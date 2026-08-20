@@ -36,3 +36,38 @@ export function withIgv(subtotalCents: number): {
     totalCents: subtotalCents + igvCents,
   };
 }
+
+/**
+ * Formato numérico peruano SIN depender de Intl en tiempo de ejecución.
+ *
+ * Por qué no `toLocaleString('es-PE')`. Depende de los datos ICU que traiga el
+ * Node que ejecute el build. En un entorno con ICU reducido devuelve
+ * silenciosamente el formato inglés: el mismo código produjo "-0.7" en un
+ * contenedor y "−0,7" en otro. Se detectó mirando la captura de un gráfico, no
+ * leyendo el código.
+ *
+ * En un sitio que publica cifras con fuente, que el separador decimal dependa
+ * del contenedor que compiló es inaceptable: la coma y el punto significan
+ * cosas distintas, y "1.200" se lee como mil doscientos o como uno coma dos
+ * según de dónde sea el lector.
+ *
+ * Se usa además el signo menos tipográfico (U+2212) y no el guion: es lo
+ * correcto en una cifra y se alinea con los dígitos.
+ */
+export function numeroPE(valor: number, decimales?: number): string {
+  const negativo = valor < 0;
+  const abs = Math.abs(valor);
+  const dec = decimales ?? (Number.isInteger(abs) ? 0 : 1);
+  const [entero, fraccion] = abs.toFixed(dec).split('.');
+  // Separador de millares: espacio fino, recomendado por el SI y sin la
+  // ambigüedad del punto frente a la coma decimal.
+  const conMillares = entero.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  const cuerpo = fraccion ? `${conMillares},${fraccion}` : conMillares;
+  return negativo ? `−${cuerpo}` : cuerpo;
+}
+
+/** Igual que numeroPE pero anteponiendo el signo cuando el valor es positivo. */
+export function numeroConSigno(valor: number, decimales?: number): string {
+  const base = numeroPE(valor, decimales);
+  return valor > 0 ? `+${base}` : base;
+}

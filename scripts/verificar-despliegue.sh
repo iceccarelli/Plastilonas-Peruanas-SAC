@@ -101,7 +101,7 @@ cuenta() { # <ruta> <patrón> <mínimo> <descripción>
 echo "— Rutas —"
 for r in / /productos /servicios /nosotros /contacto /cotizacion /recursos \
          /local /marco /marco/evaluacion /soluciones /novedades /glosario \
-         /descargas /privacidad /terminos; do
+         /informes /descargas /privacidad /terminos; do
   ruta "$r"
 done
 
@@ -126,6 +126,7 @@ pdf() { # <ruta>
 }
 pdf /marco/marco.pdf
 pdf /glosario/glosario.pdf
+pdf /informes/sectores-compradores-textiles-industriales-peru/informe.pdf
 pdf /productos/big-bags-bolsones-polipropileno/ficha-tecnica.pdf
 pdf /recursos/instalacion-geomembranas-hdpe-pozas-canales/guia.pdf
 pdf /soluciones/poza-revestida-impermeabilizacion/arquitectura.pdf
@@ -139,6 +140,7 @@ contiene "/marco" '"@type":"FAQPage"' "el marco emite FAQPage"
 contiene "/" 'application/rss+xml' "feed declarado en toda página"
 contiene "/glosario" '"@type":"DefinedTermSet"' "el glosario emite DefinedTermSet"
 contiene "/glosario/geotextil" '"@type":"DefinedTerm"' "cada término emite DefinedTerm"
+contiene "/informes/sectores-compradores-textiles-industriales-peru" '"@type":"Dataset"' "el informe emite Dataset con procedencia"
 
 echo "— Contenido esperado —"
 # Los mínimos son cotas inferiores medidas, no cifras exactas: el sitemap
@@ -155,6 +157,7 @@ contiene "/glosario/terminos.json" 'atribucionSugerida' "el volcado declara cóm
 contiene "/descargas" '"@type":"DataCatalog"' "el centro de documentación emite DataCatalog"
 contiene "/productos/catalogo.json" 'atribucionSugerida' "el catálogo declara cómo citarlo"
 contiene "/llms.txt" 'Documentos descargables' "llms.txt declara los documentos"
+contiene "/llms.txt" 'Informes del sector' "llms.txt declara los informes"
 
 echo "— Ningún dato inventado a la vista —"
 # El catálogo abierto no debe publicar precios: lo que no se sostiene en la
@@ -164,6 +167,9 @@ if grep -qE '"(precio|price|offers|stock)"' <<< "$(cuerpo /productos/catalogo.js
 else
   ok "el catálogo en JSON no publica precios ni existencias"
 fi
+
+# El informe debe declarar sus límites en la página, no solo en el PDF.
+contiene "/informes/sectores-compradores-textiles-industriales-peru" 'NO afirma' "el informe declara qué no afirma"
 home=$(cuerpo "/")
 n=$(grep -o 'data-social="[a-z]*"' <<< "$home" | sort -u | wc -l)
 if [ "$n" -le 2 ]; then ok "sólo perfiles sociales reales ($n)"; else

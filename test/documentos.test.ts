@@ -138,6 +138,7 @@ describe('centro de documentación', () => {
     expect(src).toMatch(/\$\{articles\.length\}/);
     expect(src).toMatch(/\$\{terminos\.length\}/);
     expect(src).toMatch(/\$\{solutions\.length\}/);
+    expect(src).toMatch(/\$\{informes\.length\}/);
   });
 
   it('los conteos publicados coinciden con las fuentes reales', () => {

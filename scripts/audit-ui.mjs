@@ -51,6 +51,8 @@ const ROUTES = [
   ['marco', '/marco'],
   ['marco-evaluacion', '/marco/evaluacion'],
   ['soluciones', '/soluciones'],
+  ['informes', '/informes'],
+  ['informe', '/informes/sectores-compradores-textiles-industriales-peru'],
   ['glosario', '/glosario'],
   ['descargas', '/descargas'],
   ['termino', '/glosario/geotextil'],

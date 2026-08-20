@@ -41,6 +41,26 @@ describe('modo oscuro: cobertura de la capa de compatibilidad', () => {
     expect(css).toMatch(/\.dark main :is\(\.text-gray-400, \.text-neutral-400\)/);
   });
 
+  it('la paleta de gráficos tiene su propio juego para el modo oscuro', () => {
+    // Un color validado contra fondo blanco no sirve contra #1C2C46: el modo
+    // oscuro se ELIGE, no se invierte.
+    expect(css).toMatch(/\.dark \.viz-root/);
+    for (const v of ['--viz-serie', '--viz-pos', '--viz-neg']) {
+      const apariciones = css.split(v).length - 1;
+      expect(apariciones, v).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it('el eje divergente no usa verde y rojo', () => {
+    // Es el par que la deuteranopia confunde. Se midió: ΔE 5-6 frente al
+    // umbral de 8. La regla vive en un test porque "usemos el verde de marca"
+    // es exactamente la corrección que alguien va a proponer más adelante.
+    const bloque = css.slice(css.indexOf('.viz-root'), css.indexOf('.viz-barra '));
+    expect(bloque).not.toMatch(/--viz-pos:\s*#(0[0-9A-F]|1[0-9A-F])[0-9A-F]*9[0-9A-F]/i);
+    expect(bloque).toMatch(/--viz-pos:\s*#1D4ED8/);
+    expect(bloque).toMatch(/--viz-neg:\s*#B45309/);
+  });
+
   it('los fondos semánticos de aviso también siguen al tema', () => {
     // Los cuadros de riesgo en ámbar quedaban claros con tinta clara encima.
     expect(css).toMatch(/\.bg-amber-50, \.bg-amber-100, \.bg-red-50/);

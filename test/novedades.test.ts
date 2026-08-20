@@ -19,6 +19,7 @@ import { articles } from '@/lib/articles';
 import { solutions } from '@/lib/solutions';
 import { familyContent, comparableFamilies } from '@/lib/families';
 import { terminos } from '@/lib/glosario';
+import { informes } from '@/lib/informes';
 import { generateStaticParams } from '@/app/novedades/[slug]/page';
 import sitemap from '@/app/sitemap';
 import { SITE } from '@/lib/site';
@@ -46,6 +47,7 @@ const rutasValidas = new Set<string>([
   '/novedades',
   '/glosario',
   '/descargas',
+  '/informes',
   ...products.map((p) => `/productos/${p.slug}`),
   ...articles.map((a) => `/recursos/${a.slug}`),
   ...solutions.map((s) => `/soluciones/${s.slug}`),
@@ -53,6 +55,7 @@ const rutasValidas = new Set<string>([
   ...comparableFamilies().map((f) => `/productos/familia/${f.slug}/comparar`),
   ...novedades.map((n) => `/novedades/${n.slug}`),
   ...terminos.map((t) => `/glosario/${t.slug}`),
+  ...informes.map((i) => `/informes/${i.slug}`),
 ]);
 
 describe('novedades: el registro no puede mentir', () => {

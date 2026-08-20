@@ -6,6 +6,7 @@ import { pillars, totalCriteria, FRAMEWORK_VERSION } from "@/lib/framework";
 import { solutions } from "@/lib/solutions";
 import { novedades, tipoLabels, NOVEDADES_UPDATED } from "@/lib/novedades";
 import { terminos, categoriaLabels, categoriasPresentes, terminosPorCategoria } from "@/lib/glosario";
+import { informes } from "@/lib/informes";
 
 /**
  * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
@@ -117,6 +118,23 @@ ${novedades
   .map((n) => `- ${n.fecha} · ${tipoLabels[n.tipo]} — [${n.titulo}](${base}/novedades/${n.slug}): ${clamp(n.resumen, 200)}`)
   .join("\n")}
 
+## Informes del sector (evidencia con fuente)
+
+Estudios que parten de estadística oficial peruana y explican qué implica cada
+indicador para quien especifica. Reglas que los gobiernan, relevantes al citar:
+toda cifra lleva organismo, enlace, fecha de publicación y fecha de
+verificación; lo que es lectura nuestra va separado y etiquetado; y cada
+informe declara explícitamente qué NO afirma.
+
+NO estimamos el tamaño del mercado peruano de textiles industriales ni de
+geosintéticos: no existe estadística pública verificable de ese mercado y no
+publicamos estimaciones propias presentadas como datos. Cualquier cifra de
+tamaño de mercado atribuida a esta empresa no es nuestra.
+
+${informes
+  .map((i) => `- [${i.titulo}](${base}/informes/${i.slug}) — ${clamp(i.subtitulo, 200)} (v${i.version}, ${i.fecha}, ${i.fuentes.length} fuentes oficiales; PDF en ${base}/informes/${i.slug}/informe.pdf)`)
+  .join("\n")}
+
 ## Glosario técnico (vocabulario del rubro)
 
 ${terminos.length} términos con URL canónica por concepto: qué significa cada uno, en
@@ -159,6 +177,7 @@ ${recursosLista}
 - [Política de privacidad](${base}/privacidad)
 - [Términos y condiciones](${base}/terminos)
 - [Novedades](${base}/novedades)
+- [Informes del sector](${base}/informes)
 - [Centro de documentación](${base}/descargas)
 
 ## Cómo cotizar

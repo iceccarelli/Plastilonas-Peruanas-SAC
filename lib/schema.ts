@@ -442,3 +442,41 @@ export function dataCatalogSchema(cat: {
     })),
   };
 }
+
+/**
+ * Informe con procedencia de datos.
+ *
+ * Dataset declara que la página publica DATOS con fuente, no solo prosa. Es lo
+ * que permite a un agente citar una cifra junto con el organismo que la
+ * publica, en lugar de atribuírnosla a nosotros. `isBasedOn` es el campo que
+ * hace ese trabajo: dice explícitamente de dónde salió cada número.
+ */
+export function datasetSchema(d: {
+  url: string;
+  name: string;
+  description: string;
+  fecha: string;
+  version: string;
+  fuentes: { nombre: string; url: string }[];
+}): Dict {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "@id": `${d.url}#dataset`,
+    name: d.name,
+    description: d.description,
+    url: d.url,
+    version: d.version,
+    datePublished: d.fecha,
+    dateModified: d.fecha,
+    inLanguage: SITE.language,
+    creator: organizationRef(),
+    publisher: organizationRef(),
+    isAccessibleForFree: true,
+    isBasedOn: d.fuentes.map((f) => ({
+      "@type": "CreativeWork",
+      name: f.nombre,
+      url: f.url,
+    })),
+  };
+}

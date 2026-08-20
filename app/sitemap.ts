@@ -9,6 +9,7 @@ import { solutions } from "@/lib/solutions";
 import { novedades, NOVEDADES_UPDATED } from "@/lib/novedades";
 import { LEGAL_UPDATED } from "@/lib/legal";
 import { terminos } from "@/lib/glosario";
+import { informes, INFORMES_UPDATED } from "@/lib/informes";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -97,6 +98,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
-  return [...staticRoutes, ...marcoRoutes, ...glosarioRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
+  // Informes: evidencia con fuente. lastModified real, no "hoy".
+  const informeRoutes: MetadataRoute.Sitemap = [
+    { url: `${SITE.url}/informes`, lastModified: new Date(INFORMES_UPDATED),
+      changeFrequency: "monthly", priority: 0.85 },
+    ...informes.map((i) => ({
+      url: `${SITE.url}/informes/${i.slug}`,
+      lastModified: new Date(i.fecha), changeFrequency: "yearly" as const, priority: 0.75,
+    })),
+  ];
+
+  return [...staticRoutes, ...marcoRoutes, ...informeRoutes, ...glosarioRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
     ...localRoutes, ...articleRoutes];
 }

@@ -134,6 +134,11 @@ export function trackDescargasView(slug: string): void {
   trackEvent('descargas_view', { slug });
 }
 
+/** Vista de un informe del sector: la señal de autoridad, no de compra. */
+export function trackInformeView(slug: string): void {
+  trackEvent('informe_view', { slug });
+}
+
 /* ------------------------------------------------------------------ */
 /* Marco de Especificación — el embudo de mayor intención del sitio.   */
 /* ------------------------------------------------------------------ */

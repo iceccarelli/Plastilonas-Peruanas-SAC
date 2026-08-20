@@ -588,3 +588,44 @@ main h1, main h2, main h3 { letter-spacing: -0.02em; }
 /* ── Ritmo de sección: 2 valores, no 6 ── */
 .section-pad { padding-top: 5rem; padding-bottom: 5rem; }
 @media (max-width: 640px) { .section-pad { padding-top: 3rem; padding-bottom: 3rem; } }
+
+/* ---------------------------------------------------------------------------
+   VISUALIZACIÓN DE DATOS
+
+   Los valores de estas variables NO se eligieron a ojo: se midieron con el
+   validador de paleta en las dos superficies reales del sitio (blanco en claro,
+   #1C2C46 en oscuro) y se ajustaron hasta pasar los cinco controles: banda de
+   luminosidad, piso de croma, separación bajo daltonismo, piso de visión normal
+   y contraste contra la superficie.
+
+   El eje divergente es AZUL/NARANJA y no verde/rojo aunque el verde sea el color
+   de marca. Verde y rojo es el par que la deuteranopia confunde: medido se queda
+   en ΔE 5-6 cuando el umbral es 8. Azul/naranja mide ΔE 25-28 en las tres formas
+   de daltonismo. El color de marca no vale una lectura equivocada.
+--------------------------------------------------------------------------- */
+.viz-root {
+  --viz-serie: #047857;      /* magnitud, serie única */
+  --viz-pos: #1D4ED8;        /* divergente: crecimiento */
+  --viz-neg: #B45309;        /* divergente: contracción */
+  --viz-eje: #D1D5DB;
+  --viz-etiqueta: #0A2540;
+  --viz-valor: #4B5563;
+}
+
+.dark .viz-root {
+  --viz-serie: #0EA97A;
+  --viz-pos: #4A8FE0;
+  --viz-neg: #C9800F;
+  --viz-eje: #3A4A66;
+  --viz-etiqueta: var(--text);
+  --viz-valor: var(--text-muted);
+}
+
+.viz-barra { fill: var(--viz-serie); }
+.viz-barra-pos { fill: var(--viz-pos); }
+.viz-barra-neg { fill: var(--viz-neg); }
+.viz-eje { stroke: var(--viz-eje); }
+/* La tinta de los textos es tinta, nunca el color de la serie: el color lo
+   lleva la barra, que es quien porta la identidad. */
+.viz-etiqueta { fill: var(--viz-etiqueta); font-weight: 500; }
+.viz-valor { fill: var(--viz-valor); font-variant-numeric: tabular-nums; }

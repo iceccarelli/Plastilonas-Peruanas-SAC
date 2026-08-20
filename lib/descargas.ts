@@ -4,6 +4,7 @@ import { articles } from './articles';
 import { solutions } from './solutions';
 import { terminos } from './glosario';
 import { totalCriteria, pillars, FRAMEWORK_VERSION } from './framework';
+import { informes } from './informes';
 
 /**
  * CENTRO DE DOCUMENTACIÓN — el inventario de todo lo descargable.
@@ -71,6 +72,17 @@ export function grupos(): GrupoDescargas[] {
           formato: 'pdf',
           volumen: `${totalCriteria()} criterios · ${pillars.length} pilares · v${FRAMEWORK_VERSION}`,
           origen: '/marco',
+        },
+        {
+          titulo: 'Informes del sector',
+          descripcion:
+            'Estadística oficial peruana de los sectores que compran estos productos, con la fuente de cada cifra y qué implica técnicamente para especificar.',
+          paraQuien:
+            'Para sustentar una decisión ante un comité o justificar por qué una especificación cambia según el emplazamiento.',
+          href: '/informes',
+          formato: 'pdf',
+          volumen: `${informes.length} ${informes.length === 1 ? 'informe' : 'informes'}`,
+          origen: '/informes',
         },
         {
           titulo: 'Glosario técnico completo',

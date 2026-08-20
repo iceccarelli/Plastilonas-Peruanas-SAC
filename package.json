@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "test:smoke": "bash scripts/smoke.sh",
     "audit:ui": "node scripts/audit-ui.mjs",
-    "verify:deploy": "bash scripts/verificar-despliegue.sh"
+    "verify:deploy": "bash scripts/verificar-despliegue.sh",
+    "vigilancia": "node scripts/vigilancia-fuentes.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",

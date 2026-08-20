@@ -275,6 +275,30 @@ const registro: Novedad[] = [
       { label: 'Catálogo completo', href: '/productos' },
     ],
   },
+  {
+    slug: 'informes-del-sector-con-fuente-oficial',
+    fecha: '2026-08-20',
+    tipo: 'referencia',
+    titulo: 'Informes del sector: estadística oficial y qué implica al especificar',
+    resumen:
+      'Producción e inversión minera, agroexportaciones y radiación ultravioleta, con la cifra de cada organismo, su fecha de verificación y lo que el informe explícitamente no afirma.',
+    queCambia:
+      'Hay con qué sustentar ante un comité por qué una especificación cambia según el emplazamiento, sin depender de cifras de proveedor.',
+    detalle: [
+      'Los indicadores salen de MINEM, MIDAGRI y SENAMHI, con enlace, fecha de publicación y fecha en que los verificamos. Lo que es lectura técnica nuestra va separado y etiquetado: el dato es del organismo, la consecuencia es nuestra, y el lector tiene derecho a distinguirlas.',
+      'El primer informe no estima el tamaño del mercado de textiles industriales, y lo dice en la primera sección. No existe una estadística pública verificable de ese mercado; publicar una estimación propia con aspecto de dato sería inventar el número más importante del documento. Cada informe declara además qué no afirma, con el mismo peso visual que los hallazgos.',
+      'Los gráficos se dibujan en el servidor, sin JavaScript, y llevan su tabla de datos desplegable. El eje divergente usa azul y naranja en vez del verde de marca y el rojo: verde/rojo es el par que la deuteranopia confunde, y se midió antes de elegirlo.',
+      'Se suma un mecanismo de vigilancia que comprueba periódicamente que las fuentes citadas siguen respondiendo. No publica nada: informa para que una persona decida.',
+    ],
+    enlaces: [
+      { label: 'Informes del sector', href: '/informes' },
+      {
+        label: 'Qué mueve la demanda de textiles industriales en el Perú',
+        href: '/informes/sectores-compradores-textiles-industriales-peru',
+      },
+      { label: 'Centro de documentación', href: '/descargas' },
+    ],
+  },
 ];
 
 /** Novedades de la más reciente a la más antigua. */
