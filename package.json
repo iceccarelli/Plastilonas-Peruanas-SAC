@@ -15,7 +15,9 @@
     "vigilancia": "node scripts/vigilancia-fuentes.mjs",
     "imagenes": "node scripts/imagenes.mjs",
     "imagenes:prompts": "node scripts/imagenes.mjs --prompts",
-    "imagenes:glosario": "node scripts/imagenes.mjs --prompts --grupo glosario"
+    "imagenes:glosario": "node scripts/imagenes.mjs --prompts --grupo glosario",
+    "imagenes:tomas": "node scripts/imagenes.mjs --tomas",
+    "imagenes:tomas:glosario": "node scripts/imagenes.mjs --tomas --grupo glosario"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",

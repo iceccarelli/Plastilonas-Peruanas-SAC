@@ -101,7 +101,14 @@ const rutaGaleria = (slug: string, variante: string) =>
 /* ------------------------------------------------------------------ */
 
 /** Productos a los que les falta la galería de cuatro variantes. */
-export function ranurasProducto(): RanuraImagen[] {
+/**
+ * `incluirCompletas` existe para el encargo de TOMAS ALTERNAS. Por defecto una
+ * ranura es un ENCARGO: lo que ya está publicado no se vuelve a pedir, y por
+ * eso los productos con galería completa se omiten. Pero para pedir la toma 2
+ * o la 3 de una imagen hace falta justamente la que YA existe —es su prompt el
+ * que hay que variar—, y sin este parámetro no había forma de alcanzarla.
+ */
+export function ranurasProducto(incluirCompletas = false): RanuraImagen[] {
   const completos = new Set(
     products
       .filter((p) =>
@@ -113,7 +120,7 @@ export function ranurasProducto(): RanuraImagen[] {
   );
 
   return products
-    .filter((p) => !completos.has(p.slug))
+    .filter((p) => incluirCompletas || !completos.has(p.slug))
     .flatMap((p) =>
       VARIANTES.map((v) => ({
         id: `producto:${p.slug}:${v.clave}`,
@@ -394,6 +401,46 @@ export function todasLasRanuras(): RanuraImagen[] {
     ...ranurasGuia(),
   ];
 }
+
+/**
+ * Todas las ranuras del sitio, incluidas las que ya tienen archivo publicado.
+ * Es la lista que usa el encargo de tomas alternas: para pedir la toma 2 de
+ * una imagen hay que partir del prompt de la toma 1, exista o no en disco.
+ */
+export function todasLasRanurasConPublicadas(): RanuraImagen[] {
+  return [
+    ...ranurasSolucion(),
+    ...ranurasFamilia(),
+    ...ranurasProducto(true),
+    ...ranurasGlosario(),
+    ...ranurasGuia(),
+  ];
+}
+
+/**
+ * Variación explícita por número de toma. Sin esto, un generador al que se le
+ * pide «otra versión» del mismo prompt devuelve el mismo render —fue
+ * exactamente lo que pasó con los diagramas del glosario, que llegaron por
+ * triplicado y byte a byte idénticos— y el sitio las descarta. La variación
+ * tiene que estar ESCRITA en el encargo, y tiene que cambiar la cámara o la
+ * escena, no el estilo: dos tomas con estilos distintos se leen como un error.
+ */
+export const VARIACION_TOMA: Record<number, string> = {
+  2:
+    'SEGUNDA TOMA del mismo asunto. Cambie el punto de vista: si la primera es a la altura ' +
+    'de los ojos, ésta va desde arriba en escorzo o desde el suelo. Acérquese o aléjese al ' +
+    'menos un paso completo. MISMO material, MISMO montaje, MISMA hora del día y MISMA paleta: ' +
+    'lo único que cambia es dónde está la cámara.',
+  3:
+    'TERCERA TOMA del mismo asunto. Cambie el MOMENTO en lugar de la cámara: otro instante ' +
+    'de la misma faena —el material a medio desplegar, la unión a medio ejecutar, el equipo ' +
+    'aproximándose—. Encuadre distinto de las dos anteriores. MISMO material, MISMO lugar, ' +
+    'MISMA paleta y MISMA calidad de luz.',
+  4:
+    'CUARTA TOMA del mismo asunto. Plano de contexto amplio: el mismo elemento dentro de su ' +
+    'entorno completo, ocupando una parte menor del encuadre. MISMO material, MISMO lugar, ' +
+    'MISMA paleta.',
+};
 
 /** Busca la ranura de una página concreta. */
 export const ranuraPorId = (id: string): RanuraImagen | undefined =>

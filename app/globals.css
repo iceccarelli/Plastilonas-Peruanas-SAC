@@ -561,31 +561,113 @@ main h1, main h2, main h3 { letter-spacing: -0.02em; }
 .group:hover .ken-burns { animation-play-state: paused; }
 
 /* ---------------------------------------------------------------------------
-   CRUCE ENTRE DOS TOMAS DE LA MISMA VISTA
+   CRUCE ENTRE N TOMAS DE LA MISMA VISTA
 
-   Cuando existe la segunda toma (sufijo -2), las dos se apilan y la de arriba
-   se funde. Ciclo largo a propósito: 24 s, con diez segundos de permanencia en
-   cada una. Un carrusel rápido en una ficha técnica compite con la lectura y
-   obliga a esperar para volver a ver lo que uno estaba mirando.
+   Cuando una ranura tiene varias tomas (sufijos -2, -3, -4), todas se apilan y
+   se funden en ciclo. Diez segundos por toma, a propósito: un carrusel rápido
+   en una ficha técnica compite con la lectura y obliga a esperar para volver a
+   ver lo que uno estaba mirando.
 
-   La segunda toma lleva su Ken Burns desfasado y con otro origen, de modo que
-   el cruce no parezca un salto de la misma imagen.
+   POR QUÉ EL CICLO ESTÁ ESCRITO CAPA POR CAPA Y NO CON UNA REGLA GENERAL.
+   Con tres o más capas, el cruce ingenuo —cada capa se funde y se apaga en su
+   turno— deja un instante en el que dos capas están a media opacidad y la
+   toma 1, que está debajo y siempre opaca, se transparenta a través de ambas.
+   El resultado es un fantasma de la primera imagen en cada transición.
+
+   La solución es apilar en vez de alternar: la capa k entra fundiéndose ENCIMA
+   de la k-1, que sigue opaca, y la k-1 se apaga de golpe un instante después,
+   cuando ya está tapada por completo y ese apagón no se ve. Solo la última
+   capa se funde hacia afuera al cerrar el ciclo, revelando la toma 1. Nunca
+   hay dos capas a media opacidad sobre el fondo, y por eso no hay fantasma.
+
+   Eso obliga a que los porcentajes dependan de cuántas tomas hay, y los
+   porcentajes de @keyframes no admiten variables CSS. De ahí un juego de
+   fotogramas por cada N. Son tres casos (2, 3 y 4 tomas) y se acaban.
+
+   Cada capa lleva su Ken Burns desfasado y con otro origen, para que el cruce
+   no parezca un salto de la misma imagen.
 --------------------------------------------------------------------------- */
 .toma-cruce {
-  animation: cruce-tomas 24s ease-in-out infinite;
+  /* Solo posición y pausa. El ciclo lo pone la clase .toma-capa-N, que es la
+     que sabe cuántas hermanas tiene. */
+  opacity: 0;
 }
-@keyframes cruce-tomas {
-  0%, 40%   { opacity: 0; }
-  50%, 90%  { opacity: 1; }
-  100%      { opacity: 0; }
+
+/* --- 2 tomas: 20 s (10 s cada una) --- */
+.tomas-2 .toma-capa-2 { animation: cruce-2de2 20s ease-in-out infinite; }
+@keyframes cruce-2de2 {
+  0%   { opacity: 1; }
+  8%   { opacity: 0; }
+  50%  { opacity: 0; }
+  58%  { opacity: 1; }
+  100% { opacity: 1; }
 }
-.toma-cruce .ken-burns { animation-delay: -11s; transform-origin: bottom left; }
+
+/* --- 3 tomas: 30 s --- */
+.tomas-3 .toma-capa-2 { animation: cruce-2de3 30s ease-in-out infinite; }
+.tomas-3 .toma-capa-3 { animation: cruce-3de3 30s ease-in-out infinite; }
+@keyframes cruce-2de3 {
+  0%      { opacity: 0; }
+  33.33%  { opacity: 0; }
+  39.33%  { opacity: 1; }
+  72.66%  { opacity: 1; }
+  72.67%  { opacity: 0; }  /* tapada por la capa 3: el apagón no se ve */
+  100%    { opacity: 0; }
+}
+@keyframes cruce-3de3 {
+  0%      { opacity: 1; }
+  6%      { opacity: 0; }
+  66.66%  { opacity: 0; }
+  72.66%  { opacity: 1; }
+  100%    { opacity: 1; }
+}
+
+/* --- 4 tomas: 40 s --- */
+.tomas-4 .toma-capa-2 { animation: cruce-2de4 40s ease-in-out infinite; }
+.tomas-4 .toma-capa-3 { animation: cruce-3de4 40s ease-in-out infinite; }
+.tomas-4 .toma-capa-4 { animation: cruce-4de4 40s ease-in-out infinite; }
+@keyframes cruce-2de4 {
+  0%     { opacity: 0; }
+  25%    { opacity: 0; }
+  30%    { opacity: 1; }
+  55%    { opacity: 1; }
+  55.1%  { opacity: 0; }
+  100%   { opacity: 0; }
+}
+@keyframes cruce-3de4 {
+  0%     { opacity: 0; }
+  50%    { opacity: 0; }
+  55%    { opacity: 1; }
+  80%    { opacity: 1; }
+  80.1%  { opacity: 0; }
+  100%   { opacity: 0; }
+}
+@keyframes cruce-4de4 {
+  0%     { opacity: 1; }
+  5%     { opacity: 0; }
+  75%    { opacity: 0; }
+  80%    { opacity: 1; }
+  100%   { opacity: 1; }
+}
+
+/* El Ken Burns de cada capa arranca en otro punto y desde otro origen: dos
+   tomas del mismo encuadre moviéndose igual se leen como un parpadeo, no como
+   un cambio de toma. */
+.toma-cruce.toma-capa-2 .ken-burns { animation-delay: -11s; transform-origin: bottom left; }
+.toma-cruce.toma-capa-3 .ken-burns { animation-delay: -5s;  transform-origin: top right; }
+.toma-cruce.toma-capa-4 .ken-burns { animation-delay: -17s; transform-origin: bottom right; }
+
+/* Pausa al pasar el cursor. Va al final del bloque a propósito: la forma
+   abreviada `animation:` de las reglas .tomas-N reinicia animation-play-state,
+   y con la misma especificidad gana la última. Puesta arriba, el hover no
+   pausaba nada. */
 .group:hover .toma-cruce { animation-play-state: paused; }
 
 @media (prefers-reduced-motion: reduce) {
   /* Sin excepciones: el movimiento puede provocar malestar vestibular real.
-     Se congela el zoom y se oculta la segunda toma. Queda una sola imagen
-     quieta, que es una página perfectamente correcta. */
+     Se congela el zoom y se ocultan TODAS las tomas adicionales, sean dos o
+     cuatro. Queda una sola imagen quieta, que es una página perfectamente
+     correcta. */
   .ken-burns { animation: none !important; transform: scale(1.01); }
   .toma-cruce { animation: none !important; opacity: 0 !important; }
 }

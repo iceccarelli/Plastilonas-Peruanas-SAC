@@ -3,8 +3,7 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   todasLasRanuras, ranurasProducto, ranurasFamilia, ranurasSolucion,
-  ranurasGuia, ranurasGlosario, TERMINOS_ILUSTRABLES, PISTAS_VISUALES, VARIANTES,
-} from '@/lib/imagenes';
+  ranurasGuia, ranurasGlosario, TERMINOS_ILUSTRABLES, PISTAS_VISUALES, VARIANTES, VARIACION_TOMA } from '@/lib/imagenes';
 import { products, productFamilies } from '@/lib/products';
 import { articles } from '@/lib/articles';
 import { solutions } from '@/lib/solutions';
@@ -228,9 +227,15 @@ describe('imágenes: degradación honesta', () => {
     expect(src).not.toMatch(/<img\s/);
   });
 
-  it('exige ancho y alto: sin ellos la página salta al cargar', () => {
-    expect(src).toMatch(/width=\{ranura\.ancho\}/);
-    expect(src).toMatch(/height=\{ranura\.alto\}/);
+  it('reserva el espacio antes de cargar: sin eso la página salta', () => {
+    // Se afirma sobre la GARANTÍA, no sobre la técnica. Antes eran width/height
+    // en la etiqueta; ahora es un contenedor con aspect-ratio derivado de la
+    // ranura, porque las capas apiladas necesitan `fill`. Las dos evitan el
+    // salto; lo que no puede faltar es que la proporción salga de la ranura, y
+    // que la valla de la imagen pendiente reserve exactamente lo mismo.
+    const conRatio = src.match(/aspectRatio: `\$\{ranura\.ancho\} \/ \$\{ranura\.alto\}`/g) ?? [];
+    expect(conRatio.length, 'la valla y la imagen deben reservar el mismo alto').toBe(2);
+    expect(src).not.toMatch(/<Image[^>]*className="h-auto w-full/);
   });
 });
 
@@ -241,6 +246,8 @@ describe('inventario: el script y su documento', () => {
   it('está enlazado en package.json', () => {
     expect(pkg.scripts.imagenes).toContain('scripts/imagenes.mjs');
     expect(pkg.scripts['imagenes:prompts']).toContain('--prompts');
+    expect(pkg.scripts['imagenes:tomas']).toContain('--tomas');
+    expect(pkg.scripts['imagenes:tomas:glosario']).toContain('--grupo glosario');
   });
 
   it('genera el documento desde el registro, no de una lista aparte', () => {
@@ -265,5 +272,45 @@ describe('inventario: el script y su documento', () => {
     for (const r of pendientes.slice(0, 12)) {
       expect(doc, `falta ${r.ruta} en el encargo`).toContain(r.ruta);
     }
+  });
+});
+
+describe('encargo de tomas alternas: que el generador no devuelva el mismo render', () => {
+  const script = readFileSync(join(process.cwd(), 'scripts/imagenes.mjs'), 'utf8');
+  const reg = readFileSync(join(process.cwd(), 'lib/imagenes.ts'), 'utf8');
+
+  it('parte de las ranuras YA publicadas, no de las pendientes', () => {
+    // Para pedir la toma 2 hace falta el prompt de la toma 1, que es
+    // justamente la que ya existe y que el encargo normal omite.
+    expect(script).toMatch(/todasLasRanurasConPublicadas/);
+    expect(reg).toMatch(/export function todasLasRanurasConPublicadas/);
+  });
+
+  it('cada toma lleva ESCRITO qué debe cambiar', () => {
+    // Pedir «otra versión» del mismo prompt devuelve el mismo render. Pasó con
+    // los 41 diagramas del glosario: llegaron por triplicado, byte a byte
+    // idénticos, y el sitio los descartó. La variación va en el encargo.
+    for (const t of [2, 3, 4]) {
+      expect(VARIACION_TOMA[t], `falta la variación de la toma ${t}`).toBeTruthy();
+      expect(VARIACION_TOMA[t].length).toBeGreaterThan(80);
+    }
+    // Cambia la cámara o la escena, nunca el estilo: dos tomas con estilos
+    // distintos se leen como un error, no como una rotación.
+    expect(VARIACION_TOMA[2]).toMatch(/MISMA paleta/);
+    expect(VARIACION_TOMA[3]).toMatch(/MISMA paleta/);
+    // Y cada una tiene que pedir algo DISTINTO de las otras.
+    expect(VARIACION_TOMA[2]).not.toBe(VARIACION_TOMA[3]);
+    expect(VARIACION_TOMA[3]).not.toBe(VARIACION_TOMA[4]);
+  });
+
+  it('nunca pide una toma que ya está en disco', () => {
+    expect(script).toMatch(/if \(existsSync\(join\('public', destino\)\)\) continue;/);
+  });
+
+  it('no pide más tomas de las que el sitio sabe rotar', () => {
+    // El CSS define ciclos para 2, 3 y 4. Pedir una quinta sería encargar
+    // trabajo que el sitio no puede mostrar.
+    expect(script).toMatch(/match\(\/\^\[2-4\]\$\/\)/);
+    expect(Object.keys(VARIACION_TOMA).sort()).toEqual(['2', '3', '4']);
   });
 });

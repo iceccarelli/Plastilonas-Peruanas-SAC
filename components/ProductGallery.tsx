@@ -52,9 +52,11 @@ export default function ProductGallery({
 }: {
   product: Product;
   /**
-   * Segundas tomas por imagen, resueltas en el SERVIDOR. Un componente de
-   * cliente no puede mirar el disco, y adivinar si existe el archivo `-2`
-   * produciría exactamente lo que este proyecto evita: una imagen rota.
+   * Tomas por imagen, resueltas en el SERVIDOR. Un componente de cliente no
+   * puede mirar el disco, y adivinar si existe el archivo `-2` produciría
+   * exactamente lo que este proyecto evita: una imagen rota. El servidor
+   * además ya descartó las tomas que son copias byte a byte de otra, así que
+   * lo que llega acá son variantes realmente distintas.
    */
   tomas?: Record<string, string[]>;
 }) {
@@ -103,8 +105,11 @@ export default function ProductGallery({
     return i === 0 ? product.name : `${product.name} — ${prettify(src)}`;
   };
   const activeCaption = captionFor(activeSrc);
-  // La segunda toma solo entra si el servidor confirmó que el archivo existe.
-  const segundaToma = (tomas[activeSrc] ?? [])[1];
+  // Solo entran las tomas que el servidor confirmó que existen Y que son
+  // distintas entre sí. `slice(1)` porque la toma 1 es la imagen de abajo.
+  const tomasActivas = tomas[activeSrc] ?? [activeSrc];
+  const capas = tomasActivas.slice(1, 4);
+  const claseCiclo = capas.length > 0 ? `tomas-${capas.length + 1}` : '';
 
   return (
     <div>
@@ -116,7 +121,7 @@ export default function ProductGallery({
             type="button"
             onClick={() => setLightbox(true)}
             aria-label={`Ampliar imagen de ${product.name}`}
-            className="ken-burns-wrap absolute inset-0 overflow-hidden w-full h-full cursor-zoom-in"
+            className={`ken-burns-wrap ${claseCiclo} absolute inset-0 overflow-hidden w-full h-full cursor-zoom-in`}
           >
             <Image
               src={activeSrc}
@@ -127,21 +132,28 @@ export default function ProductGallery({
               className="ken-burns object-cover"
               onError={() => setFailed((f) => ({ ...f, [active]: true }))}
             />
-            {/* Segunda toma de la MISMA vista, si existe. Se funde encima con
-                su propio Ken Burns desfasado. Va marcada aria-hidden porque no
-                aporta información nueva a quien usa lector de pantalla: es la
-                misma vista, y anunciarla dos veces sería ruido. */}
-            {segundaToma && (
-              <div className="toma-cruce absolute inset-0" aria-hidden="true">
+            {/* Tomas adicionales de la MISMA vista. Se apilan en orden de DOM
+                —la última queda arriba, que es justo lo que el ciclo de cruce
+                asume— y cada una lleva su Ken Burns desfasado. Van marcadas
+                aria-hidden porque no aportan información nueva a quien usa
+                lector de pantalla: es la misma vista, y anunciarla tres veces
+                sería ruido. Sin `priority`: la primera toma es la que decide
+                el LCP, y precargar las demás competiría con ella. */}
+            {capas.map((toma, k) => (
+              <div
+                key={toma}
+                className={`toma-cruce toma-capa-${k + 2} absolute inset-0`}
+                aria-hidden="true"
+              >
                 <Image
-                  src={segundaToma}
+                  src={toma}
                   alt=""
                   fill
                   sizes="(max-width: 768px) 100vw, 640px"
                   className="ken-burns object-cover"
                 />
               </div>
-            )}
+            ))}
             <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none" />
             <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/55 text-white text-xs px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
               <Expand className="w-3.5 h-3.5" /> Ampliar

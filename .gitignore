@@ -48,3 +48,4 @@ gallery-code.patch
 # que es permanente, y no aporta nada que public/ no tenga ya.
 *.zip
 _to_delete/
+public/images/_pruebas-tomas/
