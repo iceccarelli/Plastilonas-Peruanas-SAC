@@ -480,3 +480,41 @@ export function datasetSchema(d: {
     })),
   };
 }
+
+/**
+ * Imagen con procedencia declarada.
+ *
+ * ImageObject permite decir de una imagen algo que el atributo alt no dice:
+ * qué representa, quién la publica y si es una fotografía o un esquema. Para
+ * un agente que construye un índice visual, esa distinción es la diferencia
+ * entre citar un diagrama como esquema y citarlo como evidencia fotográfica.
+ */
+export function imageObjectSchema(img: {
+  url: string;
+  ancho: number;
+  alto: number;
+  alt: string;
+  /** Página donde vive la imagen. */
+  paginaUrl: string;
+  esDiagrama: boolean;
+}): Dict {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ImageObject",
+    "@id": `${img.paginaUrl}#imagen`,
+    contentUrl: `${SITE.url}${img.url}`,
+    url: `${SITE.url}${img.url}`,
+    width: img.ancho,
+    height: img.alto,
+    caption: img.alt,
+    description: img.alt,
+    representativeOfPage: true,
+    inLanguage: SITE.language,
+    creator: organizationRef(),
+    // Un esquema no es una fotografía de una obra ejecutada, y conviene que
+    // eso viaje con la imagen y no solo en el pie de la página.
+    ...(img.esDiagrama
+      ? { creditText: `Esquema explicativo de ${SITE.legalName}`, encodingFormat: "image/png" }
+      : { creditText: `Imagen referencial de ${SITE.legalName}` }),
+  };
+}

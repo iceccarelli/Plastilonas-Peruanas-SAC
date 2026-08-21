@@ -14,8 +14,10 @@ import { articles } from '@/lib/articles';
 import { pillars } from '@/lib/framework';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
+import ImagenContenido from '@/components/ImagenContenido';
+import { ranurasGlosario } from '@/lib/imagenes';
 import TrackView from '@/components/TrackView';
-import { breadcrumbSchema, definedTermSchema, webPageSchema } from '@/lib/schema';
+import { breadcrumbSchema, definedTermSchema, webPageSchema, imageObjectSchema } from '@/lib/schema';
 
 /**
  * Página de un término.
@@ -66,6 +68,7 @@ export default async function TerminoPage({ params }: Props) {
 
   const url = `${SITE.url}/glosario/${slug}`;
   const setUrl = `${SITE.url}/glosario`;
+  const imagen = ranurasGlosario().find((r) => r.id === `glosario:${slug}`);
   const relacionados = t.relacionados.map(terminoBySlug).filter(Boolean) as NonNullable<
     ReturnType<typeof terminoBySlug>
   >[];
@@ -98,6 +101,12 @@ export default async function TerminoPage({ params }: Props) {
             termCode: t.slug,
             alternateNames: formasDe(t).slice(1),
           }),
+          ...(imagen
+            ? [imageObjectSchema({
+                url: imagen.ruta, ancho: imagen.ancho, alto: imagen.alto,
+                alt: imagen.alt, paginaUrl: url, esDiagrama: true,
+              })]
+            : []),
           breadcrumbSchema(
             [
               { name: 'Inicio', url: `${SITE.url}/` },
@@ -138,6 +147,10 @@ export default async function TerminoPage({ params }: Props) {
       <p className="speakable-intro mb-10 border-l-4 border-[#059669] pl-6 text-xl leading-relaxed text-gray-800">
         {t.definicionCorta}
       </p>
+
+      {/* El esquema tras la definición corta y antes del desarrollo: es la
+          posición en que el dibujo ayuda a leer el texto, y no al revés. */}
+      {imagen && <ImagenContenido ranura={imagen} className="mb-10" sizes="(min-width: 768px) 720px, 100vw" />}
 
       <div className="mb-12 space-y-5 text-gray-700">
         {t.definicion.map((p) => (

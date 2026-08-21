@@ -7,8 +7,10 @@ import { familyContent, resolveFamily } from '@/lib/families';
 import { articles } from '@/lib/articles';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
+import ImagenContenido from '@/components/ImagenContenido';
+import { ranurasFamilia } from '@/lib/imagenes';
 import TrackView from '@/components/TrackView';
-import { breadcrumbSchema, faqSchema, itemListSchema, webPageSchema } from '@/lib/schema';
+import { breadcrumbSchema, faqSchema, itemListSchema, webPageSchema, imageObjectSchema } from '@/lib/schema';
 
 /**
  * Página de familia (/productos/familia/[slug]).
@@ -55,6 +57,7 @@ export default async function FamilyPage({ params }: Props) {
   const { family, content } = resolved;
 
   const url = `${SITE.url}/productos/familia/${slug}`;
+  const imagen = ranurasFamilia().find((r) => r.id === `familia:${slug}`);
   const items = products.filter((p) => p.category === family.name);
   const sectores = Array.from(new Set(items.flatMap((p) => p.sector)));
   const sourcings = Array.from(new Set(items.map((p) => p.sourcing).filter(Boolean))) as string[];
@@ -95,6 +98,12 @@ export default async function FamilyPage({ params }: Props) {
             })),
           }),
           faqSchema(content.faqs, url),
+          ...(imagen
+            ? [imageObjectSchema({
+                url: imagen.ruta, ancho: imagen.ancho, alto: imagen.alto,
+                alt: imagen.alt, paginaUrl: url, esDiagrama: false,
+              })]
+            : []),
         ]}
       />
 
@@ -114,6 +123,8 @@ export default async function FamilyPage({ params }: Props) {
       <p className="mb-6 text-sm font-medium uppercase tracking-[0.12em] text-[#059669]">
         {family.tagline} · {items.length} {items.length === 1 ? 'línea' : 'líneas'} de producto
       </p>
+
+      {imagen && <ImagenContenido ranura={imagen} prioridad className="mb-10" />}
 
       <div className="speakable-intro mb-10 max-w-3xl space-y-4 text-lg text-gray-700">
         {content.intro.map((p) => (

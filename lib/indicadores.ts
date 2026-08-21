@@ -1,5 +1,6 @@
 import type { Lectura, SerieBCRP } from './bcrp';
-import { consultarBCRP, periodoAIso, ultimasLecturas } from './bcrp';
+import { consultarBCRPDetallado, periodoAIso, ultimasLecturas } from './bcrp';
+import type { MotivoFallo } from './bcrp';
 
 /**
  * INDICADORES EN VIVO.
@@ -128,6 +129,13 @@ export interface EstadoIndicadores {
   sinConexion: boolean;
   /** Momento en que se intentó la lectura (ISO, sin hora). */
   consultadoEl: string;
+  /**
+   * Diagnóstico de la última lectura. Existe porque la primera versión fallaba
+   * en silencio: la página salió a producción sirviendo el respaldo y no había
+   * forma de saber si era un bloqueo, un tiempo agotado o un cambio de
+   * formato. Se publica en el JSON, no en la página humana.
+   */
+  diagnostico: { serie: string; motivo: MotivoFallo; estado?: number }[];
 }
 
 const desdeMensual = (hoy: Date) =>
@@ -147,14 +155,20 @@ export async function leerIndicadores(ahora: Date): Promise<EstadoIndicadores> {
   desde.setUTCDate(desde.getUTCDate() - 30);
 
   const [mensual, diario] = await Promise.all([
-    consultarBCRP(SERIES.map((s) => s.codigo), desdeMensual(ahora), hastaMensual(ahora)),
-    consultarBCRP([SERIE_TIPO_CAMBIO.codigo], iso(desde), iso(ahora)),
+    consultarBCRPDetallado(
+      SERIES.map((s) => s.codigo), desdeMensual(ahora), hastaMensual(ahora),
+    ),
+    consultarBCRPDetallado([SERIE_TIPO_CAMBIO.codigo], iso(desde), iso(ahora)),
   ]);
 
   const lecturas = new Map<string, Lectura>();
-  if (mensual) for (const l of ultimasLecturas(mensual, SERIES)) lecturas.set(l.codigo, l);
-  if (diario) {
-    for (const l of ultimasLecturas(diario, [SERIE_TIPO_CAMBIO])) lecturas.set(l.codigo, l);
+  if (mensual.datos) {
+    for (const l of ultimasLecturas(mensual.datos, SERIES)) lecturas.set(l.codigo, l);
+  }
+  if (diario.datos) {
+    for (const l of ultimasLecturas(diario.datos, [SERIE_TIPO_CAMBIO])) {
+      lecturas.set(l.codigo, l);
+    }
   }
 
   const todas = [SERIE_TIPO_CAMBIO, ...SERIES];
@@ -185,5 +199,9 @@ export async function leerIndicadores(ahora: Date): Promise<EstadoIndicadores> {
     indicadores,
     sinConexion: indicadores.every((i) => i.deRespaldo),
     consultadoEl: iso(ahora),
+    diagnostico: [
+      { serie: 'cotizaciones', motivo: mensual.motivo, estado: mensual.estado },
+      { serie: 'tipo-de-cambio', motivo: diario.motivo, estado: diario.estado },
+    ],
   };
 }

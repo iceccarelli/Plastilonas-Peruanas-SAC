@@ -129,33 +129,88 @@ export function urlSerie(codigos: string[], desde: string, hasta: string): strin
 }
 
 /**
- * Consulta el BCRP. NUNCA lanza: devuelve null si algo sale mal, y quien la
- * llama decide qué mostrar. Un fallo de la API no puede tumbar una compilación
- * ni dejar una página en blanco.
+ * Cabeceras de la petición.
+ *
+ * El User-Agent NO es cortesía: los portales del Estado peruano están detrás
+ * de cortafuegos que rechazan a un cliente sin cabecera de navegador. Ya lo
+ * habíamos comprobado —gob.pe devuelve 418 a un fetcher y 200 a un navegador—
+ * y el script de vigilancia se corrigió por eso. Este cliente se escribió
+ * después SIN aplicar la misma lección, y el resultado fue que la página de
+ * indicadores salió a producción sirviendo el respaldo en frío: el sitio
+ * "en vivo" no estaba leyendo nada.
+ *
+ * Se identifica quiénes somos y se enlaza la página que consume el dato: un
+ * rastreador que se identifica y declara su propósito es un rastreador que un
+ * administrador puede permitir en lugar de bloquear a ciegas.
  */
-export async function consultarBCRP(
+const CABECERAS: Record<string, string> = {
+  'User-Agent':
+    'Mozilla/5.0 (compatible; PlastilonasIndicadores/1.0; +https://plastilonas-peruanas-sac.vercel.app/indicadores)',
+  Accept: 'application/json, text/plain, */*',
+  'Accept-Language': 'es-PE,es;q=0.9',
+};
+
+/** Por qué falló la última consulta. Vacío si salió bien. */
+export type MotivoFallo =
+  | 'ok'
+  | 'http'
+  | 'forma-inesperada'
+  | 'tiempo-agotado'
+  | 'red';
+
+export interface ResultadoBCRP {
+  datos: RespuestaBCRP | null;
+  motivo: MotivoFallo;
+  /** Código HTTP, cuando lo hubo. Sirve para distinguir un 403 de un 500. */
+  estado?: number;
+}
+
+/**
+ * Consulta el BCRP. NUNCA lanza: devuelve el motivo del fallo y quien la llama
+ * decide qué mostrar. Un fallo de la API no puede tumbar una compilación ni
+ * dejar una página en blanco.
+ *
+ * Devuelve el MOTIVO y no solo null porque la primera versión fallaba en
+ * silencio: la página salió a producción sirviendo el respaldo y no había
+ * forma de saber si era un bloqueo, un tiempo agotado o un cambio de formato.
+ * Fallar cerrado es correcto; fallar mudo, no.
+ */
+export async function consultarBCRPDetallado(
   codigos: string[],
   desde: string,
   hasta: string,
   opciones: { revalidate?: number; timeoutMs?: number } = {},
-): Promise<RespuestaBCRP | null> {
+): Promise<ResultadoBCRP> {
   const { revalidate = 3600, timeoutMs = 8000 } = opciones;
   const control = new AbortController();
   const temporizador = setTimeout(() => control.abort(), timeoutMs);
   try {
     const res = await fetch(urlSerie(codigos, desde, hasta), {
       signal: control.signal,
-      headers: { Accept: 'application/json' },
+      headers: CABECERAS,
       next: { revalidate },
     });
-    if (!res.ok) return null;
+    if (!res.ok) return { datos: null, motivo: 'http', estado: res.status };
     const datos = (await res.json()) as RespuestaBCRP;
     // Una respuesta 200 con forma inesperada es tan inservible como un 500.
-    if (!Array.isArray(datos?.periods) || datos.periods.length === 0) return null;
-    return datos;
-  } catch {
-    return null;
+    if (!Array.isArray(datos?.periods) || datos.periods.length === 0) {
+      return { datos: null, motivo: 'forma-inesperada', estado: res.status };
+    }
+    return { datos, motivo: 'ok', estado: res.status };
+  } catch (e) {
+    const abortado = e instanceof Error && e.name === 'AbortError';
+    return { datos: null, motivo: abortado ? 'tiempo-agotado' : 'red' };
   } finally {
     clearTimeout(temporizador);
   }
+}
+
+/** Envoltura simple para quien no necesita el motivo. */
+export async function consultarBCRP(
+  codigos: string[],
+  desde: string,
+  hasta: string,
+  opciones: { revalidate?: number; timeoutMs?: number } = {},
+): Promise<RespuestaBCRP | null> {
+  return (await consultarBCRPDetallado(codigos, desde, hasta, opciones)).datos;
 }

@@ -22,6 +22,9 @@ export async function GET(): Promise<Response> {
     },
     consultadoEl: estado.consultadoEl,
     sinConexion: estado.sinConexion,
+    // Por qué falló, si falló. Un fallo cerrado que además es mudo no se puede
+    // diagnosticar en producción: pasó, y costó un despliegue entero.
+    diagnostico: estado.diagnostico,
     atribucionSugerida: `${SITE.legalName} — Indicadores del rubro, ${SITE.url}/indicadores (datos: BCRP)`,
     advertencia:
       'Valores observados y fechados, no vigentes por definición: verifique el campo periodo antes de usarlos. No incluye precios de resina, nafta ni flete, que son producto comercial de terceros.',

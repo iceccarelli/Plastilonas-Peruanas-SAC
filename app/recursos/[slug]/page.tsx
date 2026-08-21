@@ -8,6 +8,8 @@ import { products } from '@/lib/products';
 import ciudades from '@/data/ciudades.json';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
+import ImagenContenido from '@/components/ImagenContenido';
+import { ranurasGuia } from '@/lib/imagenes';
 import TrackView from '@/components/TrackView';
 import {
   articleSchema,
@@ -75,6 +77,7 @@ export default async function ArticlePage({ params }: Props) {
     .map((s) => products.find((p) => p.slug === s))
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
   const glosarioRel = terminosParaGuia(slug);
+  const imagen = ranurasGuia().find((r) => r.id === `guia:${slug}`);
   const relatedCities = (a.relatedCities ?? [])
     .map((s) => (ciudades as { slug: string; ciudad: string }[]).find((c) => c.slug === s))
     .filter((c): c is { slug: string; ciudad: string } => Boolean(c));
@@ -160,6 +163,8 @@ export default async function ArticlePage({ params }: Props) {
       <h1 className="mb-6 text-4xl font-semibold leading-tight tracking-tight text-[#0A2540]">
         {a.title}
       </h1>
+
+      {imagen && <ImagenContenido ranura={imagen} prioridad className="mb-10" />}
 
       <div className="speakable-intro mb-8 space-y-4 text-lg text-gray-700">
         {a.intro.map((p) => (

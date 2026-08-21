@@ -80,6 +80,22 @@ describe('BCRP: interpretación de la respuesta', () => {
 });
 
 describe('indicadores: falla cerrada', () => {
+  it('reporta el motivo del fallo, no solo que falló', async () => {
+    const original = globalThis.fetch;
+    globalThis.fetch = (async () =>
+      new Response('nope', { status: 403 })) as typeof fetch;
+    try {
+      const estado = await leerIndicadores(new Date('2026-08-20T12:00:00Z'));
+      expect(estado.sinConexion).toBe(true);
+      for (const d of estado.diagnostico) {
+        expect(d.motivo).toBe('http');
+        expect(d.estado).toBe(403);
+      }
+    } finally {
+      globalThis.fetch = original;
+    }
+  }, 20000);
+
   it('sin red, sirve el respaldo y lo declara como tal', async () => {
     // Se fuerza el fallo sustituyendo fetch: es el escenario que importa.
     const original = globalThis.fetch;
@@ -160,7 +176,25 @@ describe('indicadores: el cliente no puede tumbar el sitio', () => {
   const src = readFileSync(join(process.cwd(), 'lib/bcrp.ts'), 'utf8');
 
   it('la consulta nunca lanza', () => {
-    expect(src).toMatch(/catch \{\s*\n\s*return null;/);
+    expect(src).toMatch(/} catch \(e\) \{/);
+    expect(src).toMatch(/motivo: abortado \? 'tiempo-agotado' : 'red'/);
+  });
+
+  it('envía cabecera de navegador', () => {
+    // Sin User-Agent, los portales del Estado peruano devuelven 418 o 403. La
+    // lección ya se había aprendido en el script de vigilancia y este cliente
+    // se escribió sin aplicarla: la página salió a producción sirviendo el
+    // respaldo en frío. El test existe para que no vuelva a ocurrir.
+    expect(src).toMatch(/'User-Agent'/);
+    expect(src).toMatch(/Mozilla\/5\.0/);
+  });
+
+  it('distingue el motivo del fallo en vez de fallar mudo', () => {
+    // Fallar cerrado es correcto; fallar mudo impide diagnosticar en
+    // producción, que es exactamente lo que pasó.
+    for (const motivo of ['http', 'forma-inesperada', 'tiempo-agotado', 'red']) {
+      expect(src, motivo).toMatch(new RegExp(`'${motivo}'`));
+    }
   });
 
   it('la petición lleva tiempo límite', () => {

@@ -8,6 +8,8 @@ import { articleBySlug } from '@/lib/articles';
 import { pillars } from '@/lib/framework';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
+import ImagenContenido from '@/components/ImagenContenido';
+import { ranurasSolucion } from '@/lib/imagenes';
 import TrackView from '@/components/TrackView';
 import {
   breadcrumbSchema,
@@ -15,6 +17,7 @@ import {
   howToSchema,
   itemListSchema,
   webPageSchema,
+  imageObjectSchema,
 } from '@/lib/schema';
 
 /**
@@ -59,6 +62,7 @@ export default async function SolucionPage({ params }: Props) {
   if (!s) notFound();
 
   const url = `${SITE.url}/soluciones/${slug}`;
+  const imagen = ranurasSolucion().find((r) => r.id === `solucion:${slug}`);
   const componentes = s.componentes
     .map((c) => ({ ...c, producto: products.find((p) => p.slug === c.producto) }))
     .filter((c) => c.producto);
@@ -100,6 +104,12 @@ export default async function SolucionPage({ params }: Props) {
             steps: s.secuencia.map((p) => ({ name: p.paso, text: p.detalle })),
           }),
           faqSchema(s.faqs, url),
+          ...(imagen
+            ? [imageObjectSchema({
+                url: imagen.ruta, ancho: imagen.ancho, alto: imagen.alto,
+                alt: imagen.alt, paginaUrl: url, esDiagrama: true,
+              })]
+            : []),
         ]}
       />
 
@@ -125,6 +135,11 @@ export default async function SolucionPage({ params }: Props) {
       </a>
 
       <p className="speakable-intro mb-8 text-lg text-gray-700">{s.escenario}</p>
+
+      {/* El esquema va acá y no al final: en una arquitectura, ver el orden de
+          las capas ANTES de leer la lista de materiales es lo que hace que la
+          lista se entienda. */}
+      {imagen && <ImagenContenido ranura={imagen} prioridad className="mb-12" />}
 
       <section className="mb-12 rounded-3xl border border-[#059669]/20 bg-[#059669]/5 p-7">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.12em] text-[#059669]">
