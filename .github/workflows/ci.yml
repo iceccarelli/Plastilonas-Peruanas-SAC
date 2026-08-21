@@ -1,0 +1,63 @@
+name: CI
+
+# POR QUÉ EXISTE ESTE FLUJO.
+#
+# Un error de frontera entre servidor y cliente —pasar una función como prop a
+# un componente 'use client'— pasa limpiamente por `tsc` y por las 400 pruebas,
+# y solo aparece en la fase de PRERENDERIZADO de `next build`. Ocurrió: el
+# commit se empujó, Vercel intentó construir, falló, y el sitio se quedó
+# sirviendo el commit anterior durante cinco minutos mientras el verificador
+# de despliegue esperaba algo que nunca iba a llegar.
+#
+# Vercel ya construye en cada push, pero su fallo se ve en un panel que hay que
+# ir a mirar. Este flujo hace lo mismo delante: falla en rojo, en el repositorio,
+# con el log al lado, y marca el commit como roto para cualquiera que lo mire.
+#
+# El build corre DESPUÉS de tipos y pruebas a propósito: son diez segundos
+# contra dos minutos, y no tiene sentido compilar 240 páginas para descubrir
+# que faltaba un punto y coma.
+
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # Un push nuevo cancela la comprobación del anterior: lo que importa es si
+  # la punta de la rama construye, no si construía hace tres commits.
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Tipos
+        run: npx tsc --noEmit
+
+      - name: Pruebas
+        run: npx vitest run --reporter=dot
+
+      - name: Build de producción
+        # La única verificación que ve un error de prerenderizado.
+        run: npx next build
+
+      - name: Auditar el HTML generado
+        # Enlaces rotos, títulos duplicados, páginas sin <h1> ni canónico,
+        # JSON-LD con @id colgantes. Nada de eso rompe la compilación y todo
+        # eso erosiona exactamente lo que el sitio existe para construir.
+        # Corre DESPUÉS del build porque audita su salida, no el código.
+        run: npm run auditar

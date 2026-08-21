@@ -37,7 +37,16 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: {
     default: 'Plastilonas Peruanas SAC | Soluciones Industriales de Lona y Plástico',
-    template: '%s | Plastilonas Peruanas SAC',
+    // El sufijo pasa de 27 caracteres a 14. Medido sobre el HTML generado:
+    // 100 de 167 títulos pasaban de 65 caracteres —el punto en el que Google
+    // recorta— y el sufijo por sí solo causaba 67 de esos 100. Lo que se
+    // recorta es el final del título, así que la marca larga se comía la parte
+    // del texto que gana el clic.
+    //
+    // La razón social exacta no se pierde: vive donde de verdad desambigua la
+    // entidad —el JSON-LD, /llms.txt y el pie— que es donde un buscador y un
+    // agente la leen. El <title> es un espacio de clic, no un registro legal.
+    template: '%s | Plastilonas',
   },
   description: 'Más de 15 años fabricando e instalando soluciones industriales a medida en el Perú: big bags, lonas y cobertores, geosintéticos, estructuras y arquitectura textil, mallas agrícolas, ventilación industrial y más. Un solo proveedor, fabricación propia e instalación.',
   keywords: [

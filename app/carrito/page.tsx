@@ -16,7 +16,18 @@ export default function CarritoPage() {
   const total = subtotal + igv;
 
   if (!mounted) {
-    return <div className="max-w-5xl mx-auto px-6 py-20" />;
+    // El carrito vive en el navegador, así que su CONTENIDO no se puede
+    // prerenderizar sin provocar un desajuste de hidratación. El encabezado sí:
+    // devolver un div vacío dejaba la página sin un solo <h1> en el HTML
+    // servido, y una página sin encabezado es una página sin tema. Cuesta dos
+    // líneas y elimina el hueco.
+    return (
+      <div className="max-w-5xl mx-auto px-6 py-14">
+        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tighter text-[#0A2540] mb-10">
+          Tu carrito
+        </h1>
+      </div>
+    );
   }
 
   return (

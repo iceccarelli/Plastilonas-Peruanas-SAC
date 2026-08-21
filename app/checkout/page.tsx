@@ -57,7 +57,17 @@ export default function CheckoutPage() {
     }
   }
 
-  if (!mounted) return <div className="max-w-5xl mx-auto px-6 py-20" />;
+  // Ver la nota de app/carrito/page.tsx: el contenido depende del navegador,
+  // el encabezado no. Sin él la página se servía literalmente vacía.
+  if (!mounted) {
+    return (
+      <div className="max-w-5xl mx-auto px-6 py-14">
+        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tighter text-[#0A2540] mb-10">
+          Confirmar solicitud
+        </h1>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (

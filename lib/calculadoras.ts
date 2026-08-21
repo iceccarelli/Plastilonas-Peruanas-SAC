@@ -96,6 +96,15 @@ export interface Enlace {
 export interface Calculadora {
   slug: string;
   titulo: string;
+  /**
+   * Título para el <title> y la pestaña: corto a propósito.
+   *
+   * Usar `pregunta` aquí daba títulos de 86 a 99 caracteres, y Google recorta
+   * cerca de 60: el buscador veía «¿Cuántos metros cuadrados de geomembrana
+   * neces…». La pregunta completa sigue siendo el <h1> de la página, que es
+   * donde sí cabe y donde sí ayuda.
+   */
+  tituloSeo: string;
   /** La pregunta tal como la escribe quien busca. Es el encabezado real. */
   pregunta: string;
   resumen: string;
@@ -195,6 +204,7 @@ const GUIA_BIGBAGS = '/recursos/big-bags-mineria-peru-normativa-errores-estiba';
 
 const caudalVentilacion: Calculadora = {
   slug: 'caudal-ventilacion-mina',
+  tituloSeo: 'Calculadora de caudal de ventilación minera',
   titulo: 'Caudal de ventilación para una labor subterránea',
   pregunta: '¿Cuánto aire necesita mi labor y qué caudal debe entregar el ventilador?',
   resumen:
@@ -392,6 +402,7 @@ const caudalVentilacion: Calculadora = {
 
 const geomembranaPoza: Calculadora = {
   slug: 'geomembrana-poza',
+  tituloSeo: 'Calculadora de geomembrana para poza',
   titulo: 'Geomembrana para una poza o laguna revestida',
   pregunta: '¿Cuántos metros cuadrados de geomembrana necesito para revestir una poza?',
   resumen:
@@ -565,6 +576,7 @@ const geomembranaPoza: Calculadora = {
 
 const rollosPorSuperficie: Calculadora = {
   slug: 'rollos-por-superficie',
+  tituloSeo: 'Calculadora de rollos por superficie',
   titulo: 'Rollos necesarios para cubrir una superficie',
   pregunta: '¿Cuántos rollos necesito para cubrir una superficie, contando el traslape?',
   resumen:
@@ -695,6 +707,7 @@ const rollosPorSuperficie: Calculadora = {
 
 const bigBagsPorViaje: Calculadora = {
   slug: 'big-bags-por-viaje',
+  tituloSeo: 'Calculadora de big bags por viaje',
   titulo: 'Big bags por contenedor o por viaje',
   pregunta: '¿Cuántos big bags entran en un contenedor o en una plataforma, y qué limita la carga?',
   resumen:
@@ -837,6 +850,7 @@ const bigBagsPorViaje: Calculadora = {
 
 const capacidadBigBag: Calculadora = {
   slug: 'capacidad-big-bag',
+  tituloSeo: 'Calculadora de capacidad de big bag',
   titulo: 'Capacidad de un big bag según el material',
   pregunta: '¿Cuánto material entra en un big bag de estas medidas, y cuánto va a pesar?',
   resumen:

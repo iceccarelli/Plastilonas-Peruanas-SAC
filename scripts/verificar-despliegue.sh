@@ -66,7 +66,17 @@ else
       echo "  o el build falló. Revíselo en el panel de Vercel antes de dar nada por roto."
     else
       echo "  Sirviendo todavía: $servido"
-      echo "  Revise el build en el panel de Vercel antes de dar nada por roto."
+      echo ""
+      echo "  Lo más probable NO es que Vercel vaya lento: es que el BUILD FALLÓ."
+      echo "  Un error de prerenderizado —por ejemplo, pasar una función como"
+      echo "  prop a un componente de cliente— pasa limpiamente por tsc y por"
+      echo "  las pruebas, y solo revienta al construir. El sitio se queda"
+      echo "  entonces sirviendo el commit anterior, que es lo que usted ve."
+      echo ""
+      echo "  En este orden:"
+      echo "    1. gh run list --limit 3          (el flujo CI construye igual que Vercel)"
+      echo "    2. npx next build                 (reproducirlo aquí mismo)"
+      echo "    3. el panel de Vercel, solo si los dos anteriores dan verde."
     fi
     exit 1
   fi

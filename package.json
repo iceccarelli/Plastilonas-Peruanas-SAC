@@ -17,7 +17,9 @@
     "imagenes:prompts": "node scripts/imagenes.mjs --prompts",
     "imagenes:glosario": "node scripts/imagenes.mjs --prompts --grupo glosario",
     "imagenes:tomas": "node scripts/imagenes.mjs --tomas",
-    "imagenes:tomas:glosario": "node scripts/imagenes.mjs --tomas --grupo glosario"
+    "imagenes:tomas:glosario": "node scripts/imagenes.mjs --tomas --grupo glosario",
+    "auditar": "node scripts/auditar-html.mjs",
+    "auditar:json": "node scripts/auditar-html.mjs --json"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",

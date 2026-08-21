@@ -57,8 +57,11 @@ export async function generateMetadata({
   if (!calc) return {};
   const url = `${SITE.url}/calculadoras/${calc.slug}`;
   return {
-    title: calc.pregunta,
-    description: calc.resumen,
+    // Título corto para el buscador; la pregunta completa es el <h1>.
+    title: calc.tituloSeo,
+    // El resumen completo llegaba a 280 caracteres y se recorta cerca de 155.
+    // Se emite la pregunta, que es lo que el usuario reconoce en el resultado.
+    description: `${calc.pregunta} Método abierto de predimensionamiento, con la fórmula a la vista y sus límites declarados.`,
     alternates: { canonical: `/calculadoras/${calc.slug}` },
     openGraph: {
       title: `${calc.titulo} | ${SITE.name}`,
@@ -138,7 +141,7 @@ export default async function CalculadoraPage({
       <p className="speakable-intro mt-4 max-w-3xl text-lg text-gray-600">{calc.resumen}</p>
 
       <div className="mt-10">
-        <CalculadoraForm calc={calc} />
+        <CalculadoraForm slug={calc.slug} />
       </div>
 
       {/* ---------------- Método ---------------- */}

@@ -45,12 +45,7 @@ function CotizacionContent() {
     : undefined;
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-16 text-center">
-      <Link href="/" className="inline-flex items-center text-sm text-gray-500 hover:text-[#059669] mb-8"><ArrowLeft className="w-4 h-4 mr-1.5" /> Volver al inicio</Link>
-
-      <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold mb-4">Solicite su cotización</h1>
-      <p className="text-xl text-gray-600 max-w-md mx-auto">Complete el formulario y su solicitud llegará directamente a nuestro equipo comercial por WhatsApp.</p>
-
+    <div className="text-center">
       {preselectedProduct && (
         <p className="mt-6 inline-block rounded-2xl border border-[#059669]/30 bg-[#059669]/5 px-5 py-3 text-sm text-[#0A2540]">
           Cotizando: <strong>{preselectedProduct}</strong>
@@ -79,10 +74,36 @@ function CotizacionContent() {
   );
 }
 
+/**
+ * El encabezado vive FUERA del <Suspense>.
+ *
+ * Con todo dentro, Next solo podía prerenderizar el fallback —el componente lee
+ * `useSearchParams`— y el HTML servido de la página de conversión llegaba sin
+ * <h1> y sin una sola línea de texto: solo «Cargando formulario…». Para un
+ * rastreador que no ejecuta JavaScript, la página de cotización estaba en
+ * blanco.
+ */
 export default function CotizacionPage() {
   return (
-    <Suspense fallback={<div className="max-w-3xl mx-auto px-6 py-16 text-center text-gray-400">Cargando formulario…</div>}>
-      <CotizacionContent />
-    </Suspense>
+    <div className="max-w-3xl mx-auto px-6 py-16 text-center">
+      <Link href="/" className="inline-flex items-center text-sm text-gray-500 hover:text-[#059669] mb-8">
+        <ArrowLeft className="w-4 h-4 mr-1.5" /> Volver al inicio
+      </Link>
+
+      <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold mb-4">
+        Solicite su cotización técnica
+      </h1>
+      <p className="speakable-intro text-xl text-gray-600 max-w-xl mx-auto">
+        Complete el formulario y su solicitud llega directamente a nuestro equipo comercial por
+        WhatsApp. Para una cotización precisa conviene indicar producto, medidas o metraje, cantidad,
+        aplicación o sector y ciudad de entrega.
+      </p>
+
+      <Suspense
+        fallback={<div className="py-16 text-center text-gray-400">Cargando formulario…</div>}
+      >
+        <CotizacionContent />
+      </Suspense>
+    </div>
   );
 }

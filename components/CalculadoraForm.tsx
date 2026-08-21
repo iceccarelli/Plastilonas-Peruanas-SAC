@@ -3,8 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { AlertTriangle, RotateCcw, Sigma } from 'lucide-react';
-import type { Calculadora } from '@/lib/calculadoras';
-import { valoresIniciales, ADVERTENCIA } from '@/lib/calculadoras';
+import { calculadoraPorSlug, valoresIniciales, ADVERTENCIA } from '@/lib/calculadoras';
 import { numeroPE } from '@/lib/format';
 import { trackEvent } from '@/lib/analytics';
 import WhatsAppLink from '@/components/WhatsAppLink';
@@ -32,9 +31,33 @@ import WhatsAppLink from '@/components/WhatsAppLink';
  * devolvía formato inglés, y el mismo código imprimía «1,141.3» en producción y
  * «1 141,3» en local. Un número mal formateado en una memoria de cálculo se lee
  * como un error de cálculo.
+ *
+ * POR QUÉ RECIBE UN `slug` Y NO LA CALCULADORA ENTERA. Una `Calculadora` lleva
+ * dentro su método `calcular`, y una función NO CRUZA la frontera entre un
+ * componente de servidor y uno de cliente: React serializa las props, y una
+ * función no se serializa. El build falla en el prerenderizado con «Functions
+ * cannot be passed directly to Client Components», no antes: ni el chequeo de
+ * tipos ni las pruebas unitarias pueden verlo, porque en TypeScript la prop es
+ * perfectamente válida.
+ *
+ * Así que aquí se recibe el identificador y el propio cliente resuelve la
+ * calculadora contra el registro, que es TypeScript puro sin nada de servidor
+ * dentro. El registro viaja al navegador, y está bien que viaje: es el mismo
+ * método que publicamos abierto en /calculadoras/formulas.json.
  */
 
-export default function CalculadoraForm({ calc }: { calc: Calculadora }) {
+export default function CalculadoraForm({ slug }: { slug: string }) {
+  const calc = calculadoraPorSlug(slug);
+  if (!calc) return null;
+  return <Formulario calc={calc} />;
+}
+
+/**
+ * El cuerpo va aparte porque los hooks no pueden colgar de un `return` previo:
+ * la comprobación del slug tiene que ocurrir ANTES del primer useState, y las
+ * reglas de los hooks prohíben ambas cosas en la misma función.
+ */
+function Formulario({ calc }: { calc: NonNullable<ReturnType<typeof calculadoraPorSlug>> }) {
   const inicial = useMemo(() => valoresIniciales(calc), [calc]);
   const [valores, setValores] = useState<Record<string, number>>(inicial);
   const [tocado, setTocado] = useState(false);
