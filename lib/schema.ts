@@ -518,3 +518,44 @@ export function imageObjectSchema(img: {
       : { creditText: `Imagen referencial de ${SITE.legalName}` }),
   };
 }
+
+/**
+ * Herramienta de cálculo publicada en el sitio.
+ *
+ * Por qué SoftwareApplication y no solo HowTo. HowTo describe un
+ * procedimiento; esto ADEMÁS es una herramienta que se ejecuta en la página, y
+ * declararlo permite que un buscador la presente como tal. Se emiten los dos:
+ * el HowTo lleva el método —que es lo citable— y este nodo lleva la
+ * herramienta.
+ *
+ * `isAccessibleForFree` y la ausencia de `offers` no son adorno: una
+ * calculadora tras un formulario de captación no es una referencia del rubro,
+ * y declararlo gratuito y sin registro es parte de lo que la hace citable.
+ */
+export function softwareApplicationSchema(app: {
+  url: string;
+  name: string;
+  description: string;
+  category?: string;
+  /** Lo que la herramienta NO cubre. Va en el nodo, no solo en la página. */
+  limitaciones?: string[];
+}): Dict {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "@id": `${app.url}#herramienta`,
+    name: app.name,
+    description: app.description,
+    url: app.url,
+    applicationCategory: app.category ?? "UtilitiesApplication",
+    operatingSystem: "Navegador web",
+    browserRequirements: "Requiere JavaScript. No requiere registro.",
+    inLanguage: SITE.language,
+    isAccessibleForFree: true,
+    publisher: organizationRef(),
+    provider: organizationRef(),
+    ...(app.limitaciones && app.limitaciones.length
+      ? { disambiguatingDescription: `No cubre: ${app.limitaciones.join(' ')}` }
+      : {}),
+  };
+}

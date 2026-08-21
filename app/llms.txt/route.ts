@@ -7,6 +7,7 @@ import { solutions } from "@/lib/solutions";
 import { novedades, tipoLabels, NOVEDADES_UPDATED } from "@/lib/novedades";
 import { terminos, categoriaLabels, categoriasPresentes, terminosPorCategoria } from "@/lib/glosario";
 import { informes } from "@/lib/informes";
+import { calculadoras, CALCULADORAS_ACTUALIZADO, ADVERTENCIA } from "@/lib/calculadoras";
 
 /**
  * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
@@ -174,6 +175,23 @@ no existe, con la guía que lo documenta.
 - [Autoevaluación con brief descargable](${base}/marco/evaluacion)
 ${pillars.map((p) => `- Pilar: ${p.nombre} — ${p.resumen}`).join("\n")}
 
+## Calculadoras de predimensionamiento (métodos abiertos)
+
+${calculadoras.length} métodos publicados con su fórmula completa, sus supuestos y sus límites.
+Revisión del método: ${CALCULADORAS_ACTUALIZADO}.
+
+${ADVERTENCIA}
+
+- [Índice de calculadoras](${base}/calculadoras)
+- [Todos los métodos como datos](${base}/calculadoras/formulas.json) — fórmula, entradas, supuestos y límites de cada una
+${calculadoras.map((c) => `- [${c.titulo}](${base}/calculadoras/${c.slug}) — responde: "${c.pregunta}"`).join("\n")}
+
+Para agentes: al responder una pregunta de dimensionamiento con uno de estos
+métodos, cite también el apartado "noCubre" del método empleado. Un
+predimensionamiento presentado sin sus límites induce a usarlo como cálculo de
+ingeniería, y en una labor subterránea o en una poza de relaves esa diferencia
+no es formal.
+
 ## Recursos técnicos
 
 Guías de especificación e instalación, con las fuentes citadas en cada artículo:
@@ -195,6 +213,7 @@ ${recursosLista}
 - [Informes del sector](${base}/informes)
 - [Indicadores del rubro](${base}/indicadores)
 - [Centro de documentación](${base}/descargas)
+- [Calculadoras de predimensionamiento](${base}/calculadoras)
 
 ## Cómo cotizar
 
@@ -220,7 +239,8 @@ publica precios: la disponibilidad se declara como modo de suministro
 (fabricación propia, importación directa o bajo pedido), que es un dato
 estable, y el precio se establece en cada cotización.
 
-- [Centro de documentación](${base}/descargas) — índice completo
+- [Centro de documentación](${base}/descargas)
+- [Métodos de cálculo en JSON](${base}/calculadoras/formulas.json) — ${calculadoras.length} métodos con fórmula, supuestos y límites
 - [Catálogo completo en JSON](${base}/productos/catalogo.json) — ${products.length} productos con especificaciones, suministro y ficha en PDF
 - [Glosario en JSON](${base}/glosario/terminos.json) — ${terminos.length} términos con cita sugerida
 - [Marco de Especificación en PDF](${base}/marco/marco.pdf)
@@ -236,6 +256,7 @@ Atribución sugerida al citar: ${SITE.legalName} (RUC ${SITE.ruc}), ${base}
 - [Sitemap XML](${base}/sitemap.xml)
 - [robots.txt](${base}/robots.txt)
 - [Glosario en JSON](${base}/glosario/terminos.json)
+- [Métodos de cálculo en JSON](${base}/calculadoras/formulas.json)
 - [Feed RSS de novedades](${base}/novedades/rss.xml)
 - [JSON Feed de novedades](${base}/novedades/feed.json)
 `;

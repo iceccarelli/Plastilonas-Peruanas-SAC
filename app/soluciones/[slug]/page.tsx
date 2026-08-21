@@ -10,6 +10,7 @@ import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasSolucion } from '@/lib/imagenes';
+import { calculadorasQueEnlazan } from '@/lib/calculadoras';
 import TrackView from '@/components/TrackView';
 import {
   breadcrumbSchema,
@@ -59,6 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function SolucionPage({ params }: Props) {
   const { slug } = await params;
   const s = solutionBySlug(slug);
+  const calculadorasRel = calculadorasQueEnlazan(`/soluciones/${slug}`);
   if (!s) notFound();
 
   const url = `${SITE.url}/soluciones/${slug}`;
@@ -266,6 +268,33 @@ export default async function SolucionPage({ params }: Props) {
               </Link>
             ))}
           </div>
+        </section>
+      )}
+
+      {/* Calculadoras que dimensionan esta arquitectura. El enlace se deriva de
+          la propia calculadora: no hay una segunda lista que mantener. */}
+      {calculadorasRel.length > 0 && (
+        <section className="mb-14">
+          <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#0A2540]">
+            Póngale números
+          </h2>
+          <p className="mb-5 text-sm text-gray-600">
+            Predimensione esta arquitectura con la fórmula a la vista y sus límites declarados. El
+            cálculo ocurre en su navegador: no se envía nada.
+          </p>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {calculadorasRel.map((c) => (
+              <li key={c.slug}>
+                <Link
+                  href={`/calculadoras/${c.slug}`}
+                  className="flex h-full flex-col rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-100 hover:ring-gray-300"
+                >
+                  <span className="text-sm font-semibold text-[#0A2540]">{c.titulo}</span>
+                  <span className="mt-1 text-xs text-gray-600">{c.pregunta}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

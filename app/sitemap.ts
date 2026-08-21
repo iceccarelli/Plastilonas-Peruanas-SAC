@@ -10,6 +10,7 @@ import { novedades, NOVEDADES_UPDATED } from "@/lib/novedades";
 import { LEGAL_UPDATED } from "@/lib/legal";
 import { terminos } from "@/lib/glosario";
 import { informes, INFORMES_UPDATED } from "@/lib/informes";
+import { calculadoras, CALCULADORAS_ACTUALIZADO } from "@/lib/calculadoras";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -111,6 +112,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
-  return [...staticRoutes, ...marcoRoutes, ...informeRoutes, ...glosarioRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
+  // Calculadoras: lastModified es la fecha de revisión del MÉTODO, no "hoy".
+  // Declarar cambios diarios en una fórmula que no cambia enseña a los
+  // rastreadores a desconfiar del lastModified de todo el sitio.
+  const calculadoraRoutes: MetadataRoute.Sitemap = [
+    { url: `${SITE.url}/calculadoras`, lastModified: new Date(CALCULADORAS_ACTUALIZADO),
+      changeFrequency: "monthly", priority: 0.85 },
+    ...calculadoras.map((c) => ({
+      url: `${SITE.url}/calculadoras/${c.slug}`,
+      lastModified: new Date(CALCULADORAS_ACTUALIZADO),
+      changeFrequency: "monthly" as const, priority: 0.8,
+    })),
+  ];
+
+  return [...staticRoutes, ...marcoRoutes, ...calculadoraRoutes, ...informeRoutes, ...glosarioRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
     ...localRoutes, ...articleRoutes];
 }

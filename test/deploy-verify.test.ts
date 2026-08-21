@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { buildStamp } from '@/lib/version';
 import { SITE } from '@/lib/site';
@@ -88,5 +88,39 @@ describe('script de verificación', () => {
 
   it('sale con código distinto de cero cuando algo falla', () => {
     expect(script).toMatch(/exit 1/);
+  });
+});
+
+describe('cobertura: nada se publica sin verificarse', () => {
+  /**
+   * El fallo que esto evita no es hipotético: se añade un endpoint de datos,
+   * se despliega, y nadie se entera de que devuelve 404 hasta que un agente
+   * deja de citarlo. La verificación tiene que crecer con el sitio SOLA, o
+   * deja de significar algo a los dos patches.
+   */
+  it('todos los volcados JSON del sitio están en la verificación', () => {
+    const rutas: string[] = [];
+    const recorrer = (dir: string) => {
+      for (const e of readdirSync(join(process.cwd(), dir), { withFileTypes: true })) {
+        if (e.isDirectory()) recorrer(`${dir}/${e.name}`);
+        else if (e.name === 'route.ts' && dir.endsWith('.json')) rutas.push(dir.replace(/^app/, ''));
+      }
+    };
+    recorrer('app');
+    // Los endpoints bajo /api no son para rastreadores: no se verifican aquí.
+    const publicas = rutas.filter((r) => !r.startsWith('/api/'));
+    expect(publicas.length).toBeGreaterThan(3);
+    for (const r of publicas) {
+      expect(script, `${r} no aparece en verificar-despliegue.sh`).toContain(r);
+    }
+  });
+
+  it('las calculadoras se verifican con su método y sus límites', () => {
+    // Comprobar que la página responde 200 no dice nada: una calculadora sin
+    // su fórmula y sin sus límites a la vista responde 200 igual.
+    expect(script).toContain('/calculadoras/formulas.json');
+    expect(script).toMatch(/SoftwareApplication/);
+    expect(script).toMatch(/noCubre/);
+    expect(script).toMatch(/NO cubre/);
   });
 });

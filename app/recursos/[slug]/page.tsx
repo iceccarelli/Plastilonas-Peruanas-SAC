@@ -9,6 +9,7 @@ import ciudades from '@/data/ciudades.json';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import ImagenContenido from '@/components/ImagenContenido';
+import { calculadorasQueEnlazan } from '@/lib/calculadoras';
 import { ranurasGuia } from '@/lib/imagenes';
 import TrackView from '@/components/TrackView';
 import {
@@ -77,6 +78,7 @@ export default async function ArticlePage({ params }: Props) {
     .map((s) => products.find((p) => p.slug === s))
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
   const glosarioRel = terminosParaGuia(slug);
+  const calculadorasRel = calculadorasQueEnlazan(`/recursos/${slug}`);
   const imagen = ranurasGuia().find((r) => r.id === `guia:${slug}`);
   const relatedCities = (a.relatedCities ?? [])
     .map((s) => (ciudades as { slug: string; ciudad: string }[]).find((c) => c.slug === s))
@@ -312,6 +314,35 @@ export default async function ArticlePage({ params }: Props) {
         </a>
       </div>
 
+
+      {/* Calculadoras que aplican lo que esta guía explica. El enlace se deriva
+          de la propia calculadora, así que no puede quedarse obsoleto: si una
+          deja de apoyarse en esta guía, desaparece de aquí sola. */}
+      {calculadorasRel.length > 0 && (
+        <section className="mb-12 border-t pt-10">
+          <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#0A2540]">
+            Póngale números
+          </h2>
+          <p className="mb-4 text-sm text-gray-600">
+            {calculadorasRel.length === 1 ? 'Esta calculadora aplica' : 'Estas calculadoras aplican'}{' '}
+            el método de esta guía, con la fórmula a la vista y sus límites declarados. El cálculo
+            ocurre en su navegador: no se envía nada.
+          </p>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {calculadorasRel.map((c) => (
+              <li key={c.slug}>
+                <Link
+                  href={`/calculadoras/${c.slug}`}
+                  className="group flex h-full flex-col rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-100 hover:ring-gray-300"
+                >
+                  <span className="text-sm font-semibold text-[#0A2540]">{c.titulo}</span>
+                  <span className="mt-1 text-xs text-gray-600">{c.pregunta}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="mb-12 border-t pt-10">
         <h2 className="mb-4 text-2xl font-semibold tracking-tight text-[#0A2540]">Fuentes</h2>

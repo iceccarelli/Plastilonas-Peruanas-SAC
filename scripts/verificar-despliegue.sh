@@ -101,7 +101,9 @@ cuenta() { # <ruta> <patrón> <mínimo> <descripción>
 echo "— Rutas —"
 for r in / /productos /servicios /nosotros /contacto /cotizacion /recursos \
          /local /marco /marco/evaluacion /soluciones /novedades /glosario \
-         /informes /indicadores /descargas /privacidad /terminos; do
+         /informes /indicadores /descargas /privacidad /terminos \
+         /calculadoras /calculadoras/caudal-ventilacion-mina \
+         /calculadoras/geomembrana-poza; do
   ruta "$r"
 done
 
@@ -114,6 +116,7 @@ ruta /novedades/feed.json
 ruta /glosario/terminos.json
 ruta /indicadores/datos.json
 ruta /productos/catalogo.json
+ruta /calculadoras/formulas.json
 ruta /version.json
 
 echo "— Documentos descargables —"
@@ -160,6 +163,17 @@ contiene "/productos/catalogo.json" 'atribucionSugerida' "el catálogo declara c
 contiene "/llms.txt" 'Documentos descargables' "llms.txt declara los documentos"
 contiene "/llms.txt" 'Informes del sector' "llms.txt declara los informes"
 contiene "/llms.txt" 'Indicadores en vivo' "llms.txt declara los indicadores"
+contiene "/llms.txt" 'Calculadoras de predimensionamiento' "llms.txt declara las calculadoras"
+
+# Las calculadoras solo son citables si publican el método y sus límites. Una
+# caja negra que devuelve un número no la puede verificar nadie.
+contiene "/calculadoras/geomembrana-poza" '"@type":"SoftwareApplication"' "la calculadora se declara como herramienta"
+contiene "/calculadoras/geomembrana-poza" '"@type":"HowTo"' "la calculadora publica su método"
+contiene "/calculadoras/geomembrana-poza" 'factor_solape' "la fórmula se ve en la página"
+contiene "/calculadoras/geomembrana-poza" 'NO cubre' "la página declara qué no cubre"
+contiene "/calculadoras/formulas.json" 'atribucionSugerida' "los métodos declaran cómo citarlos"
+contiene "/calculadoras/formulas.json" 'noCubre' "los métodos publican sus límites"
+contiene "/calculadoras/formulas.json" 'prismatoide' "los métodos publican la fórmula completa"
 
 # El dato en vivo debe llegar con su fecha, siempre. Un valor sin periodo es
 # un adorno: quien lo lea no puede saber si sirve.
@@ -170,6 +184,11 @@ contiene "/indicadores" 'BCRP' "la página cita la fuente de cada serie"
 echo "— Ningún dato inventado a la vista —"
 # El catálogo abierto no debe publicar precios: lo que no se sostiene en la
 # cotización no se publica en datos.
+if grep -qE '"(precio|price|offers|stock)"' <<< "$(cuerpo /calculadoras/formulas.json)"; then
+  bad "los métodos de cálculo exponen precios"
+else
+  ok "los métodos de cálculo no publican precios"
+fi
 if grep -qE '"(precio|price|offers|stock)"' <<< "$(cuerpo /productos/catalogo.json)"; then
   bad "el catálogo en JSON expone precios o existencias"
 else
