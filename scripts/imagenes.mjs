@@ -37,6 +37,10 @@ const ranuras = leerRanuras();
 const faltan = ranuras.filter((r) => !existsSync(join('public', r.ruta)));
 const hay = ranuras.length - faltan.length;
 
+const soloGrupo = (() => {
+  const i = process.argv.indexOf('--grupo');
+  return i >= 0 ? process.argv[i + 1] : null;
+})();
 const modo = process.argv.includes('--prompts') ? 'prompts' : 'informe';
 
 if (modo === 'informe') {
@@ -107,6 +111,10 @@ como \`public/images/familias/geosinteticos.jpg\`.
 
 let total = 0;
 for (const [clave, titulo] of Object.entries(grupos)) {
+  // --grupo glosario emite un documento con SOLO ese silo. Un encargo de 47
+  // imágenes es difícil de repartir; uno de 41 diagramas del mismo tipo se
+  // puede pasar entero a quien dibuja diagramas.
+  if (soloGrupo && clave !== soloGrupo) continue;
   const delGrupo = ranuras.filter((r) => r.id.startsWith(`${clave}:`));
   if (!delGrupo.length) continue;
   const pendientes = delGrupo.filter((r) => !existsSync(join('public', r.ruta)));
@@ -125,7 +133,10 @@ for (const [clave, titulo] of Object.entries(grupos)) {
 }
 
 mkdirSync('docs', { recursive: true });
-writeFileSync('docs/encargo-imagenes.md', md);
-console.log(`\nEscrito docs/encargo-imagenes.md con ${total} encargos.\n`);
+const destino = soloGrupo
+  ? `docs/encargo-imagenes-${soloGrupo}.md`
+  : 'docs/encargo-imagenes.md';
+writeFileSync(destino, md);
+console.log(`\nEscrito ${destino} con ${total} encargos.\n`);
 console.log('Entrégueselo a su generador de imágenes tal cual.');
 console.log('Los nombres de archivo salen del catálogo: no los cambie.\n');

@@ -3,7 +3,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   todasLasRanuras, ranurasProducto, ranurasFamilia, ranurasSolucion,
-  ranurasGuia, ranurasGlosario, TERMINOS_ILUSTRABLES, VARIANTES,
+  ranurasGuia, ranurasGlosario, TERMINOS_ILUSTRABLES, PISTAS_VISUALES, VARIANTES,
 } from '@/lib/imagenes';
 import { products, productFamilies } from '@/lib/products';
 import { articles } from '@/lib/articles';
@@ -66,6 +66,37 @@ describe('registro de imágenes: los nombres no pueden divergir', () => {
   it('los identificadores son únicos', () => {
     const ids = todasLasRanuras().map((r) => r.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('cada término ilustrable tiene su pista de composición', () => {
+    // El prompt genérico funciona para lo que tiene forma evidente y falla en
+    // lo abstracto: "factor de seguridad" no tiene aspecto, y sin decirle qué
+    // componer el generador devuelve una ilustración decorativa, que es peor
+    // que ninguna porque ocupa el sitio de la buena.
+    for (const slug of TERMINOS_ILUSTRABLES) {
+      const pista = PISTAS_VISUALES[slug];
+      expect(pista, `falta la pista visual de ${slug}`).toBeDefined();
+      expect(pista.length, slug).toBeGreaterThan(60);
+    }
+  });
+
+  it('la pista viaja dentro del prompt', () => {
+    for (const r of ranurasGlosario()) {
+      const slug = r.id.split(':')[1];
+      expect(r.prompt, `${slug}: la pista no llegó al prompt`).toContain(
+        PISTAS_VISUALES[slug],
+      );
+    }
+  });
+
+  it('deja fuera solo lo que de verdad no se dibuja, y son pocos', () => {
+    // Un modo de aprovisionamiento comercial no tiene geometría. Una página
+    // sin imagen es mejor que una imagen que no explica nada.
+    const sinIlustrar = terminos.filter((t) => !TERMINOS_ILUSTRABLES.includes(t.slug));
+    expect(sinIlustrar.map((t) => t.slug).sort()).toEqual([
+      'fabricacion-a-medida',
+      'fabricacion-a-medida-vs-importacion',
+    ]);
   });
 
   it('los términos ilustrables existen todos en el glosario', () => {

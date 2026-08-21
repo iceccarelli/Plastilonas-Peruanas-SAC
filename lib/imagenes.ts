@@ -212,14 +212,25 @@ export function ranurasGuia(): RanuraImagen[] {
  */
 export const TERMINOS_ILUSTRABLES = [
   'big-bag-fibc',
+  'carga-de-trabajo-segura',
+  'factor-de-seguridad',
   'tipo-electrostatico-fibc',
   'liner-interior',
-  'ojal',
-  'termosellado',
+  'densidad-aparente',
+  'gramaje',
+  'lona-plastificada',
   'denier',
+  'resistencia-al-desgarro',
+  'estabilizacion-uv',
+  'termosellado',
+  'ojal',
+  'geosintetico',
   'geomembrana',
+  'hdpe',
   'geotextil',
   'no-tejido-punzonado',
+  'resistencia-al-punzonamiento',
+  'permitividad',
   'soldadura-por-cuna-caliente',
   'zanja-de-anclaje',
   'subrasante',
@@ -228,10 +239,125 @@ export const TERMINOS_ILUSTRABLES = [
   'ventilacion-impelente',
   'ventilacion-aspirante',
   'refuerzo-espiral',
+  'caudal',
+  'perdida-de-carga',
+  'factor-de-fuga',
+  'malla-antiafida',
   'mesh',
+  'porcentaje-de-sombra',
+  'malla-raschel',
   'arquitectura-textil',
   'pretensado',
+  'carga-de-viento',
+  'altitud-y-radiacion',
+  'certificado-de-lote',
+  'as-built',
 ];
+
+/**
+ * Pista de composición por término.
+ *
+ * Por qué hace falta. El prompt genérico —definición corta más unidad de
+ * medida— funciona para lo que tiene forma evidente: un ojal, una zanja de
+ * anclaje. Falla en lo abstracto: "factor de seguridad" o "permitividad" no
+ * tienen aspecto, y un generador al que se le pide dibujarlos devuelve una
+ * ilustración vaga y decorativa, que es peor que ninguna porque ocupa el sitio
+ * de la buena.
+ *
+ * Cada pista dice QUÉ COMPONER, no qué estilo usar: el estilo ya lo fija
+ * ESTILO_DIAGRAMA. Están escritas para que el dibujo haga visible la relación
+ * que el texto explica —dos escalas enfrentadas, dos estados del mismo objeto,
+ * un corte que revela capas— y no para que quede bonito.
+ *
+ * DOS TÉRMINOS QUEDAN FUERA A PROPÓSITO: `fabricacion-a-medida` y
+ * `fabricacion-a-medida-vs-importacion` describen un modo de aprovisionamiento
+ * comercial. No tienen geometría, y cualquier imagen sería relleno. Una página
+ * sin imagen es mejor que una imagen que no explica nada.
+ */
+export const PISTAS_VISUALES: Record<string, string> = {
+  'big-bag-fibc':
+    'Bolsón visto en tres cuartos con sus cuatro asas tensadas por el izaje, boca de carga arriba y boca de descarga abajo señaladas por su geometría. Un gancho de montacargas entrando en las asas.',
+  'carga-de-trabajo-segura':
+    'Dos escalas verticales enfrentadas sobre el mismo bolsón: la de la izquierda marca la carga de trabajo, la de la derecha la carga de rotura, mucho más alta. La distancia entre ambas es el margen, y debe leerse a simple vista.',
+  'factor-de-seguridad':
+    'Cinco bloques idénticos apilados junto a un bolsón que sostiene solo uno: la proporción 5:1 expresada como cantidad, no como número escrito.',
+  'tipo-electrostatico-fibc':
+    'Cuatro bolsones en fila, idénticos en forma y distintos en su tratamiento de la carga: uno liso, uno con paños de tejido de baja tensión, uno con hilos conductores y su cable a tierra conectado, uno con tejido disipativo sin cable. La diferencia debe estar en el tejido y en la presencia o ausencia del cable.',
+  'liner-interior':
+    'Corte del bolsón con la bolsa interior visible como una segunda piel separada del tejido exterior, conteniendo material fino que el tejido dejaría pasar.',
+  'densidad-aparente':
+    'Dos recipientes del mismo volumen lado a lado: uno con partículas gruesas y muchos huecos, otro con partículas finas y pocos huecos. Bajo cada uno, una balanza marcando pesos claramente distintos.',
+  'gramaje':
+    'Un cuadrado de un metro por un metro recortado de la lona, suspendido sobre el plato de una balanza. La superficie unitaria y la masa, nada más.',
+  'lona-plastificada':
+    'Corte transversal muy ampliado con las tres capas separadas y visibles: recubrimiento superior, tejido base con su trama de hilos cruzados, recubrimiento inferior.',
+  'denier':
+    'Tres hilos en paralelo, de grosor claramente creciente, y bajo ellos la misma longitud de referencia. El grosor es la variable.',
+  'resistencia-al-desgarro':
+    'Dos paños idénticos: en uno la fuerza tira de un borde intacto; en el otro, de un corte ya iniciado que se propaga. Las dos flechas de fuerza son del mismo tamaño y el resultado es distinto.',
+  'estabilizacion-uv':
+    'Dos fragmentos del mismo material bajo el mismo haz solar: en el de la izquierda las cadenas del polímero se mantienen; en el de la derecha aparecen fracturadas y el borde se resquebraja. La diferencia es el aditivo, representado como partículas dispersas en la masa del primero.',
+  'termosellado':
+    'Corte de dos láminas superpuestas: arriba una unión continua donde el material se fundió y es un solo cuerpo; abajo, para contraste, una costura con hilo que perfora ambas capas.',
+  'ojal':
+    'Corte del borde de una lona con el ojal instalado: refuerzo local de material bajo el anillo, y la cuerda tirando. El área sobre la que se reparte el esfuerzo debe ser evidente.',
+  'geosintetico':
+    'Corte de terreno con las distintas familias en su posición típica: geomalla trabando el árido arriba, geotextil separando capas, geomembrana como barrera, geocompuesto drenando. Cada una en su función, no en fila.',
+  'geomembrana':
+    'Corte de talud y fondo con la lámina continua sobre el terreno, mostrando los tres puntos donde se pierde la continuidad: unión, penetración y anclaje perimetral.',
+  'hdpe':
+    'Comparación de estructura molecular esquemática: cadenas lineales apretadas y ordenadas (alta densidad) frente a cadenas ramificadas y sueltas. Sin fórmulas.',
+  'geotextil':
+    'Dos paños ampliados lado a lado: uno de fibras entrelazadas al azar y gran espesor, otro de hilos cruzados en ángulo recto. La diferencia de construcción es todo el dibujo.',
+  'no-tejido-punzonado':
+    'Corte del velo de fibras con las agujas de púas descendiendo y arrastrando fibras de una capa a otra, dejando la estructura entrelazada y esponjosa.',
+  'resistencia-al-punzonamiento':
+    'Una piedra angulosa de la subrasante empujando desde abajo contra el geotextil y la geomembrana: se ve la deformación absorbida por el geotextil y la lámina intacta encima.',
+  'permitividad':
+    'Un mismo geotextil con dos flujos representados: uno atravesándolo perpendicularmente (permitividad) y otro corriendo dentro de su espesor a lo largo del plano (transmisividad).',
+  'soldadura-por-cuna-caliente':
+    'Corte de dos láminas solapadas con la cuña entrando entre ellas y los rodillos presionando: se ven las DOS pistas de soldadura y el canal de aire que queda entre ambas, con la aguja de presurización.',
+  'zanja-de-anclaje':
+    'Corte del borde superior del talud: la excavación perimetral con la lámina bajando dentro, doblada al fondo y cubierta con material compactado. La distancia a la corona del talud debe verse.',
+  'subrasante':
+    'Corte del terreno preparado: superficie perfilada y compactada, y junto a ella —tachados o apartados— los elementos que no deben quedar: piedra angulosa, raíz, encharcamiento.',
+  'geomalla':
+    'Corte de terreno con la geomalla tendida y el árido trabado dentro de sus aberturas: las partículas encajan en la retícula y el conjunto se comporta como un bloque.',
+  'manga-de-ventilacion':
+    'Labor subterránea en corte longitudinal con el ventilador en la bocamina, la manga tendida por el techo y el frente de trabajo al fondo.',
+  'ventilacion-impelente':
+    'Corte de labor: el ventilador empuja aire por la manga hasta el frente; el aire limpio barre el frente y retorna por la labor. Las flechas de ida van dentro de la manga y las de retorno por fuera.',
+  'ventilacion-aspirante':
+    'Corte de labor: la manga succiona desde el frente y la sección del ducto tiende a cerrarse por la depresión. Las flechas van en sentido contrario al caso impelente.',
+  'refuerzo-espiral':
+    'Tramo de manga en corte con el alambre helicoidal en su pared, y al lado la misma manga sin refuerzo mostrando la sección aplastada.',
+  'caudal':
+    'Una sección transversal de conducto con el volumen de aire que la atraviesa representado como un bloque que avanza en el tiempo.',
+  'perdida-de-carga':
+    'Ducto en corte longitudinal con la presión decreciendo a lo largo del recorrido, y las pérdidas localizadas marcadas en los codos y los acoples.',
+  'factor-de-fuga':
+    'Ducto tendido con pequeñas fugas escapando en cada unión a lo largo del recorrido, de modo que el flujo que llega al final es visiblemente menor que el que entró.',
+  'malla-antiafida':
+    'Ampliación de la trama con insectos de distinto tamaño frente a la abertura: uno queda fuera, otro pasa. La relación tamaño de abertura contra tamaño del insecto es el dibujo.',
+  'mesh':
+    'Una pulgada de referencia sobre la trama, con los hilos contados dentro de esa distancia. Dos tramas de distinta densidad para comparar.',
+  'porcentaje-de-sombra':
+    'Haz de radiación incidiendo sobre la malla: una parte se intercepta y otra pasa, representadas como dos fracciones claramente distintas del haz original.',
+  'malla-raschel':
+    'Ampliación de la estructura de tejido de urdimbre Raschel, mostrando el enlazado que impide que se deshilache, y un borde cortado que se mantiene íntegro.',
+  'arquitectura-textil':
+    'Superficie de membrana con doble curvatura opuesta —forma de silla de montar— anclada en sus puntos altos y bajos, con las líneas de tracción marcadas.',
+  'pretensado':
+    'La misma membrana en dos estados: floja y aleteando por el viento, y tensada y estable. El sistema de retensado visible en el anclaje.',
+  'carga-de-viento':
+    'Viento incidiendo sobre una cubierta ligera con las flechas de succión tirando hacia arriba mucho más marcadas que las de presión: el arrancamiento domina.',
+  'altitud-y-radiacion':
+    'Corte de la atmósfera con dos emplazamientos: uno al nivel del mar y otro en altura. El haz solar atraviesa mucho menos espesor atmosférico en el segundo y llega con más intensidad.',
+  'certificado-de-lote':
+    'Un rollo de material con su etiqueta de lote y, unido por una línea de trazabilidad, el documento que declara los ensayos de ESE lote. La correspondencia uno a uno es el mensaje.',
+  'as-built':
+    'Planta de una poza con el despiece real de paneles numerados, las líneas de unión marcadas y los puntos de reparación señalados en su posición.',
+};
 
 export function ranurasGlosario(): RanuraImagen[] {
   return terminos
@@ -249,6 +375,7 @@ export function ranurasGlosario(): RanuraImagen[] {
         `TÉRMINO: ${t.termino}\n` +
         `QUÉ SIGNIFICA: ${t.definicionCorta}\n` +
         (t.comoSeMide ? `CÓMO SE MIDE: ${t.comoSeMide}\n` : '') +
+        (PISTAS_VISUALES[t.slug] ? `QUÉ COMPONER: ${PISTAS_VISUALES[t.slug]}\n` : '') +
         `EL DIBUJO DEBE HACER EVIDENTE justamente eso y nada más: una sola idea por imagen. ` +
         `La representación tiene que ser técnicamente correcta: la geometría, las proporciones ` +
         `y el orden de los elementos deben resistir la mirada de alguien que instala esto a diario. ` +

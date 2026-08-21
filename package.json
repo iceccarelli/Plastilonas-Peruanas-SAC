@@ -14,7 +14,8 @@
     "verify:deploy": "bash scripts/verificar-despliegue.sh",
     "vigilancia": "node scripts/vigilancia-fuentes.mjs",
     "imagenes": "node scripts/imagenes.mjs",
-    "imagenes:prompts": "node scripts/imagenes.mjs --prompts"
+    "imagenes:prompts": "node scripts/imagenes.mjs --prompts",
+    "imagenes:glosario": "node scripts/imagenes.mjs --prompts --grupo glosario"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",
