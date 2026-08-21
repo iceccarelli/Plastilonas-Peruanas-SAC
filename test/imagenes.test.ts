@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   todasLasRanuras, ranurasProducto, ranurasFamilia, ranurasSolucion,
@@ -151,6 +151,57 @@ describe('registro de imágenes: calidad del encargo', () => {
           c.producto.replace(/-/g, ' '),
         );
       }
+    }
+  });
+});
+
+describe('imágenes: integridad del árbol de archivos', () => {
+  const rutasDelCatalogo = () => {
+    const r = new Set<string>();
+    for (const p of products) {
+      if (p.image) r.add(p.image);
+      for (const g of p.gallery ?? []) r.add(g);
+    }
+    return r;
+  };
+
+  it('ninguna ruta declarada en el catálogo se queda sin archivo', () => {
+    // Es el fallo que produce el icono de imagen rota, y no lo detecta ningún
+    // test de tipos: la ruta es una cadena válida aunque el archivo no exista.
+    const rotas = [...rutasDelCatalogo()].filter(
+      (r) => !existsSync(join(process.cwd(), 'public', r)),
+    );
+    expect(rotas, `rutas sin archivo: ${rotas.slice(0, 5).join(', ')}`).toEqual([]);
+  });
+
+  it('no hay imágenes huérfanas que nadie referencia', () => {
+    // Un archivo que nadie usa pesa en el repositorio y en el build, y suele
+    // ser el rastro de un renombrado a medias.
+    const ref = rutasDelCatalogo();
+    for (const r of todasLasRanuras()) ref.add(r.ruta);
+    for (const r of [...ref]) ref.add(r.replace(/\.jpg$/, '-2.jpg'));
+
+    const huerfanos: string[] = [];
+    for (const dir of ['galeria', 'glosario']) {
+      const carpeta = join(process.cwd(), 'public/images', dir);
+      if (!existsSync(carpeta)) continue;
+      for (const f of readdirSync(carpeta)) {
+        const ruta = `/images/${dir}/${f}`;
+        if (!ref.has(ruta)) huerfanos.push(ruta);
+      }
+    }
+    expect(huerfanos, `huérfanos: ${huerfanos.slice(0, 5).join(', ')}`).toEqual([]);
+  });
+
+  it('los diagramas del glosario respetan su proporción declarada', () => {
+    // Una imagen con otra proporción se recorta o deja franjas, y el hueco
+    // aparece solo en la página, nunca en un test de tipos.
+    const conArchivo = ranurasGlosario().filter((r) =>
+      existsSync(join(process.cwd(), 'public', r.ruta)),
+    );
+    if (conArchivo.length === 0) return;
+    for (const r of conArchivo) {
+      expect(r.ancho / r.alto, r.id).toBeCloseTo(4 / 3, 2);
     }
   });
 });
