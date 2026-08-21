@@ -40,9 +40,14 @@ describe('ficha técnica: generación', () => {
   }, 60_000);
 
   it('es determinista para el mismo contenido y la misma fecha', async () => {
+    // Comparaba solo la LONGITUD, y un sello de tiempo mide siempre lo mismo:
+    // el test pasaba aunque los bytes difirieran en cada generación. Ahora
+    // compara byte a byte y cruza un segundo a propósito, que es lo único que
+    // detecta un reloj metido en los metadatos del PDF.
     const a = await buildDatasheetPdf(products[0], FECHA);
+    await new Promise((r) => setTimeout(r, 1100));
     const b = await buildDatasheetPdf(products[0], FECHA);
-    expect(a.length).toBe(b.length);
+    expect(Buffer.from(a).equals(Buffer.from(b))).toBe(true);
   });
 
   it('la ruta prerenderiza una ficha por producto', () => {

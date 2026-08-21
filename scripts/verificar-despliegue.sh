@@ -101,7 +101,7 @@ cuenta() { # <ruta> <patrón> <mínimo> <descripción>
 echo "— Rutas —"
 for r in / /productos /servicios /nosotros /contacto /cotizacion /recursos \
          /local /marco /marco/evaluacion /soluciones /novedades /glosario \
-         /informes /descargas /privacidad /terminos; do
+         /informes /indicadores /descargas /privacidad /terminos; do
   ruta "$r"
 done
 
@@ -112,6 +112,7 @@ ruta /llms.txt
 ruta /novedades/rss.xml
 ruta /novedades/feed.json
 ruta /glosario/terminos.json
+ruta /indicadores/datos.json
 ruta /productos/catalogo.json
 ruta /version.json
 
@@ -158,6 +159,13 @@ contiene "/descargas" '"@type":"DataCatalog"' "el centro de documentación emite
 contiene "/productos/catalogo.json" 'atribucionSugerida' "el catálogo declara cómo citarlo"
 contiene "/llms.txt" 'Documentos descargables' "llms.txt declara los documentos"
 contiene "/llms.txt" 'Informes del sector' "llms.txt declara los informes"
+contiene "/llms.txt" 'Indicadores en vivo' "llms.txt declara los indicadores"
+
+# El dato en vivo debe llegar con su fecha, siempre. Un valor sin periodo es
+# un adorno: quien lo lea no puede saber si sirve.
+contiene "/indicadores/datos.json" '"periodo"' "cada indicador declara su periodo"
+contiene "/indicadores/datos.json" 'esUltimaLecturaConocida' "declara si el dato es fresco o de respaldo"
+contiene "/indicadores" 'BCRP' "la página cita la fuente de cada serie"
 
 echo "— Ningún dato inventado a la vista —"
 # El catálogo abierto no debe publicar precios: lo que no se sostiene en la

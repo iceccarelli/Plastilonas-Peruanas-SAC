@@ -23,6 +23,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE.url}/cotizacion`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE.url}/local`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE.url}/recursos`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    // Indicadores: la única página del sitio que cambia sola. changeFrequency
+    // diaria porque es cierto, no porque suene bien.
+    { url: `${SITE.url}/indicadores`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
     // Centro de documentación: la puerta de "necesito papeles para el expediente".
     { url: `${SITE.url}/descargas`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     // Avisos legales: prioridad baja pero indexables. Sin ellos, el pie

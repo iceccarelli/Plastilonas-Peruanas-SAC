@@ -264,6 +264,27 @@ export async function finishDoc(
   sourceUrl: string,
   generatedAt: string,
 ): Promise<Uint8Array> {
+  // Fechas del documento fijadas a partir de `generatedAt`, NO del reloj.
+  //
+  // pdf-lib estampa por defecto la hora del sistema en CreationDate y
+  // ModDate. Con eso, los 52 PDF del sitio cambiaban de bytes en CADA
+  // compilación aunque su contenido fuera idéntico: los ETags se invalidaban
+  // solos, la caché del CDN se rehacía sin motivo y un diff entre dos
+  // versiones no significaba nada.
+  //
+  // Lo delató un test propio de determinismo que fallaba una de cada dos veces
+  // en un clon limpio: pasaba solo cuando las dos generaciones caían dentro
+  // del mismo segundo. Un test intermitente casi siempre está señalando un
+  // defecto real; este lo señalaba.
+  //
+  // Mediodía UTC y no medianoche: en zona negativa como la peruana, 00:00 UTC
+  // retrocede la fecha un día.
+  const fecha = new Date(`${generatedAt}T12:00:00Z`);
+  if (!Number.isNaN(fecha.getTime())) {
+    ctx.doc.setCreationDate(fecha);
+    ctx.doc.setModificationDate(fecha);
+  }
+
   const pages = ctx.doc.getPages();
   pages.forEach((page, i) => {
     page.drawLine({

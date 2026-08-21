@@ -24,6 +24,7 @@ const navLinks = [
   { href: '/recursos', label: 'Recursos' },
   { href: '/soluciones', label: 'Soluciones' },
   { href: '/informes', label: 'Informes' },
+  { href: '/indicadores', label: 'Indicadores' },
   { href: '/glosario', label: 'Glosario' },
   { href: '/marco', label: 'Marco' },
   { href: '/novedades', label: 'Novedades' },

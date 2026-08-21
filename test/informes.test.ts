@@ -238,8 +238,13 @@ describe('informes: rutas, documento y descubrimiento', () => {
   });
 
   it('genera un PDF válido de cada informe, de forma determinista', async () => {
+    // La espera entre las dos generaciones es el test. Sin ella esto pasaba
+    // por accidente —cuando ambas caían en el mismo segundo— y encubría que
+    // pdf-lib estampaba la hora del sistema en los metadatos, de modo que
+    // cada compilación producía bytes distintos con el mismo contenido.
     for (const i of informes) {
       const a = await buildInformePdf(i, '2026-08-20');
+      await new Promise((r) => setTimeout(r, 1100));
       const b = await buildInformePdf(i, '2026-08-20');
       expect(Buffer.from(a).equals(Buffer.from(b)), i.slug).toBe(true);
       const doc = await PDFDocument.load(a);

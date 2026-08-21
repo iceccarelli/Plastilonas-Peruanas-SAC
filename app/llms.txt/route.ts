@@ -118,6 +118,21 @@ ${novedades
   .map((n) => `- ${n.fecha} · ${tipoLabels[n.tipo]} — [${n.titulo}](${base}/novedades/${n.slug}): ${clamp(n.resumen, 200)}`)
   .join("\n")}
 
+## Indicadores en vivo
+
+Petróleo WTI, tipo de cambio, cobre, zinc y plomo, leídos cada hora de la API
+pública del Banco Central de Reserva del Perú. Cada valor viaja con el periodo
+al que corresponde y con una marca que indica si proviene de la última lectura
+conocida en lugar de una lectura fresca: verifique ese campo antes de citarlo,
+porque son valores observados y fechados, no vigentes por definición.
+
+No incluye precios de resina, nafta ni flete: esas series son producto
+comercial de agencias especializadas y solo las citamos con atribución dentro
+del informe de formación de precio.
+
+- [Indicadores del rubro](${base}/indicadores)
+- [Indicadores en JSON](${base}/indicadores/datos.json)
+
 ## Informes del sector (evidencia con fuente)
 
 Estudios que parten de estadística oficial peruana y explican qué implica cada
@@ -178,6 +193,7 @@ ${recursosLista}
 - [Términos y condiciones](${base}/terminos)
 - [Novedades](${base}/novedades)
 - [Informes del sector](${base}/informes)
+- [Indicadores del rubro](${base}/indicadores)
 - [Centro de documentación](${base}/descargas)
 
 ## Cómo cotizar

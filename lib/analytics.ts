@@ -139,6 +139,11 @@ export function trackInformeView(slug: string): void {
   trackEvent('informe_view', { slug });
 }
 
+/** Vista de los indicadores en vivo: intención de compra a corto plazo. */
+export function trackIndicadoresView(slug: string): void {
+  trackEvent('indicadores_view', { slug });
+}
+
 /* ------------------------------------------------------------------ */
 /* Marco de Especificación — el embudo de mayor intención del sitio.   */
 /* ------------------------------------------------------------------ */
