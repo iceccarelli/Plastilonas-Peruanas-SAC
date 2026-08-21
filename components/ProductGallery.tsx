@@ -46,7 +46,18 @@ function captionFor(src: string): string | null {
   return k ? VIEW_CAPTIONS[k] : null;
 }
 
-export default function ProductGallery({ product }: { product: Product }) {
+export default function ProductGallery({
+  product,
+  tomas = {},
+}: {
+  product: Product;
+  /**
+   * Segundas tomas por imagen, resueltas en el SERVIDOR. Un componente de
+   * cliente no puede mirar el disco, y adivinar si existe el archivo `-2`
+   * produciría exactamente lo que este proyecto evita: una imagen rota.
+   */
+  tomas?: Record<string, string[]>;
+}) {
   const images = (
     product.gallery && product.gallery.length > 0
       ? product.gallery
@@ -92,6 +103,8 @@ export default function ProductGallery({ product }: { product: Product }) {
     return i === 0 ? product.name : `${product.name} — ${prettify(src)}`;
   };
   const activeCaption = captionFor(activeSrc);
+  // La segunda toma solo entra si el servidor confirmó que el archivo existe.
+  const segundaToma = (tomas[activeSrc] ?? [])[1];
 
   return (
     <div>
@@ -114,6 +127,21 @@ export default function ProductGallery({ product }: { product: Product }) {
               className="ken-burns object-cover"
               onError={() => setFailed((f) => ({ ...f, [active]: true }))}
             />
+            {/* Segunda toma de la MISMA vista, si existe. Se funde encima con
+                su propio Ken Burns desfasado. Va marcada aria-hidden porque no
+                aporta información nueva a quien usa lector de pantalla: es la
+                misma vista, y anunciarla dos veces sería ruido. */}
+            {segundaToma && (
+              <div className="toma-cruce absolute inset-0" aria-hidden="true">
+                <Image
+                  src={segundaToma}
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 100vw, 640px"
+                  className="ken-burns object-cover"
+                />
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none" />
             <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/55 text-white text-xs px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
               <Expand className="w-3.5 h-3.5" /> Ampliar

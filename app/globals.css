@@ -535,21 +535,59 @@ main h1, main h2, main h3 { letter-spacing: -0.02em; }
    un pequeño desfase para que no se muevan todas al unísono. Se detiene
    por completo si el usuario prefiere menos movimiento. */
 .ken-burns {
+  /* CORRECCIÓN 1. El zoom llegaba a scale(1.14). Un 14 % recorta justamente el
+     detalle que hace útil a estas fotos —la zanja de anclaje en el borde, la
+     costura, el remate—, y en un catálogo técnico ese detalle ES el argumento.
+     A 1.06 el movimiento se percibe y el encuadre sobrevive.
+
+     CORRECCIÓN 2. `will-change: transform` forzaba una capa de composición
+     permanente por cada imagen de galería. Los navegadores actuales componen
+     una animación de transform sin ayuda, y la ayuda costaba memoria en
+     páginas con muchas fotos. */
   animation: kenburns 22s ease-in-out infinite alternate;
   transform-origin: center;
-  will-change: transform;
 }
 .ken-burns-wrap:nth-of-type(3n) .ken-burns   { animation-duration: 26s; animation-delay: -6s; transform-origin: top left; }
 .ken-burns-wrap:nth-of-type(3n+1) .ken-burns { animation-duration: 20s; animation-delay: -3s; transform-origin: bottom right; }
 @keyframes kenburns {
-  from { transform: scale(1.02) translate(0, 0); }
-  to   { transform: scale(1.14) translate(-1.5%, 1.5%); }
+  from { transform: scale(1.01) translate(0, 0); }
+  to   { transform: scale(1.06) translate(-1%, 1%); }
 }
-/* En hover intensifica un pelín la sensación de vida */
-.group:hover .ken-burns { animation-duration: 12s; }
+/* CORRECCIÓN 3. Antes el hover bajaba animation-duration de 22 s a 12 s.
+   Cambiar la duración a mitad de una animación hace que el navegador
+   recalcule la posición dentro del nuevo ciclo, y la imagen SALTA al pasar el
+   cursor. Pausar no reposiciona nada: el efecto es limpio y además deja mirar
+   el detalle quieto, que es lo que uno quiere al detenerse sobre una foto. */
+.group:hover .ken-burns { animation-play-state: paused; }
+
+/* ---------------------------------------------------------------------------
+   CRUCE ENTRE DOS TOMAS DE LA MISMA VISTA
+
+   Cuando existe la segunda toma (sufijo -2), las dos se apilan y la de arriba
+   se funde. Ciclo largo a propósito: 24 s, con diez segundos de permanencia en
+   cada una. Un carrusel rápido en una ficha técnica compite con la lectura y
+   obliga a esperar para volver a ver lo que uno estaba mirando.
+
+   La segunda toma lleva su Ken Burns desfasado y con otro origen, de modo que
+   el cruce no parezca un salto de la misma imagen.
+--------------------------------------------------------------------------- */
+.toma-cruce {
+  animation: cruce-tomas 24s ease-in-out infinite;
+}
+@keyframes cruce-tomas {
+  0%, 40%   { opacity: 0; }
+  50%, 90%  { opacity: 1; }
+  100%      { opacity: 0; }
+}
+.toma-cruce .ken-burns { animation-delay: -11s; transform-origin: bottom left; }
+.group:hover .toma-cruce { animation-play-state: paused; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ken-burns { animation: none !important; transform: scale(1.02); }
+  /* Sin excepciones: el movimiento puede provocar malestar vestibular real.
+     Se congela el zoom y se oculta la segunda toma. Queda una sola imagen
+     quieta, que es una página perfectamente correcta. */
+  .ken-burns { animation: none !important; transform: scale(1.01); }
+  .toma-cruce { animation: none !important; opacity: 0 !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════

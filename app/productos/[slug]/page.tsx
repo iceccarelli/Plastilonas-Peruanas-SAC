@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
 import { products } from '@/lib/products';
 import CotizacionModal from '@/components/CotizacionModal';
 import ProductGallery from '@/components/ProductGallery';
+import { mapaDeTomas } from '@/lib/galeria';
 import ProductBuyBox from '@/components/ProductBuyBox';
 import ProductAvailability from '@/components/ProductAvailability';
 import ProductStructuredData from '@/components/ProductStructuredData';
@@ -92,7 +93,7 @@ export default async function ProductDetailPage({ params }: Props) {
       <div className="grid lg:grid-cols-2 gap-x-14 gap-y-10">
         {/* Gallery */}
         <div>
-          <ProductGallery product={product} />
+          <ProductGallery product={product} tomas={mapaDeTomas(product.gallery ?? [])} />
         </div>
 
 

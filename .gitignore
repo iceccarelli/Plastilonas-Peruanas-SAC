@@ -42,3 +42,9 @@ install-gallery*.sh
 update-gallery.sh
 stage-images.sh
 gallery-code.patch
+
+# Paquetes de imágenes: se suben al repo para transferirlos y se extraen a
+# public/. Versionarlos duplica decenas de megabytes en el historial de git,
+# que es permanente, y no aporta nada que public/ no tenga ya.
+*.zip
+_to_delete/
