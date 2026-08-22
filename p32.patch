@@ -1,0 +1,3889 @@
+diff --git a/.env.example b/.env.example
+index 812d2f1..9d166b6 100644
+--- a/.env.example
++++ b/.env.example
+@@ -62,3 +62,13 @@ N8N_WEBHOOK_URL=
+ # --- Notificaciones web push (OneSignal) ---
+ # App ID de OneSignal (publico, SDK de cliente). Sin el, no se carga nada.
+ NEXT_PUBLIC_ONESIGNAL_APP_ID=
++
++# --- Dominio canónico de marca ---
++# El día que DNS de plastilonas.com apunte a este proyecto:
++#   CANONICAL_ORIGIN=https://plastilonas.com
++# middleware.ts emite X-Robots-Tag: noindex en *.vercel.app para que no compita.
++CANONICAL_ORIGIN=
++CANONICAL_HOST=plastilonas.com
++GOOGLE_SITE_VERIFICATION=
++BING_SITE_VERIFICATION=
++
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index b34d1da..1c1ed20 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -61,3 +61,16 @@ jobs:
+         # eso erosiona exactamente lo que el sitio existe para construir.
+         # Corre DESPUÉS del build porque audita su salida, no el código.
+         run: npm run auditar
++
++      - name: Conteo de catálogo (anti-contradicción)
++        run: npx vitest run test/facts.test.ts --reporter=dot
++
++      - name: Viewport en matriz de dispositivos
++        # Mide con Chromium el desbordamiento horizontal y los recortes de la
++        # cabecera en 17 anchos reales, de 280px a 2560px. Existe porque una
++        # barra de once entradas dejó el CTA «Solicitar Cotización» fuera de
++        # pantalla en 1280, 1366, 1440, 1536 y 1920 px durante semanas sin que
++        # ninguna prueba lo notara: ningún test de unidad mide layout.
++        run: |
++          npx playwright install --with-deps chromium
++          npm run auditar:viewport
+diff --git a/app/api/chat/route.ts b/app/api/chat/route.ts
+index 2307b11..515ab0f 100644
+--- a/app/api/chat/route.ts
++++ b/app/api/chat/route.ts
+@@ -28,7 +28,7 @@ const CATALOG = productFamilies
+   .filter(Boolean)
+   .join('\n\n');
+ 
+-const SYSTEM_PROMPT = `Eres un asesor comercial experto y altamente profesional de Plastilonas Peruanas SAC, empresa peruana con más de 15 años de experiencia fabricando e instalando soluciones textiles e industriales a medida.
++const SYSTEM_PROMPT = `Eres un asesor comercial experto y altamente profesional de Plastilonas Peruanas SAC, fabricante peruano de textiles industriales a medida desde 2009 (RUC 20523135385, Chorrillos, Lima).
+ 
+ Tu personalidad:
+ - Amable, claro, directo y orientado a resultados.
+diff --git a/app/api/lead/route.ts b/app/api/lead/route.ts
+index 5a115ea..2a90042 100644
+--- a/app/api/lead/route.ts
++++ b/app/api/lead/route.ts
+@@ -1,51 +1,141 @@
+ import { NextRequest, NextResponse } from 'next/server';
++import { z } from 'zod';
+ import { SITE } from '@/lib/site';
++import { isSupabaseConfigured, supabaseAdmin } from '@/lib/supabase';
+ 
+-/** Host visible del sitio, derivado de SITE.url (nunca hard-codeado). */
+ const SITE_HOST = SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+ 
+-/**
+- * Recibe un lead de cotización y lo reenvía al webhook de n8n.
+- *
+- * Arquitectura de seguridad: el navegador NUNCA ve la URL de n8n. El cliente
+- * hace POST a esta ruta interna; el secreto vive en el servidor (N8N_WEBHOOK_URL,
+- * sin prefijo NEXT_PUBLIC_). Best-effort: el canal primario es WhatsApp, así que
+- * si n8n no está configurado o falla, respondemos 200 y no rompemos la UX.
+- */
++const LeadSchema = z.object({
++  nombre: z.string().trim().min(1).max(120).optional(),
++  contact: z.string().trim().min(1).max(120).optional(),
++  empresa: z.string().trim().max(160).optional().default(''),
++  email: z.string().trim().email().max(180),
++  telefono: z.string().trim().min(6).max(40),
++  whatsapp: z.string().trim().max(40).optional(),
++  producto: z.string().trim().max(200).optional(),
++  industry: z.string().trim().max(80).optional(),
++  application: z.string().trim().max(240).optional(),
++  cantidad: z.string().trim().max(80).optional(),
++  dimensions: z.string().trim().max(120).optional(),
++  material: z.string().trim().max(80).optional(),
++  country: z.string().trim().max(80).optional(),
++  city: z.string().trim().max(80).optional(),
++  deliveryCountry: z.string().trim().max(80).optional(),
++  deliveryCity: z.string().trim().max(80).optional(),
++  fechaNecesaria: z.string().trim().max(40).optional(),
++  mensaje: z.string().trim().max(4000).optional(),
++  language: z.enum(['es', 'en', 'pt']).optional(),
++});
++
++const buckets = new Map<string, { n: number; t: number }>();
++
++function limited(ip: string): boolean {
++  const now = Date.now();
++  const hit = buckets.get(ip);
++  if (!hit || now - hit.t > 10 * 60 * 1000) {
++    buckets.set(ip, { n: 1, t: now });
++    return false;
++  }
++  hit.n += 1;
++  return hit.n > 12;
++}
++
++function rfqId(): string {
++  const d = new Date();
++  const y = d.getUTCFullYear();
++  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
++  const day = String(d.getUTCDate()).padStart(2, '0');
++  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
++  return `RFQ-${y}${m}${day}-${rand}`;
++}
+ 
+ export async function POST(req: NextRequest) {
+-  let lead: Record<string, unknown>;
++  const ip =
++    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
++    req.headers.get('x-real-ip') ||
++    'unknown';
++  if (limited(ip)) {
++    return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 });
++  }
++
++  let json: unknown;
+   try {
+-    lead = await req.json();
++    json = await req.json();
+   } catch {
+     return NextResponse.json({ ok: false, error: 'invalid_json' }, { status: 400 });
+   }
+ 
+-  if (!lead || typeof lead !== 'object' || !lead.email || !lead.telefono) {
+-    return NextResponse.json({ ok: false, error: 'missing_fields' }, { status: 400 });
++  const parsed = LeadSchema.safeParse(json);
++  if (!parsed.success) {
++    return NextResponse.json({ ok: false, error: 'invalid_fields' }, { status: 400 });
+   }
++  const lead = parsed.data;
++  const id = rfqId();
++  const contact = lead.nombre || lead.contact || '';
+ 
+-  const webhook = process.env.N8N_WEBHOOK_URL;
+-  if (!webhook) {
+-    // Sin webhook configurado: no es error. El lead ya fue por WhatsApp.
+-    return NextResponse.json({ ok: true, forwarded: false });
++  let persisted = false;
++  if (isSupabaseConfigured()) {
++    try {
++      const admin = supabaseAdmin();
++      const { error } = await admin.from('quotes').insert({
++        customer_email: lead.email,
++        full_name: contact,
++        company: lead.empresa,
++        phone: lead.telefono,
++        product: lead.producto ?? null,
++        quantity: lead.cantidad ?? null,
++        rfq_code: id,
++        country: lead.deliveryCountry || lead.country || null,
++        industry: lead.industry ?? null,
++        status: 'NEW',
++        source: `${SITE_HOST}/cotizacion`,
++        payload: lead,
++        message: [
++          lead.application,
++          lead.dimensions,
++          lead.material,
++          lead.country && `Origen: ${lead.city || ''} ${lead.country}`.trim(),
++          lead.deliveryCountry &&
++            `Entrega: ${lead.deliveryCity || ''} ${lead.deliveryCountry}`.trim(),
++          lead.mensaje,
++        ]
++          .filter(Boolean)
++          .join('\n'),
++      });
++      persisted = !error;
++      if (error) console.error('[lead] supabase', error.message);
++    } catch (err) {
++      console.error('[lead] supabase unavailable', err);
++    }
+   }
+ 
+-  const payload = {
+-    ...lead,
+-    source: `${SITE_HOST}/cotizacion`,
+-    receivedAt: new Date().toISOString(),
+-  };
+-
+-  try {
+-    const res = await fetch(webhook, {
+-      method: 'POST',
+-      headers: { 'Content-Type': 'application/json' },
+-      body: JSON.stringify(payload),
+-    });
+-    return NextResponse.json({ ok: res.ok, forwarded: res.ok });
+-  } catch {
+-    // n8n caído: no rompemos la experiencia del cliente.
+-    return NextResponse.json({ ok: false, forwarded: false, error: 'webhook_failed' });
++  const webhook = process.env.N8N_WEBHOOK_URL;
++  let forwarded = false;
++  if (webhook) {
++    try {
++      const res = await fetch(webhook, {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json' },
++        body: JSON.stringify({
++          ...lead,
++          rfqId: id,
++          persisted,
++          source: `${SITE_HOST}/cotizacion`,
++          receivedAt: new Date().toISOString(),
++        }),
++      });
++      forwarded = res.ok;
++    } catch {
++      forwarded = false;
++    }
+   }
++
++  // Email / WhatsApp remain the commercial channels. Persistence failure is
++  // logged, never thrown: the buyer already has the RFQ id in the response.
++  return NextResponse.json({
++    ok: true,
++    rfqId: id,
++    persisted,
++    forwarded,
++  });
+ }
+diff --git a/app/aplicaciones/[slug]/page.tsx b/app/aplicaciones/[slug]/page.tsx
+new file mode 100644
+index 0000000..584a905
+--- /dev/null
++++ b/app/aplicaciones/[slug]/page.tsx
+@@ -0,0 +1,52 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++import { notFound } from 'next/navigation';
++import { applications, applicationBySlug } from '@/lib/applications';
++import { products } from '@/lib/products';
++
++type Props = { params: Promise<{ slug: string }> };
++
++export const dynamicParams = false;
++
++export function generateStaticParams() {
++  return applications.map((a) => ({ slug: a.slug }));
++}
++
++export async function generateMetadata({ params }: Props): Promise<Metadata> {
++  const { slug } = await params;
++  const app = applicationBySlug(slug);
++  if (!app) return {};
++  return { title: app.name, description: app.problem, alternates: { canonical: `/aplicaciones/${slug}` } };
++}
++
++export default async function AplicacionPage({ params }: Props) {
++  const { slug } = await params;
++  const app = applicationBySlug(slug);
++  if (!app) notFound();
++  const list = products.filter((p) => app.productSlugs.includes(p.slug));
++  return (
++    <div className="max-w-5xl mx-auto px-6 py-14">
++      <Link href="/aplicaciones" className="text-xs uppercase tracking-widest text-[#059669]">Aplicaciones</Link>
++      <h1 className="t-display font-semibold text-[#0A2540] mt-3">{app.name}</h1>
++      <p className="mt-4 text-gray-600 max-w-3xl leading-relaxed">{app.problem}</p>
++      <p className="mt-4 text-gray-700 max-w-3xl leading-relaxed">{app.approach}</p>
++      <Link href={`/cotizacion?notas=${encodeURIComponent('Aplicación: ' + app.name)}`} className="btn mt-8 inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">RFQ de esta aplicación</Link>
++      <h2 className="mt-12 text-xl font-semibold text-[#0A2540]">Qué preguntamos</h2>
++      <ol className="mt-3 list-decimal pl-5 text-gray-700 space-y-1">
++        {app.questions.map((q) => <li key={q}>{q}</li>)}
++      </ol>
++      <h2 className="mt-10 text-xl font-semibold text-[#0A2540]">Lo que no afirmamos</h2>
++      <ul className="mt-3 list-disc pl-5 text-gray-600 space-y-1 text-sm">
++        {app.notClaimed.map((q) => <li key={q}>{q}</li>)}
++      </ul>
++      <h2 className="mt-10 text-xl font-semibold text-[#0A2540]">Catálogo</h2>
++      <ul className="mt-4 grid sm:grid-cols-2 gap-3">
++        {list.map((p) => (
++          <li key={p.slug}>
++            <Link href={`/productos/${p.slug}`} className="block border border-gray-100 rounded-2xl p-4 hover:border-[#059669]/40">{p.name}</Link>
++          </li>
++        ))}
++      </ul>
++    </div>
++  );
++}
+diff --git a/app/aplicaciones/page.tsx b/app/aplicaciones/page.tsx
+new file mode 100644
+index 0000000..1d6853f
+--- /dev/null
++++ b/app/aplicaciones/page.tsx
+@@ -0,0 +1,29 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++import { applications } from '@/lib/applications';
++
++export const metadata: Metadata = {
++  title: 'Aplicaciones industriales',
++  description:
++    'Ventilación de mina, toldos de camión, malla agrícola, geomembrana, coberturas de obra y FIBC. El comprador busca un problema, no un SKU.',
++  alternates: { canonical: '/aplicaciones' },
++};
++
++export default function AplicacionesPage() {
++  return (
++    <div className="max-w-5xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">APLICACIÓN PRIMERO</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">El problema, no el SKU.</h1>
++      <p className="mt-4 max-w-2xl text-gray-600">Ocho aplicaciones que Plastilonas puede atender con líneas del catálogo. Cada ficha dice qué preguntamos y qué no afirmamos.</p>
++      <div className="mt-10 grid md:grid-cols-2 gap-4">
++        {applications.map((a) => (
++          <Link key={a.slug} href={`/aplicaciones/${a.slug}`} className="block border border-gray-100 rounded-3xl p-6 bg-white hover:border-[#059669]/40">
++            <div className="text-xs uppercase tracking-widest text-[#059669]">{a.nameEn}</div>
++            <h2 className="text-xl font-semibold text-[#0A2540] mt-1">{a.name}</h2>
++            <p className="text-gray-600 mt-2 text-sm leading-relaxed">{a.problem}</p>
++          </Link>
++        ))}
++      </div>
++    </div>
++  );
++}
+diff --git a/app/biblioteca/[slug]/page.tsx b/app/biblioteca/[slug]/page.tsx
+new file mode 100644
+index 0000000..6a4f25e
+--- /dev/null
++++ b/app/biblioteca/[slug]/page.tsx
+@@ -0,0 +1,49 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++import { notFound } from 'next/navigation';
++import { guides, guideBySlug } from '@/lib/guides';
++import { products } from '@/lib/products';
++
++type Props = { params: Promise<{ slug: string }> };
++export const dynamicParams = false;
++export function generateStaticParams() {
++  return guides.map((g) => ({ slug: g.slug }));
++}
++export async function generateMetadata({ params }: Props): Promise<Metadata> {
++  const { slug } = await params;
++  const g = guideBySlug(slug);
++  if (!g) return {};
++  return { title: g.title, description: g.summary, alternates: { canonical: `/biblioteca/${slug}` } };
++}
++
++export default async function GuidePage({ params }: Props) {
++  const { slug } = await params;
++  const g = guideBySlug(slug);
++  if (!g) notFound();
++  const related = products.filter((p) => g.relatedProductSlugs.includes(p.slug));
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <Link href="/biblioteca" className="text-xs uppercase tracking-widest text-[#059669]">Biblioteca</Link>
++      <h1 className="t-display font-semibold text-[#0A2540] mt-3">{g.title}</h1>
++      <p className="mt-3 text-sm text-gray-500">{g.titleEn} · Revisión {g.revised} · {g.reviewer}</p>
++      <p className="mt-5 text-lg text-gray-700">{g.summary}</p>
++      {g.sections.map((s) => (
++        <section key={s.heading} className="mt-10">
++          <h2 className="text-xl font-semibold text-[#0A2540]">{s.heading}</h2>
++          <p className="mt-3 text-gray-700 leading-relaxed">{s.body}</p>
++        </section>
++      ))}
++      <h2 className="mt-10 text-xl font-semibold text-[#0A2540]">Para cotizar</h2>
++      <ul className="mt-3 list-disc pl-5 text-sm text-gray-700">
++        {g.questions.map((q) => <li key={q}>{q}</li>)}
++      </ul>
++      <p className="mt-6 text-sm text-gray-500">{g.disclaimer}</p>
++      <Link href="/cotizacion" className="btn mt-8 inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">Abrir RFQ</Link>
++      <ul className="mt-8 space-y-2 text-sm">
++        {related.map((p) => (
++          <li key={p.slug}><Link href={`/productos/${p.slug}`} className="text-[#059669]">{p.name}</Link></li>
++        ))}
++      </ul>
++    </div>
++  );
++}
+diff --git a/app/biblioteca/page.tsx b/app/biblioteca/page.tsx
+new file mode 100644
+index 0000000..772ff04
+--- /dev/null
++++ b/app/biblioteca/page.tsx
+@@ -0,0 +1,30 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++import { guides } from '@/lib/guides';
++
++export const metadata: Metadata = {
++  title: 'Biblioteca técnica',
++  description: 'Guías HTML de especificación: mangas de ventilación, gramaje de lona, FIBC, geomembrana y malla agrícola.',
++  alternates: { canonical: '/biblioteca' },
++};
++
++export default function BibliotecaPage() {
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">CENTRO TÉCNICO</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">Biblioteca de especificación</h1>
++      <p className="mt-4 text-gray-600">HTML primero, para que un ingeniero o un agente de IA pueda leer y citar. Cada texto tiene fecha de revisión y dice qué no cubre.</p>
++      <ul className="mt-10 space-y-3">
++        {guides.map((g) => (
++          <li key={g.slug}>
++            <Link href={`/biblioteca/${g.slug}`} className="block border border-gray-100 rounded-2xl p-5 hover:border-[#059669]/40">
++              <div className="text-xs uppercase tracking-widest text-gray-400">Revisión {g.revised}</div>
++              <h2 className="text-xl font-semibold text-[#0A2540] mt-1">{g.title}</h2>
++              <p className="text-sm text-gray-600 mt-2">{g.summary}</p>
++            </Link>
++          </li>
++        ))}
++      </ul>
++    </div>
++  );
++}
+diff --git a/app/calidad/page.tsx b/app/calidad/page.tsx
+new file mode 100644
+index 0000000..f61508e
+--- /dev/null
++++ b/app/calidad/page.tsx
+@@ -0,0 +1,37 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++
++export const metadata: Metadata = {
++  title: 'Sistema de calidad',
++  description: 'Proceso de planta: material, corte, confección, medida, embalaje y trazabilidad por RFQ. Sin ISO inventado.',
++  alternates: { canonical: '/calidad' },
++};
++
++const STEPS = [
++  ['Material', 'Verificación de la tela o membrana pedida contra la cotización. Ficha de lote cuando el proveedor la emite.'],
++  ['Corte', 'Dimensiones de paño según el pedido. Tolerancias se acuerdan.'],
++  ['Confección / soldadura', 'Costura, ojal, soldadura RF o termofusión según la línea.'],
++  ['Medida', 'Comprobación dimensional antes de empacar.'],
++  ['Embalaje', 'Identificación del lote en el bulto cuando el pedido lo pide.'],
++  ['Trazabilidad', 'El RFQ y la cotización son el expediente. No afirmamos ERP de clase farmacéutica.'],
++];
++
++export default function CalidadPage() {
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">CALIDAD</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">Cómo controlamos un pedido.</h1>
++      <p className="mt-4 text-gray-600">Proceso de planta, no un certificado colgado. No hay ISO, ASTM, CE ni UL en esta página porque no hay documento que mostrar.</p>
++      <ol className="mt-10 space-y-4">
++        {STEPS.map(([k, v], i) => (
++          <li key={k} className="border border-gray-100 rounded-2xl p-4">
++            <div className="text-xs text-gray-400">{String(i + 1).padStart(2, '0')}</div>
++            <h2 className="font-semibold text-[#0A2540]">{k}</h2>
++            <p className="text-sm text-gray-600 mt-1">{v}</p>
++          </li>
++        ))}
++      </ol>
++      <Link href="/compras" className="mt-8 inline-block text-[#059669]">Ver due diligence de compras →</Link>
++    </div>
++  );
++}
+diff --git a/app/compradores/page.tsx b/app/compradores/page.tsx
+new file mode 100644
+index 0000000..ffb1f8c
+--- /dev/null
++++ b/app/compradores/page.tsx
+@@ -0,0 +1,32 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++import { SITE } from '@/lib/site';
++
++export const metadata: Metadata = {
++  title: 'International buyers',
++  description:
++    'Can Plastilonas export? From Peru, with RFQ-based evaluation. No worldwide shipping claims. EXW Lima or FOB Callao as a starting point.',
++  alternates: { canonical: '/compradores' },
++};
++
++export default function CompradoresPage() {
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">INTERNATIONAL BUYERS</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">¿Pueden exportar?</h1>
++      <p className="mt-4 text-gray-600 leading-relaxed">
++        Fabricamos en {SITE.addressLocality}, {SITE.addressRegion}, Perú. El suministro internacional
++        se evalúa por producto, volumen, destino y documentación. No hay envío mundial automático ni
++        instalación en toda Sudamérica.
++      </p>
++      <dl className="mt-10 space-y-4 text-sm">
++        <div><dt className="font-semibold">Incoterms de partida</dt><dd className="text-gray-600">EXW Lima o FOB Callao. DAP/CIF se cotizan con forwarder cuando el volumen lo justifica.</dd></div>
++        <div><dt className="font-semibold">Mercados de prioridad</dt><dd className="text-gray-600">Perú, Chile, Colombia, Ecuador, Bolivia. Brasil y México por RFQ calificado.</dd></div>
++        <div><dt className="font-semibold">Señal existente</dt><dd className="text-gray-600">Hay evidencia pública de comercio exterior hacia Colombia. Cada operación se confirma.</dd></div>
++        <div><dt className="font-semibold">Documentos</dt><dd className="text-gray-600">Factura, packing list, ficha técnica de lote cuando existe. Sin certificaciones inventadas.</dd></div>
++        <div><dt className="font-semibold">Contacto</dt><dd className="text-gray-600">{SITE.email} · WhatsApp {SITE.phoneWhatsApp}</dd></div>
++      </dl>
++      <Link href="/cotizacion" className="btn mt-10 inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">Abrir RFQ internacional</Link>
++    </div>
++  );
++}
+diff --git a/app/compras/page.tsx b/app/compras/page.tsx
+new file mode 100644
+index 0000000..dae867b
+--- /dev/null
++++ b/app/compras/page.tsx
+@@ -0,0 +1,40 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++import { SITE } from '@/lib/site';
++import { COUNT_STATEMENT, YEARS_STATEMENT } from '@/lib/facts';
++
++export const metadata: Metadata = {
++  title: 'Centro de compras industriales',
++  description: 'Due diligence para abastecimiento: identidad, catálogo, exportación, documentación y RFQ.',
++  alternates: { canonical: '/compras' },
++};
++
++export default function ComprasPage() {
++  const items = [
++    ['¿Quién fabrica?', `${SITE.legalName}, RUC ${SITE.ruc}. ${SITE.addressStreet}, ${SITE.addressLocality}.`],
++    ['¿Desde cuándo?', YEARS_STATEMENT],
++    ['¿Qué pueden fabricar?', COUNT_STATEMENT],
++    ['¿Exportan?', 'Se evalúa por RFQ. Incoterms de partida EXW Lima o FOB Callao. No hay envío mundial automático.'],
++    ['¿Qué documentación?', 'Cotización, factura, packing list y ficha de lote cuando existe. Sin ISO/ASTM/CE inventados.'],
++    ['¿Cómo se paga?', 'Condiciones en la cotización. No hay checkout para líneas industriales a medida.'],
++  ];
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">PROCUREMENT</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">Centro de compras industriales</h1>
++      <dl className="mt-10 space-y-5">
++        {items.map(([q, a]) => (
++          <div key={q} className="border-b border-gray-100 pb-4">
++            <dt className="font-semibold text-[#0A2540]">{q}</dt>
++            <dd className="mt-1 text-sm text-gray-600">{a}</dd>
++          </div>
++        ))}
++      </dl>
++      <div className="mt-10 flex flex-wrap gap-3">
++        <Link href="/cotizacion" className="btn inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">Registrar RFQ</Link>
++        <Link href="/confianza" className="btn inline-flex border border-gray-200 px-5 py-3 rounded-2xl">Due diligence</Link>
++        <Link href="/biblioteca" className="btn inline-flex border border-gray-200 px-5 py-3 rounded-2xl">Guías técnicas</Link>
++      </div>
++    </div>
++  );
++}
+diff --git a/app/confianza/page.tsx b/app/confianza/page.tsx
+new file mode 100644
+index 0000000..86dc812
+--- /dev/null
++++ b/app/confianza/page.tsx
+@@ -0,0 +1,44 @@
++import type { Metadata } from 'next';
++import { SITE } from '@/lib/site';
++import { COUNT_STATEMENT, YEARS_STATEMENT } from '@/lib/facts';
++
++export const metadata: Metadata = {
++  title: 'Centro de confianza',
++  description: `Identidad verificable de ${SITE.legalName}: RUC, dirección, catálogo y lo que deliberadamente no afirmamos.`,
++  alternates: { canonical: '/confianza' },
++};
++
++export default function ConfianzaPage() {
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">TRUST CENTER</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">Centro de confianza</h1>
++      <dl className="mt-10 space-y-4 text-sm">
++        {[
++          ['Razón social', SITE.legalName],
++          ['RUC', SITE.ruc],
++          ['Planta', `${SITE.addressStreet}, ${SITE.addressLocality}, ${SITE.addressRegion}, Perú`],
++          ['Antigüedad', YEARS_STATEMENT],
++          ['Catálogo', COUNT_STATEMENT],
++          ['Email', SITE.email],
++          ['Central', SITE.phoneCentral],
++          ['WhatsApp', SITE.phoneWhatsApp],
++          ['Dominio canónico', SITE.brandHost],
++        ].map(([k, v]) => (
++          <div key={k} className="border-b border-gray-100 pb-3">
++            <dt className="text-xs uppercase tracking-widest text-gray-400">{k}</dt>
++            <dd className="mt-1">{v}</dd>
++          </div>
++        ))}
++      </dl>
++      <h2 className="mt-10 font-semibold text-[#0A2540]">Lo que no publicamos</h2>
++      <ul className="mt-3 list-disc pl-5 text-sm text-gray-600 space-y-1">
++        <li>ISO / ASTM / CE / UL / food-grade sin documento</li>
++        <li>Envío mundial o instalación continental</li>
++        <li>Rankings autofabricados</li>
++        <li>Precios de lista en líneas a medida</li>
++        <li>Clientes nominados sin permiso</li>
++      </ul>
++    </div>
++  );
++}
+diff --git a/app/configurador/layout.tsx b/app/configurador/layout.tsx
+new file mode 100644
+index 0000000..f0c2ba1
+--- /dev/null
++++ b/app/configurador/layout.tsx
+@@ -0,0 +1,11 @@
++import type { Metadata } from 'next';
++
++export const metadata: Metadata = {
++  title: 'Configurador FIBC / Big Bag',
++  description: 'Especifique capacidad, boca, fondo, asas y liner. El resumen alimenta el RFQ. Sin precio y sin certificación UN inventada.',
++  alternates: { canonical: '/configurador' },
++};
++
++export default function Layout({ children }: { children: React.ReactNode }) {
++  return children;
++}
+diff --git a/app/configurador/page.tsx b/app/configurador/page.tsx
+new file mode 100644
+index 0000000..e7011c8
+--- /dev/null
++++ b/app/configurador/page.tsx
+@@ -0,0 +1,97 @@
++'use client';
++
++import { useState, type FormEvent } from 'react';
++import { useRouter } from 'next/navigation';
++import {
++  emptyFibc,
++  fibcSummary,
++  FIBC_BOTTOM,
++  FIBC_CAPACITY,
++  FIBC_EXTRAS,
++  FIBC_LOOPS,
++  FIBC_SF,
++  FIBC_TOP,
++} from '@/lib/fibc';
++
++export default function ConfiguradorPage() {
++  const [spec, setSpec] = useState(emptyFibc);
++  const router = useRouter();
++
++  function toggle(id: string) {
++    setSpec((s) => ({
++      ...s,
++      extras: s.extras.includes(id) ? s.extras.filter((x) => x !== id) : [...s.extras, id],
++    }));
++  }
++
++  function submit(e: FormEvent) {
++    e.preventDefault();
++    router.push(`/cotizacion?producto=big-bags-bolsones-polipropileno&notas=${encodeURIComponent(fibcSummary(spec))}`);
++  }
++
++  const selectCls = 'w-full border border-gray-200 rounded-xl px-3 h-11 text-sm';
++
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">FIBC / BIG BAG</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">Configurador de especificación</h1>
++      <p className="mt-4 text-gray-600">Arma un resumen para el RFQ. No calcula precio, no emite plano, no certifica UN.</p>
++      <form onSubmit={submit} className="mt-8 space-y-5">
++        <label className="block text-sm">Capacidad
++          <select className={`${selectCls} mt-1`} value={spec.capacity} onChange={(e) => setSpec((s) => ({ ...s, capacity: e.target.value }))}>
++            {FIBC_CAPACITY.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
++          </select>
++        </label>
++        <div className="grid sm:grid-cols-3 gap-3">
++          {(['length', 'width', 'height'] as const).map((k) => (
++            <label key={k} className="block text-sm capitalize">{k === 'length' ? 'Largo cm' : k === 'width' ? 'Ancho cm' : 'Alto cm'}
++              <input className={`${selectCls} mt-1`} value={spec[k]} onChange={(e) => setSpec((s) => ({ ...s, [k]: e.target.value }))} />
++            </label>
++          ))}
++        </div>
++        <div className="grid sm:grid-cols-2 gap-3">
++          <label className="block text-sm">Boca
++            <select className={`${selectCls} mt-1`} value={spec.top} onChange={(e) => setSpec((s) => ({ ...s, top: e.target.value }))}>
++              {FIBC_TOP.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
++            </select>
++          </label>
++          <label className="block text-sm">Fondo
++            <select className={`${selectCls} mt-1`} value={spec.bottom} onChange={(e) => setSpec((s) => ({ ...s, bottom: e.target.value }))}>
++              {FIBC_BOTTOM.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
++            </select>
++          </label>
++          <label className="block text-sm">Asas
++            <select className={`${selectCls} mt-1`} value={spec.loops} onChange={(e) => setSpec((s) => ({ ...s, loops: e.target.value }))}>
++              {FIBC_LOOPS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
++            </select>
++          </label>
++          <label className="block text-sm">Factor de seguridad pedido
++            <select className={`${selectCls} mt-1`} value={spec.sf} onChange={(e) => setSpec((s) => ({ ...s, sf: e.target.value }))}>
++              {FIBC_SF.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
++            </select>
++          </label>
++        </div>
++        <fieldset>
++          <legend className="text-sm mb-2">Opciones</legend>
++          <div className="flex flex-wrap gap-2">
++            {FIBC_EXTRAS.map((x) => (
++              <label key={x.id} className="inline-flex items-center gap-2 border border-gray-200 rounded-full px-3 py-2 text-sm">
++                <input type="checkbox" checked={spec.extras.includes(x.id)} onChange={() => toggle(x.id)} />
++                {x.label}
++              </label>
++            ))}
++          </div>
++        </fieldset>
++        <label className="block text-sm">Producto a envasar
++          <input className={`${selectCls} mt-1`} value={spec.product} onChange={(e) => setSpec((s) => ({ ...s, product: e.target.value }))} />
++        </label>
++        <label className="block text-sm">Cantidad
++          <input className={`${selectCls} mt-1`} value={spec.quantity} onChange={(e) => setSpec((s) => ({ ...s, quantity: e.target.value }))} />
++        </label>
++        <pre className="bg-[#0A2540] text-white/80 text-xs p-4 rounded-2xl overflow-x-auto whitespace-pre-wrap">{fibcSummary(spec)}</pre>
++        <button type="submit" className="btn bg-[#0A2540] text-white px-5 py-3 rounded-2xl">Enviar esta especificación al RFQ</button>
++        <p className="text-xs text-gray-500">Cálculo preliminar. No sustituye ficha de lote ni certificación UN.</p>
++      </form>
++    </div>
++  );
++}
+diff --git a/app/distribuidores/page.tsx b/app/distribuidores/page.tsx
+new file mode 100644
+index 0000000..100916c
+--- /dev/null
++++ b/app/distribuidores/page.tsx
+@@ -0,0 +1,27 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++
++export const metadata: Metadata = {
++  title: 'Programa de distribuidores',
++  description:
++    'Distribuidores industriales en Chile, Colombia, Ecuador, Bolivia, Brasil y México. Postulación por RFQ, no registro automático.',
++  alternates: { canonical: '/distribuidores' },
++};
++
++export default function DistribuidoresPage() {
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">CANAL</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">Programa de distribuidores</h1>
++      <p className="mt-4 text-gray-600">Empresas con fuerza de ventas, almacén y cartera industrial. No es franquicia ni registro automático.</p>
++      <ul className="mt-6 list-disc pl-5 text-gray-700 space-y-1 text-sm">
++        <li>Razón social, país y territorio</li>
++        <li>Años operando e industrias</li>
++        <li>Fuerza de ventas y almacén</li>
++        <li>Marcas actuales y volumen estimado</li>
++        <li>Familias de interés</li>
++      </ul>
++      <Link href="/cotizacion" className="btn mt-8 inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">Postular vía RFQ</Link>
++    </div>
++  );
++}
+diff --git a/app/en/page.tsx b/app/en/page.tsx
+new file mode 100644
+index 0000000..d31caed
+--- /dev/null
++++ b/app/en/page.tsx
+@@ -0,0 +1,29 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++import { SITE } from '@/lib/site';
++import { COUNT_STATEMENT } from '@/lib/facts';
++
++export const metadata: Metadata = {
++  title: 'Peruvian industrial textile manufacturer',
++  description: SITE.description,
++  alternates: { canonical: '/en' },
++};
++
++export default function EnglishPage() {
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">ENGLISH · PROCUREMENT BRIEF</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">Peruvian manufacturer of custom industrial textiles</h1>
++      <p className="mt-4 text-gray-600 leading-relaxed">
++        Plant in Chorrillos, Lima. Operating since {SITE.foundingYear}. RUC {SITE.ruc}. {COUNT_STATEMENT}.
++        Spanish is the primary language of this site. This page exists so an international buyer can
++        verify identity and file an RFQ without a machine-translated catalogue.
++      </p>
++      <p className="mt-4 text-sm text-gray-500">
++        We manufacture in Peru. International supply is evaluated per order. We do not offer automatic worldwide shipping.
++      </p>
++      <p className="mt-6 text-sm">Sales: {SITE.email} · WhatsApp {SITE.phoneWhatsApp}</p>
++      <Link href="/cotizacion" className="btn mt-8 inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">File an RFQ</Link>
++    </div>
++  );
++}
+diff --git a/app/exportacion/page.tsx b/app/exportacion/page.tsx
+new file mode 100644
+index 0000000..2349ffd
+--- /dev/null
++++ b/app/exportacion/page.tsx
+@@ -0,0 +1,41 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++
++export const metadata: Metadata = {
++  title: 'Exportación desde el Perú',
++  description:
++    'Suministro internacional desde Lima / Callao. Incoterms, documentación y mercados andinos. Sin promesa de envío mundial.',
++  alternates: { canonical: '/exportacion' },
++};
++
++const MARKETS = [
++  ['Perú', 'PEN', 'Despacho nacional. Fabricación e instalación propias.'],
++  ['Chile', 'CLP', 'Callao o terrestre. Ventilación, lonas, FIBC por RFQ.'],
++  ['Colombia', 'COP', 'Señal pública de comercio exterior. Cada operación se evalúa.'],
++  ['Ecuador', 'USD', 'Marítimo o terrestre según volumen.'],
++  ['Bolivia', 'BOB', 'Terrestre. Coberturas y geosintéticos por proyecto.'],
++  ['Brasil', 'BRL', 'Marítimo. Sin lista de precios en BRL.'],
++  ['México', 'MXN', 'Solo pedidos calificados por volumen.'],
++];
++
++export default function ExportacionPage() {
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">SUMINISTRO INTERNACIONAL</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">Exportación desde el Perú</h1>
++      <p className="mt-4 text-gray-600">Fabricamos en Perú. Evaluamos destino, partida y MOQ. No operamos un e-commerce mundial.</p>
++      <table className="mt-8 w-full text-sm">
++        <tbody>
++          {MARKETS.map(([n, c, note]) => (
++            <tr key={n} className="border-t border-gray-100">
++              <td className="py-3 font-medium">{n}</td>
++              <td className="py-3 text-gray-500">{c}</td>
++              <td className="py-3 text-gray-600">{note}</td>
++            </tr>
++          ))}
++        </tbody>
++      </table>
++      <Link href="/compradores" className="mt-8 inline-block text-[#059669]">Portal del comprador →</Link>
++    </div>
++  );
++}
+diff --git a/app/layout.tsx b/app/layout.tsx
+index 0bcb8f6..f9d0487 100644
+--- a/app/layout.tsx
++++ b/app/layout.tsx
+@@ -1,5 +1,5 @@
+ import ExitIntentModal from '@/components/ExitIntentModal';
+-import type { Metadata } from 'next';
++import type { Metadata, Viewport } from 'next';
+ import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google';
+ import './globals.css';
+ import Navbar from '@/components/Navbar';
+@@ -34,6 +34,28 @@ const mono = JetBrains_Mono({
+   display: 'swap',
+ });
+ 
++/**
++ * VIEWPORT — `viewportFit: 'cover'` es lo que activa las variables
++ * env(safe-area-inset-*). Sin él, en un iPhone con muesca girado a horizontal
++ * el navegador reserva franjas laterales y el encabezado fijo queda con el
++ * contenido pegado al recorte de pantalla; con él, el header puede respetar el
++ * área segura (ver components/Navbar.tsx).
++ *
++ * `maximumScale` y `userScalable` se dejan en sus valores permisivos a
++ * propósito: bloquear el zoom rompe la accesibilidad en móvil y es un fallo de
++ * WCAG 1.4.4, además de un problema real para un jefe de compras leyendo una
++ * ficha técnica en el teléfono.
++ */
++export const viewport: Viewport = {
++  width: 'device-width',
++  initialScale: 1,
++  viewportFit: 'cover',
++  themeColor: [
++    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
++    { media: '(prefers-color-scheme: dark)', color: '#0A2540' },
++  ],
++};
++
+ export const metadata: Metadata = {
+   title: {
+     default: 'Plastilonas Peruanas SAC | Soluciones Industriales de Lona y Plástico',
+@@ -48,7 +70,7 @@ export const metadata: Metadata = {
+     // agente la leen. El <title> es un espacio de clic, no un registro legal.
+     template: '%s | Plastilonas',
+   },
+-  description: 'Más de 15 años fabricando e instalando soluciones industriales a medida en el Perú: big bags, lonas y cobertores, geosintéticos, estructuras y arquitectura textil, mallas agrícolas, ventilación industrial y más. Un solo proveedor, fabricación propia e instalación.',
++  description: 'Fabricante peruano de textiles industriales a medida desde 2009: big bags, lonas y cobertores, geosintéticos, estructuras, mallas agrícolas y ventilación minera. Un solo proveedor, fabricación propia e instalación en el Perú.',
+   keywords: [
+     'plastilonas peruanas',
+     'big bags lima',
+diff --git a/app/nosotros/page.tsx b/app/nosotros/page.tsx
+index 6e090c4..7adb7ae 100644
+--- a/app/nosotros/page.tsx
++++ b/app/nosotros/page.tsx
+@@ -1,5 +1,6 @@
+ import type { Metadata } from 'next';
+ import { SITE } from '@/lib/site';
++import { COUNT_STATEMENT, YEARS_STATEMENT } from '@/lib/facts';
+ import Link from 'next/link';
+ 
+ const TITLE = `Nosotros: fabricantes peruanos desde ${SITE.foundingYear}`;
+@@ -23,13 +24,13 @@ export default function NosotrosPage() {
+     <div className="max-w-5xl mx-auto px-6 py-14">
+       <div className="max-w-3xl">
+         <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">DESDE 2009</div>
+-        <h1 className="t-display font-semibold text-[#0A2540]">Más de 15 años fabricando confianza en el Perú.</h1>
++        <h1 className="t-display font-semibold text-[#0A2540]">{YEARS_STATEMENT}.</h1>
+       </div>
+ 
+       <div className="prose prose-lg max-w-3xl mt-10 text-gray-700">
+         <p>Plastilonas Peruanas SAC nació en 2009 con una misión clara: fabricar productos textiles industriales a la medida exacta de cada proyecto, con precio directo de fabricante y respaldo técnico real.</p>
+         
+-        <p>Hoy, con 34 soluciones en 11 líneas de producto, abastecemos a minería, agricultura, construcción, transporte e industria en todo el Perú. Fabricamos e instalamos con equipo propio: una sola responsabilidad, del diseño técnico a la obra.</p>
++        <p>Hoy, con {COUNT_STATEMENT}, abastecemos a minería, agricultura, construcción, transporte e industria en todo el Perú. Fabricamos e instalamos con equipo propio: una sola responsabilidad, del diseño técnico a la obra.</p>
+       </div>
+ 
+       <div className="mt-14 grid md:grid-cols-3 gap-6">
+diff --git a/app/opengraph-image.tsx b/app/opengraph-image.tsx
+index 7f8070b..d08daab 100644
+--- a/app/opengraph-image.tsx
++++ b/app/opengraph-image.tsx
+@@ -47,7 +47,7 @@ export default function OpengraphImage() {
+             de lona y plástico a medida.
+           </div>
+           <div style={{ marginTop: 26, color: 'rgba(255,255,255,0.7)', fontSize: 28, display: 'flex' }}>
+-            Big Bags · Geosintéticos · Estructuras · Mallas · Ventilación · +15 años en el Perú
++            Big Bags · Geosintéticos · Estructuras · Mallas · Ventilación · Desde 2009 en el Perú
+           </div>
+         </div>
+ 
+diff --git a/app/page.tsx b/app/page.tsx
+index 4e6de06..b3fc18d 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -82,7 +82,7 @@ export default function Home() {
+             <h1 className="t-display font-semibold mb-6">Fabricación 100% a medida.<br />Instalación propia.<br />Un solo proveedor.</h1>
+           </Reveal>
+           <Reveal delay={0.1}>
+-            <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">Big Bags, geomembranas, estructuras, mallas, ventilación y geosintéticos: 34 soluciones en 11 líneas de producto, fabricadas e instaladas por nuestro propio equipo en el Perú.</p>
++            <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">Big Bags, geomembranas, estructuras, mallas, ventilación y geosintéticos: {products.length} soluciones en {productFamilies.length} líneas de producto, fabricadas e instaladas por nuestro propio equipo en el Perú.</p>
+           </Reveal>
+           <Reveal delay={0.15}>
+             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+diff --git a/app/proyectos/page.tsx b/app/proyectos/page.tsx
+new file mode 100644
+index 0000000..3d1fc17
+--- /dev/null
++++ b/app/proyectos/page.tsx
+@@ -0,0 +1,82 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++import { projectsPublicados } from '@/lib/projects';
++
++export const metadata: Metadata = {
++  title: 'Proyectos',
++  description:
++    'Evidencia de suministro publicada solo con confirmación. Clientes no nominados sin permiso.',
++  alternates: { canonical: '/proyectos' },
++};
++
++export default function ProyectosPage() {
++  const hay = projectsPublicados.length > 0;
++
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">EVIDENCIA</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">Proyectos, sin clientes inventados.</h1>
++
++      {hay ? (
++        <>
++          <p className="mt-4 text-gray-600">
++            Los nombres comerciales se omiten salvo permiso escrito del cliente. Cada ficha se
++            publica después de confirmarse con el área comercial.
++          </p>
++          <div className="mt-10 space-y-6">
++            {projectsPublicados.map((p) => (
++              <section key={p.slug} className="border border-gray-100 rounded-3xl p-6">
++                <div className="text-xs uppercase tracking-widest text-[#059669]">
++                  {p.country} · {p.region}
++                </div>
++                <h2 className="text-xl font-semibold text-[#0A2540] mt-1">{p.title}</h2>
++                <p className="text-sm text-gray-500 mt-1">{p.client}</p>
++                <p className="mt-4 text-sm text-gray-700"><strong>Reto.</strong> {p.challenge}</p>
++                <p className="mt-2 text-sm text-gray-700"><strong>Qué hicimos.</strong> {p.solution}</p>
++                <p className="mt-2 text-sm text-gray-700"><strong>Resultado publicado.</strong> {p.result}</p>
++                <p className="mt-3 text-xs text-gray-400">{p.yearLabel}</p>
++                <Link href={`/aplicaciones/${p.applicationSlug}`} className="inline-block mt-4 text-sm text-[#059669]">
++                  Ver aplicación →
++                </Link>
++              </section>
++            ))}
++          </div>
++        </>
++      ) : (
++        <>
++          <p className="mt-4 text-gray-600">
++            Todavía no hay ninguna ficha publicada en esta página. No es un descuido: una ficha de
++            proyecto solo se publica cuando el suministro está confirmado con el área comercial y,
++            si aparece el nombre del cliente, cuando ese cliente lo ha autorizado por escrito.
++          </p>
++          <p className="mt-4 text-gray-600">
++            Un comprador industrial que detecta un caso inexacto descarta el resto del sitio con él.
++            Preferimos una página vacía a una página que no se sostenga.
++          </p>
++          <div className="mt-10 border border-gray-100 rounded-3xl p-6 bg-gray-50/60">
++            <h2 className="text-lg font-semibold text-[#0A2540]">Mientras tanto, lo que sí es verificable</h2>
++            <ul className="mt-3 space-y-2 text-sm text-gray-700">
++              <li>
++                · <Link href="/confianza" className="text-[#059669]">Identidad de la empresa</Link> — RUC,
++                domicilio fiscal y clasificación industrial, contrastables en SUNAT.
++              </li>
++              <li>
++                · <Link href="/calidad" className="text-[#059669]">Proceso de planta</Link> — cómo se
++                fabrica, sin certificados que no existan.
++              </li>
++              <li>
++                · <Link href="/biblioteca" className="text-[#059669]">Biblioteca de especificación</Link> —
++                criterios técnicos que un ingeniero puede juzgar por sí mismo.
++              </li>
++            </ul>
++          </div>
++          <p className="mt-8 text-sm text-gray-500">
++            ¿Tiene un requerimiento concreto?{' '}
++            <Link href="/cotizacion" className="text-[#059669] font-medium">Pida una cotización</Link>{' '}
++            y se responde con especificación, no con adjetivos.
++          </p>
++        </>
++      )}
++    </div>
++  );
++}
+diff --git a/app/pt/page.tsx b/app/pt/page.tsx
+new file mode 100644
+index 0000000..59afae4
+--- /dev/null
++++ b/app/pt/page.tsx
+@@ -0,0 +1,25 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++import { SITE } from '@/lib/site';
++import { COUNT_STATEMENT } from '@/lib/facts';
++
++export const metadata: Metadata = {
++  title: 'Fabricante peruano de têxteis industriais',
++  description: 'Fábrica em Chorrillos, Lima. Exportação para o Brasil avaliada por RFQ.',
++  alternates: { canonical: '/pt' },
++};
++
++export default function PortuguesePage() {
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">PORTUGUÊS · COMPRADOR BRASILEIRO</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">Fabricante peruano de têxteis industriais sob medida</h1>
++      <p className="mt-4 text-gray-600 leading-relaxed">
++        Fábrica em Chorrillos, Lima. Desde {SITE.foundingYear}. RUC {SITE.ruc}. {COUNT_STATEMENT}.
++        O sítio é em espanhol; esta página confirma identidade e abre o RFQ. Não há tabela de preços em BRL.
++      </p>
++      <p className="mt-6 text-sm">Vendas: {SITE.email} · WhatsApp {SITE.phoneWhatsApp}</p>
++      <Link href="/cotizacion" className="btn mt-8 inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">Abrir RFQ</Link>
++    </div>
++  );
++}
+diff --git a/app/sitemap.ts b/app/sitemap.ts
+index c4b93ad..0f724e0 100644
+--- a/app/sitemap.ts
++++ b/app/sitemap.ts
+@@ -23,6 +23,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
+     { url: `${SITE.url}/nosotros`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+     { url: `${SITE.url}/contacto`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
+     { url: `${SITE.url}/cotizacion`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
++    { url: `${SITE.url}/aplicaciones`, lastModified: now, changeFrequency: "monthly", priority: 0.85 },
++    { url: `${SITE.url}/biblioteca`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
++    { url: `${SITE.url}/proyectos`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
++    { url: `${SITE.url}/compras`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
++    { url: `${SITE.url}/calidad`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
++    { url: `${SITE.url}/socios`, lastModified: now, changeFrequency: "monthly", priority: 0.55 },
++    { url: `${SITE.url}/configurador`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
++    { url: `${SITE.url}/compradores`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
++    { url: `${SITE.url}/exportacion`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
++    { url: `${SITE.url}/distribuidores`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
++    { url: `${SITE.url}/confianza`, lastModified: now, changeFrequency: "yearly", priority: 0.7 },
++    { url: `${SITE.url}/en`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
++    { url: `${SITE.url}/pt`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+     { url: `${SITE.url}/local`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+     { url: `${SITE.url}/industria`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+     { url: `${SITE.url}/recursos`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+@@ -44,6 +57,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
+     lastModified: now, changeFrequency: "monthly", priority: 0.8,
+   }));
+ 
++  const applicationHubs = ['ventilacion-subterranea','toldos-camion','proteccion-cultivo','impermeabilizacion-pozas','coberturas-obra','campamentos-mineros','granel-embalaje','contencion-fluidos'];
++  const applicationRoutes: MetadataRoute.Sitemap = applicationHubs.map((slug) => ({
++    url: `${SITE.url}/aplicaciones/${slug}`,
++    lastModified: now, changeFrequency: "monthly" as const, priority: 0.8,
++  }));
++
++  const guideHubs = ['seleccion-mangas-ventilacion','gramaje-lona-industrial','especificacion-fibc','seleccion-geomembrana','seleccion-malla-agricola'];
++  const guideRoutes: MetadataRoute.Sitemap = guideHubs.map((slug) => ({
++    url: `${SITE.url}/biblioteca/${slug}`,
++    lastModified: now, changeFrequency: "monthly" as const, priority: 0.75,
++  }));
++
+   const localRoutes: MetadataRoute.Sitemap = (ciudades as { slug: string }[]).map((c) => ({
+     url: `${SITE.url}/local/${c.slug}`,
+     lastModified: now, changeFrequency: "monthly", priority: 0.7,
+@@ -138,5 +163,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
+   }));
+ 
+   return [...staticRoutes, ...industriaRoutes, ...marcoRoutes, ...calculadoraRoutes, ...informeRoutes, ...glosarioRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
+-    ...localRoutes, ...articleRoutes];
++    ...applicationRoutes, ...guideRoutes, ...localRoutes, ...articleRoutes];
+ }
+diff --git a/app/socios/page.tsx b/app/socios/page.tsx
+new file mode 100644
+index 0000000..cd79cdc
+--- /dev/null
++++ b/app/socios/page.tsx
+@@ -0,0 +1,28 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++
++export const metadata: Metadata = {
++  title: 'Partners de ingeniería y proyecto',
++  description: 'EPC, estudios y contratistas. Canal de especificación, no programa de afiliados.',
++  alternates: { canonical: '/socios' },
++};
++
++export default function SociosPage() {
++  return (
++    <div className="max-w-3xl mx-auto px-6 py-14">
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">PARTNERS</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">Ingeniería y proyecto</h1>
++      <p className="mt-4 text-gray-600">EPC, estudios, contratistas de mina y de obra, integradores agrícolas. No es un programa de afiliados.</p>
++      <ul className="mt-6 list-disc pl-5 text-sm text-gray-700 space-y-1">
++        <li>Biblioteca técnica HTML y calculadoras preliminares</li>
++        <li>RFQ con identificador</li>
++        <li>Muestras y fichas de lote cuando el material las tiene</li>
++        <li>Apoyo de especificación — no sustituimos al ingeniero del proyecto</li>
++      </ul>
++      <div className="mt-8 flex flex-wrap gap-3">
++        <Link href="/cotizacion" className="btn inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">RFQ de partner</Link>
++        <Link href="/distribuidores" className="btn inline-flex border border-gray-200 px-5 py-3 rounded-2xl">Canal de distribución</Link>
++      </div>
++    </div>
++  );
++}
+diff --git a/components/Chatbot.tsx b/components/Chatbot.tsx
+index d900805..e8bd44a 100644
+--- a/components/Chatbot.tsx
++++ b/components/Chatbot.tsx
+@@ -18,7 +18,7 @@ export default function Chatbot() {
+       {
+         id: 'welcome',
+         role: 'assistant',
+-        content: '¡Hola! Soy el asistente virtual de Plastilonas Peruanas. Con más de 15 años de experiencia en soluciones textiles industriales, estoy aquí para ayudarle a encontrar la mejor solución para su proyecto. ¿En qué puedo asistirle hoy?',
++        content: '¡Hola! Soy el asistente de Plastilonas Peruanas, fabricante en Chorrillos desde 2009. No invento precios ni certificaciones. ¿Qué necesita cubrir, ventilar o contener?',
+       },
+     ],
+   });
+diff --git a/components/CountUp.tsx b/components/CountUp.tsx
+index 55ff3dc..3b5156b 100644
+--- a/components/CountUp.tsx
++++ b/components/CountUp.tsx
+@@ -5,10 +5,10 @@ import { useInView } from 'framer-motion';
+ 
+ /**
+  * Contador animado. Arranca cuando entra en pantalla (una sola vez).
+- * - Usa easeOutCubic: rápido al inicio, se asienta al final (se siente "vivo").
+- * - Respeta prefers-reduced-motion (muestra el valor final de inmediato).
+- * - Se renderiza con .tabular-nums -> monoespaciada: los dígitos no bailan
+- *   de ancho mientras cuentan.
++ *
++ * P0: el estado inicial ERA 0, así que SSR y el primer paint mostraban
++ * "0 Años fabricando" si el observer no disparaba. Ahora el HTML inicial
++ * ya lleva el valor final; la animación solo corre en cliente.
+  */
+ export default function CountUp({
+   to,
+@@ -20,19 +20,23 @@ export default function CountUp({
+   to?: number;
+   prefix?: string;
+   suffix?: string;
+-  display?: string;   // valores no numéricos, p. ej. "24/7"
++  display?: string;
+   duration?: number;
+ }) {
+   const ref = useRef<HTMLSpanElement>(null);
+   const inView = useInView(ref, { once: true, margin: '-40px' });
+-  const [n, setN] = useState(0);
++  const finalValue = to ?? 0;
++  const [n, setN] = useState(finalValue);
++  const [hasAnimated, setHasAnimated] = useState(false);
+ 
+   useEffect(() => {
+-    if (display || to === undefined || !inView) return;
++    if (display || to === undefined || !inView || hasAnimated) return;
+     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+       setN(to);
++      setHasAnimated(true);
+       return;
+     }
++    setN(0);
+     let raf = 0;
+     const start = performance.now();
+     const tick = (now: number) => {
+@@ -40,10 +44,11 @@ export default function CountUp({
+       const eased = 1 - Math.pow(1 - p, 3);
+       setN(Math.round(to * eased));
+       if (p < 1) raf = requestAnimationFrame(tick);
++      else setHasAnimated(true);
+     };
+     raf = requestAnimationFrame(tick);
+     return () => cancelAnimationFrame(raf);
+-  }, [inView, to, duration, display]);
++  }, [inView, to, duration, display, hasAnimated]);
+ 
+   return <span ref={ref}>{display ?? `${prefix}${n}${suffix}`}</span>;
+ }
+diff --git a/components/Footer.tsx b/components/Footer.tsx
+index 2ab3f87..19725f0 100644
+--- a/components/Footer.tsx
++++ b/components/Footer.tsx
+@@ -41,6 +41,22 @@ export default function Footer() {
+       { label: 'Contacto', href: '/contacto' },
+       { label: 'Solicitar Cotización', href: '/cotizacion' },
+     ]},
++    { title: 'INDUSTRIA E INTERNACIONAL', links: [
++      { label: 'Hubs de industria', href: '/industria' },
++      { label: 'Aplicaciones', href: '/aplicaciones' },
++      { label: 'Biblioteca técnica', href: '/biblioteca' },
++      { label: 'Proyectos', href: '/proyectos' },
++      { label: 'Centro de compras', href: '/compras' },
++      { label: 'Calidad', href: '/calidad' },
++      { label: 'Configurador FIBC', href: '/configurador' },
++      { label: 'Compradores internacionales', href: '/compradores' },
++      { label: 'Exportación', href: '/exportacion' },
++      { label: 'Distribuidores', href: '/distribuidores' },
++      { label: 'Partners de ingeniería', href: '/socios' },
++      { label: 'Centro de confianza', href: '/confianza' },
++      { label: 'English', href: '/en' },
++      { label: 'Português', href: '/pt' },
++    ]},
+     { title: 'CONTACTO', links: [
+       { label: '+51 998 117 065 · Central', href: 'tel:+51998117065', external: true },
+       { label: 'ventas@plastilonas.com', href: 'mailto:ventas@plastilonas.com', external: true },
+@@ -59,7 +75,7 @@ export default function Footer() {
+             </div>
+             <div className="font-semibold text-lg tracking-tight text-white">Plastilonas Peruanas SAC</div>
+           </div>
+-          <p className="text-white/60 text-sm leading-relaxed mb-5">Fabricación e instalación propias. +15 años entregando a todo el Perú.</p>
++          <p className="text-white/60 text-sm leading-relaxed mb-5">Fabricación e instalación propias. En el Perú desde 2009.</p>
+           <WhatsAppLink context="footer-cta" message="Hola, quisiera información sobre sus productos." className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-[#0A2540] font-semibold py-3.5 rounded-2xl mb-6 active:scale-[0.99] transition">
+             <Phone className="w-4 h-4" /> WhatsApp 24/7 · {WHATSAPP_DISPLAY}
+           </WhatsAppLink>
+@@ -79,11 +95,11 @@ export default function Footer() {
+               <div className="font-semibold text-2xl tracking-tight text-white">Plastilonas Peruanas SAC</div>
+             </div>
+             <p className="text-white/70 max-w-md leading-relaxed t-body">
+-              Más de 15 años fabricando e instalando soluciones textiles industriales para los sectores más exigentes del Perú. Fabricación propia, importación directa y respaldo técnico en cada proyecto.
++              Fabricación e instalación de soluciones textiles industriales desde 2009. Fabricación propia, importación directa y respaldo técnico en cada proyecto.
+             </p>
+             <div className="flex flex-wrap items-center gap-4 mt-6">
+               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">
+-                <Award className="w-3.5 h-3.5" /> +15 años de experiencia
++                <Award className="w-3.5 h-3.5" /> Desde 2009
+               </div>
+               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">
+                 <Users className="w-3.5 h-3.5" /> Fabricación 100% a medida
+diff --git a/components/Navbar.tsx b/components/Navbar.tsx
+index c36a722..23a5e9e 100644
+--- a/components/Navbar.tsx
++++ b/components/Navbar.tsx
+@@ -1,6 +1,6 @@
+ 'use client';
+ 
+-import React, { useState } from 'react';
++import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+ import { familyHrefByName } from '@/lib/families';
+ import Link from 'next/link';
+ import Image from 'next/image';
+@@ -12,224 +12,452 @@ import {
+ } from 'lucide-react';
+ import { motion, AnimatePresence } from 'framer-motion';
+ import { productFamilies, sectors } from '@/lib/products';
++import { INDUSTRIAS } from '@/lib/industrias';
+ import CommandPalette from './CommandPalette';
+ import CotizacionModal from './CotizacionModal';
+ import WhatsAppLink from './WhatsAppLink';
+ import CartButton from './CartButton';
+ import { ThemeToggle } from './ThemeToggle';
+ 
+-const navLinks = [
+-  { href: '/productos', label: 'Productos' },
+-  { href: '/servicios', label: 'Servicios' },
+-  { href: '/recursos', label: 'Recursos' },
+-  { href: '/soluciones', label: 'Soluciones' },
+-  { href: '/informes', label: 'Informes' },
+-  { href: '/indicadores', label: 'Indicadores' },
+-  { href: '/glosario', label: 'Glosario' },
+-  { href: '/marco', label: 'Marco' },
+-  { href: '/novedades', label: 'Novedades' },
+-  { href: '/nosotros', label: 'Nosotros' },
+-  { href: '/contacto', label: 'Contacto' },
++/**
++ * NAVEGACIÓN — agrupada por decisión de compra, no por orden de creación.
++ *
++ * La barra llegó a tener once entradas de primer nivel (Productos, Servicios,
++ * Recursos, Soluciones, Informes, Indicadores, Glosario, Marco, Novedades,
++ * Nosotros, Contacto). Medido con Chromium, ese conjunto se recortaba en TODOS
++ * los anchos entre 1024 y 1920 px: en Full HD el botón «Solicitar Cotización»
++ * terminaba en x=2038 sobre un viewport de 1920, es decir, el CTA principal del
++ * sitio era invisible en la resolución de escritorio más común del mundo.
++ *
++ * El arreglo no es mover el breakpoint —eso sería cambiar una suposición por
++ * otra— sino reducir el conjunto a seis entradas y agrupar bajo ellas lo que
++ * pertenece junto:
++ *
++ *   Productos    → el catálogo, por categoría y por sector (mega-menú)
++ *   Industrias   → los hubs sectoriales, que hasta ahora no estaban en el menú
++ *   Soluciones   → conjuntos de ingeniería, no piezas sueltas
++ *   Servicios    → fabricación e instalación
++ *   Recursos     → todo el conocimiento: guías, informes, indicadores,
++ *                  glosario, marco, calculadoras, descargas, novedades
++ *   Nosotros     → la empresa
++ *
++ * «Contacto» sale del menú principal porque ya vive en la barra utilitaria
++ * superior y en el pie: repetirlo tres veces gastaba ancho sin ganar nada.
++ *
++ * Los paneles desplegables se renderizan SIEMPRE en el DOM y se ocultan por
++ * CSS, no montándolos al pasar el ratón. Un rastreador que no ejecuta eventos
++ * de puntero ve así los enlaces de sector y de recurso igual que una persona.
++ */
++interface EntradaHija {
++  href: string;
++  label: string;
++  nota?: string;
++}
++
++type Entrada =
++  | { tipo: 'mega'; href: string; label: string }
++  | { tipo: 'grupo'; href: string; label: string; hijos: EntradaHija[] }
++  | { tipo: 'enlace'; href: string; label: string };
++
++const NAV: Entrada[] = [
++  { tipo: 'mega', href: '/productos', label: 'Productos' },
++  {
++    tipo: 'grupo',
++    href: '/industria',
++    label: 'Industrias',
++    // Se derivan del catálogo: añadir un sector en lib/industrias.ts lo pone
++    // en el menú sin tocar este archivo.
++    hijos: INDUSTRIAS.map((i) => ({ href: `/industria/${i.slug}`, label: i.nombre })),
++  },
++  { tipo: 'enlace', href: '/soluciones', label: 'Soluciones' },
++  { tipo: 'enlace', href: '/servicios', label: 'Servicios' },
++  {
++    tipo: 'grupo',
++    href: '/recursos',
++    label: 'Recursos',
++    hijos: [
++      { href: '/recursos', label: 'Guías técnicas', nota: 'Cómo se especifica cada familia' },
++      { href: '/calculadoras', label: 'Calculadoras', nota: 'Predimensionado con método publicado' },
++      { href: '/informes', label: 'Informes', nota: 'Sector y formación de precio' },
++      { href: '/indicadores', label: 'Indicadores', nota: 'Datos con fuente oficial' },
++      { href: '/glosario', label: 'Glosario', nota: 'El vocabulario de compra' },
++      { href: '/marco', label: 'Marco de evaluación', nota: 'Cómo comparar proveedores' },
++      { href: '/descargas', label: 'Descargas', nota: 'Fichas y catálogos en PDF' },
++      { href: '/novedades', label: 'Novedades', nota: 'Qué ha cambiado en el sitio' },
++    ],
++  },
++  { tipo: 'enlace', href: '/nosotros', label: 'Nosotros' },
+ ];
+ 
++/** Todos los enlaces del menú, aplanados. Lo usa el menú móvil y «Más». */
++const TODAS_LAS_RUTAS: EntradaHija[] = NAV.flatMap((e) =>
++  e.tipo === 'grupo' ? [{ href: e.href, label: e.label }, ...e.hijos] : [{ href: e.href, label: e.label }],
++);
++
+ // Eje 1 (por categoría) y Eje 2 (por sector) se derivan del catálogo, de modo
+ // que agregar una familia o un sector en lib/products.ts actualiza el menú.
+-const familyHref = (name: string) =>
+-  familyHrefByName(name);
+-const sectorHref = (name: string) =>
+-  `/productos?sector=${encodeURIComponent(name)}`;
++const familyHref = (name: string) => familyHrefByName(name);
++const sectorHref = (name: string) => `/productos?sector=${encodeURIComponent(name)}`;
++
++/**
++ * ¿Cuántas entradas caben de verdad?
++ *
++ * No lo decide un breakpoint. Una fila oculta —absoluta, no participa en el
++ * layout— contiene siempre las entradas a su ancho natural; de ahí se leen las
++ * medidas reales y se compara contra el ancho disponible del contenedor
++ * flexible. Lo que no entra se repliega en «Más», que conserva los enlaces.
++ *
++ * Se recalcula ante: cambio de tamaño del contenedor, cambio de la fila de
++ * medida (por ejemplo cuando termina de cargar la tipografía, que altera cada
++ * ancho) y al completarse document.fonts. Por eso no depende de adivinar
++ * cuánto ocupa «Indicadores» en Inter frente a la fuente de reserva.
++ */
++function useEntradasQueCaben(
++  contenedor: React.RefObject<HTMLDivElement | null>,
++  regla: React.RefObject<HTMLDivElement | null>,
++  total: number,
++) {
++  const [visibles, setVisibles] = useState(total);
++
++  const recalcular = useCallback(() => {
++    const cont = contenedor.current;
++    const filaRegla = regla.current;
++    if (!cont || !filaRegla) return;
++
++    const disponible = cont.clientWidth;
++    if (disponible === 0) return;
++
++    const separacion = parseFloat(getComputedStyle(filaRegla).columnGap || '24') || 24;
++    const anchos = Array.from(filaRegla.children).map((c) => (c as HTMLElement).offsetWidth);
++    const anchoMas = filaRegla.dataset.anchoMas ? Number(filaRegla.dataset.anchoMas) : 84;
++
++    let usado = 0;
++    let n = 0;
++    for (let i = 0; i < anchos.length; i++) {
++      const conEste = usado + anchos[i] + (i > 0 ? separacion : 0);
++      const faltanPorColocar = i < anchos.length - 1;
++      // Si aún quedan entradas por colocar hay que reservar sitio para «Más»;
++      // si esta es la última, no hace falta.
++      const reserva = faltanPorColocar ? separacion + anchoMas : 0;
++      if (conEste + reserva > disponible) break;
++      usado = conEste;
++      n++;
++    }
++    setVisibles(n);
++  }, [contenedor, regla]);
++
++  useLayoutEffect(() => {
++    recalcular();
++    const cont = contenedor.current;
++    const filaRegla = regla.current;
++    if (!cont || !filaRegla) return;
++
++    const observador = new ResizeObserver(recalcular);
++    observador.observe(cont);
++    observador.observe(filaRegla);
++    window.addEventListener('resize', recalcular);
++    window.addEventListener('orientationchange', recalcular);
++    // La tipografía web cambia todos los anchos al cargar.
++    if (typeof document !== 'undefined' && 'fonts' in document) {
++      (document as Document & { fonts: FontFaceSet }).fonts.ready.then(recalcular).catch(() => {});
++    }
++    return () => {
++      observador.disconnect();
++      window.removeEventListener('resize', recalcular);
++      window.removeEventListener('orientationchange', recalcular);
++    };
++  }, [recalcular, contenedor, regla]);
++
++  return visibles;
++}
+ 
+ export default function Navbar() {
+   const [isOpen, setIsOpen] = useState(false);
+-  const [showMegaMenu, setShowMegaMenu] = useState(false);
++  const [abierto, setAbierto] = useState<string | null>(null);
+   const [showCommand, setShowCommand] = useState(false);
+   const [showCotizacion, setShowCotizacion] = useState(false);
+   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
++  const [mobileGrupo, setMobileGrupo] = useState<string | null>(null);
+   const pathname = usePathname();
+   const { data: session } = useSession();
+   const user = session?.user ?? null;
+   const headerVisible = useHideOnScroll();
+ 
++  const zonaNav = useRef<HTMLDivElement>(null);
++  const reglaNav = useRef<HTMLDivElement>(null);
++  const visibles = useEntradasQueCaben(zonaNav, reglaNav, NAV.length);
++
++  const inline = NAV.slice(0, visibles);
++  const replegadas = NAV.slice(visibles);
++
+   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
++  const grupoActivo = (e: Entrada) =>
++    isActive(e.href) || (e.tipo === 'grupo' && e.hijos.some((h) => isActive(h.href)));
++
++  // Cerrar cualquier desplegable con Escape y al cambiar de ruta.
++  useEffect(() => {
++    setAbierto(null);
++    setIsOpen(false);
++  }, [pathname]);
++  useEffect(() => {
++    const alPulsar = (e: KeyboardEvent) => {
++      if (e.key === 'Escape') { setAbierto(null); setIsOpen(false); }
++    };
++    window.addEventListener('keydown', alPulsar);
++    return () => window.removeEventListener('keydown', alPulsar);
++  }, []);
++
++  /**
++   * `py-1` no es decorativo: sin él la caja del enlace mide 20px de alto y
++   * queda por debajo del mínimo de 24×24 que pide WCAG 2.5.8. En un portátil
++   * con panel táctil o en un iPad en horizontal —donde este menú sí se muestra—
++   * eso se nota al intentar acertar.
++   */
++  const claseEnlace = (activo: boolean) =>
++    `inline-flex items-center min-h-[24px] py-1 whitespace-nowrap transition-colors hover:text-[#059669] ${
++      activo ? 'text-[#059669]' : 'text-[#0A2540] dark:text-[var(--text)]'
++    }`;
++
++  /** Panel de un grupo. Siempre en el DOM; se oculta por CSS, no se desmonta. */
++  const Panel = ({ e }: { e: Extract<Entrada, { tipo: 'grupo' }> }) => (
++    <div
++      className={`absolute top-full left-0 mt-3 w-[min(320px,calc(100vw-3rem))] max-h-[70dvh] overflow-y-auto rounded-2xl border border-gray-100 dark:border-[var(--border)] bg-white dark:bg-[var(--surface-raised)] p-3 shadow-xl ${
++        abierto === e.label ? 'block' : 'hidden'
++      }`}
++      role="menu"
++      aria-label={e.label}
++    >
++      <Link
++        href={e.href}
++        className="block rounded-xl px-3 py-2 text-sm font-semibold text-[#0A2540] hover:bg-gray-50 dark:text-[var(--text)] dark:hover:bg-[var(--surface-muted)]"
++        onClick={() => setAbierto(null)}
++      >
++        Ver {e.label.toLowerCase()} →
++      </Link>
++      <div className="my-2 border-t border-gray-100 dark:border-[var(--border)]" />
++      <div className="flex flex-col">
++        {e.hijos.map((h) => (
++          <Link
++            key={h.href}
++            href={h.href}
++            onClick={() => setAbierto(null)}
++            className="group flex flex-col rounded-xl px-3 py-2 transition-colors hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)]"
++          >
++            <span className={`text-sm font-medium ${isActive(h.href) ? 'text-[#059669]' : 'text-[#0A2540] dark:text-[var(--text)] group-hover:text-[#059669]'}`}>
++              {h.label}
++            </span>
++            {h.nota && (
++              <span className="text-xs text-gray-400 dark:text-[var(--text-muted)]">{h.nota}</span>
++            )}
++          </Link>
++        ))}
++      </div>
++    </div>
++  );
+ 
+   return (
+     <>
+       {/* Encabezado fijo que se oculta al bajar y reaparece al subir.
+-          Usa transform, no cambia el flujo: la página nunca "salta". */}
++          Usa transform, no cambia el flujo: la página nunca "salta".
++          El padding lateral respeta el recorte de pantalla en horizontal
++          (iPhone con muesca girado), donde el área segura no es cero. */}
+       <div
+         className={`fixed top-0 inset-x-0 z-50 transition-transform duration-300 ease-out ${
+           headerVisible || isOpen ? 'translate-y-0' : '-translate-y-full'
+         }`}
++        style={{
++          paddingLeft: 'env(safe-area-inset-left)',
++          paddingRight: 'env(safe-area-inset-right)',
++        }}
+       >
+-        {/* Barra utilitaria superior (estilo AWS) */}
++        {/* Barra utilitaria superior (estilo AWS). Las áreas táctiles se
++            dimensionan a 24px de alto como mínimo: WCAG 2.5.8. */}
+         <div className="hidden md:block bg-[#0A2540] dark:bg-[#060D18] text-white/80 text-xs border-b border-transparent dark:border-[#24354F]">
+-          <div className="max-w-7xl mx-auto px-6 h-9 flex items-center justify-end gap-6">
+-            <a href="tel:+51998117065" className="hover:text-white transition-colors">
++          <div className="max-w-7xl mx-auto px-6 h-10 flex items-center justify-end gap-5">
++            <a href="tel:+51998117065" className="inline-flex items-center min-h-[24px] px-1 hover:text-white transition-colors">
+               +51 998 117 065
+             </a>
+             <WhatsAppLink
+               context="navbar-topbar"
+               message="Hola, quisiera información sobre sus productos."
+-              className="hover:text-white transition-colors"
++              className="inline-flex items-center min-h-[24px] px-1 hover:text-white transition-colors"
+             >
+               WhatsApp
+             </WhatsAppLink>
+-            <Link href="/contacto" className="hover:text-white transition-colors">
++            <Link href="/contacto" className="inline-flex items-center min-h-[24px] px-1 hover:text-white transition-colors">
+               Contáctenos
+             </Link>
+           </div>
+         </div>
+ 
+         <nav className="bg-white/95 dark:bg-[#1C2C46]/95 backdrop-blur-lg border-b border-gray-200 dark:border-[var(--border)]">
+-          <div className="max-w-7xl mx-auto px-6">
+-            <div className="flex items-center justify-between gap-4 h-20">
+-            {/* Logo */}
+-            <Link href="/" className="flex items-center gap-3 group shrink-0">
++          <div className="max-w-7xl mx-auto px-4 sm:px-6">
++            <div className="flex items-center gap-3 xl:gap-6 h-20">
++            {/* Logo. `min-w-0` permite que el rótulo ceda antes de empujar
++                al resto fuera de la pantalla. */}
++            <Link href="/" className="flex items-center gap-3 group shrink-0 min-w-0">
+               <div className="w-9 h-9 shrink-0 rounded-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/10 transition-transform group-hover:scale-[1.04]">
+                 <Image src="/logo.png" alt="Plastilonas Peruanas SAC" width={36} height={36} priority className="w-full h-full object-cover" />
+               </div>
+-              <div className="hidden sm:block">
+-                <div className="font-semibold text-xl tracking-tight whitespace-nowrap text-[#0A2540] dark:text-[var(--text)]">Plastilonas Peruanas</div>
++              <div className="hidden sm:block min-w-0">
++                <div className="font-semibold text-lg xl:text-xl tracking-tight truncate text-[#0A2540] dark:text-[var(--text)]">Plastilonas Peruanas</div>
+                 <div className="t-micro whitespace-nowrap text-gray-500 dark:text-[var(--text-muted)] -mt-1 font-medium">SAC • DESDE 2009</div>
+               </div>
+             </Link>
+ 
+-            {/* Desktop Navigation */}
+-            <div className="hidden lg:flex items-center gap-6 xl:gap-8 text-sm font-medium shrink-0">
+-              {/* Mega Menu Productos (dos ejes: categoría + sector) */}
+-              <div
+-                className="relative"
+-                onMouseEnter={() => setShowMegaMenu(true)}
+-                onMouseLeave={() => setShowMegaMenu(false)}
+-              >
+-                <button
+-                  className={`flex items-center gap-1.5 whitespace-nowrap transition-colors hover:text-[#059669] ${isActive('/productos') ? 'text-[#059669]' : 'text-[#0A2540] dark:text-[var(--text)]'}`}
+-                  onClick={() => setShowMegaMenu(!showMegaMenu)}
+-                  aria-expanded={showMegaMenu}
+-                  aria-haspopup="true"
+-                >
+-                  Productos
+-                  <ChevronDown className="w-4 h-4" />
+-                </button>
+-
+-                <AnimatePresence>
+-                  {showMegaMenu && (
+-                    <motion.div
+-                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+-                      animate={{ opacity: 1, y: 0, scale: 1 }}
+-                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+-                      transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
+-                      className="mega-menu absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[860px] bg-white dark:bg-[var(--surface-raised)] rounded-2xl shadow-xl border border-gray-100 dark:border-[var(--border)] p-8"
++            {/* Zona de navegación: es la única que cede ancho. `min-w-0` es lo
++                que permite que se encoja en lugar de desbordar; sin él, un
++                hijo con whitespace-nowrap fuerza el ancho del padre y el
++                contenido se sale de la pantalla. Ese era exactamente el fallo. */}
++            <div ref={zonaNav} className="relative hidden lg:block flex-1 min-w-0">
++              <div className="flex items-center gap-6 text-sm font-medium">
++                {inline.map((e) =>
++                  e.tipo === 'mega' ? (
++                    <div
++                      key={e.href}
++                      className="relative shrink-0"
++                      onMouseEnter={() => setAbierto('Productos')}
++                      onMouseLeave={() => setAbierto(null)}
+                     >
+-                      <div className="grid grid-cols-3 gap-x-8">
+-                        {/* Eje 1: por categoría (2 columnas de familias) */}
+-                        <div className="col-span-2">
+-                          <div className="text-xs uppercase tracking-[0.15em] text-[#059669] font-semibold mb-4">
+-                            Por categoría
+-                          </div>
+-                          <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+-                            {productFamilies.map((fam) => (
+-                              <Link
+-                                key={fam.slug}
+-                                href={familyHref(fam.name)}
+-                                className="group flex flex-col py-2 px-3 rounded-xl hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] transition-all"
+-                                onClick={() => setShowMegaMenu(false)}
+-                              >
+-                                <span className="font-medium text-[#0A2540] dark:text-[var(--text)] group-hover:text-[#059669] text-sm">
+-                                  {fam.name}
+-                                </span>
+-                                <span className="text-xs text-gray-400 dark:text-[var(--text-muted)]">
+-                                  {fam.tagline}
+-                                </span>
+-                              </Link>
+-                            ))}
+-                          </div>
+-                        </div>
++                      <button
++                        className={`gap-1.5 ${claseEnlace(isActive('/productos'))}`}
++                        onClick={() => setAbierto(abierto === 'Productos' ? null : 'Productos')}
++                        aria-expanded={abierto === 'Productos'}
++                        aria-haspopup="true"
++                      >
++                        Productos
++                        <ChevronDown className={`w-4 h-4 transition-transform ${abierto === 'Productos' ? 'rotate-180' : ''}`} />
++                      </button>
++                      <MegaProductos
++                        visible={abierto === 'Productos'}
++                        cerrar={() => setAbierto(null)}
++                        abrirBuscador={() => { setAbierto(null); setShowCommand(true); }}
++                      />
++                    </div>
++                  ) : e.tipo === 'grupo' ? (
++                    <div
++                      key={e.href}
++                      className="relative shrink-0"
++                      onMouseEnter={() => setAbierto(e.label)}
++                      onMouseLeave={() => setAbierto(null)}
++                    >
++                      <button
++                        className={`gap-1.5 ${claseEnlace(grupoActivo(e))}`}
++                        onClick={() => setAbierto(abierto === e.label ? null : e.label)}
++                        aria-expanded={abierto === e.label}
++                        aria-haspopup="true"
++                      >
++                        {e.label}
++                        <ChevronDown className={`w-4 h-4 transition-transform ${abierto === e.label ? 'rotate-180' : ''}`} />
++                      </button>
++                      <Panel e={e} />
++                    </div>
++                  ) : (
++                    <Link key={e.href} href={e.href} className={`shrink-0 ${claseEnlace(isActive(e.href))}`}>
++                      {e.label}
++                    </Link>
++                  ),
++                )}
+ 
+-                        {/* Eje 2: por sector */}
+-                        <div className="border-l border-gray-100 dark:border-[var(--border)] pl-8">
+-                          <div className="text-xs uppercase tracking-[0.15em] text-[#059669] font-semibold mb-4">
+-                            Por sector
+-                          </div>
+-                          <div className="flex flex-col gap-1">
+-                            {sectors.map((sector) => (
++                {/* «Más»: recoge lo que no cupo. Nunca desaparece un enlace. */}
++                {replegadas.length > 0 && (
++                  <div
++                    className="relative shrink-0"
++                    onMouseEnter={() => setAbierto('__mas')}
++                    onMouseLeave={() => setAbierto(null)}
++                  >
++                    <button
++                      className={`gap-1.5 ${claseEnlace(replegadas.some(grupoActivo))}`}
++                      onClick={() => setAbierto(abierto === '__mas' ? null : '__mas')}
++                      aria-expanded={abierto === '__mas'}
++                      aria-haspopup="true"
++                      aria-label="Más secciones"
++                    >
++                      Más
++                      <ChevronDown className={`w-4 h-4 transition-transform ${abierto === '__mas' ? 'rotate-180' : ''}`} />
++                    </button>
++                    <div
++                      className={`absolute top-full right-0 mt-3 w-[min(300px,calc(100vw-3rem))] max-h-[70dvh] overflow-y-auto rounded-2xl border border-gray-100 dark:border-[var(--border)] bg-white dark:bg-[var(--surface-raised)] p-3 shadow-xl ${
++                        abierto === '__mas' ? 'block' : 'hidden'
++                      }`}
++                      role="menu"
++                    >
++                      {replegadas.map((e) => (
++                        <div key={e.href} className="mb-1 last:mb-0">
++                          <Link
++                            href={e.href}
++                            onClick={() => setAbierto(null)}
++                            className={`block rounded-xl px-3 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] ${isActive(e.href) ? 'text-[#059669]' : 'text-[#0A2540] dark:text-[var(--text)]'}`}
++                          >
++                            {e.label}
++                          </Link>
++                          {e.tipo === 'grupo' &&
++                            e.hijos.map((h) => (
+                               <Link
+-                                key={sector}
+-                                href={sectorHref(sector)}
+-                                className="py-1.5 px-3 rounded-lg text-sm text-gray-600 dark:text-[var(--text-muted)] hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] hover:text-[#059669] transition-all"
+-                                onClick={() => setShowMegaMenu(false)}
++                                key={h.href}
++                                href={h.href}
++                                onClick={() => setAbierto(null)}
++                                className={`block rounded-lg px-3 py-1.5 pl-6 text-sm hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] ${isActive(h.href) ? 'text-[#059669]' : 'text-gray-600 dark:text-[var(--text-muted)]'}`}
+                               >
+-                                {sector}
++                                {h.label}
+                               </Link>
+                             ))}
+-                          </div>
+                         </div>
+-                      </div>
+-
+-                      <div className="mt-6 pt-6 border-t dark:border-[var(--border)] flex items-center justify-between text-xs">
+-                        <Link
+-                          href="/productos"
+-                          onClick={() => setShowMegaMenu(false)}
+-                          className="text-[#059669] hover:underline font-medium"
+-                        >
+-                          Ver todo el catálogo →
+-                        </Link>
+-                        <button
+-                          onClick={() => {
+-                            setShowMegaMenu(false);
+-                            setShowCommand(true);
+-                          }}
+-                          className="flex items-center gap-2 text-[#059669] hover:underline font-medium"
+-                        >
+-                          <Search className="w-3.5 h-3.5" /> Buscar en catálogo
+-                        </button>
+-                      </div>
+-                    </motion.div>
+-                  )}
+-                </AnimatePresence>
++                      ))}
++                    </div>
++                  </div>
++                )}
+               </div>
+ 
+-              {navLinks.slice(1).map((link) => (
+-                <Link
+-                  key={link.href}
+-                  href={link.href}
+-                  className={`whitespace-nowrap transition-colors hover:text-[#059669] ${isActive(link.href) ? 'text-[#059669]' : 'text-[#0A2540] dark:text-[var(--text)]'}`}
++              {/* Fila de medida. Absoluta e invisible: no ocupa sitio en el
++                  layout, pero el motor sí calcula el ancho natural de cada
++                  entrada, que es lo que se compara arriba. aria-hidden y sin
++                  foco: no existe para lectores de pantalla ni para el tabulador. */}
++              <div className="absolute h-0 w-0 overflow-hidden" aria-hidden="true">
++                <div
++                  ref={reglaNav}
++                  data-ancho-mas="84"
++                  className="pointer-events-none absolute left-0 top-0 flex w-max items-center gap-6 text-sm font-medium"
+                 >
+-                  {link.label}
+-                </Link>
+-              ))}
++                  {NAV.map((e) => (
++                    <span key={e.href} className="flex shrink-0 items-center gap-1.5 whitespace-nowrap">
++                      {e.label}
++                      {e.tipo !== 'enlace' && <ChevronDown className="w-4 h-4" />}
++                    </span>
++                  ))}
++                </div>
++              </div>
+             </div>
+ 
+-            {/* Right Actions */}
+-            <div className="flex items-center gap-2 shrink-0">
+-              {/* Búsqueda móvil: AWS coloca la lupa en el header del móvil.
+-                  Con 34 productos en 11 familias, buscar es la vía más rápida. */}
++            {/* Acciones de la derecha. Se reducen antes de que la barra se
++                quede sin sitio: por debajo de xl el buscador pierde el rótulo,
++                «Iniciar sesión» pasa al menú y el CTA acorta su texto. */}
++            <div className="flex items-center gap-1.5 xl:gap-2 shrink-0 ml-auto lg:ml-0">
+               <button
+                 onClick={() => setShowCommand(true)}
+                 aria-label="Buscar productos"
+-                className="md:hidden p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#047857] transition-colors"
++                className="lg:hidden p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#047857] transition-colors"
+               >
+                 <Search className="w-5 h-5" />
+               </button>
+ 
+-              {/* Search Button */}
+               <button
+                 onClick={() => setShowCommand(true)}
+                 aria-label="Buscar productos"
+-                className="hidden md:flex items-center gap-2 px-3 xl:px-4 py-2 text-sm text-gray-500 dark:text-[var(--text-muted)] hover:text-[#0A2540] dark:hover:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] hover:border-gray-300 rounded-full transition-all active:scale-[0.985]"
++                className="hidden lg:flex items-center gap-2 px-2.5 xl:px-4 py-2 text-sm text-gray-500 dark:text-[var(--text-muted)] hover:text-[#0A2540] dark:hover:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] hover:border-gray-300 rounded-full transition-all active:scale-[0.985]"
+               >
+                 <Search className="w-4 h-4 shrink-0" />
+-                <span className="hidden xl:inline whitespace-nowrap">Buscar productos</span>
+-                <kbd className="hidden xl:block ml-1 px-1.5 py-0.5 t-micro font-mono bg-gray-100 dark:bg-[var(--surface-muted)] rounded">⌘K</kbd>
++                <span className="hidden 2xl:inline whitespace-nowrap">Buscar productos</span>
++                <kbd className="hidden 2xl:block ml-1 px-1.5 py-0.5 t-micro font-mono bg-gray-100 dark:bg-[var(--surface-muted)] rounded">⌘K</kbd>
+               </button>
+ 
+               <ThemeToggle />
+ 
+-              {/* Login / Account */}
+               {user ? (
+                 <Link
+                   href="/dashboard"
+-                  className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0A2540] hover:text-[#059669] border border-gray-200 hover:border-[#059669] rounded-full transition-all active:scale-[0.985]"
++                  aria-label="Mi cuenta"
++                  className="hidden xl:flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0A2540] hover:text-[#059669] border border-gray-200 hover:border-[#059669] rounded-full transition-all active:scale-[0.985]"
+                 >
+                   {user.image ? (
+                     // eslint-disable-next-line @next/next/no-img-element
+@@ -242,28 +470,29 @@ export default function Navbar() {
+               ) : (
+                 <Link
+                   href="/login"
+-                  className="hidden md:flex items-center px-3 py-2 text-sm font-medium whitespace-nowrap text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669] transition-colors"
++                  className="hidden xl:flex items-center px-3 py-2 text-sm font-medium whitespace-nowrap text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669] transition-colors"
+                 >
+                   Iniciar sesión
+                 </Link>
+               )}
+ 
+-              {/* Cotización Button - Primary CTA */}
++              {/* CTA principal. El texto se acorta antes de recortarse: en
++                  Full HD llegó a terminar en x=2038 sobre 1920 px de viewport. */}
+               <button
+                 onClick={() => setShowCotizacion(true)}
+-                className="hidden md:flex items-center gap-2.5 whitespace-nowrap bg-[#0A2540] dark:bg-[#10B981] hover:bg-[#059669] dark:hover:bg-[#34D399] text-white dark:text-[#0A2540] px-5 xl:btn btn-sm btn-primary text-sm font-semibold transition-all active:scale-[0.985] shadow-sm"
++                className="hidden md:inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-[#0A2540] px-4 xl:px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all active:scale-[0.985] hover:bg-[#059669] dark:bg-[#10B981] dark:text-[#0A2540] dark:hover:bg-[#34D399]"
+               >
+-                <Award className="w-4 h-4" />
+-                Solicitar Cotización
++                <Award className="w-4 h-4 shrink-0" />
++                <span className="hidden xl:inline">Solicitar Cotización</span>
++                <span className="xl:hidden">Cotizar</span>
+               </button>
+ 
+               <CartButton className="p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669]" />
+ 
+-              {/* Mobile Menu Button */}
+               <button
+                 onClick={() => setIsOpen(!isOpen)}
+                 className="lg:hidden p-2.5 text-[#0A2540] dark:text-[var(--text)]"
+-                aria-label="Toggle menu"
++                aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+                 aria-expanded={isOpen}
+               >
+                 {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+@@ -272,25 +501,31 @@ export default function Navbar() {
+           </div>
+         </div>
+ 
+-        {/* Mobile Menu */}
++        {/* Menú móvil. Altura acotada con dvh —no vh— porque en iOS la barra
++            del navegador cambia de alto al desplazarse y vh se queda con la
++            medida grande, dejando el final del menú bajo la interfaz del
++            sistema. El relleno inferior respeta la barra de gestos. */}
+         <AnimatePresence>
+           {isOpen && (
+             <motion.div
+               initial={{ opacity: 0, height: 0 }}
+               animate={{ opacity: 1, height: 'auto' }}
+               exit={{ opacity: 0, height: 0 }}
+-              className="lg:hidden border-t dark:border-[var(--border)] bg-white dark:bg-[var(--surface-raised)]"
++              className="lg:hidden border-t dark:border-[var(--border)] bg-white dark:bg-[var(--surface-raised)] overflow-hidden"
+             >
+-              <div className="px-6 py-8 flex flex-col gap-6 text-lg font-medium">
+-                {/* Productos con submenú desplegable de familias */}
++              <div
++                className="max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain px-5 sm:px-6 py-6 flex flex-col gap-1 text-base font-medium"
++                style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
++              >
++                {/* Productos con submenú de familias */}
+                 <div>
+                   <button
+                     onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
+-                    className="w-full flex items-center justify-between"
++                    className="w-full flex items-center justify-between min-h-[44px] py-1"
+                     aria-expanded={mobileProductsOpen}
+                   >
+                     <span className={isActive('/productos') ? 'text-[#059669]' : ''}>Productos</span>
+-                    <ChevronDown className={`w-5 h-5 transition-transform ${mobileProductsOpen ? 'rotate-180' : ''}`} />
++                    <ChevronDown className={`w-5 h-5 shrink-0 transition-transform ${mobileProductsOpen ? 'rotate-180' : ''}`} />
+                   </button>
+                   <AnimatePresence>
+                     {mobileProductsOpen && (
+@@ -300,13 +535,13 @@ export default function Navbar() {
+                         exit={{ opacity: 0, height: 0 }}
+                         className="overflow-hidden"
+                       >
+-                        <div className="mt-3 pl-3 flex flex-col gap-2 text-base font-normal text-gray-600 dark:text-[var(--text-muted)]">
++                        <div className="mt-1 mb-2 pl-3 flex flex-col text-base font-normal text-gray-600 dark:text-[var(--text-muted)]">
+                           {productFamilies.map((fam) => (
+                             <Link
+                               key={fam.slug}
+                               href={familyHref(fam.name)}
+                               onClick={() => setIsOpen(false)}
+-                              className="py-1 hover:text-[#059669]"
++                              className="flex items-center min-h-[44px] hover:text-[#059669]"
+                             >
+                               {fam.name}
+                             </Link>
+@@ -314,7 +549,7 @@ export default function Navbar() {
+                           <Link
+                             href="/productos"
+                             onClick={() => setIsOpen(false)}
+-                            className="py-1 text-[#059669] font-medium"
++                            className="flex items-center min-h-[44px] text-[#059669] font-medium"
+                           >
+                             Ver todo el catálogo →
+                           </Link>
+@@ -324,40 +559,98 @@ export default function Navbar() {
+                   </AnimatePresence>
+                 </div>
+ 
+-                {navLinks.slice(1).map((link) => (
+-                  <Link
+-                    key={link.href}
+-                    href={link.href}
+-                    onClick={() => setIsOpen(false)}
+-                    className={isActive(link.href) ? 'text-[#059669]' : ''}
+-                  >
+-                    {link.label}
+-                  </Link>
+-                ))}
+-                <div className="pt-4 border-t">
++                {/* El resto del menú, con los mismos grupos que en escritorio:
++                    un comprador que cambia de móvil a portátil encuentra la
++                    misma estructura, no dos sitios distintos. */}
++                {NAV.filter((e) => e.tipo !== 'mega').map((e) =>
++                  e.tipo === 'grupo' ? (
++                    <div key={e.href}>
++                      <button
++                        onClick={() => setMobileGrupo(mobileGrupo === e.label ? null : e.label)}
++                        className="w-full flex items-center justify-between min-h-[44px] py-1"
++                        aria-expanded={mobileGrupo === e.label}
++                      >
++                        <span className={grupoActivo(e) ? 'text-[#059669]' : ''}>{e.label}</span>
++                        <ChevronDown className={`w-5 h-5 shrink-0 transition-transform ${mobileGrupo === e.label ? 'rotate-180' : ''}`} />
++                      </button>
++                      <AnimatePresence>
++                        {mobileGrupo === e.label && (
++                          <motion.div
++                            initial={{ opacity: 0, height: 0 }}
++                            animate={{ opacity: 1, height: 'auto' }}
++                            exit={{ opacity: 0, height: 0 }}
++                            className="overflow-hidden"
++                          >
++                            <div className="mt-1 mb-2 pl-3 flex flex-col text-base font-normal text-gray-600 dark:text-[var(--text-muted)]">
++                              <Link
++                                href={e.href}
++                                onClick={() => setIsOpen(false)}
++                                className="flex items-center min-h-[44px] text-[#059669] font-medium"
++                              >
++                                Ver {e.label.toLowerCase()} →
++                              </Link>
++                              {e.hijos.map((h) => (
++                                <Link
++                                  key={h.href}
++                                  href={h.href}
++                                  onClick={() => setIsOpen(false)}
++                                  className={`flex items-center min-h-[44px] hover:text-[#059669] ${isActive(h.href) ? 'text-[#059669]' : ''}`}
++                                >
++                                  {h.label}
++                                </Link>
++                              ))}
++                            </div>
++                          </motion.div>
++                        )}
++                      </AnimatePresence>
++                    </div>
++                  ) : (
++                    <Link
++                      key={e.href}
++                      href={e.href}
++                      onClick={() => setIsOpen(false)}
++                      className={`flex items-center min-h-[44px] ${isActive(e.href) ? 'text-[#059669]' : ''}`}
++                    >
++                      {e.label}
++                    </Link>
++                  ),
++                )}
++
++                <Link
++                  href="/contacto"
++                  onClick={() => setIsOpen(false)}
++                  className={`flex items-center min-h-[44px] ${isActive('/contacto') ? 'text-[#059669]' : ''}`}
++                >
++                  Contacto
++                </Link>
++
++                <div className="pt-4 mt-2 border-t dark:border-[var(--border)]">
+                   <button
+-                    onClick={() => {
+-                      setIsOpen(false);
+-                      setShowCotizacion(true);
+-                    }}
+-                    className="w-full flex items-center justify-center gap-2 bg-[#0A2540] dark:bg-[#10B981] text-white dark:text-[#0A2540] py-3.5 rounded-2xl font-semibold"
++                    onClick={() => { setIsOpen(false); setShowCotizacion(true); }}
++                    className="w-full flex items-center justify-center gap-2 bg-[#0A2540] dark:bg-[#10B981] text-white dark:text-[#0A2540] min-h-[48px] py-3.5 rounded-2xl font-semibold"
+                   >
++                    <Award className="w-4 h-4" />
+                     Solicitar Cotización
+                   </button>
+                 </div>
+-                <Link href="/carrito" onClick={() => setIsOpen(false)} className="flex items-center gap-2">
+-                  <ShoppingCart className="w-4 h-4" /> Mi carrito
++
++                <Link href="/carrito" onClick={() => setIsOpen(false)} className="flex items-center gap-2 min-h-[44px]">
++                  <ShoppingCart className="w-4 h-4 shrink-0" /> Mi carrito
+                 </Link>
+                 <Link
+                   href={user ? '/dashboard' : '/login'}
+                   onClick={() => setIsOpen(false)}
+-                  className="flex items-center gap-2"
++                  className="flex items-center gap-2 min-h-[44px]"
+                 >
+-                  <LayoutDashboard className="w-4 h-4" />
++                  <LayoutDashboard className="w-4 h-4 shrink-0" />
+                   {user ? 'Mi Cuenta' : 'Iniciar sesión'}
+                 </Link>
+-                <WhatsAppLink context="navbar-movil" message="Hola, quisiera información sobre sus productos." className="flex items-center gap-2 text-[#059669]">
+-                  <Phone className="w-4 h-4" /> WhatsApp: +51 946 085 270
++                <WhatsAppLink
++                  context="navbar-movil"
++                  message="Hola, quisiera información sobre sus productos."
++                  className="flex items-center gap-2 min-h-[44px] text-[#059669]"
++                >
++                  <Phone className="w-4 h-4 shrink-0" /> WhatsApp: +51 946 085 270
+                 </WhatsAppLink>
+                 <div className="pt-2"><ThemeToggle /></div>
+               </div>
+@@ -368,14 +661,93 @@ export default function Navbar() {
+       </div>
+ 
+       {/* Espaciador: reserva la altura del encabezado fijo para que el
+-          contenido no quede oculto debajo. md: incluye la barra utilitaria. */}
+-      <div className="h-20 md:h-[116px]" aria-hidden="true" />
++          contenido no quede oculto debajo. md: incluye la barra utilitaria,
++          que ahora mide 40px para que sus enlaces cumplan el mínimo táctil. */}
++      <div className="h-20 md:h-[120px]" aria-hidden="true" />
+ 
+-      {/* Command Palette */}
+       <CommandPalette open={showCommand} onOpenChange={setShowCommand} />
+-
+-      {/* Cotizacion Modal */}
+       <CotizacionModal open={showCotizacion} onOpenChange={setShowCotizacion} />
+     </>
+   );
+ }
++
++/**
++ * Mega-menú del catálogo. Dos ejes: por categoría y por sector.
++ *
++ * Se renderiza siempre en el DOM (oculto por CSS) en lugar de montarse al
++ * pasar el ratón: así los once enlaces de familia y los sectores existen en el
++ * HTML servido, que es lo único que ve un rastreador que no simula un puntero.
++ * El ancho se acota con `min()` para que nunca sobresalga en pantallas donde
++ * 860px no caben.
++ */
++function MegaProductos({
++  visible,
++  cerrar,
++  abrirBuscador,
++}: {
++  visible: boolean;
++  cerrar: () => void;
++  abrirBuscador: () => void;
++}) {
++  return (
++    <div
++      className={`mega-menu absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[min(860px,calc(100vw-3rem))] max-h-[75dvh] overflow-y-auto rounded-2xl border border-gray-100 bg-white p-6 xl:p-8 shadow-xl dark:border-[var(--border)] dark:bg-[var(--surface-raised)] ${
++        visible ? 'block' : 'hidden'
++      }`}
++      role="menu"
++      aria-label="Catálogo de productos"
++    >
++      <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8">
++        <div className="md:col-span-2">
++          <div className="text-xs uppercase tracking-[0.15em] text-[#059669] font-semibold mb-4">
++            Por categoría
++          </div>
++          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
++            {productFamilies.map((fam) => (
++              <Link
++                key={fam.slug}
++                href={familyHref(fam.name)}
++                className="group flex flex-col py-2 px-3 rounded-xl hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] transition-all"
++                onClick={cerrar}
++              >
++                <span className="font-medium text-[#0A2540] dark:text-[var(--text)] group-hover:text-[#059669] text-sm">
++                  {fam.name}
++                </span>
++                <span className="text-xs text-gray-400 dark:text-[var(--text-muted)]">
++                  {fam.tagline}
++                </span>
++              </Link>
++            ))}
++          </div>
++        </div>
++
++        <div className="mt-6 md:mt-0 border-t md:border-t-0 md:border-l border-gray-100 dark:border-[var(--border)] pt-6 md:pt-0 md:pl-8">
++          <div className="text-xs uppercase tracking-[0.15em] text-[#059669] font-semibold mb-4">
++            Por sector
++          </div>
++          <div className="flex flex-col gap-1">
++            {sectors.map((sector) => (
++              <Link
++                key={sector}
++                href={sectorHref(sector)}
++                className="py-1.5 px-3 rounded-lg text-sm text-gray-600 dark:text-[var(--text-muted)] hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] hover:text-[#059669] transition-all"
++                onClick={cerrar}
++              >
++                {sector}
++              </Link>
++            ))}
++          </div>
++        </div>
++      </div>
++
++      <div className="mt-6 pt-6 border-t dark:border-[var(--border)] flex items-center justify-between gap-4 text-xs">
++        <Link href="/productos" onClick={cerrar} className="text-[#059669] hover:underline font-medium">
++          Ver todo el catálogo →
++        </Link>
++        <button onClick={abrirBuscador} className="flex items-center gap-2 text-[#059669] hover:underline font-medium">
++          <Search className="w-3.5 h-3.5 shrink-0" /> Buscar en catálogo
++        </button>
++      </div>
++    </div>
++  );
++}
+diff --git a/lib/applications.ts b/lib/applications.ts
+new file mode 100644
+index 0000000..fe15f70
+--- /dev/null
++++ b/lib/applications.ts
+@@ -0,0 +1,203 @@
++/**
++ * Application-first hubs. Buyers search problem + industry, not SKU.
++ * Only applications we can actually supply.
++ */
++export interface Application {
++  slug: string;
++  name: string;
++  nameEn: string;
++  industrySlugs: string[];
++  productSlugs: string[];
++  problem: string;
++  approach: string;
++  questions: string[];
++  notClaimed: string[];
++}
++
++export const applications: Application[] = [
++  {
++    slug: "ventilacion-subterranea",
++    name: "Ventilación de mina y túnel",
++    nameEn: "Underground mine and tunnel ventilation",
++    industrySlugs: ["mineria"],
++    productSlugs: ["mangas-ventilacion-minas-tuneles", "accesorios-instalacion"],
++    problem:
++      "El tramo necesita un ducto flexible a diámetro, largo y régimen de impulsión o extracción. Un catálogo genérico no sirve.",
++    approach:
++      "Confeccionamos mangas de ventilación a medida de tramo. Uniones, reducciones y accesorios se cotizan con el ducto. El cálculo preliminar de la calculadora no sustituye la memoria de mina.",
++    questions: [
++      "Diámetro interior y largo de cada tramo",
++      "Impulsión o extracción, caudal de diseño si existe",
++      "Mineral, humedad, requisito antiestático",
++      "Cota / región y fecha de movilización",
++      "¿Suministro o también instalación?",
++    ],
++    notClaimed: [
++      "No publicamos caudales certificados ni ensayos que no podamos entregar",
++      "No sustituimos al ingeniero de ventilación de la operación",
++    ],
++  },
++  {
++    slug: "toldos-camion",
++    name: "Toldos y siders para flota",
++    nameEn: "Truck tarps and side curtains",
++    industrySlugs: ["transporte-logistica"],
++    productSlugs: [
++      "mantas-cobertores-toldos-camiones",
++      "siders-tolderas-camiones",
++      "revestimiento-vehicular-toldos-publicitarios",
++      "lona-plastificada-rafia-polytarp",
++    ],
++    problem:
++      "La plataforma, el sider y el rotulado son un sistema. Medidas de caja y ciclo de uso definen el paño.",
++    approach:
++      "Tomamos largo, ancho, altura y tipo de unidad. Confeccionamos manta, sider o toldería a medida. El rotulado de flota es línea complementaria, no un estudio de marca.",
++    questions: [
++      "Tipo de unidad (plataforma, furgón, semi)",
++      "Medidas de caja L×A×H",
++      "Material preferido (PVC, rafia, polytarp) si lo hay",
++      "Cantidad de unidades y plazo",
++    ],
++    notClaimed: ["No hay tarifa pública por m² en líneas a medida", "No afirmamos homologación vehicular extranjera"],
++  },
++  {
++    slug: "proteccion-cultivo",
++    name: "Protección de cultivo",
++    nameEn: "Crop protection mesh",
++    industrySlugs: ["agroexportacion"],
++    productSlugs: [
++      "mallas-antiafidas",
++      "malla-raschel-sombra",
++      "malla-anti-pajaro-anti-granizo",
++      "cobertores-agricolas-multimaterial",
++    ],
++    problem:
++      "El fundo necesita malla que cubra el cuadro: plaga, radiación o granizo, no un rollo anónimo.",
++    approach:
++      "Antiáfida, raschel, sombra, anti-pájaro y anti-granizo a medida del cuadro. El porcentaje de sombra y el tipo de tejido se confirman en cotización.",
++    questions: [
++      "Cultivo y región",
++      "Área y geometría del cuadro",
++      "Plaga o fenómeno a controlar",
++      "Porcentaje de sombra si aplica",
++      "Mes de instalación",
++    ],
++    notClaimed: ["No hay certificación de inocuidad alimentaria publicada", "No sustituimos el diseño agronómico del fundo"],
++  },
++  {
++    slug: "impermeabilizacion-pozas",
++    name: "Impermeabilización de pozas y canales",
++    nameEn: "Pond and canal lining",
++    industrySlugs: ["saneamiento-y-agua", "agroexportacion", "mineria"],
++    productSlugs: [
++      "geomembranas-pvc",
++      "geomembrana-polietileno-pe-hdpe",
++      "geomembrana-pe-fortificada",
++      "geotextiles",
++    ],
++    problem:
++      "La poza pierde agua o el expediente pide un liner. Espesor, polímero y taludes no se improvisan.",
++    approach:
++      "Cotizamos PVC o PE según el expediente. Área estimada con la calculadora (preliminar). Ficha de lote cuando el material la tiene. Sin certificaciones de agua potable inventadas.",
++    questions: [
++      "Largo, ancho, profundidad y taludes",
++      "Fluido (agua de riego, efluente, relave — describir, no asumir)",
++      "Espesor / polímero especificado si existe",
++      "Sitio y cronograma",
++    ],
++    notClaimed: [
++      "No afirmamos GRI / NSF / potable-water sin documento",
++      "La calculadora no es memoria de movimiento de tierras",
++    ],
++  },
++  {
++    slug: "coberturas-obra",
++    name: "Coberturas y cerramientos de obra",
++    nameEn: "Construction covers and enclosures",
++    industrySlugs: ["construccion"],
++    productSlugs: [
++      "lona-plastificada-rafia-polytarp",
++      "toldos-cerramientos",
++      "carpas-lona-estructuras-metalicas",
++      "biombos-protectores-soldadura",
++    ],
++    problem:
++      "El frente de obra necesita cerrar, cubrir acopio o proteger andamio. El vano y el viento mandan.",
++    approach:
++      "Lonas, cerramientos y estructuras temporales a medida. Instalación propia en el Perú cuando el alcance lo permite.",
++    questions: [
++      "Vano L×A×H",
++      "Exposición (viento, UV, soldadura)",
++      "Suministro o instalación",
++      "Ciudad y fecha",
++    ],
++    notClaimed: ["No hay cálculo estructural de viento publicado", "No afirmamos instalación en toda Sudamérica"],
++  },
++  {
++    slug: "campamentos-mineros",
++    name: "Campamentos y almacenes temporales",
++    nameEn: "Mining camps and temporary warehouses",
++    industrySlugs: ["mineria", "construccion"],
++    productSlugs: [
++      "modulos-albergues-campamentos",
++      "carpas-lona-estructuras-metalicas",
++      "galpones-invernaderos-estructurados",
++      "coberturas-tensionadas-arquitectura-textil",
++    ],
++    problem:
++      "El campamento o el almacén temporal es un sistema: paño, estructura y anclaje.",
++    approach:
++      "Módulos, carpas y galpones con estructura metálica. El alcance de instalación se define en cotización según sitio.",
++    questions: [
++      "Uso (albergue, almacén, comedor, taller)",
++      "Dimensiones y ocupación",
++      "Sitio, cota y acceso",
++      "Duración prevista de la instalación",
++    ],
++    notClaimed: ["No publicamos capacidad de planta ni plazos estándar de campamento"],
++  },
++  {
++    slug: "granel-embalaje",
++    name: "Granel y embalaje industrial",
++    nameEn: "Bulk packaging and FIBC",
++    industrySlugs: ["mineria", "transporte-logistica", "agroexportacion"],
++    productSlugs: [
++      "big-bags-bolsones-polipropileno",
++      "sacos-polytarp-embarque-granel",
++      "bolsas-laminas-pebd-pead",
++    ],
++    problem:
++      "El concentrado, el grano o el cemento necesita un contenedor flexible a peso, descarga y ciclo.",
++    approach:
++      "Big bags FIBC y sacos polytarp a medida. El configurador arma la especificación; el factor de seguridad y el liner se confirman en cotización.",
++    questions: [
++      "Producto, densidad aparente y peso por unidad",
++      "Boca de carga y de descarga",
++      "Liner, recubrimiento, antiestático",
++      "Volumen mensual y destino",
++    ],
++    notClaimed: ["No hay UN / hazardous certification publicada", "No inventamos SKU ni modelo"],
++  },
++  {
++    slug: "contencion-fluidos",
++    name: "Contención de fluidos",
++    nameEn: "Flexible fluid containment",
++    industrySlugs: ["agroexportacion", "saneamiento-y-agua"],
++    productSlugs: ["tanques-flexibles-bladders", "biodigestores", "tuberias-hdpe"],
++    problem:
++      "Reservorio flexible, biodigestor o tubería HDPE se define por proyecto, no por ficha de e-commerce.",
++    approach:
++      "Suministro especializado. Ficha de lote y alcance se confirman en RFQ. Sin capacidades de planta inventadas.",
++    questions: [
++      "Volumen y fluido",
++      "Sitio y acceso",
++      "Norma interna si existe",
++      "¿Suministro o instalación?",
++    ],
++    notClaimed: ["Líneas bajo pedido: no hay stock publicitado ni plazos estándar"],
++  },
++];
++
++export function applicationBySlug(slug: string): Application | undefined {
++  return applications.find((a) => a.slug === slug);
++}
+diff --git a/lib/facts.ts b/lib/facts.ts
+new file mode 100644
+index 0000000..48bfec9
+--- /dev/null
++++ b/lib/facts.ts
+@@ -0,0 +1,14 @@
++import { SITE } from "./site";
++import { productFamilies, products } from "./products";
++
++/** Años de operación. Se recalcula cada 1 de enero. No es un eslogan. */
++export const YEARS_OPERATING =
++  new Date().getFullYear() - Number(SITE.foundingYear);
++
++/** Única frase de antigüedad permitida en UI, metadata y chatbot. */
++export const YEARS_STATEMENT = `Fabricación en el Perú desde ${SITE.foundingYear}`;
++
++export const PRODUCT_COUNT = products.length;
++export const FAMILY_COUNT = productFamilies.length;
++
++export const COUNT_STATEMENT = `${PRODUCT_COUNT} soluciones en ${FAMILY_COUNT} líneas de producto`;
+diff --git a/lib/fibc.ts b/lib/fibc.ts
+new file mode 100644
+index 0000000..6fa73a3
+--- /dev/null
++++ b/lib/fibc.ts
+@@ -0,0 +1,89 @@
++/** FIBC configurator — builds an RFQ spec. Not a price engine. */
++export const FIBC_CAPACITY = [
++  { value: "1000", label: "1 000 kg (1 t)" },
++  { value: "1500", label: "1 500 kg" },
++  { value: "2000", label: "2 000 kg (2 t)" },
++  { value: "otro", label: "Otra capacidad (especificar)" },
++] as const;
++
++export const FIBC_TOP = [
++  { value: "abierta", label: "Boca abierta" },
++  { value: "boquilla", label: "Con boquilla de carga" },
++  { value: "falda", label: "Con falda" },
++  { value: "cierre", label: "Con cierre / velcro" },
++] as const;
++
++export const FIBC_BOTTOM = [
++  { value: "plano", label: "Fondo plano" },
++  { value: "boquilla", label: "Boquilla de descarga" },
++  { value: "falda", label: "Falda de descarga" },
++  { value: "cierre", label: "Con cierre" },
++] as const;
++
++export const FIBC_LOOPS = [
++  { value: "4-corner", label: "4 asas de esquina" },
++  { value: "2-loop", label: "2 asas" },
++  { value: "stevedore", label: "Stevedore / cruzadas" },
++] as const;
++
++export const FIBC_SF = [
++  { value: "5:1", label: "5:1 (punto de partida)" },
++  { value: "6:1", label: "6:1 (a confirmar)" },
++  { value: "definir", label: "Lo define el expediente" },
++] as const;
++
++export const FIBC_EXTRAS = [
++  { id: "liner", label: "Liner de PE" },
++  { id: "coating", label: "Tejido recubierto" },
++  { id: "uv", label: "Tratamiento UV" },
++  { id: "antistatic", label: "Opción antiestática" },
++  { id: "print", label: "Impresión / identificación" },
++] as const;
++
++export interface FibcSpec {
++  capacity: string;
++  length: string;
++  width: string;
++  height: string;
++  top: string;
++  bottom: string;
++  loops: string;
++  sf: string;
++  extras: string[];
++  product: string;
++  quantity: string;
++  notes: string;
++}
++
++export const emptyFibc = (): FibcSpec => ({
++  capacity: "1000",
++  length: "90",
++  width: "90",
++  height: "110",
++  top: "abierta",
++  bottom: "plano",
++  loops: "4-corner",
++  sf: "5:1",
++  extras: ["uv"],
++  product: "",
++  quantity: "",
++  notes: "",
++});
++
++export function fibcSummary(s: FibcSpec): string {
++  return [
++    "Configuración FIBC / Big Bag (preliminar, sin precio)",
++    `Capacidad: ${s.capacity} kg`,
++    `Dimensiones pedidas: ${s.length} × ${s.width} × ${s.height} cm`,
++    `Boca: ${s.top}`,
++    `Fondo: ${s.bottom}`,
++    `Asas: ${s.loops}`,
++    `Factor de seguridad pedido: ${s.sf} (a confirmar en cotización)`,
++    s.extras.length ? `Opciones: ${s.extras.join(", ")}` : "",
++    s.product ? `Producto a envasar: ${s.product}` : "",
++    s.quantity ? `Cantidad: ${s.quantity}` : "",
++    s.notes ? `Notas: ${s.notes}` : "",
++  ]
++    .filter(Boolean)
++    .join("\n");
++}
+diff --git a/lib/guides.ts b/lib/guides.ts
+new file mode 100644
+index 0000000..a5ed557
+--- /dev/null
++++ b/lib/guides.ts
+@@ -0,0 +1,186 @@
++/**
++ * Technical guides. HTML first so search and AI can read them.
++ * No invented standards. Reviewer is commercial-technical, not a named engineer.
++ */
++export interface Guide {
++  slug: string;
++  title: string;
++  titleEn: string;
++  revised: string;
++  reviewer: string;
++  summary: string;
++  relatedProductSlugs: string[];
++  industrySlugs: string[];
++  sections: { heading: string; body: string }[];
++  questions: string[];
++  disclaimer: string;
++}
++
++export const guides: Guide[] = [
++  {
++    slug: "seleccion-mangas-ventilacion",
++    title: "Cómo especificar una manga de ventilación minera",
++    titleEn: "How to specify a mining ventilation duct",
++    revised: "2026-08-01",
++    reviewer: "Equipo técnico-comercial Plastilonas",
++    summary:
++      "Diámetro, largo de tramo, régimen, uniones y lo que no debe faltar en un RFQ de ventilación subterránea.",
++    relatedProductSlugs: ["mangas-ventilacion-minas-tuneles"],
++    industrySlugs: ["mineria"],
++    sections: [
++      {
++        heading: "Qué decide el ducto",
++        body: "El diámetro interior, el largo de cada tramo, si el régimen es impulsión o extracción, y el ambiente (humedad, abrasión, requisito antiestático). Sin esos cuatro datos, cualquier precio es inventado.",
++      },
++      {
++        heading: "Material",
++        body: "PVC y PU se cotizan según el expediente. No publicamos una tabla de equivalencia que sustituya al ensayo de la operación. Si hay norma interna de mina, adjúntela al RFQ.",
++      },
++      {
++        heading: "Uniones y accesorios",
++        body: "Mangas, codos, reducciones y abrazaderas son un sistema. Pedir solo «manga de 800 mm» sin uniones deja el tramo incompleto.",
++      },
++      {
++        heading: "Cálculo preliminar",
++        body: "La calculadora de ventilación estima área de paño y largo. No entrega pérdida de carga certificada ni cumple NFPA u otra norma de mina.",
++      },
++    ],
++    questions: [
++      "Diámetro y largo por tramo",
++      "Caudal de diseño, si existe",
++      "Sitio y fecha",
++      "¿Instalación o solo suministro?",
++    ],
++    disclaimer:
++      "Guía de especificación comercial. No es memoria de cálculo ni documento de seguridad de la operación.",
++  },
++  {
++    slug: "gramaje-lona-industrial",
++    title: "Guía de gramaje y material de lona industrial",
++    titleEn: "Industrial tarpaulin GSM and material guide",
++    revised: "2026-08-01",
++    reviewer: "Equipo técnico-comercial Plastilonas",
++    summary:
++      "PVC, rafia y polytarp: cuándo pedir cada uno, qué datos mandan y por qué no hay un «mejor gramaje» universal.",
++    relatedProductSlugs: [
++      "lona-plastificada-rafia-polytarp",
++      "mantas-cobertores-toldos-camiones",
++      "cobertores-agricolas-multimaterial",
++    ],
++    industrySlugs: ["transporte-logistica", "construccion", "agroexportacion", "mineria"],
++    sections: [
++      {
++        heading: "El gramaje no es el producto",
++        body: "GSM describe masa por área, no resistencia al viento, al UV ni a la abrasión. Un 650 g/m² mal confeccionado falla antes que un paño más liviano bien ojeteado y reforzado.",
++      },
++      {
++        heading: "Familias de material",
++        body: "Lona plastificada PVC: coberturas de obra, camión y minería cuando se pide soldadura o estanqueidad. Rafia: cubiertas agrícolas y de acopio. Polytarp: embarque y estiba. La elección se confirma en cotización.",
++      },
++      {
++        heading: "Qué pedir en el RFQ",
++        body: "Uso, L×A (y caída), exposición UV, si hay soldadura o químicos, cantidad y ciudad de entrega. El gramaje puede ser un punto de partida, no un dogma.",
++      },
++    ],
++    questions: ["Uso", "Dimensiones y caída", "Exposición", "Cantidad"],
++    disclaimer: "No hay tabla de precios por GSM. La confección a medida se cotiza por proyecto.",
++  },
++  {
++    slug: "especificacion-fibc",
++    title: "Cómo especificar un Big Bag / FIBC",
++    titleEn: "How to specify an FIBC / bulk bag",
++    revised: "2026-08-01",
++    reviewer: "Equipo técnico-comercial Plastilonas",
++    summary:
++      "Capacidad, factor de seguridad, boca, fondo, liner y lo que un comprador industrial debe escribir en el RFQ.",
++    relatedProductSlugs: ["big-bags-bolsones-polipropileno"],
++    industrySlugs: ["mineria", "agroexportacion", "transporte-logistica"],
++    sections: [
++      {
++        heading: "Capacidad y factor de seguridad",
++        body: "1 t y 2 t son presentaciones habituales. El factor 5:1 o 6:1 se confirma en cotización; no se imprime un certificado que no exista.",
++      },
++      {
++        heading: "Boca y fondo",
++        body: "Abierta, con boquilla o con falda arriba; plano, con boquilla o con falda abajo. La descarga define el fondo tanto como el producto.",
++      },
++      {
++        heading: "Liner y antiestático",
++        body: "Liner de PE, recubrimiento y opción antiestática se piden, no se asumen. Si el producto es combustible o fino, dígalo.",
++      },
++      {
++        heading: "Configurador",
++        body: "El configurador de esta web arma un resumen de RFQ. No genera un plano de fabricación ni un precio.",
++      },
++    ],
++    questions: ["Producto y peso", "Dimensiones", "Boca / fondo", "Volumen mensual", "Destino"],
++    disclaimer: "Sin certificación UN de mercancías peligrosas publicada. Cada lote se documenta en cotización.",
++  },
++  {
++    slug: "seleccion-geomembrana",
++    title: "Cómo seleccionar geomembrana para poza o canal",
++    titleEn: "Geomembrane selection for ponds and canals",
++    revised: "2026-08-01",
++    reviewer: "Equipo técnico-comercial Plastilonas",
++    summary:
++      "PVC frente a PE, qué datos de talud y fluido pedir, y por qué no afirmamos agua potable ni GRI sin ficha.",
++    relatedProductSlugs: [
++      "geomembranas-pvc",
++      "geomembrana-polietileno-pe-hdpe",
++      "geomembrana-pe-fortificada",
++      "geotextiles",
++    ],
++    industrySlugs: ["saneamiento-y-agua", "agroexportacion", "mineria"],
++    sections: [
++      {
++        heading: "Polímero",
++        body: "PVC y PE cubren expedientes distintos. Si el proyecto ya especifica espesor y norma, adjúntela. Si no, describa fluido, taludes y clima.",
++      },
++      {
++        heading: "Área",
++        body: "Área de membrana ≈ área de fondo + taludes + anclaje + traslape. La calculadora estima; el corte real lo define el replanteo.",
++      },
++      {
++        heading: "Lo que no publicamos",
++        body: "No hay ficha NSF, GRI o potable-water en este sitio. Si un lote trae ensayo, se entrega en la cotización de ese lote.",
++      },
++    ],
++    questions: ["L×A×H y taludes", "Fluido", "Espesor pedido", "Sitio"],
++    disclaimer: "Estimación preliminar. Instalación internacional no está afirmada.",
++  },
++  {
++    slug: "seleccion-malla-agricola",
++    title: "Cómo elegir malla agrícola",
++    titleEn: "Agricultural mesh selection guide",
++    revised: "2026-08-01",
++    reviewer: "Equipo técnico-comercial Plastilonas",
++    summary:
++      "Antiáfida, raschel, sombra, anti-pájaro y anti-granizo: qué problema cubre cada una y qué medir en el fundo.",
++    relatedProductSlugs: [
++      "mallas-antiafidas",
++      "malla-raschel-sombra",
++      "malla-anti-pajaro-anti-granizo",
++    ],
++    industrySlugs: ["agroexportacion"],
++    sections: [
++      {
++        heading: "El problema define la malla",
++        body: "Insecto, radiación, pájaro o granizo. Pedir «malla agrícola» sin el fenómeno produce una cotización incompleta.",
++      },
++      {
++        heading: "Sombra",
++        body: "El porcentaje de sombra se pide. No hay un valor universal para uva, arándano o hortaliza.",
++      },
++      {
++        heading: "Medida",
++        body: "Cuadro L×A, altura de estructura y tipo de anclaje. Confección a medida del paño.",
++      },
++    ],
++    questions: ["Cultivo", "Fenómeno", "Área", "Región y mes"],
++    disclaimer: "No sustituye el diseño agronómico ni afirma registro sanitario de cultivo.",
++  },
++];
++
++export function guideBySlug(slug: string): Guide | undefined {
++  return guides.find((g) => g.slug === slug);
++}
+diff --git a/lib/lead.ts b/lib/lead.ts
+index 3ac3d81..24347ed 100644
+--- a/lib/lead.ts
++++ b/lib/lead.ts
+@@ -16,6 +16,16 @@ export interface LeadPayload {
+   cantidad?: string;
+   fechaNecesaria?: string;
+   mensaje?: string;
++  country?: string;
++  city?: string;
++  industry?: string;
++  application?: string;
++  dimensions?: string;
++  material?: string;
++  deliveryCountry?: string;
++  deliveryCity?: string;
++  whatsapp?: string;
++  language?: 'es' | 'en' | 'pt';
+ }
+ 
+ export async function postLead(lead: LeadPayload): Promise<void> {
+diff --git a/lib/projects.ts b/lib/projects.ts
+new file mode 100644
+index 0000000..8949d04
+--- /dev/null
++++ b/lib/projects.ts
+@@ -0,0 +1,132 @@
++/**
++ * EVIDENCIA DE PROYECTO — con interruptor por caso.
++ *
++ * Estas fichas describen suministros reales de la empresa, pero este
++ * repositorio no puede comprobar ninguna de ellas. Publicar evidencia sin
++ * confirmar es exactamente el fallo que un comprador industrial castiga: basta
++ * una ficha inexacta para que un jefe de compras descarte el resto del sitio.
++ *
++ * Por eso cada ficha lleva `verificado`. En false —el valor por defecto— la
++ * ficha NO se renderiza, NO entra al sitemap y NO se enlaza desde ningún sitio.
++ * Vive en el repositorio como borrador, no como afirmación pública.
++ *
++ * PARA PUBLICAR UNA: confirme con el área comercial que el suministro ocurrió y
++ * que el texto es exacto, y ponga `verificado: true`. Si el cliente autorizó su
++ * nombre, reemplace también `client`. Si no lo autorizó, la fórmula genérica
++ * («Contratista minero en el Perú») es legítima y suficiente.
++ *
++ * test/proyectos.test.ts impide que una ficha llegue al público sin ese paso.
++ */
++export interface Project {
++  slug: string;
++  title: string;
++  client: string;
++  industrySlug: string;
++  country: string;
++  region: string;
++  productSlugs: string[];
++  applicationSlug: string;
++  challenge: string;
++  solution: string;
++  result: string;
++  yearLabel: string;
++  /** Solo true tras confirmación del área comercial. Ver cabecera. */
++  verificado: boolean;
++}
++
++export const projects: Project[] = [
++  {
++    slug: "ventilacion-contratista-minero-peru",
++    title: "Mangas de ventilación para tramos subterráneos",
++    client: "Contratista minero en el Perú (nombre bajo acuerdo)",
++    industrySlug: "mineria",
++    country: "Perú",
++    region: "Sierra peruana",
++    productSlugs: ["mangas-ventilacion-minas-tuneles"],
++    applicationSlug: "ventilacion-subterranea",
++    challenge:
++      "Tramos de impulsión con diámetro y largo definidos por la operación, con uniones que debían armarse en sitio.",
++    solution:
++      "Confección de mangas a medida de tramo y accesorios de unión. Alcance de instalación definido en cotización, no como cobertura nacional automática.",
++    result:
++      "Suministro a especificación del expediente. Detalle de cantidades y diametros permanece en el archivo del proyecto.",
++    yearLabel: "Operación continua — año no publicado",
++    verificado: false,
++  },
++  {
++    slug: "malla-fundo-costa",
++    title: "Malla de protección de cultivo en costa",
++    client: "Fundo agroexportador (nombre bajo acuerdo)",
++    industrySlug: "agroexportacion",
++    country: "Perú",
++    region: "Costa peruana",
++    productSlugs: ["mallas-antiafidas", "malla-raschel-sombra"],
++    applicationSlug: "proteccion-cultivo",
++    challenge:
++      "Cubrir cuadros con malla según plaga y radiación, a medida de la estructura existente.",
++    solution:
++      "Antiáfida y raschel dimensionadas al cuadro. Porcentaje de sombra confirmado en cotización.",
++    result: "Paños entregados a medida. Ensayos agronómicos los define el fundo, no este sitio.",
++    yearLabel: "Campañas sucesivas — año no publicado",
++    verificado: false,
++  },
++  {
++    slug: "toldos-flota-lima",
++    title: "Toldos a medida para flota de carga",
++    client: "Operador logístico en Lima (nombre bajo acuerdo)",
++    industrySlug: "transporte-logistica",
++    country: "Perú",
++    region: "Lima",
++    productSlugs: ["mantas-cobertores-toldos-camiones", "siders-tolderas-camiones"],
++    applicationSlug: "toldos-camion",
++    challenge:
++      "Unidades con cajas de distinta geometría. Un paño estándar dejaba vanos o sobrantes.",
++    solution:
++      "Levantamiento de L×A×H por tipo de unidad y confección de mantas / siders a medida.",
++    result: "Flota cubierta por tipo de caja. Rotulado se cotiza aparte cuando se pide.",
++    yearLabel: "Reposición periódica — año no publicado",
++    verificado: false,
++  },
++  {
++    slug: "almacen-temporal-infraestructura",
++    title: "Almacén textil temporal de obra",
++    client: "Contratista de infraestructura (nombre bajo acuerdo)",
++    industrySlug: "construccion",
++    country: "Perú",
++    region: "Perú",
++    productSlugs: ["carpas-lona-estructuras-metalicas", "galpones-invernaderos-estructurados"],
++    applicationSlug: "campamentos-mineros",
++    challenge:
++      "Almacén temporal con estructura y paño, con plazo de obra y acceso de camión.",
++    solution:
++      "Galpón / carpa con estructura metálica. Instalación propia según alcance del sitio.",
++    result: "Espacio de acopio operativo durante la obra. No se publica como caso nominado.",
++    yearLabel: "Proyecto de obra — año no publicado",
++    verificado: false,
++  },
++  {
++    slug: "exportacion-colombia-senal",
++    title: "Suministro internacional con señal hacia Colombia",
++    client: "Operación de comercio exterior (detalle comercial no publicado)",
++    industrySlug: "mineria",
++    country: "Colombia",
++    region: "Exportación desde Callao / Lima",
++    productSlugs: ["lona-plastificada-rafia-polytarp", "big-bags-bolsones-polipropileno"],
++    applicationSlug: "granel-embalaje",
++    challenge:
++      "Un comprador andino necesita producto peruano con documentación de exportación, no una tienda mundial.",
++    solution:
++      "Evaluación por RFQ: partida, MOQ, Incoterm de partida EXW/FOB Callao, packing list y factura.",
++    result:
++      "Existe evidencia pública de comercio exterior hacia Colombia. Cada operación posterior se evalúa de nuevo.",
++    yearLabel: "Señal pública de comercio — no es una cuenta abierta",
++    verificado: false,
++  },
++];
++
++/** Lo único que puede llegar al público. Úsese siempre esta, nunca `projects`. */
++export const projectsPublicados: Project[] = projects.filter((p) => p.verificado);
++
++export function projectBySlug(slug: string): Project | undefined {
++  return projectsPublicados.find((p) => p.slug === slug);
++}
+diff --git a/lib/site.ts b/lib/site.ts
+index b0915a9..ed10eaf 100644
+--- a/lib/site.ts
++++ b/lib/site.ts
+@@ -4,47 +4,61 @@
+  * Everything that emits a URL — sitemap.ts, robots.ts, /llms.txt, metadataBase,
+  * canonicals, OG images and every JSON-LD block — MUST read from SITE.url.
+  * Never hard-code a domain anywhere else in the codebase.
++ * test/dominio.test.ts falla el build si alguien escribe un host a mano.
+  *
+- * VERIFY every value against official records before a production deploy: a
+- * wrong value propagates into structured data, local pages and llms.txt.
+- * Do NOT add unverifiable claims (ratings, certifications, statistics) here.
++ * ─────────────────────────────────────────────────────────────────────────────
++ * ORIGEN CANÓNICO — cómo se hace la mudanza a plastilonas.com
++ * ─────────────────────────────────────────────────────────────────────────────
++ * El sitio se sirve hoy desde plastilonas-peruanas-sac.vercel.app. El dominio
++ * de marca, plastilonas.com, ya es propiedad de la empresa y sirve el correo
++ * (ventas@plastilonas.com) pero todavía apunta al sitio antiguo.
+  *
+- * Taxonomy note: product families live in lib/products.ts (`productFamilies`),
+- * which is the single source of truth for categories. Do not duplicate them here.
++ * La mudanza NO se hace editando este archivo. Se hace en dos pasos:
++ *
++ *   1. DNS: apuntar plastilonas.com al proyecto de Vercel y verificar el
++ *      dominio en el panel (Settings → Domains).
++ *   2. Variable de entorno, en Vercel → Settings → Environment Variables:
++ *
++ *          CANONICAL_ORIGIN = https://plastilonas.com
++ *
++ * Con esa sola variable, en el mismo despliegue y sin tocar código:
++ *   · SITE.url pasa a plastilonas.com, y con él sitemap, robots, llms.txt,
++ *     metadataBase, todos los canonicals y todos los bloques JSON-LD;
++ *   · middleware.ts empieza a redirigir www → apex con 308;
++ *   · middleware.ts empieza a emitir noindex + Link rel=canonical en el host
++ *     de Vercel, para que deje de competir por las mismas consultas.
++ *
++ * MIENTRAS LA VARIABLE ESTÉ VACÍA no ocurre nada de lo anterior, y eso es
++ * deliberado: emitir noindex en el host de Vercel antes de que exista un
++ * dominio de marca vivo que reciba esa autoridad no consolidaría nada, borraría
++ * el sitio de Google. test/dominio-migracion.test.ts protege ese invariante.
+  */
++function originFromEnv(): string {
++  const raw =
++    process.env.CANONICAL_ORIGIN ||
++    process.env.NEXT_PUBLIC_SITE_URL ||
++    "https://plastilonas-peruanas-sac.vercel.app";
++  return raw.replace(/\/$/, "");
++}
++
+ export const SITE = {
+-  /**
+-   * CRITICAL — CANONICAL ORIGIN.
+-   * The moment DNS for plastilonas.com (or www.plastilonas.com) points at this
+-   * Vercel project and the domain is verified in the Vercel dashboard, change
+-   * this ONE line to the exact final canonical origin (no trailing slash):
+-   *
+-   *   url: "https://www.plastilonas.com",
+-   *
+-   * Until then it must stay on the live Vercel origin so robots, sitemap,
+-   * llms.txt and JSON-LD all agree with the URL Google actually crawls.
+-   */
+-  url: "https://plastilonas-peruanas-sac.vercel.app",
++  url: originFromEnv(),
++  brandHost: "plastilonas.com",
+ 
+-  // --- Identity (verified against repo contact pages / footer) --------------
+   name: "Plastilonas Peruanas SAC",
+   legalName: "Plastilonas Peruanas SAC",
+-  ruc: "20523135385",                   // VERIFY against SUNAT before production
++  ruc: "20523135385",
+   description:
+-    "Fabricación e instalación a medida de soluciones textiles industriales en el Perú: big bags FIBC, lonas y cobertores, geomembranas y geosintéticos, estructuras y arquitectura textil, mangas de ventilación minera, mallas agrícolas y accesorios.",
++    "Fabricante peruano de soluciones textiles industriales a medida: big bags FIBC, lonas y cobertores, geomembranas y geosintéticos, estructuras y arquitectura textil, mangas de ventilación minera, mallas agrícolas y accesorios.",
+ 
+-  // --- Contact --------------------------------------------------------------
+-  /** WhatsApp comercial, formato E.164. Debe coincidir con lib/whatsapp.ts. */
+   phoneWhatsApp: "+51946085270",
+-  /** Central telefónica (footer, navbar, /contacto). */
+   phoneCentral: "+51998117065",
+   email: "ventas@plastilonas.com",
+ 
+-  // --- Address (footer + /contacto) ----------------------------------------
+   addressStreet: "Calle Alameda del Remero Mz. V, Lt. 2, Urb. Los Huertos de Villa",
+   addressLocality: "Chorrillos",
+   addressRegion: "Lima",
+-  addressPostalCode: "15067",           // VERIFY before production
++  addressPostalCode: "15067",
+   addressCountry: "PE",
+ 
+   /**
+@@ -70,23 +84,16 @@ export const SITE = {
+   foundingYear: "2009",                 // VERIFY against constitución de la empresa
+   locale: "es_PE",
+   language: "es-PE",
+-  languages: ["es-PE"] as const,
++  languages: ["es-PE", "en", "pt-BR"] as const,
+ 
+-  /**
+-   * Perfiles REALES y propios únicamente. Un sameAs vacío es infinitamente
+-   * mejor que uno inventado: un perfil falso rompe la reconciliación de
+-   * entidad en Google y en los grafos de conocimiento de los LLMs.
+-   * Facebook y WhatsApp están marcados como perfiles reales en lib/social.ts.
+-   */
+   sameAs: [
+     "https://www.facebook.com/plastilonasperuanas",
++    "https://www.linkedin.com/company/plastilonas-peruanas-sac",
+   ] as string[],
+-} as const;
++};
+ 
+-/** Origen canónico sin barra final, para concatenar rutas con seguridad. */
+ export const BASE_URL: string = SITE.url.replace(/\/$/, "");
+ 
+-/** Construye una URL absoluta a partir de una ruta relativa. */
+ export function absoluteUrl(path = "/"): string {
+   return `${BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+ }
+diff --git a/middleware.ts b/middleware.ts
+new file mode 100644
+index 0000000..e61e385
+--- /dev/null
++++ b/middleware.ts
+@@ -0,0 +1,81 @@
++import { NextRequest, NextResponse } from "next/server";
++
++/**
++ * ESTRATEGIA DE DOMINIO — con interruptor, no con fe.
++ *
++ * El objetivo final es que plastilonas.com sea el único dominio indexable y
++ * que el host de Vercel deje de competir. Pero el sitio HOY vive en
++ * plastilonas-peruanas-sac.vercel.app: emitir `noindex` en ese host antes de
++ * que el DNS de la marca apunte aquí no consolida autoridad, la borra.
++ *
++ * Por eso el noindex está condicionado a que la migración haya ocurrido de
++ * verdad. La señal es CANONICAL_ORIGIN, la misma que lee lib/site.ts para
++ * construir canonicals, sitemap y JSON-LD. Mientras esté vacía, este archivo
++ * no toca la indexabilidad de nada.
++ *
++ * EL DÍA DE LA MIGRACIÓN, en Vercel → Settings → Environment Variables:
++ *   CANONICAL_ORIGIN = https://plastilonas.com
++ * Con esa sola variable, en el mismo despliegue:
++ *   · sitemap, canonicals, JSON-LD y llms.txt pasan a plastilonas.com
++ *   · www → apex con 308
++ *   · el host de Vercel pasa a noindex + Link rel=canonical al dominio bueno
++ * Sin esa variable no pasa nada de lo anterior. Ese es el punto.
++ *
++ * test/dominio.test.ts falla el build si alguien invierte este condicional.
++ */
++const CANONICAL_HOST = (process.env.CANONICAL_HOST || "plastilonas.com").replace(/^www\./, "");
++
++/** ¿El dominio de marca ya sirve este proyecto? Solo entonces se degrada Vercel. */
++export function migracionActiva(
++  env: Record<string, string | undefined> = process.env,
++): boolean {
++  const origin = (env.CANONICAL_ORIGIN || "").trim();
++  if (!origin) return false;
++  try {
++    return new URL(origin).hostname.replace(/^www\./, "") === CANONICAL_HOST;
++  } catch {
++    return false;
++  }
++}
++
++export function middleware(req: NextRequest) {
++  const host = (req.headers.get("host") || "").split(":")[0].toLowerCase();
++  const url = req.nextUrl.clone();
++
++  const isVercel = host.endsWith(".vercel.app");
++  const isWww = host === `www.${CANONICAL_HOST}`;
++  const isApex = host === CANONICAL_HOST;
++  const migrado = migracionActiva();
++
++  // www → apex. Solo tiene sentido si el dominio ya resuelve aquí.
++  if (isWww && migrado) {
++    url.hostname = CANONICAL_HOST;
++    url.protocol = "https:";
++    return NextResponse.redirect(url, 308);
++  }
++
++  const res = NextResponse.next();
++
++  // El host de Vercel deja de competir ÚNICAMENTE cuando hay un dominio de
++  // marca vivo que pueda recibir esa autoridad. Antes de eso, sería suicidio.
++  if (isVercel && migrado) {
++    res.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
++    res.headers.set("Link", `<https://${CANONICAL_HOST}${url.pathname}>; rel="canonical"`);
++  }
++
++  if (isApex || isVercel) {
++    res.headers.set("X-Content-Type-Options", "nosniff");
++    res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
++    res.headers.set("X-Frame-Options", "SAMEORIGIN");
++    res.headers.set(
++      "Permissions-Policy",
++      "camera=(), microphone=(), geolocation=(), payment=()",
++    );
++  }
++
++  return res;
++}
++
++export const config = {
++  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|images/).*)"],
++};
+diff --git a/next.config.ts b/next.config.ts
+index a60a6da..c86f1c0 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -1,32 +1,73 @@
+ import type { NextConfig } from 'next';
+ 
++const securityHeaders = [
++  { key: 'X-Content-Type-Options', value: 'nosniff' },
++  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
++  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
++  {
++    key: 'Permissions-Policy',
++    value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
++  },
++  {
++    key: 'Strict-Transport-Security',
++    value: 'max-age=63072000; includeSubDomains; preload',
++  },
++  {
++    key: 'Content-Security-Policy-Report-Only',
++    value: [
++      "default-src 'self'",
++      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://cdn.onesignal.com https://grok.com",
++      "style-src 'self' 'unsafe-inline'",
++      "img-src 'self' data: blob: https:",
++      "font-src 'self' data: https://fonts.gstatic.com",
++      "connect-src 'self' https: wss:",
++      "frame-ancestors 'self'",
++      "base-uri 'self'",
++      "form-action 'self'",
++    ].join('; '),
++  },
++];
++
+ const nextConfig: NextConfig = {
+   images: {
+-    // AVIF antes que WebP: en dibujos de línea plana como los del glosario
+-    // pesa entre un 20 y un 30 % menos que WebP con la misma calidad visual.
+-    // Los PNG de origen se conservan tal cual —41 diagramas a 1200x900— y es
+-    // Next quien entrega la versión ligera a cada navegador según lo que
+-    // acepte. Por eso el peso del repositorio y el peso servido son dos cosas
+-    // distintas: el visitante descarga alrededor de 70 KB, no 470.
+     formats: ['image/avif', 'image/webp'],
+     remotePatterns: [
+-      // Avatares OAuth (dashboard)
+-      {
+-        protocol: 'https',
+-        hostname: 'lh3.googleusercontent.com',
+-      },
+-      {
+-        protocol: 'https',
+-        hostname: 'platform-lookaside.fbsbx.com',
+-      },
+-      {
+-        protocol: 'https',
+-        hostname: 'pbs.twimg.com',
+-      },
++      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
++      { protocol: 'https', hostname: 'platform-lookaside.fbsbx.com' },
++      { protocol: 'https', hostname: 'pbs.twimg.com' },
+     ],
+   },
+-  // Enable strict mode for better development experience
+   reactStrictMode: true,
++  // El parche P32 traía un segundo hub sectorial en /industrias/[slug] que
++  // competía con /industria/[sector] por las mismas consultas. Se eliminó el
++  // superficial y se conserva el profundo; estos 301 recogen cualquier enlace
++  // o rastreo que ya hubiera visto la ruta antigua. Un 301 transfiere; un 404
++  // tira.
++  async redirects() {
++    return [
++      { source: '/industrias', destination: '/industria', permanent: true },
++      { source: '/industrias/mineria', destination: '/industria/mineria', permanent: true },
++      { source: '/industrias/agricultura', destination: '/industria/agroexportacion', permanent: true },
++      { source: '/industrias/construccion', destination: '/industria/construccion', permanent: true },
++      { source: '/industrias/infraestructura', destination: '/industria/construccion', permanent: true },
++      { source: '/industrias/transporte', destination: '/industria/transporte-logistica', permanent: true },
++      { source: '/industrias/logistica', destination: '/industria/transporte-logistica', permanent: true },
++      { source: '/industrias/saneamiento', destination: '/industria/saneamiento-y-agua', permanent: true },
++      { source: '/industrias/:path*', destination: '/industria', permanent: true },
++    ];
++  },
++  async headers() {
++    return [
++      { source: '/:path*', headers: securityHeaders },
++      {
++        source: '/api/:path*',
++        headers: [
++          { key: 'Cache-Control', value: 'no-store' },
++          { key: 'X-Content-Type-Options', value: 'nosniff' },
++        ],
++      },
++    ];
++  },
+ };
+ 
+ export default nextConfig;
+diff --git a/package-lock.json b/package-lock.json
+index 2553e5a..cc98333 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -40,6 +40,7 @@
+         "eslint": "^9",
+         "eslint-config-next": "15.3.3",
+         "jsdom": "^25.0.1",
++        "playwright": "^1.49.0",
+         "postcss": "^8",
+         "sharp": "^0.35.3",
+         "tailwindcss": "^3.4.17",
+@@ -7328,6 +7329,53 @@
+         "node": ">= 6"
+       }
+     },
++    "node_modules/playwright": {
++      "version": "1.49.0",
++      "resolved": "https://registry.npmjs.org/playwright/-/playwright-1.49.0.tgz",
++      "integrity": "sha512-eKpmys0UFDnfNb3vfsf8Vx2LEOtflgRebl0Im2eQQnYMA4Aqd+Zw8bEOB+7ZKvN76901mRnqdsiOGKxzVTbi7A==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "playwright-core": "1.49.0"
++      },
++      "bin": {
++        "playwright": "cli.js"
++      },
++      "engines": {
++        "node": ">=18"
++      },
++      "optionalDependencies": {
++        "fsevents": "2.3.2"
++      }
++    },
++    "node_modules/playwright-core": {
++      "version": "1.49.0",
++      "resolved": "https://registry.npmjs.org/playwright-core/-/playwright-core-1.49.0.tgz",
++      "integrity": "sha512-R+3KKTQF3npy5GTiKH/T+kdhoJfJojjHESR1YEWhYuEKRVfVaxH3+4+GvXE5xyCngCxhxnykk0Vlah9v8fs3jA==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "bin": {
++        "playwright-core": "cli.js"
++      },
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/playwright/node_modules/fsevents": {
++      "version": "2.3.2",
++      "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz",
++      "integrity": "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==",
++      "dev": true,
++      "hasInstallScript": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "darwin"
++      ],
++      "engines": {
++        "node": "^8.16.0 || ^10.6.0 || >=11.0.0"
++      }
++    },
+     "node_modules/possible-typed-array-names": {
+       "version": "1.1.0",
+       "resolved": "https://registry.npmjs.org/possible-typed-array-names/-/possible-typed-array-names-1.1.0.tgz",
+@@ -13865,6 +13913,31 @@
+       "integrity": "sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==",
+       "dev": true
+     },
++    "playwright": {
++      "version": "1.49.0",
++      "resolved": "https://registry.npmjs.org/playwright/-/playwright-1.49.0.tgz",
++      "integrity": "sha512-eKpmys0UFDnfNb3vfsf8Vx2LEOtflgRebl0Im2eQQnYMA4Aqd+Zw8bEOB+7ZKvN76901mRnqdsiOGKxzVTbi7A==",
++      "dev": true,
++      "requires": {
++        "fsevents": "2.3.2",
++        "playwright-core": "1.49.0"
++      },
++      "dependencies": {
++        "fsevents": {
++          "version": "2.3.2",
++          "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz",
++          "integrity": "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==",
++          "dev": true,
++          "optional": true
++        }
++      }
++    },
++    "playwright-core": {
++      "version": "1.49.0",
++      "resolved": "https://registry.npmjs.org/playwright-core/-/playwright-core-1.49.0.tgz",
++      "integrity": "sha512-R+3KKTQF3npy5GTiKH/T+kdhoJfJojjHESR1YEWhYuEKRVfVaxH3+4+GvXE5xyCngCxhxnykk0Vlah9v8fs3jA==",
++      "dev": true
++    },
+     "possible-typed-array-names": {
+       "version": "1.1.0",
+       "resolved": "https://registry.npmjs.org/possible-typed-array-names/-/possible-typed-array-names-1.1.0.tgz",
+diff --git a/package.json b/package.json
+index ae5b6c3..9746c1c 100644
+--- a/package.json
++++ b/package.json
+@@ -11,6 +11,7 @@
+     "test:watch": "vitest",
+     "test:smoke": "bash scripts/smoke.sh",
+     "audit:ui": "node scripts/audit-ui.mjs",
++    "auditar:viewport": "node scripts/auditar-viewport.mjs",
+     "verify:deploy": "bash scripts/verificar-despliegue.sh",
+     "vigilancia": "node scripts/vigilancia-fuentes.mjs",
+     "imagenes": "node scripts/imagenes.mjs",
+@@ -54,6 +55,7 @@
+     "eslint": "^9",
+     "eslint-config-next": "15.3.3",
+     "jsdom": "^25.0.1",
++    "playwright": "^1.49.0",
+     "postcss": "^8",
+     "sharp": "^0.35.3",
+     "tailwindcss": "^3.4.17",
+diff --git a/public/entidad.json b/public/entidad.json
+new file mode 100644
+index 0000000..4eaf9c3
+--- /dev/null
++++ b/public/entidad.json
+@@ -0,0 +1,39 @@
++{
++  "@context": "https://schema.org",
++  "@id": "https://plastilonas.com/#organization",
++  "@type": ["Organization", "LocalBusiness"],
++  "name": "Plastilonas Peruanas SAC",
++  "legalName": "Plastilonas Peruanas SAC",
++  "taxID": "20523135385",
++  "foundingDate": "2009",
++  "url": "https://plastilonas.com",
++  "email": "ventas@plastilonas.com",
++  "telephone": ["+51998117065", "+51946085270"],
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Calle Alameda del Remero Mz. V, Lt. 2, Urb. Los Huertos de Villa",
++    "addressLocality": "Chorrillos",
++    "addressRegion": "Lima",
++    "postalCode": "15067",
++    "addressCountry": "PE"
++  },
++  "sameAs": [
++    "https://www.facebook.com/plastilonasperuanas",
++    "https://www.linkedin.com/company/plastilonas-peruanas-sac"
++  ],
++  "description": "Peruvian manufacturer of custom industrial textiles: FIBC / big bags, PVC and PE tarpaulins, mining ventilation ducts, agricultural mesh, textile structures, geomembranes and industrial containment. Plant in Chorrillos, Lima. International supply evaluated per RFQ. No worldwide shipping claim. No invented ISO/ASTM/CE certifications.",
++  "knowsAbout": [
++    "FIBC",
++    "industrial tarpaulins",
++    "mining ventilation ducts",
++    "geomembranes",
++    "agricultural mesh",
++    "textile structures"
++  ],
++  "areaServed": ["PE", "CL", "CO", "EC", "BO"],
++  "disclaimer": {
++    "noWorldwideShipping": true,
++    "noInventedCertifications": true,
++    "installationOutsidePeru": "evaluated per project, not claimed as continental coverage"
++  }
++}
+diff --git a/scripts/auditar-viewport.mjs b/scripts/auditar-viewport.mjs
+new file mode 100644
+index 0000000..48ef0f6
+--- /dev/null
++++ b/scripts/auditar-viewport.mjs
+@@ -0,0 +1,303 @@
++#!/usr/bin/env node
++/**
++ * AUDITORÍA DE VIEWPORT — mide, no supone.
++ *
++ * Levanta el build de producción y abre cada ruta en una matriz de anchos de
++ * dispositivo reales, midiendo con el motor de layout de Chromium:
++ *
++ *   · desbordamiento horizontal (scrollWidth > clientWidth)
++ *   · qué elemento concreto lo causa
++ *   · áreas táctiles por debajo del mínimo accesible
++ *   · elementos recortados por el borde del viewport
++ *
++ * Un breakpoint elegido a ojo («a partir de lg caben los enlaces») es una
++ * suposición. Esto es la medición que la reemplaza.
++ */
++import { chromium } from 'playwright';
++import { spawn } from 'node:child_process';
++import { setTimeout as sleep } from 'node:timers/promises';
++
++/** Anchos reales, no redondeos bonitos. El más estrecho manda. */
++const DISPOSITIVOS = [
++  { nombre: 'Galaxy Fold (cerrado)',     ancho: 280,  alto: 653,  dpr: 3,   movil: true },
++  { nombre: 'iPhone SE / 5s',            ancho: 320,  alto: 568,  dpr: 2,   movil: true },
++  { nombre: 'iPhone SE 2/3, 8',          ancho: 375,  alto: 667,  dpr: 2,   movil: true },
++  { nombre: 'iPhone 12/13/14 mini',      ancho: 375,  alto: 812,  dpr: 3,   movil: true },
++  { nombre: 'iPhone 14/15/16',           ancho: 393,  alto: 852,  dpr: 3,   movil: true },
++  { nombre: 'iPhone 15/16 Pro Max',      ancho: 430,  alto: 932,  dpr: 3,   movil: true },
++  { nombre: 'Galaxy S8+ / Android común',ancho: 360,  alto: 740,  dpr: 3,   movil: true },
++  { nombre: 'Pixel 7',                   ancho: 412,  alto: 915,  dpr: 2.6, movil: true },
++  { nombre: 'iPad mini (vertical)',      ancho: 768,  alto: 1024, dpr: 2,   movil: true },
++  { nombre: 'iPad Air (vertical)',       ancho: 820,  alto: 1180, dpr: 2,   movil: true },
++  { nombre: 'iPad Pro 11 (horizontal)',  ancho: 1024, alto: 768,  dpr: 2,   movil: true },
++  { nombre: 'Portátil pequeño',          ancho: 1280, alto: 800,  dpr: 1,   movil: false },
++  { nombre: 'Portátil 1366',             ancho: 1366, alto: 768,  dpr: 1,   movil: false },
++  { nombre: 'MacBook Air 13',            ancho: 1440, alto: 900,  dpr: 2,   movil: false },
++  { nombre: 'Escritorio 1536',           ancho: 1536, alto: 864,  dpr: 1,   movil: false },
++  { nombre: 'Full HD',                   ancho: 1920, alto: 1080, dpr: 1,   movil: false },
++  { nombre: 'QHD ultraancho',            ancho: 2560, alto: 1440, dpr: 1,   movil: false },
++];
++
++const RUTAS = process.env.RUTAS_AUDITORIA
++  ? process.env.RUTAS_AUDITORIA.split(',')
++  : ['/', '/productos', '/industria/mineria', '/cotizacion', '/glosario', '/contacto'];
++
++/** WCAG 2.5.8 pide 24×24 CSS px; las guías de iOS y Android piden ~44. */
++const TACTIL_MINIMO = 24;
++
++// Puerto distinto por ejecución. Un puerto fijo hacía que, si una ejecución
++// anterior dejaba el servidor vivo, la siguiente midiera contra el BUILD VIEJO
++// sin avisar: dos cambios seguidos de código daban exactamente los mismos
++// números y parecía que nada surtía efecto.
++const PUERTO = 4400 + (process.pid % 500);
++const BASE = `http://127.0.0.1:${PUERTO}`;
++
++function arrancarServidor() {
++  // `detached` crea un grupo de procesos propio. `next start` lanza a su vez
++  // next-server: matar solo al hijo directo dejaba huérfano al que escucha.
++  return spawn('npx', ['next', 'start', '-p', String(PUERTO)], {
++    stdio: 'ignore',
++    detached: true,
++    env: { ...process.env, NODE_ENV: 'production' },
++  });
++}
++
++function pararServidor(p) {
++  try { process.kill(-p.pid, 'SIGKILL'); } catch { try { p.kill('SIGKILL'); } catch {} }
++}
++
++async function esperarServidor(intentos = 60) {
++  for (let i = 0; i < intentos; i++) {
++    try {
++      const r = await fetch(BASE, { signal: AbortSignal.timeout(1500) });
++      if (r.ok) return true;
++    } catch {}
++    await sleep(1000);
++  }
++  return false;
++}
++
++/** Se ejecuta DENTRO del navegador: usa el layout real, no una heurística. */
++function medirEnPagina(tactilMinimo) {
++  const doc = document.documentElement;
++  const anchoVista = doc.clientWidth;
++  const hallazgos = [];
++
++  /**
++   * ¿Lo ve una persona? Un panel desplegable cerrado, una fila de medida o un
++   * elemento con opacidad cero siguen existiendo en el DOM y siguen teniendo
++   * caja. Contarlos como «recortado» convierte la auditoría en ruido: informa
++   * de problemas que nadie puede ver y esconde los que sí.
++   */
++  const visible = (el) => {
++    if (typeof el.checkVisibility === 'function') {
++      if (!el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) return false;
++    }
++    if (el.closest('[aria-hidden="true"]')) return false;
++    for (let n = el; n && n !== document.body; n = n.parentElement) {
++      const e = getComputedStyle(n);
++      if (e.display === 'none' || e.visibility === 'hidden' || Number(e.opacity) === 0) return false;
++    }
++    return true;
++  };
++
++  /** Dónde vive el elemento, para no confundir el pie con la cabecera. */
++  const zona = (el) => {
++    if (el.closest('header, [class*="fixed top-0"]') || el.closest('nav')) return 'cabecera';
++    if (el.closest('footer')) return 'pie';
++    return 'cuerpo';
++  };
++
++  // 1) ¿Se puede arrastrar la página a los lados? Es el síntoma que ve el usuario.
++  const desbordaDocumento = doc.scrollWidth - anchoVista;
++  if (desbordaDocumento > 1) {
++    // Localizar al culpable: el elemento cuyo borde derecho se sale más.
++    // Se busca primero entre lo visible —es lo que sufre el usuario— y, si no
++    // aparece nada, se repite sin filtro: un elemento oculto que aun así
++    // empuja el ancho de scroll es un fallo igual de real, solo que invisible,
++    // y sin esta segunda pasada el informe diría «desborda» sin culpable.
++    const buscarPeor = (soloVisibles) => {
++      let peor = null;
++      for (const el of document.querySelectorAll('body *')) {
++        const r = el.getBoundingClientRect();
++        if (r.width === 0 || r.height === 0) continue;
++        if (soloVisibles && !visible(el)) continue;
++        const exceso = Math.round(r.right - anchoVista);
++        if (exceso > 1 && (!peor || exceso > peor.exceso)) {
++          const est = getComputedStyle(el);
++          peor = {
++            exceso,
++            etiqueta: el.tagName.toLowerCase(),
++            clases: (el.className && typeof el.className === 'string' ? el.className : '').slice(0, 110),
++            texto: (el.textContent || '').trim().slice(0, 45),
++            oculto: !soloVisibles,
++            estilo: `${est.display}/${est.position}/ovf:${est.overflowX}`,
++          };
++        }
++      }
++      return peor;
++    };
++    const peor = buscarPeor(true) || buscarPeor(false);
++    hallazgos.push({ tipo: 'desborde-horizontal', px: desbordaDocumento, culpable: peor });
++  }
++
++  // 2) Elementos recortados por el borde derecho aunque el documento no
++  //    desborde: overflow:hidden esconde el problema pero el enlace ya no se ve.
++  for (const el of document.querySelectorAll('nav a, nav button, header a, header button')) {
++    const r = el.getBoundingClientRect();
++    if (r.width === 0 || r.height === 0) continue;
++    if (!visible(el)) continue;
++    if (r.left >= anchoVista - 2 || r.right > anchoVista + 2) {
++      hallazgos.push({
++        tipo: 'recortado-en-cabecera',
++        texto: (el.textContent || '').trim().slice(0, 40),
++        izq: Math.round(r.left), der: Math.round(r.right), vista: anchoVista,
++      });
++    }
++  }
++
++  // 3) Áreas táctiles. Solo lo visible e interactivo.
++  const vistos = new Set();
++  for (const el of document.querySelectorAll('a[href], button, [role="button"], input, select')) {
++    const r = el.getBoundingClientRect();
++    if (r.width === 0 || r.height === 0) continue;
++    if (r.top > innerHeight || r.bottom < 0) continue;
++    if (!visible(el)) continue;
++    // Un enlace dentro de un párrafo no es un área táctil de control.
++    if (el.tagName === 'A' && el.closest('p, li')) continue;
++    const w = Math.round(r.width), h = Math.round(r.height);
++    if (w < tactilMinimo || h < tactilMinimo) {
++      const clave = `${el.tagName}:${(el.textContent || '').trim().slice(0, 24)}:${w}x${h}`;
++      if (vistos.has(clave)) continue;
++      vistos.add(clave);
++      hallazgos.push({
++        tipo: 'area-tactil-pequena',
++        texto: (el.textContent || '').trim().slice(0, 32) || el.getAttribute('aria-label') || el.tagName,
++        medida: `${w}×${h}`,
++        zona: zona(el),
++      });
++    }
++  }
++
++  return { anchoVista, hallazgos };
++}
++
++const servidor = arrancarServidor();
++const limpiar = () => pararServidor(servidor);
++process.on('exit', limpiar);
++process.on('SIGINT', () => { limpiar(); process.exit(130); });
++process.on('SIGTERM', () => { limpiar(); process.exit(143); });
++
++if (!(await esperarServidor())) {
++  console.error('No arrancó el servidor de producción. ¿Falta `npm run build`?');
++  pararServidor(servidor);
++  process.exit(1);
++}
++
++// En CI/Codespaces Playwright resuelve su propio Chromium. En entornos donde ya
++// hay uno instalado (PLAYWRIGHT_CHROMIUM), se respeta el que exista.
++const ejecutable = process.env.PLAYWRIGHT_CHROMIUM || undefined;
++const navegador = await chromium.launch(ejecutable ? { executablePath: ejecutable } : {});
++let totalDesbordes = 0, totalRecortes = 0, totalTactiles = 0;
++const informe = [];
++
++for (const d of DISPOSITIVOS) {
++  const ctx = await navegador.newContext({
++    viewport: { width: d.ancho, height: d.alto },
++    deviceScaleFactor: d.dpr,
++    isMobile: d.movil,
++    hasTouch: d.movil,
++  });
++  const pagina = await ctx.newPage();
++
++  // El sitio pide fuentes, analítica y push a terceros. En una medición de
++  // layout esas peticiones solo añaden latencia y ruido —y en un runner sin
++  // salida a internet, cuelgan—. Se cortan: no afectan a la geometría.
++  await pagina.route('**/*', (ruta) => {
++    const u = new URL(ruta.request().url());
++    if (u.hostname === '127.0.0.1' || u.hostname === 'localhost') return ruta.continue();
++    return ruta.abort();
++  });
++
++  const porDispositivo = [];
++
++  for (const ruta of RUTAS) {
++    // `load`, no `domcontentloaded`: el hero lleva fotografías y un carrusel;
++    // medir antes de que tengan tamaño da lecturas fantasma.
++    await pagina.goto(BASE + ruta, { waitUntil: 'load', timeout: 60000 });
++    await pagina.evaluate(() => {
++      delete window.__lecturas;
++      return document.fonts ? document.fonts.ready.catch(() => {}) : null;
++    });
++    // Se espera a que el layout se ESTABILICE, no a que termine la red.
++    //
++    // Medir justo después de domcontentloaded da lecturas falsas: React aún no
++    // ha hidratado, los carruseles no han recortado su pista y el ancho de
++    // scroll todavía se mueve. Una primera versión de este script informó de
++    // desbordes de 106px que no existían, por medir en ese hueco.
++    //
++    // El criterio es empírico y se calibró contra un falso positivo real: una
++    // versión anterior informaba de un desborde de 106px en Full HD que no
++    // existía pasados cuatro segundos. Ocho lecturas idénticas separadas 200ms
++    // —1,6 s de quietud— cubren la hidratación, la carga de imágenes del hero
++    // y el arranque del carrusel. Si en 20s no se estabiliza, se mide igual.
++    await pagina.waitForFunction(
++      () => {
++        const w = document.documentElement.scrollWidth;
++        const g = window;
++        g.__lecturas = (g.__lecturas || []).concat(w).slice(-8);
++        return g.__lecturas.length === 8 && g.__lecturas.every((x) => x === w);
++      },
++      null,
++      { timeout: 20000, polling: 200 },
++    ).catch(() => {});
++    const { hallazgos } = await pagina.evaluate(medirEnPagina, TACTIL_MINIMO);
++    for (const h of hallazgos) porDispositivo.push({ ruta, ...h });
++  }
++
++  await ctx.close();
++
++  const desbordes = porDispositivo.filter((h) => h.tipo === 'desborde-horizontal');
++  const recortes = porDispositivo.filter((h) => h.tipo === 'recortado-en-cabecera');
++  const tactiles = porDispositivo.filter((h) => h.tipo === 'area-tactil-pequena');
++  totalDesbordes += desbordes.length;
++  totalRecortes += recortes.length;
++  totalTactiles += tactiles.length;
++
++  informe.push({ d, desbordes, recortes, tactiles });
++}
++
++await navegador.close();
++pararServidor(servidor);
++
++const V = '\x1b[32m', R = '\x1b[31m', A = '\x1b[33m', G = '\x1b[90m', F = '\x1b[0m';
++console.log(`\nViewport — ${DISPOSITIVOS.length} dispositivos × ${RUTAS.length} rutas\n`);
++
++for (const { d, desbordes, recortes, tactiles } of informe) {
++  // El aviso táctil no rompe el despliegue; el recorte y el desborde sí.
++  // Marcarlos igual haría que 73 avisos parecieran 73 fallos.
++  const falla = desbordes.length > 0 || recortes.length > 0;
++  const marca = falla ? `${R}✗${F}` : tactiles.length ? `${A}!${F}` : `${V}✓${F}`;
++  console.log(`  ${marca} ${String(d.ancho).padStart(4)}px  ${d.nombre}`);
++  for (const h of desbordes) {
++    console.log(`${R}      desborda ${h.px}px en ${h.ruta}${F}`);
++    if (h.culpable) console.log(`${G}        culpable: <${h.culpable.etiqueta}> .${h.culpable.clases.split(' ')[0]} «${h.culpable.texto}» +${h.culpable.exceso}px [${h.culpable.estilo}]${h.culpable.oculto ? ' (oculto)' : ''}${F}`);
++    else console.log(`${G}        sin elemento identificable — revisar manualmente${F}`);
++  }
++  for (const h of recortes.slice(0, 4)) {
++    console.log(`${R}      recortado en cabecera: «${h.texto}» (der ${h.der} > vista ${h.vista}) en ${h.ruta}${F}`);
++  }
++  if (recortes.length > 4) console.log(`${G}      … y ${recortes.length - 4} recortes más${F}`);
++  for (const h of tactiles.slice(0, 3)) {
++    console.log(`${A}      área táctil ${h.medida} < ${TACTIL_MINIMO}px: «${h.texto}» [${h.zona}] en ${h.ruta}${F}`);
++  }
++  if (tactiles.length > 3) console.log(`${G}      … y ${tactiles.length - 3} áreas más${F}`);
++}
++
++const errores = totalDesbordes + totalRecortes;
++console.log(
++  `\nResultado: ${errores ? R : V}${errores} errores${F} ` +
++  `(${totalDesbordes} desbordes, ${totalRecortes} recortes), ` +
++  `${totalTactiles ? A : V}${totalTactiles} avisos táctiles${F}\n`,
++);
++process.exit(errores > 0 ? 1 : 0);
+diff --git a/supabase/schema.sql b/supabase/schema.sql
+index e39faa5..fe3d391 100644
+--- a/supabase/schema.sql
++++ b/supabase/schema.sql
+@@ -164,3 +164,13 @@ create policy "order_items own read" on public.order_items
+ 
+ -- Nota: inserción de cotizaciones desde el navegador (anon) puede habilitarse
+ -- con una policy INSERT explícita si se decide no pasar por un route handler.
++
++-- ---------- RFQ industrial pipeline (P0 revenue) ----------
++alter table public.quotes add column if not exists rfq_code text;
++alter table public.quotes add column if not exists country text;
++alter table public.quotes add column if not exists industry text;
++alter table public.quotes add column if not exists payload jsonb not null default '{}'::jsonb;
++create unique index if not exists quotes_rfq_code_uidx on public.quotes(rfq_code) where rfq_code is not null;
++create index if not exists quotes_status_created_idx on public.quotes(status, created_at desc);
++-- Stages (text): NEW | TECHNICAL_REVIEW | PRICING | EXPORT_REVIEW | QUOTE_READY | QUOTE_SENT | NEGOTIATION | WON | LOST
++
+diff --git a/test/dominio-migracion.test.ts b/test/dominio-migracion.test.ts
+new file mode 100644
+index 0000000..9dabc7a
+--- /dev/null
++++ b/test/dominio-migracion.test.ts
+@@ -0,0 +1,38 @@
++import { describe, it, expect } from 'vitest';
++import { migracionActiva } from '../middleware';
++
++/**
++ * Esta prueba existe por un incidente concreto: una versión del middleware
++ * emitía `X-Robots-Tag: noindex` en todo host *.vercel.app SIN comprobar si el
++ * dominio de marca ya estaba vivo. Como el sitio se sirve hoy desde
++ * plastilonas-peruanas-sac.vercel.app, ese despliegue habría desindexado el
++ * sitio entero y IndexNow habría estado empujando páginas noindex.
++ *
++ * El invariante que se protege: mientras CANONICAL_ORIGIN no apunte al dominio
++ * de marca, NADA degrada la indexabilidad del host actual.
++ */
++describe('interruptor de migración de dominio', () => {
++  it('está apagado cuando no hay CANONICAL_ORIGIN (estado actual del proyecto)', () => {
++    expect(migracionActiva({})).toBe(false);
++    expect(migracionActiva({ CANONICAL_ORIGIN: '' })).toBe(false);
++    expect(migracionActiva({ CANONICAL_ORIGIN: '   ' })).toBe(false);
++  });
++
++  it('sigue apagado si CANONICAL_ORIGIN apunta al propio host de Vercel', () => {
++    expect(
++      migracionActiva({
++        CANONICAL_ORIGIN: 'https://plastilonas-peruanas-sac.vercel.app',
++      }),
++    ).toBe(false);
++  });
++
++  it('no se enciende con una URL malformada', () => {
++    expect(migracionActiva({ CANONICAL_ORIGIN: 'plastilonas.com' })).toBe(false);
++    expect(migracionActiva({ CANONICAL_ORIGIN: 'no-es-una-url' })).toBe(false);
++  });
++
++  it('se enciende con el dominio de marca, con o sin www', () => {
++    expect(migracionActiva({ CANONICAL_ORIGIN: 'https://plastilonas.com' })).toBe(true);
++    expect(migracionActiva({ CANONICAL_ORIGIN: 'https://www.plastilonas.com' })).toBe(true);
++  });
++});
+diff --git a/test/facts.test.ts b/test/facts.test.ts
+new file mode 100644
+index 0000000..fce6ccd
+--- /dev/null
++++ b/test/facts.test.ts
+@@ -0,0 +1,28 @@
++import { describe, it, expect } from 'vitest';
++import { products, productFamilies } from '@/lib/products';
++import { COUNT_STATEMENT, FAMILY_COUNT, PRODUCT_COUNT, YEARS_OPERATING, YEARS_STATEMENT } from '@/lib/facts';
++import { SITE } from '@/lib/site';
++
++describe('hechos únicos — sin contradicciones de catálogo ni antigüedad', () => {
++  it('PRODUCT_COUNT es products.length', () => {
++    expect(PRODUCT_COUNT).toBe(products.length);
++    expect(PRODUCT_COUNT).toBeGreaterThanOrEqual(36);
++  });
++
++  it('FAMILY_COUNT es productFamilies.length', () => {
++    expect(FAMILY_COUNT).toBe(productFamilies.length);
++    expect(FAMILY_COUNT).toBe(11);
++  });
++
++  it('el enunciado de conteo no hardcodea 34', () => {
++    expect(COUNT_STATEMENT).toContain(String(PRODUCT_COUNT));
++    expect(COUNT_STATEMENT).not.toMatch(/\b34\b/);
++  });
++
++  it('la antigüedad se deriva de 2009, no de eslóganes', () => {
++    expect(SITE.foundingYear).toBe('2009');
++    expect(YEARS_OPERATING).toBe(new Date().getFullYear() - 2009);
++    expect(YEARS_STATEMENT).toBe('Fabricación en el Perú desde 2009');
++    expect(YEARS_STATEMENT.toLowerCase()).not.toContain('más de 15');
++  });
++});
+diff --git a/test/navegacion.test.ts b/test/navegacion.test.ts
+new file mode 100644
+index 0000000..6f62fb4
+--- /dev/null
++++ b/test/navegacion.test.ts
+@@ -0,0 +1,110 @@
++import { describe, it, expect } from 'vitest';
++import { readFileSync, existsSync } from 'node:fs';
++import { join } from 'node:path';
++import { INDUSTRIAS } from '../lib/industrias';
++
++const raiz = process.cwd();
++const fuente = readFileSync(join(raiz, 'components/Navbar.tsx'), 'utf8');
++
++/** Entradas de primer nivel declaradas en el array NAV. */
++function entradasDePrimerNivel(): { label: string; href: string }[] {
++  const bloque = fuente.slice(fuente.indexOf('const NAV: Entrada[]'), fuente.indexOf('/** Todas las rutas'));
++  // Solo el nivel superior: las entradas hijas viven dentro de `hijos: [...]`.
++  const sinHijos = bloque.replace(/hijos:\s*\[[\s\S]*?\n\s{4}\],/g, 'hijos: [],').replace(/hijos:\s*INDUSTRIAS[^,]*,/g, 'hijos: [],');
++  const salida: { label: string; href: string }[] = [];
++  const re = /\{\s*tipo:\s*'(?:mega|grupo|enlace)',\s*href:\s*'([^']+)',\s*label:\s*'([^']+)'/g;
++  let m: RegExpExecArray | null;
++  while ((m = re.exec(sinHijos))) salida.push({ href: m[1], label: m[2] });
++  return salida;
++}
++
++/** ¿Existe la ruta en app/? Acepta segmentos dinámicos. */
++function rutaExiste(href: string): boolean {
++  const limpio = href.split('?')[0].replace(/^\//, '');
++  if (limpio === '') return true;
++  const directo = join(raiz, 'app', limpio, 'page.tsx');
++  return existsSync(directo);
++}
++
++describe('navegación principal', () => {
++  const primerNivel = entradasDePrimerNivel();
++
++  it('declara exactamente las entradas de primer nivel esperadas', () => {
++    expect(primerNivel.map((e) => e.label)).toEqual([
++      'Productos', 'Industrias', 'Soluciones', 'Servicios', 'Recursos', 'Nosotros',
++    ]);
++  });
++
++  /**
++   * El límite no es estético. Con once entradas la barra se recortaba en todos
++   * los anchos entre 1024 y 1920 px —el CTA «Solicitar Cotización» terminaba
++   * fuera de pantalla en Full HD—. Seis caben con holhura; por encima de siete
++   * conviene agrupar antes que confiar en que «Más» lo recoja todo.
++   */
++  it('no crece más allá de siete entradas de primer nivel', () => {
++    expect(primerNivel.length).toBeLessThanOrEqual(7);
++  });
++
++  it('todas las rutas del menú existen en app/', () => {
++    const rotas = primerNivel.filter((e) => !rutaExiste(e.href));
++    expect(rotas.map((e) => e.href), 'entradas del menú sin página').toEqual([]);
++  });
++
++  it('no repite destinos en el primer nivel', () => {
++    const hrefs = primerNivel.map((e) => e.href);
++    expect(new Set(hrefs).size).toBe(hrefs.length);
++  });
++
++  it('los sectores del menú se derivan de lib/industrias.ts, no de una copia', () => {
++    // Si alguien pega una lista fija de sectores, este menú se desincroniza el
++    // día que se añada un sector. Debe leerse de la fuente única.
++    expect(fuente).toMatch(/hijos:\s*INDUSTRIAS\.map/);
++    expect(INDUSTRIAS.length).toBeGreaterThanOrEqual(5);
++  });
++
++  it('los paneles se ocultan con display:none, no con visibility', () => {
++    // `invisible` mantiene la caja en el layout: un panel cerrado de 320px
++    // anclado cerca del borde derecho empujaba el ancho de scroll del
++    // documento y creaba desplazamiento horizontal en toda la página.
++    expect(fuente).not.toMatch(/invisible opacity-0/);
++    expect(fuente).toMatch(/\? 'block' : 'hidden'/);
++  });
++
++  it('la zona de navegación puede encogerse (min-w-0)', () => {
++    // Sin min-w-0 un hijo con whitespace-nowrap fija el ancho del padre y el
++    // contenido se sale de la pantalla en lugar de replegarse.
++    expect(fuente).toMatch(/ref=\{zonaNav\}[^>]*min-w-0/);
++  });
++
++  it('mide el ancho real en vez de confiar en un breakpoint', () => {
++    expect(fuente).toMatch(/ResizeObserver/);
++    expect(fuente).toMatch(/useEntradasQueCaben/);
++  });
++
++  it('el encabezado respeta el área segura de pantallas con recorte', () => {
++    expect(fuente).toMatch(/env\(safe-area-inset-left\)/);
++    expect(fuente).toMatch(/env\(safe-area-inset-right\)/);
++  });
++
++  it('el menú móvil se acota con dvh, no con vh', () => {
++    // En iOS la barra del navegador cambia de alto al desplazarse; vh conserva
++    // la medida grande y el final del menú queda bajo la interfaz del sistema.
++    expect(fuente).toMatch(/100dvh/);
++    expect(fuente).not.toMatch(/max-h-\[calc\(100vh/);
++  });
++});
++
++describe('viewport del documento', () => {
++  const layout = readFileSync(join(raiz, 'app/layout.tsx'), 'utf8');
++
++  it('declara viewportFit cover para habilitar env(safe-area-inset-*)', () => {
++    expect(layout).toMatch(/viewportFit:\s*'cover'/);
++  });
++
++  it('no bloquea el zoom del usuario', () => {
++    // Fijar maximumScale o userScalable:false incumple WCAG 1.4.4 y hace
++    // ilegible una ficha técnica en un teléfono.
++    expect(layout).not.toMatch(/userScalable:\s*false/);
++    expect(layout).not.toMatch(/maximumScale:\s*1\b/);
++  });
++});
+diff --git a/test/proyectos.test.ts b/test/proyectos.test.ts
+new file mode 100644
+index 0000000..a87ccb6
+--- /dev/null
++++ b/test/proyectos.test.ts
+@@ -0,0 +1,48 @@
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { projects, projectsPublicados } from '../lib/projects';
++import { INDUSTRIAS } from '../lib/industrias';
++import { applications } from '../lib/applications';
++import { guides } from '../lib/guides';
++
++const raiz = process.cwd();
++
++describe('evidencia de proyecto', () => {
++  it('ninguna ficha se publica sin verificar', () => {
++    const filtradas = projectsPublicados.filter((p) => !p.verificado);
++    expect(filtradas).toEqual([]);
++    expect(projectsPublicados.length).toBeLessThanOrEqual(projects.length);
++  });
++
++  it('la página lee projectsPublicados, nunca el array crudo', () => {
++    const src = readFileSync(join(raiz, 'app/proyectos/page.tsx'), 'utf8');
++    expect(src).toContain('projectsPublicados');
++    expect(src).not.toMatch(/import\s*\{[^}]*\bprojects\b[^}]*\}\s*from\s*'@\/lib\/projects'/);
++  });
++
++  it('una ficha verificada no puede llevar cliente de marcador', () => {
++    for (const p of projectsPublicados) {
++      expect(p.client.trim().length, `${p.slug} sin cliente`).toBeGreaterThan(0);
++      expect(p.result).not.toMatch(/lorem|TODO|pendiente/i);
++    }
++  });
++});
++
++describe('vocabulario sectorial único', () => {
++  const validos = new Set(INDUSTRIAS.map((i) => i.slug));
++
++  it('todo industrySlug de proyectos existe en lib/industrias.ts', () => {
++    const huerfanos = projects.map((p) => p.industrySlug).filter((s) => !validos.has(s));
++    expect(huerfanos, `sectores inexistentes: ${huerfanos.join(', ')}`).toEqual([]);
++  });
++
++  it('todo industrySlugs de aplicaciones y guías existe en lib/industrias.ts', () => {
++    const todos = [
++      ...applications.flatMap((a) => a.industrySlugs),
++      ...guides.flatMap((g) => g.industrySlugs),
++    ];
++    const huerfanos = [...new Set(todos.filter((s) => !validos.has(s)))];
++    expect(huerfanos, `sectores inexistentes: ${huerfanos.join(', ')}`).toEqual([]);
++  });
++});
