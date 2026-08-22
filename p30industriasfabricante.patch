@@ -1,0 +1,1622 @@
+From 9c4d506a9f3c549c7444b9a3fe6bdbf7c6b00b5f Mon Sep 17 00:00:00 2001
+From: c <a@b>
+Date: Sat, 22 Aug 2026 02:08:15 +0000
+Subject: [PATCH] p30
+
+---
+ app/industria/[sector]/page.tsx | 297 ++++++++++++++++++++++++
+ app/industria/page.tsx          | 126 +++++++++++
+ app/sitemap.ts                  |  14 +-
+ components/CotizacionModal.tsx  |  43 +++-
+ components/Footer.tsx           |   8 +
+ components/StructuredData.tsx   |   6 +
+ docs/industrias-y-fabricante.md | 122 ++++++++++
+ lib/industrias.ts               | 386 ++++++++++++++++++++++++++++++++
+ lib/lead.ts                     |   2 +
+ lib/ruc.ts                      |  79 +++++++
+ lib/schema.ts                   |  12 +
+ lib/site.ts                     |  19 ++
+ lib/whatsapp.ts                 |   3 +
+ scripts/auditar-html.mjs        |  12 +-
+ test/industrias.test.ts         | 169 ++++++++++++++
+ test/ruc.test.ts                |  68 ++++++
+ 16 files changed, 1362 insertions(+), 4 deletions(-)
+ create mode 100644 app/industria/[sector]/page.tsx
+ create mode 100644 app/industria/page.tsx
+ create mode 100644 docs/industrias-y-fabricante.md
+ create mode 100644 lib/industrias.ts
+ create mode 100644 lib/ruc.ts
+ create mode 100644 test/industrias.test.ts
+ create mode 100644 test/ruc.test.ts
+
+diff --git a/app/industria/[sector]/page.tsx b/app/industria/[sector]/page.tsx
+new file mode 100644
+index 0000000..59dc3b8
+--- /dev/null
++++ b/app/industria/[sector]/page.tsx
+@@ -0,0 +1,297 @@
++import type { Metadata } from 'next';
++import { notFound } from 'next/navigation';
++import Link from 'next/link';
++import { ArrowRight, AlertTriangle, MapPin } from 'lucide-react';
++import { SITE } from '@/lib/site';
++import {
++  INDUSTRIAS,
++  industriaBySlug,
++  productosOrdenados,
++  productosDe,
++  solucionesDe,
++  guiasDe,
++  catalogoHref,
++  tituloIndustria,
++  descripcionIndustria,
++} from '@/lib/industrias';
++import { JsonLd } from '@/components/JsonLd';
++import TrackView from '@/components/TrackView';
++import WhatsAppLink from '@/components/WhatsAppLink';
++import {
++  breadcrumbSchema,
++  faqSchema,
++  itemListSchema,
++  serviceSchema,
++  webPageSchema,
++} from '@/lib/schema';
++
++/**
++ * Hub de sector (/industria/[sector]).
++ *
++ * Contenido propio arriba —problema de compra, criterio, logística—; listas
++ * derivadas abajo. Los cuatro primeros productos son los `ancla` declarados en
++ * lib/industrias.ts; el resto del sector vive en el catálogo ya filtrado, que
++ * es donde siempre vivió. No se clona el catálogo aquí.
++ */
++
++type Props = { params: Promise<{ sector: string }> };
++
++export const dynamicParams = false;
++
++export function generateStaticParams() {
++  return INDUSTRIAS.map((i) => ({ sector: i.slug }));
++}
++
++export async function generateMetadata({ params }: Props): Promise<Metadata> {
++  const { sector } = await params;
++  const ind = industriaBySlug(sector);
++  if (!ind) return {};
++  const url = `${SITE.url}/industria/${ind.slug}`;
++  const title = tituloIndustria(ind);
++  const description = descripcionIndustria(ind);
++  return {
++    title,
++    description,
++    alternates: { canonical: `/industria/${ind.slug}` },
++    openGraph: {
++      title: `${title} | ${SITE.name}`,
++      description,
++      url,
++      locale: SITE.locale,
++      type: 'website',
++    },
++  };
++}
++
++export default async function IndustriaPage({ params }: Props) {
++  const { sector } = await params;
++  const ind = industriaBySlug(sector);
++  if (!ind) notFound();
++
++  const url = `${SITE.url}/industria/${ind.slug}`;
++  const todos = productosOrdenados(ind);
++  const ancla = todos.slice(0, ind.ancla.length);
++  const restantes = todos.length - ancla.length;
++  const soluciones = solucionesDe(ind);
++  const guias = guiasDe(ind);
++
++  return (
++    <div className="mx-auto max-w-4xl px-4 py-14">
++      <TrackView kind="solution" slug={`industria:${ind.slug}`} />
++      <JsonLd
++        data={[
++          webPageSchema({
++            url,
++            name: tituloIndustria(ind),
++            description: descripcionIndustria(ind),
++            breadcrumbId: `${url}#breadcrumb`,
++            speakable: ['.speakable-intro'],
++          }),
++          breadcrumbSchema(
++            [
++              { name: 'Inicio', url: `${SITE.url}/` },
++              { name: 'Industrias', url: `${SITE.url}/industria` },
++              { name: ind.nombre, url },
++            ],
++            `${url}#breadcrumb`,
++          ),
++          /**
++           * Service con areaServed = el sector y sus regiones. No se clona el
++           * LocalBusiness (que vive en Chorrillos) en cada hub: eso sería
++           * declarar sedes que no existen.
++           */
++          serviceSchema({
++            name: `Fabricación e instalación para ${ind.nombre.toLowerCase()}`,
++            description: ind.intro,
++            url,
++            cityName: ind.regiones[0],
++            regionName: ind.regiones[0],
++            serviceTypes: ancla.map((p) => p.name),
++          }),
++          itemListSchema({
++            url,
++            name: `Productos para ${ind.nombre.toLowerCase()}`,
++            items: todos.map((p) => ({
++              name: p.name,
++              url: `${SITE.url}/productos/${p.slug}`,
++            })),
++          }),
++          faqSchema(ind.faqs, url),
++        ]}
++      />
++
++      <nav className="mb-6 text-sm text-neutral-500">
++        <Link href="/" className="hover:text-[#059669]">
++          Inicio
++        </Link>{' '}
++        /{' '}
++        <Link href="/industria" className="hover:text-[#059669]">
++          Industrias
++        </Link>{' '}
++        / <span>{ind.nombre}</span>
++      </nav>
++
++      <p className="mb-2 font-mono text-xs uppercase tracking-wider text-[#059669]">
++        Sector comprador
++      </p>
++      <h1 className="mb-6 text-3xl font-semibold tracking-tight text-[#0A2540] sm:text-4xl">
++        {ind.nombre}: {ind.complementoTitulo}
++      </h1>
++      <p className="speakable-intro mb-12 text-lg leading-relaxed text-gray-700">
++        {ind.intro}
++      </p>
++
++      <section className="mb-14">
++        <h2 className="mb-6 text-2xl font-semibold tracking-tight text-[#0A2540]">
++          Lo que se rompe cuando se compra sin criterio
++        </h2>
++        <div className="space-y-5">
++          {ind.problemas.map((p) => (
++            <div
++              key={p.titulo}
++              className="rounded-2xl border border-amber-200/70 bg-amber-50/50 p-5"
++            >
++              <div className="mb-2 flex items-start gap-2.5">
++                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
++                <h3 className="font-semibold text-[#0A2540]">{p.titulo}</h3>
++              </div>
++              <p className="pl-7 text-sm leading-relaxed text-gray-700">{p.detalle}</p>
++            </div>
++          ))}
++        </div>
++      </section>
++
++      <section className="mb-14">
++        <h2 className="mb-2 text-2xl font-semibold tracking-tight text-[#0A2540]">
++          Productos ancla del sector
++        </h2>
++        <p className="mb-6 text-sm text-gray-600">
++          Los que resuelven la mayor parte de los requerimientos de{' '}
++          {ind.nombre.toLowerCase()}.
++        </p>
++        <ul className="grid gap-3 sm:grid-cols-2">
++          {ancla.map((p) => (
++            <li key={p.slug}>
++              <Link
++                href={`/productos/${p.slug}`}
++                className="group block h-full rounded-2xl border border-neutral-200 p-5 transition-colors hover:border-[#059669]/40"
++              >
++                <span className="font-medium text-[#0A2540] group-hover:text-[#059669]">
++                  {p.name}
++                </span>
++                <span className="mt-1.5 block text-sm leading-relaxed text-neutral-600">
++                  {p.shortDescription}
++                </span>
++              </Link>
++            </li>
++          ))}
++        </ul>
++        {restantes > 0 && (
++          <Link
++            href={catalogoHref(ind)}
++            className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-[#059669] hover:underline"
++          >
++            Ver los {productosDe(ind).length} productos etiquetados para este sector
++            <ArrowRight className="h-4 w-4" />
++          </Link>
++        )}
++      </section>
++
++      {soluciones.length > 0 && (
++        <section className="mb-14">
++          <h2 className="mb-2 text-2xl font-semibold tracking-tight text-[#0A2540]">
++            Arquitecturas de referencia
++          </h2>
++          <p className="mb-6 text-sm text-gray-600">
++            El conjunto armado, no la pieza suelta: qué componente cumple qué
++            función y en qué orden se ejecuta.
++          </p>
++          <ul className="space-y-2.5">
++            {soluciones.map((s) => (
++              <li key={s.slug}>
++                <Link
++                  href={`/soluciones/${s.slug}`}
++                  className="group flex items-start gap-2 text-gray-700 hover:text-[#059669]"
++                >
++                  <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#059669]" />
++                  <span className="font-medium">{s.titulo}</span>
++                </Link>
++              </li>
++            ))}
++          </ul>
++        </section>
++      )}
++
++      {guias.length > 0 && (
++        <section className="mb-14">
++          <h2 className="mb-6 text-2xl font-semibold tracking-tight text-[#0A2540]">
++            Guías técnicas del sector
++          </h2>
++          <ul className="space-y-2.5">
++            {guias.slice(0, 8).map((a) => (
++              <li key={a.slug}>
++                <Link
++                  href={`/recursos/${a.slug}`}
++                  className="group flex items-start gap-2 text-gray-700 hover:text-[#059669]"
++                >
++                  <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#059669]" />
++                  <span>{a.title}</span>
++                </Link>
++              </li>
++            ))}
++          </ul>
++        </section>
++      )}
++
++      <section className="mb-14 rounded-3xl border border-gray-200 bg-gray-50 p-7">
++        <div className="mb-3 flex items-center gap-2.5">
++          <MapPin className="h-4 w-4 text-[#059669]" />
++          <h2 className="text-xl font-semibold text-[#0A2540]">
++            Despacho hacia su operación
++          </h2>
++        </div>
++        <p className="mb-4 leading-relaxed text-gray-700">{ind.logistica}</p>
++        <p className="text-sm text-gray-600">
++          Regiones donde este sector concentra demanda:{' '}
++          <strong className="text-[#0A2540]">{ind.regiones.join(' · ')}</strong>
++        </p>
++      </section>
++
++      <section className="mb-14">
++        <h2 className="mb-6 text-2xl font-semibold tracking-tight text-[#0A2540]">
++          Preguntas técnicas frecuentes
++        </h2>
++        <dl className="space-y-6">
++          {ind.faqs.map((f) => (
++            <div key={f.q}>
++              <dt className="mb-1.5 font-semibold text-[#0A2540]">{f.q}</dt>
++              <dd className="leading-relaxed text-gray-700">{f.a}</dd>
++            </div>
++          ))}
++        </dl>
++      </section>
++
++      <div className="flex flex-wrap gap-3">
++        <WhatsAppLink
++          context={`industria:${ind.slug}`}
++          message={`Hola, necesito una cotización técnica para ${ind.nombre.toLowerCase()}.`}
++          className="inline-flex items-center justify-center rounded-2xl bg-[#0A2540] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#059669]"
++        >
++          Cotización técnica por WhatsApp
++        </WhatsAppLink>
++        <Link
++          href="/cotizacion"
++          className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-6 py-3 font-medium text-gray-700 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
++        >
++          Formulario de cotización
++        </Link>
++        <Link
++          href="/industria"
++          className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-6 py-3 font-medium text-gray-700 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
++        >
++          Otros sectores
++        </Link>
++      </div>
++    </div>
++  );
++}
+diff --git a/app/industria/page.tsx b/app/industria/page.tsx
+new file mode 100644
+index 0000000..1894e4c
+--- /dev/null
++++ b/app/industria/page.tsx
+@@ -0,0 +1,126 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++import { ArrowRight } from 'lucide-react';
++import { SITE } from '@/lib/site';
++import {
++  INDUSTRIAS,
++  productosDe,
++  tituloIndustria,
++  descripcionIndustria,
++} from '@/lib/industrias';
++import { descripcionAjustada } from '@/lib/meta';
++import { JsonLd } from '@/components/JsonLd';
++import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
++
++/**
++ * Índice de sectores (/industria).
++ *
++ * Es el quinto eje de navegación del sitio, junto a familia, arquitectura,
++ * marco y ciudad. Responde a la pregunta con la que empieza de verdad una
++ * compra industrial: «soy de este sector, ¿qué me sirve?».
++ */
++
++const url = `${SITE.url}/industria`;
++
++export const metadata: Metadata = {
++  title: 'Soluciones por industria',
++  // Por el mismo presupuesto que el resto del sitio: frases completas hasta
++  // donde quepa, nunca una idea partida por la mitad.
++  description: descripcionAjustada([
++    'Minería, agroexportación, transporte, construcción y saneamiento.',
++    'Qué se fabrica para cada sector, con qué criterio se especifica y a dónde se despacha.',
++  ]),
++  alternates: { canonical: '/industria' },
++  openGraph: {
++    title: `Soluciones por industria | ${SITE.name}`,
++    description:
++      'Qué fabricamos para minería, agroexportación, transporte, construcción y saneamiento en el Perú.',
++    url,
++    locale: SITE.locale,
++    type: 'website',
++  },
++};
++
++export default function IndustriaIndexPage() {
++  return (
++    <div className="mx-auto max-w-5xl px-4 py-14">
++      <JsonLd
++        data={[
++          webPageSchema({
++            url,
++            name: 'Soluciones por industria',
++            description:
++              'Índice de sectores compradores de textiles industriales y geosintéticos en el Perú.',
++            type: 'CollectionPage',
++            breadcrumbId: `${url}#breadcrumb`,
++            speakable: ['.speakable-intro'],
++          }),
++          breadcrumbSchema(
++            [
++              { name: 'Inicio', url: `${SITE.url}/` },
++              { name: 'Industrias', url },
++            ],
++            `${url}#breadcrumb`,
++          ),
++          itemListSchema({
++            url,
++            name: 'Sectores atendidos',
++            description: 'Hubs por industria compradora.',
++            items: INDUSTRIAS.map((i) => ({
++              name: i.nombre,
++              url: `${SITE.url}/industria/${i.slug}`,
++            })),
++          }),
++        ]}
++      />
++
++      <nav className="mb-6 text-sm text-neutral-500">
++        <Link href="/" className="hover:text-[#059669]">
++          Inicio
++        </Link>{' '}
++        / <span>Industrias</span>
++      </nav>
++
++      <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#0A2540] mb-5">
++        Soluciones por industria
++      </h1>
++      <p className="speakable-intro text-lg text-gray-600 max-w-3xl mb-4">
++        Nadie en una minera busca «geosintéticos»: busca resolver una poza. El
++        catálogo está ordenado por material y por familia, que es como se
++        fabrica; esta sección lo ordena por sector, que es como se compra.
++      </p>
++      <p className="text-gray-600 max-w-3xl mb-12">
++        Cada página reúne lo que se fabrica para ese sector, el criterio con el
++        que se especifica, qué se rompe cuando se compra sin criterio y a qué
++        regiones se despacha. Los productos salen del propio catálogo: no hay
++        una lista paralela que pueda quedar desfasada.
++      </p>
++
++      <div className="grid gap-5 sm:grid-cols-2">
++        {INDUSTRIAS.map((ind) => {
++          const n = productosDe(ind).length;
++          return (
++            <Link
++              key={ind.slug}
++              href={`/industria/${ind.slug}`}
++              className="group rounded-3xl border border-gray-200 p-7 transition-all hover:border-[#059669]/50 hover:shadow-sm"
++            >
++              <div className="mb-2 font-mono text-xs uppercase tracking-wider text-[#059669]">
++                {n} productos del catálogo
++              </div>
++              <h2 className="mb-3 text-xl font-semibold text-[#0A2540] group-hover:text-[#059669]">
++                {tituloIndustria(ind)}
++              </h2>
++              <p className="mb-5 text-sm leading-relaxed text-gray-600">
++                {descripcionIndustria(ind)}
++              </p>
++              <span className="inline-flex items-center gap-1 text-sm font-medium text-[#059669]">
++                Ver el sector <ArrowRight className="h-4 w-4" />
++              </span>
++            </Link>
++          );
++        })}
++      </div>
++    </div>
++  );
++}
+diff --git a/app/sitemap.ts b/app/sitemap.ts
+index 80702c5..c4b93ad 100644
+--- a/app/sitemap.ts
++++ b/app/sitemap.ts
+@@ -11,6 +11,7 @@ import { LEGAL_UPDATED } from "@/lib/legal";
+ import { terminos } from "@/lib/glosario";
+ import { informes, INFORMES_UPDATED } from "@/lib/informes";
+ import { calculadoras, CALCULADORAS_ACTUALIZADO } from "@/lib/calculadoras";
++import { INDUSTRIAS } from "@/lib/industrias";
+ 
+ export default function sitemap(): MetadataRoute.Sitemap {
+   const now = new Date();
+@@ -23,6 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
+     { url: `${SITE.url}/contacto`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
+     { url: `${SITE.url}/cotizacion`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+     { url: `${SITE.url}/local`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
++    { url: `${SITE.url}/industria`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+     { url: `${SITE.url}/recursos`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+     // Indicadores: la única página del sitio que cambia sola. changeFrequency
+     // diaria porque es cierto, no porque suene bien.
+@@ -125,6 +127,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
+     })),
+   ];
+ 
+-  return [...staticRoutes, ...marcoRoutes, ...calculadoraRoutes, ...informeRoutes, ...glosarioRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
++  // Un hub por sector comprador. `priority` se deja igual que el resto del
++  // contenido editorial: Google confirmó hace años que ignora este campo, así
++  // que subirlo a 0.9 sería decorar el XML, no priorizar nada.
++  const industriaRoutes: MetadataRoute.Sitemap = INDUSTRIAS.map((i) => ({
++    url: `${SITE.url}/industria/${i.slug}`,
++    lastModified: now,
++    changeFrequency: "monthly" as const,
++    priority: 0.8,
++  }));
++
++  return [...staticRoutes, ...industriaRoutes, ...marcoRoutes, ...calculadoraRoutes, ...informeRoutes, ...glosarioRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
+     ...localRoutes, ...articleRoutes];
+ }
+diff --git a/components/CotizacionModal.tsx b/components/CotizacionModal.tsx
+index 683cc64..6b86e91 100644
+--- a/components/CotizacionModal.tsx
++++ b/components/CotizacionModal.tsx
+@@ -11,10 +11,24 @@ import { toast } from 'sonner';
+ import { buildQuoteMessage, openWhatsApp, saveQuoteLocally } from '@/lib/whatsapp';
+ import { trackQuoteRequest, trackQuoteStarted } from '@/lib/analytics';
+ import { postLead } from '@/lib/lead';
++import { errorRuc, normalizarRuc } from '@/lib/ruc';
+ 
+ const formSchema = z.object({
+   nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+   empresa: z.string().min(2, 'Ingrese el nombre de su empresa'),
++  /**
++   * RUC opcional, pero validado de verdad. Una expresión regular de once
++   * dígitos acepta 12345678901 y deja el campo sin valor de cualificación;
++   * el dígito verificador del módulo 11 rechaza eso en el navegador
++   * (ver lib/ruc.ts). Sigue sin comprobar existencia en el padrón de SUNAT.
++   */
++  ruc: z
++    .string()
++    .optional()
++    .superRefine((v, ctx) => {
++      const msg = errorRuc(v ?? '');
++      if (msg) ctx.addIssue({ code: z.ZodIssueCode.custom, message: msg });
++    }),
+   email: z.string().email('Ingrese un correo electrónico válido'),
+   telefono: z.string().min(9, 'Ingrese un número de teléfono válido').regex(/^[0-9+\s()-]+$/, 'Formato de teléfono inválido'),
+   producto: z.string().optional(),
+@@ -73,11 +87,16 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
+   const onSubmit = async (data: FormData) => {
+     setIsSubmitting(true);
+ 
++    // El RUC viaja normalizado a dígitos: el comercial lo pega en la consulta
++    // de SUNAT sin limpiar guiones ni espacios a mano.
++    const ruc = normalizarRuc(data.ruc ?? '') || undefined;
++
+     // Envío real: abrimos WhatsApp con la solicitud estructurada, lista para
+     // enviar al equipo comercial. Sin backend intermedio que pueda fallar.
+     const message = buildQuoteMessage({
+       nombre: data.nombre,
+       empresa: data.empresa,
++      ruc,
+       email: data.email,
+       telefono: data.telefono,
+       producto: data.producto,
+@@ -90,6 +109,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
+     saveQuoteLocally({
+       nombre: data.nombre,
+       empresa: data.empresa,
++      ruc,
+       email: data.email,
+       telefono: data.telefono,
+       producto: data.producto,
+@@ -100,6 +120,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
+     void postLead({
+       nombre: data.nombre,
+       empresa: data.empresa,
++      ruc,
+       email: data.email,
+       telefono: data.telefono,
+       producto: data.producto,
+@@ -202,6 +223,24 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
+                     />
+                     {errors.empresa && <p className="text-red-500 text-xs mt-1.5">{errors.empresa.message}</p>}
+                   </div>
++                  <div>
++                    <label className="block text-sm font-medium text-gray-700 mb-1.5">RUC (opcional)</label>
++                    <input
++                      {...register('ruc')}
++                      inputMode="numeric"
++                      maxLength={13}
++                      className="form-input w-full px-4 py-3 border border-gray-200 rounded-2xl text-sm focus:border-[#059669]"
++                      placeholder="20123456789"
++                      aria-describedby="ruc-ayuda"
++                    />
++                    {errors.ruc ? (
++                      <p className="text-red-500 text-xs mt-1.5">{errors.ruc.message}</p>
++                    ) : (
++                      <p id="ruc-ayuda" className="text-gray-400 text-xs mt-1.5">
++                        Agiliza la emisión de la cotización con factura.
++                      </p>
++                    )}
++                  </div>
+                 </div>
+ 
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+@@ -240,11 +279,11 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
+                     </select>
+                   </div>
+                   <div>
+-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Cantidad aproximada</label>
++                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Cantidad o metraje del proyecto</label>
+                     <input 
+                       {...register('cantidad')} 
+                       className="form-input w-full px-4 py-3 border border-gray-200 rounded-2xl text-sm focus:border-[#059669]" 
+-                      placeholder="Ej: 50 unidades / 2000 m²" 
++                      placeholder="Ej: 2 500 m² · 40 mangas Ø600 · 12 toldos" 
+                     />
+                   </div>
+                 </div>
+diff --git a/components/Footer.tsx b/components/Footer.tsx
+index 851179d..2ab3f87 100644
+--- a/components/Footer.tsx
++++ b/components/Footer.tsx
+@@ -18,6 +18,14 @@ export default function Footer() {
+       { label: 'Ventilación Industrial', href: '/productos/familia/ventilacion-industrial' },
+       { label: 'Ver catálogo completo →', href: '/productos' },
+     ]},
++    { title: 'INDUSTRIAS', links: [
++      { label: 'Minería', href: '/industria/mineria' },
++      { label: 'Agroexportación', href: '/industria/agroexportacion' },
++      { label: 'Transporte y logística', href: '/industria/transporte-logistica' },
++      { label: 'Construcción e infraestructura', href: '/industria/construccion' },
++      { label: 'Saneamiento y agua', href: '/industria/saneamiento-y-agua' },
++      { label: 'Ver todos los sectores →', href: '/industria' },
++    ]},
+     { title: 'EMPRESA', links: [
+       { label: 'Recursos técnicos', href: '/recursos' },
+       { label: 'Arquitecturas de referencia', href: '/soluciones' },
+diff --git a/components/StructuredData.tsx b/components/StructuredData.tsx
+index ec098ad..38c57bb 100644
+--- a/components/StructuredData.tsx
++++ b/components/StructuredData.tsx
+@@ -49,6 +49,10 @@ export default function StructuredData() {
+       addressCountry: SITE.addressCountry,
+     },
+     areaServed: { '@type': 'Country', name: 'Perú' },
++    // Clasificación industrial: así se declara «fábrica» con vocabulario que
++    // schema.org tiene tipado. Un tipo «Manufacturer» no existe (ver lib/site.ts).
++    isicV4: SITE.isicV4,
++    naics: SITE.naics,
+     sameAs: SITE.sameAs,
+   };
+ 
+@@ -75,6 +79,8 @@ export default function StructuredData() {
+       addressCountry: SITE.addressCountry,
+     },
+     areaServed: { '@type': 'Country', name: 'Perú' },
++    isicV4: SITE.isicV4,
++    naics: SITE.naics,
+     currenciesAccepted: 'PEN',
+     contactPoint: [
+       {
+diff --git a/docs/industrias-y-fabricante.md b/docs/industrias-y-fabricante.md
+new file mode 100644
+index 0000000..5e3dc98
+--- /dev/null
++++ b/docs/industrias-y-fabricante.md
+@@ -0,0 +1,122 @@
++# P30 — El sector como puerta de entrada
++
++Qué se añadió, qué se descartó a propósito y por qué.
++
++## 1. `/industria` — el eje que faltaba
++
++El sitio tenía cuatro ejes de navegación indexables:
++
++| Eje | Pregunta que responde |
++|---|---|
++| `/productos/familia/*` | ¿qué línea me sirve? (por material) |
++| `/soluciones/*` | ¿cómo se arma el conjunto? (por obra) |
++| `/marco` | ¿qué tengo que definir? (por criterio) |
++| `/local/*` | ¿llegan a mi ciudad? (por geografía) |
++
++Faltaba el eje por el que empieza una compra industrial: **el sector del
++comprador**. Nadie en una minera busca «geosintéticos»; busca resolver una poza.
++
++El dato ya existía. Cada producto de `lib/products.ts` lleva
++`sector: ['Minería', 'Construcción']` desde el principio, y las arquitecturas de
++referencia también. Esa clasificación se usaba para filtrar en cliente y **no
++tenía una sola URL propia**: el sitio sabía qué le vende a minería y no lo decía
++en ninguna página indexable.
++
++Cinco hubs, elegidos por volumen real de catálogo:
++
++| Ruta | Etiquetas que absorbe | Productos derivados |
++|---|---|---|
++| `/industria/mineria` | Minería | 18 |
++| `/industria/agroexportacion` | Agricultura | 19 |
++| `/industria/transporte-logistica` | Transporte, Logística | 9 |
++| `/industria/construccion` | Construcción, Infraestructura | 24 |
++| `/industria/saneamiento-y-agua` | Saneamiento | 7 |
++
++**No hay hub «Industrial»**, que es la etiqueta con más productos (19). Nadie
++teclea «industrial» como intención de compra: sería relleno con aspecto de
++estrategia.
++
++### Regla de no deriva
++
++Los productos de cada hub **no se escriben a mano**: se derivan de las etiquetas
++que ya lleva el catálogo. Una lista de slugs copiada quedaría desfasada el día
++que alguien añada un producto, y nadie se enteraría. Lo único escrito a mano es
++lo que ningún dato puede dar —el problema de compra, el criterio, la logística—
++y los `ancla`, que son orden de presentación y **están verificados por prueba**:
++`test/industrias.test.ts` falla si un ancla no existe o no lleva la etiqueta de
++su sector.
++
++La lista larga no se clona: enlaza a `/productos?sector=…`, que ya funcionaba.
++
++## 2. La señal de fabricante, con vocabulario que existe
++
++`schema.org` **no define un tipo `Manufacturer`**. Los subtipos de `Organization`
++son `Airline`, `Corporation`, `LocalBusiness`, `NGO` y una veintena más;
++«Manufacturer» no está entre ellos. Existe `manufacturer`, pero como **propiedad
++de `Product`** apuntando a una `Organization` — que es exactamente como
++`ProductStructuredData.tsx` ya lo emitía.
++
++Declarar `"@type": ["Organization", "Manufacturer"]` no refuerza la señal:
++mete un tipo inexistente en el nodo raíz de la empresa. Lo mismo
++`additionalType: "https://schema.org/Manufacturer"`, que es una URI muerta.
++
++Lo que sí está tipado en `Organization` y sí se lee:
++
++- `taxID` — el RUC, además del `identifier`/`PropertyValue` que nombra el esquema peruano
++- `isicV4: "2220"` — CIIU Rev.4, fabricación de productos de plástico
++- `naics: "326199"` — equivalente norteamericano
++
++Y `manufacturer` se añadió a `productSchema()` de `lib/schema.ts`, que era el
++único emisor de producto que aún no lo declaraba.
++
++`test/industrias.test.ts` falla si alguien reintroduce el tipo inventado.
++
++## 3. RUC validado de verdad
++
++Un campo con `/^[0-9]{11}$/` acepta `12345678901`, `00000000000` y el teléfono
++del que rellena por salir del paso. No cualifica nada; el comercial descubre el
++error cuando ya emitió la cotización.
++
++`lib/ruc.ts` comprueba el **dígito verificador del módulo 11**: factores
++`5 4 3 2 7 6 5 4 3 2` sobre los diez primeros dígitos, y prefijo en
++`10 / 15 / 17 / 20`. La prueba que da autoridad al algoritmo es que valida el RUC
++de la propia empresa (`20523135385`), fijado en `test/ruc.test.ts`.
++
++Alcance honesto: verifica que el número esté **bien formado**, no que exista en
++el padrón de SUNAT ni que esté activo y habido. Eso es una consulta de servidor.
++
++El error es específico —«El RUC tiene 11 dígitos; ingresó 8», «El dígito
++verificador no corresponde»— porque un «RUC inválido» genérico hace que el
++comprador reescriba el mismo número tres veces.
++
++## 4. El trinquete de títulos
++
++P29 llevó de 100 a 0 los títulos que Google recorta. Nada impedía deshacerlo:
++`titulo-largo` era un **aviso** entre cincuenta y nadie mira un renglón ámbar.
++
++Ahora es **error** y rompe la integración continua. De cero solo se sale hacia
++arriba. Corregirlo no es truncar: es pasar el título por `tituloAjustado` de
++`lib/meta.ts`, que suelta el complemento cuando no cabe entero.
++
++Y una prueba adicional exige que el complemento **sobreviva**: un título que se
++queda en «Transporte y logística» cabe perfectamente y desperdicia veintinueve
++caracteres de espacio de clic. Por eso los sectores tienen `tituloBase` — el
++nombre completo gana el encabezado, la versión corta gana el resultado de
++búsqueda.
++
++## Lo que se descartó a propósito
++
++- **Meta `keywords` con la matriz de palabras clave.** Google las ignora desde
++  2009. Meter «RUC 20523135385» ahí es ruido, no señal.
++- **Subir `priority` en el sitemap a 0.9.** Google confirmó que ignora ese campo.
++  Reordenar el XML es decorarlo.
++- **Un segundo campo «volumen del proyecto».** «Cantidad aproximada» ya lo
++  capturaba; dos campos casi iguales bajan la tasa de completado y parten el
++  mismo dato en dos. Se le cambió el nombre y el ejemplo, y ya.
++- **Reemplazar `SITE.description` por una descripción con palabras clave.** Esa
++  cadena alimenta el JSON-LD, los Open Graph y los PDF: cambiarla por un anuncio
++  de 137 caracteres degrada la descripción de la empresa en todos ellos y
++  dispara descripciones duplicadas en el auditor.
++- **`areaServed` con siete ciudades en `Organization`.** Redundante: el país ya
++  las contiene y `/local/*` ya emite `Service` con `areaServed` por ciudad, que
++  es la señal granular correcta.
+diff --git a/lib/industrias.ts b/lib/industrias.ts
+new file mode 100644
+index 0000000..f03d280
+--- /dev/null
++++ b/lib/industrias.ts
+@@ -0,0 +1,386 @@
++import { products } from './products';
++import { solutions } from './solutions';
++import { articles } from './articles';
++import { tituloAjustado, descripcionAjustada } from './meta';
++import type { Product } from './types';
++
++/**
++ * HUBS DE INDUSTRIA (/industria y /industria/[sector]).
++ *
++ * EL HUECO QUE LLENA. El catálogo ya clasifica cada producto por sector
++ * —`sector: ['Minería', 'Construcción']` en lib/products.ts— y las
++ * arquitecturas de referencia también. Esa clasificación existe desde el
++ * principio, se usa para filtrar en cliente… y no tiene una sola URL propia.
++ * Es decir: el sitio SABE qué vende a minería y no lo dice en ninguna página
++ * indexable. Quien busca «mangas de ventilación para minería» aterriza, con
++ * suerte, en una ficha suelta.
++ *
++ * POR QUÉ NO ES OTRA CAPA DE LO MISMO. Ya existen cuatro ejes:
++ *   /productos/familia/*  → «¿qué línea me sirve?» (por material)
++ *   /soluciones/*         → «¿cómo se arma el conjunto?» (por obra)
++ *   /marco                → «¿qué tengo que definir?» (por criterio)
++ *   /local/*              → «¿llegan a mi ciudad?» (por geografía)
++ * Falta el eje por el que de verdad busca un jefe de compras: SU INDUSTRIA.
++ * Nadie en una minera busca «geosintéticos»; busca resolver una poza.
++ *
++ * REGLA DE NO DERIVA — la que hace que esta capa no envejezca. Los productos
++ * de cada hub NO se escriben a mano: se derivan de las etiquetas de sector que
++ * ya lleva el catálogo. Una lista de slugs copiada aquí quedaría desfasada el
++ * día que alguien añada un producto o le cambie el sector, y nadie se
++ * enteraría. Lo único escrito a mano es lo que ningún dato puede dar: el
++ * problema de compra, el criterio y la logística. Los `ancla` son un orden de
++ * presentación, y test/industrias.test.ts verifica que cada uno exista Y lleve
++ * la etiqueta del sector.
++ *
++ * POR QUÉ NO HAY HUB «INDUSTRIAL». Es la etiqueta con más productos (19) y la
++ * peor candidata a página: nadie teclea «industrial» como intención de compra.
++ * Un hub que no responde a una búsqueda real es contenido de relleno con
++ * aspecto de estrategia.
++ *
++ * REGLA DE HONESTIDAD, la misma del resto del repositorio: ni una obra
++ * ejecutada, ni un cliente, ni un volumen, ni una certificación que no se
++ * pueda respaldar con un documento. El texto habla de criterios y de lo que se
++ * fabrica, que es verificable.
++ */
++
++export interface Industria {
++  slug: string;
++  /** Nombre del sector, tal como lo llama el comprador. */
++  nombre: string;
++  /** Etiquetas de `Product.sector` que este hub absorbe. Fuente de la derivación. */
++  etiquetas: string[];
++  /**
++   * Base del <title> cuando el nombre completo no deja sitio al complemento.
++   * «Construcción e infraestructura» son 30 de los 51 caracteres disponibles:
++   * el nombre entero gana el encabezado y pierde el resultado de búsqueda.
++   */
++  tituloBase?: string;
++  /**
++   * Complemento del <title>. Está escrito PARA CABER: lib/meta.ts lo suelta
++   * entero si no entra, y un título que se queda en «Transporte y logística»
++   * desperdicia veintinueve caracteres de espacio de clic.
++   */
++  complementoTitulo: string;
++  /** Frases de la descripción, en orden de importancia. */
++  frasesDescripcion: string[];
++  /** Párrafo de apertura, marcado como speakable. */
++  intro: string;
++  /** Qué se rompe cuando se compra sin criterio en este sector. */
++  problemas: { titulo: string; detalle: string }[];
++  /** Orden de presentación. Deben existir y llevar la etiqueta (lo verifica el test). */
++  ancla: string[];
++  /** Departamentos donde este sector concentra demanda. */
++  regiones: string[];
++  /** Nota logística real: se despacha desde Chorrillos. */
++  logistica: string;
++  faqs: { q: string; a: string }[];
++}
++
++export const INDUSTRIAS: Industria[] = [
++  {
++    slug: 'mineria',
++    nombre: 'Minería',
++    etiquetas: ['Minería'],
++    complementoTitulo: 'mangas de ventilación y geomembranas',
++    frasesDescripcion: [
++      'Mangas de ventilación para túneles, geomembranas para pozas y cobertores de alta resistencia, fabricados a medida en Chorrillos.',
++      'Despacho a los corredores mineros del país.',
++    ],
++    intro:
++      'En minería el material no se elige por catálogo: se elige por pérdida de carga en el ducto, por compatibilidad química de la lámina con lo que va a contener y por si el conjunto se puede instalar en un frente a 4 000 metros sin volver a bajar por una pieza que faltó. Fabricamos e instalamos mangas de ventilación, geomembranas y cobertores contra especificación, no contra un catálogo cerrado.',
++    problemas: [
++      {
++        titulo: 'La manga se especifica por diámetro y nada más',
++        detalle:
++          'El diámetro es el dato fácil. Lo que decide el consumo del ventilador durante toda la vida del frente es la rugosidad interior, la calidad de las uniones y cuántas fugas tiene el tramo. Una manga barata con uniones flojas se paga en energía todos los días del año.',
++      },
++      {
++        titulo: 'El espesor de la geomembrana se copia de otra obra',
++        detalle:
++          'El espesor no se hereda: depende del líquido contenido, del punzonamiento de la subrasante y de la vida de diseño. Copiar el número de una poza de agua limpia a una de solución es el camino corto a una filtración que después se atribuye al material.',
++      },
++      {
++        titulo: 'El cobertor se compra por precio por metro cuadrado',
++        detalle:
++          'A radiación de sierra alta, un cobertor mal especificado no dura la campaña. El costo real no es el metro cuadrado: es reponerlo dos veces y parar el acopio mientras tanto.',
++      },
++      {
++        titulo: 'El plazo de importación no entra en el cronograma',
++        detalle:
++          'Cuando la pieza viene de fuera, el cronograma de avance queda atado a un contenedor. Fabricar en Lima cambia el plazo de semanas a días y permite corregir una medida sin repetir el ciclo completo.',
++      },
++    ],
++    ancla: [
++      'mangas-ventilacion-minas-tuneles',
++      'geomembranas-pvc',
++      'geomembrana-pe-fortificada',
++      'big-bags-bolsones-polipropileno',
++    ],
++    regiones: ['Arequipa', 'Cajamarca', 'Pasco', 'Moquegua', 'Áncash', 'Junín'],
++    logistica:
++      'Fabricación en Chorrillos y despacho a los corredores mineros del sur, centro y norte. Las medidas, uniones y accesorios se cierran antes del corte: rectificar en planta cuesta horas y rectificar en campamento cuesta días.',
++    faqs: [
++      {
++        q: '¿Qué espesor de geomembrana se necesita para una poza en minería?',
++        a: 'No hay un número único y desconfíe de quien lo dé por teléfono. El espesor sale de tres datos: qué contiene la poza, qué punzonamiento tiene la subrasante y cuántos años debe durar. En contención de agua industrial se suele trabajar en el rango de 1.0 a 1.5 mm con geotextil de protección; en soluciones agresivas manda la compatibilidad química del polímero antes que el espesor. Lo definimos en la cotización con la ficha del material.',
++      },
++      {
++        q: '¿Fabrican mangas de ventilación en diámetros no estándar?',
++        a: 'Sí. Diámetro, longitud de tramo, tipo de unión y refuerzos se confeccionan según el diseño de ventilación del frente. Es el caso normal, no la excepción: el estándar de otro no suele coincidir con su sección.',
++      },
++      {
++        q: '¿Instalan en operaciones fuera de Lima?',
++        a: 'Fabricamos en Chorrillos y despachamos a todo el país. La instalación de geomembranas y estructuras se coordina contra el cronograma de la obra, no contra el nuestro.',
++      },
++    ],
++  },
++  {
++    slug: 'agroexportacion',
++    nombre: 'Agroexportación',
++    etiquetas: ['Agricultura'],
++    complementoTitulo: 'mallas antiáfidas y cobertores',
++    frasesDescripcion: [
++      'Mallas antiáfidas y de sombra, cobertores agrícolas y envases para campaña, fabricados a medida para valles de la costa peruana.',
++      'Despacho a Ica, Piura y La Libertad.',
++    ],
++    intro:
++      'La malla no se compra por rollo: se compra por trama, por gramaje y por cuántas campañas tiene que aguantar bajo la radiación del valle. Una malla antiáfida con la trama equivocada deja pasar al vector que iba a detener, y el ahorro por metro se pierde en una sola aplicación fitosanitaria de emergencia.',
++    problemas: [
++      {
++        titulo: 'La trama se elige por precio y no por la plaga',
++        detalle:
++          'Una malla antiáfida se define por el número de hilos que la cruzan, que es lo que fija el tamaño de paso. Si el paso es mayor que el insecto que se quiere excluir, la malla es una sombra cara.',
++      },
++      {
++        titulo: 'El cobertor no llega al final de la campaña',
++        detalle:
++          'La radiación de la costa peruana degrada un material sin estabilización adecuada en meses. El costo se mide por campaña cubierta, no por metro comprado.',
++      },
++      {
++        titulo: 'El ancho útil no coincide con el módulo del campo',
++        detalle:
++          'Comprar el ancho de rollo que había en stock obliga a traslapar o a cortar. Ambas cosas se pagan en merma y en horas de instalación.',
++      },
++    ],
++    ancla: [
++      'mallas-antiafidas',
++      'malla-raschel-sombra',
++      'malla-anti-pajaro-anti-granizo',
++      'cobertores-agricolas-multimaterial',
++    ],
++    regiones: ['Ica', 'Piura', 'La Libertad', 'Lambayeque', 'Áncash', 'Arequipa'],
++    logistica:
++      'Los volúmenes de campaña se programan con anticipación desde Lima hacia los valles de la costa. El ancho de rollo y la confección se definen contra el módulo del campo para reducir traslape y merma.',
++    faqs: [
++      {
++        q: '¿Cómo se elige la trama de una malla antiáfida?',
++        a: 'Por el insecto que se quiere excluir. La trama fija el tamaño de paso: para áfidos se trabajan tramas cerradas y para exclusión más gruesa se puede abrir, ganando ventilación. Cerrar de más también tiene costo, porque reduce el intercambio de aire y sube la temperatura bajo la malla. Se decide con el cultivo y la presión de plaga sobre la mesa.',
++      },
++      {
++        q: '¿Entregan por volumen de campaña a Ica o Piura?',
++        a: 'Sí. Es el caso habitual: se programa el volumen contra la fecha de instalación y se despacha desde Lima. Cuanto antes se cierre el ancho útil, menos merma queda en campo.',
++      },
++    ],
++  },
++  {
++    slug: 'transporte-logistica',
++    nombre: 'Transporte y logística',
++    etiquetas: ['Transporte', 'Logística'],
++    tituloBase: 'Transporte',
++    complementoTitulo: 'toldos, siders y lonas de carga',
++    frasesDescripcion: [
++      'Toldos y tolderas para camión, siders, lonas de carga y films de unitización, confeccionados a la medida real de la unidad.',
++      'Despacho nacional desde Lima.',
++    ],
++    intro:
++      'Un toldo no falla por la lona: falla por el ojal, por la costura y por el refuerzo que no se puso donde tira la soga. Confeccionamos toldos, tolderas y siders sobre la medida real de la caja —no sobre una tabla de medidas estándar— porque una unidad fuera de plano deja el toldo corto justo donde importa.',
++    problemas: [
++      {
++        titulo: 'Se compra por gramaje y se rompe por el ojal',
++        detalle:
++          'La lona rara vez es el punto débil. El punto débil es la concentración de esfuerzo en el amarre. Sin refuerzo local, un material excelente se rasga desde el ojal en pocas rutas.',
++      },
++      {
++        titulo: 'Medida estándar sobre una caja que no lo es',
++        detalle:
++          'Las carrocerías se modifican. Un toldo cortado contra tabla y no contra la unidad queda corto en un lado y sobra en el otro, que es donde el viento lo agarra.',
++      },
++      {
++        titulo: 'Lona plastificada, rafia y polytarp usados como sinónimos',
++        detalle:
++          'Son tres materiales con vidas útiles y costos distintos. Elegir mal no se nota el primer mes: se nota en el ciclo de reposición.',
++      },
++    ],
++    ancla: [
++      'mantas-cobertores-toldos-camiones',
++      'siders-tolderas-camiones',
++      'lona-plastificada-rafia-polytarp',
++      'films-termocontraibles-shrink',
++    ],
++    regiones: ['Lima', 'Callao', 'La Libertad', 'Arequipa', 'Piura', 'Ica'],
++    logistica:
++      'Planta en Chorrillos, sobre el eje Lima–Callao. Se toma medida sobre la unidad o se trabaja contra plano de caja, con refuerzos definidos según el sistema de amarre que ya usa la flota.',
++    faqs: [
++      {
++        q: '¿Cuál es la diferencia entre lona plastificada, rafia y polytarp?',
++        a: 'La lona plastificada de PVC es impermeable y aguanta exposición continua: es la de mayor vida útil y la de mayor costo. La rafia de polipropileno es liviana y económica, buena para cobertura temporal o carga poco exigente. El polytarp queda en medio: bajo peso con buena resistencia al desgarro. La elección la deciden el tipo de carga, la ruta y cada cuánto está dispuesto a reponer.',
++      },
++      {
++        q: '¿Confeccionan sobre la medida exacta de la carrocería?',
++        a: 'Sí, y es lo que recomendamos. Trabajamos con medida tomada sobre la unidad o con plano de caja, incluyendo refuerzos en las zonas de amarre según el sistema de fijación que ya tiene el camión.',
++      },
++    ],
++  },
++  {
++    slug: 'construccion',
++    nombre: 'Construcción e infraestructura',
++    etiquetas: ['Construcción', 'Infraestructura'],
++    tituloBase: 'Construcción',
++    complementoTitulo: 'carpas, cobertores y biombos',
++    frasesDescripcion: [
++      'Carpas con estructura, cobertores de obra, biombos de soldadura y geosintéticos para movimiento de tierras, con fabricación e instalación propias.',
++    ],
++    intro:
++      'En obra el textil industrial protege tres cosas distintas —el personal, el material y el proceso— y cada una tiene su criterio. Una carpa se dimensiona por la luz que debe salvar y el viento de la zona; un biombo de soldadura, por lo que debe contener; un geotextil, por la función que cumple bajo tierra. Fabricamos e instalamos las tres con un solo responsable.',
++    problemas: [
++      {
++        titulo: 'La carpa se pide por metros cuadrados',
++        detalle:
++          'El área no dimensiona nada. Lo que dimensiona es la luz libre, la carga de viento de la zona y qué va debajo. Una estructura elegida por área es una estructura elegida al azar.',
++      },
++      {
++        titulo: 'El geosintético se elige por nombre y no por función',
++        detalle:
++          'Separar, filtrar, drenar, proteger y reforzar son cinco funciones distintas con cinco criterios de especificación distintos. «Geotextil» a secas no es una especificación.',
++      },
++      {
++        titulo: 'Lona por un lado, estructura por otro, instalación por un tercero',
++        detalle:
++          'Con tres proveedores, la responsabilidad se reparte hasta desaparecer: cada uno cumplió su parte y el conjunto igual falla. Un solo responsable es lo que hace reclamable el resultado.',
++      },
++    ],
++    ancla: [
++      'carpas-lona-estructuras-metalicas',
++      'coberturas-tensionadas-arquitectura-textil',
++      'geotextiles',
++      'biombos-protectores-soldadura',
++    ],
++    regiones: ['Lima', 'Callao', 'Arequipa', 'La Libertad', 'Cusco', 'Piura'],
++    logistica:
++      'Fabricación en Chorrillos e instalación con equipo propio en Lima, coordinada a nivel nacional. Estructura y lona se dimensionan juntas contra la luz y el uso real: almacén temporal, taller o cobertura de losa no son el mismo problema.',
++    faqs: [
++      {
++        q: '¿Fabrican e instalan, o solo suministran?',
++        a: 'Las dos cosas, y esa es la razón de ser de la empresa. Fabricamos la lona, dimensionamos la estructura e instalamos con equipo propio, de modo que hay un solo responsable del resultado y no tres partes explicando por qué la falla es de otro.',
++      },
++      {
++        q: '¿Qué diferencia hay entre un geotextil de separación y uno de refuerzo?',
++        a: 'La función y, por lo tanto, la propiedad que gobierna. En separación importa la retención de finos y la permeabilidad; en refuerzo importa la resistencia a la tracción y la deformación a la que se alcanza. Especificar solo el gramaje deja fuera lo que decide el desempeño en ambos casos.',
++      },
++    ],
++  },
++  {
++    slug: 'saneamiento-y-agua',
++    nombre: 'Saneamiento y agua',
++    etiquetas: ['Saneamiento'],
++    tituloBase: 'Saneamiento',
++    complementoTitulo: 'geomembranas y biodigestores',
++    frasesDescripcion: [
++      'Geomembranas para lagunas y canales, tanques flexibles, biodigestores y tubería HDPE para proyectos de agua y saneamiento en el Perú.',
++    ],
++    intro:
++      'En agua y saneamiento la obra se juzga por una sola pregunta: si contiene o si filtra. La lámina es apenas una de las piezas que deciden la respuesta; las otras son la subrasante aceptada, el geotextil de protección, la zanja de anclaje, los detalles de penetración y el ensayo de costura que demuestra que lo instalado es lo especificado.',
++    problemas: [
++      {
++        titulo: 'Se compra la lámina y se olvida el conjunto',
++        detalle:
++          'Una laguna revestida no es una geomembrana: es subrasante, protección, lámina, anclaje, penetraciones y ensayos. Suministrar solo la lámina y callar el resto produce exactamente las filtraciones que después se le atribuyen al material.',
++      },
++      {
++        titulo: 'Sin ensayo de costura no hay nada que reclamar',
++        detalle:
++          'La costura es donde falla un revestimiento. Si no queda registro del ensayo, no hay forma de distinguir un defecto de instalación de un defecto de material cuando aparece la filtración.',
++      },
++      {
++        titulo: 'El almacenamiento temporal se improvisa',
++        detalle:
++          'Un tanque flexible dimensionado sin considerar la superficie de apoyo y el llenado real termina siendo un problema de seguridad, no una solución de almacenamiento.',
++      },
++    ],
++    ancla: [
++      'geomembrana-polietileno-pe-hdpe',
++      'geotextiles',
++      'tanques-flexibles-bladders',
++      'biodigestores',
++    ],
++    regiones: ['Lima', 'Arequipa', 'Cusco', 'Piura', 'Junín', 'Cajamarca'],
++    logistica:
++      'Suministro e instalación coordinados con el avance de la obra civil. La aceptación de subrasante manda: instalar sobre una superficie no aceptada compromete el revestimiento antes de que entre el agua.',
++    faqs: [
++      {
++        q: '¿Entregan registro de los ensayos de costura?',
++        a: 'Sí, y conviene exigirlo a cualquier instalador. Sin registro de ensayo no hay forma de demostrar qué se instaló, y cuando aparece una filtración la discusión se vuelve una cuestión de palabra contra palabra.',
++      },
++      {
++        q: '¿Qué se especifica primero, la geomembrana o el geotextil?',
++        a: 'Primero el contenido y la subrasante, que son los que mandan. De ahí sale qué polímero resiste el líquido y qué protección necesita la lámina contra el punzonamiento. Elegir la lámina primero y buscarle protección después es hacerlo al revés.',
++      },
++    ],
++  },
++];
++
++/* ------------------------------------------------------------------ */
++/* Derivación desde el catálogo — nada de listas paralelas             */
++/* ------------------------------------------------------------------ */
++
++export function industriaBySlug(slug: string): Industria | undefined {
++  return INDUSTRIAS.find((i) => i.slug === slug);
++}
++
++/** Todos los productos etiquetados con alguna etiqueta del hub. */
++export function productosDe(ind: Industria): Product[] {
++  return products.filter((p) => p.sector.some((s) => ind.etiquetas.includes(s)));
++}
++
++/**
++ * Productos en orden de presentación: primero los `ancla` (en su orden), luego
++ * el resto del sector. Los `ancla` que no existan se ignoran en silencio aquí
++ * porque el test ya los declara fallo: no hace falta romper la página en
++ * producción por un dato que la integración continua debía haber atajado.
++ */
++export function productosOrdenados(ind: Industria): Product[] {
++  const delSector = productosDe(ind);
++  const porSlug = new Map(delSector.map((p) => [p.slug, p]));
++  const ancla = ind.ancla.map((s) => porSlug.get(s)).filter(Boolean) as Product[];
++  const anclaSlugs = new Set(ancla.map((p) => p.slug));
++  return [...ancla, ...delSector.filter((p) => !anclaSlugs.has(p.slug))];
++}
++
++/** Arquitecturas de referencia que declaran este sector. */
++export function solucionesDe(ind: Industria) {
++  return solutions.filter((s) => s.sectores.some((x) => ind.etiquetas.includes(x)));
++}
++
++/** Guías técnicas de /recursos que declaran este sector. */
++export function guiasDe(ind: Industria) {
++  return articles.filter((a) => a.sectors.some((x) => ind.etiquetas.includes(x)));
++}
++
++/** Enlace al catálogo ya filtrado: la lista larga vive donde siempre vivió. */
++export function catalogoHref(ind: Industria): string {
++  return `/productos?sector=${encodeURIComponent(ind.etiquetas[0])}`;
++}
++
++/* ------------------------------------------------------------------ */
++/* Metadatos dentro del presupuesto (lib/meta.ts)                      */
++/* ------------------------------------------------------------------ */
++
++/** <title> del hub, con el complemento solo si cabe entero. */
++export function tituloIndustria(ind: Industria): string {
++  return tituloAjustado(ind.tituloBase ?? ind.nombre, ind.complementoTitulo);
++}
++
++/** Meta description armada con frases completas hasta el límite. */
++export function descripcionIndustria(ind: Industria): string {
++  return descripcionAjustada(ind.frasesDescripcion);
++}
+diff --git a/lib/lead.ts b/lib/lead.ts
+index 84a2d51..3ac3d81 100644
+--- a/lib/lead.ts
++++ b/lib/lead.ts
+@@ -8,6 +8,8 @@
+ export interface LeadPayload {
+   nombre: string;
+   empresa?: string;
++  /** RUC ya normalizado a 11 dígitos (ver lib/ruc.ts). */
++  ruc?: string;
+   email: string;
+   telefono: string;
+   producto?: string;
+diff --git a/lib/ruc.ts b/lib/ruc.ts
+new file mode 100644
+index 0000000..f7ef408
+--- /dev/null
++++ b/lib/ruc.ts
+@@ -0,0 +1,79 @@
++/**
++ * VALIDACIÓN DE RUC PERUANO — MÓDULO 11.
++ *
++ * Por qué existe este archivo y no una expresión regular.
++ *
++ * Un formulario B2B que pide RUC con `/^[0-9]{11}$/` acepta 12345678901,
++ * 00000000000 y el número de teléfono del que rellena por salir del paso. Eso
++ * no es validar: es contar dígitos. El campo entonces no cualifica nada y el
++ * comercial descubre el error cuando ya emitió la cotización a un RUC que no
++ * existe.
++ *
++ * El RUC lleva su propio dígito verificador. Comprobarlo cuesta diez
++ * multiplicaciones y rechaza en el navegador la inmensa mayoría de números
++ * inventados o mal tecleados, ANTES de que el lead entre al CRM.
++ *
++ * ALCANCE HONESTO: esto verifica que el número esté BIEN FORMADO, no que
++ * exista en el padrón de SUNAT ni que esté activo y habido. Para eso hace
++ * falta consultar el servicio de SUNAT, que es una decisión de servidor y de
++ * costo, no de formulario. Decirlo aquí evita que alguien lea esta función
++ * como una comprobación de existencia.
++ *
++ * Prueba de que el algoritmo es el correcto: valida el RUC de la propia
++ * empresa (20523135385). Está fijado en test/ruc.test.ts.
++ */
++
++/** Factores del módulo 11, aplicados a los diez primeros dígitos. */
++const FACTORES = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2] as const;
++
++/**
++ * Prefijos de dos dígitos que SUNAT tiene asignados.
++ *  10 → persona natural con negocio
++ *  15 → persona natural no domiciliada (asignación histórica)
++ *  17 → persona jurídica no domiciliada
++ *  20 → persona jurídica
++ */
++const PREFIJOS = ['10', '15', '17', '20'] as const;
++
++/** Deja solo dígitos: el comprador escribe «20523135385», «20-52313538-5» o con espacios. */
++export function normalizarRuc(valor: string): string {
++  return valor.replace(/\D/g, '');
++}
++
++/** Dígito verificador esperado para los diez primeros dígitos. */
++export function digitoVerificadorRuc(diez: string): number {
++  const suma = FACTORES.reduce((acc, f, i) => acc + f * Number(diez[i]), 0);
++  const dv = 11 - (suma % 11);
++  if (dv === 10) return 0;
++  if (dv === 11) return 1;
++  return dv;
++}
++
++/** ¿El número está bien formado (longitud, prefijo y dígito verificador)? */
++export function rucValido(valor: string): boolean {
++  const d = normalizarRuc(valor);
++  if (d.length !== 11) return false;
++  if (!(PREFIJOS as readonly string[]).includes(d.slice(0, 2))) return false;
++  return digitoVerificadorRuc(d.slice(0, 10)) === Number(d[10]);
++}
++
++/** Empresa (20/17) frente a persona natural con negocio (10/15). */
++export function esPersonaJuridica(valor: string): boolean {
++  const d = normalizarRuc(valor);
++  return d.length === 11 && (d.startsWith('20') || d.startsWith('17'));
++}
++
++/**
++ * Mensaje de error específico. Un «RUC inválido» genérico hace que el
++ * comprador reescriba el mismo número tres veces sin saber qué corregir.
++ */
++export function errorRuc(valor: string): string | null {
++  const d = normalizarRuc(valor);
++  if (!d) return null; // vacío: el campo es opcional, no se reclama.
++  if (d.length !== 11) return `El RUC tiene 11 dígitos; ingresó ${d.length}.`;
++  if (!(PREFIJOS as readonly string[]).includes(d.slice(0, 2)))
++    return 'El RUC empieza en 10, 15, 17 o 20.';
++  if (digitoVerificadorRuc(d.slice(0, 10)) !== Number(d[10]))
++    return 'El dígito verificador no corresponde: revise el número.';
++  return null;
++}
+diff --git a/lib/schema.ts b/lib/schema.ts
+index 2e25a1d..3ee567d 100644
+--- a/lib/schema.ts
++++ b/lib/schema.ts
+@@ -289,6 +289,14 @@ export function organizationSchema(): Dict {
+       propertyID: "RUC",
+       value: SITE.ruc,
+     },
++    // taxID es la propiedad tipada para el identificador fiscal. El
++    // identifier/PropertyValue de arriba se mantiene porque nombra el esquema
++    // peruano («RUC»), que taxID por sí solo no dice.
++    taxID: SITE.ruc,
++    // Clasificación industrial: así se declara «fábrica» con vocabulario real
++    // (ver la nota en lib/site.ts sobre por qué no existe un tipo Manufacturer).
++    isicV4: SITE.isicV4,
++    naics: SITE.naics,
+     address: {
+       "@type": "PostalAddress",
+       streetAddress: SITE.addressStreet,
+@@ -330,6 +338,10 @@ export function productSchema(p: {
+     ...(p.image ? { image: p.image } : {}),
+     ...(p.material ? { material: p.material } : {}),
+     brand: { "@type": "Brand", name: SITE.name },
++    // `manufacturer` es el ÚNICO lugar donde schema.org modela la fabricación,
++    // y es una propiedad de Product, no un tipo de Organization. Apunta al
++    // nodo de la empresa ya declarado: quien fabrica esto es esta empresa.
++    manufacturer: businessRef(),
+     ...(offers ? { offers } : {}),
+   };
+ }
+diff --git a/lib/site.ts b/lib/site.ts
+index e7906f1..b0915a9 100644
+--- a/lib/site.ts
++++ b/lib/site.ts
+@@ -47,6 +47,25 @@ export const SITE = {
+   addressPostalCode: "15067",           // VERIFY before production
+   addressCountry: "PE",
+ 
++  /**
++   * CLASIFICACIÓN INDUSTRIAL — la forma correcta de decir «somos fábrica».
++   *
++   * schema.org NO tiene un tipo `Manufacturer`: los subtipos de Organization
++   * son Airline, Corporation, LocalBusiness, NGO y una veintena más, y ninguno
++   * es ese. `manufacturer` existe, pero como PROPIEDAD de Product apuntando a
++   * una Organization —que es como ya se emite en ProductStructuredData—.
++   * Declarar `"@type": ["Organization", "Manufacturer"]` no refuerza nada:
++   * introduce un tipo inexistente en el nodo raíz de la empresa.
++   *
++   * Lo que sí está tipado en Organization y sí se lee: `naics` e `isicV4`.
++   * Son códigos de clasificación industrial oficiales; dicen «fabricación de
++   * productos de plástico» sin ambigüedad y sin inventar vocabulario.
++   */
++  /** CIIU/ISIC Rev.4 2220 — Fabricación de productos de plástico. VERIFY contra la ficha RUC. */
++  isicV4: "2220",
++  /** NAICS 326199 — All Other Plastics Product Manufacturing. Equivalente norteamericano. */
++  naics: "326199",
++
+   // --- Misc -----------------------------------------------------------------
+   foundingYear: "2009",                 // VERIFY against constitución de la empresa
+   locale: "es_PE",
+diff --git a/lib/whatsapp.ts b/lib/whatsapp.ts
+index b6e22e5..edb140b 100644
+--- a/lib/whatsapp.ts
++++ b/lib/whatsapp.ts
+@@ -18,6 +18,8 @@ const SITE_HOST = SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+ export interface QuoteLead {
+   nombre: string;
+   empresa?: string;
++  /** RUC ya normalizado a 11 dígitos (ver lib/ruc.ts). */
++  ruc?: string;
+   email: string;
+   telefono: string;
+   producto?: string;
+@@ -31,6 +33,7 @@ export function buildQuoteMessage(lead: QuoteLead): string {
+     '',
+     `*Nombre:* ${lead.nombre}`,
+     lead.empresa ? `*Empresa:* ${lead.empresa}` : null,
++    lead.ruc ? `*RUC:* ${lead.ruc}` : null,
+     `*Email:* ${lead.email}`,
+     `*Teléfono:* ${lead.telefono}`,
+     lead.producto ? `*Producto de interés:* ${lead.producto}` : null,
+diff --git a/scripts/auditar-html.mjs b/scripts/auditar-html.mjs
+index e6bebd0..2fe83ee 100644
+--- a/scripts/auditar-html.mjs
++++ b/scripts/auditar-html.mjs
+@@ -182,7 +182,17 @@ for (const p of paginas) {
+   const t = titulo(html);
+   if (!t) anota('error', 'sin-titulo', ruta, 'la página no emite <title>');
+   else {
+-    if (t.length > 65) anota('aviso', 'titulo-largo', ruta, `${t.length} caracteres: Google trunca cerca de 60`);
++    // TRINQUETE. Esto era un aviso mientras había 100 títulos largos: marcar
++    // como error un defecto que aparece cien veces solo consigue que se apague
++    // la comprobación. Una vez llevado a cero, el aviso deja de servir para
++    // nada: nadie mira un renglón ámbar entre cincuenta, y el primer parche que
++    // añada una página con un título de 74 caracteres lo deshace en silencio.
++    //
++    // De cero solo se sale hacia arriba, así que a partir de aquí ES UN ERROR y
++    // rompe la integración continua. Corregirlo no es truncar: es pasar el
++    // título por `tituloAjustado` de lib/meta.ts, que suelta el complemento
++    // cuando no cabe entero.
++    if (t.length > 65) anota('error', 'titulo-largo', ruta, `${t.length} caracteres: Google recorta en 65 (use tituloAjustado de lib/meta.ts)`);
+     if (t.length < 15) anota('aviso', 'titulo-corto', ruta, `«${t}» (${t.length} caracteres)`);
+     // Marca repetida. Ocurrió de verdad: al acortar el sufijo de la plantilla,
+     // las doce páginas de ciudad —que metían la marca en su propio título—
+diff --git a/test/industrias.test.ts b/test/industrias.test.ts
+new file mode 100644
+index 0000000..81aab63
+--- /dev/null
++++ b/test/industrias.test.ts
+@@ -0,0 +1,169 @@
++import { describe, it, expect } from 'vitest';
++import {
++  INDUSTRIAS,
++  productosDe,
++  productosOrdenados,
++  solucionesDe,
++  guiasDe,
++  tituloIndustria,
++  descripcionIndustria,
++  catalogoHref,
++} from '@/lib/industrias';
++import { products } from '@/lib/products';
++import { tituloCabe, MAX_DESCRIPCION } from '@/lib/meta';
++
++describe('hubs de industria', () => {
++  it('los slugs son únicos y con forma de URL', () => {
++    const slugs = INDUSTRIAS.map((i) => i.slug);
++    expect(new Set(slugs).size).toBe(slugs.length);
++    for (const s of slugs) expect(s).toMatch(/^[a-z0-9-]+$/);
++  });
++
++  it('cada etiqueta de sector existe de verdad en el catálogo', () => {
++    const reales = new Set(products.flatMap((p) => p.sector));
++    for (const ind of INDUSTRIAS) {
++      for (const e of ind.etiquetas) {
++        expect(reales, `etiqueta «${e}» de ${ind.slug} no existe en el catálogo`).toContain(e);
++      }
++    }
++  });
++
++  it('ningún hub queda delgado: mínimo cinco productos derivados', () => {
++    for (const ind of INDUSTRIAS) {
++      expect(productosDe(ind).length, `${ind.slug} tiene muy pocos productos`).toBeGreaterThanOrEqual(5);
++    }
++  });
++
++  /**
++   * La prueba que evita el fallo silencioso: un `ancla` mal escrito no rompe
++   * la compilación ni la página —solo desaparece de la lista sin avisar—.
++   */
++  it('todo producto ancla existe y lleva la etiqueta de su sector', () => {
++    for (const ind of INDUSTRIAS) {
++      for (const slug of ind.ancla) {
++        const p = products.find((x) => x.slug === slug);
++        expect(p, `ancla «${slug}» de ${ind.slug} no existe en lib/products.ts`).toBeDefined();
++        expect(
++          p!.sector.some((s) => ind.etiquetas.includes(s)),
++          `«${slug}» no lleva ninguna etiqueta de ${ind.slug} (${ind.etiquetas.join('/')})`,
++        ).toBe(true);
++      }
++    }
++  });
++
++  it('los anclas encabezan el orden de presentación', () => {
++    for (const ind of INDUSTRIAS) {
++      const orden = productosOrdenados(ind).map((p) => p.slug);
++      expect(orden.slice(0, ind.ancla.length)).toEqual(ind.ancla);
++      expect(new Set(orden).size).toBe(orden.length);
++      expect(orden.length).toBe(productosDe(ind).length);
++    }
++  });
++
++  it('los títulos caben en el resultado de búsqueda, con la marca incluida', () => {
++    for (const ind of INDUSTRIAS) {
++      const t = tituloIndustria(ind);
++      expect(tituloCabe(t), `«${t}» (${t.length}) no cabe con el sufijo de marca`).toBe(true);
++      expect(t.length).toBeGreaterThanOrEqual(15);
++    }
++  });
++
++  /**
++   * Que quepa no basta: si el complemento se cae, el título queda en el nombre
++   * del sector a secas y se desperdicia la mitad del espacio de clic. Esta
++   * prueba obliga a escribir complementos que ENTREN, no a confiar en que
++   * lib/meta.ts los suelte.
++   */
++  it('el complemento del título sobrevive: ninguno se cae por no caber', () => {
++    for (const ind of INDUSTRIAS) {
++      const t = tituloIndustria(ind);
++      expect(t, `${ind.slug}: el complemento no cupo y se soltó entero`).toContain(':');
++      expect(t).toContain(ind.complementoTitulo);
++      // Y que quede espacio real usado: no un título de tres palabras.
++      expect(t.length).toBeGreaterThanOrEqual(35);
++    }
++  });
++
++  it('los títulos no se repiten entre sí', () => {
++    const ts = INDUSTRIAS.map(tituloIndustria);
++    expect(new Set(ts).size).toBe(ts.length);
++  });
++
++  it('las descripciones caben y no se quedan cortas', () => {
++    for (const ind of INDUSTRIAS) {
++      const d = descripcionIndustria(ind);
++      expect(d.length).toBeLessThanOrEqual(MAX_DESCRIPCION);
++      expect(d.length, `${ind.slug}: descripción de ${d.length} caracteres`).toBeGreaterThanOrEqual(70);
++      expect(d.endsWith('…')).toBe(false); // nunca una frase partida
++    }
++  });
++
++  it('las descripciones no se repiten entre sectores', () => {
++    const ds = INDUSTRIAS.map(descripcionIndustria);
++    expect(new Set(ds).size).toBe(ds.length);
++  });
++
++  it('cada hub aporta contenido propio, no una plantilla rellenada', () => {
++    for (const ind of INDUSTRIAS) {
++      expect(ind.problemas.length).toBeGreaterThanOrEqual(3);
++      expect(ind.faqs.length).toBeGreaterThanOrEqual(2);
++      expect(ind.intro.length).toBeGreaterThan(150);
++      expect(ind.regiones.length).toBeGreaterThanOrEqual(4);
++      for (const f of ind.faqs) expect(f.a.length).toBeGreaterThan(80);
++    }
++  });
++
++  it('el enlace al catálogo filtrado va codificado (las etiquetas llevan tilde)', () => {
++    for (const ind of INDUSTRIAS) {
++      const href = catalogoHref(ind);
++      expect(href.startsWith('/productos?sector=')).toBe(true);
++      expect(href).not.toMatch(/[ áéíóúñÁÉÍÓÚÑ]/);
++    }
++  });
++
++  it('las derivaciones de soluciones y guías no explotan si el sector no tiene ninguna', () => {
++    for (const ind of INDUSTRIAS) {
++      expect(Array.isArray(solucionesDe(ind))).toBe(true);
++      expect(Array.isArray(guiasDe(ind))).toBe(true);
++    }
++  });
++});
++
++/**
++ * Señal de fabricante. La tentación es declarar `"@type": ["Organization",
++ * "Manufacturer"]`, que suena más fuerte y es vocabulario inventado: los
++ * subtipos de Organization en schema.org son Airline, Corporation,
++ * LocalBusiness, NGO y una veintena más, y «Manufacturer» no está entre ellos.
++ * Un tipo inexistente en el nodo raíz de la empresa no refuerza nada: lo
++ * ensucia. Lo que sí está tipado es naics, isicV4 y taxID en Organization, y
++ * `manufacturer` como PROPIEDAD de Product.
++ */
++describe('señal de fabricante en JSON-LD', () => {
++  it('la organización declara identificador fiscal y clasificación industrial', async () => {
++    const { organizationSchema } = await import('@/lib/schema');
++    const { SITE } = await import('@/lib/site');
++    const org = organizationSchema();
++    expect(org.taxID).toBe(SITE.ruc);
++    expect(org.isicV4).toBe(SITE.isicV4);
++    expect(org.naics).toBe(SITE.naics);
++  });
++
++  it('no se inventa un tipo «Manufacturer» que schema.org no define', async () => {
++    const { organizationSchema, localBusinessSchema, productSchema } = await import('@/lib/schema');
++    const nodos = [organizationSchema(), localBusinessSchema(), productSchema({
++      name: 'x', description: 'y', url: 'https://example.test/x',
++    })];
++    for (const n of nodos) {
++      const tipos = ([] as unknown[]).concat(n['@type'] as never);
++      expect(tipos).not.toContain('Manufacturer');
++      expect(JSON.stringify(n)).not.toContain('schema.org/Manufacturer');
++    }
++  });
++
++  it('la fabricación se declara donde schema.org sí la modela: en el producto', async () => {
++    const { productSchema } = await import('@/lib/schema');
++    const p = productSchema({ name: 'x', description: 'y', url: 'https://example.test/x' });
++    expect(p.manufacturer).toBeDefined();
++    expect(JSON.stringify(p.manufacturer)).toContain('#business');
++  });
++});
+diff --git a/test/ruc.test.ts b/test/ruc.test.ts
+new file mode 100644
+index 0000000..172f600
+--- /dev/null
++++ b/test/ruc.test.ts
+@@ -0,0 +1,68 @@
++import { describe, it, expect } from 'vitest';
++import {
++  rucValido,
++  errorRuc,
++  normalizarRuc,
++  digitoVerificadorRuc,
++  esPersonaJuridica,
++} from '@/lib/ruc';
++import { SITE } from '@/lib/site';
++
++/**
++ * La prueba que da autoridad al algoritmo: el RUC de la propia empresa.
++ * Si alguien cambia los factores del módulo 11, esta prueba cae primero.
++ */
++describe('RUC — dígito verificador', () => {
++  it('valida el RUC de la propia empresa', () => {
++    expect(rucValido(SITE.ruc)).toBe(true);
++    expect(esPersonaJuridica(SITE.ruc)).toBe(true);
++  });
++
++  it('rechaza el relleno que una expresión regular de 11 dígitos aceptaría', () => {
++    // Estos son exactamente los números que un formulario con /^\d{11}$/ deja pasar.
++    for (const basura of ['12345678901', '00000000000', '11111111111', '99999999999']) {
++      expect(rucValido(basura)).toBe(false);
++    }
++  });
++
++  it('rechaza prefijos que SUNAT no asigna', () => {
++    // Se construye un número con dígito verificador correcto pero prefijo inválido.
++    const cuerpo = '3052313538';
++    const n = `${cuerpo}${digitoVerificadorRuc(cuerpo)}`;
++    expect(n).toHaveLength(11);
++    expect(rucValido(n)).toBe(false);
++  });
++
++  it('rechaza un solo dígito cambiado', () => {
++    const d = SITE.ruc.split('');
++    d[4] = String((Number(d[4]) + 1) % 10);
++    expect(rucValido(d.join(''))).toBe(false);
++  });
++
++  it('acepta el número escrito con guiones o espacios', () => {
++    expect(normalizarRuc(' 20-52313538 5 ')).toBe(SITE.ruc);
++    expect(rucValido('20-52313538-5')).toBe(true);
++  });
++
++  it('no reclama cuando el campo está vacío: es opcional', () => {
++    expect(errorRuc('')).toBeNull();
++    expect(errorRuc('   ')).toBeNull();
++  });
++
++  it('explica qué corregir en vez de decir «inválido»', () => {
++    expect(errorRuc('2052313')).toMatch(/11 dígitos/);
++    expect(errorRuc('30523135385')).toMatch(/10, 15, 17 o 20/);
++    expect(errorRuc('20523135380')).toMatch(/verificador/);
++    expect(errorRuc(SITE.ruc)).toBeNull();
++  });
++
++  it('el dígito verificador siempre queda entre 0 y 9', () => {
++    for (let i = 0; i < 400; i++) {
++      const cuerpo = String(20_000_000_000 + i * 7919).slice(0, 10);
++      const dv = digitoVerificadorRuc(cuerpo);
++      expect(dv).toBeGreaterThanOrEqual(0);
++      expect(dv).toBeLessThanOrEqual(9);
++      expect(rucValido(`${cuerpo}${dv}`)).toBe(true);
++    }
++  });
++});
+-- 
+2.43.0
+
