@@ -3,7 +3,7 @@ import { SITE } from '@/lib/site';
 import Link from 'next/link';
 import { ArrowRight, Check } from 'lucide-react';
 
-const TITLE = 'Servicios: fabricación, instalación y mantenimiento';
+const TITLE = 'Servicios: fabricación e instalación';
 const DESCRIPTION =
   'Fabricación a medida, instalación en obra con equipo propio, asesoría técnica y mantenimiento de lonas, geomembranas, estructuras textiles y mangas de ventilación en todo el Perú.';
 

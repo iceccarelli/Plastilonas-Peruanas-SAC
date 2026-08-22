@@ -16,7 +16,7 @@ import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
  */
 
 const URL = `${SITE.url}/soluciones`;
-const TITLE = 'Arquitecturas de referencia: el conjunto armado, no la pieza suelta';
+const TITLE = 'Arquitecturas de referencia';
 const DESCRIPTION = `${solutions.length} configuraciones de referencia para proyectos industriales en el Perú: poza revestida, frente ventilado, despacho a granel, protección de cultivo, almacenamiento remoto y campamento temporal. Con su lista de componentes, secuencia y modos de falla.`;
 
 export const metadata: Metadata = {

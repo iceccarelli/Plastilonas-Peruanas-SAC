@@ -52,7 +52,7 @@ ok "estoy en la raíz del repositorio; el parche está a salvo fuera del árbol"
 # El parche se construyó contra el HEAD publicado. Si el árbol local va por
 # delante o por detrás, aplicarlo produce conflictos silenciosos.
 git fetch --quiet origin main
-BASE_ESPERADA="ff691b9"
+BASE_ESPERADA="bffeee8"
 BASE_REAL="$(git rev-parse --short origin/main)"
 if [ "$BASE_REAL" != "$BASE_ESPERADA" ]; then
   nota "origin/main está en $BASE_REAL; el parche se construyó sobre $BASE_ESPERADA."

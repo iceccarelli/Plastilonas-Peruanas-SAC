@@ -21,18 +21,28 @@ permissions:
 jobs:
   indexnow:
     runs-on: ubuntu-latest
-    # Sin clave configurada el envío obtendría 403: mejor no ejecutarlo.
-    if: ${{ vars.SITE_URL != '' }}
+    # Ya no hay condición. Antes era `if: vars.SITE_URL != ''`, y como esa
+    # variable nunca se configuró, este flujo NUNCA se ejecutó: el sitio llevaba
+    # semanas publicando sin avisar a un solo buscador. La clave y el dominio
+    # se leen ahora del repositorio.
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        # El script lee la clave y el dominio del repositorio a través de tsx.
+        # Va antes de la espera: instalar consume parte del tiempo que de todos
+        # modos había que esperar a Vercel.
+        run: npm ci
 
       - name: Esperar a que Vercel publique el despliegue
+        # El script comprueba la prueba de propiedad ANTES de enviar. Si
+        # producción todavía sirve el build anterior, la clave no coincide y el
+        # envío aborta con un mensaje claro en vez de un 403 mudo.
         run: sleep 60
 
       - name: Enviar todas las URLs del sitemap a IndexNow
-        env:
-          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
-          SITE_URL: ${{ vars.SITE_URL }}
         run: node scripts/submit-indexnow.mjs

@@ -18,7 +18,7 @@ export default function Chatbot() {
       {
         id: 'welcome',
         role: 'assistant',
-        content: '¡Hola! Soy el asistente virtual de Plastilonas Peruanas. Con más de 15 años de experiencia en soluciones textiles industriales, estoy aquí para ayudarle a encontrar la mejor solución para su proyecto. ¿En qué puedo asistirle hoy?',
+        content: '¡Hola! Soy el asistente de Plastilonas Peruanas, fabricante en Chorrillos desde 2009. No invento precios ni certificaciones. ¿Qué necesita cubrir, ventilar o contener?',
       },
     ],
   });

@@ -164,3 +164,13 @@ create policy "order_items own read" on public.order_items
 
 -- Nota: inserción de cotizaciones desde el navegador (anon) puede habilitarse
 -- con una policy INSERT explícita si se decide no pasar por un route handler.
+
+-- ---------- RFQ industrial pipeline (P0 revenue) ----------
+alter table public.quotes add column if not exists rfq_code text;
+alter table public.quotes add column if not exists country text;
+alter table public.quotes add column if not exists industry text;
+alter table public.quotes add column if not exists payload jsonb not null default '{}'::jsonb;
+create unique index if not exists quotes_rfq_code_uidx on public.quotes(rfq_code) where rfq_code is not null;
+create index if not exists quotes_status_created_idx on public.quotes(status, created_at desc);
+-- Stages (text): NEW | TECHNICAL_REVIEW | PRICING | EXPORT_REVIEW | QUOTE_READY | QUOTE_SENT | NEGOTIATION | WON | LOST
+

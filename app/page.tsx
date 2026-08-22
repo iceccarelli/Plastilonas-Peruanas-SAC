@@ -82,7 +82,7 @@ export default function Home() {
             <h1 className="t-display font-semibold mb-6">Fabricación 100% a medida.<br />Instalación propia.<br />Un solo proveedor.</h1>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">Big Bags, geomembranas, estructuras, mallas, ventilación y geosintéticos: 34 soluciones en 11 líneas de producto, fabricadas e instaladas por nuestro propio equipo en el Perú.</p>
+            <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">Big Bags, geomembranas, estructuras, mallas, ventilación y geosintéticos: {products.length} soluciones en {productFamilies.length} líneas de producto, fabricadas e instaladas por nuestro propio equipo en el Perú.</p>
           </Reveal>
           <Reveal delay={0.15}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

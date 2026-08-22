@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { tituloAjustado, descripcionAjustada } from '@/lib/meta';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, AlertTriangle, Ruler } from 'lucide-react';
@@ -47,8 +48,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const url = `${SITE.url}/glosario/${slug}`;
   const title = t.siglas ? `${t.termino} (${t.siglas})` : t.termino;
   return {
-    title: `${title}: qué es y cómo se especifica`,
-    description: t.definicionCorta,
+    // El complemento entra solo si cabe entero: «HDPE: qué es y cómo se
+    // especifica» sí, «Tipos electrostáticos de FIBC (A, B, C y D)» se queda
+    // con el nombre solo. Nunca una frase partida por la mitad.
+    title: tituloAjustado(title, 'qué es y cómo se especifica'),
+    description: descripcionAjustada([t.definicionCorta]),
     keywords: formasDe(t),
     alternates: { canonical: `/glosario/${slug}` },
     openGraph: {

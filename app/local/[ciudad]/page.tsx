@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { tituloAjustado, descripcionAjustada } from '@/lib/meta';
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ciudades from "@/data/ciudades.json";
@@ -21,8 +22,15 @@ function get(slug: string) { return CIUDADES.find((c) => c.slug === slug); }
 
 export async function generateMetadata({ params }: { params: Promise<{ ciudad: string }> }): Promise<Metadata> {
   const { ciudad } = await params; const c = get(ciudad); if (!c) return {};
-  const title = `Plastilonas y mantas plásticas en ${c.ciudad} | ${SITE.name}`;
-  const description = `Fabricación y venta de plastilonas, lonas, cobertores e impermeabilización en ${c.ciudad}, ${c.departamento}. ${c.usosPrincipales.slice(0,2).join(", ")} y más. Cotiza por WhatsApp.`;
+  // Sin ` | ${SITE.name}`: la plantilla de app/layout.tsx ya añade la marca, y
+  // ponerla aquí producía «… | Plastilonas Peruanas SAC | Plastilonas» en las
+  // doce páginas de ciudad. La marca la pone la plantilla, una sola vez.
+  const title = tituloAjustado(`Plastilonas y lonas en ${c.ciudad}`, 'fabricación y despacho');
+  const description = descripcionAjustada([
+    `Fabricación y despacho de plastilonas, lonas, cobertores e impermeabilización en ${c.ciudad}, ${c.departamento}.`,
+    `${c.usosPrincipales.slice(0, 2).join(", ")}.`,
+    'Cotice por WhatsApp.',
+  ]);
   const url = `${SITE.url}/local/${c.slug}`;
   return { title, description, alternates: { canonical: url },
     openGraph: { title, description, url, locale: "es_PE", type: "website" } };

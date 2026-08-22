@@ -8,12 +8,24 @@
 export interface LeadPayload {
   nombre: string;
   empresa?: string;
+  /** RUC ya normalizado a 11 dígitos (ver lib/ruc.ts). */
+  ruc?: string;
   email: string;
   telefono: string;
   producto?: string;
   cantidad?: string;
   fechaNecesaria?: string;
   mensaje?: string;
+  country?: string;
+  city?: string;
+  industry?: string;
+  application?: string;
+  dimensions?: string;
+  material?: string;
+  deliveryCountry?: string;
+  deliveryCity?: string;
+  whatsapp?: string;
+  language?: 'es' | 'en' | 'pt';
 }
 
 export async function postLead(lead: LeadPayload): Promise<void> {

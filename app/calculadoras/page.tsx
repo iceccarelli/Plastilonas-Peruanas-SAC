@@ -17,7 +17,7 @@ import { breadcrumbSchema, itemListSchema, webPageSchema, faqSchema } from '@/li
  */
 
 const URL = `${SITE.url}/calculadoras`;
-const TITLE = 'Calculadoras de predimensionamiento para proyectos industriales';
+const TITLE = 'Calculadoras de predimensionamiento';
 const DESCRIPTION = `${calculadoras.length} calculadoras abiertas para el rubro en el Perú: caudal de ventilación en labor subterránea, geomembrana para poza revestida, rollos por superficie con traslape, big bags por viaje y capacidad de un big bag. Con la fórmula a la vista y lo que cada método no cubre.`;
 
 export const metadata: Metadata = {

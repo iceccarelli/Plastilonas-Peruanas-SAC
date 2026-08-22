@@ -289,6 +289,14 @@ export function organizationSchema(): Dict {
       propertyID: "RUC",
       value: SITE.ruc,
     },
+    // taxID es la propiedad tipada para el identificador fiscal. El
+    // identifier/PropertyValue de arriba se mantiene porque nombra el esquema
+    // peruano («RUC»), que taxID por sí solo no dice.
+    taxID: SITE.ruc,
+    // Clasificación industrial: así se declara «fábrica» con vocabulario real
+    // (ver la nota en lib/site.ts sobre por qué no existe un tipo Manufacturer).
+    isicV4: SITE.isicV4,
+    naics: SITE.naics,
     address: {
       "@type": "PostalAddress",
       streetAddress: SITE.addressStreet,
@@ -330,6 +338,10 @@ export function productSchema(p: {
     ...(p.image ? { image: p.image } : {}),
     ...(p.material ? { material: p.material } : {}),
     brand: { "@type": "Brand", name: SITE.name },
+    // `manufacturer` es el ÚNICO lugar donde schema.org modela la fabricación,
+    // y es una propiedad de Product, no un tipo de Organization. Apunta al
+    // nodo de la empresa ya declarado: quien fabrica esto es esta empresa.
+    manufacturer: businessRef(),
     ...(offers ? { offers } : {}),
   };
 }

@@ -12,7 +12,7 @@ import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
  */
 
 const URL = `${SITE.url}/marco/evaluacion`;
-const TITLE = 'Autoevaluación: ¿está su proyecto listo para cotizar?';
+const TITLE = '¿Su proyecto está listo para cotizar?';
 const DESCRIPTION = `Responda ${totalCriteria()} criterios técnicos y obtenga un brief de especificación descargable con lo que falta definir. Sin registro y sin enviar datos: el PDF se genera en su navegador.`;
 
 export const metadata: Metadata = {

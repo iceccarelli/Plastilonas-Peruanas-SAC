@@ -49,6 +49,10 @@ export default function StructuredData() {
       addressCountry: SITE.addressCountry,
     },
     areaServed: { '@type': 'Country', name: 'Perú' },
+    // Clasificación industrial: así se declara «fábrica» con vocabulario que
+    // schema.org tiene tipado. Un tipo «Manufacturer» no existe (ver lib/site.ts).
+    isicV4: SITE.isicV4,
+    naics: SITE.naics,
     sameAs: SITE.sameAs,
   };
 
@@ -75,6 +79,8 @@ export default function StructuredData() {
       addressCountry: SITE.addressCountry,
     },
     areaServed: { '@type': 'Country', name: 'Perú' },
+    isicV4: SITE.isicV4,
+    naics: SITE.naics,
     currenciesAccepted: 'PEN',
     contactPoint: [
       {

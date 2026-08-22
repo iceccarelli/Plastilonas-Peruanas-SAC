@@ -61,3 +61,16 @@ jobs:
         # eso erosiona exactamente lo que el sitio existe para construir.
         # Corre DESPUÉS del build porque audita su salida, no el código.
         run: npm run auditar
+
+      - name: Conteo de catálogo (anti-contradicción)
+        run: npx vitest run test/facts.test.ts --reporter=dot
+
+      - name: Viewport en matriz de dispositivos
+        # Mide con Chromium el desbordamiento horizontal y los recortes de la
+        # cabecera en 17 anchos reales, de 280px a 2560px. Existe porque una
+        # barra de once entradas dejó el CTA «Solicitar Cotización» fuera de
+        # pantalla en 1280, 1366, 1440, 1536 y 1920 px durante semanas sin que
+        # ninguna prueba lo notara: ningún test de unidad mide layout.
+        run: |
+          npx playwright install --with-deps chromium
+          npm run auditar:viewport

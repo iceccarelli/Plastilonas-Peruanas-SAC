@@ -32,6 +32,24 @@
  */
 
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+
+/**
+ * El origen canónico se lee de lib/site.ts, nunca se escribe aquí.
+ *
+ * El día de la mudanza a plastilonas.com, un dominio escrito a mano en este
+ * User-Agent seguiría apuntando al viejo. Una identificación de rastreador que
+ * no lleva a ninguna parte es peor que no identificarse: invita a bloquearla.
+ */
+const ORIGEN = JSON.parse(
+  execFileSync('npx', ['tsx', '-e', "import {SITE} from './lib/site'; console.log(JSON.stringify(SITE.url));"], {
+    encoding: 'utf8',
+    maxBuffer: 4 * 1024 * 1024,
+  })
+    .trim()
+    .split('\n')
+    .pop(),
+);
 
 const MAX_DIAS = Number(process.env.MAX_DIAS ?? 180);
 const TIEMPO_ESPERA = Number(process.env.TIMEOUT_MS ?? 15000);
@@ -74,7 +92,7 @@ function leerFuentes(ruta, etiqueta) {
  */
 const CABECERAS = {
   'User-Agent':
-    'Mozilla/5.0 (compatible; PlastilonasSourceCheck/1.0; +https://plastilonas-peruanas-sac.vercel.app/informes)',
+    `Mozilla/5.0 (compatible; PlastilonasSourceCheck/1.0; +${ORIGEN}/informes)`,
   Accept: 'text/html,application/xhtml+xml,application/pdf;q=0.9,*/*;q=0.8',
   'Accept-Language': 'es-PE,es;q=0.9',
 };

@@ -16,7 +16,7 @@ import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
  */
 
 const URL = `${SITE.url}/informes`;
-const TITLE = 'Informes del sector: los datos oficiales y qué implican técnicamente';
+const TITLE = 'Informes del sector con dato oficial';
 const DESCRIPTION = `Estudios de ${SITE.name} sobre los indicadores que mueven la demanda de textiles industriales y geosintéticos en el Perú. Cada cifra con su fuente oficial, su fecha de consulta y lo que el informe NO afirma.`;
 
 export const metadata: Metadata = {

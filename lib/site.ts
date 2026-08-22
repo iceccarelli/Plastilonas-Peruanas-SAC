@@ -4,70 +4,96 @@
  * Everything that emits a URL — sitemap.ts, robots.ts, /llms.txt, metadataBase,
  * canonicals, OG images and every JSON-LD block — MUST read from SITE.url.
  * Never hard-code a domain anywhere else in the codebase.
+ * test/dominio.test.ts falla el build si alguien escribe un host a mano.
  *
- * VERIFY every value against official records before a production deploy: a
- * wrong value propagates into structured data, local pages and llms.txt.
- * Do NOT add unverifiable claims (ratings, certifications, statistics) here.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * ORIGEN CANÓNICO — cómo se hace la mudanza a plastilonas.com
+ * ─────────────────────────────────────────────────────────────────────────────
+ * El sitio se sirve hoy desde plastilonas-peruanas-sac.vercel.app. El dominio
+ * de marca, plastilonas.com, ya es propiedad de la empresa y sirve el correo
+ * (ventas@plastilonas.com) pero todavía apunta al sitio antiguo.
  *
- * Taxonomy note: product families live in lib/products.ts (`productFamilies`),
- * which is the single source of truth for categories. Do not duplicate them here.
+ * La mudanza NO se hace editando este archivo. Se hace en dos pasos:
+ *
+ *   1. DNS: apuntar plastilonas.com al proyecto de Vercel y verificar el
+ *      dominio en el panel (Settings → Domains).
+ *   2. Variable de entorno, en Vercel → Settings → Environment Variables:
+ *
+ *          CANONICAL_ORIGIN = https://plastilonas.com
+ *
+ * Con esa sola variable, en el mismo despliegue y sin tocar código:
+ *   · SITE.url pasa a plastilonas.com, y con él sitemap, robots, llms.txt,
+ *     metadataBase, todos los canonicals y todos los bloques JSON-LD;
+ *   · middleware.ts empieza a redirigir www → apex con 308;
+ *   · middleware.ts empieza a emitir noindex + Link rel=canonical en el host
+ *     de Vercel, para que deje de competir por las mismas consultas.
+ *
+ * MIENTRAS LA VARIABLE ESTÉ VACÍA no ocurre nada de lo anterior, y eso es
+ * deliberado: emitir noindex en el host de Vercel antes de que exista un
+ * dominio de marca vivo que reciba esa autoridad no consolidaría nada, borraría
+ * el sitio de Google. test/dominio-migracion.test.ts protege ese invariante.
  */
-export const SITE = {
-  /**
-   * CRITICAL — CANONICAL ORIGIN.
-   * The moment DNS for plastilonas.com (or www.plastilonas.com) points at this
-   * Vercel project and the domain is verified in the Vercel dashboard, change
-   * this ONE line to the exact final canonical origin (no trailing slash):
-   *
-   *   url: "https://www.plastilonas.com",
-   *
-   * Until then it must stay on the live Vercel origin so robots, sitemap,
-   * llms.txt and JSON-LD all agree with the URL Google actually crawls.
-   */
-  url: "https://plastilonas-peruanas-sac.vercel.app",
+function originFromEnv(): string {
+  const raw =
+    process.env.CANONICAL_ORIGIN ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://plastilonas-peruanas-sac.vercel.app";
+  return raw.replace(/\/$/, "");
+}
 
-  // --- Identity (verified against repo contact pages / footer) --------------
+export const SITE = {
+  url: originFromEnv(),
+  brandHost: "plastilonas.com",
+
   name: "Plastilonas Peruanas SAC",
   legalName: "Plastilonas Peruanas SAC",
-  ruc: "20523135385",                   // VERIFY against SUNAT before production
+  ruc: "20523135385",
   description:
-    "Fabricación e instalación a medida de soluciones textiles industriales en el Perú: big bags FIBC, lonas y cobertores, geomembranas y geosintéticos, estructuras y arquitectura textil, mangas de ventilación minera, mallas agrícolas y accesorios.",
+    "Fabricante peruano de soluciones textiles industriales a medida: big bags FIBC, lonas y cobertores, geomembranas y geosintéticos, estructuras y arquitectura textil, mangas de ventilación minera, mallas agrícolas y accesorios.",
 
-  // --- Contact --------------------------------------------------------------
-  /** WhatsApp comercial, formato E.164. Debe coincidir con lib/whatsapp.ts. */
   phoneWhatsApp: "+51946085270",
-  /** Central telefónica (footer, navbar, /contacto). */
   phoneCentral: "+51998117065",
   email: "ventas@plastilonas.com",
 
-  // --- Address (footer + /contacto) ----------------------------------------
   addressStreet: "Calle Alameda del Remero Mz. V, Lt. 2, Urb. Los Huertos de Villa",
   addressLocality: "Chorrillos",
   addressRegion: "Lima",
-  addressPostalCode: "15067",           // VERIFY before production
+  addressPostalCode: "15067",
   addressCountry: "PE",
+
+  /**
+   * CLASIFICACIÓN INDUSTRIAL — la forma correcta de decir «somos fábrica».
+   *
+   * schema.org NO tiene un tipo `Manufacturer`: los subtipos de Organization
+   * son Airline, Corporation, LocalBusiness, NGO y una veintena más, y ninguno
+   * es ese. `manufacturer` existe, pero como PROPIEDAD de Product apuntando a
+   * una Organization —que es como ya se emite en ProductStructuredData—.
+   * Declarar `"@type": ["Organization", "Manufacturer"]` no refuerza nada:
+   * introduce un tipo inexistente en el nodo raíz de la empresa.
+   *
+   * Lo que sí está tipado en Organization y sí se lee: `naics` e `isicV4`.
+   * Son códigos de clasificación industrial oficiales; dicen «fabricación de
+   * productos de plástico» sin ambigüedad y sin inventar vocabulario.
+   */
+  /** CIIU/ISIC Rev.4 2220 — Fabricación de productos de plástico. VERIFY contra la ficha RUC. */
+  isicV4: "2220",
+  /** NAICS 326199 — All Other Plastics Product Manufacturing. Equivalente norteamericano. */
+  naics: "326199",
 
   // --- Misc -----------------------------------------------------------------
   foundingYear: "2009",                 // VERIFY against constitución de la empresa
   locale: "es_PE",
   language: "es-PE",
-  languages: ["es-PE"] as const,
+  languages: ["es-PE", "en", "pt-BR"] as const,
 
-  /**
-   * Perfiles REALES y propios únicamente. Un sameAs vacío es infinitamente
-   * mejor que uno inventado: un perfil falso rompe la reconciliación de
-   * entidad en Google y en los grafos de conocimiento de los LLMs.
-   * Facebook y WhatsApp están marcados como perfiles reales en lib/social.ts.
-   */
   sameAs: [
     "https://www.facebook.com/plastilonasperuanas",
+    "https://www.linkedin.com/company/plastilonas-peruanas-sac",
   ] as string[],
-} as const;
+};
 
-/** Origen canónico sin barra final, para concatenar rutas con seguridad. */
 export const BASE_URL: string = SITE.url.replace(/\/$/, "");
 
-/** Construye una URL absoluta a partir de una ruta relativa. */
 export function absoluteUrl(path = "/"): string {
   return `${BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
