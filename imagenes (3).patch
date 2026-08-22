@@ -1,0 +1,889 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 1c1ed20..c91d7f4 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -65,6 +65,12 @@ jobs:
+       - name: Conteo de catálogo (anti-contradicción)
+         run: npx vitest run test/facts.test.ts --reporter=dot
+ 
++      - name: Imágenes — ninguna ruta citada sin archivo
++        # Corre ANTES del viewport porque es instantáneo y no necesita
++        # navegador: si una ruta de imagen no existe, no hace falta arrancar
++        # Chromium en 17 dispositivos para saber que la página saldrá rota.
++        run: npm run auditar:imagenes
++
+       - name: Viewport en matriz de dispositivos
+         # Mide con Chromium el desbordamiento horizontal y los recortes de la
+         # cabecera en 17 anchos reales, de 280px a 2560px. Existe porque una
+diff --git a/app/cotizacion/page.tsx b/app/cotizacion/page.tsx
+index 9447644..0ffac9a 100644
+--- a/app/cotizacion/page.tsx
++++ b/app/cotizacion/page.tsx
+@@ -86,7 +86,7 @@ function CotizacionContent() {
+ export default function CotizacionPage() {
+   return (
+     <div className="max-w-3xl mx-auto px-6 py-16 text-center">
+-      <Link href="/" className="inline-flex items-center text-sm text-gray-500 hover:text-[#059669] mb-8">
++      <Link href="/" className="inline-flex min-h-[24px] items-center py-1 text-sm text-gray-500 hover:text-[#059669] mb-8">
+         <ArrowLeft className="w-4 h-4 mr-1.5" /> Volver al inicio
+       </Link>
+ 
+diff --git a/app/industria/[sector]/page.tsx b/app/industria/[sector]/page.tsx
+index 59dc3b8..26240d5 100644
+--- a/app/industria/[sector]/page.tsx
++++ b/app/industria/[sector]/page.tsx
+@@ -120,15 +120,20 @@ export default async function IndustriaPage({ params }: Props) {
+         ]}
+       />
+ 
+-      <nav className="mb-6 text-sm text-neutral-500">
+-        <Link href="/" className="hover:text-[#059669]">
++      {/* Las migas son enlaces reales y hay que poder acertarles: sin el
++          relleno vertical su caja mide 17px de alto, por debajo del mínimo de
++          24×24 de WCAG 2.5.8. En un móvil son dos objetivos pequeños y muy
++          juntos, que es el peor caso posible. */}
++      <nav className="mb-6 flex flex-wrap items-center gap-x-1 text-sm text-neutral-500">
++        <Link href="/" className="inline-flex min-h-[24px] items-center py-1 hover:text-[#059669]">
+           Inicio
+-        </Link>{' '}
+-        /{' '}
+-        <Link href="/industria" className="hover:text-[#059669]">
++        </Link>
++        <span aria-hidden="true">/</span>
++        <Link href="/industria" className="inline-flex min-h-[24px] items-center py-1 hover:text-[#059669]">
+           Industrias
+-        </Link>{' '}
+-        / <span>{ind.nombre}</span>
++        </Link>
++        <span aria-hidden="true">/</span>
++        <span className="inline-flex min-h-[24px] items-center py-1">{ind.nombre}</span>
+       </nav>
+ 
+       <p className="mb-2 font-mono text-xs uppercase tracking-wider text-[#059669]">
+diff --git a/app/page.tsx b/app/page.tsx
+index b3fc18d..8702aac 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -8,6 +8,19 @@ import FeaturedDeck from '@/components/FeaturedDeck';
+ import SectorTicker from '@/components/SectorTicker';
+ import FamilyCarousel from '@/components/FamilyCarousel';
+ import ServiceTabs from '@/components/ServiceTabs';
++import { tomasDe } from '@/lib/galeria';
++
++/**
++ * Foto base de cada servicio. Vivía dentro de ServiceTabs, que es un
++ * componente de cliente y por tanto no podía comprobar si el archivo existe.
++ * Aquí sí: esta página es de servidor.
++ */
++const FOTO_SERVICIO: Record<string, string> = {
++  ruler: '/images/servicio-fabricacion.jpg',
++  hardhat: '/images/servicio-instalacion.jpg',
++  ship: '/images/servicio-importacion.jpg',
++  lightbulb: '/images/servicio-asesoria.jpg',
++};
+ import HeroCarousel from '@/components/HeroCarousel';
+ import SectionHeading from '@/components/SectionHeading';
+ import MachineryGallery from '@/components/MachineryGallery';
+@@ -172,7 +185,17 @@ export default function Home() {
+             <SectionHeading eyebrow="Más que fabricación" title="Servicios integrales, de principio a fin" className="mb-10" />
+           </Reveal>
+           <Reveal delay={0.05}>
+-            <ServiceTabs services={services.map((sv, i) => ({ ...sv, icon: ['ruler', 'hardhat', 'ship', 'lightbulb'][i] }))} />
++            <ServiceTabs
++              services={services.map((sv, i) => {
++                const icon = ['ruler', 'hardhat', 'ship', 'lightbulb'][i];
++                // Las tomas se resuelven AQUÍ, en el servidor, porque es el
++                // único sitio con acceso al disco. `tomasDe` devuelve la
++                // primera foto más las secundarias que existan de verdad, ya
++                // sin duplicados byte a byte.
++                const base = FOTO_SERVICIO[icon];
++                return { ...sv, icon, tomas: tomasDe(base) };
++              })}
++            />
+           </Reveal>
+         </div>
+       </section>
+diff --git a/components/ImagenContenido.tsx b/components/ImagenContenido.tsx
+index f0947f7..2ed6f96 100644
+--- a/components/ImagenContenido.tsx
++++ b/components/ImagenContenido.tsx
+@@ -13,10 +13,19 @@ import { tomasDe, claseCiclo } from '@/lib/galeria';
+  * página. Y una imagen de relleno genérica es peor todavía: ocupa el sitio de
+  * la buena y nadie vuelve a acordarse de encargarla.
+  *
+- * La solución: se comprueba en tiempo de compilación si el archivo existe. Si
+- * está, se muestra. Si no, se muestra un marcador sobrio que declara qué
+- * imagen falta — visible para quien administra el sitio, discreto para el
+- * visitante, e imposible de confundir con contenido terminado.
++ * La solución, en tres escalones:
++ *
++ *   1. Si el archivo encargado existe, se muestra. Siempre gana.
++ *   2. Si no, y la ranura declara un RESPALDO —la fotografía real de un
++ *      producto de esa misma familia, solución o guía, ya publicada en este
++ *      repositorio—, se muestra esa. No es relleno genérico ni una
++ *      ilustración inventada: es material propio y correspondiente al tema.
++ *      El `alt` pasa a describir lo que de verdad se ve, porque un alt que
++ *      describe una imagen ausente es peor que no tener alt.
++ *   3. Si tampoco hay respaldo, el marcador sobrio: declara qué falta,
++ *      visible para quien administra e imposible de confundir con contenido
++ *      terminado. Un hueco declarado sigue siendo mejor que una imagen que no
++ *      corresponde.
+  *
+  * ROTACIÓN. Si además existen `{nombre}-2`, `-3` o `-4`, se apilan y se
+  * alternan con el mismo cruce de la galería de producto. Un término del
+@@ -55,8 +64,17 @@ export default function ImagenContenido({
+   sizes?: string;
+ }) {
+   const hay = archivoExiste(ranura.ruta);
++  const respaldo =
++    !hay && ranura.respaldo && archivoExiste(ranura.respaldo.ruta) ? ranura.respaldo : null;
++
++  // Lo que se va a pintar de verdad. A partir de aquí el componente no vuelve
++  // a mirar `ranura.ruta`: si mezclara la ruta pedida con el alt del respaldo
++  // —o al revés— el resultado sería una imagen mal descrita, que es
++  // exactamente el fallo de accesibilidad que esto pretende evitar.
++  const fuente = hay ? ranura.ruta : respaldo?.ruta ?? null;
++  const textoAlt = hay ? ranura.alt : respaldo?.alt ?? ranura.alt;
+ 
+-  if (!hay) {
++  if (!fuente) {
+     return (
+       <div
+         className={`flex items-center justify-center rounded-3xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center ${className}`}
+@@ -72,7 +90,7 @@ export default function ImagenContenido({
+     );
+   }
+ 
+-  const tomas = tomasDe(ranura.ruta);
++  const tomas = tomasDe(fuente);
+   const capas = tomas.slice(1);
+   const ciclo = claseCiclo(tomas.length);
+ 
+@@ -83,8 +101,8 @@ export default function ImagenContenido({
+         style={{ aspectRatio: `${ranura.ancho} / ${ranura.alto}` }}
+       >
+         <Image
+-          src={ranura.ruta}
+-          alt={ranura.alt}
++          src={fuente}
++          alt={textoAlt}
+           fill
+           sizes={sizes}
+           priority={prioridad}
+@@ -103,15 +121,25 @@ export default function ImagenContenido({
+           </div>
+         ))}
+       </div>
+-      {/* Una ilustración no es una fotografía del producto real, y decirlo es
+-          más barato que un pedido devuelto. */}
+-      {ranura.tipo !== 'foto' && (
++      {/* El pie describe lo que se está viendo AHORA, no lo que la ranura
++          pedía. Si se está mostrando el respaldo, lo que hay en pantalla es
++          una fotografía real de nuestro catálogo: llamarla «imagen
++          referencial» o «esquema» sería mentir en la dirección contraria, y
++          restar credibilidad a una foto que sí es nuestra. */}
++      {respaldo ? (
+         <figcaption className="mt-2 text-xs text-gray-500">
+-          {ranura.tipo === 'diagrama'
+-            ? 'Esquema explicativo. No representa una obra ejecutada.'
+-            : 'Imagen referencial. Las especificaciones se confirman en la cotización.'}
++          Fotografía de nuestro catálogo: {respaldo.nombre}.
+           {capas.length > 0 && ` ${tomas.length} vistas alternadas.`}
+         </figcaption>
++      ) : (
++        ranura.tipo !== 'foto' && (
++          <figcaption className="mt-2 text-xs text-gray-500">
++            {ranura.tipo === 'diagrama'
++              ? 'Esquema explicativo. No representa una obra ejecutada.'
++              : 'Imagen referencial. Las especificaciones se confirman en la cotización.'}
++            {capas.length > 0 && ` ${tomas.length} vistas alternadas.`}
++          </figcaption>
++        )
+       )}
+     </figure>
+   );
+diff --git a/components/ProductCard.tsx b/components/ProductCard.tsx
+index 22a389d..c0a2dda 100644
+--- a/components/ProductCard.tsx
++++ b/components/ProductCard.tsx
+@@ -78,7 +78,7 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
+         <div className="pt-5 mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-t border-gray-100">
+           <Link 
+             href={`/productos/${product.slug}`} 
+-            className="inline-flex items-center text-sm font-medium text-[#047857] hover:underline whitespace-nowrap"
++            className="inline-flex min-h-[24px] items-center py-1 text-sm font-medium text-[#047857] hover:underline whitespace-nowrap"
+           >
+             Ver especificaciones <ArrowRight className="ml-1.5 w-4 h-4" />
+           </Link>
+diff --git a/components/ServiceTabs.tsx b/components/ServiceTabs.tsx
+index b5bc8f9..34a6dde 100644
+--- a/components/ServiceTabs.tsx
++++ b/components/ServiceTabs.tsx
+@@ -8,16 +8,24 @@ import { Ruler, HardHat, Ship, Lightbulb, ArrowRight, Check, type LucideIcon } f
+ 
+ const ICONS: Record<string, LucideIcon> = { ruler: Ruler, hardhat: HardHat, ship: Ship, lightbulb: Lightbulb };
+ 
+-// Cada servicio -> par de fotos (slug base). El componente prueba /images/<base>.jpg
+-// y <base>-2.jpg; si alguna falta, cae con elegancia (sin ícono roto).
+-const PHOTO: Record<string, string> = {
+-  ruler: 'servicio-fabricacion',
+-  hardhat: 'servicio-instalacion',
+-  ship: 'servicio-importacion',
+-  lightbulb: 'servicio-asesoria',
+-};
+-
+-type Svc = { title: string; desc: string; icon: string };
++/**
++ * FOTOS DE SERVICIO — resueltas en el servidor, no adivinadas aquí.
++ *
++ * La versión anterior construía la ruta con `/images/${base}${ph === 1 ? '-2' : ''}.jpg`
++ * y un comentario prometía que «si alguna falta, cae con elegancia (sin ícono
++ * roto)». No caía: nunca existieron servicio-fabricacion-2.jpg ni
++ * servicio-instalacion-2.jpg, y cada carga de la portada lanzaba
++ *
++ *   ⨯ The requested resource isn't a valid image for /images/servicio-instalacion-2.jpg
++ *
++ * Un componente de cliente no puede mirar el disco, así que la promesa era
++ * imposible de cumplir desde aquí. Ahora el servidor resuelve qué tomas
++ * existen —con `tomasDe`, el mismo mecanismo de la galería de producto, que
++ * además descarta las copias byte a byte— y las pasa ya resueltas. Si un
++ * servicio tiene una sola foto, se muestra fija; si aparece una segunda, el
++ * cruce se activa solo con dejar el archivo en su sitio.
++ */
++type Svc = { title: string; desc: string; icon: string; tomas: string[] };
+ 
+ export default function ServiceTabs({ services }: { services: Svc[] }) {
+   const [active, setActive] = useState(0);
+@@ -25,7 +33,7 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
+   const [hover, setHover] = useState(false);
+   const svc = services[active];
+   const Icon = ICONS[svc.icon] ?? Ruler;
+-  const base = PHOTO[svc.icon];
++  const tomas = svc.tomas?.length ? svc.tomas : [];
+ 
+   // Auto-avance de pestañas cada 5s (pausa al pasar el cursor / prefiere menos movimiento).
+   useEffect(() => {
+@@ -35,12 +43,15 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
+     return () => clearInterval(id);
+   }, [hover, services.length]);
+ 
+-  // Crossfade entre las 2 fotos del servicio activo cada 3.5s.
++  // Cruce entre las tomas del servicio activo cada 3.5s.
+   useEffect(() => {
+     setPhase(0);
+-    const id = setInterval(() => setPhase((p) => (p === 0 ? 1 : 0)), 3500);
++    // Con una sola toma no hay nada que alternar: mantener el intervalo solo
++    // gastaría renders y provocaría un cruce de la imagen contra sí misma.
++    if (tomas.length < 2) return;
++    const id = setInterval(() => setPhase((p) => (p + 1) % tomas.length), 3500);
+     return () => clearInterval(id);
+-  }, [active]);
++  }, [active, tomas.length]);
+ 
+   return (
+     <div
+@@ -76,10 +87,10 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
+         {/* Capa de fotos */}
+         <div className="absolute inset-0">
+           <AnimatePresence>
+-            {[0, 1].map((ph) =>
++            {tomas.map((_, ph) =>
+               ph === phase ? (
+                 <motion.div
+-                  key={`${base}-${ph}`}
++                  key={`${svc.icon}-${ph}`}
+                   initial={{ opacity: 0 }}
+                   animate={{ opacity: 1 }}
+                   exit={{ opacity: 0 }}
+@@ -87,7 +98,7 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
+                   className="absolute inset-0 ken-burns-wrap"
+                 >
+                   <Image
+-                    src={`/images/${base}${ph === 1 ? '-2' : ''}.jpg`}
++                    src={tomas[ph] ?? tomas[0]}
+                     alt={svc.title}
+                     fill
+                     sizes="(max-width: 1024px) 100vw, 900px"
+diff --git a/lib/imagenes.ts b/lib/imagenes.ts
+index 0e5353d..e697479 100644
+--- a/lib/imagenes.ts
++++ b/lib/imagenes.ts
+@@ -47,6 +47,28 @@ export interface RanuraImagen {
+   contexto: string;
+   /** Encargo para generarla. Se emite con el script de prompts. */
+   prompt: string;
++  /**
++   * FOTOGRAFÍA REAL DE RESERVA, ya publicada en este repositorio.
++   *
++   * Mientras la imagen encargada no llega, la página mostraba un marcador
++   * gris. Eso es honesto, pero once portadas de familia, diez de guía y seis
++   * de solución en gris es un sitio que parece a medio hacer — y a un jefe de
++   * compras eso le dice algo sobre cómo trabajamos, aunque el texto sea
++   * impecable.
++   *
++   * El respaldo NO es una imagen de relleno genérica ni una ilustración
++   * inventada: es la fotografía de un producto REAL de esa misma familia,
++   * solución o guía, que ya está en public/images/galeria. Se deriva del
++   * catálogo, así que no puede desviarse: si el producto cambia de foto, el
++   * respaldo cambia con él.
++   *
++   * Cuando se usa, el `alt` pasa a describir lo que de verdad se ve —el
++   * producto fotografiado— y no lo que la ranura pedía. Un alt que describe
++   * una imagen que no está es peor que no tener alt.
++   *
++   * La imagen encargada SIEMPRE gana: basta con dejar el archivo en su ruta.
++   */
++  respaldo?: { ruta: string; alt: string; nombre: string };
+ }
+ 
+ /* ------------------------------------------------------------------ */
+@@ -141,6 +163,25 @@ export function ranurasProducto(incluirCompletas = false): RanuraImagen[] {
+     );
+ }
+ 
++/**
++ * Primera fotografía real disponible entre una lista de slugs de producto.
++ *
++ * Devuelve undefined si ninguno tiene foto: en ese caso la página vuelve al
++ * marcador, que sigue siendo la respuesta correcta. Preferimos un hueco
++ * declarado a una imagen que no corresponde.
++ */
++function fotoRealDe(
++  slugs: string[],
++): { ruta: string; alt: string; nombre: string } | undefined {
++  for (const slug of slugs) {
++    const p = products.find((x) => x.slug === slug);
++    if (p?.image) {
++      return { ruta: p.image, alt: `${p.name} — ${p.shortDescription}`, nombre: p.name };
++    }
++  }
++  return undefined;
++}
++
+ /** Portada de cada familia: once páginas indexables hoy sin imagen. */
+ export function ranurasFamilia(): RanuraImagen[] {
+   return productFamilies.map((f) => {
+@@ -153,6 +194,9 @@ export function ranurasFamilia(): RanuraImagen[] {
+       alt: `${f.name}: ${f.tagline}`,
+       tipo: 'ilustracion' as TipoImagen,
+       contexto: `Portada de /productos/familia/${f.slug}`,
++      // Un producto de la propia familia es la portada más fiel que existe
++      // mientras no haya una foto de conjunto encargada.
++      respaldo: fotoRealDe(items.map((p) => p.slug)),
+       prompt:
+         `${ESTILO_FOTO.replace('Proporción 3:2 horizontal.', 'Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.')}\n\n` +
+         `TEMA: familia de producto "${f.name}". ${f.tagline}\n` +
+@@ -176,6 +220,10 @@ export function ranurasSolucion(): RanuraImagen[] {
+     alt: `Esquema de la arquitectura de referencia: ${s.titulo}`,
+     tipo: 'diagrama' as TipoImagen,
+     contexto: `Encabezado de /soluciones/${s.slug}`,
++    // El diagrama sigue siendo lo que esta ranura merece —un corte explica lo
++    // que una foto no—, pero mientras no exista, la foto del componente
++    // principal de la solución es información real, no relleno.
++    respaldo: fotoRealDe(s.componentes.map((c) => c.producto)),
+     prompt:
+       `${ESTILO_DIAGRAMA}\n\n` +
+       `TEMA: corte o vista isométrica de esta configuración: ${s.titulo}.\n` +
+@@ -202,6 +250,10 @@ export function ranurasGuia(): RanuraImagen[] {
+       alt: `Apertura de la guía: ${a.title.length > 120 ? `${a.title.slice(0, 117)}…` : a.title}`,
+     tipo: 'ilustracion' as TipoImagen,
+     contexto: `Encabezado de /recursos/${a.slug}`,
++    // Los productos relacionados de la guía ya están declarados en el
++    // artículo: la foto del primero con imagen es exactamente el material del
++    // que trata el texto.
++    respaldo: fotoRealDe(a.relatedProducts ?? []),
+     prompt:
+       `${ESTILO_FOTO.replace('Proporción 3:2 horizontal.', 'Proporción 16:9 horizontal.')}\n\n` +
+       `TEMA: ${a.title}\n` +
+diff --git a/package.json b/package.json
+index 9746c1c..f83cac2 100644
+--- a/package.json
++++ b/package.json
+@@ -12,6 +12,7 @@
+     "test:smoke": "bash scripts/smoke.sh",
+     "audit:ui": "node scripts/audit-ui.mjs",
+     "auditar:viewport": "node scripts/auditar-viewport.mjs",
++    "auditar:imagenes": "node scripts/auditar-imagenes.mjs",
+     "verify:deploy": "bash scripts/verificar-despliegue.sh",
+     "vigilancia": "node scripts/vigilancia-fuentes.mjs",
+     "imagenes": "node scripts/imagenes.mjs",
+diff --git a/scripts/auditar-imagenes.mjs b/scripts/auditar-imagenes.mjs
+new file mode 100644
+index 0000000..f35d5f1
+--- /dev/null
++++ b/scripts/auditar-imagenes.mjs
+@@ -0,0 +1,105 @@
++#!/usr/bin/env node
++/**
++ * AUDITORÍA DE IMÁGENES — ninguna ruta declarada puede quedar sin archivo.
++ *
++ * El fallo que motiva este script: `components/ServiceTabs.tsx` construía la
++ * ruta `/images/servicio-{x}-2.jpg` y un comentario prometía que «si alguna
++ * falta, cae con elegancia». No caía. Cada carga de la portada escupía
++ *
++ *   ⨯ The requested resource isn't a valid image for /images/servicio-instalacion-2.jpg
++ *
++ * en el registro del servidor, y ninguna de las 517 pruebas lo notaba: una
++ * prueba de unidad no mira el disco de `public/`, y el build tampoco resuelve
++ * las rutas de imagen.
++ *
++ * Qué comprueba:
++ *   1. Toda ruta literal citada desde app/, components/ y lib/ existe.
++ *   2. Toda ranura del registro de imágenes se resuelve: archivo encargado,
++ *      o respaldo real, o marcador declarado a propósito.
++ *   3. Ningún archivo de public/images está vacío o es sospechosamente chico.
++ *
++ * Lo 1 y lo 3 son ERROR: rompen la página. Lo 2 es AVISO cuando cae en el
++ * marcador, porque un hueco declarado es una decisión, no un defecto.
++ */
++import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
++import { join, extname } from 'node:path';
++
++const raiz = process.cwd();
++const V = '\x1b[32m', R = '\x1b[31m', A = '\x1b[33m', G = '\x1b[90m', F = '\x1b[0m';
++
++const errores = [];
++const avisos = [];
++
++/* ---- 1) rutas literales en código de render ------------------------------ */
++function fuentes(dir, out = []) {
++  if (!existsSync(dir)) return out;
++  for (const e of readdirSync(dir, { withFileTypes: true })) {
++    const p = join(dir, e.name);
++    if (e.isDirectory()) fuentes(p, out);
++    else if (/\.(tsx?|jsx?)$/.test(e.name) && !/\.test\./.test(e.name)) out.push(p);
++  }
++  return out;
++}
++
++const RE_RUTA = /['"`](\/[A-Za-z0-9_\-./]*\.(?:jpg|jpeg|png|webp|avif|svg))['"`]/gi;
++const literales = new Map();
++for (const f of [join(raiz, 'app'), join(raiz, 'components'), join(raiz, 'lib')].flatMap((d) => fuentes(d))) {
++  const src = readFileSync(f, 'utf8');
++  let m;
++  while ((m = RE_RUTA.exec(src))) {
++    const r = m[1];
++    if (!literales.has(r)) literales.set(r, new Set());
++    literales.get(r).add(f.replace(raiz + '/', ''));
++  }
++}
++for (const [ruta, quien] of literales) {
++  if (!existsSync(join(raiz, 'public', ruta))) {
++    errores.push({ tipo: 'ruta-sin-archivo', ruta, quien: [...quien] });
++  }
++}
++
++/* ---- 2) el registro de ranuras lo audita test/imagenes-registro.test.ts --- *
++ * Ese registro es TypeScript y importarlo aquí obligaría a añadir tsx como
++ * dependencia solo para esto. Vitest ya está instalado y resuelve TS de
++ * fábrica, así que la comprobación de ranuras y respaldos vive allí y corre
++ * con `npm test`. Este script se queda con lo que sí puede verificar sin
++ * compilador: rutas literales y archivos rotos.                              */
++
++/* ---- 3) archivos vacíos o rotos ------------------------------------------ */
++const EXT = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif', '.svg']);
++let totalArchivos = 0;
++(function rec(d) {
++  if (!existsSync(d)) return;
++  for (const e of readdirSync(d, { withFileTypes: true })) {
++    const p = join(d, e.name);
++    if (e.isDirectory()) { rec(p); continue; }
++    if (!EXT.has(extname(e.name).toLowerCase())) continue;
++    totalArchivos++;
++    const bytes = statSync(p).size;
++    // 512 bytes: por debajo de eso no hay fotografía posible; un SVG mínimo sí,
++    // por eso se exceptúan.
++    if (bytes < 512 && extname(e.name).toLowerCase() !== '.svg') {
++      errores.push({ tipo: 'archivo-vacio', ruta: p.replace(join(raiz, 'public'), ''), bytes });
++    }
++  }
++})(join(raiz, 'public'));
++
++/* ---- informe -------------------------------------------------------------- */
++console.log(`\nImágenes — ${totalArchivos} archivos en public/, ${literales.size} rutas citadas desde código\n`);
++
++const porTipo = (lista, t) => lista.filter((x) => x.tipo === t);
++void avisos;
++
++for (const e of porTipo(errores, 'ruta-sin-archivo')) {
++  console.log(`  ${R}✗${F} ${e.ruta}`);
++  console.log(`${G}      citada desde ${e.quien.join(', ')} y el archivo no existe${F}`);
++}
++for (const e of porTipo(errores, 'archivo-vacio')) {
++  console.log(`  ${R}✗${F} ${e.ruta} — ${e.bytes} bytes, no es una imagen válida`);
++}
++
++console.log(
++  `\nResultado: ${errores.length ? R : V}${errores.length} errores${F}, ` +
++  `${avisos.length ? A : V}${avisos.length} avisos${F}\n`,
++);
++process.exit(errores.length ? 1 : 0);
+diff --git a/scripts/auditar-viewport.mjs b/scripts/auditar-viewport.mjs
+index 48ef0f6..e1b4596 100644
+--- a/scripts/auditar-viewport.mjs
++++ b/scripts/auditar-viewport.mjs
+@@ -38,9 +38,43 @@ const DISPOSITIVOS = [
+   { nombre: 'QHD ultraancho',            ancho: 2560, alto: 1440, dpr: 1,   movil: false },
+ ];
+ 
++/**
++ * DOS BARRIDOS, PORQUE LAS DOS PREGUNTAS NO CUESTAN LO MISMO.
++ *
++ * Si el layout se recorta depende del ancho, así que hay que preguntarlo en
++ * los 17 dispositivos. Si una imagen carga NO depende del ancho: un 404 es un
++ * 404 en 280px y en 2560px. Cruzar ambas cosas daba 17 × 11 = 187 cargas con
++ * el optimizador de imágenes de Next por medio, y la ejecución no terminaba.
++ *
++ * Así que el layout se mide sobre una ruta por familia de plantilla, y las
++ * imágenes sobre TODAS las rutas pero solo en dos anchos —uno de móvil y uno
++ * de escritorio—, que es donde `sizes` puede resolver a un archivo distinto.
++ */
+ const RUTAS = process.env.RUTAS_AUDITORIA
+   ? process.env.RUTAS_AUDITORIA.split(',')
+-  : ['/', '/productos', '/industria/mineria', '/cotizacion', '/glosario', '/contacto'];
++  : ['/', '/productos', '/industria/mineria', '/cotizacion'];
++
++const RUTAS_IMAGENES = process.env.RUTAS_IMAGENES
++  ? process.env.RUTAS_IMAGENES.split(',')
++  : [
++      '/',
++      '/productos',
++      '/productos/familia/estructuras-arquitectura-textil',
++      '/productos/familia/geosinteticos',
++      '/productos/big-bags-bolsones-polipropileno',
++      '/soluciones/poza-revestida-impermeabilizacion',
++      '/recursos/instalacion-geomembranas-hdpe-pozas-canales',
++      '/industria/mineria',
++      '/glosario/geotextil',
++      '/nosotros',
++      '/servicios',
++    ];
++
++/** Anchos donde `sizes` puede resolver a un archivo distinto. */
++const ANCHOS_IMAGEN = [
++  { nombre: 'movil 393px',      ancho: 393,  alto: 852, dpr: 3, movil: true },
++  { nombre: 'escritorio 1440px', ancho: 1440, alto: 900, dpr: 2, movil: false },
++];
+ 
+ /** WCAG 2.5.8 pide 24×24 CSS px; las guías de iOS y Android piden ~44. */
+ const TACTIL_MINIMO = 24;
+@@ -156,7 +190,17 @@ function medirEnPagina(tactilMinimo) {
+     }
+   }
+ 
+-  // 3) Áreas táctiles. Solo lo visible e interactivo.
++  // 3) IMÁGENES QUE NO CARGAN.
++  //
++  // `complete && naturalWidth === 0` es la única señal fiable: significa que
++  // el navegador terminó de intentarlo y no obtuvo píxeles. Un 404, un
++  // archivo corrupto o un optimizador que devuelve null caen todos aquí.
++  // Ninguna prueba de unidad ve esto —no miran el disco de public/— y el
++  // build tampoco resuelve rutas de imagen, así que sin esta comprobación un
++  // hueco solo se descubre mirando la página.
++  // (Las imágenes rotas se miden en el segundo barrido: no dependen del ancho.)
++
++  // 4) Áreas táctiles. Solo lo visible e interactivo.
+   const vistos = new Set();
+   for (const el of document.querySelectorAll('a[href], button, [role="button"], input, select')) {
+     const r = el.getBoundingClientRect();
+@@ -198,7 +242,7 @@ if (!(await esperarServidor())) {
+ // hay uno instalado (PLAYWRIGHT_CHROMIUM), se respeta el que exista.
+ const ejecutable = process.env.PLAYWRIGHT_CHROMIUM || undefined;
+ const navegador = await chromium.launch(ejecutable ? { executablePath: ejecutable } : {});
+-let totalDesbordes = 0, totalRecortes = 0, totalTactiles = 0;
++let totalDesbordes = 0, totalRecortes = 0, totalTactiles = 0, totalRotas = 0;
+ const informe = [];
+ 
+ for (const d of DISPOSITIVOS) {
+@@ -222,9 +266,16 @@ for (const d of DISPOSITIVOS) {
+   const porDispositivo = [];
+ 
+   for (const ruta of RUTAS) {
+-    // `load`, no `domcontentloaded`: el hero lleva fotografías y un carrusel;
+-    // medir antes de que tengan tamaño da lecturas fantasma.
+-    await pagina.goto(BASE + ruta, { waitUntil: 'load', timeout: 60000 });
++    // `domcontentloaded`, no `load`.
++    //
++    // `load` espera a TODOS los subrecursos y no llegaba nunca en las portadas
++    // de familia: el optimizador de Next redimensiona once fotos en la primera
++    // visita. Para medir geometría no hace falta — basta con que el ancho de
++    // scroll deje de moverse, que es lo que comprueba la espera de abajo—, y
++    // esperar a que cada <img> estuviera `complete` colgaba 45s por ruta y por
++    // dispositivo, porque una imagen con carga diferida que nunca entra en
++    // pantalla no se declara completa jamás.
++    await pagina.goto(BASE + ruta, { waitUntil: 'domcontentloaded', timeout: 60000 });
+     await pagina.evaluate(() => {
+       delete window.__lecturas;
+       return document.fonts ? document.fonts.ready.catch(() => {}) : null;
+@@ -260,13 +311,82 @@ for (const d of DISPOSITIVOS) {
+   const desbordes = porDispositivo.filter((h) => h.tipo === 'desborde-horizontal');
+   const recortes = porDispositivo.filter((h) => h.tipo === 'recortado-en-cabecera');
+   const tactiles = porDispositivo.filter((h) => h.tipo === 'area-tactil-pequena');
++
+   totalDesbordes += desbordes.length;
+   totalRecortes += recortes.length;
+   totalTactiles += tactiles.length;
+ 
++
+   informe.push({ d, desbordes, recortes, tactiles });
+ }
+ 
++/* ------------------------------------------------------------------ */
++/* Segundo barrido: ¿alguna imagen no llega a pintar un solo píxel?    */
++/* ------------------------------------------------------------------ */
++const rotas = [];
++for (const a of ANCHOS_IMAGEN) {
++  const ctx = await navegador.newContext({
++    viewport: { width: a.ancho, height: a.alto },
++    deviceScaleFactor: a.dpr,
++    isMobile: a.movil,
++    hasTouch: a.movil,
++  });
++  const pagina = await ctx.newPage();
++  await pagina.route('**/*', (r) => {
++    const u = new URL(r.request().url());
++    return u.hostname === '127.0.0.1' || u.hostname === 'localhost' ? r.continue() : r.abort();
++  });
++
++  for (const ruta of RUTAS_IMAGENES) {
++    await pagina.goto(BASE + ruta, { waitUntil: 'domcontentloaded', timeout: 60000 });
++
++    // Recorrer la página entera ANTES de medir.
++    //
++    // Una <img loading="lazy"> que nunca entra en pantalla se queda con
++    // complete=false para siempre: el navegador ni siquiera la pide. Preguntar
++    // «¿están todas completas?» sin bajar antes no se responde nunca. Bajando
++    // hasta el pie se disparan todas y la pregunta pasa a tener respuesta.
++    await pagina.evaluate(async () => {
++      const paso = Math.round(innerHeight * 0.8);
++      for (let y = 0; y < document.body.scrollHeight; y += paso) {
++        scrollTo(0, y);
++        await new Promise((r) => setTimeout(r, 120));
++      }
++      scrollTo(0, 0);
++      await new Promise((r) => setTimeout(r, 300));
++    });
++    await pagina
++      .waitForFunction(() => Array.from(document.images).every((i) => i.complete), null, {
++        timeout: 20000,
++        polling: 250,
++      })
++      .catch(() => {});
++
++    const halladas = await pagina.evaluate(() => {
++      const fuera = [];
++      for (const img of document.images) {
++        // `complete && naturalWidth === 0` es la única señal fiable de rotura:
++        // el navegador terminó de intentarlo y no obtuvo píxeles. Un 404, un
++        // archivo corrupto y un optimizador que devuelve null caen todos aquí.
++        // Una imagen aún cargando tiene complete=false y no cuenta.
++        // Una imagen que sigue cargando tiene complete=false y no se juzga:
++        // solo se acusa a la que terminó y no trajo un solo píxel.
++        if (img.complete && img.naturalWidth === 0) {
++          fuera.push({ estado: 'rota', src: img.currentSrc || img.src, alt: img.alt });
++        }
++      }
++      return fuera.map((x) => ({
++        ...x,
++        src: String(x.src || '').replace(location.origin, '').slice(0, 130),
++        alt: String(x.alt || '').slice(0, 60),
++      }));
++    });
++    for (const h of halladas) rotas.push({ ancho: a.nombre, ruta, ...h });
++  }
++  await ctx.close();
++}
++totalRotas = rotas.filter((r) => r.estado === 'rota').length;
++
+ await navegador.close();
+ pararServidor(servidor);
+ 
+@@ -274,8 +394,9 @@ const V = '\x1b[32m', R = '\x1b[31m', A = '\x1b[33m', G = '\x1b[90m', F = '\x1b[
+ console.log(`\nViewport — ${DISPOSITIVOS.length} dispositivos × ${RUTAS.length} rutas\n`);
+ 
+ for (const { d, desbordes, recortes, tactiles } of informe) {
+-  // El aviso táctil no rompe el despliegue; el recorte y el desborde sí.
+-  // Marcarlos igual haría que 73 avisos parecieran 73 fallos.
++  // El aviso táctil no rompe el despliegue; el recorte, el desborde y una
++  // imagen que no carga sí. Marcarlos igual haría que 73 avisos parecieran
++  // 73 fallos.
+   const falla = desbordes.length > 0 || recortes.length > 0;
+   const marca = falla ? `${R}✗${F}` : tactiles.length ? `${A}!${F}` : `${V}✓${F}`;
+   console.log(`  ${marca} ${String(d.ancho).padStart(4)}px  ${d.nombre}`);
+@@ -294,10 +415,21 @@ for (const { d, desbordes, recortes, tactiles } of informe) {
+   if (tactiles.length > 3) console.log(`${G}      … y ${tactiles.length - 3} áreas más${F}`);
+ }
+ 
+-const errores = totalDesbordes + totalRecortes;
++console.log(`\nImágenes — ${RUTAS_IMAGENES.length} rutas × ${ANCHOS_IMAGEN.length} anchos\n`);
++if (totalRotas === 0) {
++  console.log(`  ${V}✓${F} todas las imágenes pintan píxeles en las ${RUTAS_IMAGENES.length} rutas`);
++} else {
++  for (const r of rotas.filter((x) => x.estado === 'rota').slice(0, 20)) {
++    console.log(`  ${R}✗${F} ${r.ruta} [${r.ancho}]`);
++    console.log(`${G}      ${r.src}  «${r.alt}»${F}`);
++  }
++  if (totalRotas > 20) console.log(`${G}      … y ${totalRotas - 20} más${F}`);
++}
++
++const errores = totalDesbordes + totalRecortes + totalRotas;
+ console.log(
+   `\nResultado: ${errores ? R : V}${errores} errores${F} ` +
+-  `(${totalDesbordes} desbordes, ${totalRecortes} recortes), ` +
++  `(${totalDesbordes} desbordes, ${totalRecortes} recortes, ${totalRotas} imágenes rotas), ` +
+   `${totalTactiles ? A : V}${totalTactiles} avisos táctiles${F}\n`,
+ );
+ process.exit(errores > 0 ? 1 : 0);
+diff --git a/test/galeria.test.ts b/test/galeria.test.ts
+index 940a92b..bfee43b 100644
+--- a/test/galeria.test.ts
++++ b/test/galeria.test.ts
+@@ -273,8 +273,19 @@ describe('glosario y recursos: la misma rotación', () => {
+ 
+   it('resuelve las tomas con la misma librería que la galería', () => {
+     // Dos implementaciones del mismo cruce divergen; una sola no puede.
++    //
++    // Esta comprobación fijaba antes el literal `tomasDe(ranura.ruta)`, es
++    // decir, el NOMBRE de una variable. Cuando el componente pasó a poder
++    // servir una fotografía de respaldo —y por tanto a resolver las tomas de
++    // la imagen que realmente pinta, no de la que la ranura pedía—, la prueba
++    // falló sin que nada se hubiera roto. Ahora se verifica la regla: las
++    // tomas se resuelven con `tomasDe` sobre EXACTAMENTE la misma expresión
++    // que alimenta el `src` de la imagen principal.
+     expect(src).toMatch(/from '@\/lib\/galeria'/);
+-    expect(src).toMatch(/tomasDe\(ranura\.ruta\)/);
++    const llamada = src.match(/const tomas = tomasDe\(([A-Za-z0-9_.]+)\)/);
++    expect(llamada, 'ImagenContenido debe resolver sus tomas con tomasDe').toBeTruthy();
++    const fuente = llamada![1];
++    expect(src).toMatch(new RegExp(`src=\\{${fuente.replace('.', '\\.')}\\}`));
+     expect(src).toMatch(/claseCiclo\(/);
+   });
+ 
+diff --git a/test/imagenes-registro.test.ts b/test/imagenes-registro.test.ts
+new file mode 100644
+index 0000000..ec598c0
+--- /dev/null
++++ b/test/imagenes-registro.test.ts
+@@ -0,0 +1,122 @@
++import { describe, it, expect } from 'vitest';
++import { existsSync, statSync } from 'node:fs';
++import { join } from 'node:path';
++import {
++  ranurasFamilia,
++  ranurasSolucion,
++  ranurasGuia,
++  todasLasRanuras,
++} from '../lib/imagenes';
++import { products } from '../lib/products';
++
++const publico = (r: string) => join(process.cwd(), 'public', r);
++const hay = (r: string) => existsSync(publico(r));
++
++/**
++ * Estas pruebas nacen de un fallo concreto y visible: once portadas de
++ * familia, diez de guía y seis de solución mostraban un rectángulo gris con
++ * el texto «Imagen pendiente de publicación» — con la ruta del archivo que
++ * falta impresa encima. Era el comportamiento diseñado, y como degradación es
++ * honesto, pero un comprador industrial que llega a /productos/familia/... y
++ * ve un hueco con una ruta de archivo saca conclusiones sobre la empresa que
++ * ningún texto de la página desmiente.
++ *
++ * El arreglo no fue inventar imágenes: fue descubrir que cada familia,
++ * solución y guía YA tenía fotografías reales de sus propios productos en el
++ * repositorio, y derivar el respaldo de ahí.
++ */
++describe('registro de imágenes: toda ranura de portada se resuelve', () => {
++  const grupos = [
++    ['familia', ranurasFamilia()],
++    ['solución', ranurasSolucion()],
++    ['guía', ranurasGuia()],
++  ] as const;
++
++  for (const [nombre, ranuras] of grupos) {
++    it(`ninguna ranura de ${nombre} queda en marcador`, () => {
++      const enMarcador = ranuras.filter(
++        (r) => !hay(r.ruta) && !(r.respaldo && hay(r.respaldo.ruta)),
++      );
++      expect(
++        enMarcador.map((r) => r.ruta),
++        `sin archivo ni respaldo: se verían como un rectángulo gris`,
++      ).toEqual([]);
++      expect(ranuras.length).toBeGreaterThan(0);
++    });
++  }
++
++  it('todo respaldo apunta a un archivo real y con peso', () => {
++    const malos: string[] = [];
++    for (const r of todasLasRanuras()) {
++      if (!r.respaldo) continue;
++      if (!hay(r.respaldo.ruta)) { malos.push(`${r.id} → ${r.respaldo.ruta} no existe`); continue; }
++      if (statSync(publico(r.respaldo.ruta)).size < 512) {
++        malos.push(`${r.id} → ${r.respaldo.ruta} pesa menos de 512B`);
++      }
++    }
++    expect(malos).toEqual([]);
++  });
++
++  it('todo respaldo procede del catálogo, no de una ruta escrita a mano', () => {
++    // Si alguien codifica una ruta suelta como respaldo, el día que cambie la
++    // foto del producto el respaldo se queda apuntando a la anterior. Debe
++    // derivarse siempre de products.
++    const delCatalogo = new Set(products.map((p) => p.image).filter(Boolean));
++    const ajenos = todasLasRanuras()
++      .filter((r) => r.respaldo && !delCatalogo.has(r.respaldo.ruta))
++      .map((r) => `${r.id} → ${r.respaldo!.ruta}`);
++    expect(ajenos).toEqual([]);
++  });
++
++  it('el respaldo nombra el producto que se ve, para poder declararlo al pie', () => {
++    for (const r of todasLasRanuras()) {
++      if (!r.respaldo) continue;
++      expect(r.respaldo.nombre.trim().length, `${r.id} sin nombre de producto`).toBeGreaterThan(0);
++      expect(r.respaldo.alt.trim().length, `${r.id} sin alt`).toBeGreaterThan(0);
++    }
++  });
++});
++
++describe('fotos de servicio de la portada', () => {
++  const BASES = [
++    '/images/servicio-fabricacion.jpg',
++    '/images/servicio-instalacion.jpg',
++    '/images/servicio-importacion.jpg',
++    '/images/servicio-asesoria.jpg',
++  ];
++
++  it('las cuatro fotos base existen', () => {
++    expect(BASES.filter((b) => !hay(b))).toEqual([]);
++  });
++
++  it('ServiceTabs ya no construye la ruta de la segunda toma a mano', () => {
++    // El fallo original: `/images/${base}${ph === 1 ? '-2' : ''}.jpg` pedía
++    // archivos que nunca existieron y el servidor lo registraba como
++    // «The requested resource isn't a valid image … received null» en cada
++    // carga de la portada. Un componente de cliente no puede comprobar el
++    // disco; la resolución tiene que venir del servidor.
++    // Se mira el CÓDIGO, no la prosa: el propio archivo cita la expresión
++    // vieja en su comentario para explicar qué se corrigió, y buscarla en el
++    // texto completo daría un falso positivo eterno.
++    const src = sinComentarios(readFileSyncSafe('components/ServiceTabs.tsx'));
++    expect(src).not.toMatch(/\$\{base\}\$\{ph === 1/);
++    expect(src).not.toMatch(/const PHOTO: Record<string, string>/);
++    expect(src).toMatch(/tomas\[ph\]/);
++  });
++
++  it('la portada resuelve las tomas en el servidor', () => {
++    const src = readFileSyncSafe('app/page.tsx');
++    expect(src).toMatch(/tomasDe\(/);
++    expect(src).toMatch(/FOTO_SERVICIO/);
++  });
++});
++
++/** Quita bloques /* *\/ y líneas // para que las pruebas juzguen código. */
++function sinComentarios(src: string): string {
++  return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
++}
++
++function readFileSyncSafe(rel: string): string {
++  // eslint-disable-next-line @typescript-eslint/no-var-requires
++  return require('node:fs').readFileSync(join(process.cwd(), rel), 'utf8');
++}
