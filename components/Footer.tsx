@@ -18,6 +18,14 @@ export default function Footer() {
       { label: 'Ventilación Industrial', href: '/productos/familia/ventilacion-industrial' },
       { label: 'Ver catálogo completo →', href: '/productos' },
     ]},
+    { title: 'INDUSTRIAS', links: [
+      { label: 'Minería', href: '/industria/mineria' },
+      { label: 'Agroexportación', href: '/industria/agroexportacion' },
+      { label: 'Transporte y logística', href: '/industria/transporte-logistica' },
+      { label: 'Construcción e infraestructura', href: '/industria/construccion' },
+      { label: 'Saneamiento y agua', href: '/industria/saneamiento-y-agua' },
+      { label: 'Ver todos los sectores →', href: '/industria' },
+    ]},
     { title: 'EMPRESA', links: [
       { label: 'Recursos técnicos', href: '/recursos' },
       { label: 'Arquitecturas de referencia', href: '/soluciones' },
@@ -32,6 +40,22 @@ export default function Footer() {
       { label: 'Nuestros Servicios', href: '/servicios' },
       { label: 'Contacto', href: '/contacto' },
       { label: 'Solicitar Cotización', href: '/cotizacion' },
+    ]},
+    { title: 'INDUSTRIA E INTERNACIONAL', links: [
+      { label: 'Hubs de industria', href: '/industria' },
+      { label: 'Aplicaciones', href: '/aplicaciones' },
+      { label: 'Biblioteca técnica', href: '/biblioteca' },
+      { label: 'Proyectos', href: '/proyectos' },
+      { label: 'Centro de compras', href: '/compras' },
+      { label: 'Calidad', href: '/calidad' },
+      { label: 'Configurador FIBC', href: '/configurador' },
+      { label: 'Compradores internacionales', href: '/compradores' },
+      { label: 'Exportación', href: '/exportacion' },
+      { label: 'Distribuidores', href: '/distribuidores' },
+      { label: 'Partners de ingeniería', href: '/socios' },
+      { label: 'Centro de confianza', href: '/confianza' },
+      { label: 'English', href: '/en' },
+      { label: 'Português', href: '/pt' },
     ]},
     { title: 'CONTACTO', links: [
       { label: '+51 998 117 065 · Central', href: 'tel:+51998117065', external: true },
@@ -51,7 +75,7 @@ export default function Footer() {
             </div>
             <div className="font-semibold text-lg tracking-tight text-white">Plastilonas Peruanas SAC</div>
           </div>
-          <p className="text-white/60 text-sm leading-relaxed mb-5">Fabricación e instalación propias. +15 años entregando a todo el Perú.</p>
+          <p className="text-white/60 text-sm leading-relaxed mb-5">Fabricación e instalación propias. En el Perú desde 2009.</p>
           <WhatsAppLink context="footer-cta" message="Hola, quisiera información sobre sus productos." className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-[#0A2540] font-semibold py-3.5 rounded-2xl mb-6 active:scale-[0.99] transition">
             <Phone className="w-4 h-4" /> WhatsApp 24/7 · {WHATSAPP_DISPLAY}
           </WhatsAppLink>
@@ -71,11 +95,11 @@ export default function Footer() {
               <div className="font-semibold text-2xl tracking-tight text-white">Plastilonas Peruanas SAC</div>
             </div>
             <p className="text-white/70 max-w-md leading-relaxed t-body">
-              Más de 15 años fabricando e instalando soluciones textiles industriales para los sectores más exigentes del Perú. Fabricación propia, importación directa y respaldo técnico en cada proyecto.
+              Fabricación e instalación de soluciones textiles industriales desde 2009. Fabricación propia, importación directa y respaldo técnico en cada proyecto.
             </p>
             <div className="flex flex-wrap items-center gap-4 mt-6">
               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">
-                <Award className="w-3.5 h-3.5" /> +15 años de experiencia
+                <Award className="w-3.5 h-3.5" /> Desde 2009
               </div>
               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">
                 <Users className="w-3.5 h-3.5" /> Fabricación 100% a medida

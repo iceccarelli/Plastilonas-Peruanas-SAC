@@ -1,4 +1,4 @@
-import { isValidIndexNowKey } from '@/lib/indexnow';
+import { INDEXNOW_KEY, isValidIndexNowKey } from '@/lib/indexnow';
 
 /**
  * Prueba de propiedad para IndexNow.
@@ -13,22 +13,29 @@ import { isValidIndexNowKey } from '@/lib/indexnow';
  * Al servirlo en la raíz (`/indexnow-key.txt`) la clave cubre todo el sitio; en
  * un subdirectorio solo validaría ese subárbol.
  *
- * Sin INDEXNOW_KEY configurada responde 404: preferimos una ausencia honesta a
- * publicar una clave de relleno que haría fallar la verificación con un 403.
+ * ANTES ESTO RESPONDÍA 404. La clave salía de una variable de entorno que
+ * nadie había configurado, así que la prueba de propiedad no existía, el envío
+ * habría obtenido 403 y el flujo de GitHub ni siquiera arrancaba. El sitio
+ * entero era invisible para Bing, Yandex, Seznam, Naver y Yep —y, por la vía
+ * de Bing, para la búsqueda de ChatGPT— por una variable sin poner.
+ *
+ * Ahora la clave vive en lib/indexnow.ts, que es donde debe estar: el
+ * protocolo obliga a publicarla igualmente en esta misma URL. Ver la nota
+ * larga en ese archivo.
  */
 export const dynamic = 'force-static';
 
 export async function GET(): Promise<Response> {
-  const key = process.env.INDEXNOW_KEY;
-
-  if (!isValidIndexNowKey(key)) {
-    return new Response('Not found', {
-      status: 404,
+  // Una clave mal formada haría fallar la verificación con 403 sin decir por
+  // qué. Se comprueba aquí y hay un test que lo comprueba al compilar.
+  if (!isValidIndexNowKey(INDEXNOW_KEY)) {
+    return new Response('Clave IndexNow con formato invalido', {
+      status: 500,
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     });
   }
 
-  return new Response(key, {
+  return new Response(INDEXNOW_KEY, {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'Cache-Control': 'public, max-age=3600, s-maxage=86400',

@@ -127,6 +127,7 @@ ruta /glosario/terminos.json
 ruta /indicadores/datos.json
 ruta /productos/catalogo.json
 ruta /calculadoras/formulas.json
+ruta /indexnow-key.txt
 ruta /version.json
 
 echo "— Documentos descargables —"
@@ -174,6 +175,18 @@ contiene "/llms.txt" 'Documentos descargables' "llms.txt declara los documentos"
 contiene "/llms.txt" 'Informes del sector' "llms.txt declara los informes"
 contiene "/llms.txt" 'Indicadores en vivo' "llms.txt declara los indicadores"
 contiene "/llms.txt" 'Calculadoras de predimensionamiento' "llms.txt declara las calculadoras"
+
+# La prueba de propiedad de IndexNow. Sin ella, el envío obtiene 403 y el sitio
+# es invisible para Bing, Yandex, Seznam, Naver y Yep — y, por la vía de Bing,
+# para la búsqueda de ChatGPT. Respondía 404 hasta que la clave pasó al
+# repositorio: se comprueba que sirve EXACTAMENTE la clave, no que exista.
+clave_repo=$(grep -oE "INDEXNOW_KEY = '[^']+'" lib/indexnow.ts | grep -oE "'[^']+'" | tr -d "'")
+clave_viva=$(cuerpo /indexnow-key.txt | tr -d '[:space:]')
+if [ -n "$clave_repo" ] && [ "$clave_viva" = "$clave_repo" ]; then
+  ok "la prueba de propiedad de IndexNow sirve la clave del repositorio"
+else
+  bad "la prueba de propiedad de IndexNow no coincide con lib/indexnow.ts"
+fi
 
 # Las calculadoras solo son citables si publican el método y sus límites. Una
 # caja negra que devuelve un número no la puede verificar nadie.

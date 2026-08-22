@@ -32,6 +32,8 @@
  *     cambio a cero cada sábado.
  */
 
+import { SITE } from './site';
+
 const BASE = 'https://estadisticas.bcrp.gob.pe/estadisticas/series/api';
 
 export interface SerieBCRP {
@@ -144,8 +146,11 @@ export function urlSerie(codigos: string[], desde: string, hasta: string): strin
  * administrador puede permitir en lugar de bloquear a ciegas.
  */
 const CABECERAS: Record<string, string> = {
-  'User-Agent':
-    'Mozilla/5.0 (compatible; PlastilonasIndicadores/1.0; +https://plastilonas-peruanas-sac.vercel.app/indicadores)',
+  // El dominio se deriva de SITE.url: escrito a mano, el día que el sitio se
+  // mude a plastilonas.com este User-Agent seguiría enlazando a una URL que ya
+  // no es la canónica, y el administrador del BCRP vería una identificación
+  // que no lleva a ninguna parte.
+  'User-Agent': `Mozilla/5.0 (compatible; PlastilonasIndicadores/1.0; +${SITE.url}/indicadores)`,
   Accept: 'application/json, text/plain, */*',
   'Accept-Language': 'es-PE,es;q=0.9',
 };

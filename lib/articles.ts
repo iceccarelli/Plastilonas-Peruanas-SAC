@@ -86,7 +86,7 @@ export const articles: Article[] = [
     slug: 'big-bags-mineria-peru-normativa-errores-estiba',
     title:
       'Big Bags para minería en el Perú: qué exige la normativa y los 7 errores de estiba que rompen bolsones',
-    metaTitle: 'Big Bags para minería en Perú: normativa ISO 21898 y errores de estiba',
+    metaTitle: 'Big Bags en minería: ISO 21898 y errores de estiba',
     description:
       'Factor de seguridad 5:1 vs 6:1, la exigencia de certificación ISO 21898:2004 en el Puerto del Callao desde 2023, y los siete errores de manipulación y estiba que causan la mayoría de las roturas de big bags en operaciones mineras peruanas.',
     datePublished: '2026-08-17',
@@ -226,7 +226,7 @@ export const articles: Article[] = [
     slug: 'instalacion-geomembranas-hdpe-pozas-canales',
     title:
       'Instalación de geomembranas HDPE en pozas y canales: secuencia, ensayos de soldadura y los fallos que aparecen recién a los seis meses',
-    metaTitle: 'Instalación de geomembranas HDPE en pozas y canales: guía técnica',
+    metaTitle: 'Geomembrana HDPE en pozas y canales: instalación',
     description:
       'Preparación de subrasante, zanja de anclaje, soldadura por cuña caliente y extrusión, ensayos no destructivos (caja de vacío ASTM D5641 y presión de aire en costura doble) y los errores de instalación que provocan filtraciones meses después de la entrega.',
     datePublished: '2026-08-17',
@@ -407,7 +407,7 @@ export const articles: Article[] = [
     slug: 'calculo-caudal-mangas-ventilacion-mina-subterranea',
     title:
       'Cálculo de caudal para mangas de ventilación en mina subterránea: método, corrección por altitud y por qué su manga entrega menos aire del que promete',
-    metaTitle: 'Cálculo de caudal para mangas de ventilación minera en el Perú',
+    metaTitle: 'Caudal para mangas de ventilación minera',
     description:
       'Requerimiento de aire por persona y por HP diésel, corrección por altitud sobre los 1500, 3000 y 4000 msnm, pérdidas por fricción y por fugas en la manga, y cómo dimensionar diámetro y tramo para que el aire llegue al frente.',
     datePublished: '2026-08-17',
@@ -584,7 +584,7 @@ export const articles: Article[] = [
     slug: 'ventilacion-impelente-vs-aspirante-labores-mineras',
     title:
       'Impelente o aspirante: cómo elegir el sistema de ventilación auxiliar de una labor y qué manga exige cada uno',
-    metaTitle: 'Ventilación impelente vs aspirante en minería: cuál usar | Perú',
+    metaTitle: 'Ventilación impelente vs aspirante en minería',
     description:
       'Diferencias reales entre ventilación impelente, aspirante y mixta en labores ciegas: tiempo de reingreso tras voladura, control de polvo, distancia de la manga al frente y por qué la manga aspirante exige refuerzo antic colapso.',
     datePublished: '2026-08-18',
@@ -699,7 +699,7 @@ export const articles: Article[] = [
     slug: 'como-elegir-geotextil-separacion-drenaje-refuerzo',
     title:
       'Cómo elegir un geotextil: separación, filtración, drenaje o refuerzo, y por qué el gramaje solo no alcanza',
-    metaTitle: 'Cómo elegir un geotextil: función, gramaje y supervivencia | Perú',
+    metaTitle: 'Cómo elegir un geotextil: función y supervivencia',
     description:
       'Las cuatro funciones del geotextil, por qué comprar por gramaje es la forma más común de equivocarse, qué propiedades exige AASHTO M288 según la severidad de la obra y cómo evitar la colmatación del filtro.',
     datePublished: '2026-08-18',
@@ -817,7 +817,7 @@ export const articles: Article[] = [
     slug: 'mallas-antiafidas-densidad-trama-ventilacion',
     title:
       'Mallas antiáfidas: cómo elegir la densidad de trama sin asfixiar el cultivo',
-    metaTitle: 'Mallas antiáfidas: densidad de trama y ventilación | Perú',
+    metaTitle: 'Mallas antiáfidas: densidad de trama y ventilación',
     description:
       'Qué plaga excluye cada densidad de trama, por qué excluir trips puede exigir varias veces más superficie de malla para mantener la ventilación, y cómo decidir entre exclusión total y manejo integrado en valles peruanos.',
     datePublished: '2026-08-18',
@@ -913,7 +913,7 @@ export const articles: Article[] = [
     slug: 'carpas-industriales-carga-viento-norma-e020',
     title:
       'Carpas y coberturas textiles: cómo se calcula la carga de viento en el Perú según la Norma E.020',
-    metaTitle: 'Carga de viento en carpas y coberturas textiles: Norma E.020 | Perú',
+    metaTitle: 'Carga de viento en carpas textiles: Norma E.020',
     description:
       'Velocidad de diseño según altura, presión de viento, factores de forma para superficies inclinadas y cubiertas curvas, y por qué la succión —no la presión— es la que arranca las coberturas textiles.',
     datePublished: '2026-08-18',
@@ -1056,7 +1056,7 @@ export const articles: Article[] = [
     slug: 'cobertores-transporte-concentrado-mineral',
     title:
       'Cobertores para transporte de concentrado: contención, amarre y el error de comprar por metro cuadrado',
-    metaTitle: 'Cobertores para transporte de concentrado mineral | Perú',
+    metaTitle: 'Cobertores para transporte de concentrado mineral',
     description:
       'Qué exige el transporte de concentrados por carretera en el Perú, por qué el cobertor es un elemento de contención y no solo una tapa, y cómo se especifica el amarre para que resista viento a velocidad de ruta.',
     datePublished: '2026-08-18',
@@ -1160,7 +1160,7 @@ export const articles: Article[] = [
     slug: 'tanques-flexibles-almacenamiento-agua-operaciones-remotas',
     title:
       'Tanques flexibles para agua en operaciones remotas: base, volumen útil y la pregunta del agua potable',
-    metaTitle: 'Tanques flexibles de agua: base, volumen y potabilidad | Perú',
+    metaTitle: 'Tanques flexibles de agua: base y potabilidad',
     description:
       'Cómo dimensionar un tanque flexible, por qué la preparación de la base decide su vida útil, y qué preguntar sobre certificación de materiales cuando el contenido es agua para consumo humano.',
     datePublished: '2026-08-18',
@@ -1282,7 +1282,7 @@ export const articles: Article[] = [
     slug: 'mulch-madera-espesor-calculo-cobertura-suelo',
     title:
       'Mulch de madera: cómo calcular el volumen y por qué el espesor decide si funciona o no',
-    metaTitle: 'Mulch de madera: cálculo de volumen y espesor correcto | Perú',
+    metaTitle: 'Mulch de madera: cálculo de volumen y espesor',
     description:
       'Fórmula para calcular el volumen de mulch por superficie y espesor, qué rango de espesor recomiendan los servicios de extensión, y los errores de aplicación que anulan el beneficio o dañan la planta.',
     datePublished: '2026-08-18',

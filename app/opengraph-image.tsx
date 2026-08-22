@@ -47,7 +47,7 @@ export default function OpengraphImage() {
             de lona y plástico a medida.
           </div>
           <div style={{ marginTop: 26, color: 'rgba(255,255,255,0.7)', fontSize: 28, display: 'flex' }}>
-            Big Bags · Geosintéticos · Estructuras · Mallas · Ventilación · +15 años en el Perú
+            Big Bags · Geosintéticos · Estructuras · Mallas · Ventilación · Desde 2009 en el Perú
           </div>
         </div>
 

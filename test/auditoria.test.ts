@@ -26,6 +26,11 @@ import { join } from 'node:path';
  * donde debería estar el portafolio entero.
  */
 
+import { tituloAjustado, descripcionAjustada, tituloCabe } from '@/lib/meta';
+import { articles } from '@/lib/articles';
+import { solutions } from '@/lib/solutions';
+import { novedades } from '@/lib/novedades';
+
 const raiz = process.cwd();
 const leer = (r: string) => readFileSync(join(raiz, r), 'utf8');
 
@@ -130,7 +135,7 @@ describe('el auditor del HTML es un mecanismo, no un script suelto', () => {
   it('distingue error de aviso y solo falla por errores', () => {
     const src = leer('scripts/auditar-html.mjs');
     expect(src).toMatch(/process\.exit\(errores\.length \? 1 : 0\)/);
-    for (const tipo of ['enlace-roto', 'sin-h1', 'sin-canonico', 'titulo-duplicado', 'jsonld-id-colgante']) {
+    for (const tipo of ['enlace-roto', 'sin-h1', 'sin-canonico', 'titulo-duplicado', 'jsonld-id-colgante', 'marca-duplicada']) {
       expect(src, `${tipo} debería ser error`).toMatch(new RegExp(`'error', '${tipo}'`));
     }
   });
@@ -149,5 +154,57 @@ describe('el auditor del HTML es un mecanismo, no un script suelto', () => {
     const src = leer('app/calculadoras/[slug]/page.tsx');
     expect(src).toMatch(/title: calc\.tituloSeo/);
     expect(src).not.toMatch(/title: calc\.pregunta/);
+  });
+});
+
+describe('el ajuste de metadatos: el complemento entra solo si cabe', () => {
+  it('un título corto se lleva su explicación; uno largo se queda con el nombre', () => {
+    // Truncar produce «Tipos electrostáticos de FIBC (A, B, C y…», que se lee
+    // como un error del sitio. Aquí no hay nunca una frase partida.
+    expect(tituloAjustado('HDPE', 'qué es y cómo se especifica')).toBe('HDPE: qué es y cómo se especifica');
+    expect(tituloAjustado('Tipos electrostáticos de FIBC (A, B, C y D)', 'qué es y cómo se especifica')).toBe(
+      'Tipos electrostáticos de FIBC (A, B, C y D)',
+    );
+    expect(tituloAjustado('Geotextil')).toBe('Geotextil');
+  });
+
+  it('el resultado cabe en el resultado de búsqueda siempre que la base quepa', () => {
+    for (const base of ['HDPE', 'Geomembrana', 'Zanja de anclaje', 'Permitividad']) {
+      const t = tituloAjustado(base, 'qué es y cómo se especifica');
+      expect(tituloCabe(t), `«${t}» no cabe`).toBe(true);
+    }
+  });
+
+  it('la descripción se arma con frases completas y para', () => {
+    const d = descripcionAjustada([
+      'Primera frase que siempre sobrevive.',
+      'Segunda frase que cabe.',
+      'Una tercera frase larguísima que ya no cabe de ninguna manera dentro del presupuesto disponible para la descripción.',
+    ]);
+    expect(d).toBe('Primera frase que siempre sobrevive. Segunda frase que cabe.');
+    expect(d.endsWith('.')).toBe(true);
+  });
+
+  it('si ni la primera frase cabe, recorta por palabra y nunca parte una', () => {
+    const d = descripcionAjustada(['Una frase muy larga que no cabe de ninguna manera'], 30);
+    expect(d.length).toBeLessThanOrEqual(30);
+    expect(d.endsWith('…')).toBe(true);
+    expect(d).not.toMatch(/\s…$/);
+  });
+
+  it('ninguna ciudad vuelve a meter la marca en su propio título', () => {
+    // La plantilla ya la añade: ponerla aquí producía la marca dos veces.
+    const src = readFileSync(join(raiz, 'app/local/[ciudad]/page.tsx'), 'utf8');
+    const meta = src.slice(src.indexOf('export async function generateMetadata'));
+    const cuerpo = meta.slice(0, meta.indexOf('\n}'));
+    expect(cuerpo.replace(/\/\/.*$/gm, '')).not.toMatch(/title = `[^`]*\$\{SITE\.name\}/);
+  });
+
+  it('los títulos autorales caben en el presupuesto', () => {
+    // Llevaban un « | Perú» que, con la marca de la plantilla, daba dos
+    // separadores seguidos y se comía siete caracteres del espacio útil.
+    for (const a of articles) expect(tituloCabe(a.metaTitle), `recurso: ${a.metaTitle}`).toBe(true);
+    for (const s of solutions) expect(tituloCabe(s.metaTitle), `solución: ${s.metaTitle}`).toBe(true);
+    for (const n of novedades) expect(tituloCabe(n.titulo), `novedad: ${n.titulo}`).toBe(true);
   });
 });

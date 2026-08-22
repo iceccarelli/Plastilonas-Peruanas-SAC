@@ -11,6 +11,7 @@ import { LEGAL_UPDATED } from "@/lib/legal";
 import { terminos } from "@/lib/glosario";
 import { informes, INFORMES_UPDATED } from "@/lib/informes";
 import { calculadoras, CALCULADORAS_ACTUALIZADO } from "@/lib/calculadoras";
+import { INDUSTRIAS } from "@/lib/industrias";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -22,7 +23,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE.url}/nosotros`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE.url}/contacto`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
     { url: `${SITE.url}/cotizacion`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${SITE.url}/aplicaciones`, lastModified: now, changeFrequency: "monthly", priority: 0.85 },
+    { url: `${SITE.url}/biblioteca`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${SITE.url}/proyectos`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE.url}/compras`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
+    { url: `${SITE.url}/calidad`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
+    { url: `${SITE.url}/socios`, lastModified: now, changeFrequency: "monthly", priority: 0.55 },
+    { url: `${SITE.url}/configurador`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE.url}/compradores`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${SITE.url}/exportacion`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
+    { url: `${SITE.url}/distribuidores`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE.url}/confianza`, lastModified: now, changeFrequency: "yearly", priority: 0.7 },
+    { url: `${SITE.url}/en`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE.url}/pt`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE.url}/local`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE.url}/industria`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE.url}/recursos`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     // Indicadores: la única página del sitio que cambia sola. changeFrequency
     // diaria porque es cierto, no porque suene bien.
@@ -40,6 +55,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${SITE.url}/productos/${p.slug}`,
     lastModified: now, changeFrequency: "monthly", priority: 0.8,
+  }));
+
+  const applicationHubs = ['ventilacion-subterranea','toldos-camion','proteccion-cultivo','impermeabilizacion-pozas','coberturas-obra','campamentos-mineros','granel-embalaje','contencion-fluidos'];
+  const applicationRoutes: MetadataRoute.Sitemap = applicationHubs.map((slug) => ({
+    url: `${SITE.url}/aplicaciones/${slug}`,
+    lastModified: now, changeFrequency: "monthly" as const, priority: 0.8,
+  }));
+
+  const guideHubs = ['seleccion-mangas-ventilacion','gramaje-lona-industrial','especificacion-fibc','seleccion-geomembrana','seleccion-malla-agricola'];
+  const guideRoutes: MetadataRoute.Sitemap = guideHubs.map((slug) => ({
+    url: `${SITE.url}/biblioteca/${slug}`,
+    lastModified: now, changeFrequency: "monthly" as const, priority: 0.75,
   }));
 
   const localRoutes: MetadataRoute.Sitemap = (ciudades as { slug: string }[]).map((c) => ({
@@ -125,6 +152,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
-  return [...staticRoutes, ...marcoRoutes, ...calculadoraRoutes, ...informeRoutes, ...glosarioRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
-    ...localRoutes, ...articleRoutes];
+  // Un hub por sector comprador. `priority` se deja igual que el resto del
+  // contenido editorial: Google confirmó hace años que ignora este campo, así
+  // que subirlo a 0.9 sería decorar el XML, no priorizar nada.
+  const industriaRoutes: MetadataRoute.Sitemap = INDUSTRIAS.map((i) => ({
+    url: `${SITE.url}/industria/${i.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...industriaRoutes, ...marcoRoutes, ...calculadoraRoutes, ...informeRoutes, ...glosarioRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
+    ...applicationRoutes, ...guideRoutes, ...localRoutes, ...articleRoutes];
 }

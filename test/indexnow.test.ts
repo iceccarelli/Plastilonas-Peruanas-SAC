@@ -1,11 +1,22 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { isValidIndexNowKey, INDEXNOW_KEY_PATTERN } from '@/lib/indexnow';
+import { isValidIndexNowKey, INDEXNOW_KEY_PATTERN, INDEXNOW_KEY, INDEXNOW_KEY_PATH } from '@/lib/indexnow';
 import { siteUrl } from '@/lib/stripe';
 import { SITE } from '@/lib/site';
 
 const ROOT = process.cwd();
+
+/**
+ * El archivo sin comentarios.
+ *
+ * Es la cuarta vez en este repositorio que un test falla contra su propia
+ * prosa: el comentario que EXPLICA por qué ya no se usa `process.env` contiene
+ * la cadena `process.env`. Se afirma sobre el código, no sobre lo que el
+ * código dice de sí mismo.
+ */
+const sinComentarios = (src: string) =>
+  src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 describe('IndexNow: prueba de propiedad', () => {
   it('acepta claves dentro del rango de la especificación (8–128)', () => {
@@ -25,6 +36,66 @@ describe('IndexNow: prueba de propiedad', () => {
 
   it('el patrón está anclado: no valida una subcadena dentro de basura', () => {
     expect(INDEXNOW_KEY_PATTERN.test('!!!validkey123!!!')).toBe(false);
+  });
+});
+
+describe('IndexNow: el canal no depende de que nadie configure una consola', () => {
+  /**
+   * El fallo que esto impide ya ocurrió y duró semanas: la clave salía de
+   * `process.env.INDEXNOW_KEY`, nadie la configuró, /indexnow-key.txt
+   * respondía 404 y el flujo de GitHub estaba condicionado a una variable que
+   * tampoco existía. El sitio publicaba 163 URLs sin avisar a un solo
+   * buscador, y todas las verificaciones daban verde porque todas miraban otra
+   * cosa.
+   */
+  const ruta = readFileSync(join(ROOT, 'app/indexnow-key.txt/route.ts'), 'utf8');
+  const flujo = readFileSync(join(ROOT, '.github/workflows/seo-maintenance.yml'), 'utf8');
+  const envio = readFileSync(join(ROOT, 'scripts/submit-indexnow.mjs'), 'utf8');
+
+  it('la clave está en el repositorio y es válida', () => {
+    expect(isValidIndexNowKey(INDEXNOW_KEY)).toBe(true);
+    expect(INDEXNOW_KEY.length).toBeGreaterThanOrEqual(16);
+  });
+
+  it('la ruta sirve la clave siempre, no un 404 condicional', () => {
+    expect(ruta).toMatch(/from '@\/lib\/indexnow'/);
+    expect(ruta).toMatch(/new Response\(INDEXNOW_KEY/);
+    expect(sinComentarios(ruta), 'volvió a depender del entorno').not.toMatch(/process\.env/);
+  });
+
+  it('no hay una segunda fuente de la clave que pueda divergir', () => {
+    // Con dos orígenes, configurarla en Vercel y no en Actions produce un 403
+    // silencioso: el archivo publica una clave y el envío usa otra.
+    const fuentes = [
+      ['lib', readFileSync(join(ROOT, 'lib/indexnow.ts'), 'utf8')],
+      ['envío', envio],
+      ['flujo', flujo],
+    ] as const;
+    for (const [nombre, src] of fuentes) {
+      expect(
+        sinComentarios(src),
+        `${nombre} vuelve a leer INDEXNOW_KEY del entorno`,
+      ).not.toMatch(/process\.env\.INDEXNOW_KEY|secrets\.INDEXNOW_KEY/);
+    }
+  });
+
+  it('el flujo de mantenimiento no está condicionado a una variable', () => {
+    // Los comentarios de YAML empiezan por #, no por //.
+    const flujoSinNotas = flujo.replace(/^\s*#.*$/gm, '');
+    expect(flujoSinNotas, 'volvió la condición que lo mantuvo apagado').not.toMatch(/if:\s*\$\{\{\s*vars\./);
+    expect(flujo).toMatch(/submit-indexnow\.mjs/);
+    expect(flujo).toMatch(/push:/);
+  });
+
+  it('el envío lee la clave y el dominio del propio repositorio', () => {
+    expect(envio).toMatch(/lib\/indexnow/);
+    expect(envio).toMatch(/lib\/site/);
+    expect(sinComentarios(envio), 'volvió a depender de SITE_URL del entorno').not.toMatch(/process\.env\.SITE_URL/);
+  });
+
+  it('la ruta pública declarada coincide con la que usa el envío', () => {
+    expect(INDEXNOW_KEY_PATH).toBe('/indexnow-key.txt');
+    expect(envio).toContain(INDEXNOW_KEY_PATH);
   });
 });
 
