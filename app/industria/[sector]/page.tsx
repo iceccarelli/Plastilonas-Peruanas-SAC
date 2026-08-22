@@ -120,15 +120,20 @@ export default async function IndustriaPage({ params }: Props) {
         ]}
       />
 
-      <nav className="mb-6 text-sm text-neutral-500">
-        <Link href="/" className="hover:text-[#059669]">
+      {/* Las migas son enlaces reales y hay que poder acertarles: sin el
+          relleno vertical su caja mide 17px de alto, por debajo del mínimo de
+          24×24 de WCAG 2.5.8. En un móvil son dos objetivos pequeños y muy
+          juntos, que es el peor caso posible. */}
+      <nav className="mb-6 flex flex-wrap items-center gap-x-1 text-sm text-neutral-500">
+        <Link href="/" className="inline-flex min-h-[24px] items-center py-1 hover:text-[#059669]">
           Inicio
-        </Link>{' '}
-        /{' '}
-        <Link href="/industria" className="hover:text-[#059669]">
+        </Link>
+        <span aria-hidden="true">/</span>
+        <Link href="/industria" className="inline-flex min-h-[24px] items-center py-1 hover:text-[#059669]">
           Industrias
-        </Link>{' '}
-        / <span>{ind.nombre}</span>
+        </Link>
+        <span aria-hidden="true">/</span>
+        <span className="inline-flex min-h-[24px] items-center py-1">{ind.nombre}</span>
       </nav>
 
       <p className="mb-2 font-mono text-xs uppercase tracking-wider text-[#059669]">

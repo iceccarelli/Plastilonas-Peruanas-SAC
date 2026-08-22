@@ -78,7 +78,7 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
         <div className="pt-5 mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-t border-gray-100">
           <Link 
             href={`/productos/${product.slug}`} 
-            className="inline-flex items-center text-sm font-medium text-[#047857] hover:underline whitespace-nowrap"
+            className="inline-flex min-h-[24px] items-center py-1 text-sm font-medium text-[#047857] hover:underline whitespace-nowrap"
           >
             Ver especificaciones <ArrowRight className="ml-1.5 w-4 h-4" />
           </Link>

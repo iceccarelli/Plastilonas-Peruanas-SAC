@@ -86,7 +86,7 @@ function CotizacionContent() {
 export default function CotizacionPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-16 text-center">
-      <Link href="/" className="inline-flex items-center text-sm text-gray-500 hover:text-[#059669] mb-8">
+      <Link href="/" className="inline-flex min-h-[24px] items-center py-1 text-sm text-gray-500 hover:text-[#059669] mb-8">
         <ArrowLeft className="w-4 h-4 mr-1.5" /> Volver al inicio
       </Link>
 

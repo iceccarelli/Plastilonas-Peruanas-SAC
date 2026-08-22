@@ -38,9 +38,43 @@ const DISPOSITIVOS = [
   { nombre: 'QHD ultraancho',            ancho: 2560, alto: 1440, dpr: 1,   movil: false },
 ];
 
+/**
+ * DOS BARRIDOS, PORQUE LAS DOS PREGUNTAS NO CUESTAN LO MISMO.
+ *
+ * Si el layout se recorta depende del ancho, así que hay que preguntarlo en
+ * los 17 dispositivos. Si una imagen carga NO depende del ancho: un 404 es un
+ * 404 en 280px y en 2560px. Cruzar ambas cosas daba 17 × 11 = 187 cargas con
+ * el optimizador de imágenes de Next por medio, y la ejecución no terminaba.
+ *
+ * Así que el layout se mide sobre una ruta por familia de plantilla, y las
+ * imágenes sobre TODAS las rutas pero solo en dos anchos —uno de móvil y uno
+ * de escritorio—, que es donde `sizes` puede resolver a un archivo distinto.
+ */
 const RUTAS = process.env.RUTAS_AUDITORIA
   ? process.env.RUTAS_AUDITORIA.split(',')
-  : ['/', '/productos', '/industria/mineria', '/cotizacion', '/glosario', '/contacto'];
+  : ['/', '/productos', '/industria/mineria', '/cotizacion'];
+
+const RUTAS_IMAGENES = process.env.RUTAS_IMAGENES
+  ? process.env.RUTAS_IMAGENES.split(',')
+  : [
+      '/',
+      '/productos',
+      '/productos/familia/estructuras-arquitectura-textil',
+      '/productos/familia/geosinteticos',
+      '/productos/big-bags-bolsones-polipropileno',
+      '/soluciones/poza-revestida-impermeabilizacion',
+      '/recursos/instalacion-geomembranas-hdpe-pozas-canales',
+      '/industria/mineria',
+      '/glosario/geotextil',
+      '/nosotros',
+      '/servicios',
+    ];
+
+/** Anchos donde `sizes` puede resolver a un archivo distinto. */
+const ANCHOS_IMAGEN = [
+  { nombre: 'movil 393px',      ancho: 393,  alto: 852, dpr: 3, movil: true },
+  { nombre: 'escritorio 1440px', ancho: 1440, alto: 900, dpr: 2, movil: false },
+];
 
 /** WCAG 2.5.8 pide 24×24 CSS px; las guías de iOS y Android piden ~44. */
 const TACTIL_MINIMO = 24;
@@ -101,6 +135,19 @@ function medirEnPagina(tactilMinimo) {
     return true;
   };
 
+  /**
+   * ¿El enlace vive dentro de una frase? Se mide el texto del contenedor que
+   * no pertenece a ningún enlace: si queda prosa suficiente, el objetivo está
+   * embebido en un texto y su tamaño lo impone la altura de línea.
+   */
+  const enUnaFrase = (el) => {
+    const padre = el.parentElement;
+    if (!padre) return false;
+    let ajeno = (padre.textContent || '');
+    for (const a of padre.querySelectorAll('a')) ajeno = ajeno.replace(a.textContent || '', '');
+    return ajeno.replace(/\s+/g, ' ').trim().length >= 25;
+  };
+
   /** Dónde vive el elemento, para no confundir el pie con la cabecera. */
   const zona = (el) => {
     if (el.closest('header, [class*="fixed top-0"]') || el.closest('nav')) return 'cabecera';
@@ -156,15 +203,42 @@ function medirEnPagina(tactilMinimo) {
     }
   }
 
-  // 3) Áreas táctiles. Solo lo visible e interactivo.
+  // 3) IMÁGENES QUE NO CARGAN.
+  //
+  // `complete && naturalWidth === 0` es la única señal fiable: significa que
+  // el navegador terminó de intentarlo y no obtuvo píxeles. Un 404, un
+  // archivo corrupto o un optimizador que devuelve null caen todos aquí.
+  // Ninguna prueba de unidad ve esto —no miran el disco de public/— y el
+  // build tampoco resuelve rutas de imagen, así que sin esta comprobación un
+  // hueco solo se descubre mirando la página.
+  // (Las imágenes rotas se miden en el segundo barrido: no dependen del ancho.)
+
+  // 4) Áreas táctiles. Solo lo visible e interactivo.
   const vistos = new Set();
   for (const el of document.querySelectorAll('a[href], button, [role="button"], input, select')) {
     const r = el.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) continue;
     if (r.top > innerHeight || r.bottom < 0) continue;
     if (!visible(el)) continue;
-    // Un enlace dentro de un párrafo no es un área táctil de control.
-    if (el.tagName === 'A' && el.closest('p, li')) continue;
+    // EXCEPCIÓN «EN LÍNEA» DE WCAG 2.5.8, aplicada como está escrita.
+    //
+    // El criterio exime al objetivo que «está en una frase, o cuyo tamaño lo
+    // impone la altura de línea del texto que no es objetivo». Un enlace
+    // dentro de una oración no puede agrandarse sin romper el párrafo, y
+    // convertirlo en botón sería peor diseño, no mejor accesibilidad.
+    //
+    // Esto se comprobaba antes con `el.closest('p, li')`, que es la etiqueta
+    // equivocada: acusaba el teléfono de /cotizacion —«…por WhatsApp al
+    // +51 946 085 270 para una atención inmediata.»— por vivir en un <div> en
+    // lugar de un <p>, y habría exculpado cualquier enlace suelto metido
+    // dentro de un párrafo vacío de texto.
+    //
+    // El criterio real no es la etiqueta sino si hay UNA FRASE alrededor. Se
+    // mide el texto del contenedor que NO pertenece a ningún enlace: 25
+    // caracteres distinguen una oración («para una atención inmediata») de
+    // los separadores de una miga de pan (« / »), que no son una frase y sí
+    // deben cumplir el mínimo.
+    if (el.tagName === 'A' && enUnaFrase(el)) continue;
     const w = Math.round(r.width), h = Math.round(r.height);
     if (w < tactilMinimo || h < tactilMinimo) {
       const clave = `${el.tagName}:${(el.textContent || '').trim().slice(0, 24)}:${w}x${h}`;
@@ -198,7 +272,7 @@ if (!(await esperarServidor())) {
 // hay uno instalado (PLAYWRIGHT_CHROMIUM), se respeta el que exista.
 const ejecutable = process.env.PLAYWRIGHT_CHROMIUM || undefined;
 const navegador = await chromium.launch(ejecutable ? { executablePath: ejecutable } : {});
-let totalDesbordes = 0, totalRecortes = 0, totalTactiles = 0;
+let totalDesbordes = 0, totalRecortes = 0, totalTactiles = 0, totalRotas = 0;
 const informe = [];
 
 for (const d of DISPOSITIVOS) {
@@ -222,9 +296,16 @@ for (const d of DISPOSITIVOS) {
   const porDispositivo = [];
 
   for (const ruta of RUTAS) {
-    // `load`, no `domcontentloaded`: el hero lleva fotografías y un carrusel;
-    // medir antes de que tengan tamaño da lecturas fantasma.
-    await pagina.goto(BASE + ruta, { waitUntil: 'load', timeout: 60000 });
+    // `domcontentloaded`, no `load`.
+    //
+    // `load` espera a TODOS los subrecursos y no llegaba nunca en las portadas
+    // de familia: el optimizador de Next redimensiona once fotos en la primera
+    // visita. Para medir geometría no hace falta — basta con que el ancho de
+    // scroll deje de moverse, que es lo que comprueba la espera de abajo—, y
+    // esperar a que cada <img> estuviera `complete` colgaba 45s por ruta y por
+    // dispositivo, porque una imagen con carga diferida que nunca entra en
+    // pantalla no se declara completa jamás.
+    await pagina.goto(BASE + ruta, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await pagina.evaluate(() => {
       delete window.__lecturas;
       return document.fonts ? document.fonts.ready.catch(() => {}) : null;
@@ -260,12 +341,81 @@ for (const d of DISPOSITIVOS) {
   const desbordes = porDispositivo.filter((h) => h.tipo === 'desborde-horizontal');
   const recortes = porDispositivo.filter((h) => h.tipo === 'recortado-en-cabecera');
   const tactiles = porDispositivo.filter((h) => h.tipo === 'area-tactil-pequena');
+
   totalDesbordes += desbordes.length;
   totalRecortes += recortes.length;
   totalTactiles += tactiles.length;
 
+
   informe.push({ d, desbordes, recortes, tactiles });
 }
+
+/* ------------------------------------------------------------------ */
+/* Segundo barrido: ¿alguna imagen no llega a pintar un solo píxel?    */
+/* ------------------------------------------------------------------ */
+const rotas = [];
+for (const a of ANCHOS_IMAGEN) {
+  const ctx = await navegador.newContext({
+    viewport: { width: a.ancho, height: a.alto },
+    deviceScaleFactor: a.dpr,
+    isMobile: a.movil,
+    hasTouch: a.movil,
+  });
+  const pagina = await ctx.newPage();
+  await pagina.route('**/*', (r) => {
+    const u = new URL(r.request().url());
+    return u.hostname === '127.0.0.1' || u.hostname === 'localhost' ? r.continue() : r.abort();
+  });
+
+  for (const ruta of RUTAS_IMAGENES) {
+    await pagina.goto(BASE + ruta, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+    // Recorrer la página entera ANTES de medir.
+    //
+    // Una <img loading="lazy"> que nunca entra en pantalla se queda con
+    // complete=false para siempre: el navegador ni siquiera la pide. Preguntar
+    // «¿están todas completas?» sin bajar antes no se responde nunca. Bajando
+    // hasta el pie se disparan todas y la pregunta pasa a tener respuesta.
+    await pagina.evaluate(async () => {
+      const paso = Math.round(innerHeight * 0.8);
+      for (let y = 0; y < document.body.scrollHeight; y += paso) {
+        scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 120));
+      }
+      scrollTo(0, 0);
+      await new Promise((r) => setTimeout(r, 300));
+    });
+    await pagina
+      .waitForFunction(() => Array.from(document.images).every((i) => i.complete), null, {
+        timeout: 20000,
+        polling: 250,
+      })
+      .catch(() => {});
+
+    const halladas = await pagina.evaluate(() => {
+      const fuera = [];
+      for (const img of document.images) {
+        // `complete && naturalWidth === 0` es la única señal fiable de rotura:
+        // el navegador terminó de intentarlo y no obtuvo píxeles. Un 404, un
+        // archivo corrupto y un optimizador que devuelve null caen todos aquí.
+        // Una imagen aún cargando tiene complete=false y no cuenta.
+        // Una imagen que sigue cargando tiene complete=false y no se juzga:
+        // solo se acusa a la que terminó y no trajo un solo píxel.
+        if (img.complete && img.naturalWidth === 0) {
+          fuera.push({ estado: 'rota', src: img.currentSrc || img.src, alt: img.alt });
+        }
+      }
+      return fuera.map((x) => ({
+        ...x,
+        src: String(x.src || '').replace(location.origin, '').slice(0, 130),
+        alt: String(x.alt || '').slice(0, 60),
+      }));
+    });
+    for (const h of halladas) rotas.push({ ancho: a.nombre, ruta, ...h });
+  }
+  await ctx.close();
+}
+totalRotas = rotas.filter((r) => r.estado === 'rota').length;
 
 await navegador.close();
 pararServidor(servidor);
@@ -274,8 +424,9 @@ const V = '\x1b[32m', R = '\x1b[31m', A = '\x1b[33m', G = '\x1b[90m', F = '\x1b[
 console.log(`\nViewport — ${DISPOSITIVOS.length} dispositivos × ${RUTAS.length} rutas\n`);
 
 for (const { d, desbordes, recortes, tactiles } of informe) {
-  // El aviso táctil no rompe el despliegue; el recorte y el desborde sí.
-  // Marcarlos igual haría que 73 avisos parecieran 73 fallos.
+  // El aviso táctil no rompe el despliegue; el recorte, el desborde y una
+  // imagen que no carga sí. Marcarlos igual haría que 73 avisos parecieran
+  // 73 fallos.
   const falla = desbordes.length > 0 || recortes.length > 0;
   const marca = falla ? `${R}✗${F}` : tactiles.length ? `${A}!${F}` : `${V}✓${F}`;
   console.log(`  ${marca} ${String(d.ancho).padStart(4)}px  ${d.nombre}`);
@@ -294,10 +445,21 @@ for (const { d, desbordes, recortes, tactiles } of informe) {
   if (tactiles.length > 3) console.log(`${G}      … y ${tactiles.length - 3} áreas más${F}`);
 }
 
-const errores = totalDesbordes + totalRecortes;
+console.log(`\nImágenes — ${RUTAS_IMAGENES.length} rutas × ${ANCHOS_IMAGEN.length} anchos\n`);
+if (totalRotas === 0) {
+  console.log(`  ${V}✓${F} todas las imágenes pintan píxeles en las ${RUTAS_IMAGENES.length} rutas`);
+} else {
+  for (const r of rotas.filter((x) => x.estado === 'rota').slice(0, 20)) {
+    console.log(`  ${R}✗${F} ${r.ruta} [${r.ancho}]`);
+    console.log(`${G}      ${r.src}  «${r.alt}»${F}`);
+  }
+  if (totalRotas > 20) console.log(`${G}      … y ${totalRotas - 20} más${F}`);
+}
+
+const errores = totalDesbordes + totalRecortes + totalRotas;
 console.log(
   `\nResultado: ${errores ? R : V}${errores} errores${F} ` +
-  `(${totalDesbordes} desbordes, ${totalRecortes} recortes), ` +
+  `(${totalDesbordes} desbordes, ${totalRecortes} recortes, ${totalRotas} imágenes rotas), ` +
   `${totalTactiles ? A : V}${totalTactiles} avisos táctiles${F}\n`,
 );
 process.exit(errores > 0 ? 1 : 0);

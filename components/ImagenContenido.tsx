@@ -13,10 +13,19 @@ import { tomasDe, claseCiclo } from '@/lib/galeria';
  * página. Y una imagen de relleno genérica es peor todavía: ocupa el sitio de
  * la buena y nadie vuelve a acordarse de encargarla.
  *
- * La solución: se comprueba en tiempo de compilación si el archivo existe. Si
- * está, se muestra. Si no, se muestra un marcador sobrio que declara qué
- * imagen falta — visible para quien administra el sitio, discreto para el
- * visitante, e imposible de confundir con contenido terminado.
+ * La solución, en tres escalones:
+ *
+ *   1. Si el archivo encargado existe, se muestra. Siempre gana.
+ *   2. Si no, y la ranura declara un RESPALDO —la fotografía real de un
+ *      producto de esa misma familia, solución o guía, ya publicada en este
+ *      repositorio—, se muestra esa. No es relleno genérico ni una
+ *      ilustración inventada: es material propio y correspondiente al tema.
+ *      El `alt` pasa a describir lo que de verdad se ve, porque un alt que
+ *      describe una imagen ausente es peor que no tener alt.
+ *   3. Si tampoco hay respaldo, el marcador sobrio: declara qué falta,
+ *      visible para quien administra e imposible de confundir con contenido
+ *      terminado. Un hueco declarado sigue siendo mejor que una imagen que no
+ *      corresponde.
  *
  * ROTACIÓN. Si además existen `{nombre}-2`, `-3` o `-4`, se apilan y se
  * alternan con el mismo cruce de la galería de producto. Un término del
@@ -55,8 +64,17 @@ export default function ImagenContenido({
   sizes?: string;
 }) {
   const hay = archivoExiste(ranura.ruta);
+  const respaldo =
+    !hay && ranura.respaldo && archivoExiste(ranura.respaldo.ruta) ? ranura.respaldo : null;
 
-  if (!hay) {
+  // Lo que se va a pintar de verdad. A partir de aquí el componente no vuelve
+  // a mirar `ranura.ruta`: si mezclara la ruta pedida con el alt del respaldo
+  // —o al revés— el resultado sería una imagen mal descrita, que es
+  // exactamente el fallo de accesibilidad que esto pretende evitar.
+  const fuente = hay ? ranura.ruta : respaldo?.ruta ?? null;
+  const textoAlt = hay ? ranura.alt : respaldo?.alt ?? ranura.alt;
+
+  if (!fuente) {
     return (
       <div
         className={`flex items-center justify-center rounded-3xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center ${className}`}
@@ -72,7 +90,7 @@ export default function ImagenContenido({
     );
   }
 
-  const tomas = tomasDe(ranura.ruta);
+  const tomas = tomasDe(fuente);
   const capas = tomas.slice(1);
   const ciclo = claseCiclo(tomas.length);
 
@@ -83,8 +101,8 @@ export default function ImagenContenido({
         style={{ aspectRatio: `${ranura.ancho} / ${ranura.alto}` }}
       >
         <Image
-          src={ranura.ruta}
-          alt={ranura.alt}
+          src={fuente}
+          alt={textoAlt}
           fill
           sizes={sizes}
           priority={prioridad}
@@ -103,15 +121,25 @@ export default function ImagenContenido({
           </div>
         ))}
       </div>
-      {/* Una ilustración no es una fotografía del producto real, y decirlo es
-          más barato que un pedido devuelto. */}
-      {ranura.tipo !== 'foto' && (
+      {/* El pie describe lo que se está viendo AHORA, no lo que la ranura
+          pedía. Si se está mostrando el respaldo, lo que hay en pantalla es
+          una fotografía real de nuestro catálogo: llamarla «imagen
+          referencial» o «esquema» sería mentir en la dirección contraria, y
+          restar credibilidad a una foto que sí es nuestra. */}
+      {respaldo ? (
         <figcaption className="mt-2 text-xs text-gray-500">
-          {ranura.tipo === 'diagrama'
-            ? 'Esquema explicativo. No representa una obra ejecutada.'
-            : 'Imagen referencial. Las especificaciones se confirman en la cotización.'}
+          Fotografía de nuestro catálogo: {respaldo.nombre}.
           {capas.length > 0 && ` ${tomas.length} vistas alternadas.`}
         </figcaption>
+      ) : (
+        ranura.tipo !== 'foto' && (
+          <figcaption className="mt-2 text-xs text-gray-500">
+            {ranura.tipo === 'diagrama'
+              ? 'Esquema explicativo. No representa una obra ejecutada.'
+              : 'Imagen referencial. Las especificaciones se confirman en la cotización.'}
+            {capas.length > 0 && ` ${tomas.length} vistas alternadas.`}
+          </figcaption>
+        )
       )}
     </figure>
   );

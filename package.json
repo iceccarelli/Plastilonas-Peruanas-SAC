@@ -12,6 +12,7 @@
     "test:smoke": "bash scripts/smoke.sh",
     "audit:ui": "node scripts/audit-ui.mjs",
     "auditar:viewport": "node scripts/auditar-viewport.mjs",
+    "auditar:imagenes": "node scripts/auditar-imagenes.mjs",
     "verify:deploy": "bash scripts/verificar-despliegue.sh",
     "vigilancia": "node scripts/vigilancia-fuentes.mjs",
     "imagenes": "node scripts/imagenes.mjs",
