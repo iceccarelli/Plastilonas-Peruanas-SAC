@@ -70,7 +70,7 @@ export const metadata: Metadata = {
     // agente la leen. El <title> es un espacio de clic, no un registro legal.
     template: '%s | Plastilonas',
   },
-  description: 'Fabricante peruano de textiles industriales a medida desde 2009: big bags, lonas y cobertores, geosintéticos, estructuras, mallas agrícolas y ventilación minera. Un solo proveedor, fabricación propia e instalación en el Perú.',
+  description: SITE.description,
   keywords: [
     'plastilonas peruanas',
     'big bags lima',

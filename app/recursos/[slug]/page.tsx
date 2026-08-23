@@ -19,6 +19,7 @@ import {
   howToSchema,
   webPageSchema,
 } from '@/lib/schema';
+import { descripcionDeTexto } from '@/lib/meta';
 
 /**
  * Plantilla de artículo técnico.
@@ -42,14 +43,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const a = articleBySlug(slug);
   if (!a) return {};
   const url = `${SITE.url}/recursos/${a.slug}`;
+  // La etiqueta de búsqueda se ajusta al espacio que Google deja de verdad;
+  // el texto largo sigue entero en la página y en el JSON-LD, donde no estorba.
+  const descripcionBusqueda = descripcionDeTexto(a.description);
+
   return {
     title: a.metaTitle,
-    description: a.description,
+    description: descripcionBusqueda,
     keywords: [a.category, ...a.sectors, 'Perú', 'guía técnica'],
     alternates: { canonical: `/recursos/${a.slug}` },
     openGraph: {
       title: a.metaTitle,
-      description: a.description,
+      description: descripcionBusqueda,
       url,
       locale: SITE.locale,
       type: 'article',
@@ -59,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: 'summary_large_image',
       title: a.metaTitle,
-      description: a.description,
+      description: descripcionBusqueda,
     },
   };
 }

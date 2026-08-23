@@ -27,7 +27,7 @@ import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 
 const URL = `${SITE.url}/novedades`;
 const TITLE = 'Novedades: qué cambió y cuándo';
-const DESCRIPTION = `Registro fechado de los cambios publicados por ${SITE.name}: líneas de catálogo, guías técnicas, herramientas y criterios del rubro. Cada entrada enlaza a lo que cambió. Con feed RSS y JSON.`;
+const DESCRIPTION = `Registro fechado de lo que cambia en el catálogo, las guías y las herramientas. Cada entrada enlaza a lo que cambió. Con feed RSS y JSON.`;
 
 export const metadata: Metadata = {
   title: TITLE,

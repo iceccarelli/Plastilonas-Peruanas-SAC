@@ -9,6 +9,7 @@ import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
+import { descripcionDeTexto } from '@/lib/meta';
 
 /**
  * Tabla comparativa por familia (/productos/familia/[slug]/comparar).
@@ -41,7 +42,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { family } = resolved;
   const items = products.filter((p) => p.category === family.name);
   const title = `Comparativa: ${items.length} alternativas de ${family.name.toLowerCase()}`;
-  const description = `Tabla comparativa de ${items.map((p) => p.name).slice(0, 3).join(', ')} y más: especificaciones lado a lado, origen de suministro y disponibilidad, para elegir con criterio técnico.`;
+  // Nombrar tres productos gastaba 120 de los 155 caracteres y dejaba fuera lo
+  // único que distingue esta página: que las especificaciones están enfrentadas.
+  const description = descripcionDeTexto(
+    `${items.length} ${family.name.toLowerCase()} enfrentadas: especificación, origen y disponibilidad, lado a lado. Para elegir con criterio y no por catálogo.`,
+  );
   return {
     title,
     description,

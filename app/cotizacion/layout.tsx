@@ -11,7 +11,7 @@ import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
 
 const URL = `${SITE.url}/cotizacion`;
 const TITLE = 'Solicitar cotización técnica';
-const DESCRIPTION = `Cotice big bags, lonas, geomembranas, carpas, mangas de ventilación o mallas con ${SITE.name}. Indique producto, medidas, cantidad y ciudad de entrega: respondemos por WhatsApp (${SITE.phoneWhatsApp}) con especificación y plazo.`;
+const DESCRIPTION = `Indique producto, medidas, cantidad y ciudad de entrega. Respondemos por WhatsApp (${SITE.phoneWhatsApp}) con especificación y plazo.`;
 
 export const metadata: Metadata = {
   title: TITLE,

@@ -48,8 +48,14 @@ export const SITE = {
   name: "Plastilonas Peruanas SAC",
   legalName: "Plastilonas Peruanas SAC",
   ruc: "20523135385",
+  /**
+   * Descripción de reserva del sitio. La usan /en, la página de error y varias
+   * etiquetas Open Graph, así que tiene que caber en el resultado de búsqueda:
+   * 155 caracteres. La versión anterior enumeraba las siete familias y llegaba
+   * a 225, de modo que Google cortaba justo en «mangas de ventilación mine…».
+   */
   description:
-    "Fabricante peruano de soluciones textiles industriales a medida: big bags FIBC, lonas y cobertores, geomembranas y geosintéticos, estructuras y arquitectura textil, mangas de ventilación minera, mallas agrícolas y accesorios.",
+    "Fabricante peruano de textil industrial a medida: big bags FIBC, lonas y cobertores, geosintéticos, estructuras, ventilación minera y mallas agrícolas.",
 
   phoneWhatsApp: "+51946085270",
   phoneCentral: "+51998117065",

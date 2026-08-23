@@ -217,7 +217,21 @@ for (const p of paginas) {
   const d = descripcion(html);
   if (!d) anota('error', 'sin-descripcion', ruta, 'la página no emite meta description');
   else {
-    if (d.length > 165) anota('aviso', 'descripcion-larga', ruta, `${d.length} caracteres: se trunca cerca de 155`);
+    /**
+     * ERROR, no aviso. Estuvo como aviso mientras 67 páginas lo incumplían, y
+     * un aviso que nadie puede atender es ruido: se aprende a pasar por encima
+     * de él, y entonces deja de avisar de nada. Con las 67 corregidas, el
+     * listón se sube y se cierra la puerta.
+     *
+     * El umbral de la comprobación es 155 —el punto real de recorte— y no los
+     * 165 de antes, que era el aviso concediendo un margen que Google no
+     * concede. `descripcionDeTexto` en lib/meta.ts construye la descripción
+     * dentro del presupuesto a partir del texto largo; cuando no puede
+     * (porque la primera frase ya se pasa) devuelve el texto entero a
+     * propósito, para que falle aquí y lo reescriba una persona. Recortar con
+     * puntos suspensivos sería esconder el problema, no resolverlo.
+     */
+    if (d.length > 155) anota('error', 'descripcion-larga', ruta, `${d.length} caracteres: Google recorta cerca de 155`);
     if (d.length < 70) anota('aviso', 'descripcion-corta', ruta, `${d.length} caracteres`);
     porDescripcion.set(d, [...(porDescripcion.get(d) ?? []), ruta]);
   }

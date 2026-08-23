@@ -30,7 +30,7 @@ export const revalidate = 3600;
 
 const URL = `${SITE.url}/indicadores`;
 const TITLE = 'Indicadores que mueven el precio de una plastilona';
-const DESCRIPTION = `Petróleo WTI, tipo de cambio, cobre, zinc y plomo, leídos de la API del Banco Central de Reserva del Perú. Cada valor con la fecha de su lectura y con la explicación de qué decide en una cotización de textiles industriales.`;
+const DESCRIPTION = `Petróleo WTI, tipo de cambio, cobre, zinc y plomo, leídos del BCRP. Cada valor con la fecha de su lectura y qué decide en una cotización.`;
 
 export const metadata: Metadata = {
   title: TITLE,

@@ -715,7 +715,7 @@ export const products: Product[] = [
     name: 'Mallas Antiáfidas para Protección de Cultivos',
     category: 'Mallas y Coberturas Agrícolas',
     sector: ['Agricultura'],
-    shortDescription: 'Mallas antiáfidas de alta densidad para protección de cultivos contra insectos, pájaros y condiciones climáticas adversas. Ideales para agricultura protegida.',
+    shortDescription: 'Malla antiáfida para excluir insectos en cultivo protegido. La densidad de trama se elige según la plaga y la ventilación que hay que conservar.',
     description: 'Mallas antiáfidas tejidas con hilos de polietileno de alta densidad (HDPE) con tratamiento UV, diseñadas para crear barreras físicas efectivas contra áfidos, mosca blanca, trips y otros insectos plaga, así como protección contra pájaros y granizo. Disponibles en diferentes densidades de malla (17x17, 25x25, 40x40 hilos/pulgada) según el tipo de cultivo y plaga objetivo. Perfectas para invernaderos, túneles altos, mallas sombra y sistemas de protección de cultivos a campo abierto.',
     specifications: [
       { label: 'Material', value: 'Polietileno de alta densidad (HDPE) 100% virgen con tratamiento UV' },

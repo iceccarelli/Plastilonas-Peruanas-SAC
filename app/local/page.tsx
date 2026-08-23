@@ -52,9 +52,7 @@ const REGION_ORDER = ["costa", "sierra", "selva"];
 // Sin ` | ${SITE.name}`: la plantilla de app/layout.tsx ya añade la marca, y
 // ponerla aquí servía «… | Plastilonas Peruanas SAC | Plastilonas».
 const TITLE = `Cobertura nacional: ${CIUDADES.length} ciudades del Perú`;
-const DESCRIPTION = `Fabricamos en ${SITE.addressLocality}, ${SITE.addressRegion} y despachamos a todo el Perú. Contexto climático, usos y sectores de demanda por ciudad: ${CIUDADES.slice(0, 6)
-  .map((c) => c.ciudad)
-  .join(", ")} y más.`;
+const DESCRIPTION = `Fabricamos en ${SITE.addressLocality} y despachamos a todo el Perú. Contexto climático, usos y sectores de demanda en ${CIUDADES.length} ciudades.`;
 
 const FAQS = [
   {

@@ -21,6 +21,7 @@ import {
 import CalculadoraForm from '@/components/CalculadoraForm';
 import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasCalculadora } from '@/lib/imagenes';
+import { descripcionDeTexto } from '@/lib/meta';
 
 /**
  * Página de una calculadora.
@@ -64,11 +65,11 @@ export async function generateMetadata({
     title: calc.tituloSeo,
     // El resumen completo llegaba a 280 caracteres y se recorta cerca de 155.
     // Se emite la pregunta, que es lo que el usuario reconoce en el resultado.
-    description: `${calc.pregunta} Método abierto de predimensionamiento, con la fórmula a la vista y sus límites declarados.`,
+    description: descripcionDeTexto(`${calc.pregunta} Método abierto de predimensionamiento, con la fórmula a la vista y sus límites declarados.`),
     alternates: { canonical: `/calculadoras/${calc.slug}` },
     openGraph: {
       title: `${calc.titulo} | ${SITE.name}`,
-      description: calc.resumen,
+      description: descripcionDeTexto(calc.resumen),
       url,
       locale: SITE.locale,
       type: 'website',

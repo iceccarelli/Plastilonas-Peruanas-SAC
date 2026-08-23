@@ -11,7 +11,7 @@ import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
 
 const URL = `${SITE.url}/contacto`;
 const TITLE = 'Contacto: WhatsApp, central y planta';
-const DESCRIPTION = `Contacte a ${SITE.legalName} (RUC ${SITE.ruc}): WhatsApp ${SITE.phoneWhatsApp}, central ${SITE.phoneCentral}, ${SITE.email}. Planta y oficinas en ${SITE.addressLocality}, ${SITE.addressRegion}.`;
+const DESCRIPTION = `WhatsApp ${SITE.phoneWhatsApp}, central ${SITE.phoneCentral}, ${SITE.email}. Planta y oficinas en ${SITE.addressLocality}, ${SITE.addressRegion}. RUC ${SITE.ruc}.`;
 
 export const metadata: Metadata = {
   title: TITLE,

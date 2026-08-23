@@ -9,7 +9,7 @@ import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
 const URL_NOSOTROS = `${SITE.url}/nosotros`;
 
 const TITLE = `Nosotros: fabricantes peruanos desde ${SITE.foundingYear}`;
-const DESCRIPTION = `${SITE.legalName} (RUC ${SITE.ruc}) fabrica e instala soluciones textiles industriales desde su planta en ${SITE.addressLocality}, ${SITE.addressRegion}. Historia, capacidad de fabricación propia y forma de trabajo.`;
+const DESCRIPTION = `${SITE.legalName}, RUC ${SITE.ruc}. Fabricamos e instalamos desde nuestra planta en ${SITE.addressLocality}: historia, capacidad propia y forma de trabajo.`;
 
 export const metadata: Metadata = {
   title: TITLE,

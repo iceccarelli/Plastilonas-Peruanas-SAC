@@ -15,7 +15,7 @@ import { ranurasProceso } from '@/lib/imagenes';
 
 const URL = `${SITE.url}/marco/evaluacion`;
 const TITLE = '¿Su proyecto está listo para cotizar?';
-const DESCRIPTION = `Responda ${totalCriteria()} criterios técnicos y obtenga un brief de especificación descargable con lo que falta definir. Sin registro y sin enviar datos: el PDF se genera en su navegador.`;
+const DESCRIPTION = `Responda ${totalCriteria()} criterios y descargue un brief con lo que falta definir. Sin registro: el PDF se genera en su navegador.`;
 
 export const metadata: Metadata = {
   title: TITLE,

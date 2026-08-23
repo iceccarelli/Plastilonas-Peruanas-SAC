@@ -11,6 +11,7 @@ import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasFamilia } from '@/lib/imagenes';
 import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, faqSchema, itemListSchema, webPageSchema, imageObjectSchema } from '@/lib/schema';
+import { descripcionDeTexto } from '@/lib/meta';
 
 /**
  * Página de familia (/productos/familia/[slug]).
@@ -36,13 +37,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!resolved) return {};
   const { content } = resolved;
   const url = `${SITE.url}/productos/familia/${slug}`;
+  // La etiqueta de búsqueda se ajusta al espacio que Google deja de verdad;
+  // el texto largo sigue entero en la página y en el JSON-LD, donde no estorba.
+  const descripcionBusqueda = descripcionDeTexto(content.metaDescription);
+
   return {
     title: content.metaTitle,
-    description: content.metaDescription,
+    description: descripcionBusqueda,
     alternates: { canonical: `/productos/familia/${slug}` },
     openGraph: {
       title: content.metaTitle,
-      description: content.metaDescription,
+      description: descripcionBusqueda,
       url,
       locale: SITE.locale,
       type: 'website',

@@ -20,6 +20,7 @@ import {
   webPageSchema,
   imageObjectSchema,
 } from '@/lib/schema';
+import { descripcionDeTexto } from '@/lib/meta';
 
 /**
  * Arquitectura de referencia (/soluciones/[slug]).
@@ -43,13 +44,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const s = solutionBySlug(slug);
   if (!s) return {};
   const url = `${SITE.url}/soluciones/${slug}`;
+  // La etiqueta de búsqueda se ajusta al espacio que Google deja de verdad;
+  // el texto largo sigue entero en la página y en el JSON-LD, donde no estorba.
+  const descripcionBusqueda = descripcionDeTexto(s.metaDescription);
+
   return {
     title: s.metaTitle,
-    description: s.metaDescription,
+    description: descripcionBusqueda,
     alternates: { canonical: `/soluciones/${slug}` },
     openGraph: {
       title: s.metaTitle,
-      description: s.metaDescription,
+      description: descripcionBusqueda,
       url,
       locale: SITE.locale,
       type: 'article',

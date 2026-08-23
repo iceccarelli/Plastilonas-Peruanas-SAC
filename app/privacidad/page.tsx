@@ -8,7 +8,7 @@ const INTRO = `Qué datos recoge este sitio, con qué finalidad, con quién se c
 
 export const metadata: Metadata = {
   title: TITLE,
-  description: `Política de privacidad de ${SITE.legalName} (RUC ${SITE.ruc}): datos recogidos en cotizaciones y pedidos, encargados de tratamiento, cookies de analítica y derechos bajo la Ley N.º 29733.`,
+  description: `Datos que recogemos en cotizaciones y pedidos, encargados de tratamiento, cookies de analítica y derechos bajo la Ley N.º 29733.`,
   alternates: { canonical: '/privacidad' },
   openGraph: {
     title: `${TITLE} | ${SITE.name}`,

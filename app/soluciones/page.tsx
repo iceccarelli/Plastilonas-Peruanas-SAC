@@ -19,7 +19,7 @@ import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 
 const URL = `${SITE.url}/soluciones`;
 const TITLE = 'Arquitecturas de referencia';
-const DESCRIPTION = `${solutions.length} configuraciones de referencia para proyectos industriales en el Perú: poza revestida, frente ventilado, despacho a granel, protección de cultivo, almacenamiento remoto y campamento temporal. Con su lista de componentes, secuencia y modos de falla.`;
+const DESCRIPTION = `${solutions.length} configuraciones de referencia con su lista de componentes, la secuencia de ejecución y lo que falla al comprar las piezas por separado.`;
 
 export const metadata: Metadata = {
   title: TITLE,
