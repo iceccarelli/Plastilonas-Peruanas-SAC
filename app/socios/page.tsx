@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import ImagenContenido from '@/components/ImagenContenido';
+import { ranurasProceso } from '@/lib/imagenes';
 
 export const metadata: Metadata = {
   title: 'Partners de ingeniería y proyecto',
@@ -8,10 +10,15 @@ export const metadata: Metadata = {
 };
 
 export default function SociosPage() {
+  const esquema = ranurasProceso().find((r) => r.id === 'proceso:socios-especificacion');
   return (
     <div className="max-w-3xl mx-auto px-6 py-14">
       <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">PARTNERS</div>
       <h1 className="t-display font-semibold text-[#0A2540]">Ingeniería y proyecto</h1>
+      {/* Diagrama del registro. `ImagenContenido` degrada solo: mientras el
+          archivo no exista no se pinta nada roto, y en cuanto se publique
+          aparece aquí sin tocar esta página. */}
+      {esquema && <ImagenContenido ranura={esquema} prioridad className="mt-8" sizes="(min-width: 768px) 720px, 100vw" />}
       <p className="mt-4 text-gray-600">EPC, estudios, contratistas de mina y de obra, integradores agrícolas. No es un programa de afiliados.</p>
       <ul className="mt-6 list-disc pl-5 text-sm text-gray-700 space-y-1">
         <li>Biblioteca técnica HTML y calculadoras preliminares</li>

@@ -5,6 +5,15 @@ import { guides, guideBySlug } from '@/lib/guides';
 import { products } from '@/lib/products';
 import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasBiblioteca } from '@/lib/imagenes';
+import { SITE } from '@/lib/site';
+import { JsonLd } from '@/components/JsonLd';
+import {
+  articleSchema,
+  breadcrumbSchema,
+  imageObjectSchema,
+  itemListSchema,
+  webPageSchema,
+} from '@/lib/schema';
 
 type Props = { params: Promise<{ slug: string }> };
 export const dynamicParams = false;
@@ -27,12 +36,74 @@ export default async function GuidePage({ params }: Props) {
   // solo el caso de que aún no esté publicado.
   const diagrama = ranurasBiblioteca().find((r) => r.id === `biblioteca:${g.slug}`);
 
+  const url = `${SITE.url}/biblioteca/${g.slug}`;
+
   return (
     <div className="max-w-3xl mx-auto px-6 py-14">
+      {/* Estas cinco guías no emitían NINGÚN dato estructurado: existían para
+          un lector humano y eran mudas para todo lo demás. Una guía de
+          especificación es TechArticle, no Article: distinguirlo es lo que
+          separa documentación técnica de una nota de prensa a ojos de quien
+          decide a quién citar. */}
+      <JsonLd
+        data={[
+          /**
+           * El WebPage va PRIMERO y no es opcional: `articleSchema` apunta su
+           * `mainEntityOfPage` a `#webpage`, y sin este nodo esa referencia
+           * queda colgando —el TechArticle declara pertenecer a una página que
+           * el grafo no contiene—. La auditoría de HTML lo detecta como error,
+           * y con razón: un grafo con referencias rotas se descarta entero.
+           */
+          webPageSchema({
+            url,
+            name: g.title,
+            description: g.summary,
+            type: 'ItemPage',
+            speakable: ['.speakable-intro'],
+            breadcrumbId: `${url}#breadcrumb`,
+          }),
+          articleSchema({
+            url,
+            headline: g.title,
+            description: g.summary,
+            datePublished: g.revised,
+            dateModified: g.revised,
+            section: 'Biblioteca de especificación',
+            articleType: 'TechArticle',
+          }),
+          breadcrumbSchema(
+            [
+              { name: 'Inicio', url: `${SITE.url}/` },
+              { name: 'Biblioteca', url: `${SITE.url}/biblioteca` },
+              { name: g.title, url },
+            ],
+            `${url}#breadcrumb`,
+          ),
+          // Lo que hace falta para cotizar, como lista tipada. Es la respuesta
+          // literal a «¿qué datos necesito reunir?», que es lo que un agente
+          // acaba citando cuando alguien pregunta cómo especificar esto.
+          itemListSchema({
+            url,
+            name: `Datos necesarios para cotizar: ${g.title}`,
+            description: 'Lo que debe reunir un comprador antes de pedir precio.',
+            items: g.questions.map((q) => ({ name: q, url })),
+          }),
+          ...(diagrama
+            ? [imageObjectSchema({
+                url: diagrama.ruta,
+                ancho: diagrama.ancho,
+                alto: diagrama.alto,
+                alt: diagrama.alt,
+                paginaUrl: url,
+                esDiagrama: true,
+              })]
+            : []),
+        ]}
+      />
       <Link href="/biblioteca" className="text-xs uppercase tracking-widest text-[#059669]">Biblioteca</Link>
       <h1 className="t-display font-semibold text-[#0A2540] mt-3">{g.title}</h1>
       <p className="mt-3 text-sm text-gray-500">{g.titleEn} · Revisión {g.revised} · {g.reviewer}</p>
-      <p className="mt-5 text-lg text-gray-700">{g.summary}</p>
+      <p className="speakable-intro mt-5 text-lg text-gray-700">{g.summary}</p>
 
       {/* El dibujo va DESPUÉS del resumen y ANTES del desarrollo: quien llega
           buscando cómo especificar algo necesita ver la pieza completa antes de

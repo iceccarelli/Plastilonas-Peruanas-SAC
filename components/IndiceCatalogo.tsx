@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { products, productFamilies, availabilityLabels } from '@/lib/products';
 import { familyHrefByName } from '@/lib/families';
+import MiniaturaRanura from '@/components/MiniaturaRanura';
+import { ranurasFamilia } from '@/lib/imagenes';
 
 /**
  * ÍNDICE COMPLETO DEL CATÁLOGO, RENDERIZADO EN EL SERVIDOR.
@@ -28,6 +30,7 @@ import { familyHrefByName } from '@/lib/families';
  */
 
 export default function IndiceCatalogo() {
+  const portadas = ranurasFamilia();
   const porFamilia = productFamilies
     .map((f) => ({
       familia: f,
@@ -56,6 +59,24 @@ export default function IndiceCatalogo() {
         <div className="mt-8 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
           {porFamilia.map(({ familia, items }) => (
             <div key={familia.slug}>
+              {/* Portada de la familia, la MISMA que sirve /productos/familia/…
+                  Sin ella, el HTML de /productos —la página que reparte
+                  autoridad hacia las 36 fichas— no contenía ni una sola
+                  imagen de producto: la rejilla filtrable es de cliente y un
+                  rastreador que no ejecuta JavaScript, que son casi todos los
+                  de IA, veía un índice de texto sin nada que mirar. */}
+              <Link
+                href={familyHrefByName(familia.name)}
+                aria-hidden="true"
+                tabIndex={-1}
+                className="group block"
+              >
+                <MiniaturaRanura
+                  ranura={portadas.find((r) => r.id === `familia:${familia.slug}`)}
+                  className="mb-3 w-full"
+                  sizes="(min-width: 1024px) 380px, (min-width: 640px) 45vw, 100vw"
+                />
+              </Link>
               <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
                 <Link href={familyHrefByName(familia.name)} className="hover:text-[#059669]">
                   {familia.name}

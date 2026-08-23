@@ -6,6 +6,8 @@ import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
+import ImagenContenido from '@/components/ImagenContenido';
+import { ranurasProceso } from '@/lib/imagenes';
 
 /**
  * Índice de informes del sector.
@@ -33,6 +35,7 @@ export const metadata: Metadata = {
 };
 
 export default function InformesPage() {
+  const esquema = ranurasProceso().find((r) => r.id === 'proceso:informes-metodo');
   return (
     <div className="mx-auto max-w-4xl px-4 py-14">
       <TrackView kind="informe" slug="indice" />
@@ -75,6 +78,10 @@ export default function InformesPage() {
       <h1 className="mb-4 text-4xl font-semibold tracking-tight text-[#0A2540]">
         Informes del sector
       </h1>
+      {/* Diagrama del registro. Degrada solo: sin archivo no se pinta nada,
+          y en cuanto se publique aparece sin tocar esta página. */}
+      {esquema && <ImagenContenido ranura={esquema} className="mb-8 mt-6" sizes="(min-width: 768px) 860px, 100vw" />}
+
 
       <p className="speakable-intro mb-6 max-w-3xl text-lg text-gray-700">
         Qué dicen los indicadores oficiales de los sectores que compran textiles

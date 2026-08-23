@@ -22,6 +22,7 @@ import { ranurasErrorCompra } from '@/lib/imagenes';
 import {
   breadcrumbSchema,
   faqSchema,
+  imageObjectSchema,
   itemListSchema,
   serviceSchema,
   webPageSchema,
@@ -122,6 +123,24 @@ export default async function IndustriaPage({ params }: Props) {
             })),
           }),
           faqSchema(ind.faqs, url),
+          /**
+           * Los esquemas de error de compra son el contenido más específico de
+           * la página: cada uno dibuja una compra que salió mal en este sector.
+           * Se declaran todos, con `clave` distinta para que no colisionen en el
+           * grafo, y sólo el primero es representativo de la página.
+           */
+          ...diagramasError.map((d, i) =>
+            imageObjectSchema({
+              url: d.ruta,
+              ancho: d.ancho,
+              alto: d.alto,
+              alt: d.alt,
+              paginaUrl: url,
+              esDiagrama: true,
+              clave: d.id.split(':').pop() ?? String(i),
+              representativa: i === 0,
+            }),
+          ),
         ]}
       />
 

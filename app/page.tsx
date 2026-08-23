@@ -32,11 +32,30 @@ import CountUp from '@/components/CountUp';
  * defecto del layout y no declaraba canonical — dos páginas con la misma
  * descripción compiten entre sí y el canonical queda a criterio de Google.
  */
+/**
+ * hreflang — se declara SOLO entre estas tres páginas.
+ *
+ * `/en` y `/pt` no son traducciones del sitio: son una página de identidad y
+ * RFQ por idioma. hreflang significa «el mismo contenido en otro idioma», así
+ * que declararlo en las 275 páginas apuntaría cada ficha de producto a una
+ * portada en inglés que no la traduce. Google descarta el clúster entero
+ * cuando el destino no corresponde, y de paso se pierde el caso en que sí
+ * corresponde. Aquí corresponde: las tres son la puerta de entrada al mismo
+ * proveedor, cada una en su idioma. x-default apunta al español porque es el
+ * idioma real del catálogo.
+ */
+const ALTERNOS = {
+  'es-PE': '/',
+  en: '/en',
+  'pt-BR': '/pt',
+  'x-default': '/',
+} as const;
+
 export const metadata: Metadata = {
   title: 'Fabricante de big bags, lonas, geomembranas y mallas en Perú',
   description:
     `${SITE.name} fabrica e instala a medida soluciones textiles industriales en el Perú desde ${SITE.foundingYear}: big bags FIBC, lonas y cobertores, geomembranas y geotextiles, carpas, mangas de ventilación minera y mallas agrícolas. Un solo proveedor, despacho nacional.`,
-  alternates: { canonical: '/' },
+  alternates: { canonical: '/', languages: ALTERNOS },
   openGraph: {
     title: `${SITE.name} | Fabricante de soluciones textiles industriales en el Perú`,
     description: SITE.description,

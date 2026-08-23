@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import { products, sourcingLabels, availabilityLabels } from '@/lib/products';
 import { resolveFamily, comparableFamilies } from '@/lib/families';
@@ -157,6 +158,23 @@ export default async function CompararPage({ params }: Props) {
               </th>
               {items.map((p) => (
                 <th key={p.slug} className="min-w-[220px] p-4 text-left align-top">
+                  {/* Comparar seis geomembranas por columnas de texto obliga a
+                      recordar cuál es cuál mientras se baja por la tabla. La
+                      miniatura ancla la columna. `alt=""` porque el nombre del
+                      producto va justo debajo, dentro del mismo enlace. */}
+                  {p.image && (
+                    <Link href={`/productos/${p.slug}`} aria-hidden="true" tabIndex={-1}>
+                      <span className="relative mb-3 block h-24 w-full overflow-hidden rounded-xl bg-white">
+                        <Image
+                          src={p.image}
+                          alt=""
+                          fill
+                          sizes="220px"
+                          className="object-cover"
+                        />
+                      </span>
+                    </Link>
+                  )}
                   <Link
                     href={`/productos/${p.slug}`}
                     className="font-semibold text-[#0A2540] hover:text-[#059669]"

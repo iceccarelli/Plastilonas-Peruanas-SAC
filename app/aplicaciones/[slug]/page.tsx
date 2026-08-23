@@ -5,6 +5,9 @@ import { applications, applicationBySlug } from '@/lib/applications';
 import { products } from '@/lib/products';
 import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasAplicacion } from '@/lib/imagenes';
+import { SITE } from '@/lib/site';
+import { JsonLd } from '@/components/JsonLd';
+import { webPageSchema, breadcrumbSchema, imageObjectSchema, itemListSchema } from '@/lib/schema';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -28,8 +31,47 @@ export default async function AplicacionPage({ params }: Props) {
   const list = products.filter((p) => app.productSlugs.includes(p.slug));
   const foto = ranurasAplicacion().find((r) => r.id === `aplicacion:${app.slug}`);
 
+  const url = `${SITE.url}/aplicaciones/${app.slug}`;
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-14">
+      {/* Las ocho páginas de aplicación responden a la búsqueda por problema,
+          que es como busca un comprador industrial —y como pregunta quien
+          consulta a un modelo—. Eran invisibles para las máquinas. */}
+      <JsonLd
+        data={[
+          webPageSchema({
+            url,
+            name: app.name,
+            description: app.problem,
+            breadcrumbId: `${url}#breadcrumb`,
+          }),
+          breadcrumbSchema(
+            [
+              { name: 'Inicio', url: `${SITE.url}/` },
+              { name: 'Aplicaciones', url: `${SITE.url}/aplicaciones` },
+              { name: app.name, url },
+            ],
+            `${url}#breadcrumb`,
+          ),
+          itemListSchema({
+            url,
+            name: `Qué preguntamos para cotizar: ${app.name}`,
+            description: 'Los datos que definen el alcance antes de dar precio.',
+            items: app.questions.map((q) => ({ name: q, url })),
+          }),
+          ...(foto
+            ? [imageObjectSchema({
+                url: foto.ruta,
+                ancho: foto.ancho,
+                alto: foto.alto,
+                alt: foto.alt,
+                paginaUrl: url,
+                esDiagrama: false,
+              })]
+            : []),
+        ]}
+      />
       <Link href="/aplicaciones" className="text-xs uppercase tracking-widest text-[#059669]">Aplicaciones</Link>
       <h1 className="t-display font-semibold text-[#0A2540] mt-3">{app.name}</h1>
       <p className="mt-4 text-gray-600 max-w-3xl leading-relaxed">{app.problem}</p>
