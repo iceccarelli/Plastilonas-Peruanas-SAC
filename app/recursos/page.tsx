@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { ArrowRight, Clock } from 'lucide-react';
 import { SITE } from '@/lib/site';
 import { articles, articleCategories } from '@/lib/articles';
+import MiniaturaRanura from '@/components/MiniaturaRanura';
+import { ranurasGuia } from '@/lib/imagenes';
 import { familyHrefByName } from '@/lib/families';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
@@ -33,6 +35,7 @@ export const metadata: Metadata = {
 };
 
 export default function RecursosIndexPage() {
+  const portadas = ranurasGuia();
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
       <JsonLd
@@ -100,8 +103,16 @@ export default function RecursosIndexPage() {
         {articles.map((a) => (
           <article
             key={a.slug}
-            className="group rounded-3xl border border-gray-100 p-7 transition-all hover:border-[#059669]/40"
+            className="group overflow-hidden rounded-3xl border border-gray-100 transition-all hover:border-[#059669]/40"
           >
+            <Link href={`/recursos/${a.slug}`} aria-hidden="true" tabIndex={-1}>
+              <MiniaturaRanura
+                ranura={portadas.find((r) => r.id === `guia:${a.slug}`)}
+                className="w-full rounded-none"
+                sizes="(min-width: 768px) 760px, 100vw"
+              />
+            </Link>
+            <div className="p-7">
             <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
               <Link
                 href={familyHrefByName(a.category)}
@@ -139,6 +150,7 @@ export default function RecursosIndexPage() {
             >
               Leer la guía <ArrowRight className="h-4 w-4" />
             </Link>
+            </div>
           </article>
         ))}
       </div>

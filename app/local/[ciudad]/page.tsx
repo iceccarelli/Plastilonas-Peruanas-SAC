@@ -5,6 +5,7 @@ import Link from "next/link";
 import ciudades from "@/data/ciudades.json";
 import { SITE } from "@/lib/site";
 import { products } from "@/lib/products";
+import Image from "next/image";
 import { breadcrumbSchema, faqSchema, serviceSchema, webPageSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
 import WhatsAppLink from "@/components/WhatsAppLink";
@@ -101,9 +102,20 @@ export default async function CiudadPage({ params }: { params: Promise<{ ciudad:
             {relacionados.map((p) => (
               <li key={p.slug}>
                 <Link href={`/productos/${p.slug}`}
-                  className="group block rounded-2xl border border-neutral-200 p-4 transition-colors hover:border-[#059669]/40">
-                  <span className="font-medium text-[#0A2540] group-hover:text-[#059669]">{p.name}</span>
-                  <span className="mt-1 line-clamp-2 block text-sm text-neutral-600">{p.shortDescription}</span>
+                  className="group block overflow-hidden rounded-2xl border border-neutral-200 transition-colors hover:border-[#059669]/40">
+                  {/* Las doce páginas de ciudad servían HTML sin una sola
+                      imagen de producto. Es la misma fotografía de catálogo
+                      que ya publica la ficha: no se encarga nada nuevo y el
+                      rastreador deja de ver una página de solo texto. */}
+                  {p.image && (
+                    <span className="relative block h-36 w-full bg-neutral-50">
+                      <Image src={p.image} alt="" fill sizes="(min-width: 640px) 320px, 100vw" className="object-cover" />
+                    </span>
+                  )}
+                  <span className="block p-4">
+                    <span className="font-medium text-[#0A2540] group-hover:text-[#059669]">{p.name}</span>
+                    <span className="mt-1 line-clamp-2 block text-sm text-neutral-600">{p.shortDescription}</span>
+                  </span>
                 </Link>
               </li>
             ))}

@@ -12,6 +12,8 @@ import { terminos } from "@/lib/glosario";
 import { informes, INFORMES_UPDATED } from "@/lib/informes";
 import { calculadoras, CALCULADORAS_ACTUALIZADO } from "@/lib/calculadoras";
 import { INDUSTRIAS } from "@/lib/industrias";
+import { applications } from "@/lib/applications";
+import { guides } from "@/lib/guides";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -57,16 +59,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: now, changeFrequency: "monthly", priority: 0.8,
   }));
 
-  const applicationHubs = ['ventilacion-subterranea','toldos-camion','proteccion-cultivo','impermeabilizacion-pozas','coberturas-obra','campamentos-mineros','granel-embalaje','contencion-fluidos'];
-  const applicationRoutes: MetadataRoute.Sitemap = applicationHubs.map((slug) => ({
-    url: `${SITE.url}/aplicaciones/${slug}`,
+  // Derivados de la fuente de verdad, no de una lista paralela: estos dos
+  // arrays estaban escritos a mano con los ocho y los cinco slugs copiados.
+  // Añadir una aplicación en lib/applications.ts creaba una página que el
+  // sitemap no declaraba, y nadie se enteraba hasta mirar Search Console.
+  const applicationRoutes: MetadataRoute.Sitemap = applications.map((a) => ({
+    url: `${SITE.url}/aplicaciones/${a.slug}`,
     lastModified: now, changeFrequency: "monthly" as const, priority: 0.8,
   }));
 
-  const guideHubs = ['seleccion-mangas-ventilacion','gramaje-lona-industrial','especificacion-fibc','seleccion-geomembrana','seleccion-malla-agricola'];
-  const guideRoutes: MetadataRoute.Sitemap = guideHubs.map((slug) => ({
-    url: `${SITE.url}/biblioteca/${slug}`,
-    lastModified: now, changeFrequency: "monthly" as const, priority: 0.75,
+  const guideRoutes: MetadataRoute.Sitemap = guides.map((g) => ({
+    url: `${SITE.url}/biblioteca/${g.slug}`,
+    lastModified: new Date(g.revised), changeFrequency: "monthly" as const, priority: 0.75,
   }));
 
   const localRoutes: MetadataRoute.Sitemap = (ciudades as { slug: string }[]).map((c) => ({

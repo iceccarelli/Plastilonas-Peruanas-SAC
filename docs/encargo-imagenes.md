@@ -63,418 +63,11 @@ como `public/images/familias/geosinteticos.jpg`.
 
 ## Arquitecturas de referencia (diagramas)
 
-6 pendientes de 6.
-
-### 1. `/images/soluciones/poza-revestida-impermeabilizacion.png`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/soluciones/poza-revestida-impermeabilizacion.png` |
-| **Tamaño** | 1600 × 900 px |
-| **Tipo** | diagrama |
-| **Dónde se usa** | Encabezado de /soluciones/poza-revestida-impermeabilizacion |
-| **Texto alternativo** | Esquema de la arquitectura de referencia: Poza revestida: el conjunto completo, no solo la lámina |
-
-**Prompt:**
-
-```
-Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
-
-TEMA: corte o vista isométrica de esta configuración: Poza revestida: el conjunto completo, no solo la lámina.
-ESCENARIO: Una poza de proceso, de agua o de almacenamiento que debe contener su contenido durante toda la vida del proyecto, en un terreno que rara vez es el ideal.
-COMPONENTES QUE DEBEN DISTINGUIRSE, en su posición relativa correcta:
-  1. geotextiles — Protección mecánica entre la subrasante y la barrera impermeable.
-  2. geomembrana polietileno pe hdpe — Barrera impermeable principal.
-  3. geomembranas pvc — Alternativa de barrera cuando la geometría exige mayor flexibilidad.
-  4. geocompuestos drenaje — Alivio de presión bajo la lámina y conducción de fluidos.
-  5. accesorios instalacion — Fijación, remates y elementos de detalle.
-IMPORTANTE: la posición de cada capa debe ser técnicamente correcta; el valor del dibujo es que un ingeniero pueda verificar el orden de montaje.
-```
-
----
-
-### 2. `/images/soluciones/frente-avance-ventilado.png`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/soluciones/frente-avance-ventilado.png` |
-| **Tamaño** | 1600 × 900 px |
-| **Tipo** | diagrama |
-| **Dónde se usa** | Encabezado de /soluciones/frente-avance-ventilado |
-| **Texto alternativo** | Esquema de la arquitectura de referencia: Frente de avance ventilado: del cálculo de caudal a la manga instalada |
-
-**Prompt:**
-
-```
-Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
-
-TEMA: corte o vista isométrica de esta configuración: Frente de avance ventilado: del cálculo de caudal a la manga instalada.
-ESCENARIO: Una labor ciega en avance, con personal y equipo diésel operando, donde el aire debe llegar al fondo y los gases de voladura evacuarse dentro del ciclo de trabajo.
-COMPONENTES QUE DEBEN DISTINGUIRSE, en su posición relativa correcta:
-  1. mangas ventilacion minas tuneles — Conducción del aire entre el ventilador y el frente.
-  2. accesorios instalacion — Suspensión, empalmes y fijación a lo largo de la labor.
-  3. lona plastificada rafia polytarp — Cortinas y tabiques de control de flujo cuando el circuito lo requiere.
-IMPORTANTE: la posición de cada capa debe ser técnicamente correcta; el valor del dibujo es que un ingeniero pueda verificar el orden de montaje.
-```
-
----
-
-### 3. `/images/soluciones/despacho-concentrado-granel.png`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/soluciones/despacho-concentrado-granel.png` |
-| **Tamaño** | 1600 × 900 px |
-| **Tipo** | diagrama |
-| **Dónde se usa** | Encabezado de /soluciones/despacho-concentrado-granel |
-| **Texto alternativo** | Esquema de la arquitectura de referencia: Despacho de concentrado a granel: del llenado al puerto |
-
-**Prompt:**
-
-```
-Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
-
-TEMA: corte o vista isométrica de esta configuración: Despacho de concentrado a granel: del llenado al puerto.
-ESCENARIO: Material a granel que sale de operación, pasa por balanza, viaja por carretera y llega a un terminal portuario con requisitos documentales propios.
-COMPONENTES QUE DEBEN DISTINGUIRSE, en su posición relativa correcta:
-  1. big bags bolsones polipropileno — Envase y elemento de izaje del material a granel.
-  2. sacos polytarp embarque granel — Alternativa de envase para embarque y estiba.
-  3. films termocontraibles shrink — Unitización y protección de la carga paletizada.
-  4. mantas cobertores toldos camiones — Contención y protección de la carga durante el transporte.
-  5. siders tolderas camiones — Cerramiento lateral de la unidad cuando el tipo de carrocería lo requiere.
-IMPORTANTE: la posición de cada capa debe ser técnicamente correcta; el valor del dibujo es que un ingeniero pueda verificar el orden de montaje.
-```
-
----
-
-### 4. `/images/soluciones/proteccion-cultivo-agroexportacion.png`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/soluciones/proteccion-cultivo-agroexportacion.png` |
-| **Tamaño** | 1600 × 900 px |
-| **Tipo** | diagrama |
-| **Dónde se usa** | Encabezado de /soluciones/proteccion-cultivo-agroexportacion |
-| **Texto alternativo** | Esquema de la arquitectura de referencia: Protección de cultivo: barrera sanitaria, sombra y suelo |
-
-**Prompt:**
-
-```
-Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
-
-TEMA: corte o vista isométrica de esta configuración: Protección de cultivo: barrera sanitaria, sombra y suelo.
-ESCENARIO: Un cultivo de agroexportación que necesita excluir vectores, manejar radiación y conservar humedad, en valles donde la radiación y el viento castigan el material tanto como la plaga.
-COMPONENTES QUE DEBEN DISTINGUIRSE, en su posición relativa correcta:
-  1. mallas antiafidas — Barrera física de exclusión de vectores.
-  2. malla raschel sombra — Control de radiación y temperatura de hoja.
-  3. malla anti pajaro anti granizo — Protección mecánica frente a fauna y granizo.
-  4. mulch madera picada — Cobertura de suelo: retención de humedad y control de malezas.
-  5. geotextiles — Separación y control en caminos internos y obras de riego.
-IMPORTANTE: la posición de cada capa debe ser técnicamente correcta; el valor del dibujo es que un ingeniero pueda verificar el orden de montaje.
-```
-
----
-
-### 5. `/images/soluciones/almacenamiento-agua-operacion-remota.png`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/soluciones/almacenamiento-agua-operacion-remota.png` |
-| **Tamaño** | 1600 × 900 px |
-| **Tipo** | diagrama |
-| **Dónde se usa** | Encabezado de /soluciones/almacenamiento-agua-operacion-remota |
-| **Texto alternativo** | Esquema de la arquitectura de referencia: Almacenamiento de agua en operación remota |
-
-**Prompt:**
-
-```
-Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
-
-TEMA: corte o vista isométrica de esta configuración: Almacenamiento de agua en operación remota.
-ESCENARIO: Un frente de trabajo remoto que necesita almacenar y distribuir agua sin obra civil, sin grúa y con logística de acceso limitada.
-COMPONENTES QUE DEBEN DISTINGUIRSE, en su posición relativa correcta:
-  1. tanques flexibles bladders — Almacenamiento desplegable sin obra civil.
-  2. tuberias hdpe — Conducción entre almacenamiento y punto de uso.
-  3. geomembrana polietileno pe hdpe — Contención secundaria o revestimiento de la zona de apoyo cuando el contenido lo exige.
-  4. geotextiles — Protección de la base contra material anguloso.
-IMPORTANTE: la posición de cada capa debe ser técnicamente correcta; el valor del dibujo es que un ingeniero pueda verificar el orden de montaje.
-```
-
----
-
-### 6. `/images/soluciones/campamento-almacen-temporal.png`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/soluciones/campamento-almacen-temporal.png` |
-| **Tamaño** | 1600 × 900 px |
-| **Tipo** | diagrama |
-| **Dónde se usa** | Encabezado de /soluciones/campamento-almacen-temporal |
-| **Texto alternativo** | Esquema de la arquitectura de referencia: Campamento y almacén temporal: cubrir, cerrar y proteger |
-
-**Prompt:**
-
-```
-Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
-
-TEMA: corte o vista isométrica de esta configuración: Campamento y almacén temporal: cubrir, cerrar y proteger.
-ESCENARIO: Una faena que necesita cubrir superficie, almacenar material y habilitar puestos de trabajo con estructuras que se montan y, muchas veces, se desmontan al terminar la campaña.
-COMPONENTES QUE DEBEN DISTINGUIRSE, en su posición relativa correcta:
-  1. carpas lona estructuras metalicas — Cobertura principal de superficie.
-  2. modulos albergues campamentos — Módulos habilitados para uso de personal o almacenamiento.
-  3. toldos cerramientos — Cerramientos laterales y control de ingreso de viento y lluvia.
-  4. lona plastificada rafia polytarp — Cobertura de material acopiado y protección temporal.
-  5. biombos protectores soldadura — Protección colectiva en puestos de trabajo con soldadura.
-IMPORTANTE: la posición de cada capa debe ser técnicamente correcta; el valor del dibujo es que un ingeniero pueda verificar el orden de montaje.
-```
-
----
+0 pendientes de 6.
 
 ## Portadas de familia
 
-11 pendientes de 11.
-
-### 7. `/images/familias/envases-embalaje.jpg`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/familias/envases-embalaje.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Portada de /productos/familia/envases-embalaje |
-| **Texto alternativo** | Envases y Embalaje: Big Bags, sacos, bolsas y films |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.
-
-TEMA: familia de producto "Envases y Embalaje". Big Bags, sacos, bolsas y films
-DEBE SUGERIR EL CONJUNTO, no un solo artículo: Big Bags / Bolsones de Polipropileno; Sacos Polytarp para Embarque a Granel; Bolsas y Láminas de Polietileno PEBD / PEAD; Films Termocontraíbles (Shrink) y Mangas PE.
-ENCUADRE: escena de trabajo real donde esta familia se usa, con varios de sus elementos visibles a distinta distancia.
-```
-
----
-
-### 8. `/images/familias/lonas-cobertores.jpg`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/familias/lonas-cobertores.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Portada de /productos/familia/lonas-cobertores |
-| **Texto alternativo** | Lonas y Cobertores: Confección textil 100% a medida |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.
-
-TEMA: familia de producto "Lonas y Cobertores". Confección textil 100% a medida
-DEBE SUGERIR EL CONJUNTO, no un solo artículo: Lona Plastificada, Rafia y Polytarp a Medida; Mantas Cobertores y Toldos para Camiones; Siders y Tolderas para Camiones; Cobertores Multimaterial (Polytarp, PE, Raschel, Térmico, PP).
-ENCUADRE: escena de trabajo real donde esta familia se usa, con varios de sus elementos visibles a distinta distancia.
-```
-
----
-
-### 9. `/images/familias/estructuras-arquitectura-textil.jpg`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/familias/estructuras-arquitectura-textil.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Portada de /productos/familia/estructuras-arquitectura-textil |
-| **Texto alternativo** | Estructuras y Arquitectura Textil: Carpas, tensadas, módulos e invernaderos |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.
-
-TEMA: familia de producto "Estructuras y Arquitectura Textil". Carpas, tensadas, módulos e invernaderos
-DEBE SUGERIR EL CONJUNTO, no un solo artículo: Carpas de Lona Plástica con Estructuras Metálicas; Coberturas Tensionadas y Arquitectura Textil; Coberturas y Estructuras Inflables; Módulos y Albergues para Campamentos.
-ENCUADRE: escena de trabajo real donde esta familia se usa, con varios de sus elementos visibles a distinta distancia.
-```
-
----
-
-### 10. `/images/familias/mallas-agricolas.jpg`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/familias/mallas-agricolas.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Portada de /productos/familia/mallas-agricolas |
-| **Texto alternativo** | Mallas y Coberturas Agrícolas: Antiáfidas, Raschel y protección de cultivo |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.
-
-TEMA: familia de producto "Mallas y Coberturas Agrícolas". Antiáfidas, Raschel y protección de cultivo
-DEBE SUGERIR EL CONJUNTO, no un solo artículo: Mallas Antiáfidas para Protección de Cultivos; Malla Raschel y Malla Sombra; Malla Anti-Pájaro y Anti-Granizo.
-ENCUADRE: escena de trabajo real donde esta familia se usa, con varios de sus elementos visibles a distinta distancia.
-```
-
----
-
-### 11. `/images/familias/ventilacion-industrial.jpg`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/familias/ventilacion-industrial.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Portada de /productos/familia/ventilacion-industrial |
-| **Texto alternativo** | Ventilación Industrial: Mangas para minas y túneles |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.
-
-TEMA: familia de producto "Ventilación Industrial". Mangas para minas y túneles
-DEBE SUGERIR EL CONJUNTO, no un solo artículo: Mangas de Ventilación para Minas y Túneles.
-ENCUADRE: escena de trabajo real donde esta familia se usa, con varios de sus elementos visibles a distinta distancia.
-```
-
----
-
-### 12. `/images/familias/geosinteticos.jpg`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/familias/geosinteticos.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Portada de /productos/familia/geosinteticos |
-| **Texto alternativo** | Geosintéticos e Impermeabilización: Geomembranas, geotextiles y geomallas |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.
-
-TEMA: familia de producto "Geosintéticos e Impermeabilización". Geomembranas, geotextiles y geomallas
-DEBE SUGERIR EL CONJUNTO, no un solo artículo: Geomembranas de PVC; Geomembrana de Polietileno (PE / HDPE); Geomembrana de PE Fortificada (Reforzada); Geomembrana Bituminosa.
-ENCUADRE: escena de trabajo real donde esta familia se usa, con varios de sus elementos visibles a distinta distancia.
-```
-
----
-
-### 13. `/images/familias/ambientales-fluidos.jpg`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/familias/ambientales-fluidos.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Portada de /productos/familia/ambientales-fluidos |
-| **Texto alternativo** | Soluciones Ambientales y Fluidos: Tanques, biodigestores y tuberías HDPE |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.
-
-TEMA: familia de producto "Soluciones Ambientales y Fluidos". Tanques, biodigestores y tuberías HDPE
-DEBE SUGERIR EL CONJUNTO, no un solo artículo: Tanques Flexibles (Bladders); Biodigestores para Tratamiento de Residuos; Tuberías HDPE y Accesorios.
-ENCUADRE: escena de trabajo real donde esta familia se usa, con varios de sus elementos visibles a distinta distancia.
-```
-
----
-
-### 14. `/images/familias/seguridad-industrial.jpg`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/familias/seguridad-industrial.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Portada de /productos/familia/seguridad-industrial |
-| **Texto alternativo** | Protección y Seguridad Industrial: Biombos y protección de taller |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.
-
-TEMA: familia de producto "Protección y Seguridad Industrial". Biombos y protección de taller
-DEBE SUGERIR EL CONJUNTO, no un solo artículo: Biombos Protectores para Talleres de Soldadura; Barreras Acústicas / Cortinas Antirruido.
-ENCUADRE: escena de trabajo real donde esta familia se usa, con varios de sus elementos visibles a distinta distancia.
-```
-
----
-
-### 15. `/images/familias/accesorios.jpg`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/familias/accesorios.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Portada de /productos/familia/accesorios |
-| **Texto alternativo** | Accesorios y Complementos: Ojalillos, sogas, tensores y tubos |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.
-
-TEMA: familia de producto "Accesorios y Complementos". Ojalillos, sogas, tensores y tubos
-DEBE SUGERIR EL CONJUNTO, no un solo artículo: Accesorios de Instalación (Ojalillos, Sogas, Tensores, Tubos).
-ENCUADRE: escena de trabajo real donde esta familia se usa, con varios de sus elementos visibles a distinta distancia.
-```
-
----
-
-### 16. `/images/familias/publicidad.jpg`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/familias/publicidad.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Portada de /productos/familia/publicidad |
-| **Texto alternativo** | Publicidad y Comunicación Visual: Gigantografías y rotulado de flota |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.
-
-TEMA: familia de producto "Publicidad y Comunicación Visual". Gigantografías y rotulado de flota
-DEBE SUGERIR EL CONJUNTO, no un solo artículo: Gigantografías, Letreros y Señalética; Revestimiento Vehicular y Toldos Publicitarios.
-ENCUADRE: escena de trabajo real donde esta familia se usa, con varios de sus elementos visibles a distinta distancia.
-```
-
----
-
-### 17. `/images/familias/especialidades.jpg`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/familias/especialidades.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Portada de /productos/familia/especialidades |
-| **Texto alternativo** | Especialidades: Mulch y valor agregado |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.
-
-TEMA: familia de producto "Especialidades". Mulch y valor agregado
-DEBE SUGERIR EL CONJUNTO, no un solo artículo: Mulch de Madera Picada.
-ENCUADRE: escena de trabajo real donde esta familia se usa, con varios de sus elementos visibles a distinta distancia.
-```
-
----
+0 pendientes de 11.
 
 ## Términos del glosario (diagramas)
 
@@ -482,224 +75,213 @@ ENCUADRE: escena de trabajo real donde esta familia se usa, con varios de sus el
 
 ## Encabezados de guía
 
-10 pendientes de 10.
+0 pendientes de 10.
 
-### 18. `/images/recursos/big-bags-mineria-peru-normativa-errores-estiba.jpg`
+## Guías de especificación (diagramas)
+
+0 pendientes de 5.
+
+## Geometría de las calculadoras (diagramas)
+
+0 pendientes de 5.
+
+## Errores de compra por sector (diagramas)
+
+0 pendientes de 16.
+
+## Hubs de aplicación
+
+0 pendientes de 8.
+
+## Procesos y flujos del sitio (diagramas)
+
+9 pendientes de 13.
+
+### 1. `/images/proceso/compras-homologacion.png`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/recursos/big-bags-mineria-peru-normativa-errores-estiba.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/big-bags-mineria-peru-normativa-errores-estiba |
-| **Texto alternativo** | Apertura de la guía: Big Bags para minería en el Perú: qué exige la normativa y los 7 errores de estiba que rompen bolsones |
+| **Archivo** | `public/images/proceso/compras-homologacion.png` |
+| **Tamaño** | 1600 × 800 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /compras |
+| **Texto alternativo** | Recorrido de homologación de un proveedor, de la identidad al primer pedido |
 
 **Prompt:**
 
 ```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
 
-TEMA: Big Bags para minería en el Perú: qué exige la normativa y los 7 errores de estiba que rompen bolsones
-DE QUÉ TRATA: Factor de seguridad 5:1 vs 6:1, la exigencia de certificación ISO 21898:2004 en el Puerto del Callao desde 2023, y los siete errores de manipulación y estiba que causan la mayoría de las roturas de big bags en operaciones mineras peruanas.
-ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+TEMA: recorrido de homologación de un proveedor industrial en seis paradas: verificar identidad y RUC, revisar catálogo y modo de suministro, confirmar alcance de exportación, reunir documentación técnica, emitir el RFQ y cerrar el primer pedido.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
 ```
 
 ---
 
-### 19. `/images/recursos/instalacion-geomembranas-hdpe-pozas-canales.jpg`
+### 2. `/images/proceso/confianza-identidad.png`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/recursos/instalacion-geomembranas-hdpe-pozas-canales.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/instalacion-geomembranas-hdpe-pozas-canales |
-| **Texto alternativo** | Apertura de la guía: Instalación de geomembranas HDPE en pozas y canales: secuencia, ensayos de soldadura y los fallos que aparecen recién… |
+| **Archivo** | `public/images/proceso/confianza-identidad.png` |
+| **Tamaño** | 1600 × 800 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /confianza |
+| **Texto alternativo** | Lo que se puede verificar de la empresa y lo que deliberadamente no se afirma |
 
 **Prompt:**
 
 ```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
 
-TEMA: Instalación de geomembranas HDPE en pozas y canales: secuencia, ensayos de soldadura y los fallos que aparecen recién a los seis meses
-DE QUÉ TRATA: Preparación de subrasante, zanja de anclaje, soldadura por cuña caliente y extrusión, ensayos no destructivos (caja de vacío ASTM D5641 y presión de aire en costura doble) y los errores de instalación que provocan filtraciones meses después de la entrega.
-ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+TEMA: dos columnas enfrentadas: a la izquierda lo verificable —razón social, RUC, dirección de planta, catálogo, año de inicio—; a la derecha lo que no se afirma —certificaciones propias, envío mundial, obras publicadas—, cada lado con su marca distinta.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
 ```
 
 ---
 
-### 20. `/images/recursos/calculo-caudal-mangas-ventilacion-mina-subterranea.jpg`
+### 3. `/images/proceso/compradores-incoterm.png`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/recursos/calculo-caudal-mangas-ventilacion-mina-subterranea.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/calculo-caudal-mangas-ventilacion-mina-subterranea |
-| **Texto alternativo** | Apertura de la guía: Cálculo de caudal para mangas de ventilación en mina subterránea: método, corrección por altitud y por qué su manga e… |
+| **Archivo** | `public/images/proceso/compradores-incoterm.png` |
+| **Tamaño** | 1600 × 700 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /compradores |
+| **Texto alternativo** | Dónde cambia la responsabilidad entre EXW Lima, FOB Callao y DAP destino |
 
 **Prompt:**
 
 ```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
 
-TEMA: Cálculo de caudal para mangas de ventilación en mina subterránea: método, corrección por altitud y por qué su manga entrega menos aire del que promete
-DE QUÉ TRATA: Requerimiento de aire por persona y por HP diésel, corrección por altitud sobre los 1500, 3000 y 4000 msnm, pérdidas por fricción y por fugas en la manga, y cómo dimensionar diámetro y tramo para que el aire llegue al frente.
-ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+TEMA: línea de suministro de planta a destino con tres marcas de traspaso de responsabilidad —EXW en planta, FOB al costado del buque en el Callao, DAP en destino— indicando en cada tramo quién asume coste y riesgo.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
 ```
 
 ---
 
-### 21. `/images/recursos/ventilacion-impelente-vs-aspirante-labores-mineras.jpg`
+### 4. `/images/proceso/distribuidores-canal.png`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/recursos/ventilacion-impelente-vs-aspirante-labores-mineras.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/ventilacion-impelente-vs-aspirante-labores-mineras |
-| **Texto alternativo** | Apertura de la guía: Impelente o aspirante: cómo elegir el sistema de ventilación auxiliar de una labor y qué manga exige cada uno |
+| **Archivo** | `public/images/proceso/distribuidores-canal.png` |
+| **Tamaño** | 1600 × 800 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /distribuidores |
+| **Texto alternativo** | Territorio, almacén y fuerza de ventas: lo que se evalúa en una postulación de canal |
 
 **Prompt:**
 
 ```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
 
-TEMA: Impelente o aspirante: cómo elegir el sistema de ventilación auxiliar de una labor y qué manga exige cada uno
-DE QUÉ TRATA: Diferencias reales entre ventilación impelente, aspirante y mixta en labores ciegas: tiempo de reingreso tras voladura, control de polvo, distancia de la manga al frente y por qué la manga aspirante exige refuerzo antic colapso.
-ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+TEMA: los tres requisitos que se evalúan en un distribuidor —territorio definido, almacén propio y fuerza de ventas industrial— y el paso de postulación por RFQ que los reúne, sin sugerir registro automático.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
 ```
 
 ---
 
-### 22. `/images/recursos/como-elegir-geotextil-separacion-drenaje-refuerzo.jpg`
+### 5. `/images/proceso/socios-especificacion.png`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/recursos/como-elegir-geotextil-separacion-drenaje-refuerzo.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/como-elegir-geotextil-separacion-drenaje-refuerzo |
-| **Texto alternativo** | Apertura de la guía: Cómo elegir un geotextil: separación, filtración, drenaje o refuerzo, y por qué el gramaje solo no alcanza |
+| **Archivo** | `public/images/proceso/socios-especificacion.png` |
+| **Tamaño** | 1600 × 800 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /socios |
+| **Texto alternativo** | Dónde entra el fabricante en el ciclo de un proyecto de ingeniería |
 
 **Prompt:**
 
 ```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
 
-TEMA: Cómo elegir un geotextil: separación, filtración, drenaje o refuerzo, y por qué el gramaje solo no alcanza
-DE QUÉ TRATA: Las cuatro funciones del geotextil, por qué comprar por gramaje es la forma más común de equivocarse, qué propiedades exige AASHTO M288 según la severidad de la obra y cómo evitar la colmatación del filtro.
-ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+TEMA: ciclo de un proyecto de ingeniería —estudio, especificación, licitación, ejecución— señalando el punto de la especificación como el momento en que interviene el fabricante, no la fase de compra.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
 ```
 
 ---
 
-### 23. `/images/recursos/mallas-antiafidas-densidad-trama-ventilacion.jpg`
+### 6. `/images/proceso/proyectos-verificacion.png`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/recursos/mallas-antiafidas-densidad-trama-ventilacion.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/mallas-antiafidas-densidad-trama-ventilacion |
-| **Texto alternativo** | Apertura de la guía: Mallas antiáfidas: cómo elegir la densidad de trama sin asfixiar el cultivo |
+| **Archivo** | `public/images/proceso/proyectos-verificacion.png` |
+| **Tamaño** | 1600 × 700 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /proyectos |
+| **Texto alternativo** | Por qué una ficha de obra no se publica hasta estar confirmada y autorizada |
 
 **Prompt:**
 
 ```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
 
-TEMA: Mallas antiáfidas: cómo elegir la densidad de trama sin asfixiar el cultivo
-DE QUÉ TRATA: Qué plaga excluye cada densidad de trama, por qué excluir trips puede exigir varias veces más superficie de malla para mantener la ventilación, y cómo decidir entre exclusión total y manejo integrado en valles peruanos.
-ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+TEMA: compuerta de dos condiciones que una ficha de obra debe pasar antes de publicarse —confirmación interna de que la obra ocurrió tal como está escrita, y autorización del cliente para mencionarla— con la ficha detenida antes de la compuerta.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
 ```
 
 ---
 
-### 24. `/images/recursos/carpas-industriales-carga-viento-norma-e020.jpg`
+### 7. `/images/proceso/marco-pilares.png`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/recursos/carpas-industriales-carga-viento-norma-e020.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/carpas-industriales-carga-viento-norma-e020 |
-| **Texto alternativo** | Apertura de la guía: Carpas y coberturas textiles: cómo se calcula la carga de viento en el Perú según la Norma E.020 |
+| **Archivo** | `public/images/proceso/marco-pilares.png` |
+| **Tamaño** | 1600 × 900 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /marco |
+| **Texto alternativo** | Los pilares del marco de especificación y qué decide cada uno |
 
 **Prompt:**
 
 ```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
 
-TEMA: Carpas y coberturas textiles: cómo se calcula la carga de viento en el Perú según la Norma E.020
-DE QUÉ TRATA: Velocidad de diseño según altura, presión de viento, factores de forma para superficies inclinadas y cubiertas curvas, y por qué la succión —no la presión— es la que arranca las coberturas textiles.
-ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+TEMA: los pilares del marco de especificación dispuestos como columnas, cada una con el tipo de decisión que resuelve y lo que ocurre en obra si ese dato no existe al cotizar.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
 ```
 
 ---
 
-### 25. `/images/recursos/cobertores-transporte-concentrado-mineral.jpg`
+### 8. `/images/proceso/informes-metodo.png`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/recursos/cobertores-transporte-concentrado-mineral.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/cobertores-transporte-concentrado-mineral |
-| **Texto alternativo** | Apertura de la guía: Cobertores para transporte de concentrado: contención, amarre y el error de comprar por metro cuadrado |
+| **Archivo** | `public/images/proceso/informes-metodo.png` |
+| **Tamaño** | 1600 × 800 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /informes |
+| **Texto alternativo** | Cómo se construye un informe: dato oficial, lectura propia y lo que no se afirma |
 
 **Prompt:**
 
 ```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
 
-TEMA: Cobertores para transporte de concentrado: contención, amarre y el error de comprar por metro cuadrado
-DE QUÉ TRATA: Qué exige el transporte de concentrados por carretera en el Perú, por qué el cobertor es un elemento de contención y no solo una tapa, y cómo se especifica el amarre para que resista viento a velocidad de ruta.
-ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+TEMA: tres bandas apiladas y visiblemente distintas: la cifra de fuente oficial con su organismo y fecha, la lectura propia claramente separada, y la banda de lo que el informe declara no afirmar.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
 ```
 
 ---
 
-### 26. `/images/recursos/tanques-flexibles-almacenamiento-agua-operaciones-remotas.jpg`
+### 9. `/images/proceso/local-cobertura.png`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/recursos/tanques-flexibles-almacenamiento-agua-operaciones-remotas.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/tanques-flexibles-almacenamiento-agua-operaciones-remotas |
-| **Texto alternativo** | Apertura de la guía: Tanques flexibles para agua en operaciones remotas: base, volumen útil y la pregunta del agua potable |
+| **Archivo** | `public/images/proceso/local-cobertura.png` |
+| **Tamaño** | 1600 × 1000 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /local |
+| **Texto alternativo** | Despacho nacional desde una sola planta en Lima |
 
 **Prompt:**
 
 ```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
 
-TEMA: Tanques flexibles para agua en operaciones remotas: base, volumen útil y la pregunta del agua potable
-DE QUÉ TRATA: Cómo dimensionar un tanque flexible, por qué la preparación de la base decide su vida útil, y qué preguntar sobre certificación de materiales cuando el contenido es agua para consumo humano.
-ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
-```
-
----
-
-### 27. `/images/recursos/mulch-madera-espesor-calculo-cobertura-suelo.jpg`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/recursos/mulch-madera-espesor-calculo-cobertura-suelo.jpg` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/mulch-madera-espesor-calculo-cobertura-suelo |
-| **Texto alternativo** | Apertura de la guía: Mulch de madera: cómo calcular el volumen y por qué el espesor decide si funciona o no |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
-
-TEMA: Mulch de madera: cómo calcular el volumen y por qué el espesor decide si funciona o no
-DE QUÉ TRATA: Fórmula para calcular el volumen de mulch por superficie y espesor, qué rango de espesor recomiendan los servicios de extensión, y los errores de aplicación que anulan el beneficio o dañan la planta.
-ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+TEMA: silueta del Perú con la planta marcada en Lima y radios de despacho hacia las ciudades con página propia, dejando claro que hay una sola planta y no sedes regionales.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
 ```
 
 ---

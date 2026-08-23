@@ -11,6 +11,8 @@ import {
 import { descripcionAjustada } from '@/lib/meta';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
+import MiniaturaRanura from '@/components/MiniaturaRanura';
+import { ranurasErrorCompra } from '@/lib/imagenes';
 
 /**
  * Índice de sectores (/industria).
@@ -42,6 +44,7 @@ export const metadata: Metadata = {
 };
 
 export default function IndustriaIndexPage() {
+  const errores = ranurasErrorCompra();
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
       <JsonLd
@@ -103,8 +106,17 @@ export default function IndustriaIndexPage() {
             <Link
               key={ind.slug}
               href={`/industria/${ind.slug}`}
-              className="group rounded-3xl border border-gray-200 p-7 transition-all hover:border-[#059669]/50 hover:shadow-sm"
+              className="group overflow-hidden rounded-3xl border border-gray-200 transition-all hover:border-[#059669]/50 hover:shadow-sm"
             >
+              {/* El primer error de compra documentado del sector. Es el
+                  contenido que distingue este hub de una categoría más del
+                  catálogo, y conviene que se vea antes de entrar. */}
+              <MiniaturaRanura
+                ranura={errores.find((r) => r.id.startsWith(`error:${ind.slug}:`))}
+                className="w-full rounded-none"
+                sizes="(min-width: 640px) 480px, 100vw"
+              />
+              <div className="p-7">
               <div className="mb-2 font-mono text-xs uppercase tracking-wider text-[#059669]">
                 {n} productos del catálogo
               </div>
@@ -117,6 +129,7 @@ export default function IndustriaIndexPage() {
               <span className="inline-flex items-center gap-1 text-sm font-medium text-[#059669]">
                 Ver el sector <ArrowRight className="h-4 w-4" />
               </span>
+              </div>
             </Link>
           );
         })}

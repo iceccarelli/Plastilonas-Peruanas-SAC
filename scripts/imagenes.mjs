@@ -152,12 +152,26 @@ if (modo === 'informe') {
 
 // --- Documento de encargo ---------------------------------------------------
 
+/**
+ * Los silos del encargo. TIENE que estar completo: el documento se arma
+ * recorriendo estas claves, de modo que una ranura cuyo prefijo no aparezca
+ * aquí no se encarga y no avisa. Pasó: se añadieron cinco familias nuevas
+ * —biblioteca, calculadora, error, aplicación y proceso— y el encargo siguió
+ * emitiéndose con las cinco originales, informando alegremente de «0
+ * pendientes» con nueve diagramas sin dibujar. La comprobación de más abajo
+ * existe para que no vuelva a pasar en silencio.
+ */
 const grupos = {
   solucion: 'Arquitecturas de referencia (diagramas)',
   familia: 'Portadas de familia',
   producto: 'Galerías de producto',
   glosario: 'Términos del glosario (diagramas)',
   guia: 'Encabezados de guía',
+  biblioteca: 'Guías de especificación (diagramas)',
+  calculadora: 'Geometría de las calculadoras (diagramas)',
+  error: 'Errores de compra por sector (diagramas)',
+  aplicacion: 'Hubs de aplicación',
+  proceso: 'Procesos y flujos del sitio (diagramas)',
 };
 
 // --- Encargo de tomas alternas ----------------------------------------------
@@ -318,6 +332,18 @@ como \`public/images/familias/geosinteticos.jpg\`.
 ---
 
 `;
+
+// Ninguna ranura puede quedar fuera del encargo por no tener silo.
+const sinSilo = [...new Set(ranuras.map((r) => r.id.split(':')[0]))].filter(
+  (g) => !(g in grupos),
+);
+if (sinSilo.length) {
+  console.error(
+    `\n  Hay ranuras cuyo prefijo no tiene silo en \`grupos\`: ${sinSilo.join(', ')}.` +
+      `\n  Añádalo antes de generar el encargo o esas imágenes no se pedirán a nadie.\n`,
+  );
+  process.exit(2);
+}
 
 let total = 0;
 for (const [clave, titulo] of Object.entries(grupos)) {

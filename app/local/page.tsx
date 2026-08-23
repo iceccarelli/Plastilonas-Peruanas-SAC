@@ -11,6 +11,8 @@ import {
   faqSchema,
 } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
+import ImagenContenido from '@/components/ImagenContenido';
+import { ranurasProceso } from '@/lib/imagenes';
 
 /**
  * Índice de cobertura local (/local).
@@ -83,6 +85,7 @@ export const metadata: Metadata = {
 };
 
 export default function LocalIndexPage() {
+  const esquema = ranurasProceso().find((r) => r.id === 'proceso:local-cobertura');
   const porRegion = REGION_ORDER.map((region) => ({
     region,
     label: REGION_LABEL[region] ?? region,
@@ -131,6 +134,10 @@ export default function LocalIndexPage() {
       <h1 className="mb-4 text-4xl font-semibold tracking-tight text-[#0A2540]">
         Cobertura en {CIUDADES.length} ciudades del Perú
       </h1>
+      {/* Diagrama del registro. Degrada solo: sin archivo no se pinta nada,
+          y en cuanto se publique aparece sin tocar esta página. */}
+      {esquema && <ImagenContenido ranura={esquema} className="mb-8 mt-6" sizes="(min-width: 768px) 860px, 100vw" />}
+
 
       <p className="speakable-intro mb-10 max-w-3xl text-lg text-gray-700">
         {SITE.name} fabrica en {SITE.addressLocality}, {SITE.addressRegion} y despacha a

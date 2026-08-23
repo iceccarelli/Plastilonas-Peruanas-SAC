@@ -5,6 +5,8 @@ import { calculadoras, areasDeCalculo, ADVERTENCIA } from '@/lib/calculadoras';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, itemListSchema, webPageSchema, faqSchema } from '@/lib/schema';
+import MiniaturaRanura from '@/components/MiniaturaRanura';
+import { ranurasCalculadora } from '@/lib/imagenes';
 
 /**
  * Índice de calculadoras.
@@ -54,6 +56,7 @@ const PREGUNTAS = [
 
 export default function CalculadorasPage() {
   const areas = areasDeCalculo();
+  const geometrias = ranurasCalculadora();
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
@@ -118,6 +121,14 @@ export default function CalculadorasPage() {
                     href={`/calculadoras/${c.slug}`}
                     className="group flex h-full flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-gray-100 transition hover:ring-gray-300"
                   >
+                    {/* El esquema de geometría del método. Un índice de
+                        calculadoras sin figura obliga a entrar en cinco para
+                        saber cuál mide lo que uno necesita. */}
+                    <MiniaturaRanura
+                      ranura={geometrias.find((r) => r.id === `calculadora:${c.slug}`)}
+                      className="mb-4 w-full"
+                      sizes="(min-width: 640px) 420px, 100vw"
+                    />
                     <Calculator className="h-5 w-5 text-[#059669]" aria-hidden="true" />
                     <h3 className="mt-3 text-lg font-semibold text-gray-900">{c.titulo}</h3>
                     <p className="mt-2 text-sm text-gray-600">{c.pregunta}</p>

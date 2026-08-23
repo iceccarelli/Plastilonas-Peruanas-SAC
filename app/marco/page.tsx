@@ -12,6 +12,8 @@ import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, faqSchema, itemListSchema, webPageSchema } from '@/lib/schema';
+import ImagenContenido from '@/components/ImagenContenido';
+import { ranurasProceso } from '@/lib/imagenes';
 
 /**
  * Marco de Especificación Plastilonas — el documento público.
@@ -61,6 +63,7 @@ export const metadata: Metadata = {
 };
 
 export default function MarcoPage() {
+  const esquema = ranurasProceso().find((r) => r.id === 'proceso:marco-pilares');
   return (
     <div className="mx-auto max-w-4xl px-4 py-14">
       <TrackView kind="framework" slug="marco" />
@@ -101,6 +104,10 @@ export default function MarcoPage() {
       <h1 className="mb-6 text-4xl font-semibold leading-tight tracking-tight text-[#0A2540]">
         Marco de Especificación: seis pilares para definir un proyecto antes de cotizarlo
       </h1>
+      {/* Diagrama del registro. Degrada solo: sin archivo no se pinta nada,
+          y en cuanto se publique aparece sin tocar esta página. */}
+      {esquema && <ImagenContenido ranura={esquema} className="mb-8 mt-6" sizes="(min-width: 768px) 860px, 100vw" />}
+
 
       {/* El marco solo cambia la posición de quien lo publica si CIRCULA, y los
           estándares circulan en PDF: se adjuntan a un requerimiento y se usan

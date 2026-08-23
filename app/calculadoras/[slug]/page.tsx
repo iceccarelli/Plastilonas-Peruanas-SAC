@@ -14,6 +14,7 @@ import { JsonLd } from '@/components/JsonLd';
 import {
   breadcrumbSchema,
   howToSchema,
+  imageObjectSchema,
   softwareApplicationSchema,
   webPageSchema,
 } from '@/lib/schema';
@@ -122,6 +123,23 @@ export default async function CalculadoraPage({
               text: linea,
             })),
           }),
+          /**
+           * El esquema de geometría es lo que un comprador mira antes de creerse
+           * el número. Si no se declara, un agente que lea sólo el grafo ve la
+           * fórmula sin la figura que define qué es cada letra.
+           */
+          ...(geometria
+            ? [
+                imageObjectSchema({
+                  url: geometria.ruta,
+                  ancho: geometria.ancho,
+                  alto: geometria.alto,
+                  alt: geometria.alt,
+                  paginaUrl: url,
+                  esDiagrama: true,
+                }),
+              ]
+            : []),
         ]}
       />
 

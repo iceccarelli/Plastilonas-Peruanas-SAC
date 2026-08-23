@@ -509,18 +509,29 @@ export function imageObjectSchema(img: {
   /** Página donde vive la imagen. */
   paginaUrl: string;
   esDiagrama: boolean;
+  /**
+   * Discriminante para páginas con más de una imagen declarada. Sin él, dos
+   * ImageObject en la misma página comparten `@id` y el segundo sobrescribe al
+   * primero en el grafo del buscador: se declararían dos y se leería una.
+   */
+  clave?: string;
+  /**
+   * `representativeOfPage` sólo puede ser cierto en una imagen por página.
+   * Marcarlas todas es declarar cuatro portadas y no tener ninguna.
+   */
+  representativa?: boolean;
 }): Dict {
   return {
     "@context": "https://schema.org",
     "@type": "ImageObject",
-    "@id": `${img.paginaUrl}#imagen`,
+    "@id": `${img.paginaUrl}#imagen${img.clave ? `-${img.clave}` : ""}`,
     contentUrl: `${SITE.url}${img.url}`,
     url: `${SITE.url}${img.url}`,
     width: img.ancho,
     height: img.alto,
     caption: img.alt,
     description: img.alt,
-    representativeOfPage: true,
+    representativeOfPage: img.representativa ?? true,
     inLanguage: SITE.language,
     creator: organizationRef(),
     // Un esquema no es una fotografía de una obra ejecutada, y conviene que

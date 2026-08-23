@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, Layers } from 'lucide-react';
 import { solutions } from '@/lib/solutions';
+import MiniaturaRanura from '@/components/MiniaturaRanura';
+import { ranurasSolucion } from '@/lib/imagenes';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
@@ -33,6 +35,7 @@ export const metadata: Metadata = {
 };
 
 export default function SolucionesPage() {
+  const portadas = ranurasSolucion();
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
       <JsonLd
@@ -91,8 +94,18 @@ export default function SolucionesPage() {
         {solutions.map((s) => (
           <article
             key={s.slug}
-            className="group rounded-3xl border border-gray-100 p-7 transition-all hover:border-[#059669]/40"
+            className="group overflow-hidden rounded-3xl border border-gray-100 transition-all hover:border-[#059669]/40"
           >
+            {/* La misma portada que abre la arquitectura. Seis conjuntos
+                descritos solo con texto se confunden entre sí en la lista. */}
+            <Link href={`/soluciones/${s.slug}`} aria-hidden="true" tabIndex={-1}>
+              <MiniaturaRanura
+                ranura={portadas.find((r) => r.id === `solucion:${s.slug}`)}
+                className="w-full rounded-none"
+                sizes="(min-width: 768px) 760px, 100vw"
+              />
+            </Link>
+            <div className="p-7">
             <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
               <span className="inline-flex items-center gap-1.5 font-medium uppercase tracking-[0.12em] text-[#059669]">
                 <Layers className="h-3.5 w-3.5" />
@@ -115,6 +128,7 @@ export default function SolucionesPage() {
             >
               Ver el conjunto completo <ArrowRight className="h-4 w-4" />
             </Link>
+            </div>
           </article>
         ))}
       </div>

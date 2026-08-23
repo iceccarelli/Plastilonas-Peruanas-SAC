@@ -608,6 +608,82 @@ const PROCESOS = [
     alt: 'Ejes del marco de evaluación de un proveedor de textiles industriales',
     tema: 'los ejes con que se compara a un proveedor: capacidad de fabricación, alcance de instalación, documentación técnica, plazo, respuesta al RFQ y evidencia de obra',
   },
+  // Segundo encargo. Estas nueve páginas llegan hoy al rastreador sin una sola
+  // imagen, y son precisamente las que abre quien está decidiendo si homologar
+  // a este proveedor. El texto ya está escrito; falta la figura que lo hace
+  // recorrible de un vistazo.
+  {
+    slug: 'compras-homologacion',
+    ruta: '/compras',
+    ancho: 1600,
+    alto: 800,
+    alt: 'Recorrido de homologación de un proveedor, de la identidad al primer pedido',
+    tema: 'recorrido de homologación de un proveedor industrial en seis paradas: verificar identidad y RUC, revisar catálogo y modo de suministro, confirmar alcance de exportación, reunir documentación técnica, emitir el RFQ y cerrar el primer pedido',
+  },
+  {
+    slug: 'confianza-identidad',
+    ruta: '/confianza',
+    ancho: 1600,
+    alto: 800,
+    alt: 'Lo que se puede verificar de la empresa y lo que deliberadamente no se afirma',
+    tema: 'dos columnas enfrentadas: a la izquierda lo verificable —razón social, RUC, dirección de planta, catálogo, año de inicio—; a la derecha lo que no se afirma —certificaciones propias, envío mundial, obras publicadas—, cada lado con su marca distinta',
+  },
+  {
+    slug: 'compradores-incoterm',
+    ruta: '/compradores',
+    ancho: 1600,
+    alto: 700,
+    alt: 'Dónde cambia la responsabilidad entre EXW Lima, FOB Callao y DAP destino',
+    tema: 'línea de suministro de planta a destino con tres marcas de traspaso de responsabilidad —EXW en planta, FOB al costado del buque en el Callao, DAP en destino— indicando en cada tramo quién asume coste y riesgo',
+  },
+  {
+    slug: 'distribuidores-canal',
+    ruta: '/distribuidores',
+    ancho: 1600,
+    alto: 800,
+    alt: 'Territorio, almacén y fuerza de ventas: lo que se evalúa en una postulación de canal',
+    tema: 'los tres requisitos que se evalúan en un distribuidor —territorio definido, almacén propio y fuerza de ventas industrial— y el paso de postulación por RFQ que los reúne, sin sugerir registro automático',
+  },
+  {
+    slug: 'socios-especificacion',
+    ruta: '/socios',
+    ancho: 1600,
+    alto: 800,
+    alt: 'Dónde entra el fabricante en el ciclo de un proyecto de ingeniería',
+    tema: 'ciclo de un proyecto de ingeniería —estudio, especificación, licitación, ejecución— señalando el punto de la especificación como el momento en que interviene el fabricante, no la fase de compra',
+  },
+  {
+    slug: 'proyectos-verificacion',
+    ruta: '/proyectos',
+    ancho: 1600,
+    alto: 700,
+    alt: 'Por qué una ficha de obra no se publica hasta estar confirmada y autorizada',
+    tema: 'compuerta de dos condiciones que una ficha de obra debe pasar antes de publicarse —confirmación interna de que la obra ocurrió tal como está escrita, y autorización del cliente para mencionarla— con la ficha detenida antes de la compuerta',
+  },
+  {
+    slug: 'marco-pilares',
+    ruta: '/marco',
+    ancho: 1600,
+    alto: 900,
+    alt: 'Los pilares del marco de especificación y qué decide cada uno',
+    tema: 'los pilares del marco de especificación dispuestos como columnas, cada una con el tipo de decisión que resuelve y lo que ocurre en obra si ese dato no existe al cotizar',
+  },
+  {
+    slug: 'informes-metodo',
+    ruta: '/informes',
+    ancho: 1600,
+    alto: 800,
+    alt: 'Cómo se construye un informe: dato oficial, lectura propia y lo que no se afirma',
+    tema: 'tres bandas apiladas y visiblemente distintas: la cifra de fuente oficial con su organismo y fecha, la lectura propia claramente separada, y la banda de lo que el informe declara no afirmar',
+  },
+  {
+    slug: 'local-cobertura',
+    ruta: '/local',
+    ancho: 1600,
+    alto: 1000,
+    alt: 'Despacho nacional desde una sola planta en Lima',
+    tema: 'silueta del Perú con la planta marcada en Lima y radios de despacho hacia las ciudades con página propia, dejando claro que hay una sola planta y no sedes regionales',
+  },
 ] as const;
 
 export function ranurasProceso(): RanuraImagen[] {
