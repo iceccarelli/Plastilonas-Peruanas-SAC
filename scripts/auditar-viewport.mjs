@@ -100,6 +100,29 @@ function pararServidor(p) {
   try { process.kill(-p.pid, 'SIGKILL'); } catch { try { p.kill('SIGKILL'); } catch {} }
 }
 
+/**
+ * Navegación con reintentos.
+ *
+ * Un `goto` que se agota no significa que la página esté rota: significa que
+ * el servidor no contestó a tiempo. Con un solo intento, un atasco puntual
+ * tumba una comprobación de cinco minutos y deja el PR en rojo por algo que
+ * no es un defecto del sitio. Tres intentos con espera creciente distinguen
+ * el atasco del fallo real: si las tres veces falla, es del sitio.
+ */
+async function irA(pagina, url, intentos = 3) {
+  let ultimo;
+  for (let i = 1; i <= intentos; i++) {
+    try {
+      await pagina.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+      return;
+    } catch (e) {
+      ultimo = e;
+      if (i < intentos) await new Promise((r) => setTimeout(r, 2000 * i));
+    }
+  }
+  throw new Error(`no se pudo abrir ${url} tras ${intentos} intentos: ${ultimo?.message ?? ''}`);
+}
+
 async function esperarServidor(intentos = 60) {
   for (let i = 0; i < intentos; i++) {
     try {
@@ -284,13 +307,43 @@ for (const d of DISPOSITIVOS) {
   });
   const pagina = await ctx.newPage();
 
-  // El sitio pide fuentes, analítica y push a terceros. En una medición de
-  // layout esas peticiones solo añaden latencia y ruido —y en un runner sin
-  // salida a internet, cuelgan—. Se cortan: no afectan a la geometría.
+  // Dos intervenciones sobre la red, por motivos distintos.
+  //
+  // 1. Terceros (fuentes, analítica, push): se cortan. Solo añaden latencia y
+  //    ruido, y en un runner sin salida a internet cuelgan.
+  //
+  // 2. EL OPTIMIZADOR DE IMÁGENES DE NEXT: se puentea, y esto es lo que hacía
+  //    fallar la comprobación en CI.
+  //
+  //    Cada dispositivo de la matriz tiene un ancho y una densidad distintos,
+  //    así que `sizes` pide a /_next/image una variante distinta de CADA foto.
+  //    Diecisiete dispositivos sobre páginas con una docena de imágenes son
+  //    cientos de redimensionados con sharp en un `next start` de un solo
+  //    proceso. En un runner de dos núcleos la cola crece hasta que una
+  //    navegación posterior se queda sin respuesta:
+  //
+  //      page.goto: Timeout 60000ms exceeded
+  //        navigating to "http://127.0.0.1:4421/industria/mineria"
+  //
+  //    Ese fallo no era del sitio: era esta herramienta ahogando al servidor
+  //    que ella misma levanta. Sirviendo el archivo original en lugar de la
+  //    variante, la geometría medida es idéntica —el <img> conserva su caja,
+  //    que es lo único que este barrido mira— y el cuello de botella
+  //    desaparece.
+  //
+  //    El optimizador SÍ se ejercita en el segundo barrido, el de imágenes,
+  //    que corre sobre dos anchos y sí debe detectar una variante que vuelve
+  //    vacía. Cada barrido recibe lo que necesita, no lo mismo.
   await pagina.route('**/*', (ruta) => {
     const u = new URL(ruta.request().url());
-    if (u.hostname === '127.0.0.1' || u.hostname === 'localhost') return ruta.continue();
-    return ruta.abort();
+    if (u.hostname !== '127.0.0.1' && u.hostname !== 'localhost') return ruta.abort();
+    if (u.pathname === '/_next/image') {
+      const original = u.searchParams.get('url');
+      if (original && original.startsWith('/')) {
+        return ruta.continue({ url: `${BASE}${original}` });
+      }
+    }
+    return ruta.continue();
   });
 
   const porDispositivo = [];
@@ -305,7 +358,7 @@ for (const d of DISPOSITIVOS) {
     // esperar a que cada <img> estuviera `complete` colgaba 45s por ruta y por
     // dispositivo, porque una imagen con carga diferida que nunca entra en
     // pantalla no se declara completa jamás.
-    await pagina.goto(BASE + ruta, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await irA(pagina, BASE + ruta);
     await pagina.evaluate(() => {
       delete window.__lecturas;
       return document.fonts ? document.fonts.ready.catch(() => {}) : null;
@@ -368,7 +421,7 @@ for (const a of ANCHOS_IMAGEN) {
   });
 
   for (const ruta of RUTAS_IMAGENES) {
-    await pagina.goto(BASE + ruta, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await irA(pagina, BASE + ruta);
 
     // Recorrer la página entera ANTES de medir.
     //
