@@ -8,16 +8,24 @@ import { Ruler, HardHat, Ship, Lightbulb, ArrowRight, Check, type LucideIcon } f
 
 const ICONS: Record<string, LucideIcon> = { ruler: Ruler, hardhat: HardHat, ship: Ship, lightbulb: Lightbulb };
 
-// Cada servicio -> par de fotos (slug base). El componente prueba /images/<base>.jpg
-// y <base>-2.jpg; si alguna falta, cae con elegancia (sin ícono roto).
-const PHOTO: Record<string, string> = {
-  ruler: 'servicio-fabricacion',
-  hardhat: 'servicio-instalacion',
-  ship: 'servicio-importacion',
-  lightbulb: 'servicio-asesoria',
-};
-
-type Svc = { title: string; desc: string; icon: string };
+/**
+ * FOTOS DE SERVICIO — resueltas en el servidor, no adivinadas aquí.
+ *
+ * La versión anterior construía la ruta con `/images/${base}${ph === 1 ? '-2' : ''}.jpg`
+ * y un comentario prometía que «si alguna falta, cae con elegancia (sin ícono
+ * roto)». No caía: nunca existieron servicio-fabricacion-2.jpg ni
+ * servicio-instalacion-2.jpg, y cada carga de la portada lanzaba
+ *
+ *   ⨯ The requested resource isn't a valid image for /images/servicio-instalacion-2.jpg
+ *
+ * Un componente de cliente no puede mirar el disco, así que la promesa era
+ * imposible de cumplir desde aquí. Ahora el servidor resuelve qué tomas
+ * existen —con `tomasDe`, el mismo mecanismo de la galería de producto, que
+ * además descarta las copias byte a byte— y las pasa ya resueltas. Si un
+ * servicio tiene una sola foto, se muestra fija; si aparece una segunda, el
+ * cruce se activa solo con dejar el archivo en su sitio.
+ */
+type Svc = { title: string; desc: string; icon: string; tomas: string[] };
 
 export default function ServiceTabs({ services }: { services: Svc[] }) {
   const [active, setActive] = useState(0);
@@ -25,7 +33,7 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
   const [hover, setHover] = useState(false);
   const svc = services[active];
   const Icon = ICONS[svc.icon] ?? Ruler;
-  const base = PHOTO[svc.icon];
+  const tomas = svc.tomas?.length ? svc.tomas : [];
 
   // Auto-avance de pestañas cada 5s (pausa al pasar el cursor / prefiere menos movimiento).
   useEffect(() => {
@@ -35,12 +43,15 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
     return () => clearInterval(id);
   }, [hover, services.length]);
 
-  // Crossfade entre las 2 fotos del servicio activo cada 3.5s.
+  // Cruce entre las tomas del servicio activo cada 3.5s.
   useEffect(() => {
     setPhase(0);
-    const id = setInterval(() => setPhase((p) => (p === 0 ? 1 : 0)), 3500);
+    // Con una sola toma no hay nada que alternar: mantener el intervalo solo
+    // gastaría renders y provocaría un cruce de la imagen contra sí misma.
+    if (tomas.length < 2) return;
+    const id = setInterval(() => setPhase((p) => (p + 1) % tomas.length), 3500);
     return () => clearInterval(id);
-  }, [active]);
+  }, [active, tomas.length]);
 
   return (
     <div
@@ -76,10 +87,10 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
         {/* Capa de fotos */}
         <div className="absolute inset-0">
           <AnimatePresence>
-            {[0, 1].map((ph) =>
+            {tomas.map((_, ph) =>
               ph === phase ? (
                 <motion.div
-                  key={`${base}-${ph}`}
+                  key={`${svc.icon}-${ph}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -87,7 +98,7 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
                   className="absolute inset-0 ken-burns-wrap"
                 >
                   <Image
-                    src={`/images/${base}${ph === 1 ? '-2' : ''}.jpg`}
+                    src={tomas[ph] ?? tomas[0]}
                     alt={svc.title}
                     fill
                     sizes="(max-width: 1024px) 100vw, 900px"

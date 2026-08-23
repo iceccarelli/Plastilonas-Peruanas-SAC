@@ -1,5 +1,5 @@
 import ExitIntentModal from '@/components/ExitIntentModal';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
@@ -34,6 +34,28 @@ const mono = JetBrains_Mono({
   display: 'swap',
 });
 
+/**
+ * VIEWPORT — `viewportFit: 'cover'` es lo que activa las variables
+ * env(safe-area-inset-*). Sin él, en un iPhone con muesca girado a horizontal
+ * el navegador reserva franjas laterales y el encabezado fijo queda con el
+ * contenido pegado al recorte de pantalla; con él, el header puede respetar el
+ * área segura (ver components/Navbar.tsx).
+ *
+ * `maximumScale` y `userScalable` se dejan en sus valores permisivos a
+ * propósito: bloquear el zoom rompe la accesibilidad en móvil y es un fallo de
+ * WCAG 1.4.4, además de un problema real para un jefe de compras leyendo una
+ * ficha técnica en el teléfono.
+ */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0A2540' },
+  ],
+};
+
 export const metadata: Metadata = {
   title: {
     default: 'Plastilonas Peruanas SAC | Soluciones Industriales de Lona y Plástico',
@@ -48,7 +70,7 @@ export const metadata: Metadata = {
     // agente la leen. El <title> es un espacio de clic, no un registro legal.
     template: '%s | Plastilonas',
   },
-  description: 'Más de 15 años fabricando e instalando soluciones industriales a medida en el Perú: big bags, lonas y cobertores, geosintéticos, estructuras y arquitectura textil, mallas agrícolas, ventilación industrial y más. Un solo proveedor, fabricación propia e instalación.',
+  description: 'Fabricante peruano de textiles industriales a medida desde 2009: big bags, lonas y cobertores, geosintéticos, estructuras, mallas agrícolas y ventilación minera. Un solo proveedor, fabricación propia e instalación en el Perú.',
   keywords: [
     'plastilonas peruanas',
     'big bags lima',

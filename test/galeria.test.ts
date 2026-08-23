@@ -273,8 +273,19 @@ describe('glosario y recursos: la misma rotación', () => {
 
   it('resuelve las tomas con la misma librería que la galería', () => {
     // Dos implementaciones del mismo cruce divergen; una sola no puede.
+    //
+    // Esta comprobación fijaba antes el literal `tomasDe(ranura.ruta)`, es
+    // decir, el NOMBRE de una variable. Cuando el componente pasó a poder
+    // servir una fotografía de respaldo —y por tanto a resolver las tomas de
+    // la imagen que realmente pinta, no de la que la ranura pedía—, la prueba
+    // falló sin que nada se hubiera roto. Ahora se verifica la regla: las
+    // tomas se resuelven con `tomasDe` sobre EXACTAMENTE la misma expresión
+    // que alimenta el `src` de la imagen principal.
     expect(src).toMatch(/from '@\/lib\/galeria'/);
-    expect(src).toMatch(/tomasDe\(ranura\.ruta\)/);
+    const llamada = src.match(/const tomas = tomasDe\(([A-Za-z0-9_.]+)\)/);
+    expect(llamada, 'ImagenContenido debe resolver sus tomas con tomasDe').toBeTruthy();
+    const fuente = llamada![1];
+    expect(src).toMatch(new RegExp(`src=\\{${fuente.replace('.', '\\.')}\\}`));
     expect(src).toMatch(/claseCiclo\(/);
   });
 

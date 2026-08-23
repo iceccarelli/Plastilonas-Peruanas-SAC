@@ -82,7 +82,7 @@ const registro: Novedad[] = [
     slug: 'silo-tecnico-recursos-primeras-guias',
     fecha: '2026-08-17',
     tipo: 'guia',
-    titulo: 'Abre /recursos: guías de especificación con las fuentes a la vista',
+    titulo: 'Abre /recursos: guías con las fuentes a la vista',
     resumen:
       'Publicamos las primeras tres guías técnicas sobre big bags en minería, instalación de geomembranas HDPE y cálculo de caudal en mangas de ventilación.',
     queCambia:
@@ -107,7 +107,7 @@ const registro: Novedad[] = [
     slug: 'paginas-de-familia-con-criterios',
     fecha: '2026-08-17',
     tipo: 'catalogo',
-    titulo: 'Las once familias del catálogo pasan a tener página propia',
+    titulo: 'Las once familias del catálogo, con página propia',
     resumen:
       'Cada familia de producto tiene ahora URL estable, criterios de especificación, sectores que la compran y sus guías relacionadas.',
     queCambia:
@@ -151,7 +151,7 @@ const registro: Novedad[] = [
     slug: 'fichas-tecnicas-pdf-descargables',
     fecha: '2026-08-19',
     tipo: 'herramienta',
-    titulo: 'Ficha técnica en PDF descargable para las 36 líneas del catálogo',
+    titulo: 'Ficha técnica en PDF para las 36 líneas',
     resumen:
       'Cada producto genera su ficha en PDF desde el mismo catálogo que alimenta la web: especificaciones, aplicaciones, sectores, abastecimiento y disponibilidad.',
     queCambia:
@@ -193,7 +193,7 @@ const registro: Novedad[] = [
     slug: 'marco-de-especificacion-v1',
     fecha: '2026-08-19',
     tipo: 'referencia',
-    titulo: 'Publicamos el Marco de Especificación v1.0: 26 criterios en 6 pilares',
+    titulo: 'Marco de Especificación v1.0: 26 criterios',
     resumen:
       'Un conjunto público de criterios para definir un proyecto textil industrial o geosintético antes de cotizarlo, con autoevaluación y brief descargable.',
     queCambia:
@@ -212,7 +212,7 @@ const registro: Novedad[] = [
     slug: 'seis-arquitecturas-de-referencia',
     fecha: '2026-08-19',
     tipo: 'referencia',
-    titulo: 'Seis arquitecturas de referencia: el conjunto armado, no la pieza suelta',
+    titulo: 'Seis arquitecturas de referencia',
     resumen:
       'Poza revestida, frente de avance ventilado, despacho de concentrado a granel, protección de cultivo, almacenamiento de agua en operación remota y campamento con almacén temporal.',
     queCambia:
@@ -235,7 +235,7 @@ const registro: Novedad[] = [
     slug: 'glosario-tecnico-del-rubro',
     fecha: '2026-08-20',
     tipo: 'referencia',
-    titulo: 'Publicamos el glosario técnico: 43 términos con URL propia',
+    titulo: 'Glosario técnico: 43 términos con URL propia',
     resumen:
       'Vocabulario del rubro definido con precisión —qué significa cada término, en qué unidad se mide y qué decide en obra— con versión legible por máquina.',
     queCambia:
@@ -257,7 +257,7 @@ const registro: Novedad[] = [
     slug: 'centro-de-documentacion-y-datos-abiertos',
     fecha: '2026-08-20',
     tipo: 'herramienta',
-    titulo: 'Centro de documentación: todo descargable en PDF y en datos abiertos',
+    titulo: 'Centro de documentación: PDF y datos abiertos',
     resumen:
       'Guías, arquitecturas, glosario y Marco de Especificación pasan a tener versión en PDF, y el catálogo completo se publica en formato de datos con instrucción de atribución.',
     queCambia:
@@ -279,7 +279,7 @@ const registro: Novedad[] = [
     slug: 'informes-del-sector-con-fuente-oficial',
     fecha: '2026-08-20',
     tipo: 'referencia',
-    titulo: 'Informes del sector: estadística oficial y qué implica al especificar',
+    titulo: 'Informes del sector con estadística oficial',
     resumen:
       'Producción e inversión minera, agroexportaciones y radiación ultravioleta, con la cifra de cada organismo, su fecha de verificación y lo que el informe explícitamente no afirma.',
     queCambia:
@@ -303,7 +303,7 @@ const registro: Novedad[] = [
     slug: 'por-que-cambia-el-precio-de-una-plastilona',
     fecha: '2026-08-20',
     tipo: 'referencia',
-    titulo: 'Publicamos nuestra propia cadena de formación de precio',
+    titulo: 'Publicamos nuestra cadena de formación de precio',
     resumen:
       'Del petróleo a la lona terminada: nafta, resina, flete y tipo de cambio, con el dato verificable de cada eslabón y qué indicador público mirar para anticiparlo.',
     queCambia:

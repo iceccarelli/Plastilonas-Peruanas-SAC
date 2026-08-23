@@ -113,6 +113,9 @@ const rutaDeclarada = (destino) =>
     return re.test(destino);
   });
 
+/** Formas exactas de la marca. Un segmento igual a una de estas ES la marca. */
+const MARCAS = new Set(['Plastilonas', 'Plastilonas Peruanas', 'Plastilonas Peruanas SAC']);
+
 const defectos = [];
 const anota = (gravedad, tipo, ruta, detalle) => defectos.push({ gravedad, tipo, ruta, detalle });
 
@@ -179,8 +182,34 @@ for (const p of paginas) {
   const t = titulo(html);
   if (!t) anota('error', 'sin-titulo', ruta, 'la página no emite <title>');
   else {
-    if (t.length > 65) anota('aviso', 'titulo-largo', ruta, `${t.length} caracteres: Google trunca cerca de 60`);
+    // TRINQUETE. Esto era un aviso mientras había 100 títulos largos: marcar
+    // como error un defecto que aparece cien veces solo consigue que se apague
+    // la comprobación. Una vez llevado a cero, el aviso deja de servir para
+    // nada: nadie mira un renglón ámbar entre cincuenta, y el primer parche que
+    // añada una página con un título de 74 caracteres lo deshace en silencio.
+    //
+    // De cero solo se sale hacia arriba, así que a partir de aquí ES UN ERROR y
+    // rompe la integración continua. Corregirlo no es truncar: es pasar el
+    // título por `tituloAjustado` de lib/meta.ts, que suelta el complemento
+    // cuando no cabe entero.
+    if (t.length > 65) anota('error', 'titulo-largo', ruta, `${t.length} caracteres: Google recorta en 65 (use tituloAjustado de lib/meta.ts)`);
     if (t.length < 15) anota('aviso', 'titulo-corto', ruta, `«${t}» (${t.length} caracteres)`);
+    // Marca repetida. Ocurrió de verdad: al acortar el sufijo de la plantilla,
+    // las doce páginas de ciudad —que metían la marca en su propio título—
+    // empezaron a servir «… | Plastilonas Peruanas SAC | Plastilonas». Es un
+    // error que solo se ve en el HTML final, porque nace de la SUMA de la
+    // plantilla y del título de la página.
+    //
+    // Se cuentan SEGMENTOS que son exactamente la marca, no apariciones de la
+    // palabra: en el Perú «plastilona» es el sustantivo del producto, y
+    // «Plastilonas y lonas en Arequipa | Plastilonas» es correcto. Contar la
+    // palabra marcaba las doce ciudades como defectuosas estando bien, que es
+    // la forma más rápida de que un auditor deje de mirarse.
+    const segmentos = t.split(' | ').map((x) => x.trim());
+    const comoMarca = segmentos.filter((x) => MARCAS.has(x)).length;
+    if (comoMarca > 1) {
+      anota('error', 'marca-duplicada', ruta, `la marca aparece como segmento ${comoMarca} veces: «${t}»`);
+    }
     porTitulo.set(t, [...(porTitulo.get(t) ?? []), ruta]);
   }
 

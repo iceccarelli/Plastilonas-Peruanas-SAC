@@ -47,6 +47,28 @@ export interface RanuraImagen {
   contexto: string;
   /** Encargo para generarla. Se emite con el script de prompts. */
   prompt: string;
+  /**
+   * FOTOGRAFÍA REAL DE RESERVA, ya publicada en este repositorio.
+   *
+   * Mientras la imagen encargada no llega, la página mostraba un marcador
+   * gris. Eso es honesto, pero once portadas de familia, diez de guía y seis
+   * de solución en gris es un sitio que parece a medio hacer — y a un jefe de
+   * compras eso le dice algo sobre cómo trabajamos, aunque el texto sea
+   * impecable.
+   *
+   * El respaldo NO es una imagen de relleno genérica ni una ilustración
+   * inventada: es la fotografía de un producto REAL de esa misma familia,
+   * solución o guía, que ya está en public/images/galeria. Se deriva del
+   * catálogo, así que no puede desviarse: si el producto cambia de foto, el
+   * respaldo cambia con él.
+   *
+   * Cuando se usa, el `alt` pasa a describir lo que de verdad se ve —el
+   * producto fotografiado— y no lo que la ranura pedía. Un alt que describe
+   * una imagen que no está es peor que no tener alt.
+   *
+   * La imagen encargada SIEMPRE gana: basta con dejar el archivo en su ruta.
+   */
+  respaldo?: { ruta: string; alt: string; nombre: string };
 }
 
 /* ------------------------------------------------------------------ */
@@ -141,6 +163,25 @@ export function ranurasProducto(incluirCompletas = false): RanuraImagen[] {
     );
 }
 
+/**
+ * Primera fotografía real disponible entre una lista de slugs de producto.
+ *
+ * Devuelve undefined si ninguno tiene foto: en ese caso la página vuelve al
+ * marcador, que sigue siendo la respuesta correcta. Preferimos un hueco
+ * declarado a una imagen que no corresponde.
+ */
+function fotoRealDe(
+  slugs: string[],
+): { ruta: string; alt: string; nombre: string } | undefined {
+  for (const slug of slugs) {
+    const p = products.find((x) => x.slug === slug);
+    if (p?.image) {
+      return { ruta: p.image, alt: `${p.name} — ${p.shortDescription}`, nombre: p.name };
+    }
+  }
+  return undefined;
+}
+
 /** Portada de cada familia: once páginas indexables hoy sin imagen. */
 export function ranurasFamilia(): RanuraImagen[] {
   return productFamilies.map((f) => {
@@ -153,6 +194,9 @@ export function ranurasFamilia(): RanuraImagen[] {
       alt: `${f.name}: ${f.tagline}`,
       tipo: 'ilustracion' as TipoImagen,
       contexto: `Portada de /productos/familia/${f.slug}`,
+      // Un producto de la propia familia es la portada más fiel que existe
+      // mientras no haya una foto de conjunto encargada.
+      respaldo: fotoRealDe(items.map((p) => p.slug)),
       prompt:
         `${ESTILO_FOTO.replace('Proporción 3:2 horizontal.', 'Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.')}\n\n` +
         `TEMA: familia de producto "${f.name}". ${f.tagline}\n` +
@@ -176,6 +220,10 @@ export function ranurasSolucion(): RanuraImagen[] {
     alt: `Esquema de la arquitectura de referencia: ${s.titulo}`,
     tipo: 'diagrama' as TipoImagen,
     contexto: `Encabezado de /soluciones/${s.slug}`,
+    // El diagrama sigue siendo lo que esta ranura merece —un corte explica lo
+    // que una foto no—, pero mientras no exista, la foto del componente
+    // principal de la solución es información real, no relleno.
+    respaldo: fotoRealDe(s.componentes.map((c) => c.producto)),
     prompt:
       `${ESTILO_DIAGRAMA}\n\n` +
       `TEMA: corte o vista isométrica de esta configuración: ${s.titulo}.\n` +
@@ -202,6 +250,10 @@ export function ranurasGuia(): RanuraImagen[] {
       alt: `Apertura de la guía: ${a.title.length > 120 ? `${a.title.slice(0, 117)}…` : a.title}`,
     tipo: 'ilustracion' as TipoImagen,
     contexto: `Encabezado de /recursos/${a.slug}`,
+    // Los productos relacionados de la guía ya están declarados en el
+    // artículo: la foto del primero con imagen es exactamente el material del
+    // que trata el texto.
+    respaldo: fotoRealDe(a.relatedProducts ?? []),
     prompt:
       `${ESTILO_FOTO.replace('Proporción 3:2 horizontal.', 'Proporción 16:9 horizontal.')}\n\n` +
       `TEMA: ${a.title}\n` +

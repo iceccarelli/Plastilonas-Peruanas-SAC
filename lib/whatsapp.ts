@@ -18,6 +18,8 @@ const SITE_HOST = SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 export interface QuoteLead {
   nombre: string;
   empresa?: string;
+  /** RUC ya normalizado a 11 dígitos (ver lib/ruc.ts). */
+  ruc?: string;
   email: string;
   telefono: string;
   producto?: string;
@@ -31,6 +33,7 @@ export function buildQuoteMessage(lead: QuoteLead): string {
     '',
     `*Nombre:* ${lead.nombre}`,
     lead.empresa ? `*Empresa:* ${lead.empresa}` : null,
+    lead.ruc ? `*RUC:* ${lead.ruc}` : null,
     `*Email:* ${lead.email}`,
     `*Teléfono:* ${lead.telefono}`,
     lead.producto ? `*Producto de interés:* ${lead.producto}` : null,

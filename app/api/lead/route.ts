@@ -1,51 +1,141 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { SITE } from '@/lib/site';
+import { isSupabaseConfigured, supabaseAdmin } from '@/lib/supabase';
 
-/** Host visible del sitio, derivado de SITE.url (nunca hard-codeado). */
 const SITE_HOST = SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
-/**
- * Recibe un lead de cotización y lo reenvía al webhook de n8n.
- *
- * Arquitectura de seguridad: el navegador NUNCA ve la URL de n8n. El cliente
- * hace POST a esta ruta interna; el secreto vive en el servidor (N8N_WEBHOOK_URL,
- * sin prefijo NEXT_PUBLIC_). Best-effort: el canal primario es WhatsApp, así que
- * si n8n no está configurado o falla, respondemos 200 y no rompemos la UX.
- */
+const LeadSchema = z.object({
+  nombre: z.string().trim().min(1).max(120).optional(),
+  contact: z.string().trim().min(1).max(120).optional(),
+  empresa: z.string().trim().max(160).optional().default(''),
+  email: z.string().trim().email().max(180),
+  telefono: z.string().trim().min(6).max(40),
+  whatsapp: z.string().trim().max(40).optional(),
+  producto: z.string().trim().max(200).optional(),
+  industry: z.string().trim().max(80).optional(),
+  application: z.string().trim().max(240).optional(),
+  cantidad: z.string().trim().max(80).optional(),
+  dimensions: z.string().trim().max(120).optional(),
+  material: z.string().trim().max(80).optional(),
+  country: z.string().trim().max(80).optional(),
+  city: z.string().trim().max(80).optional(),
+  deliveryCountry: z.string().trim().max(80).optional(),
+  deliveryCity: z.string().trim().max(80).optional(),
+  fechaNecesaria: z.string().trim().max(40).optional(),
+  mensaje: z.string().trim().max(4000).optional(),
+  language: z.enum(['es', 'en', 'pt']).optional(),
+});
+
+const buckets = new Map<string, { n: number; t: number }>();
+
+function limited(ip: string): boolean {
+  const now = Date.now();
+  const hit = buckets.get(ip);
+  if (!hit || now - hit.t > 10 * 60 * 1000) {
+    buckets.set(ip, { n: 1, t: now });
+    return false;
+  }
+  hit.n += 1;
+  return hit.n > 12;
+}
+
+function rfqId(): string {
+  const d = new Date();
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `RFQ-${y}${m}${day}-${rand}`;
+}
 
 export async function POST(req: NextRequest) {
-  let lead: Record<string, unknown>;
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
+  if (limited(ip)) {
+    return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 });
+  }
+
+  let json: unknown;
   try {
-    lead = await req.json();
+    json = await req.json();
   } catch {
     return NextResponse.json({ ok: false, error: 'invalid_json' }, { status: 400 });
   }
 
-  if (!lead || typeof lead !== 'object' || !lead.email || !lead.telefono) {
-    return NextResponse.json({ ok: false, error: 'missing_fields' }, { status: 400 });
+  const parsed = LeadSchema.safeParse(json);
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: 'invalid_fields' }, { status: 400 });
+  }
+  const lead = parsed.data;
+  const id = rfqId();
+  const contact = lead.nombre || lead.contact || '';
+
+  let persisted = false;
+  if (isSupabaseConfigured()) {
+    try {
+      const admin = supabaseAdmin();
+      const { error } = await admin.from('quotes').insert({
+        customer_email: lead.email,
+        full_name: contact,
+        company: lead.empresa,
+        phone: lead.telefono,
+        product: lead.producto ?? null,
+        quantity: lead.cantidad ?? null,
+        rfq_code: id,
+        country: lead.deliveryCountry || lead.country || null,
+        industry: lead.industry ?? null,
+        status: 'NEW',
+        source: `${SITE_HOST}/cotizacion`,
+        payload: lead,
+        message: [
+          lead.application,
+          lead.dimensions,
+          lead.material,
+          lead.country && `Origen: ${lead.city || ''} ${lead.country}`.trim(),
+          lead.deliveryCountry &&
+            `Entrega: ${lead.deliveryCity || ''} ${lead.deliveryCountry}`.trim(),
+          lead.mensaje,
+        ]
+          .filter(Boolean)
+          .join('\n'),
+      });
+      persisted = !error;
+      if (error) console.error('[lead] supabase', error.message);
+    } catch (err) {
+      console.error('[lead] supabase unavailable', err);
+    }
   }
 
   const webhook = process.env.N8N_WEBHOOK_URL;
-  if (!webhook) {
-    // Sin webhook configurado: no es error. El lead ya fue por WhatsApp.
-    return NextResponse.json({ ok: true, forwarded: false });
+  let forwarded = false;
+  if (webhook) {
+    try {
+      const res = await fetch(webhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...lead,
+          rfqId: id,
+          persisted,
+          source: `${SITE_HOST}/cotizacion`,
+          receivedAt: new Date().toISOString(),
+        }),
+      });
+      forwarded = res.ok;
+    } catch {
+      forwarded = false;
+    }
   }
 
-  const payload = {
-    ...lead,
-    source: `${SITE_HOST}/cotizacion`,
-    receivedAt: new Date().toISOString(),
-  };
-
-  try {
-    const res = await fetch(webhook, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    return NextResponse.json({ ok: res.ok, forwarded: res.ok });
-  } catch {
-    // n8n caído: no rompemos la experiencia del cliente.
-    return NextResponse.json({ ok: false, forwarded: false, error: 'webhook_failed' });
-  }
+  // Email / WhatsApp remain the commercial channels. Persistence failure is
+  // logged, never thrown: the buyer already has the RFQ id in the response.
+  return NextResponse.json({
+    ok: true,
+    rfqId: id,
+    persisted,
+    forwarded,
+  });
 }

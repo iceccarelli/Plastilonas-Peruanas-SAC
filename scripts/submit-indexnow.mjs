@@ -12,14 +12,38 @@
  * cada ejecución obtenía 403 y no indexaba nada. Ahora la lista se deriva del
  * sitemap real en producción, de modo que crece sola con el sitio.
  *
+ * NO NECESITA NINGUNA VARIABLE DE ENTORNO. La clave y el origen canónico se
+ * leen del propio repositorio —lib/indexnow.ts y lib/site.ts— porque cualquier
+ * otra cosa deja el envío esperando a que alguien configure una consola. Ver
+ * la nota larga de lib/indexnow.ts sobre por qué la clave no es un secreto.
+ *
  * Uso:
- *   INDEXNOW_KEY=... SITE_URL=https://... node scripts/submit-indexnow.mjs
- *   node scripts/submit-indexnow.mjs --dry-run          (no envía nada)
+ *   node scripts/submit-indexnow.mjs                     (envía todo el sitemap)
+ *   node scripts/submit-indexnow.mjs --dry-run           (no envía nada)
  *   node scripts/submit-indexnow.mjs https://.../una-url (envía solo esas)
  */
 
-const KEY = process.env.INDEXNOW_KEY;
-const SITE_URL = (process.env.SITE_URL || 'https://plastilonas-peruanas-sac.vercel.app').replace(/\/$/, '');
+import { execFileSync } from 'node:child_process';
+
+/**
+ * El registro es TypeScript; se lee a través de tsx para no duplicar aquí ni
+ * la clave ni el dominio. Duplicarlos es exactamente cómo se desincronizan.
+ */
+function desdeElRepositorio() {
+  const salida = execFileSync(
+    'npx',
+    [
+      'tsx',
+      '-e',
+      "import {INDEXNOW_KEY} from './lib/indexnow'; import {SITE} from './lib/site'; console.log(JSON.stringify({key: INDEXNOW_KEY, site: SITE.url}));",
+    ],
+    { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 },
+  );
+  return JSON.parse(salida.trim().split('\n').pop());
+}
+
+const { key: KEY, site: SITE_CANONICO } = desdeElRepositorio();
+const SITE_URL = SITE_CANONICO.replace(/\/$/, '');
 const KEY_LOCATION = `${SITE_URL}/indexnow-key.txt`;
 const ENDPOINT = 'https://api.indexnow.org/indexnow';
 const MAX_URLS_PER_REQUEST = 10000;
@@ -41,7 +65,7 @@ async function urlsFromSitemap() {
 
 async function main() {
   if (!KEY || !KEY_PATTERN.test(KEY)) {
-    console.error('INDEXNOW_KEY ausente o con formato inválido (8–128 caracteres alfanuméricos o guiones).');
+    console.error('La clave de lib/indexnow.ts tiene un formato inválido (8–128 caracteres alfanuméricos o guiones).');
     process.exit(1);
   }
 
@@ -53,7 +77,8 @@ async function main() {
     console.error(
       `La prueba de propiedad falló. ${KEY_LOCATION} devolvió ${proof.status}` +
         (proof.ok ? ' con un contenido distinto de la clave.' : '.') +
-        '\nConfigure INDEXNOW_KEY en el entorno de producción y despliegue antes de enviar.',
+        '\nEso significa que producción todavía sirve un build anterior a este commit.' +
+        '\nEspere a que Vercel termine el despliegue y vuelva a ejecutar.',
     );
     process.exit(1);
   }

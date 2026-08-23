@@ -10,7 +10,7 @@ import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
  */
 
 const URL = `${SITE.url}/contacto`;
-const TITLE = 'Contacto: WhatsApp, central telefónica y planta en Chorrillos';
+const TITLE = 'Contacto: WhatsApp, central y planta';
 const DESCRIPTION = `Contacte a ${SITE.legalName} (RUC ${SITE.ruc}): WhatsApp ${SITE.phoneWhatsApp}, central ${SITE.phoneCentral}, ${SITE.email}. Planta y oficinas en ${SITE.addressLocality}, ${SITE.addressRegion}.`;
 
 export const metadata: Metadata = {

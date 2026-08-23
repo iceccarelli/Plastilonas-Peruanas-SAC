@@ -8,6 +8,19 @@ import FeaturedDeck from '@/components/FeaturedDeck';
 import SectorTicker from '@/components/SectorTicker';
 import FamilyCarousel from '@/components/FamilyCarousel';
 import ServiceTabs from '@/components/ServiceTabs';
+import { tomasDe } from '@/lib/galeria';
+
+/**
+ * Foto base de cada servicio. Vivía dentro de ServiceTabs, que es un
+ * componente de cliente y por tanto no podía comprobar si el archivo existe.
+ * Aquí sí: esta página es de servidor.
+ */
+const FOTO_SERVICIO: Record<string, string> = {
+  ruler: '/images/servicio-fabricacion.jpg',
+  hardhat: '/images/servicio-instalacion.jpg',
+  ship: '/images/servicio-importacion.jpg',
+  lightbulb: '/images/servicio-asesoria.jpg',
+};
 import HeroCarousel from '@/components/HeroCarousel';
 import SectionHeading from '@/components/SectionHeading';
 import MachineryGallery from '@/components/MachineryGallery';
@@ -82,7 +95,7 @@ export default function Home() {
             <h1 className="t-display font-semibold mb-6">Fabricación 100% a medida.<br />Instalación propia.<br />Un solo proveedor.</h1>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">Big Bags, geomembranas, estructuras, mallas, ventilación y geosintéticos: 34 soluciones en 11 líneas de producto, fabricadas e instaladas por nuestro propio equipo en el Perú.</p>
+            <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">Big Bags, geomembranas, estructuras, mallas, ventilación y geosintéticos: {products.length} soluciones en {productFamilies.length} líneas de producto, fabricadas e instaladas por nuestro propio equipo en el Perú.</p>
           </Reveal>
           <Reveal delay={0.15}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -172,7 +185,17 @@ export default function Home() {
             <SectionHeading eyebrow="Más que fabricación" title="Servicios integrales, de principio a fin" className="mb-10" />
           </Reveal>
           <Reveal delay={0.05}>
-            <ServiceTabs services={services.map((sv, i) => ({ ...sv, icon: ['ruler', 'hardhat', 'ship', 'lightbulb'][i] }))} />
+            <ServiceTabs
+              services={services.map((sv, i) => {
+                const icon = ['ruler', 'hardhat', 'ship', 'lightbulb'][i];
+                // Las tomas se resuelven AQUÍ, en el servidor, porque es el
+                // único sitio con acceso al disco. `tomasDe` devuelve la
+                // primera foto más las secundarias que existan de verdad, ya
+                // sin duplicados byte a byte.
+                const base = FOTO_SERVICIO[icon];
+                return { ...sv, icon, tomas: tomasDe(base) };
+              })}
+            />
           </Reveal>
         </div>
       </section>

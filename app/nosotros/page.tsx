@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SITE } from '@/lib/site';
+import { COUNT_STATEMENT, YEARS_STATEMENT } from '@/lib/facts';
 import Link from 'next/link';
 
 const TITLE = `Nosotros: fabricantes peruanos desde ${SITE.foundingYear}`;
@@ -23,13 +24,13 @@ export default function NosotrosPage() {
     <div className="max-w-5xl mx-auto px-6 py-14">
       <div className="max-w-3xl">
         <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">DESDE 2009</div>
-        <h1 className="t-display font-semibold text-[#0A2540]">Más de 15 años fabricando confianza en el Perú.</h1>
+        <h1 className="t-display font-semibold text-[#0A2540]">{YEARS_STATEMENT}.</h1>
       </div>
 
       <div className="prose prose-lg max-w-3xl mt-10 text-gray-700">
         <p>Plastilonas Peruanas SAC nació en 2009 con una misión clara: fabricar productos textiles industriales a la medida exacta de cada proyecto, con precio directo de fabricante y respaldo técnico real.</p>
         
-        <p>Hoy, con 34 soluciones en 11 líneas de producto, abastecemos a minería, agricultura, construcción, transporte e industria en todo el Perú. Fabricamos e instalamos con equipo propio: una sola responsabilidad, del diseño técnico a la obra.</p>
+        <p>Hoy, con {COUNT_STATEMENT}, abastecemos a minería, agricultura, construcción, transporte e industria en todo el Perú. Fabricamos e instalamos con equipo propio: una sola responsabilidad, del diseño técnico a la obra.</p>
       </div>
 
       <div className="mt-14 grid md:grid-cols-3 gap-6">

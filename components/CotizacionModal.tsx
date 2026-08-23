@@ -11,10 +11,24 @@ import { toast } from 'sonner';
 import { buildQuoteMessage, openWhatsApp, saveQuoteLocally } from '@/lib/whatsapp';
 import { trackQuoteRequest, trackQuoteStarted } from '@/lib/analytics';
 import { postLead } from '@/lib/lead';
+import { errorRuc, normalizarRuc } from '@/lib/ruc';
 
 const formSchema = z.object({
   nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
   empresa: z.string().min(2, 'Ingrese el nombre de su empresa'),
+  /**
+   * RUC opcional, pero validado de verdad. Una expresión regular de once
+   * dígitos acepta 12345678901 y deja el campo sin valor de cualificación;
+   * el dígito verificador del módulo 11 rechaza eso en el navegador
+   * (ver lib/ruc.ts). Sigue sin comprobar existencia en el padrón de SUNAT.
+   */
+  ruc: z
+    .string()
+    .optional()
+    .superRefine((v, ctx) => {
+      const msg = errorRuc(v ?? '');
+      if (msg) ctx.addIssue({ code: z.ZodIssueCode.custom, message: msg });
+    }),
   email: z.string().email('Ingrese un correo electrónico válido'),
   telefono: z.string().min(9, 'Ingrese un número de teléfono válido').regex(/^[0-9+\s()-]+$/, 'Formato de teléfono inválido'),
   producto: z.string().optional(),
@@ -73,11 +87,16 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
 
+    // El RUC viaja normalizado a dígitos: el comercial lo pega en la consulta
+    // de SUNAT sin limpiar guiones ni espacios a mano.
+    const ruc = normalizarRuc(data.ruc ?? '') || undefined;
+
     // Envío real: abrimos WhatsApp con la solicitud estructurada, lista para
     // enviar al equipo comercial. Sin backend intermedio que pueda fallar.
     const message = buildQuoteMessage({
       nombre: data.nombre,
       empresa: data.empresa,
+      ruc,
       email: data.email,
       telefono: data.telefono,
       producto: data.producto,
@@ -90,6 +109,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
     saveQuoteLocally({
       nombre: data.nombre,
       empresa: data.empresa,
+      ruc,
       email: data.email,
       telefono: data.telefono,
       producto: data.producto,
@@ -100,6 +120,7 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
     void postLead({
       nombre: data.nombre,
       empresa: data.empresa,
+      ruc,
       email: data.email,
       telefono: data.telefono,
       producto: data.producto,
@@ -202,6 +223,24 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
                     />
                     {errors.empresa && <p className="text-red-500 text-xs mt-1.5">{errors.empresa.message}</p>}
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">RUC (opcional)</label>
+                    <input
+                      {...register('ruc')}
+                      inputMode="numeric"
+                      maxLength={13}
+                      className="form-input w-full px-4 py-3 border border-gray-200 rounded-2xl text-sm focus:border-[#059669]"
+                      placeholder="20123456789"
+                      aria-describedby="ruc-ayuda"
+                    />
+                    {errors.ruc ? (
+                      <p className="text-red-500 text-xs mt-1.5">{errors.ruc.message}</p>
+                    ) : (
+                      <p id="ruc-ayuda" className="text-gray-400 text-xs mt-1.5">
+                        Agiliza la emisión de la cotización con factura.
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -240,11 +279,11 @@ export default function CotizacionModal({ open, onOpenChange, preselectedProduct
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Cantidad aproximada</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Cantidad o metraje del proyecto</label>
                     <input 
                       {...register('cantidad')} 
                       className="form-input w-full px-4 py-3 border border-gray-200 rounded-2xl text-sm focus:border-[#059669]" 
-                      placeholder="Ej: 50 unidades / 2000 m²" 
+                      placeholder="Ej: 2 500 m² · 40 mangas Ø600 · 12 toldos" 
                     />
                   </div>
                 </div>

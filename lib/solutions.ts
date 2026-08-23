@@ -65,7 +65,7 @@ export const solutions: Solution[] = [
   {
     slug: 'poza-revestida-impermeabilizacion',
     titulo: 'Poza revestida: el conjunto completo, no solo la lámina',
-    metaTitle: 'Poza revestida: geomembrana, geotextil y anclaje | Perú',
+    metaTitle: 'Poza revestida: geomembrana, geotextil y anclaje',
     metaDescription:
       'Arquitectura de referencia para revestir una poza o canal: protección de subrasante, barrera impermeable, anclaje perimetral, detalles de penetración y plan de ensayos de costura.',
     escenario:
@@ -183,7 +183,7 @@ export const solutions: Solution[] = [
   {
     slug: 'frente-avance-ventilado',
     titulo: 'Frente de avance ventilado: del cálculo de caudal a la manga instalada',
-    metaTitle: 'Ventilación de frente de avance: caudal, manga e instalación | Perú',
+    metaTitle: 'Frente de avance ventilado: caudal e instalación',
     metaDescription:
       'Arquitectura de referencia para ventilar una labor subterránea: demanda por personal y equipo diésel corregida por altitud, elección de esquema, diámetro de manga y verificación en el frente.',
     escenario:
@@ -291,7 +291,7 @@ export const solutions: Solution[] = [
   {
     slug: 'despacho-concentrado-granel',
     titulo: 'Despacho de concentrado a granel: del llenado al puerto',
-    metaTitle: 'Despacho de concentrado a granel: envase, estiba y cobertura | Perú',
+    metaTitle: 'Despacho de concentrado a granel: envase y estiba',
     metaDescription:
       'Arquitectura de referencia para despachar material a granel: envase con carga de trabajo segura declarada, unitización, cobertura de tolva y la documentación que exige el terminal.',
     escenario:
@@ -403,7 +403,7 @@ export const solutions: Solution[] = [
   {
     slug: 'proteccion-cultivo-agroexportacion',
     titulo: 'Protección de cultivo: barrera sanitaria, sombra y suelo',
-    metaTitle: 'Protección de cultivo: mallas, sombra y cobertura de suelo | Perú',
+    metaTitle: 'Protección de cultivo: mallas, sombra y suelo',
     metaDescription:
       'Arquitectura de referencia para proteger un cultivo de agroexportación: exclusión de plagas sin asfixiar la ventilación, control de radiación y manejo de humedad del suelo.',
     escenario:
@@ -514,7 +514,7 @@ export const solutions: Solution[] = [
   {
     slug: 'almacenamiento-agua-operacion-remota',
     titulo: 'Almacenamiento de agua en operación remota',
-    metaTitle: 'Almacenamiento de agua remoto: tanques flexibles y conducción | Perú',
+    metaTitle: 'Almacenamiento de agua en operación remota',
     metaDescription:
       'Arquitectura de referencia para almacenar y conducir agua en frentes remotos: preparación de base, volumen útil real, conducción en HDPE y la pregunta correcta sobre potabilidad.',
     escenario:
@@ -618,7 +618,7 @@ export const solutions: Solution[] = [
   {
     slug: 'campamento-almacen-temporal',
     titulo: 'Campamento y almacén temporal: cubrir, cerrar y proteger',
-    metaTitle: 'Campamento y almacén temporal: carpas, módulos y cerramientos | Perú',
+    metaTitle: 'Campamento y almacén temporal: carpas y módulos',
     metaDescription:
       'Arquitectura de referencia para instalar cobertura y almacenamiento temporal en obra o faena: cargas de viento, anclaje disponible, cerramientos y protección de puestos de trabajo.',
     escenario:

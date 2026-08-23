@@ -126,7 +126,7 @@ const sectoresCompradores: Informe = {
   subtitulo:
     'Los indicadores oficiales de minería, agroexportación y radiación solar, y qué implican técnicamente para quien especifica.',
   metaTitle:
-    'Informe: qué mueve la demanda de textiles industriales y geosintéticos en el Perú',
+    'Qué mueve la demanda de textiles industriales',
   metaDescription:
     'Producción e inversión minera, agroexportaciones y radiación ultravioleta en el Perú, con las cifras oficiales de MINEM, MIDAGRI y SENAMHI, y qué implica cada una para especificar geomembranas, mangas de ventilación, mallas y cobertores.',
   fecha: '2026-08-20',
@@ -372,7 +372,7 @@ const formacionDePrecio: Informe = {
   titulo: 'Por qué cambia el precio de una plastilona',
   subtitulo:
     'La cadena que va del petróleo a la lona terminada, con el dato público de cada eslabón y qué indicador mirar para anticiparlo.',
-  metaTitle: 'Por qué sube y baja el precio de plastilonas, big bags y geomembranas en el Perú',
+  metaTitle: 'Por qué sube y baja el precio de una plastilona',
   metaDescription:
     'La cadena de formación de costo de los textiles industriales y geosintéticos: nafta, resina PP y PE, flete marítimo y tipo de cambio. Con las cifras de ICIS, Drewry y el BCRP, y los indicadores públicos que cualquier comprador puede consultar.',
   fecha: '2026-08-20',
