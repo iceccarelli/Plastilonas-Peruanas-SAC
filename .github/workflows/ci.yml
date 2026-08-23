@@ -80,3 +80,15 @@ jobs:
         run: |
           npx playwright install --with-deps chromium
           npm run auditar:viewport
+
+      - name: Desplegables de la cabecera
+        # Abre los cuatro grupos en los cinco anchos donde se muestra la barra
+        # horizontal y comprueba, para cada opción, que se ve, que se alcanza
+        # con el puntero, que nada la tapa, que mide 24px y que su destino
+        # responde. Existe porque los 48 paneles —los cuatro grupos en los
+        # cuatro anchos— se cerraban mientras el puntero viajaba del botón a la
+        # primera opción, por doce píxeles de separación que no pertenecían a
+        # ningún elemento. Se veía como «el menú desaparece solo» y ninguna
+        # prueba lo notaba: ni el HTML ni el layout estaban mal, lo que fallaba
+        # era el trayecto.
+        run: npm run auditar:navegacion

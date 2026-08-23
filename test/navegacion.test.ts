@@ -6,6 +6,18 @@ import { INDUSTRIAS } from '../lib/industrias';
 const raiz = process.cwd();
 const fuente = readFileSync(join(raiz, 'components/Navbar.tsx'), 'utf8');
 
+/**
+ * El mismo archivo sin comentarios. Hace falta porque estas pruebas afirman
+ * cosas sobre lo que el componente HACE, y un comentario que EXPLICA por qué
+ * algo no está —«no lleva role="menu", y este es el motivo»— contiene la
+ * cadena que se está prohibiendo. La primera versión de la prueba se cazó a sí
+ * misma: falló señalando el párrafo que documenta el arreglo.
+ */
+const codigo = fuente
+  .replace(/\/\*[\s\S]*?\*\//g, '')
+  .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
+  .replace(/^\s*\/\/.*$/gm, '');
+
 /** Entradas de primer nivel declaradas en el array NAV. */
 function entradasDePrimerNivel(): { label: string; href: string }[] {
   const bloque = fuente.slice(fuente.indexOf('const NAV: Entrada[]'), fuente.indexOf('/** Todas las rutas'));
@@ -60,6 +72,85 @@ describe('navegación principal', () => {
     // día que se añada un sector. Debe leerse de la fuente única.
     expect(fuente).toMatch(/hijos:\s*INDUSTRIAS\.map/);
     expect(INDUSTRIAS.length).toBeGreaterThanOrEqual(5);
+  });
+
+  /**
+   * EL TRAYECTO DEL PUNTERO.
+   *
+   * Lo que estas cuatro pruebas defienden no se ve en una captura ni lo mide
+   * ninguna prueba de maquetación: el panel se dibujaba bien, en su sitio y con
+   * todo dentro. Lo que fallaba era llegar hasta él. Entre el borde del botón y
+   * el borde del panel había doce píxeles que no pertenecían a ningún elemento,
+   * y el manejador que cierra vive en el contenedor, cuya caja termina en el
+   * botón —un hijo `absolute` no agranda a su padre—. El puntero que bajaba
+   * cruzaba esa franja, salía del contenedor y el panel se ocultaba antes de
+   * que llegara. `npm run auditar:navegacion` lo midió: 48 de 48 paneles, los
+   * cuatro grupos en los cuatro anchos.
+   *
+   * Son pruebas de código fuente y no de comportamiento, a propósito: el
+   * auditor de Chromium ya comprueba el comportamiento, pero tarda cuatro
+   * minutos y corre al final. Estas tardan milisegundos y rompen en cuanto
+   * alguien quita la pieza, que es cuando conviene enterarse.
+   */
+  it('el panel extiende su zona sensible hasta el botón', () => {
+    // Sin este puente, la franja de `mt-3` vuelve a ser tierra de nadie.
+    /**
+     * El puente es un ELEMENTO, no un pseudoelemento del panel. Con `before:`
+     * no funcionaba: el panel lleva `overflow-y-auto` y eso recorta cuanto
+     * sobresalga de su caja, incluido algo colocado 12px por encima. Existía
+     * en las clases y no en pantalla.
+     */
+    const puentes = [...codigo.matchAll(/absolute top-full left-0 right-0 h-3/g)];
+    expect(
+      puentes.length,
+      'cada desplegable necesita su puente: el de grupo, el de «Más» y el mega',
+    ).toBeGreaterThanOrEqual(3);
+    expect(codigo, 'el puente no puede vivir dentro del panel: overflow lo recorta')
+      .not.toMatch(/before:-top-3/);
+  });
+
+  it('el cierre es diferido, no inmediato', () => {
+    // Cerrar al instante castiga cualquier temblor de la mano en el trayecto.
+    expect(codigo).toMatch(/setTimeout\(\(\) => setAbierto\(null\), \d+\)/);
+  });
+
+  it('el cierre lo maneja la zona entera, no cada grupo por separado', () => {
+    /**
+     * Con `onMouseLeave` en cada grupo, pasar por encima del vecino camino de
+     * tu propio panel programaba un cierre, y el resultado dependía del orden
+     * de los eventos y de la velocidad de la mano: el fallo salía en una
+     * ejecución y no en la siguiente. En `zonaNav` —que contiene la fila y los
+     * paneles— sólo se dispara al abandonar toda la navegación.
+     */
+    expect(codigo).toMatch(/manejadoresZona/);
+    // Y el cambio entre grupos sigue siendo diferido: hacen falta las dos.
+    expect(codigo).toMatch(/cambioPendiente/);
+    expect(codigo).toMatch(/const manejadoresZona = \{[\s\S]*?onMouseLeave: cerrarConRetardo/);
+    // Y cualquier movimiento dentro de la zona cancela un cierre pendiente.
+    expect(codigo).toMatch(/onMouseMove: cancelarCierre/);
+    // Y ningún grupo puede volver a llevar el suyo.
+    expect(codigo).not.toMatch(/const manejadores = \(clave: string\) => \(\{[^}]*onMouseLeave/);
+  });
+
+  it('los desplegables se abren también con el teclado', () => {
+    // Sin onFocus/onBlur el menú sólo existe para quien usa ratón, y con él
+    // desaparecen del recorrido tanto una persona con teclado como un agente
+    // que navega por el árbol de accesibilidad.
+    expect(codigo).toMatch(/onFocus:/);
+    expect(codigo).toMatch(/onBlur:/);
+  });
+
+  it('los paneles de navegación no se declaran como menú de aplicación', () => {
+    /**
+     * `role="menu"` es para menús de aplicación, no para listas de enlaces.
+     * Puesto sobre estos paneles, un lector de pantalla deja de anunciar los
+     * enlaces como enlaces y pasa a esperar navegación por flechas que nadie
+     * implementó. El patrón correcto —y el que un agente lee sin ambigüedad—
+     * es el de divulgación: botón con aria-expanded y aria-controls.
+     */
+    expect(codigo).not.toMatch(/role="menu"/);
+    expect(codigo).toMatch(/aria-controls=/);
+    expect(codigo).not.toMatch(/aria-haspopup/);
   });
 
   it('los paneles se ocultan con display:none, no con visibility', () => {

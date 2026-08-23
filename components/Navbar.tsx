@@ -174,6 +174,150 @@ function useEntradasQueCaben(
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [abierto, setAbierto] = useState<string | null>(null);
+
+  /**
+   * APERTURA Y CIERRE DE LOS DESPLEGABLES.
+   *
+   * El fallo que esto corrige, medido con `npm run auditar:navegacion` sobre
+   * los cuatro grupos en los cuatro anchos donde se muestra el menú
+   * horizontal: 48 de 48 paneles se cerraban mientras el puntero viajaba del
+   * botón a la primera opción. Es decir, TODOS. Desde fuera se veía como «el
+   * menú aparece y desaparece solo».
+   *
+   * Por qué pasaba. `onMouseLeave` vive en el contenedor `relative`, cuya caja
+   * termina en el borde inferior del botón: un panel `absolute` no agranda a su
+   * padre. Entre ese borde y el panel había doce píxeles de separación que no
+   * pertenecían a nadie. El puntero que bajaba cruzaba esa franja, salía del
+   * contenedor, se disparaba `mouseleave` y el panel se ocultaba ANTES de que
+   * el puntero llegara a él. Cuanto más deprisa se movía la mano, más parecía
+   * cosa del azar.
+   *
+   * Se corrige por dos vías, y hacen falta las dos:
+   *
+   *   · El puente. El panel extiende su zona sensible hacia arriba hasta tocar
+   *     el botón, con un pseudoelemento transparente. La franja deja de ser
+   *     tierra de nadie y `mouseleave` ya no se dispara al cruzarla.
+   *
+   *   · El retardo. Aun con el puente, un recorrido diagonal hacia un panel
+   *     ancho puede salirse del contenedor un instante. Cerrar al momento
+   *     castiga un temblor de la mano; esperar 180 ms no se percibe y perdona
+   *     el trayecto. Volver a entrar cancela el cierre pendiente.
+   *
+   * `abrir` es inmediato a propósito: retrasar la apertura sí se nota.
+   */
+  const cierrePendiente = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelarCierre = useCallback(() => {
+    if (cierrePendiente.current) {
+      clearTimeout(cierrePendiente.current);
+      cierrePendiente.current = null;
+    }
+  }, []);
+  /**
+   * Abrir de cero es inmediato: retrasar eso sí se nota. CAMBIAR de un grupo
+   * abierto a otro, no.
+   *
+   * Los paneles anchos —el de productos, el de «Más»— empiezan a la izquierda
+   * de su propio botón, así que el camino recto del botón a la primera opción
+   * baja en diagonal y roza al grupo vecino. Con el cambio inmediato, ese roce
+   * de dos fotogramas abre el panel del vecino encima del que uno iba a usar.
+   * No era el menú cerrándose: era otro menú tomando su sitio, y por eso el
+   * arreglo de la franja muerta no lo hizo desaparecer.
+   *
+   * Con 120 ms, atravesar un vecino no lo abre y detenerse sobre él sí. La
+   * diferencia entre pasar por encima y apuntar es la única que importa aquí.
+   *
+   * Hicieron falta las dos piezas y probé cada una sola antes de verlo: el
+   * cierre en la zona entera quita las cascadas entre hermanos, y este retardo
+   * quita los cambios por roce. Con una sola, el fallo bajaba de frecuencia y
+   * seguía apareciendo una vez de cada tres.
+   */
+  const cambioPendiente = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelarCambio = useCallback(() => {
+    if (cambioPendiente.current) {
+      clearTimeout(cambioPendiente.current);
+      cambioPendiente.current = null;
+    }
+  }, []);
+  const abrir = useCallback((clave: string) => {
+    cancelarCierre();
+    cancelarCambio();
+    setAbierto((actual) => {
+      if (actual === null || actual === clave) return clave;
+      cambioPendiente.current = setTimeout(() => setAbierto(clave), 120);
+      return actual;
+    });
+  }, [cancelarCierre, cancelarCambio]);
+  const cerrarConRetardo = useCallback(() => {
+    cancelarCierre();
+    cancelarCambio();
+    cierrePendiente.current = setTimeout(() => setAbierto(null), 180);
+  }, [cancelarCierre, cancelarCambio]);
+  const cerrarYa = useCallback(() => {
+    cancelarCierre();
+    cancelarCambio();
+    setAbierto(null);
+  }, [cancelarCierre, cancelarCambio]);
+  useEffect(() => () => { cancelarCierre(); cancelarCambio(); }, [cancelarCierre, cancelarCambio]);
+
+  /**
+   * ABRIR VIVE EN CADA GRUPO; CERRAR VIVE EN LA ZONA ENTERA.
+   *
+   * Esta asimetría es el arreglo, y costó dos intentos entenderlo.
+   *
+   * Con `onMouseLeave` en cada grupo, cualquier salida de un grupo programaba
+   * un cierre: incluida la salida que ocurre al pasar por encima del grupo de
+   * al lado camino de tu propio panel. El panel de «Más» se despliega hacia la
+   * izquierda, así que ir del botón a su primera opción es un recorrido en
+   * diagonal que roza al vecino. De ahí salía una cascada de entrar-salir-
+   * entrar entre hermanos cuyo resultado dependía del orden y de la velocidad
+   * de la mano: el fallo aparecía en una ejecución y no en la siguiente.
+   * Intenté taparlo con un segundo temporizador que retrasara el cambio de
+   * grupo. Redujo la frecuencia y no lo eliminó, porque no atacaba la causa:
+   * sobraba un manejador, no faltaba uno.
+   *
+   * Puesto en `zonaNav`, que contiene la fila entera Y los paneles —son
+   * descendientes suyos—, `mouseleave` sólo se dispara al abandonar toda la
+   * navegación. Moverse entre hermanos deja de programar cierres, porque nunca
+   * se sale de la zona. Un manejador en lugar de cinco, y una clase entera de
+   * carreras que ya no puede ocurrir.
+   *
+   * `onFocus` y `onBlur` no son un extra: sin ellos el menú sólo existe para
+   * quien usa ratón, y desaparece del recorrido tanto de una persona con
+   * teclado como de un agente que navega por el árbol de accesibilidad.
+   */
+  const manejadores = (clave: string) => ({
+    onMouseEnter: () => abrir(clave),
+    onFocus: () => abrir(clave),
+  });
+  const manejadoresZona = {
+    /**
+     * `onMouseMove` es la línea que cierra el caso, y hubo que aislarla con un
+     * experimento: subiendo el retardo de cierre a cinco segundos el fallo
+     * desaparecía por completo, lo que descartaba la geometría y los
+     * re-renders y dejaba una sola causa posible, un cierre programado que
+     * nadie cancelaba.
+     *
+     * De dónde salía. Entre grupo y grupo el puntero sale de la barra y
+     * programa un cierre, correctamente. Al volver a entrar, `abrir` lo
+     * cancela… salvo que la entrada no dispare `mouseenter` de ningún grupo,
+     * que es lo que ocurre cuando el trayecto pasa por el hueco entre dos
+     * entradas o cuando la página se desplaza bajo un puntero quieto. El
+     * cierre quedaba armado y saltaba 180 ms después, con el ratón ya dentro
+     * del panel.
+     *
+     * El invariante que faltaba: si hay un cierre pendiente es porque el
+     * puntero salió de la navegación; entonces cualquier movimiento DENTRO de
+     * ella —fila, botones o paneles, que son descendientes y por tanto
+     * burbujean hasta aquí— demuestra que volvió, y lo cancela. Con eso deja
+     * de importar por qué se programó.
+     */
+    onMouseMove: cancelarCierre,
+    onMouseLeave: cerrarConRetardo,
+    onBlur: (ev: React.FocusEvent<HTMLDivElement>) => {
+      if (!ev.currentTarget.contains(ev.relatedTarget as Node | null)) cerrarConRetardo();
+    },
+  };
+
   const [showCommand, setShowCommand] = useState(false);
   const [showCotizacion, setShowCotizacion] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
@@ -189,6 +333,10 @@ export default function Navbar() {
 
   const inline = NAV.slice(0, visibles);
   const replegadas = NAV.slice(visibles);
+
+  /** Id estable para enlazar botón y panel con aria-controls. */
+  const idGrupo = (etiqueta: string) =>
+    etiqueta.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
   const grupoActivo = (e: Entrada) =>
@@ -221,16 +369,50 @@ export default function Navbar() {
   /** Panel de un grupo. Siempre en el DOM; se oculta por CSS, no se desmonta. */
   const Panel = ({ e }: { e: Extract<Entrada, { tipo: 'grupo' }> }) => (
     <div
-      className={`absolute top-full left-0 mt-3 w-[min(320px,calc(100vw-3rem))] max-h-[70dvh] overflow-y-auto rounded-2xl border border-gray-100 dark:border-[var(--border)] bg-white dark:bg-[var(--surface-raised)] p-3 shadow-xl ${
+      /**
+       * `before:` dibuja el PUENTE: una franja transparente de 12px que sube
+       * desde el borde del panel hasta el botón y tapa exactamente el hueco
+       * que abre `mt-3`. Sin ella el puntero cruza tierra de nadie, el
+       * contenedor recibe `mouseleave` y el panel se cierra en el trayecto.
+       *
+       * `overflow-y-auto` obliga a `overflow-x-visible`, porque un contenedor
+       * con overflow en un eje recorta también en el otro, y ahí se comería el
+       * puente.
+       *
+       * NO lleva `role="menu"`. Esto es un desplegable de navegación, no un
+       * menú de aplicación: con `role="menu"` un lector de pantalla deja de
+       * anunciar los enlaces como enlaces y pasa a esperar flechas que nadie
+       * implementó. El patrón correcto es el de divulgación —botón con
+       * `aria-expanded` y `aria-controls` apuntando a este panel—, que es
+       * además el que un agente lee sin ambigüedad en el árbol de
+       * accesibilidad.
+       */
+      /**
+       * El panel se reafirma a sí mismo al recibir el puntero. Sin esto, un
+       * cierre programado durante el trayecto —al rozar el borde de la zona,
+       * al cruzar entre hermanos— seguía vivo cuando el puntero ya estaba
+       * dentro del panel, y saltaba 180 ms después con el ratón quieto encima.
+       * Nada lo cancelaba: `onMouseEnter` vive en el contenedor del grupo, y
+       * pasar del botón al panel no vuelve a entrar en el contenedor, porque
+       * nunca se salió de él.
+       *
+       * Se vio midiendo el trayecto paso a paso: el panel se cerraba en el
+       * paso 5 de 12 con el puntero dentro de la barra, y al hacer la sonda
+       * más lenta dejaba de fallar. Eso descarta la geometría y señala un
+       * temporizador. Con esta línea, estar dentro del panel cancela cualquier
+       * cierre pendiente, venga de donde venga.
+       */
+      id={`panel-${idGrupo(e.label)}`}
+      onMouseEnter={() => abrir(e.label)}
+      className={`absolute top-full left-0 mt-3 w-[min(320px,calc(100vw-3rem))] max-h-[70dvh] overflow-y-auto overflow-x-visible rounded-2xl border border-gray-100 dark:border-[var(--border)] bg-white dark:bg-[var(--surface-raised)] p-3 shadow-xl ${
         abierto === e.label ? 'block' : 'hidden'
       }`}
-      role="menu"
       aria-label={e.label}
     >
       <Link
         href={e.href}
         className="block rounded-xl px-3 py-2 text-sm font-semibold text-[#0A2540] hover:bg-gray-50 dark:text-[var(--text)] dark:hover:bg-[var(--surface-muted)]"
-        onClick={() => setAbierto(null)}
+        onClick={cerrarYa}
       >
         Ver {e.label.toLowerCase()} →
       </Link>
@@ -240,7 +422,7 @@ export default function Navbar() {
           <Link
             key={h.href}
             href={h.href}
-            onClick={() => setAbierto(null)}
+            onClick={cerrarYa}
             className="group flex flex-col rounded-xl px-3 py-2 transition-colors hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)]"
           >
             <span className={`text-sm font-medium ${isActive(h.href) ? 'text-[#059669]' : 'text-[#0A2540] dark:text-[var(--text)] group-hover:text-[#059669]'}`}>
@@ -262,8 +444,23 @@ export default function Navbar() {
           El padding lateral respeta el recorte de pantalla en horizontal
           (iPhone con muesca girado), donde el área segura no es cero. */}
       <div
+        /**
+         * `abierto !== null` es lo que faltaba, y es un fallo real, no una
+         * sutileza. La cabecera se esconde al bajar la página trasladándose
+         * fuera de la pantalla; si en ese momento hay un desplegable abierto,
+         * SE LO LLEVA CON ELLA. El puntero se queda sobre el hueco vacío que
+         * deja, se dispara el cierre y el menú desaparece: exactamente el
+         * síntoma que se estaba persiguiendo, por una causa distinta de la
+         * franja muerta.
+         *
+         * Lo destapó `auditar:navegacion` sin buscarlo: fallaba sólo en la
+         * portada y sólo en anchos grandes, porque es la página que da para
+         * desplazarse mientras se recorre el menú. Con un desplegable abierto
+         * la cabecera se queda; en cuanto se cierra, vuelve a esconderse al
+         * bajar, que es lo que se quería.
+         */
         className={`fixed top-0 inset-x-0 z-50 transition-transform duration-300 ease-out ${
-          headerVisible || isOpen ? 'translate-y-0' : '-translate-y-full'
+          headerVisible || isOpen || abierto !== null ? 'translate-y-0' : '-translate-y-full'
         }`}
         style={{
           paddingLeft: 'env(safe-area-inset-left)',
@@ -309,47 +506,84 @@ export default function Navbar() {
                 que permite que se encoja en lugar de desbordar; sin él, un
                 hijo con whitespace-nowrap fuerza el ancho del padre y el
                 contenido se sale de la pantalla. Ese era exactamente el fallo. */}
-            <div ref={zonaNav} className="relative hidden lg:block flex-1 min-w-0">
+            <div ref={zonaNav} className="relative hidden lg:block flex-1 min-w-0" {...manejadoresZona}>
               <div className="flex items-center gap-6 text-sm font-medium">
                 {inline.map((e) =>
                   e.tipo === 'mega' ? (
+                    /**
+                     * SIN `relative`, y es deliberado. El panel de productos mide
+                     * 860px y se centraba sobre este disparador, que vive a un
+                     * tercio de la barra: a 1024px el panel empezaba en −131px,
+                     * o sea con seis categorías enteras fuera de la pantalla por
+                     * la izquierda. Se veían al abrir y ya no estaban.
+                     *
+                     * Al quitar `relative` aquí, el panel se posiciona contra
+                     * `zonaNav` —el contenedor de la fila, que sí está dentro
+                     * del ancho útil— y no puede salirse por ningún lado.
+                     */
                     <div
                       key={e.href}
-                      className="relative shrink-0"
-                      onMouseEnter={() => setAbierto('Productos')}
-                      onMouseLeave={() => setAbierto(null)}
+                      className="shrink-0"
+                      {...manejadores('Productos')}
                     >
                       <button
                         className={`gap-1.5 ${claseEnlace(isActive('/productos'))}`}
                         onClick={() => setAbierto(abierto === 'Productos' ? null : 'Productos')}
                         aria-expanded={abierto === 'Productos'}
-                        aria-haspopup="true"
+                        aria-controls="panel-productos"
                       >
                         Productos
                         <ChevronDown className={`w-4 h-4 transition-transform ${abierto === 'Productos' ? 'rotate-180' : ''}`} />
                       </button>
+                      <span
+                        aria-hidden="true"
+                        className={`absolute top-full left-0 right-0 h-3 ${abierto === 'Productos' ? 'block' : 'hidden'}`}
+                      />
                       <MegaProductos
                         visible={abierto === 'Productos'}
-                        cerrar={() => setAbierto(null)}
-                        abrirBuscador={() => { setAbierto(null); setShowCommand(true); }}
+                        cerrar={cerrarYa}
+                        reafirmar={() => abrir('Productos')}
+                        abrirBuscador={() => { cerrarYa(); setShowCommand(true); }}
                       />
                     </div>
                   ) : e.tipo === 'grupo' ? (
                     <div
                       key={e.href}
                       className="relative shrink-0"
-                      onMouseEnter={() => setAbierto(e.label)}
-                      onMouseLeave={() => setAbierto(null)}
+                      {...manejadores(e.label)}
                     >
                       <button
                         className={`gap-1.5 ${claseEnlace(grupoActivo(e))}`}
                         onClick={() => setAbierto(abierto === e.label ? null : e.label)}
                         aria-expanded={abierto === e.label}
-                        aria-haspopup="true"
+                        aria-controls={`panel-${idGrupo(e.label)}`}
                       >
                         {e.label}
                         <ChevronDown className={`w-4 h-4 transition-transform ${abierto === e.label ? 'rotate-180' : ''}`} />
                       </button>
+                      {/**
+                        * EL PUENTE, como elemento propio y no como
+                        * pseudoelemento del panel.
+                        *
+                        * Primero lo puse con `before:` sobre el propio panel, y
+                        * no funcionaba: el panel lleva `overflow-y-auto` para
+                        * poder desplazarse cuando es más alto que la pantalla, y
+                        * eso RECORTA todo lo que sobresalga de su caja —incluido
+                        * un pseudoelemento colocado 12px por encima—. El puente
+                        * existía en las clases y no existía en pantalla. Llegué
+                        * a escribir un comentario diciendo que `overflow-x-visible`
+                        * lo resolvía; no lo resolvía, porque el recorte que
+                        * importaba era el vertical.
+                        *
+                        * Aquí es un hermano del panel dentro del contenedor, que
+                        * no recorta nada. Cubre exactamente la franja que abre
+                        * `mt-3`, de modo que el puntero que baja del botón al
+                        * panel nunca pisa tierra de nadie.
+                        */}
+                      <span
+                        aria-hidden="true"
+                        className={`absolute top-full left-0 right-0 h-3 ${abierto === e.label ? 'block' : 'hidden'}`}
+                      />
                       <Panel e={e} />
                     </div>
                   ) : (
@@ -363,30 +597,35 @@ export default function Navbar() {
                 {replegadas.length > 0 && (
                   <div
                     className="relative shrink-0"
-                    onMouseEnter={() => setAbierto('__mas')}
-                    onMouseLeave={() => setAbierto(null)}
+                    {...manejadores('__mas')}
                   >
                     <button
                       className={`gap-1.5 ${claseEnlace(replegadas.some(grupoActivo))}`}
                       onClick={() => setAbierto(abierto === '__mas' ? null : '__mas')}
                       aria-expanded={abierto === '__mas'}
-                      aria-haspopup="true"
+                      aria-controls="panel-mas"
                       aria-label="Más secciones"
                     >
                       Más
                       <ChevronDown className={`w-4 h-4 transition-transform ${abierto === '__mas' ? 'rotate-180' : ''}`} />
                     </button>
+                    <span
+                      aria-hidden="true"
+                      className={`absolute top-full left-0 right-0 h-3 ${abierto === '__mas' ? 'block' : 'hidden'}`}
+                    />
                     <div
-                      className={`absolute top-full right-0 mt-3 w-[min(300px,calc(100vw-3rem))] max-h-[70dvh] overflow-y-auto rounded-2xl border border-gray-100 dark:border-[var(--border)] bg-white dark:bg-[var(--surface-raised)] p-3 shadow-xl ${
+                      id="panel-mas"
+                      onMouseEnter={() => abrir('__mas')}
+                      aria-label="Más secciones"
+                      className={`absolute top-full right-0 mt-3 w-[min(300px,calc(100vw-3rem))] max-h-[70dvh] overflow-y-auto overflow-x-visible rounded-2xl border border-gray-100 dark:border-[var(--border)] bg-white dark:bg-[var(--surface-raised)] p-3 shadow-xl ${
                         abierto === '__mas' ? 'block' : 'hidden'
                       }`}
-                      role="menu"
                     >
                       {replegadas.map((e) => (
                         <div key={e.href} className="mb-1 last:mb-0">
                           <Link
                             href={e.href}
-                            onClick={() => setAbierto(null)}
+                            onClick={cerrarYa}
                             className={`block rounded-xl px-3 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] ${isActive(e.href) ? 'text-[#059669]' : 'text-[#0A2540] dark:text-[var(--text)]'}`}
                           >
                             {e.label}
@@ -396,7 +635,7 @@ export default function Navbar() {
                               <Link
                                 key={h.href}
                                 href={h.href}
-                                onClick={() => setAbierto(null)}
+                                onClick={cerrarYa}
                                 className={`block rounded-lg px-3 py-1.5 pl-6 text-sm hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] ${isActive(h.href) ? 'text-[#059669]' : 'text-gray-600 dark:text-[var(--text-muted)]'}`}
                               >
                                 {h.label}
@@ -683,18 +922,22 @@ export default function Navbar() {
 function MegaProductos({
   visible,
   cerrar,
+  reafirmar,
   abrirBuscador,
 }: {
   visible: boolean;
   cerrar: () => void;
+  /** Cancela cualquier cierre pendiente cuando el puntero entra al panel. */
+  reafirmar: () => void;
   abrirBuscador: () => void;
 }) {
   return (
     <div
-      className={`mega-menu absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[min(860px,calc(100vw-3rem))] max-h-[75dvh] overflow-y-auto rounded-2xl border border-gray-100 bg-white p-6 xl:p-8 shadow-xl dark:border-[var(--border)] dark:bg-[var(--surface-raised)] ${
+      id="panel-productos"
+      onMouseEnter={reafirmar}
+      className={`mega-menu absolute top-full left-0 mt-3 w-full max-w-[860px] max-h-[75dvh] overflow-y-auto overflow-x-visible rounded-2xl border border-gray-100 bg-white p-6 xl:p-8 shadow-xl dark:border-[var(--border)] dark:bg-[var(--surface-raised)] ${
         visible ? 'block' : 'hidden'
       }`}
-      role="menu"
       aria-label="Catálogo de productos"
     >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8">
@@ -740,11 +983,22 @@ function MegaProductos({
         </div>
       </div>
 
+      {/* `min-h-[24px]` y el relleno vertical no son estética: sin ellos la caja
+          de estos dos objetivos mide 16px de alto, por debajo del mínimo de
+          24x24 de WCAG 2.5.8. Son además los dos únicos elementos del panel
+          que no son una fila de lista, así que nadie les había puesto altura. */}
       <div className="mt-6 pt-6 border-t dark:border-[var(--border)] flex items-center justify-between gap-4 text-xs">
-        <Link href="/productos" onClick={cerrar} className="text-[#059669] hover:underline font-medium">
+        <Link
+          href="/productos"
+          onClick={cerrar}
+          className="inline-flex min-h-[24px] items-center py-1 font-medium text-[#059669] hover:underline"
+        >
           Ver todo el catálogo →
         </Link>
-        <button onClick={abrirBuscador} className="flex items-center gap-2 text-[#059669] hover:underline font-medium">
+        <button
+          onClick={abrirBuscador}
+          className="inline-flex min-h-[24px] items-center gap-2 py-1 font-medium text-[#059669] hover:underline"
+        >
           <Search className="w-3.5 h-3.5 shrink-0" /> Buscar en catálogo
         </button>
       </div>

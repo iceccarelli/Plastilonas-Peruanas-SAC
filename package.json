@@ -13,6 +13,7 @@
     "audit:ui": "node scripts/audit-ui.mjs",
     "auditar:viewport": "node scripts/auditar-viewport.mjs",
     "auditar:imagenes": "node scripts/auditar-imagenes.mjs",
+    "auditar:navegacion": "node scripts/auditar-navegacion.mjs",
     "verify:deploy": "bash scripts/verificar-despliegue.sh",
     "vigilancia": "node scripts/vigilancia-fuentes.mjs",
     "imagenes": "node scripts/imagenes.mjs",

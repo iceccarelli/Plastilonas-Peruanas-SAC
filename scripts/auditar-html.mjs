@@ -20,7 +20,7 @@
  * ejecución: son deuda visible, no una parada de línea.
  */
 
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const RAIZ = process.cwd();
@@ -146,6 +146,43 @@ const canonico = (h) => h.match(/<link rel="canonical" href="([^"]+)"/i)?.[1] ??
 const h1s = (h) => [...h.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/gi)].map((m) => decodificar(m[1].replace(/<[^>]+>/g, '')).trim());
 
 /** Enlaces internos, ya normalizados y sin ancla ni query. */
+/**
+ * La ruta de archivo detrás de un `src`. Next sirve casi todas las imágenes a
+ * través de su optimizador —`/_next/image?url=%2Fimages%2Ffoo.png&w=…`—, así
+ * que el `src` del HTML no es la ruta del archivo: hay que sacarla del
+ * parámetro `url`. Sin esto, comprobar la existencia del archivo daría siempre
+ * por bueno cualquier `src`, que es no comprobar nada.
+ */
+function archivoDeSrc(src) {
+  const limpio = decodificar(src);
+  if (limpio.startsWith('/_next/image')) {
+    const u = limpio.match(/[?&]url=([^&]+)/);
+    if (!u) return null;
+    const dentro = decodeURIComponent(u[1]);
+    return dentro.startsWith('/') ? dentro : null;
+  }
+  if (limpio.startsWith('/_next/static')) return null; // recursos del compilador
+  if (limpio.startsWith('data:') || /^https?:\/\//.test(limpio)) return null;
+  return limpio.startsWith('/') ? limpio : null;
+}
+
+/**
+ * Nombre accesible de un elemento, a partir de su etiqueta de apertura y su
+ * contenido. Se mira, en el orden en que lo hace un navegador: `aria-label`,
+ * el texto visible, el `alt` de una imagen interior y `title`.
+ */
+function nombreAccesible(apertura, contenido) {
+  const aria = apertura.match(/\baria-label="([^"]*)"/i)?.[1];
+  if (aria && aria.trim()) return aria.trim();
+  const texto = decodificar(contenido.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+  if (texto) return texto;
+  const alt = contenido.match(/<img\b[^>]*\balt="([^"]+)"/i)?.[1];
+  if (alt && alt.trim()) return alt.trim();
+  const title = apertura.match(/\btitle="([^"]*)"/i)?.[1];
+  if (title && title.trim()) return title.trim();
+  return null;
+}
+
 function enlacesInternos(html) {
   const out = new Set();
   for (const m of html.matchAll(/href="(\/[^"#?]*)(?:[#?][^"]*)?"/g)) {
@@ -248,6 +285,42 @@ for (const p of paginas) {
   // --- Imágenes sin alt ---------------------------------------------
   const sinAlt = [...html.matchAll(/<img\b(?![^>]*\balt=)[^>]*>/gi)];
   if (sinAlt.length) anota('error', 'img-sin-alt', ruta, `${sinAlt.length} <img> sin atributo alt`);
+
+  // --- Imágenes que apuntan a un archivo que no está ------------------
+  //
+  // `alt` comprobado y archivo ausente es el peor par posible: la página
+  // declara qué se ve y no se ve nada. El auditor de rutas mira las citadas
+  // DESDE EL CÓDIGO; esto mira las que de verdad se sirvieron, que incluye las
+  // que arma una plantilla en tiempo de compilación y ninguna línea nombra.
+  for (const m of html.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/gi)) {
+    const archivo = archivoDeSrc(m[1]);
+    if (!archivo) continue;
+    const abs = join(RAIZ, 'public', decodeURIComponent(archivo));
+    let tam = -1;
+    try { tam = statSync(abs).size; } catch { tam = -1; }
+    if (tam < 0) anota('error', 'img-sin-archivo', ruta, `<img> apunta a ${archivo}, que no existe en public/`);
+    else if (tam < 512) anota('error', 'img-vacia', ruta, `${archivo} pesa ${tam} bytes: no es una imagen`);
+  }
+
+  // --- Enlaces y botones sin nombre accesible -------------------------
+  //
+  // Un enlace cuyo contenido es sólo un icono no tiene nombre: un lector de
+  // pantalla anuncia «enlace» y nada más, y un agente que recorre el árbol de
+  // accesibilidad ve un destino sin etiqueta y no puede decidir si le sirve.
+  // Se ve perfectamente con los ojos y es invisible para todo lo demás.
+  for (const m of html.matchAll(/<a\b([^>]*\bhref="[^"]*"[^>]*)>([\s\S]*?)<\/a>/gi)) {
+    if (/\baria-hidden="true"/i.test(m[1])) continue;
+    if (!nombreAccesible(m[1], m[2])) {
+      const href = m[1].match(/\bhref="([^"]*)"/i)?.[1] ?? '?';
+      anota('error', 'enlace-sin-nombre', ruta, `enlace a ${href} sin texto, aria-label ni alt`);
+    }
+  }
+  for (const m of html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/gi)) {
+    if (/\baria-hidden="true"/i.test(m[1])) continue;
+    if (!nombreAccesible(m[1], m[2])) {
+      anota('error', 'boton-sin-nombre', ruta, 'un <button> sin texto ni aria-label: nadie sabe qué hace');
+    }
+  }
 
   // --- JSON-LD ------------------------------------------------------
   for (const bruto of bloquesJsonLd(html)) {
