@@ -22,7 +22,7 @@ import { breadcrumbSchema, dataCatalogSchema, webPageSchema } from '@/lib/schema
 
 const URL = `${SITE.url}/descargas`;
 const TITLE = 'Centro de documentación y datos abiertos';
-const DESCRIPTION = `Documentos técnicos en PDF y datos abiertos de ${SITE.name}: ${products.length} fichas de producto, ${articles.length} guías de especificación, ${solutions.length} arquitecturas de referencia, el Marco de Especificación, el glosario y el catálogo completo en formato de datos. Sin registro.`;
+const DESCRIPTION = `${products.length} fichas de producto, ${articles.length} guías, ${solutions.length} arquitecturas, el Marco y el glosario, en PDF. El catálogo completo, como datos. Sin registro.`;
 
 export const metadata: Metadata = {
   title: TITLE,

@@ -14,10 +14,7 @@ import { products, productFamilies } from '@/lib/products';
  */
 
 const TITLE = `Catálogo: ${products.length} soluciones textiles industriales`;
-const DESCRIPTION = `Catálogo técnico completo de ${SITE.name}: ${productFamilies
-  .slice(0, 6)
-  .map((f) => f.name.toLowerCase())
-  .join(', ')} y más. Especificaciones reales, fabricación a medida y despacho a todo el Perú.`;
+const DESCRIPTION = `${products.length} líneas en ${productFamilies.length} familias, con especificación real y modo de suministro declarado. Fabricación a medida y despacho a todo el Perú.`;
 
 export const metadata: Metadata = {
   title: TITLE,

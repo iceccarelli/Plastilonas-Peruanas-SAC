@@ -8,7 +8,7 @@ const INTRO = `Cómo funciona la relación comercial: venta por cotización, alc
 
 export const metadata: Metadata = {
   title: TITLE,
-  description: `Términos y condiciones de ${SITE.legalName}: venta B2B por cotización sin precios de lista, alcance de las fichas y guías técnicas, compra en línea y ley aplicable.`,
+  description: `Venta B2B por cotización, sin precios de lista. Alcance de las fichas y guías técnicas, compra en línea y ley aplicable.`,
   alternates: { canonical: '/terminos' },
   openGraph: {
     title: `${TITLE} | ${SITE.name}`,

@@ -54,7 +54,7 @@ const ALTERNOS = {
 export const metadata: Metadata = {
   title: 'Fabricante de big bags, lonas, geomembranas y mallas en Perú',
   description:
-    `${SITE.name} fabrica e instala a medida soluciones textiles industriales en el Perú desde ${SITE.foundingYear}: big bags FIBC, lonas y cobertores, geomembranas y geotextiles, carpas, mangas de ventilación minera y mallas agrícolas. Un solo proveedor, despacho nacional.`,
+    `Fabricamos e instalamos a medida desde ${SITE.foundingYear}: big bags FIBC, lonas, geomembranas, carpas, ventilación minera y mallas. Un solo proveedor, despacho nacional.`,
   alternates: { canonical: '/', languages: ALTERNOS },
   openGraph: {
     title: `${SITE.name} | Fabricante de soluciones textiles industriales en el Perú`,

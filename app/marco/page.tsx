@@ -28,7 +28,7 @@ import { ranurasProceso } from '@/lib/imagenes';
 
 const URL = `${SITE.url}/marco`;
 const TITLE = 'Marco de Especificación: 6 pilares y 27 criterios';
-const DESCRIPTION = `Criterios públicos para especificar big bags, geomembranas, coberturas y ventilación antes de cotizar: compatibilidad, cargas, exposición, ejecución, documentación y operación. ${totalCriteria()} criterios verificables con su fuente.`;
+const DESCRIPTION = `${totalCriteria()} criterios verificables para definir un proyecto antes de cotizarlo: compatibilidad, cargas, exposición, ejecución, documentación y operación.`;
 
 const FAQS = [
   {

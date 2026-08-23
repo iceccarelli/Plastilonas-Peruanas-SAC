@@ -10,6 +10,7 @@ import BarChart from '@/components/BarChart';
 import LineChart from '@/components/LineChart';
 import { numeroConSigno } from '@/lib/format';
 import { articleSchema, breadcrumbSchema, datasetSchema, webPageSchema } from '@/lib/schema';
+import { descripcionDeTexto } from '@/lib/meta';
 
 /**
  * Página de informe.
@@ -38,13 +39,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const i = informeBySlug(slug);
   if (!i) return {};
   const url = `${SITE.url}/informes/${slug}`;
+  // La etiqueta de búsqueda se ajusta al espacio que Google deja de verdad;
+  // el texto largo sigue entero en la página y en el JSON-LD, donde no estorba.
+  const descripcionBusqueda = descripcionDeTexto(i.metaDescription);
+
   return {
     title: i.metaTitle,
-    description: i.metaDescription,
+    description: descripcionBusqueda,
     alternates: { canonical: `/informes/${slug}` },
     openGraph: {
       title: `${i.titulo} | ${SITE.name}`,
-      description: i.metaDescription,
+      description: descripcionBusqueda,
       url,
       locale: SITE.locale,
       type: 'article',

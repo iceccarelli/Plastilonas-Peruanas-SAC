@@ -24,7 +24,7 @@ import { breadcrumbSchema, definedTermSetSchema, webPageSchema } from '@/lib/sch
 
 const URL = `${SITE.url}/glosario`;
 const TITLE = 'Glosario técnico de textiles y geosintéticos';
-const DESCRIPTION = `${terminos.length} términos del rubro definidos con precisión: qué significan, cómo se miden y qué deciden en obra. Vocabulario de referencia para especificar big bags, lonas, geosintéticos, ventilación minera y mallas agrícolas en el Perú.`;
+const DESCRIPTION = `${terminos.length} términos del rubro: qué significan, cómo se miden y qué deciden en obra. Vocabulario de referencia, útil se compre a quien se compre.`;
 
 export const metadata: Metadata = {
   title: TITLE,

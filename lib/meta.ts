@@ -84,3 +84,60 @@ export function recortarPorPalabra(texto: string, max: number): string {
 
 /** ¿Este título cabe en el resultado de búsqueda, con la marca incluida? */
 export const tituloCabe = (titulo: string): boolean => titulo.length + SUFIJO_MARCA <= MAX_TITULO;
+
+/**
+ * Descripción a partir de un párrafo ya escrito.
+ *
+ * Por qué hace falta además de `descripcionAjustada`. Esa función pide las
+ * frases sueltas y en orden de importancia, que es lo correcto cuando se
+ * escribe la descripción a propósito. Pero la mayor parte del sitio no la
+ * escribe: la hereda de un campo que ya existe —`article.description`,
+ * `solucion.metaDescription`, `novedad.resumen`— y que además se pinta en la
+ * página. Ahí no hay frases sueltas que pasar: hay un párrafo.
+ *
+ * La regla es: el prefijo MÁS LARGO que termine en un final de frase de verdad
+ * y quepa en el presupuesto. El texto de la página no se toca; sigue completo
+ * donde el lector lo lee entero.
+ *
+ * DÓNDE NO CORTA, y por qué importa en este rubro concreto. La primera versión
+ * de esto cortaba por punto, dos puntos o punto y coma seguidos de espacio, y
+ * el comentario afirmaba que las abreviaturas quedaban a salvo. Era falso, y
+ * se vio a la primera prueba: «D.S. N.° 024-2016-EM» salía como «S. ° 024» y
+ * «factor de seguridad 5:1 vs 6:1» como «5 1 vs 1». Un texto técnico de este
+ * sector está lleno de puntos y de dos puntos que no terminan nada — normas,
+ * relaciones de carga, decimales, horas—. Por eso ahora sólo cuenta como final
+ * de frase un `.`, `!` o `?` seguido de espacio y MAYÚSCULA, y se descarta si
+ * lo que va justo antes del punto es una inicial suelta: «D.S.»,
+ * «N.°» dejan de ser fronteras. Los dos puntos y el punto y coma no
+ * cortan nunca: aquí introducen la parte útil, no la cierran.
+ *
+ * Si no hay ninguna frontera dentro del presupuesto, NO se inventa una: se
+ * devuelve el texto tal cual, largo. Recortar con puntos suspensivos escondería
+ * el problema, y el problema es que ese texto está mal escrito para este uso.
+ * `test/descripciones.test.ts` lo hace fallar para que lo reescriba una persona.
+ */
+export function descripcionDeTexto(texto: string, max = MAX_DESCRIPCION): string {
+  const limpio = (texto ?? '').replace(/\s+/g, ' ').trim();
+  if (limpio.length <= max) return limpio;
+
+  let mejor = '';
+  // Final de frase: . ! ? + espacio + mayúscula. La captura anterior sirve
+  // para descartar las abreviaturas y los decimales.
+  const frontera = /(.)([.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿¡])/g;
+  for (let m = frontera.exec(limpio); m; m = frontera.exec(limpio)) {
+    // Inicial de abreviatura: una mayúscula suelta, precedida de punto o de
+    // espacio. «D.S. N.° 024» tiene una frontera aparente en «S. N», y no lo
+    // es. Los decimales no hacen falta comprobarlos: «1.5» no lleva espacio ni
+    // mayúscula detrás del punto, así que la expresión ya los descarta.
+    const anterior = limpio[m.index] ?? '';
+    const previo = limpio[m.index - 1] ?? '';
+    if (/^[A-ZÁÉÍÓÚÑ]$/.test(anterior) && (previo === '.' || previo === ' ')) continue;
+    const corte = limpio.slice(0, m.index + 2).trim();
+    if (corte.length > max) break;
+    mejor = corte;
+  }
+  return mejor || limpio;
+}
+
+/** ¿Esta descripción cabe entera en el resultado de búsqueda? */
+export const descripcionCabe = (d: string): boolean => d.trim().length <= MAX_DESCRIPCION;

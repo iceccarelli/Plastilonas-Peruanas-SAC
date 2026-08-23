@@ -128,7 +128,7 @@ const registro: Novedad[] = [
     tipo: 'guia',
     titulo: 'Siete guías nuevas: el silo técnico llega a diez',
     resumen:
-      'Ventilación impelente frente a aspirante, elección de geotextil, densidad de malla antiáfida, carga de viento en carpas, transporte de concentrado, tanques flexibles y cálculo de mulch.',
+      'Siete guías nuevas: impelente frente a aspirante, geotextil, malla antiáfida, viento en carpas, concentrado, tanques flexibles y mulch.',
     queCambia:
       'Las siete decisiones que más veces nos llegan mal definidas quedan documentadas con su criterio y su fuente, disponibles antes de pedir cotización.',
     detalle: [
@@ -153,7 +153,7 @@ const registro: Novedad[] = [
     tipo: 'herramienta',
     titulo: 'Ficha técnica en PDF para las 36 líneas',
     resumen:
-      'Cada producto genera su ficha en PDF desde el mismo catálogo que alimenta la web: especificaciones, aplicaciones, sectores, abastecimiento y disponibilidad.',
+      'Cada producto genera su ficha en PDF desde el catálogo que alimenta la web. Especificaciones, aplicaciones, sectores, abastecimiento y disponibilidad.',
     queCambia:
       'El expediente técnico se arma sin esperar respuesta comercial, y la ficha nunca contradice a la página porque ambas salen de la misma fuente.',
     detalle: [
@@ -214,7 +214,7 @@ const registro: Novedad[] = [
     tipo: 'referencia',
     titulo: 'Seis arquitecturas de referencia',
     resumen:
-      'Poza revestida, frente de avance ventilado, despacho de concentrado a granel, protección de cultivo, almacenamiento de agua en operación remota y campamento con almacén temporal.',
+      'Poza revestida, frente ventilado, despacho a granel, protección de cultivo, almacenamiento de agua remoto y campamento con almacén temporal.',
     queCambia:
       'Quien necesita resolver un escenario completo ve la lista de materiales entera, el orden de ejecución y qué falla al comprar por piezas sueltas.',
     detalle: [
@@ -259,7 +259,7 @@ const registro: Novedad[] = [
     tipo: 'herramienta',
     titulo: 'Centro de documentación: PDF y datos abiertos',
     resumen:
-      'Guías, arquitecturas, glosario y Marco de Especificación pasan a tener versión en PDF, y el catálogo completo se publica en formato de datos con instrucción de atribución.',
+      'Guías, arquitecturas, glosario y Marco pasan a tener versión en PDF. El catálogo completo se publica como datos, con instrucción de atribución.',
     queCambia:
       'El expediente técnico se arma sin pedir nada por correo, y cualquier integración o agente puede leer el catálogo entero sin rastrear página por página.',
     detalle: [
@@ -281,7 +281,7 @@ const registro: Novedad[] = [
     tipo: 'referencia',
     titulo: 'Informes del sector con estadística oficial',
     resumen:
-      'Producción e inversión minera, agroexportaciones y radiación ultravioleta, con la cifra de cada organismo, su fecha de verificación y lo que el informe explícitamente no afirma.',
+      'Producción e inversión minera, agroexportaciones y radiación ultravioleta. Cada cifra con su organismo, su fecha y lo que el informe no afirma.',
     queCambia:
       'Hay con qué sustentar ante un comité por qué una especificación cambia según el emplazamiento, sin depender de cifras de proveedor.',
     detalle: [
@@ -305,7 +305,7 @@ const registro: Novedad[] = [
     tipo: 'referencia',
     titulo: 'Publicamos nuestra cadena de formación de precio',
     resumen:
-      'Del petróleo a la lona terminada: nafta, resina, flete y tipo de cambio, con el dato verificable de cada eslabón y qué indicador público mirar para anticiparlo.',
+      'Del petróleo a la lona terminada: nafta, resina, flete y tipo de cambio. Cada eslabón con su dato verificable y el indicador público que lo anticipa.',
     queCambia:
       'La pregunta "¿por qué me subió la cotización?" pasa a tener una respuesta con fuente, y el comprador puede seguir por su cuenta los indicadores que la mueven.',
     detalle: [

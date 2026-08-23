@@ -35,7 +35,7 @@ export const familyContent: FamilyContent[] = [
     h1: 'Envases y embalaje industrial a medida en el Perú',
     metaTitle: 'Envases y embalaje industrial: big bags, sacos y films | Perú',
     metaDescription:
-      'Big Bags FIBC, sacos polytarp, bolsas y láminas de polietileno y films termocontraíbles fabricados a medida para minería, agroexportación y logística en el Perú.',
+      'Big bags FIBC, sacos polytarp, bolsas y láminas de polietileno y films termocontraíbles, fabricados a medida en el Perú.',
     intro: [
       'El envase industrial es el último eslabón entre su producto terminado y el cliente, y el primero que falla cuando se especifica por precio unitario. Un bolsón que se rompe en cancha, un film que no unitiza la paleta o un saco que no resiste la estiba convierten un ahorro de céntimos por unidad en pérdida de producto, parada de despacho e incidente de seguridad.',
       'Esta familia cubre el envase de material a granel y la protección de carga paletizada. Todo se define por especificación: capacidad real según densidad aparente, configuración de boca y fondo, tratamientos y documentación exigida por el destino.',
@@ -87,7 +87,7 @@ export const familyContent: FamilyContent[] = [
     h1: 'Lonas, cobertores y mantas industriales confeccionadas a medida',
     metaTitle: 'Lonas y cobertores industriales a medida | Perú',
     metaDescription:
-      'Lona plastificada, mantas y cobertores para camiones, siders, cobertores agrícolas y mantas aislantes, confeccionados a medida en el Perú con refuerzos y ojalillos según uso.',
+      'Lona plastificada, mantas y cobertores para camión y sider, cobertores agrícolas y mantas aislantes, a medida y con refuerzo según el uso.',
     intro: [
       'La lona es el producto donde la confección pesa más que el material. Dos cobertores del mismo rollo se comportan de forma completamente distinta según el paso de costura, el refuerzo del perímetro, la distancia entre ojalillos y el tratamiento del borde: ahí es donde una lona dura tres temporadas o se rasga en la primera tormenta.',
       'Esta familia cubre desde el cobertor de camión que trabaja a 90 km/h con carga viva hasta la manta térmica de proceso industrial. Todo se confecciona a la medida real del elemento a cubrir, no a medidas de catálogo.',
@@ -134,7 +134,7 @@ export const familyContent: FamilyContent[] = [
     h1: 'Carpas, coberturas tensadas y arquitectura textil en el Perú',
     metaTitle: 'Carpas industriales y arquitectura textil a medida | Perú',
     metaDescription:
-      'Carpas con estructura metálica, coberturas tensadas, módulos para campamento, galpones e invernaderos y toldos, diseñados, fabricados e instalados a medida en el Perú.',
+      'Carpas con estructura metálica, coberturas tensadas, módulos de campamento, galpones, invernaderos y toldos. Diseño, fabricación e instalación.',
     intro: [
       'Una cobertura textil es una estructura, no una lona grande. El textil trabaja a tracción y transmite las cargas de viento y de nieve a un sistema estructural que debe estar dimensionado para recibirlas: cuando falla una carpa industrial, casi nunca falla la tela, falla el anclaje o el cálculo de la carga que nadie hizo.',
       'Esta familia cubre desde el módulo de campamento minero hasta la cubierta tensada arquitectónica. Cada proyecto parte de la geometría, la ubicación y las cargas del sitio.',
@@ -181,7 +181,7 @@ export const familyContent: FamilyContent[] = [
     h1: 'Mallas agrícolas: antiáfidas, raschel y antipájaro para el agro peruano',
     metaTitle: 'Mallas agrícolas antiáfidas, raschel y antipájaro | Perú',
     metaDescription:
-      'Mallas antiáfidas para control de plagas, malla raschel de sombra y mallas antipájaro y antigranizo para protección de cultivos en la costa, sierra y selva del Perú.',
+      'Malla antiáfida para control de plagas, raschel de sombra, antipájaro y antigranizo para cultivos en costa, sierra y selva del Perú.',
     intro: [
       'En agroexportación la malla no es un insumo de ferretería: es una barrera sanitaria y un instrumento de manejo de radiación. La densidad de trama de una antiáfida determina qué insecto pasa y cuál no; el porcentaje de sombra de una raschel cambia la temperatura de hoja y, con ella, el comportamiento del cultivo.',
       'Esta familia se abastece por importación directa, lo que permite mantener densidades y porcentajes consistentes entre lotes: un cambio de trama entre campañas invalida la comparación agronómica del ciclo anterior.',
@@ -275,7 +275,7 @@ export const familyContent: FamilyContent[] = [
     h1: 'Geosintéticos e impermeabilización: geomembranas, geotextiles y geomallas',
     metaTitle: 'Geomembranas HDPE y PVC, geotextiles y geomallas | Perú',
     metaDescription:
-      'Geomembranas de PVC, HDPE, PE fortificado y bituminosas, geotextiles, geomallas y geocompuestos de drenaje para pozas, canales, rellenos y obras en el Perú.',
+      'Geomembranas de PVC, HDPE, PE fortificado y bituminosas, geotextiles, geomallas y geocompuestos de drenaje para pozas, canales y rellenos.',
     intro: [
       'En impermeabilización, el material es la parte fácil. Una geomembrana bien especificada y mal instalada se comporta peor que una lámina más delgada bien instalada: las filtraciones aparecen en la soldadura, en las penetraciones y en la zanja de anclaje, casi nunca en el centro del panel.',
       'Esta familia cubre la barrera (geomembranas), la protección y separación (geotextiles), el refuerzo (geomallas) y el drenaje (geocompuestos). Las líneas técnicas se abastecen bajo pedido con ficha y certificado de lote del fabricante entregados en la cotización: no publicamos como propios números de certificado que no podemos respaldar.',
@@ -327,7 +327,7 @@ export const familyContent: FamilyContent[] = [
     h1: 'Soluciones ambientales y manejo de fluidos: tanques flexibles, biodigestores y tuberías HDPE',
     metaTitle: 'Tanques flexibles, biodigestores y tuberías HDPE | Perú',
     metaDescription:
-      'Tanques flexibles y bladders para almacenamiento de agua y combustible, biodigestores y tuberías HDPE para saneamiento, agricultura y operaciones mineras en el Perú.',
+      'Tanques flexibles y bladders para agua y combustible, biodigestores y tubería HDPE para saneamiento, agricultura y operación minera.',
     intro: [
       'Almacenar y conducir fluidos en operaciones remotas plantea un problema distinto al de la obra urbana: la solución tiene que llegar en camión, montarse sin grúa y funcionar sin mantenimiento especializado durante toda la campaña.',
       'Esta familia se abastece por importación directa y mediante aliados técnicos especializados, en modalidad bajo pedido. Se declara así de forma explícita: preferimos decir cómo abastecemos cada línea antes que presentar todo como fabricación propia.',
@@ -374,7 +374,7 @@ export const familyContent: FamilyContent[] = [
     h1: 'Protección y seguridad industrial: biombos de soldadura y barreras acústicas',
     metaTitle: 'Biombos de soldadura y barreras acústicas industriales | Perú',
     metaDescription:
-      'Biombos y cortinas de protección para soldadura y barreras acústicas para obra e industria, fabricados a medida en el Perú según el espacio y el riesgo a controlar.',
+      'Biombos y cortinas de protección para soldadura y barreras acústicas para obra e industria, a medida según el espacio y el riesgo.',
     intro: [
       'Los elementos de protección colectiva se especifican por el riesgo que controlan, no por su apariencia. Un biombo de soldadura existe para que la radiación del arco no alcance a quien pasa al lado; una barrera acústica, para que el nivel de presión sonora baje del otro lado de la línea de propiedad.',
       'Se fabrican a medida porque el espacio que deben proteger y la fuente que deben contener son siempre particulares.',
@@ -458,7 +458,7 @@ export const familyContent: FamilyContent[] = [
     h1: 'Publicidad y comunicación visual: gigantografías y rotulado de flota',
     metaTitle: 'Gigantografías, señalética y rotulado vehicular | Perú',
     metaDescription:
-      'Gigantografías, señalética y revestimiento vehicular con toldos publicitarios impresos, fabricados a medida en el Perú para comercio, industria y flotas de transporte.',
+      'Gigantografías, señalética, revestimiento vehicular y toldos publicitarios impresos, a medida para comercio, industria y flotas.',
     intro: [
       'Una gigantografía a la intemperie y una gráfica de flota son problemas de material antes que de diseño: el sustrato debe resistir radiación, lluvia y velocidad sin que la tinta se degrade ni el borde se despegue.',
       'Esta familia es de fabricación propia y aprovecha la misma capacidad de confección de las lonas: refuerzo perimetral, ojalillos y terminaciones pensadas para instalación real a la intemperie, no solo para la impresión.',

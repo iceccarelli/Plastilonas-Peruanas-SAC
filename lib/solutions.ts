@@ -67,7 +67,7 @@ export const solutions: Solution[] = [
     titulo: 'Poza revestida: el conjunto completo, no solo la lámina',
     metaTitle: 'Poza revestida: geomembrana, geotextil y anclaje',
     metaDescription:
-      'Arquitectura de referencia para revestir una poza o canal: protección de subrasante, barrera impermeable, anclaje perimetral, detalles de penetración y plan de ensayos de costura.',
+      'Revestir una poza o canal: protección de subrasante, barrera impermeable, anclaje perimetral, detalles de penetración y plan de ensayos de costura.',
     escenario:
       'Una poza de proceso, de agua o de almacenamiento que debe contener su contenido durante toda la vida del proyecto, en un terreno que rara vez es el ideal.',
     problema: [
@@ -185,7 +185,7 @@ export const solutions: Solution[] = [
     titulo: 'Frente de avance ventilado: del cálculo de caudal a la manga instalada',
     metaTitle: 'Frente de avance ventilado: caudal e instalación',
     metaDescription:
-      'Arquitectura de referencia para ventilar una labor subterránea: demanda por personal y equipo diésel corregida por altitud, elección de esquema, diámetro de manga y verificación en el frente.',
+      'Ventilar una labor subterránea: demanda por personal y equipo diésel corregida por altitud, esquema, diámetro de manga y verificación en el frente.',
     escenario:
       'Una labor ciega en avance, con personal y equipo diésel operando, donde el aire debe llegar al fondo y los gases de voladura evacuarse dentro del ciclo de trabajo.',
     problema: [
@@ -293,7 +293,7 @@ export const solutions: Solution[] = [
     titulo: 'Despacho de concentrado a granel: del llenado al puerto',
     metaTitle: 'Despacho de concentrado a granel: envase y estiba',
     metaDescription:
-      'Arquitectura de referencia para despachar material a granel: envase con carga de trabajo segura declarada, unitización, cobertura de tolva y la documentación que exige el terminal.',
+      'Despachar material a granel: envase con carga de trabajo segura declarada, unitización, cobertura de tolva y la documentación que exige el terminal.',
     escenario:
       'Material a granel que sale de operación, pasa por balanza, viaja por carretera y llega a un terminal portuario con requisitos documentales propios.',
     problema: [
@@ -405,7 +405,7 @@ export const solutions: Solution[] = [
     titulo: 'Protección de cultivo: barrera sanitaria, sombra y suelo',
     metaTitle: 'Protección de cultivo: mallas, sombra y suelo',
     metaDescription:
-      'Arquitectura de referencia para proteger un cultivo de agroexportación: exclusión de plagas sin asfixiar la ventilación, control de radiación y manejo de humedad del suelo.',
+      'Proteger un cultivo de agroexportación: excluir plagas sin asfixiar la ventilación, controlar la radiación y manejar la humedad del suelo.',
     escenario:
       'Un cultivo de agroexportación que necesita excluir vectores, manejar radiación y conservar humedad, en valles donde la radiación y el viento castigan el material tanto como la plaga.',
     problema: [
@@ -516,7 +516,7 @@ export const solutions: Solution[] = [
     titulo: 'Almacenamiento de agua en operación remota',
     metaTitle: 'Almacenamiento de agua en operación remota',
     metaDescription:
-      'Arquitectura de referencia para almacenar y conducir agua en frentes remotos: preparación de base, volumen útil real, conducción en HDPE y la pregunta correcta sobre potabilidad.',
+      'Almacenar y conducir agua en un frente remoto: preparación de base, volumen útil real, conducción en HDPE y la pregunta correcta sobre potabilidad.',
     escenario:
       'Un frente de trabajo remoto que necesita almacenar y distribuir agua sin obra civil, sin grúa y con logística de acceso limitada.',
     problema: [
@@ -620,7 +620,7 @@ export const solutions: Solution[] = [
     titulo: 'Campamento y almacén temporal: cubrir, cerrar y proteger',
     metaTitle: 'Campamento y almacén temporal: carpas y módulos',
     metaDescription:
-      'Arquitectura de referencia para instalar cobertura y almacenamiento temporal en obra o faena: cargas de viento, anclaje disponible, cerramientos y protección de puestos de trabajo.',
+      'Cobertura y almacenamiento temporal en obra o faena: cargas de viento, anclaje disponible, cerramientos y protección de los puestos de trabajo.',
     escenario:
       'Una faena que necesita cubrir superficie, almacenar material y habilitar puestos de trabajo con estructuras que se montan y, muchas veces, se desmontan al terminar la campaña.',
     problema: [

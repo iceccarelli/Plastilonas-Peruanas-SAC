@@ -12,6 +12,7 @@ import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import { articleSchema, breadcrumbSchema, webPageSchema } from '@/lib/schema';
+import { descripcionDeTexto } from '@/lib/meta';
 
 /**
  * Entrada del registro fechado.
@@ -35,13 +36,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const n = novedadBySlug(slug);
   if (!n) return {};
   const url = `${SITE.url}/novedades/${slug}`;
+  // La etiqueta de búsqueda se ajusta al espacio que Google deja de verdad;
+  // el texto largo sigue entero en la página y en el JSON-LD, donde no estorba.
+  const descripcionBusqueda = descripcionDeTexto(n.resumen);
+
   return {
     title: n.titulo,
-    description: n.resumen,
+    description: descripcionBusqueda,
     alternates: { canonical: `/novedades/${slug}` },
     openGraph: {
       title: `${n.titulo} | ${SITE.name}`,
-      description: n.resumen,
+      description: descripcionBusqueda,
       url,
       locale: SITE.locale,
       type: 'article',

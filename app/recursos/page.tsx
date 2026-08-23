@@ -19,7 +19,7 @@ import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 
 const URL = `${SITE.url}/recursos`;
 const TITLE = 'Recursos técnicos: especificación e instalación';
-const DESCRIPTION = `Guías técnicas en español para especificar, instalar y auditar soluciones textiles industriales y geosintéticos en el Perú: big bags para minería, geomembranas en pozas y canales, ventilación de labores subterráneas. Escritas por ${SITE.name} con las fuentes citadas.`;
+const DESCRIPTION = `Guías para especificar, instalar y auditar textil industrial y geosintéticos en el Perú, con las fuentes citadas en cada una.`;
 
 export const metadata: Metadata = {
   title: TITLE,

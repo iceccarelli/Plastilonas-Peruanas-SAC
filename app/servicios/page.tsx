@@ -10,7 +10,7 @@ const URL_SERVICIOS = `${SITE.url}/servicios`;
 
 const TITLE = 'Servicios: fabricación e instalación';
 const DESCRIPTION =
-  'Fabricación a medida, instalación en obra con equipo propio, asesoría técnica y mantenimiento de lonas, geomembranas, estructuras textiles y mangas de ventilación en todo el Perú.';
+  'Fabricación a medida en planta propia, instalación en obra con equipo propio, asesoría técnica y mantenimiento, en todo el Perú.';
 
 export const metadata: Metadata = {
   title: TITLE,
