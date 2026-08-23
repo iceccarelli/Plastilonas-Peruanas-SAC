@@ -17,6 +17,8 @@ import {
 import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import WhatsAppLink from '@/components/WhatsAppLink';
+import ImagenContenido from '@/components/ImagenContenido';
+import { ranurasErrorCompra } from '@/lib/imagenes';
 import {
   breadcrumbSchema,
   faqSchema,
@@ -74,6 +76,9 @@ export default async function IndustriaPage({ params }: Props) {
   const restantes = todos.length - ancla.length;
   const soluciones = solucionesDe(ind);
   const guias = guiasDe(ind);
+  // Los diagramas de este sector, en el mismo orden que `problemas`.
+  const diagramasError = ranurasErrorCompra().filter((r) => r.id.startsWith(`error:${ind.slug}:`));
+
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-14">
@@ -151,7 +156,7 @@ export default async function IndustriaPage({ params }: Props) {
           Lo que se rompe cuando se compra sin criterio
         </h2>
         <div className="space-y-5">
-          {ind.problemas.map((p) => (
+          {ind.problemas.map((p, i) => (
             <div
               key={p.titulo}
               className="rounded-2xl border border-amber-200/70 bg-amber-50/50 p-5"
@@ -161,6 +166,19 @@ export default async function IndustriaPage({ params }: Props) {
                 <h3 className="font-semibold text-[#0A2540]">{p.titulo}</h3>
               </div>
               <p className="pl-7 text-sm leading-relaxed text-gray-700">{p.detalle}</p>
+
+              {/* El dibujo del error, dentro de su propia tarjeta. Un «así no /
+                  así sí» al lado del texto que lo describe es lo que convierte
+                  una advertencia en algo que se recuerda al redactar el RFQ.
+                  Ninguno lleva prioridad: el primero ya está muy por debajo del
+                  pliegue y competirían entre sí por el LCP. */}
+              {diagramasError[i] && (
+                <ImagenContenido
+                  ranura={diagramasError[i]}
+                  className="mt-4 ml-7"
+                  sizes="(min-width: 768px) 640px, 100vw"
+                />
+              )}
             </div>
           ))}
         </div>

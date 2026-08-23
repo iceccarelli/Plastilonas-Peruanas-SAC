@@ -18,6 +18,8 @@ import {
   webPageSchema,
 } from '@/lib/schema';
 import CalculadoraForm from '@/components/CalculadoraForm';
+import ImagenContenido from '@/components/ImagenContenido';
+import { ranurasCalculadora } from '@/lib/imagenes';
 
 /**
  * Página de una calculadora.
@@ -83,6 +85,7 @@ export default async function CalculadoraPage({
   if (!calc) notFound();
 
   const url = `${SITE.url}/calculadoras/${calc.slug}`;
+  const geometria = ranurasCalculadora().find((r) => r.id === `calculadora:${calc.slug}`);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
@@ -139,6 +142,14 @@ export default async function CalculadoraPage({
         {calc.pregunta}
       </h1>
       <p className="speakable-intro mt-4 max-w-3xl text-lg text-gray-600">{calc.resumen}</p>
+
+      {/* La geometría ANTES del formulario. Los campos piden magnitudes —largo
+          desarrollado del talud, ancho útil frente a nominal— que solo se
+          entienden viendo qué se está midiendo. Puesta después, el usuario ya
+          habría escrito el número equivocado. */}
+      {geometria && (
+        <ImagenContenido ranura={geometria} prioridad className="mt-8" sizes="(min-width: 1024px) 900px, 100vw" />
+      )}
 
       <div className="mt-10">
         <CalculadoraForm slug={calc.slug} />

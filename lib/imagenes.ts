@@ -2,6 +2,10 @@ import { products, productFamilies } from './products';
 import { articles } from './articles';
 import { solutions } from './solutions';
 import { terminos } from './glosario';
+import { guides } from './guides';
+import { applications } from './applications';
+import { INDUSTRIAS } from './industrias';
+import { calculadoras } from './calculadoras';
 
 /**
  * REGISTRO DE IMÁGENES.
@@ -443,6 +447,182 @@ export function ranurasGlosario(): RanuraImagen[] {
     }));
 }
 
+/* ------------------------------------------------------------------ */
+/* Contenido técnico: donde el dibujo hace el trabajo que el texto no  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Las cinco guías de /biblioteca explican cómo especificar un objeto que TIENE
+ * PARTES: una manga con sus uniones, una lona con su ojal, un big bag con su
+ * boca y su fondo. Un texto puede nombrarlas; solo un dibujo las sitúa unas
+ * respecto de otras, que es exactamente la información que falta cuando un
+ * comprador pide «manga de 800 mm» y recibe un tramo sin uniones.
+ */
+export function ranurasBiblioteca(): RanuraImagen[] {
+  return guides.map((g) => ({
+    id: `biblioteca:${g.slug}`,
+    ruta: `/images/biblioteca/${g.slug}.png`,
+    ancho: 1600,
+    alto: 900,
+    alt: `Diagrama de especificación: ${g.title}`,
+    tipo: 'diagrama' as TipoImagen,
+    contexto: `Cuerpo de /biblioteca/${g.slug}`,
+    prompt:
+      `${ESTILO_DIAGRAMA}\n\n` +
+      `TEMA: anatomía de lo que esta guía enseña a especificar — ${g.title}.\n` +
+      `RESUMEN DE LA GUÍA: ${g.summary}\n` +
+      `DEBEN DISTINGUIRSE las partes que deciden la compra, cada una en su posición real.` +
+      `\nIMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.`,
+  }));
+}
+
+/**
+ * Las calculadoras publican su método, que es lo que las separa de una caja
+ * negra. Pero un método descrito con palabras obliga a reconstruir la
+ * geometría en la cabeza. El dibujo de lo que se está midiendo —los cuatro
+ * taludes de una poza, el ancho útil frente al nominal— convierte la fórmula
+ * en algo que un ingeniero puede verificar de un vistazo.
+ */
+export function ranurasCalculadora(): RanuraImagen[] {
+  return calculadoras.map((c) => ({
+    id: `calculadora:${c.slug}`,
+    ruta: `/images/calculadoras/${c.slug}.png`,
+    ancho: 1600,
+    alto: 900,
+    alt: `Geometría del cálculo: ${c.titulo}`,
+    tipo: 'diagrama' as TipoImagen,
+    contexto: `Encabezado de /calculadoras/${c.slug}`,
+    prompt:
+      `${ESTILO_DIAGRAMA}\n\n` +
+      `TEMA: la geometría que esta calculadora mide — ${c.titulo}.\n` +
+      `PREGUNTA QUE RESPONDE: ${c.pregunta}\n` +
+      `MÉTODO: ${c.resumen}\n` +
+      `DEBEN VERSE ACOTADAS las magnitudes que el formulario pide.` +
+      `\nIMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.`,
+  }));
+}
+
+/**
+ * ERRORES DE COMPRA. Cada hub sectorial nombra tres o cuatro errores concretos
+ * —«Se compra por gramaje y se rompe por el ojal»— y son el contenido que
+ * distingue este sitio de un catálogo. Dibujados como «así no / así sí»
+ * funcionan para las tres audiencias a la vez: la persona lo entiende sin
+ * leer, el rastreador lo indexa por su texto alternativo, y un modelo que
+ * quiera citarnos tiene algo concreto que citar.
+ *
+ * El nombre del archivo NO se deriva del título, porque un título puede
+ * reescribirse sin que la imagen deje de ser correcta. Se declara aquí, en el
+ * mismo orden que `problemas`, y test/imagenes-registro.test.ts comprueba que
+ * las dos listas tengan la misma longitud: si alguien añade un error sin su
+ * dibujo, el build lo dice.
+ */
+const SLUG_ERROR: Record<string, string[]> = {
+  mineria: ['manga-solo-diametro', 'espesor-copiado', 'cobertor-por-precio', 'plazo-importacion'],
+  agroexportacion: ['trama-por-precio', 'cobertor-no-llega', 'ancho-util-modulo'],
+  'transporte-logistica': ['gramaje-vs-ojal', 'medida-estandar', 'tres-materiales'],
+  construccion: ['carpa-por-m2', 'geosintetico-por-nombre', 'responsabilidad-partida'],
+  'saneamiento-y-agua': ['solo-la-lamina', 'ensayo-de-costura', 'almacenamiento-improvisado'],
+};
+
+export function ranurasErrorCompra(): RanuraImagen[] {
+  const salida: RanuraImagen[] = [];
+  for (const ind of INDUSTRIAS) {
+    const slugs = SLUG_ERROR[ind.slug] ?? [];
+    ind.problemas.forEach((p, i) => {
+      const slug = slugs[i];
+      if (!slug) return;
+      salida.push({
+        id: `error:${ind.slug}:${slug}`,
+        ruta: `/images/industria/${ind.slug}-${slug}.png`,
+        ancho: 1400,
+        alto: 800,
+        alt: `${p.titulo} — comparación de la compra mal especificada frente a la correcta`,
+        tipo: 'diagrama' as TipoImagen,
+        contexto: `Problema «${p.titulo}» en /industria/${ind.slug}`,
+        prompt:
+          `${ESTILO_DIAGRAMA}\n\n` +
+          `TEMA: el error de compra «${p.titulo}», dibujado como comparación.\n` +
+          `DETALLE: ${p.detalle}\n` +
+          `IZQUIERDA la compra mal especificada, DERECHA la correcta. En verde solo lo que cambia.` +
+          `\nIMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.`,
+      });
+    });
+  }
+  return salida;
+}
+
+/** Las ocho páginas que responden a la búsqueda por problema. */
+export function ranurasAplicacion(): RanuraImagen[] {
+  return applications.map((a) => ({
+    id: `aplicacion:${a.slug}`,
+    ruta: `/images/aplicaciones/${a.slug}.jpg`,
+    ancho: 1920,
+    alto: 1080,
+    alt: `${a.name}: la situación de obra donde esta aplicación se resuelve`,
+    tipo: 'foto' as TipoImagen,
+    contexto: `Portada de /aplicaciones/${a.slug}`,
+    prompt:
+      `${ESTILO_FOTO.replace('Proporción 3:2 horizontal.', 'Proporción 16:9 horizontal, con espacio libre a la izquierda para superponer un título.')}\n\n` +
+      `TEMA: ${a.name}. ${a.problem}\n` +
+      `ENCUADRE: escena de trabajo real donde esto se instala o se usa.`,
+  }));
+}
+
+/**
+ * Cuatro páginas argumentales. Son las que un comprador lee cuando ya está
+ * decidiendo con quién trabaja, y las cuatro explican un PROCESO o una
+ * ESTRUCTURA: el despiece de un big bag, el flujo de planta, la cadena de
+ * exportación y los ejes con que se compara a un proveedor. Ninguna de las
+ * cuatro se lee mejor en prosa.
+ */
+const PROCESOS = [
+  {
+    slug: 'configurador-fibc',
+    ruta: '/configurador',
+    ancho: 1600,
+    alto: 900,
+    alt: 'Vista despiezada de un big bag con las opciones que ofrece el configurador',
+    tema: 'vista despiezada de un big bag FIBC con sus opciones: boca de carga, cuerpo y faja, asas, liner y fondo de descarga',
+  },
+  {
+    slug: 'calidad-planta',
+    ruta: '/calidad',
+    ancho: 1600,
+    alto: 700,
+    alt: 'Flujo del proceso de planta, de la recepción de material a la trazabilidad por pedido',
+    tema: 'flujo horizontal del proceso de planta: recepción de material, corte, confección y soldadura, control dimensional, embalaje y trazabilidad por pedido',
+  },
+  {
+    slug: 'exportacion-flujo',
+    ruta: '/exportacion',
+    ancho: 1600,
+    alto: 800,
+    alt: 'Cadena de suministro internacional desde la planta en Lima hasta el destino andino',
+    tema: 'cadena de suministro de la planta en Lima al Callao y de ahí al destino, con el punto donde cambia la responsabilidad y la fila de documentos que la acompaña',
+  },
+  {
+    slug: 'marco-evaluacion',
+    ruta: '/marco/evaluacion',
+    ancho: 1600,
+    alto: 900,
+    alt: 'Ejes del marco de evaluación de un proveedor de textiles industriales',
+    tema: 'los ejes con que se compara a un proveedor: capacidad de fabricación, alcance de instalación, documentación técnica, plazo, respuesta al RFQ y evidencia de obra',
+  },
+] as const;
+
+export function ranurasProceso(): RanuraImagen[] {
+  return PROCESOS.map((p) => ({
+    id: `proceso:${p.slug}`,
+    ruta: `/images/proceso/${p.slug}.png`,
+    ancho: p.ancho,
+    alto: p.alto,
+    alt: p.alt,
+    tipo: 'diagrama' as TipoImagen,
+    contexto: `Cuerpo de ${p.ruta}`,
+    prompt: `${ESTILO_DIAGRAMA}\n\nTEMA: ${p.tema}.` + `\nIMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.`,
+  }));
+}
+
 /** Todas las ranuras pendientes, en orden de prioridad de publicación. */
 export function todasLasRanuras(): RanuraImagen[] {
   return [
@@ -451,6 +631,11 @@ export function todasLasRanuras(): RanuraImagen[] {
     ...ranurasProducto(),
     ...ranurasGlosario(),
     ...ranurasGuia(),
+    ...ranurasBiblioteca(),
+    ...ranurasCalculadora(),
+    ...ranurasErrorCompra(),
+    ...ranurasAplicacion(),
+    ...ranurasProceso(),
   ];
 }
 
@@ -466,6 +651,11 @@ export function todasLasRanurasConPublicadas(): RanuraImagen[] {
     ...ranurasProducto(true),
     ...ranurasGlosario(),
     ...ranurasGuia(),
+    ...ranurasBiblioteca(),
+    ...ranurasCalculadora(),
+    ...ranurasErrorCompra(),
+    ...ranurasAplicacion(),
+    ...ranurasProceso(),
   ];
 }
 

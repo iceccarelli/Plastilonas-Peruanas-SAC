@@ -13,7 +13,16 @@ import { execFileSync } from 'node:child_process';
  * .gitignore sugiere. Esta prueba obliga.
  */
 const PERMITIDOS = new Set<string>([]);
-const ARTEFACTO = [/\.patch$/, /\.diff$/, /^integrar.*\.sh$/, /^(aplicar|apply).*\.sh$/];
+const ARTEFACTO = [
+  /\.patch$/,
+  /\.diff$/,
+  // Los ZIP de entrega de imágenes llegaron a sumar 51 MB en la raíz: el mismo
+  // patrón que los parches, con el mismo coste. Las imágenes van a
+  // public/images/, el contenedor no se queda.
+  /\.zip$/,
+  /^integrar.*\.sh$/,
+  /^(aplicar|apply).*\.sh$/,
+];
 
 describe('la raíz del repositorio se mantiene limpia', () => {
   it('ningún artefacto de entrega queda versionado', () => {

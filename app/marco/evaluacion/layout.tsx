@@ -4,6 +4,8 @@ import { totalCriteria } from '@/lib/framework';
 import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
+import ImagenContenido from '@/components/ImagenContenido';
+import { ranurasProceso } from '@/lib/imagenes';
 
 /**
  * La evaluación es un client component (estado del formulario) y no puede
@@ -29,6 +31,10 @@ export const metadata: Metadata = {
 };
 
 export default function EvaluacionLayout({ children }: { children: React.ReactNode }) {
+  // Los ejes de comparación, sobre la herramienta. La página es un componente
+  // de cliente y no puede mirar el disco; este layout, que es de servidor, sí.
+  const esquema = ranurasProceso().find((r) => r.id === 'proceso:marco-evaluacion');
+
   return (
     <>
       <TrackView kind="framework" slug="evaluacion" />
@@ -50,6 +56,11 @@ export default function EvaluacionLayout({ children }: { children: React.ReactNo
           ),
         ]}
       />
+      {esquema && (
+        <div className="mx-auto max-w-3xl px-6 pt-14">
+          <ImagenContenido ranura={esquema} prioridad sizes="(min-width: 768px) 720px, 100vw" />
+        </div>
+      )}
       {children}
     </>
   );
