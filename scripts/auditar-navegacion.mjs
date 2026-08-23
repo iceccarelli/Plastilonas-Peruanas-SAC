@@ -68,7 +68,17 @@ async function esperarServidor() {
 }
 
 const fallos = [];
-const anota = (tipo, donde, detalle) => fallos.push({ tipo, donde, detalle });
+/**
+ * Se informa EN EL MOMENTO, además de resumir al final. Este auditor tarda
+ * varios minutos y arranca un navegador; cuando el navegador se cae a mitad
+ * —pasa en máquinas con poca memoria— el resumen nunca se imprime y la
+ * ejecución no dice absolutamente nada de lo que llevaba encontrado. Un
+ * hallazgo escrito cuando ocurre sobrevive a la caída.
+ */
+const anota = (tipo, donde, detalle) => {
+  fallos.push({ tipo, donde, detalle });
+  console.log(`  ${R}✗${F} ${tipo} · ${G}${donde}: ${detalle}${F}`);
+};
 
 async function irA(pagina, ruta) {
   for (let i = 0; i < 3; i++) {
@@ -153,6 +163,54 @@ for (const vp of ANCHOS) {
       const opciones = panel.locator('a[href]');
       const cuantas = await opciones.count();
       if (cuantas === 0) { anota('panel-vacio', `${vp.w}px ${ruta} · ${etiqueta}`, 'el panel no contiene enlaces'); malas++; continue; }
+
+      // --- EL PUENTE, medido. Esta comprobación es geométrica y por eso no
+      // depende de la velocidad del ratón ni de la carga de la máquina, al
+      // contrario que el recorrido de más abajo. Existe porque el puente de
+      // «Más» medía el ancho de su botón —unos 60px— mientras su panel se
+      // despliega 240px hacia la izquierda: el camino a la primera opción
+      // cruzaba el hueco por fuera del puente. La prueba del recorrido lo
+      // cazaba una vez de cada tres, según el equipo; ésta lo caza siempre.
+      // El mega entra con una animación de 200ms que mueve su techo. Medir a
+      // mitad da un hueco que no existe una vez asentado, así que se espera a
+      // que el rectángulo deje de moverse antes de juzgar la geometría.
+      await esperar(280);
+      const geo = await pagina.evaluate(
+        ([sel, idx]) => {
+          const b = document.querySelectorAll(sel)[idx];
+          if (!b) return null;
+          const puente = b.parentElement?.querySelector(':scope > span[aria-hidden="true"]');
+          const panel = b.nextElementSibling?.tagName === 'SPAN'
+            ? b.nextElementSibling.nextElementSibling
+            : b.nextElementSibling;
+          const zona = b.closest('nav')?.querySelector('.lg\\:block');
+          if (!puente || !panel || !zona) return { falta: !puente ? 'puente' : !panel ? 'panel' : 'zona' };
+          const p = puente.getBoundingClientRect();
+          const q = panel.getBoundingClientRect();
+          const z = zona.getBoundingClientRect();
+          const fallos = [];
+          // Horizontal: el puente tiene que abarcar el panel de lado a lado.
+          if (p.left > q.left + 1) fallos.push(`no llega por la izquierda (puente ${Math.round(p.left)} > panel ${Math.round(q.left)})`);
+          if (p.right < q.right - 1) fallos.push(`no llega por la derecha (puente ${Math.round(p.right)} < panel ${Math.round(q.right)})`);
+          // Vertical: no puede quedar franja descubierta entre el borde
+          // inferior de la barra y el techo del panel. Se mide contra la BARRA
+          // y no contra el botón: lo que hay entre el botón y el borde de la
+          // barra sigue estando dentro de la barra, y ahí el puntero no se
+          // pierde. Medirlo contra el botón daba por rotos los tres paneles
+          // sin que hubiera nada roto.
+          if (p.top > z.bottom + 1) fallos.push(`arranca por debajo de la barra (${Math.round(p.top)} > ${Math.round(z.bottom)})`);
+          if (p.bottom < q.top - 1) fallos.push(`no llega al panel (${Math.round(p.bottom)} < ${Math.round(q.top)})`);
+          return { fallos };
+        },
+        ['nav .lg\\:block button[aria-controls]', i],
+      );
+      if (geo?.falta) {
+        anota('sin-puente', `${vp.w}px ${ruta} · ${etiqueta}`, `no encuentro el ${geo.falta}`);
+        malas++;
+      } else if (geo?.fallos?.length) {
+        anota('puente-corto', `${vp.w}px ${ruta} · ${etiqueta}`, geo.fallos.join('; '));
+        malas++;
+      }
 
       // --- LA TRAYECTORIA. Del centro del botón al centro de la primera
       // opción, en pasos, como se mueve una mano. Si el panel se cierra a

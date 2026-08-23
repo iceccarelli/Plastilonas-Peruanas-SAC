@@ -537,7 +537,14 @@ export default function Navbar() {
                       </button>
                       <span
                         aria-hidden="true"
-                        className={`absolute top-full left-0 right-0 h-3 ${abierto === 'Productos' ? 'block' : 'hidden'}`}
+                        /* h-5 y no h-3: el hueco mide 12px, pero el panel entra
+                           con una animación de escala que baja su techo hasta
+                           16px durante 200ms. Un puente al ras deja pasar a
+                           quien se mueva deprisa justo al abrir. Solapando 8px
+                           dentro del panel el hueco no existe en ningún
+                           fotograma, y el solape no estorba: el panel se pinta
+                           por encima y se queda con el clic. */
+                        className={`absolute top-full left-0 right-0 h-5 ${abierto === 'Productos' ? 'block' : 'hidden'}`}
                       />
                       <MegaProductos
                         visible={abierto === 'Productos'}
@@ -582,7 +589,7 @@ export default function Navbar() {
                         */}
                       <span
                         aria-hidden="true"
-                        className={`absolute top-full left-0 right-0 h-3 ${abierto === e.label ? 'block' : 'hidden'}`}
+                        className={`absolute top-full left-0 h-5 w-[min(320px,calc(100vw-3rem))] ${abierto === e.label ? 'block' : 'hidden'}`}
                       />
                       <Panel e={e} />
                     </div>
@@ -609,9 +616,17 @@ export default function Navbar() {
                       Más
                       <ChevronDown className={`w-4 h-4 transition-transform ${abierto === '__mas' ? 'rotate-180' : ''}`} />
                     </button>
+                      {/* El puente tiene que medir lo que mide el PANEL, no lo
+                          que mide el botón. Este panel está alineado a la
+                          derecha y se despliega ~240px hacia la izquierda; el
+                          puente medía el ancho del contenedor —el del botón, unos
+                          60px— así que el camino en diagonal hacia la primera
+                          opción cruzaba el hueco POR FUERA del puente y volvía a
+                          pisar tierra de nadie. Por eso «Más» seguía fallando
+                          cuando los demás grupos ya no. */}
                     <span
                       aria-hidden="true"
-                      className={`absolute top-full left-0 right-0 h-3 ${abierto === '__mas' ? 'block' : 'hidden'}`}
+                      className={`absolute top-full right-0 h-5 w-[min(300px,calc(100vw-3rem))] ${abierto === '__mas' ? 'block' : 'hidden'}`}
                     />
                     <div
                       id="panel-mas"

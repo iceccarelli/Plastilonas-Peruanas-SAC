@@ -100,7 +100,7 @@ describe('navegación principal', () => {
      * sobresalga de su caja, incluido algo colocado 12px por encima. Existía
      * en las clases y no en pantalla.
      */
-    const puentes = [...codigo.matchAll(/absolute top-full left-0 right-0 h-3/g)];
+    const puentes = [...codigo.matchAll(/absolute top-full (left-0 right-0|left-0|right-0) h-5/g)];
     expect(
       puentes.length,
       'cada desplegable necesita su puente: el de grupo, el de «Más» y el mega',
