@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { statSync } from 'node:fs';
+import { statSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
@@ -109,5 +109,79 @@ describe('la raíz del repositorio se mantiene limpia', () => {
       ['main', 'master', 'HEAD', 'FETCH_HEAD', 'ORIG_HEAD'].includes(f),
     );
     expect(colisiones, 'chocan con nombres de referencia de git').toEqual([]);
+  });
+});
+
+describe('el README describe el repositorio que existe', () => {
+  /**
+   * POR QUÉ ESTO ES UNA PRUEBA Y NO UNA REVISIÓN.
+   *
+   * El README es el primer archivo que abre quien hereda esto —una persona o
+   * un agente que va a editar el código—, y es el único que nadie ejecuta, así
+   * que envejece sin hacer ruido. El que había mandaba crear una cuenta en
+   * OpenAI y poner `OPENAI_API_KEY`. El chatbot corre sobre Anthropic y lee
+   * `ANTHROPIC_API_KEY`: siguiendo esas instrucciones se paga a un proveedor
+   * equivocado y el chat sigue sin funcionar, sin ningún error que lo explique.
+   * Decía además que el sitio usaba imágenes de relleno —hay 459 archivos— y
+   * que usaba Tailwind 4, que es la 3.
+   *
+   * Aquí sólo se comprueba lo comprobable: que los comandos existan, que los
+   * archivos citados estén y que las variables sean las que lee el código.
+   * La prosa sigue siendo responsabilidad de quien escribe.
+   */
+  /**
+   * Se lee SIN try/catch, a propósito. La primera versión lo envolvía en uno
+   * que devolvía cadena vacía, y cada prueba empezaba con `if (!readme)
+   * return`. Faltaba el import de `readFileSync`, así que el catch se tragaba
+   * un ReferenceError y las cinco pruebas pasaban sin comprobar nada: las
+   * saboteé a propósito para verificarlas y me dijeron que todo estaba bien.
+   * Una prueba que no puede fallar es peor que ninguna, porque ocupa su sitio.
+   * Si el README no existe, esto revienta, que es lo correcto.
+   */
+  const readme = readFileSync(join(process.cwd(), 'README.md'), 'utf8');
+
+  it('cada `npm run` que menciona existe en package.json', () => {
+    const pkg = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8'));
+    const citados = [...readme.matchAll(/npm run ([a-z:]+)/g)].map((m) => m[1]);
+    const ausentes = [...new Set(citados)].filter((c) => !(c in (pkg.scripts ?? {})));
+    expect(ausentes, 'el README manda ejecutar comandos que no existen').toEqual([]);
+  });
+
+  it('cada archivo de lib/ que cita existe', () => {
+    const citados = [...readme.matchAll(/`(lib\/[a-z-]+\.ts)`/g)].map((m) => m[1]);
+    const ausentes = [...new Set(citados)].filter((f) => !existsSync(join(process.cwd(), f)));
+    expect(ausentes, 'el README describe archivos que ya no están').toEqual([]);
+  });
+
+  it('cada variable de entorno que cita está en .env.example', () => {
+    const ejemplo = readFileSync(join(process.cwd(), '.env.example'), 'utf8');
+    const citadas = [...readme.matchAll(/`([A-Z][A-Z0-9_]{4,})`/g)].map((m) => m[1]);
+    const ausentes = [...new Set(citadas)]
+      // Se citan también las que el código NO lee, para desmentirlas.
+      .filter((v) => v !== 'OPENAI_API_KEY')
+      .filter((v) => !ejemplo.includes(v));
+    expect(ausentes, 'variables citadas en el README que .env.example no declara').toEqual([]);
+  });
+
+  it('no manda configurar la clave del proveedor equivocado', () => {
+    // Mencionarla para desmentirla es correcto; mandar ponerla, no.
+    expect(readme).not.toMatch(/OPENAI_API_KEY\s*=/);
+    expect(readme, 'el chatbot lee ANTHROPIC_API_KEY').toContain('ANTHROPIC_API_KEY');
+  });
+
+  it('no se atribuye lo que la empresa no puede respaldar', () => {
+    // Las mismas reglas que rigen el sitio rigen su documentación.
+    // Ojo con el gato que se muerde la cola: la primera versión de esta
+    // prueba falló contra el README limpio, porque el párrafo que explica de
+    // dónde salió la regla reproducía la cifra inventada. Documentar un error
+    // no puede exigir repetirlo. Si vuelve a pasar, se reformula el texto —
+    // nunca se debilita la regla.
+    for (const re of [
+      /(m[áa]s de|\+)\s*\d[\d.,]*\s*(empresas|clientes|obras)/i,
+      /\b(somos|estamos)\s+certificad/i,
+      /nivel internacional/i,
+    ]) {
+      expect(readme, `el README afirma algo que el sitio no afirma: ${re}`).not.toMatch(re);
+    }
   });
 });
