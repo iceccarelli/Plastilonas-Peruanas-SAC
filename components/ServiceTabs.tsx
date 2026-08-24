@@ -16,7 +16,7 @@ const ICONS: Record<string, LucideIcon> = { ruler: Ruler, hardhat: HardHat, ship
  * roto)». No caía: nunca existieron servicio-fabricacion-2.jpg ni
  * servicio-instalacion-2.jpg, y cada carga de la portada lanzaba
  *
- *   ⨯ The requested resource isn't a valid image for /images/servicio-instalacion-2.jpg
+ *   ⨯ The requested resource isn't a valid image for /images/servicio-instalacion-2.webp
  *
  * Un componente de cliente no puede mirar el disco, así que la promesa era
  * imposible de cumplir desde aquí. Ahora el servidor resuelve qué tomas

@@ -11,7 +11,7 @@ import { calculadoras } from './calculadoras';
  * REGISTRO DE IMÁGENES.
  *
  * Qué resuelve. El catálogo ya declara 155 rutas de imagen con una convención
- * estable —/images/galeria/{slug}-{variante}.jpg— y 116 de esos archivos ya
+ * estable —/images/galeria/{slug}-{variante}.webp— y 116 de esos archivos ya
  * existen. Lo que faltaba no era una convención: era saber CUÁLES faltan y
  * poder pedirlas sin que el nombre se desvíe.
  *
@@ -120,7 +120,7 @@ export const VARIANTES = [
 ] as const;
 
 const rutaGaleria = (slug: string, variante: string) =>
-  `/images/galeria/${slug}-${variante}.jpg`;
+  `/images/galeria/${slug}-${variante}.webp`;
 
 /* ------------------------------------------------------------------ */
 /* Ranuras derivadas de los datos reales                              */
@@ -192,7 +192,7 @@ export function ranurasFamilia(): RanuraImagen[] {
     const items = products.filter((p) => p.category === f.name);
     return {
       id: `familia:${f.slug}`,
-      ruta: `/images/familias/${f.slug}.jpg`,
+      ruta: `/images/familias/${f.slug}.webp`,
       ancho: 1920,
       alto: 1080,
       alt: `${f.name}: ${f.tagline}`,
@@ -218,7 +218,7 @@ export function ranurasFamilia(): RanuraImagen[] {
 export function ranurasSolucion(): RanuraImagen[] {
   return solutions.map((s) => ({
     id: `solucion:${s.slug}`,
-    ruta: `/images/soluciones/${s.slug}.png`,
+    ruta: `/images/soluciones/${s.slug}.webp`,
     ancho: 1600,
     alto: 900,
     alt: `Esquema de la arquitectura de referencia: ${s.titulo}`,
@@ -245,7 +245,7 @@ export function ranurasSolucion(): RanuraImagen[] {
 export function ranurasGuia(): RanuraImagen[] {
   return articles.map((a) => ({
     id: `guia:${a.slug}`,
-    ruta: `/images/recursos/${a.slug}.jpg`,
+    ruta: `/images/recursos/${a.slug}.webp`,
     ancho: 1920,
     alto: 1080,
     // El título de una guía puede ser largo; el alt se acota para no
@@ -427,7 +427,7 @@ export function ranurasGlosario(): RanuraImagen[] {
     .filter((t) => TERMINOS_ILUSTRABLES.includes(t.slug))
     .map((t) => ({
       id: `glosario:${t.slug}`,
-      ruta: `/images/glosario/${t.slug}.png`,
+      ruta: `/images/glosario/${t.slug}.webp`,
       ancho: 1200,
       alto: 900,
       alt: `Esquema explicativo del término ${t.termino}`,
@@ -461,7 +461,7 @@ export function ranurasGlosario(): RanuraImagen[] {
 export function ranurasBiblioteca(): RanuraImagen[] {
   return guides.map((g) => ({
     id: `biblioteca:${g.slug}`,
-    ruta: `/images/biblioteca/${g.slug}.png`,
+    ruta: `/images/biblioteca/${g.slug}.webp`,
     ancho: 1600,
     alto: 900,
     alt: `Diagrama de especificación: ${g.title}`,
@@ -486,7 +486,7 @@ export function ranurasBiblioteca(): RanuraImagen[] {
 export function ranurasCalculadora(): RanuraImagen[] {
   return calculadoras.map((c) => ({
     id: `calculadora:${c.slug}`,
-    ruta: `/images/calculadoras/${c.slug}.png`,
+    ruta: `/images/calculadoras/${c.slug}.webp`,
     ancho: 1600,
     alto: 900,
     alt: `Geometría del cálculo: ${c.titulo}`,
@@ -533,7 +533,7 @@ export function ranurasErrorCompra(): RanuraImagen[] {
       if (!slug) return;
       salida.push({
         id: `error:${ind.slug}:${slug}`,
-        ruta: `/images/industria/${ind.slug}-${slug}.png`,
+        ruta: `/images/industria/${ind.slug}-${slug}.webp`,
         ancho: 1400,
         alto: 800,
         alt: `${p.titulo} — comparación de la compra mal especificada frente a la correcta`,
@@ -555,7 +555,7 @@ export function ranurasErrorCompra(): RanuraImagen[] {
 export function ranurasAplicacion(): RanuraImagen[] {
   return applications.map((a) => ({
     id: `aplicacion:${a.slug}`,
-    ruta: `/images/aplicaciones/${a.slug}.jpg`,
+    ruta: `/images/aplicaciones/${a.slug}.webp`,
     ancho: 1920,
     alto: 1080,
     alt: `${a.name}: la situación de obra donde esta aplicación se resuelve`,
@@ -689,7 +689,7 @@ const PROCESOS = [
 export function ranurasProceso(): RanuraImagen[] {
   return PROCESOS.map((p) => ({
     id: `proceso:${p.slug}`,
-    ruta: `/images/proceso/${p.slug}.png`,
+    ruta: `/images/proceso/${p.slug}.webp`,
     ancho: p.ancho,
     alto: p.alto,
     alt: p.alt,

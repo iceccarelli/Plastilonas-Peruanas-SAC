@@ -79,10 +79,10 @@ describe('registro de imágenes: toda ranura de portada se resuelve', () => {
 
 describe('fotos de servicio de la portada', () => {
   const BASES = [
-    '/images/servicio-fabricacion.jpg',
-    '/images/servicio-instalacion.jpg',
-    '/images/servicio-importacion.jpg',
-    '/images/servicio-asesoria.jpg',
+    '/images/servicio-fabricacion.webp',
+    '/images/servicio-instalacion.webp',
+    '/images/servicio-importacion.webp',
+    '/images/servicio-asesoria.webp',
   ];
 
   it('las cuatro fotos base existen', () => {

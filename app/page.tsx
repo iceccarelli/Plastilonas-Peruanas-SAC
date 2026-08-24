@@ -16,10 +16,10 @@ import { tomasDe } from '@/lib/galeria';
  * Aquí sí: esta página es de servidor.
  */
 const FOTO_SERVICIO: Record<string, string> = {
-  ruler: '/images/servicio-fabricacion.jpg',
-  hardhat: '/images/servicio-instalacion.jpg',
-  ship: '/images/servicio-importacion.jpg',
-  lightbulb: '/images/servicio-asesoria.jpg',
+  ruler: '/images/servicio-fabricacion.webp',
+  hardhat: '/images/servicio-instalacion.webp',
+  ship: '/images/servicio-importacion.webp',
+  lightbulb: '/images/servicio-asesoria.webp',
 };
 import HeroCarousel from '@/components/HeroCarousel';
 import SectionHeading from '@/components/SectionHeading';

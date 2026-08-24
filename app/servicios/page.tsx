@@ -31,28 +31,28 @@ export default function ServiciosPage() {
       title: "Fabricación a Medida",
       description: "Diseñamos y fabricamos productos textiles industriales exactamente según sus especificaciones técnicas, medidas y requerimientos de resistencia.",
       features: ["Asesoría técnica especializada", "Diseño CAD y prototipos", "Materiales importados con ficha técnica", "Control de calidad en cada lote", "Entrega en todo el Perú"],
-      foto: '/images/servicio-fabricacion.jpg',
+      foto: '/images/servicio-fabricacion.webp',
       alt: 'Corte y confección de textil técnico industrial en planta.',
     },
     {
       title: "Instalación Profesional",
       description: "Contamos con un equipo técnico altamente capacitado para la instalación de carpas, estructuras, geomembranas y sistemas de ventilación en obra.",
       features: ["Instalación profesional", "Supervisión de calidad", "Capacitación al personal del cliente", "Mantenimiento preventivo", "Soporte post-venta"],
-      foto: '/images/servicio-instalacion.jpg',
+      foto: '/images/servicio-instalacion.webp',
       alt: 'Montaje en obra de una estructura textil por personal propio.',
     },
     {
       title: "Importación Directa",
       description: "Accedemos directamente a proveedores internacionales de materiales técnicos, con precios competitivos y ficha técnica del material en cada cotización.",
       features: ["Materiales de primera línea", "Precios sin intermediarios", "Trazabilidad completa", "Ficha técnica del fabricante", "Stock estratégico"],
-      foto: '/images/servicio-importacion.jpg',
+      foto: '/images/servicio-importacion.webp',
       alt: 'Rollos de material técnico importado, almacenados en planta.',
     },
     {
       title: "Soluciones Personalizadas",
       description: "Desde el diagnóstico de su necesidad hasta la entrega final, le acompañamos en todo el proceso de desarrollo de soluciones textiles a medida.",
       features: ["Análisis de requerimientos", "Propuesta técnica y económica", "Seguimiento de proyecto", "Soporte post-venta", "Reposición y mantenimiento"],
-      foto: '/images/servicio-asesoria.jpg',
+      foto: '/images/servicio-asesoria.webp',
       alt: 'Revisión de especificación técnica sobre plano antes de cotizar.',
     }
   ];

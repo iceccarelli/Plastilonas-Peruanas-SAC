@@ -31,6 +31,44 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
+
+    /**
+     * PRESUPUESTO DE TRANSFORMACIONES.
+     *
+     * Cada combinación distinta de (imagen, ancho, calidad) es una
+     * transformación que el optimizador ejecuta y que Vercel cuenta. Con los
+     * ocho `deviceSizes` por defecto —640, 750, 828, 1080, 1200, 1920, 2048 y
+     * 3840— y 459 imágenes, el techo teórico son unas 3.700 sólo para cubrir
+     * el catálogo una vez, y se vuelve a pagar en cada despliegue que invalide
+     * la caché.
+     *
+     * Estos seis anchos salen de los `sizes` que el sitio declara de verdad:
+     * ninguna imagen se pinta por encima de 900px de ancho CSS, así que 2048 y
+     * 3840 nunca se piden salvo en pantallas retina muy grandes, donde 1920 ya
+     * basta. Recortar la lista baja el techo a la mitad sin que se vea
+     * distinto: el navegador elige el primer ancho que cubra su necesidad.
+     *
+     * `imageSizes` son los tamaños pequeños —miniaturas de índice, logo, pies
+     * de tarjeta— que no deben resolverse contra la lista grande.
+     */
+    deviceSizes: [640, 828, 1080, 1200, 1600, 1920],
+    imageSizes: [96, 176, 256, 384],
+
+    /**
+     * 31 días. El valor por defecto hace que el optimizador vuelva a
+     * transformar la misma imagen mucho antes de que haga falta: estas
+     * imágenes son estáticas y cambian sólo cuando se despliega, y un
+     * despliegue ya invalida por sí mismo. Alargar la caché no arriesga a
+     * servir algo viejo y quita trabajo repetido.
+     */
+    minimumCacheTTL: 2678400,
+
+    /**
+     * Una sola calidad. Next 15 permite declararlas y advierte si se pide una
+     * que no está en la lista; fijar una evita que un `quality` suelto en
+     * cualquier componente duplique todas las variantes de esa imagen.
+     */
+    qualities: [75],
     remotePatterns: [
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       { protocol: 'https', hostname: 'platform-lookaside.fbsbx.com' },

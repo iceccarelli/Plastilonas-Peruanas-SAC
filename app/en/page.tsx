@@ -44,7 +44,7 @@ export default function EnglishPage() {
       <figure className="mt-8">
         <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl bg-gray-100">
           <Image
-            src="/images/servicio-fabricacion.jpg"
+            src="/images/servicio-fabricacion.webp"
             alt="Manufacturing floor at the Chorrillos plant, Lima."
             fill
             sizes="(min-width: 768px) 720px, 100vw"

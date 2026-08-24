@@ -61,8 +61,8 @@ export default function NosotrosPage() {
           la única parte de la página que la sostiene sin pedir confianza. */}
       <div className="mt-12 grid gap-4 sm:grid-cols-2">
         {[
-          { src: '/images/servicio-fabricacion.jpg', alt: 'Confección de textil técnico en la planta de Chorrillos.', pie: 'Fabricación en planta propia.' },
-          { src: '/images/servicio-instalacion.jpg', alt: 'Personal propio montando una estructura textil en obra.', pie: 'Instalación en obra con equipo propio.' },
+          { src: '/images/servicio-fabricacion.webp', alt: 'Confección de textil técnico en la planta de Chorrillos.', pie: 'Fabricación en planta propia.' },
+          { src: '/images/servicio-instalacion.webp', alt: 'Personal propio montando una estructura textil en obra.', pie: 'Instalación en obra con equipo propio.' },
         ].map((f) => (
           <figure key={f.src}>
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl bg-gray-100">

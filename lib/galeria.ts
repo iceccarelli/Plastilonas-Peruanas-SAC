@@ -9,9 +9,9 @@ import { join } from 'node:path';
  * instalación y escala— y el glosario declara un diagrama por término. Cada
  * una de esas ranuras puede tener VARIAS TOMAS que se alternan entre sí:
  *
- *   /images/galeria/geomembranas-pvc-general.jpg      toma 1
- *   /images/galeria/geomembranas-pvc-general-2.jpg    toma 2 (opcional)
- *   /images/galeria/geomembranas-pvc-general-3.jpg    toma 3 (opcional)
+ *   /images/galeria/geomembranas-pvc-general.webp      toma 1
+ *   /images/galeria/geomembranas-pvc-general-2.webp    toma 2 (opcional)
+ *   /images/galeria/geomembranas-pvc-general-3.webp    toma 3 (opcional)
  *
  * Por qué el sufijo numérico y no una entrada más en `gallery`. Las
  * miniaturas se derivan de `gallery`, y su leyenda sale del sufijo de vista:

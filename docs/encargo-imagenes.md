@@ -97,11 +97,11 @@ como `public/images/familias/geosinteticos.jpg`.
 
 9 pendientes de 13.
 
-### 1. `/images/proceso/compras-homologacion.png`
+### 1. `/images/proceso/compras-homologacion.webp`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/proceso/compras-homologacion.png` |
+| **Archivo** | `public/images/proceso/compras-homologacion.webp` |
 | **Tamaño** | 1600 × 800 px |
 | **Tipo** | diagrama |
 | **Dónde se usa** | Cuerpo de /compras |
@@ -118,11 +118,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 2. `/images/proceso/confianza-identidad.png`
+### 2. `/images/proceso/confianza-identidad.webp`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/proceso/confianza-identidad.png` |
+| **Archivo** | `public/images/proceso/confianza-identidad.webp` |
 | **Tamaño** | 1600 × 800 px |
 | **Tipo** | diagrama |
 | **Dónde se usa** | Cuerpo de /confianza |
@@ -139,11 +139,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 3. `/images/proceso/compradores-incoterm.png`
+### 3. `/images/proceso/compradores-incoterm.webp`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/proceso/compradores-incoterm.png` |
+| **Archivo** | `public/images/proceso/compradores-incoterm.webp` |
 | **Tamaño** | 1600 × 700 px |
 | **Tipo** | diagrama |
 | **Dónde se usa** | Cuerpo de /compradores |
@@ -160,11 +160,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 4. `/images/proceso/distribuidores-canal.png`
+### 4. `/images/proceso/distribuidores-canal.webp`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/proceso/distribuidores-canal.png` |
+| **Archivo** | `public/images/proceso/distribuidores-canal.webp` |
 | **Tamaño** | 1600 × 800 px |
 | **Tipo** | diagrama |
 | **Dónde se usa** | Cuerpo de /distribuidores |
@@ -181,11 +181,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 5. `/images/proceso/socios-especificacion.png`
+### 5. `/images/proceso/socios-especificacion.webp`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/proceso/socios-especificacion.png` |
+| **Archivo** | `public/images/proceso/socios-especificacion.webp` |
 | **Tamaño** | 1600 × 800 px |
 | **Tipo** | diagrama |
 | **Dónde se usa** | Cuerpo de /socios |
@@ -202,11 +202,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 6. `/images/proceso/proyectos-verificacion.png`
+### 6. `/images/proceso/proyectos-verificacion.webp`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/proceso/proyectos-verificacion.png` |
+| **Archivo** | `public/images/proceso/proyectos-verificacion.webp` |
 | **Tamaño** | 1600 × 700 px |
 | **Tipo** | diagrama |
 | **Dónde se usa** | Cuerpo de /proyectos |
@@ -223,11 +223,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 7. `/images/proceso/marco-pilares.png`
+### 7. `/images/proceso/marco-pilares.webp`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/proceso/marco-pilares.png` |
+| **Archivo** | `public/images/proceso/marco-pilares.webp` |
 | **Tamaño** | 1600 × 900 px |
 | **Tipo** | diagrama |
 | **Dónde se usa** | Cuerpo de /marco |
@@ -244,11 +244,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 8. `/images/proceso/informes-metodo.png`
+### 8. `/images/proceso/informes-metodo.webp`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/proceso/informes-metodo.png` |
+| **Archivo** | `public/images/proceso/informes-metodo.webp` |
 | **Tamaño** | 1600 × 800 px |
 | **Tipo** | diagrama |
 | **Dónde se usa** | Cuerpo de /informes |
@@ -265,11 +265,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 9. `/images/proceso/local-cobertura.png`
+### 9. `/images/proceso/local-cobertura.webp`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/proceso/local-cobertura.png` |
+| **Archivo** | `public/images/proceso/local-cobertura.webp` |
 | **Tamaño** | 1600 × 1000 px |
 | **Tipo** | diagrama |
 | **Dónde se usa** | Cuerpo de /local |

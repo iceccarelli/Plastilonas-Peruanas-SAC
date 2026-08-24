@@ -442,7 +442,23 @@ Atribución sugerida al citar: ${SITE.legalName} (RUC ${SITE.ruc}), ${base}
   return new Response(body, {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
-      "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+      /**
+       * Se acortó de 86.400 a 900 segundos, y no es una preferencia.
+       *
+       * Este archivo existe para decirle a un agente qué contiene el sitio
+       * HOY. Con 24 horas de caché en el CDN y siete días de
+       * `stale-while-revalidate`, un despliegue que publica trece secciones
+       * nuevas seguía sirviendo el mapa anterior durante un día entero. Se
+       * midió: minutos después de publicar, el sitio servía el commit nuevo y
+       * un llms.txt de 37 KB que era el viejo; el bueno pesa 56 KB y anuncia
+       * seis secciones que aquél no mencionaba. Justo el fallo que este
+       * archivo debería impedir, causado por su propia cabecera.
+       *
+       * Quince minutos es tiempo de sobra para que el CDN absorba el tráfico
+       * y lo bastante corto para que un mapa desactualizado no sobreviva a la
+       * siguiente visita de un rastreador.
+       */
+      "Cache-Control": "public, max-age=300, s-maxage=900, stale-while-revalidate=3600",
       "X-Robots-Tag": "all",
     },
   });

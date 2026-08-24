@@ -8,6 +8,7 @@ import { products, productFamilies } from '@/lib/products';
 import { articles } from '@/lib/articles';
 import { solutions } from '@/lib/solutions';
 import { terminos } from '@/lib/glosario';
+import { rutaToma, MAX_TOMAS } from '@/lib/galeria';
 
 /**
  * El registro solo sirve si el nombre del archivo encargado es EXACTAMENTE el
@@ -17,25 +18,37 @@ import { terminos } from '@/lib/glosario';
 
 describe('registro de imágenes: los nombres no pueden divergir', () => {
   it('cada ranura deriva su ruta del slug real de su entidad', () => {
+    /**
+     * Se comprueba la CARPETA y el NOMBRE, no la extensión.
+     *
+     * Antes esta prueba fijaba `.png` literal, y rompió el día que los 77
+     * esquemas pasaron a WebP —una conversión que quitó 46 MB sin cambiar una
+     * sola imagen de sitio—. La prueba tenía razón en vigilar que el nombre
+     * salga del slug de la entidad y no de una lista paralela; no la tenía en
+     * decidir en qué formato se guarda, que es una decisión de rendimiento y
+     * cambiará otra vez. Una prueba que fija el detalle en vez de la regla
+     * convierte cada mejora en un fallo rojo, y enseña a editarla sin leerla.
+     */
+    const rutaDe = (r: { ruta: string }) => r.ruta.replace(/\.[a-z0-9]+$/i, '');
     for (const r of ranurasSolucion()) {
       const slug = r.id.split(':')[1];
       expect(solutions.some((s) => s.slug === slug), slug).toBe(true);
-      expect(r.ruta).toBe(`/images/soluciones/${slug}.png`);
+      expect(rutaDe(r)).toBe(`/images/soluciones/${slug}`);
     }
     for (const r of ranurasFamilia()) {
       const slug = r.id.split(':')[1];
       expect(productFamilies.some((f) => f.slug === slug), slug).toBe(true);
-      expect(r.ruta).toBe(`/images/familias/${slug}.jpg`);
+      expect(rutaDe(r)).toBe(`/images/familias/${slug}`);
     }
     for (const r of ranurasGuia()) {
       const slug = r.id.split(':')[1];
       expect(articles.some((a) => a.slug === slug), slug).toBe(true);
-      expect(r.ruta).toBe(`/images/recursos/${slug}.jpg`);
+      expect(rutaDe(r)).toBe(`/images/recursos/${slug}`);
     }
     for (const r of ranurasGlosario()) {
       const slug = r.id.split(':')[1];
       expect(terminos.some((t) => t.slug === slug), slug).toBe(true);
-      expect(r.ruta).toBe(`/images/glosario/${slug}.png`);
+      expect(rutaDe(r)).toBe(`/images/glosario/${slug}`);
     }
   });
 
@@ -178,7 +191,12 @@ describe('imágenes: integridad del árbol de archivos', () => {
     // ser el rastro de un renombrado a medias.
     const ref = rutasDelCatalogo();
     for (const r of todasLasRanuras()) ref.add(r.ruta);
-    for (const r of [...ref]) ref.add(r.replace(/\.jpg$/, '-2.jpg'));
+    // Las tomas alternas se expanden con el MISMO ayudante que usa el sitio,
+    // no con un regex propio. El que había fijaba `.jpg`, y el día que las
+    // imágenes pasaron a WebP dejó de reconocer las tomas `-2`: cuatro
+    // archivos perfectamente referenciados aparecieron como huérfanos. Una
+    // prueba con su propia copia de la regla acaba comprobando su copia.
+    for (const r of [...ref]) for (let n = 2; n <= MAX_TOMAS; n++) ref.add(rutaToma(r, n));
 
     const huerfanos: string[] = [];
     for (const dir of ['galeria', 'glosario']) {

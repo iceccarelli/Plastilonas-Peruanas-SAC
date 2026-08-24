@@ -501,6 +501,15 @@ export function datasetSchema(d: {
  * un agente que construye un índice visual, esa distinción es la diferencia
  * entre citar un diagrama como esquema y citarlo como evidencia fotográfica.
  */
+/** Tipo MIME a partir de la extensión del archivo. */
+function formatoDeImagen(ruta: string): string {
+  const ext = ruta.split(".").pop()?.toLowerCase() ?? "";
+  return (
+    { webp: "image/webp", avif: "image/avif", png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", svg: "image/svg+xml" }[ext] ??
+    "image/webp"
+  );
+}
+
 export function imageObjectSchema(img: {
   url: string;
   ancho: number;
@@ -537,7 +546,17 @@ export function imageObjectSchema(img: {
     // Un esquema no es una fotografía de una obra ejecutada, y conviene que
     // eso viaje con la imagen y no solo en el pie de la página.
     ...(img.esDiagrama
-      ? { creditText: `Esquema explicativo de ${SITE.legalName}`, encodingFormat: "image/png" }
+      ? {
+          creditText: `Esquema explicativo de ${SITE.legalName}`,
+          /**
+           * Derivado de la ruta, no escrito a mano. Estuvo fijo en "image/png"
+           * y dejó de ser cierto el día que los 77 esquemas pasaron a WebP:
+           * el grafo declaraba un formato que el servidor no servía. Un dato
+           * estructurado que contradice la respuesta HTTP es peor que no
+           * declararlo, porque invita a comprobarlo y falla la comprobación.
+           */
+          encodingFormat: formatoDeImagen(img.url),
+        }
       : { creditText: `Imagen referencial de ${SITE.legalName}` }),
   };
 }

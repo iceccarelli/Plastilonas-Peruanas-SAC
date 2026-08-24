@@ -11,22 +11,22 @@ interface Slide {
 // se muestra hero-01 como elemento LCP; al montar, el orden se baraja para que
 // cada visita empiece en una imagen distinta.
 const SLIDES: Slide[] = [
-  { src: '/images/hero/hero-01.jpg', alt: 'Paisaje industrial minero en los Andes peruanos' },
-  { src: '/images/hero/hero-02.jpg', alt: 'Carga de big bags (FIBC) en planta industrial' },
-  { src: '/images/hero/hero-03.jpg', alt: 'Instalación de geomembrana HDPE en poza de contención' },
-  { src: '/images/hero/hero-04.jpg', alt: 'Geotextil y geomalla en obra de movimiento de tierras' },
-  { src: '/images/hero/hero-05.jpg', alt: 'Estructura tensada de arquitectura textil' },
-  { src: '/images/hero/hero-06.jpg', alt: 'Malla agrícola de sombra y anti-granizo sobre cultivo' },
-  { src: '/images/hero/hero-07.jpg', alt: 'Tanque flexible (bladder) para almacenamiento de agua' },
-  { src: '/images/hero/hero-08.jpg', alt: 'Camión con siders y tolderas en carretera peruana' },
-  { src: '/images/hero/hero-09.jpg', alt: 'Mangas de ventilación industrial en planta' },
-  { src: '/images/hero/hero-10.jpg', alt: 'Almacén con rollos de lonas industriales' },
-  { src: '/images/hero/hero-11.jpg', alt: 'Operarios en línea de fabricación de lonas' },
-  { src: '/images/hero/hero-12.jpg', alt: 'Acopio minero cubierto con lona en altura' },
-  { src: '/images/hero/hero-13.jpg', alt: 'Invernadero con film técnico agrícola' },
-  { src: '/images/hero/hero-14.jpg', alt: 'Cosecha de café con sacos de yute y big bags' },
-  { src: '/images/hero/hero-15.jpg', alt: 'Geosintéticos para control de erosión en talud' },
-  { src: '/images/hero/hero-16.jpg', alt: 'Patio logístico con cargas paletizadas y embaladas' },
+  { src: '/images/hero/hero-01.webp', alt: 'Paisaje industrial minero en los Andes peruanos' },
+  { src: '/images/hero/hero-02.webp', alt: 'Carga de big bags (FIBC) en planta industrial' },
+  { src: '/images/hero/hero-03.webp', alt: 'Instalación de geomembrana HDPE en poza de contención' },
+  { src: '/images/hero/hero-04.webp', alt: 'Geotextil y geomalla en obra de movimiento de tierras' },
+  { src: '/images/hero/hero-05.webp', alt: 'Estructura tensada de arquitectura textil' },
+  { src: '/images/hero/hero-06.webp', alt: 'Malla agrícola de sombra y anti-granizo sobre cultivo' },
+  { src: '/images/hero/hero-07.webp', alt: 'Tanque flexible (bladder) para almacenamiento de agua' },
+  { src: '/images/hero/hero-08.webp', alt: 'Camión con siders y tolderas en carretera peruana' },
+  { src: '/images/hero/hero-09.webp', alt: 'Mangas de ventilación industrial en planta' },
+  { src: '/images/hero/hero-10.webp', alt: 'Almacén con rollos de lonas industriales' },
+  { src: '/images/hero/hero-11.webp', alt: 'Operarios en línea de fabricación de lonas' },
+  { src: '/images/hero/hero-12.webp', alt: 'Acopio minero cubierto con lona en altura' },
+  { src: '/images/hero/hero-13.webp', alt: 'Invernadero con film técnico agrícola' },
+  { src: '/images/hero/hero-14.webp', alt: 'Cosecha de café con sacos de yute y big bags' },
+  { src: '/images/hero/hero-15.webp', alt: 'Geosintéticos para control de erosión en talud' },
+  { src: '/images/hero/hero-16.webp', alt: 'Patio logístico con cargas paletizadas y embaladas' },
 ];
 
 const INTERVAL_MS = 6000;
