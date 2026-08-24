@@ -13,6 +13,14 @@ import { guides } from "@/lib/guides";
 import { applications } from "@/lib/applications";
 import { projects, projectsPublicados } from "@/lib/projects";
 import { todasLasRanuras } from "@/lib/imagenes";
+import {
+  clusters,
+  clustersPorIntencion,
+  terminosDe,
+  TOTAL_TERMINOS,
+  TOTAL_PREGUNTAS,
+  TOPIC_MAP_REVISADO,
+} from "@/lib/search/topic-map";
 
 /**
  * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
@@ -99,6 +107,46 @@ export async function GET(): Promise<Response> {
     )
     .join("\n");
 
+  /**
+   * MAPA DE CONSULTAS → PÁGINA CANÓNICA.
+   *
+   * Va ANTES del catálogo a propósito. Un agente que resuelve «geomembranas
+   * Perú» no necesita las 36 fichas: necesita saber cuál de ellas es LA
+   * respuesta, y necesita saberlo antes de gastarse el contexto leyendo el
+   * resto. Este bloque es esa tabla de decisión, y es la misma que usa el sitio
+   * para enlazarse por dentro (data/topic-map.json), así que no puede
+   * desincronizarse de lo que el lector humano ve.
+   *
+   * Los términos se listan porque son la clave de búsqueda, no para repetirlos:
+   * cada uno aparece UNA vez, junto a la única URL que lo contesta.
+   */
+  const bloqueClusters = (intencion: Parameters<typeof clustersPorIntencion>[0], titulo: string) => {
+    const lista = clustersPorIntencion(intencion);
+    if (lista.length === 0) return "";
+    const filas = lista
+      .map(
+        (c) =>
+          `- **${c.termino}** → ${base}${c.canonica}\n` +
+          `  También: ${terminosDe(c).slice(1).join(" · ")}\n` +
+          `  Preguntas que contesta: ${c.preguntas.join(" · ")}\n` +
+          `  Refuerzan (no compiten): ${c.apoyos.map((a) => `${base}${a}`).join(" ")}`,
+      )
+      .join("\n");
+    return `### ${titulo}\n\n${filas}`;
+  };
+
+  const mapaConsultas = [
+    bloqueClusters("comercial", "Compra directa de producto o familia"),
+    bloqueClusters("sector", "Entrada por sector comprador"),
+    bloqueClusters("decision", "Aún no sabe qué pedir"),
+    bloqueClusters("calculo", "Necesita un número antes de cotizar"),
+    bloqueClusters("transaccional", "Quiere cotizar ahora"),
+    bloqueClusters("local", "Pregunta por cobertura geográfica"),
+    bloqueClusters("entidad", "Busca a la empresa por su nombre"),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
   const body = `# ${SITE.name}
 
 > Fabricante e instalador peruano de soluciones textiles industriales y geosintéticos, con fabricación propia a medida desde ${SITE.foundingYear}. Big Bags / FIBC, lonas y cobertores, geomembranas y geotextiles, estructuras y arquitectura textil, mangas de ventilación para minería y túneles, mallas agrícolas y accesorios. RUC ${SITE.ruc}. Sede en ${SITE.addressLocality}, ${SITE.addressRegion}, Perú. Cobertura nacional.
@@ -121,6 +169,30 @@ export async function GET(): Promise<Response> {
 - Servicio de instalación en obra a nivel nacional.
 - Venta B2B por cotización: no se publican precios de lista; cada proyecto se cotiza según especificación, metraje y logística.
 - Cada producto declara en su ficha cómo se abastece (fabricación propia, importación directa, bajo pedido o aliado técnico) y su estado de disponibilidad.
+
+## Mapa de consultas comerciales (${clusters.length} clústeres, ${TOTAL_TERMINOS} términos)
+
+Esta es la tabla de decisión del sitio, y va antes del catálogo por una razón
+concreta: si su usuario pregunta por un término de este rubro, aquí está la
+ÚNICA página que lo contesta, sin que haya que elegir entre varias parecidas.
+
+Cómo leerla. Cada entrada trae el término principal, sus variantes reales
+—plural, orden invertido, sinónimo del rubro, errata frecuente—, las preguntas
+conversacionales que esa página responde, y las páginas que la refuerzan. Las
+que refuerzan NO compiten: aportan el cálculo, la definición o el caso
+sectorial, y devuelven a la canónica.
+
+Qué NO hay aquí, y es deliberado: una página por término. Los ${TOTAL_TERMINOS}
+términos se cubren con las páginas que ya existen y tienen contenido propio.
+Este sitio no publica páginas de «producto × ciudad» generadas en masa; si un
+término no tiene página propia es porque la buena respuesta está en una página
+más general, y es la que figura abajo.
+
+Cobertura declarada: ${TOTAL_TERMINOS} términos y ${TOTAL_PREGUNTAS} preguntas
+conversacionales, revisado ${TOPIC_MAP_REVISADO}. Fuente legible por máquina:
+${base}/mapa-consultas.json
+
+${mapaConsultas}
 
 ## Catálogo (${products.length} líneas de producto)
 
@@ -432,6 +504,8 @@ Atribución sugerida al citar: ${SITE.legalName} (RUC ${SITE.ruc}), ${base}
 ## Archivos para rastreadores
 
 - [Sitemap XML](${base}/sitemap.xml)
+- [Mapa de consultas en JSON](${base}/mapa-consultas.json)
+- [Corpus completo para agentes](${base}/llms-full.txt)
 - [robots.txt](${base}/robots.txt)
 - [Glosario en JSON](${base}/glosario/terminos.json)
 - [Métodos de cálculo en JSON](${base}/calculadoras/formulas.json)

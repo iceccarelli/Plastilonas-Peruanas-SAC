@@ -1,0 +1,2517 @@
+{
+  "generadoPor": "scripts/auditar-estado.mjs",
+  "commit": "67693bd",
+  "resumen": {
+    "plantillasDePagina": 51,
+    "urlsPublicas": 203,
+    "endpointsMaquina": 18,
+    "endpointsApi": 5,
+    "productos": 36,
+    "familias": 11,
+    "industrias": 5,
+    "terminosGlosario": 43,
+    "guias": 5,
+    "aplicaciones": 8,
+    "soluciones": 6,
+    "ciudades": 12,
+    "proyectosRedactados": 5,
+    "proyectosPublicados": 0,
+    "clustersDeConsulta": 67,
+    "terminosMapeados": 647,
+    "paginasSinCanonical": 2,
+    "paginasSinEsquema": 10,
+    "paginasProfundasSinBreadcrumbSchema": 1,
+    "paginasHuerfanas": 1,
+    "paginasAMasDeTresClics": 1,
+    "inconsistencias": 0
+  },
+  "rutas": [
+    {
+      "ruta": "/aplicaciones/[slug]",
+      "archivo": "app/aplicaciones/[slug]/page.tsx",
+      "dinamica": true,
+      "instancias": 8,
+      "slugs": [
+        "ventilacion-subterranea",
+        "toldos-camion",
+        "proteccion-cultivo",
+        "impermeabilizacion-pozas",
+        "coberturas-obra",
+        "campamentos-mineros",
+        "granel-embalaje",
+        "contencion-fluidos"
+      ],
+      "title": null,
+      "tituloDerivado": true,
+      "h1": "{app.name}",
+      "canonical": "/aplicaciones/${slug}",
+      "esquemas": [
+        "breadcrumbSchema",
+        "imageObjectSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/aplicaciones",
+        "/cotizacion",
+        "/productos/[slug]"
+      ],
+      "lineas": 104
+    },
+    {
+      "ruta": "/aplicaciones",
+      "archivo": "app/aplicaciones/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Aplicaciones industriales",
+      "tituloDerivado": false,
+      "h1": "El problema, no el SKU.",
+      "canonical": "/aplicaciones",
+      "esquemas": [
+        "breadcrumbSchema (vía EsquemaPagina)",
+        "webPageSchema (vía EsquemaPagina)"
+      ],
+      "enlacesSalientes": [
+        "/aplicaciones/[slug]"
+      ],
+      "lineas": 49
+    },
+    {
+      "ruta": "/biblioteca/[slug]",
+      "archivo": "app/biblioteca/[slug]/page.tsx",
+      "dinamica": true,
+      "instancias": 5,
+      "slugs": [
+        "seleccion-mangas-ventilacion",
+        "gramaje-lona-industrial",
+        "especificacion-fibc",
+        "seleccion-geomembrana",
+        "seleccion-malla-agricola"
+      ],
+      "title": null,
+      "tituloDerivado": true,
+      "h1": "{g.title}",
+      "canonical": "/biblioteca/${slug}",
+      "esquemas": [
+        "articleSchema",
+        "breadcrumbSchema",
+        "imageObjectSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/biblioteca",
+        "/cotizacion",
+        "/productos/[slug]"
+      ],
+      "lineas": 135
+    },
+    {
+      "ruta": "/biblioteca",
+      "archivo": "app/biblioteca/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Biblioteca técnica",
+      "tituloDerivado": false,
+      "h1": "Biblioteca de especificación",
+      "canonical": "/biblioteca",
+      "esquemas": [
+        "breadcrumbSchema (vía EsquemaPagina)",
+        "webPageSchema (vía EsquemaPagina)"
+      ],
+      "enlacesSalientes": [
+        "/biblioteca/[slug]"
+      ],
+      "lineas": 49
+    },
+    {
+      "ruta": "/calculadoras/[slug]",
+      "archivo": "app/calculadoras/[slug]/page.tsx",
+      "dinamica": true,
+      "instancias": 5,
+      "slugs": [
+        "caudal-ventilacion-mina",
+        "geomembrana-poza",
+        "rollos-por-superficie",
+        "big-bags-por-viaje",
+        "capacidad-big-bag"
+      ],
+      "title": "${calc.titulo} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "{calc.pregunta}",
+      "canonical": "/calculadoras/${calc.slug}",
+      "esquemas": [
+        "breadcrumbSchema",
+        "howToSchema",
+        "imageObjectSchema",
+        "softwareApplicationSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/calculadoras",
+        "/calculadoras/formulas.json"
+      ],
+      "lineas": 278
+    },
+    {
+      "ruta": "/calculadoras",
+      "archivo": "app/calculadoras/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "¿Cuánto necesito?",
+      "canonical": "/calculadoras",
+      "esquemas": [
+        "breadcrumbSchema",
+        "faqSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/calculadoras/[slug]",
+        "/calculadoras/formulas.json"
+      ],
+      "lineas": 182
+    },
+    {
+      "ruta": "/calidad",
+      "archivo": "app/calidad/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Sistema de calidad",
+      "tituloDerivado": false,
+      "h1": "Cómo controlamos un pedido.",
+      "canonical": "/calidad",
+      "esquemas": [
+        "breadcrumbSchema (vía EsquemaPagina)",
+        "webPageSchema (vía EsquemaPagina)"
+      ],
+      "enlacesSalientes": [
+        "/compras"
+      ],
+      "lineas": 47
+    },
+    {
+      "ruta": "/carrito",
+      "archivo": "app/carrito/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Carrito de cotización",
+      "tituloDerivado": false,
+      "h1": "Tu carrito",
+      "canonical": "/carrito",
+      "esquemas": [],
+      "enlacesSalientes": [
+        "/checkout",
+        "/productos"
+      ],
+      "lineas": 120
+    },
+    {
+      "ruta": "/checkout/exito",
+      "archivo": "app/checkout/exito/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Solicitud recibida",
+      "tituloDerivado": false,
+      "h1": "¡Gracias por tu compra!",
+      "canonical": "/checkout/exito",
+      "esquemas": [],
+      "enlacesSalientes": [
+        "/dashboard",
+        "/productos"
+      ],
+      "lineas": 45
+    },
+    {
+      "ruta": "/checkout",
+      "archivo": "app/checkout/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Confirmar solicitud",
+      "tituloDerivado": false,
+      "h1": "Confirmar solicitud",
+      "canonical": "/checkout",
+      "esquemas": [],
+      "enlacesSalientes": [
+        "/carrito",
+        "/productos"
+      ],
+      "lineas": 180
+    },
+    {
+      "ruta": "/compradores",
+      "archivo": "app/compradores/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "International buyers",
+      "tituloDerivado": false,
+      "h1": "¿Pueden exportar?",
+      "canonical": "/compradores",
+      "esquemas": [
+        "breadcrumbSchema (vía EsquemaPagina)",
+        "webPageSchema (vía EsquemaPagina)"
+      ],
+      "enlacesSalientes": [
+        "/cotizacion"
+      ],
+      "lineas": 40
+    },
+    {
+      "ruta": "/compras",
+      "archivo": "app/compras/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Centro de compras industriales",
+      "tituloDerivado": false,
+      "h1": "Centro de compras industriales",
+      "canonical": "/compras",
+      "esquemas": [
+        "breadcrumbSchema (vía EsquemaPagina)",
+        "webPageSchema (vía EsquemaPagina)"
+      ],
+      "enlacesSalientes": [
+        "/biblioteca",
+        "/confianza",
+        "/cotizacion"
+      ],
+      "lineas": 48
+    },
+    {
+      "ruta": "/confianza",
+      "archivo": "app/confianza/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Centro de confianza",
+      "tituloDerivado": false,
+      "h1": "Centro de confianza",
+      "canonical": "/confianza",
+      "esquemas": [
+        "breadcrumbSchema (vía EsquemaPagina)",
+        "webPageSchema (vía EsquemaPagina)"
+      ],
+      "enlacesSalientes": [],
+      "lineas": 52
+    },
+    {
+      "ruta": "/configurador",
+      "archivo": "app/configurador/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Configurador FIBC / Big Bag",
+      "tituloDerivado": false,
+      "h1": "Configurador de especificación",
+      "canonical": "/configurador",
+      "esquemas": [],
+      "enlacesSalientes": [],
+      "lineas": 98
+    },
+    {
+      "ruta": "/contacto",
+      "archivo": "app/contacto/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Hablemos de su proyecto",
+      "canonical": "/contacto",
+      "esquemas": [
+        "breadcrumbSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/cotizacion"
+      ],
+      "lineas": 141
+    },
+    {
+      "ruta": "/cotizacion",
+      "archivo": "app/cotizacion/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Solicite su cotización técnica",
+      "canonical": "/cotizacion",
+      "esquemas": [
+        "breadcrumbSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/"
+      ],
+      "lineas": 110
+    },
+    {
+      "ruta": "/dashboard",
+      "archivo": "app/dashboard/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Mi Cuenta",
+      "tituloDerivado": false,
+      "h1": "Hola, {firstName}",
+      "canonical": null,
+      "esquemas": [],
+      "enlacesSalientes": [
+        "/cotizacion",
+        "/productos"
+      ],
+      "lineas": 115
+    },
+    {
+      "ruta": "/descargas",
+      "archivo": "app/descargas/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Centro de documentación",
+      "canonical": "/descargas",
+      "esquemas": [
+        "breadcrumbSchema",
+        "dataCatalogSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/contacto",
+        "/cotizacion"
+      ],
+      "lineas": 233
+    },
+    {
+      "ruta": "/distribuidores",
+      "archivo": "app/distribuidores/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Programa de distribuidores",
+      "tituloDerivado": false,
+      "h1": "Programa de distribuidores",
+      "canonical": "/distribuidores",
+      "esquemas": [
+        "breadcrumbSchema (vía EsquemaPagina)",
+        "webPageSchema (vía EsquemaPagina)"
+      ],
+      "enlacesSalientes": [
+        "/cotizacion"
+      ],
+      "lineas": 35
+    },
+    {
+      "ruta": "/en",
+      "archivo": "app/en/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Peruvian industrial textile manufacturer",
+      "tituloDerivado": false,
+      "h1": "Peruvian manufacturer of custom industrial textiles",
+      "canonical": "/en",
+      "esquemas": [],
+      "enlacesSalientes": [
+        "/cotizacion"
+      ],
+      "lineas": 70
+    },
+    {
+      "ruta": "/exportacion",
+      "archivo": "app/exportacion/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Exportación desde el Perú",
+      "tituloDerivado": false,
+      "h1": "Exportación desde el Perú",
+      "canonical": "/exportacion",
+      "esquemas": [
+        "breadcrumbSchema (vía EsquemaPagina)",
+        "webPageSchema (vía EsquemaPagina)"
+      ],
+      "enlacesSalientes": [
+        "/compradores"
+      ],
+      "lineas": 51
+    },
+    {
+      "ruta": "/glosario/[slug]",
+      "archivo": "app/glosario/[slug]/page.tsx",
+      "dinamica": true,
+      "instancias": 43,
+      "slugs": [
+        "big-bag-fibc",
+        "carga-de-trabajo-segura",
+        "factor-de-seguridad",
+        "tipo-electrostatico-fibc",
+        "liner-interior",
+        "densidad-aparente",
+        "gramaje",
+        "lona-plastificada",
+        "denier",
+        "resistencia-al-desgarro",
+        "estabilizacion-uv",
+        "termosellado",
+        "ojal",
+        "geosintetico",
+        "geomembrana",
+        "hdpe",
+        "geotextil",
+        "no-tejido-punzonado",
+        "resistencia-al-punzonamiento",
+        "permitividad",
+        "soldadura-por-cuna-caliente",
+        "zanja-de-anclaje",
+        "subrasante",
+        "geomalla",
+        "manga-de-ventilacion",
+        "ventilacion-impelente",
+        "ventilacion-aspirante",
+        "refuerzo-espiral",
+        "caudal",
+        "perdida-de-carga",
+        "factor-de-fuga",
+        "malla-antiafida",
+        "mesh",
+        "porcentaje-de-sombra",
+        "malla-raschel",
+        "arquitectura-textil",
+        "pretensado",
+        "carga-de-viento",
+        "altitud-y-radiacion",
+        "certificado-de-lote",
+        "as-built",
+        "fabricacion-a-medida",
+        "fabricacion-a-medida-vs-importacion"
+      ],
+      "title": "${title} | Glosario técnico de ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "{t.termino}",
+      "canonical": "/glosario/${slug}",
+      "esquemas": [
+        "breadcrumbSchema",
+        "definedTermSchema",
+        "imageObjectSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/cotizacion",
+        "/glosario",
+        "/glosario/[slug]",
+        "/marco",
+        "/productos/[slug]",
+        "/recursos/[slug]"
+      ],
+      "lineas": 319
+    },
+    {
+      "ruta": "/glosario",
+      "archivo": "app/glosario/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Glosario técnico",
+      "canonical": "/glosario",
+      "esquemas": [
+        "breadcrumbSchema",
+        "definedTermSetSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/contacto",
+        "/glosario/[slug]",
+        "/glosario/glosario.pdf",
+        "/glosario/terminos.json",
+        "/marco"
+      ],
+      "lineas": 228
+    },
+    {
+      "ruta": "/indicadores",
+      "archivo": "app/indicadores/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Indicadores del rubro",
+      "canonical": "/indicadores",
+      "esquemas": [
+        "breadcrumbSchema",
+        "datasetSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/cotizacion",
+        "/indicadores/datos.json",
+        "/informes/[slug]",
+        "/informes/formacion-de-precio-y-volatilidad-textiles-industriales"
+      ],
+      "lineas": 225
+    },
+    {
+      "ruta": "/industria/[sector]",
+      "archivo": "app/industria/[sector]/page.tsx",
+      "dinamica": true,
+      "instancias": 5,
+      "slugs": [
+        "mineria",
+        "agroexportacion",
+        "transporte-logistica",
+        "construccion",
+        "saneamiento-y-agua"
+      ],
+      "title": "${title} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "{ind.nombre}: {ind.complementoTitulo}",
+      "canonical": "/industria/${ind.slug}",
+      "esquemas": [
+        "breadcrumbSchema",
+        "faqSchema",
+        "imageObjectSchema",
+        "itemListSchema",
+        "serviceSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/cotizacion",
+        "/industria",
+        "/productos/[slug]",
+        "/recursos/[slug]",
+        "/soluciones/[slug]"
+      ],
+      "lineas": 343
+    },
+    {
+      "ruta": "/industria",
+      "archivo": "app/industria/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Soluciones por industria",
+      "tituloDerivado": false,
+      "h1": "Soluciones por industria",
+      "canonical": "/industria",
+      "esquemas": [
+        "breadcrumbSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/industria/[slug]"
+      ],
+      "lineas": 140
+    },
+    {
+      "ruta": "/informes/[slug]",
+      "archivo": "app/informes/[slug]/page.tsx",
+      "dinamica": true,
+      "instancias": 2,
+      "slugs": [
+        "sectores-compradores-textiles-industriales-peru",
+        "formacion-de-precio-y-volatilidad-textiles-industriales"
+      ],
+      "title": "${i.titulo} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "{i.titulo}",
+      "canonical": "/informes/${slug}",
+      "esquemas": [
+        "articleSchema",
+        "breadcrumbSchema",
+        "datasetSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/cotizacion",
+        "/informes",
+        "/informes/[slug]/informe.pdf",
+        "/marco"
+      ],
+      "lineas": 297
+    },
+    {
+      "ruta": "/informes",
+      "archivo": "app/informes/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Informes del sector",
+      "canonical": "/informes",
+      "esquemas": [
+        "breadcrumbSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/contacto",
+        "/informes/[slug]",
+        "/marco"
+      ],
+      "lineas": 167
+    },
+    {
+      "ruta": "/local/[ciudad]",
+      "archivo": "app/local/[ciudad]/page.tsx",
+      "dinamica": true,
+      "instancias": 12,
+      "slugs": [
+        "lima",
+        "arequipa",
+        "trujillo",
+        "chiclayo",
+        "piura",
+        "ica",
+        "cusco",
+        "chimbote",
+        "iquitos",
+        "huancayo",
+        "tacna",
+        "pucallpa"
+      ],
+      "title": null,
+      "tituloDerivado": true,
+      "h1": "Plastilonas, lonas y cobertores en {c.ciudad}",
+      "canonical": "url",
+      "esquemas": [
+        "breadcrumbSchema",
+        "faqSchema",
+        "serviceSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/local",
+        "/productos/[slug]"
+      ],
+      "lineas": 138
+    },
+    {
+      "ruta": "/local",
+      "archivo": "app/local/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": null,
+      "tituloDerivado": true,
+      "h1": "Cobertura en {CIUDADES.length} ciudades del Perú",
+      "canonical": "/local",
+      "esquemas": [
+        "breadcrumbSchema",
+        "faqSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/cotizacion",
+        "/local/[slug]",
+        "/productos",
+        "/productos/familia/[slug]"
+      ],
+      "lineas": 239
+    },
+    {
+      "ruta": "/login",
+      "archivo": "app/login/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Iniciar Sesión",
+      "tituloDerivado": false,
+      "h1": "Portal de clientes",
+      "canonical": null,
+      "esquemas": [],
+      "enlacesSalientes": [
+        "/cotizacion"
+      ],
+      "lineas": 87
+    },
+    {
+      "ruta": "/marco/evaluacion",
+      "archivo": "app/marco/evaluacion/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Evalúe la definición de su proyecto",
+      "canonical": "/marco/evaluacion",
+      "esquemas": [
+        "breadcrumbSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/marco"
+      ],
+      "lineas": 260
+    },
+    {
+      "ruta": "/marco",
+      "archivo": "app/marco/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Marco de Especificación: seis pilares para definir un proyecto antes de cotizarlo",
+      "canonical": "/marco",
+      "esquemas": [
+        "breadcrumbSchema",
+        "faqSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/marco/evaluacion",
+        "/marco/marco.pdf",
+        "/recursos",
+        "/recursos/[slug]"
+      ],
+      "lineas": 246
+    },
+    {
+      "ruta": "/nosotros",
+      "archivo": "app/nosotros/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "{YEARS_STATEMENT}.",
+      "canonical": "/nosotros",
+      "esquemas": [
+        "breadcrumbSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/contacto"
+      ],
+      "lineas": 110
+    },
+    {
+      "ruta": "/novedades/[slug]",
+      "archivo": "app/novedades/[slug]/page.tsx",
+      "dinamica": true,
+      "instancias": 11,
+      "slugs": [
+        "silo-tecnico-recursos-primeras-guias",
+        "paginas-de-familia-con-criterios",
+        "siete-guias-nuevas-silo-a-diez",
+        "fichas-tecnicas-pdf-descargables",
+        "comparador-lado-a-lado-por-familia",
+        "marco-de-especificacion-v1",
+        "seis-arquitecturas-de-referencia",
+        "glosario-tecnico-del-rubro",
+        "centro-de-documentacion-y-datos-abiertos",
+        "informes-del-sector-con-fuente-oficial",
+        "por-que-cambia-el-precio-de-una-plastilona"
+      ],
+      "title": "${n.titulo} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "{n.titulo}",
+      "canonical": "/novedades/${slug}",
+      "esquemas": [
+        "articleSchema",
+        "breadcrumbSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/novedades",
+        "/novedades/[slug]",
+        "/novedades/rss.xml"
+      ],
+      "lineas": 213
+    },
+    {
+      "ruta": "/novedades",
+      "archivo": "app/novedades/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Novedades — ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Novedades",
+      "canonical": "/novedades",
+      "esquemas": [
+        "breadcrumbSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/contacto",
+        "/marco",
+        "/novedades/[slug]",
+        "/novedades/feed.json",
+        "/novedades/rss.xml"
+      ],
+      "lineas": 222
+    },
+    {
+      "ruta": "/",
+      "archivo": "app/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Fabricante de big bags, lonas, geomembranas y mallas en Perú",
+      "tituloDerivado": false,
+      "h1": "Fabricación 100% a medida.<br />Instalación propia.<br />Un solo proveedor.",
+      "canonical": "/",
+      "esquemas": [
+        "organizationSchema (vía StructuredData)"
+      ],
+      "enlacesSalientes": [
+        "/cotizacion",
+        "/nosotros",
+        "/productos"
+      ],
+      "lineas": 230
+    },
+    {
+      "ruta": "/privacidad",
+      "archivo": "app/privacidad/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": null,
+      "canonical": "/privacidad",
+      "esquemas": [],
+      "enlacesSalientes": [],
+      "lineas": 33
+    },
+    {
+      "ruta": "/productos/[slug]",
+      "archivo": "app/productos/[slug]/page.tsx",
+      "dinamica": true,
+      "instancias": 36,
+      "slugs": [
+        "big-bags-bolsones-polipropileno",
+        "sacos-polytarp-embarque-granel",
+        "bolsas-laminas-pebd-pead",
+        "films-termocontraibles-shrink",
+        "lona-plastificada-rafia-polytarp",
+        "mantas-cobertores-toldos-camiones",
+        "siders-tolderas-camiones",
+        "cobertores-agricolas-multimaterial",
+        "mantas-arpilleras-granjas",
+        "mantas-aislantes-termicas-termoacusticas",
+        "carpas-lona-estructuras-metalicas",
+        "coberturas-tensionadas-arquitectura-textil",
+        "coberturas-inflables",
+        "modulos-albergues-campamentos",
+        "galpones-invernaderos-estructurados",
+        "toldos-cerramientos",
+        "mallas-antiafidas",
+        "malla-raschel-sombra",
+        "malla-anti-pajaro-anti-granizo",
+        "mangas-ventilacion-minas-tuneles",
+        "geomembranas-pvc",
+        "geomembrana-polietileno-pe-hdpe",
+        "geomembrana-pe-fortificada",
+        "geomembrana-bituminosa",
+        "geotextiles",
+        "geomallas-geogrids",
+        "tanques-flexibles-bladders",
+        "biodigestores",
+        "tuberias-hdpe",
+        "biombos-protectores-soldadura",
+        "accesorios-instalacion",
+        "gigantografias-senaletica",
+        "revestimiento-vehicular-toldos-publicitarios",
+        "mulch-madera-picada",
+        "geocompuestos-drenaje",
+        "barreras-acusticas"
+      ],
+      "title": "Producto no encontrado",
+      "tituloDerivado": false,
+      "h1": "{product.name}",
+      "canonical": "/productos/${product.slug}",
+      "esquemas": [
+        "breadcrumbSchema",
+        "faqSchema",
+        "productSchema (vía ProductStructuredData)",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/cotizacion",
+        "/glosario/[slug]",
+        "/productos",
+        "/productos/[slug]",
+        "/soluciones/[slug]"
+      ],
+      "lineas": 312
+    },
+    {
+      "ruta": "/productos/familia/[slug]/comparar",
+      "archivo": "app/productos/familia/[slug]/comparar/page.tsx",
+      "dinamica": true,
+      "instancias": 11,
+      "slugs": [
+        "envases-embalaje",
+        "lonas-cobertores",
+        "estructuras-arquitectura-textil",
+        "mallas-agricolas",
+        "ventilacion-industrial",
+        "geosinteticos",
+        "ambientales-fluidos",
+        "seguridad-industrial",
+        "accesorios",
+        "publicidad",
+        "especialidades"
+      ],
+      "title": "${title} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Comparativa: {items.length} alternativas de {family.name.toLowerCase()}",
+      "canonical": "/productos/familia/${slug}/comparar",
+      "esquemas": [
+        "breadcrumbSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/productos",
+        "/productos/[slug]",
+        "/productos/[slug]/ficha-tecnica.pdf",
+        "/productos/familia/[slug]"
+      ],
+      "lineas": 326
+    },
+    {
+      "ruta": "/productos/familia/[slug]",
+      "archivo": "app/productos/familia/[slug]/page.tsx",
+      "dinamica": true,
+      "instancias": 11,
+      "slugs": [
+        "envases-embalaje",
+        "lonas-cobertores",
+        "estructuras-arquitectura-textil",
+        "mallas-agricolas",
+        "ventilacion-industrial",
+        "geosinteticos",
+        "ambientales-fluidos",
+        "seguridad-industrial",
+        "accesorios",
+        "publicidad",
+        "especialidades"
+      ],
+      "title": null,
+      "tituloDerivado": true,
+      "h1": "{content.h1}",
+      "canonical": "/productos/familia/${slug}",
+      "esquemas": [
+        "breadcrumbSchema",
+        "faqSchema",
+        "imageObjectSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/cotizacion",
+        "/productos",
+        "/productos/[slug]",
+        "/productos/familia/[slug]",
+        "/productos/familia/[slug]/comparar",
+        "/recursos/[slug]"
+      ],
+      "lineas": 315
+    },
+    {
+      "ruta": "/productos",
+      "archivo": "app/productos/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Productos Industriales",
+      "canonical": "/productos",
+      "esquemas": [
+        "breadcrumbSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [],
+      "lineas": 92
+    },
+    {
+      "ruta": "/proyectos",
+      "archivo": "app/proyectos/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Proyectos",
+      "tituloDerivado": false,
+      "h1": "Proyectos, sin clientes inventados.",
+      "canonical": "/proyectos",
+      "esquemas": [
+        "breadcrumbSchema (vía EsquemaPagina)",
+        "webPageSchema (vía EsquemaPagina)"
+      ],
+      "enlacesSalientes": [
+        "/aplicaciones/[slug]",
+        "/biblioteca",
+        "/calidad",
+        "/confianza",
+        "/cotizacion"
+      ],
+      "lineas": 90
+    },
+    {
+      "ruta": "/pt",
+      "archivo": "app/pt/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Fabricante peruano de têxteis industriais",
+      "tituloDerivado": false,
+      "h1": "Fabricante peruano de têxteis industriais sob medida",
+      "canonical": "/pt",
+      "esquemas": [],
+      "enlacesSalientes": [
+        "/cotizacion"
+      ],
+      "lineas": 64
+    },
+    {
+      "ruta": "/recursos/[slug]",
+      "archivo": "app/recursos/[slug]/page.tsx",
+      "dinamica": true,
+      "instancias": 10,
+      "slugs": [
+        "big-bags-mineria-peru-normativa-errores-estiba",
+        "instalacion-geomembranas-hdpe-pozas-canales",
+        "calculo-caudal-mangas-ventilacion-mina-subterranea",
+        "ventilacion-impelente-vs-aspirante-labores-mineras",
+        "como-elegir-geotextil-separacion-drenaje-refuerzo",
+        "mallas-antiafidas-densidad-trama-ventilacion",
+        "carpas-industriales-carga-viento-norma-e020",
+        "cobertores-transporte-concentrado-mineral",
+        "tanques-flexibles-almacenamiento-agua-operaciones-remotas",
+        "mulch-madera-espesor-calculo-cobertura-suelo"
+      ],
+      "title": null,
+      "tituloDerivado": true,
+      "h1": "{a.title}",
+      "canonical": "/recursos/${a.slug}",
+      "esquemas": [
+        "articleSchema",
+        "breadcrumbSchema",
+        "faqSchema",
+        "howToSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/calculadoras/[slug]",
+        "/cotizacion",
+        "/glosario/[slug]",
+        "/local/[slug]",
+        "/productos/[slug]",
+        "/recursos",
+        "/recursos/[slug]/guia.pdf"
+      ],
+      "lineas": 476
+    },
+    {
+      "ruta": "/recursos",
+      "archivo": "app/recursos/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Recursos técnicos",
+      "canonical": "/recursos",
+      "esquemas": [
+        "breadcrumbSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/cotizacion",
+        "/productos",
+        "/recursos/[slug]"
+      ],
+      "lineas": 184
+    },
+    {
+      "ruta": "/servicios",
+      "archivo": "app/servicios/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Fabricación e instalación, de principio a fin",
+      "canonical": "/servicios",
+      "esquemas": [
+        "breadcrumbSchema",
+        "itemListSchema",
+        "serviceSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/cotizacion"
+      ],
+      "lineas": 149
+    },
+    {
+      "ruta": "/socios",
+      "archivo": "app/socios/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Partners de ingeniería y proyecto",
+      "tituloDerivado": false,
+      "h1": "Ingeniería y proyecto",
+      "canonical": "/socios",
+      "esquemas": [
+        "breadcrumbSchema (vía EsquemaPagina)",
+        "webPageSchema (vía EsquemaPagina)"
+      ],
+      "enlacesSalientes": [
+        "/cotizacion",
+        "/distribuidores"
+      ],
+      "lineas": 36
+    },
+    {
+      "ruta": "/soluciones/[slug]",
+      "archivo": "app/soluciones/[slug]/page.tsx",
+      "dinamica": true,
+      "instancias": 6,
+      "slugs": [
+        "poza-revestida-impermeabilizacion",
+        "frente-avance-ventilado",
+        "despacho-concentrado-granel",
+        "proteccion-cultivo-agroexportacion",
+        "almacenamiento-agua-operacion-remota",
+        "campamento-almacen-temporal"
+      ],
+      "title": null,
+      "tituloDerivado": true,
+      "h1": "{s.titulo}",
+      "canonical": "/soluciones/${slug}",
+      "esquemas": [
+        "breadcrumbSchema",
+        "faqSchema",
+        "howToSchema",
+        "imageObjectSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/calculadoras/[slug]",
+        "/cotizacion",
+        "/marco#[slug]",
+        "/marco/evaluacion",
+        "/productos/[slug]",
+        "/recursos/[slug]",
+        "/soluciones",
+        "/soluciones/[slug]/arquitectura.pdf"
+      ],
+      "lineas": 346
+    },
+    {
+      "ruta": "/soluciones",
+      "archivo": "app/soluciones/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "Arquitecturas de referencia",
+      "canonical": "/soluciones",
+      "esquemas": [
+        "breadcrumbSchema",
+        "itemListSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/cotizacion",
+        "/marco/evaluacion",
+        "/soluciones/[slug]"
+      ],
+      "lineas": 162
+    },
+    {
+      "ruta": "/terminos",
+      "archivo": "app/terminos/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": null,
+      "canonical": "/terminos",
+      "esquemas": [],
+      "enlacesSalientes": [],
+      "lineas": 33
+    }
+  ],
+  "endpointsMaquina": [
+    {
+      "ruta": "/calculadoras/formulas.json",
+      "archivo": "app/calculadoras/formulas.json/route.ts",
+      "contentType": "application/json; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": true,
+      "noindex": false
+    },
+    {
+      "ruta": "/glosario/glosario.pdf",
+      "archivo": "app/glosario/glosario.pdf/route.ts",
+      "contentType": "application/pdf",
+      "estatico": true,
+      "abiertoACors": false,
+      "noindex": false
+    },
+    {
+      "ruta": "/glosario/terminos.json",
+      "archivo": "app/glosario/terminos.json/route.ts",
+      "contentType": "application/json; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": true,
+      "noindex": false
+    },
+    {
+      "ruta": "/indexnow-key.txt",
+      "archivo": "app/indexnow-key.txt/route.ts",
+      "contentType": "text/plain; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": false,
+      "noindex": false
+    },
+    {
+      "ruta": "/indicadores/datos.json",
+      "archivo": "app/indicadores/datos.json/route.ts",
+      "contentType": "application/json; charset=utf-8",
+      "estatico": false,
+      "abiertoACors": true,
+      "noindex": false
+    },
+    {
+      "ruta": "/informes/[slug]/informe.pdf",
+      "archivo": "app/informes/[slug]/informe.pdf/route.ts",
+      "contentType": "application/pdf",
+      "estatico": true,
+      "abiertoACors": false,
+      "noindex": false
+    },
+    {
+      "ruta": "/llms-full.txt",
+      "archivo": "app/llms-full.txt/route.ts",
+      "contentType": "text/plain; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": true,
+      "noindex": true
+    },
+    {
+      "ruta": "/llms.txt",
+      "archivo": "app/llms.txt/route.ts",
+      "contentType": "text/plain; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": false,
+      "noindex": false
+    },
+    {
+      "ruta": "/mapa-consultas.json",
+      "archivo": "app/mapa-consultas.json/route.ts",
+      "contentType": "application/json; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": true,
+      "noindex": false
+    },
+    {
+      "ruta": "/marco/marco.pdf",
+      "archivo": "app/marco/marco.pdf/route.ts",
+      "contentType": "application/pdf",
+      "estatico": true,
+      "abiertoACors": false,
+      "noindex": false
+    },
+    {
+      "ruta": "/novedades/feed.json",
+      "archivo": "app/novedades/feed.json/route.ts",
+      "contentType": "application/feed+json; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": false,
+      "noindex": false
+    },
+    {
+      "ruta": "/novedades/rss.xml",
+      "archivo": "app/novedades/rss.xml/route.ts",
+      "contentType": "application/rss+xml; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": false,
+      "noindex": false
+    },
+    {
+      "ruta": "/productos/[slug]/contenido.md",
+      "archivo": "app/productos/[slug]/contenido.md/route.ts",
+      "contentType": "text/markdown; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": true,
+      "noindex": true
+    },
+    {
+      "ruta": "/productos/[slug]/ficha-tecnica.pdf",
+      "archivo": "app/productos/[slug]/ficha-tecnica.pdf/route.ts",
+      "contentType": "application/pdf",
+      "estatico": true,
+      "abiertoACors": false,
+      "noindex": false
+    },
+    {
+      "ruta": "/productos/catalogo.json",
+      "archivo": "app/productos/catalogo.json/route.ts",
+      "contentType": "application/json; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": true,
+      "noindex": false
+    },
+    {
+      "ruta": "/recursos/[slug]/guia.pdf",
+      "archivo": "app/recursos/[slug]/guia.pdf/route.ts",
+      "contentType": "application/pdf",
+      "estatico": true,
+      "abiertoACors": false,
+      "noindex": false
+    },
+    {
+      "ruta": "/soluciones/[slug]/arquitectura.pdf",
+      "archivo": "app/soluciones/[slug]/arquitectura.pdf/route.ts",
+      "contentType": "application/pdf",
+      "estatico": true,
+      "abiertoACors": false,
+      "noindex": false
+    },
+    {
+      "ruta": "/version.json",
+      "archivo": "app/version.json/route.ts",
+      "contentType": "application/json; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": false,
+      "noindex": true
+    }
+  ],
+  "endpointsApi": [
+    {
+      "ruta": "/api/auth/[...nextauth]",
+      "archivo": "app/api/auth/[...nextauth]/route.ts",
+      "publico": false
+    },
+    {
+      "ruta": "/api/chat",
+      "archivo": "app/api/chat/route.ts",
+      "publico": false
+    },
+    {
+      "ruta": "/api/checkout/stripe",
+      "archivo": "app/api/checkout/stripe/route.ts",
+      "publico": false
+    },
+    {
+      "ruta": "/api/lead",
+      "archivo": "app/api/lead/route.ts",
+      "publico": false
+    },
+    {
+      "ruta": "/api/webhooks/stripe",
+      "archivo": "app/api/webhooks/stripe/route.ts",
+      "publico": false
+    }
+  ],
+  "catalogo": {
+    "productos": [
+      "big-bags-bolsones-polipropileno",
+      "sacos-polytarp-embarque-granel",
+      "bolsas-laminas-pebd-pead",
+      "films-termocontraibles-shrink",
+      "lona-plastificada-rafia-polytarp",
+      "mantas-cobertores-toldos-camiones",
+      "siders-tolderas-camiones",
+      "cobertores-agricolas-multimaterial",
+      "mantas-arpilleras-granjas",
+      "mantas-aislantes-termicas-termoacusticas",
+      "carpas-lona-estructuras-metalicas",
+      "coberturas-tensionadas-arquitectura-textil",
+      "coberturas-inflables",
+      "modulos-albergues-campamentos",
+      "galpones-invernaderos-estructurados",
+      "toldos-cerramientos",
+      "mallas-antiafidas",
+      "malla-raschel-sombra",
+      "malla-anti-pajaro-anti-granizo",
+      "mangas-ventilacion-minas-tuneles",
+      "geomembranas-pvc",
+      "geomembrana-polietileno-pe-hdpe",
+      "geomembrana-pe-fortificada",
+      "geomembrana-bituminosa",
+      "geotextiles",
+      "geomallas-geogrids",
+      "tanques-flexibles-bladders",
+      "biodigestores",
+      "tuberias-hdpe",
+      "biombos-protectores-soldadura",
+      "accesorios-instalacion",
+      "gigantografias-senaletica",
+      "revestimiento-vehicular-toldos-publicitarios",
+      "mulch-madera-picada",
+      "geocompuestos-drenaje",
+      "barreras-acusticas"
+    ],
+    "familias": [
+      "envases-embalaje",
+      "lonas-cobertores",
+      "estructuras-arquitectura-textil",
+      "mallas-agricolas",
+      "ventilacion-industrial",
+      "geosinteticos",
+      "ambientales-fluidos",
+      "seguridad-industrial",
+      "accesorios",
+      "publicidad",
+      "especialidades"
+    ],
+    "industrias": [
+      "mineria",
+      "agroexportacion",
+      "transporte-logistica",
+      "construccion",
+      "saneamiento-y-agua"
+    ],
+    "glosario": [
+      "big-bag-fibc",
+      "carga-de-trabajo-segura",
+      "factor-de-seguridad",
+      "tipo-electrostatico-fibc",
+      "liner-interior",
+      "densidad-aparente",
+      "gramaje",
+      "lona-plastificada",
+      "denier",
+      "resistencia-al-desgarro",
+      "estabilizacion-uv",
+      "termosellado",
+      "ojal",
+      "geosintetico",
+      "geomembrana",
+      "hdpe",
+      "geotextil",
+      "no-tejido-punzonado",
+      "resistencia-al-punzonamiento",
+      "permitividad",
+      "soldadura-por-cuna-caliente",
+      "zanja-de-anclaje",
+      "subrasante",
+      "geomalla",
+      "manga-de-ventilacion",
+      "ventilacion-impelente",
+      "ventilacion-aspirante",
+      "refuerzo-espiral",
+      "caudal",
+      "perdida-de-carga",
+      "factor-de-fuga",
+      "malla-antiafida",
+      "mesh",
+      "porcentaje-de-sombra",
+      "malla-raschel",
+      "arquitectura-textil",
+      "pretensado",
+      "carga-de-viento",
+      "altitud-y-radiacion",
+      "certificado-de-lote",
+      "as-built",
+      "fabricacion-a-medida",
+      "fabricacion-a-medida-vs-importacion"
+    ],
+    "guias": [
+      "seleccion-mangas-ventilacion",
+      "gramaje-lona-industrial",
+      "especificacion-fibc",
+      "seleccion-geomembrana",
+      "seleccion-malla-agricola"
+    ],
+    "aplicaciones": [
+      "ventilacion-subterranea",
+      "toldos-camion",
+      "proteccion-cultivo",
+      "impermeabilizacion-pozas",
+      "coberturas-obra",
+      "campamentos-mineros",
+      "granel-embalaje",
+      "contencion-fluidos"
+    ],
+    "soluciones": [
+      "poza-revestida-impermeabilizacion",
+      "frente-avance-ventilado",
+      "despacho-concentrado-granel",
+      "proteccion-cultivo-agroexportacion",
+      "almacenamiento-agua-operacion-remota",
+      "campamento-almacen-temporal"
+    ],
+    "articulos": [
+      "big-bags-mineria-peru-normativa-errores-estiba",
+      "instalacion-geomembranas-hdpe-pozas-canales",
+      "calculo-caudal-mangas-ventilacion-mina-subterranea",
+      "ventilacion-impelente-vs-aspirante-labores-mineras",
+      "como-elegir-geotextil-separacion-drenaje-refuerzo",
+      "mallas-antiafidas-densidad-trama-ventilacion",
+      "carpas-industriales-carga-viento-norma-e020",
+      "cobertores-transporte-concentrado-mineral",
+      "tanques-flexibles-almacenamiento-agua-operaciones-remotas",
+      "mulch-madera-espesor-calculo-cobertura-suelo"
+    ],
+    "novedades": [
+      "silo-tecnico-recursos-primeras-guias",
+      "paginas-de-familia-con-criterios",
+      "siete-guias-nuevas-silo-a-diez",
+      "fichas-tecnicas-pdf-descargables",
+      "comparador-lado-a-lado-por-familia",
+      "marco-de-especificacion-v1",
+      "seis-arquitecturas-de-referencia",
+      "glosario-tecnico-del-rubro",
+      "centro-de-documentacion-y-datos-abiertos",
+      "informes-del-sector-con-fuente-oficial",
+      "por-que-cambia-el-precio-de-una-plastilona"
+    ],
+    "informes": [
+      "sectores-compradores-textiles-industriales-peru",
+      "formacion-de-precio-y-volatilidad-textiles-industriales"
+    ],
+    "calculadoras": [
+      "caudal-ventilacion-mina",
+      "geomembrana-poza",
+      "rollos-por-superficie",
+      "big-bags-por-viaje",
+      "capacidad-big-bag"
+    ],
+    "proyectos": [
+      "ventilacion-contratista-minero-peru",
+      "malla-fundo-costa",
+      "toldos-flota-lima",
+      "almacen-temporal-infraestructura",
+      "exportacion-colombia-senal"
+    ],
+    "ciudades": [
+      "lima",
+      "arequipa",
+      "trujillo",
+      "chiclayo",
+      "piura",
+      "ica",
+      "cusco",
+      "chimbote",
+      "iquitos",
+      "huancayo",
+      "tacna",
+      "pucallpa"
+    ]
+  },
+  "proyectos": {
+    "redactados": [
+      "ventilacion-contratista-minero-peru",
+      "malla-fundo-costa",
+      "toldos-flota-lima",
+      "almacen-temporal-infraestructura",
+      "exportacion-colombia-senal"
+    ],
+    "publicados": []
+  },
+  "mapaConsultas": {
+    "existe": true,
+    "version": "1.0.0",
+    "revisado": "2026-08-24",
+    "clusters": [
+      {
+        "id": "big-bags",
+        "canonica": "/productos/big-bags-bolsones-polipropileno",
+        "intencion": "comercial",
+        "termino": "big bags",
+        "variantes": 25,
+        "preguntas": 5,
+        "apoyos": 11
+      },
+      {
+        "id": "sacos-polytarp",
+        "canonica": "/productos/sacos-polytarp-embarque-granel",
+        "intencion": "comercial",
+        "termino": "sacos polytarp",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "bolsas-pe",
+        "canonica": "/productos/bolsas-laminas-pebd-pead",
+        "intencion": "comercial",
+        "termino": "bolsas de polietileno industrial",
+        "variantes": 8,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "films-shrink",
+        "canonica": "/productos/films-termocontraibles-shrink",
+        "intencion": "comercial",
+        "termino": "film termocontraíble",
+        "variantes": 7,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "familia-envases",
+        "canonica": "/productos/familia/envases-embalaje",
+        "intencion": "comercial",
+        "termino": "envases y embalaje industrial",
+        "variantes": 7,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "lona-plastificada",
+        "canonica": "/productos/lona-plastificada-rafia-polytarp",
+        "intencion": "comercial",
+        "termino": "lona plastificada",
+        "variantes": 16,
+        "preguntas": 4,
+        "apoyos": 8
+      },
+      {
+        "id": "mantas-toldos-camion",
+        "canonica": "/productos/mantas-cobertores-toldos-camiones",
+        "intencion": "comercial",
+        "termino": "toldos para camiones",
+        "variantes": 11,
+        "preguntas": 3,
+        "apoyos": 6
+      },
+      {
+        "id": "siders-tolderas",
+        "canonica": "/productos/siders-tolderas-camiones",
+        "intencion": "comercial",
+        "termino": "siders y tolderas",
+        "variantes": 7,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "cobertores-agricolas",
+        "canonica": "/productos/cobertores-agricolas-multimaterial",
+        "intencion": "comercial",
+        "termino": "cobertores agrícolas",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "arpilleras-granjas",
+        "canonica": "/productos/mantas-arpilleras-granjas",
+        "intencion": "comercial",
+        "termino": "arpilleras para granjas",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "mantas-termicas",
+        "canonica": "/productos/mantas-aislantes-termicas-termoacusticas",
+        "intencion": "comercial",
+        "termino": "mantas aislantes térmicas",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "familia-lonas",
+        "canonica": "/productos/familia/lonas-cobertores",
+        "intencion": "comercial",
+        "termino": "lonas y cobertores industriales",
+        "variantes": 9,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "carpas",
+        "canonica": "/productos/carpas-lona-estructuras-metalicas",
+        "intencion": "comercial",
+        "termino": "carpas industriales",
+        "variantes": 10,
+        "preguntas": 3,
+        "apoyos": 6
+      },
+      {
+        "id": "tensionadas",
+        "canonica": "/productos/coberturas-tensionadas-arquitectura-textil",
+        "intencion": "comercial",
+        "termino": "coberturas tensionadas",
+        "variantes": 8,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "inflables",
+        "canonica": "/productos/coberturas-inflables",
+        "intencion": "comercial",
+        "termino": "estructuras inflables",
+        "variantes": 5,
+        "preguntas": 2,
+        "apoyos": 2
+      },
+      {
+        "id": "campamentos",
+        "canonica": "/productos/modulos-albergues-campamentos",
+        "intencion": "comercial",
+        "termino": "módulos para campamentos",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "invernaderos",
+        "canonica": "/productos/galpones-invernaderos-estructurados",
+        "intencion": "comercial",
+        "termino": "invernaderos",
+        "variantes": 9,
+        "preguntas": 3,
+        "apoyos": 4
+      },
+      {
+        "id": "toldos-cerramientos",
+        "canonica": "/productos/toldos-cerramientos",
+        "intencion": "comercial",
+        "termino": "toldos y cerramientos industriales",
+        "variantes": 10,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "familia-estructuras",
+        "canonica": "/productos/familia/estructuras-arquitectura-textil",
+        "intencion": "comercial",
+        "termino": "estructuras textiles",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "mallas-antiafidas",
+        "canonica": "/productos/mallas-antiafidas",
+        "intencion": "comercial",
+        "termino": "malla antiáfida",
+        "variantes": 8,
+        "preguntas": 3,
+        "apoyos": 7
+      },
+      {
+        "id": "malla-raschel",
+        "canonica": "/productos/malla-raschel-sombra",
+        "intencion": "comercial",
+        "termino": "malla raschel",
+        "variantes": 10,
+        "preguntas": 3,
+        "apoyos": 6
+      },
+      {
+        "id": "malla-antipajaro",
+        "canonica": "/productos/malla-anti-pajaro-anti-granizo",
+        "intencion": "comercial",
+        "termino": "malla anti pájaro",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "familia-mallas",
+        "canonica": "/productos/familia/mallas-agricolas",
+        "intencion": "comercial",
+        "termino": "mallas agrícolas",
+        "variantes": 7,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "mangas-ventilacion",
+        "canonica": "/productos/mangas-ventilacion-minas-tuneles",
+        "intencion": "comercial",
+        "termino": "mangas de ventilación",
+        "variantes": 11,
+        "preguntas": 4,
+        "apoyos": 11
+      },
+      {
+        "id": "familia-ventilacion",
+        "canonica": "/productos/familia/ventilacion-industrial",
+        "intencion": "comercial",
+        "termino": "ventilación industrial",
+        "variantes": 7,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "geosinteticos",
+        "canonica": "/productos/familia/geosinteticos",
+        "intencion": "comercial",
+        "termino": "geomembranas",
+        "variantes": 11,
+        "preguntas": 4,
+        "apoyos": 9
+      },
+      {
+        "id": "geomembrana-pvc",
+        "canonica": "/productos/geomembranas-pvc",
+        "intencion": "comercial",
+        "termino": "geomembrana de PVC",
+        "variantes": 4,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "geomembrana-hdpe",
+        "canonica": "/productos/geomembrana-polietileno-pe-hdpe",
+        "intencion": "comercial",
+        "termino": "geomembrana HDPE",
+        "variantes": 9,
+        "preguntas": 3,
+        "apoyos": 9
+      },
+      {
+        "id": "geomembrana-fortificada",
+        "canonica": "/productos/geomembrana-pe-fortificada",
+        "intencion": "comercial",
+        "termino": "geomembrana fortificada",
+        "variantes": 4,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "geomembrana-bituminosa",
+        "canonica": "/productos/geomembrana-bituminosa",
+        "intencion": "comercial",
+        "termino": "geomembrana bituminosa",
+        "variantes": 3,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "geotextiles",
+        "canonica": "/productos/geotextiles",
+        "intencion": "comercial",
+        "termino": "geotextiles",
+        "variantes": 8,
+        "preguntas": 3,
+        "apoyos": 7
+      },
+      {
+        "id": "geomallas",
+        "canonica": "/productos/geomallas-geogrids",
+        "intencion": "comercial",
+        "termino": "geomallas",
+        "variantes": 8,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "geocompuestos",
+        "canonica": "/productos/geocompuestos-drenaje",
+        "intencion": "comercial",
+        "termino": "geocompuestos de drenaje",
+        "variantes": 5,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "tanques-flexibles",
+        "canonica": "/productos/tanques-flexibles-bladders",
+        "intencion": "comercial",
+        "termino": "tanques flexibles",
+        "variantes": 9,
+        "preguntas": 3,
+        "apoyos": 5
+      },
+      {
+        "id": "biodigestores",
+        "canonica": "/productos/biodigestores",
+        "intencion": "comercial",
+        "termino": "biodigestores",
+        "variantes": 5,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "tuberias-hdpe",
+        "canonica": "/productos/tuberias-hdpe",
+        "intencion": "comercial",
+        "termino": "tuberías HDPE",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "familia-ambientales",
+        "canonica": "/productos/familia/ambientales-fluidos",
+        "intencion": "comercial",
+        "termino": "soluciones ambientales y de fluidos",
+        "variantes": 5,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "biombos",
+        "canonica": "/productos/biombos-protectores-soldadura",
+        "intencion": "comercial",
+        "termino": "biombos protectores",
+        "variantes": 7,
+        "preguntas": 2,
+        "apoyos": 2
+      },
+      {
+        "id": "barreras-acusticas",
+        "canonica": "/productos/barreras-acusticas",
+        "intencion": "comercial",
+        "termino": "barreras acústicas",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "familia-seguridad",
+        "canonica": "/productos/familia/seguridad-industrial",
+        "intencion": "comercial",
+        "termino": "protección y seguridad industrial",
+        "variantes": 4,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "accesorios-instalacion",
+        "canonica": "/productos/accesorios-instalacion",
+        "intencion": "comercial",
+        "termino": "accesorios de instalación",
+        "variantes": 8,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "familia-accesorios",
+        "canonica": "/productos/familia/accesorios",
+        "intencion": "comercial",
+        "termino": "accesorios y complementos",
+        "variantes": 3,
+        "preguntas": 2,
+        "apoyos": 2
+      },
+      {
+        "id": "gigantografias",
+        "canonica": "/productos/gigantografias-senaletica",
+        "intencion": "comercial",
+        "termino": "gigantografías",
+        "variantes": 7,
+        "preguntas": 2,
+        "apoyos": 2
+      },
+      {
+        "id": "revestimiento-vehicular",
+        "canonica": "/productos/revestimiento-vehicular-toldos-publicitarios",
+        "intencion": "comercial",
+        "termino": "revestimiento vehicular",
+        "variantes": 5,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "familia-publicidad",
+        "canonica": "/productos/familia/publicidad",
+        "intencion": "comercial",
+        "termino": "publicidad y comunicación visual",
+        "variantes": 3,
+        "preguntas": 2,
+        "apoyos": 2
+      },
+      {
+        "id": "mulch",
+        "canonica": "/productos/mulch-madera-picada",
+        "intencion": "comercial",
+        "termino": "mulch",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "familia-especialidades",
+        "canonica": "/productos/familia/especialidades",
+        "intencion": "comercial",
+        "termino": "líneas especiales",
+        "variantes": 3,
+        "preguntas": 2,
+        "apoyos": 2
+      },
+      {
+        "id": "sector-mineria",
+        "canonica": "/industria/mineria",
+        "intencion": "sector",
+        "termino": "textiles industriales para minería",
+        "variantes": 7,
+        "preguntas": 3,
+        "apoyos": 7
+      },
+      {
+        "id": "sector-agro",
+        "canonica": "/industria/agroexportacion",
+        "intencion": "sector",
+        "termino": "protección de cultivos para agroexportación",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 6
+      },
+      {
+        "id": "sector-transporte",
+        "canonica": "/industria/transporte-logistica",
+        "intencion": "sector",
+        "termino": "cobertura de carga para transporte y logística",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 6
+      },
+      {
+        "id": "sector-construccion",
+        "canonica": "/industria/construccion",
+        "intencion": "sector",
+        "termino": "coberturas temporales para construcción",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "sector-saneamiento",
+        "canonica": "/industria/saneamiento-y-agua",
+        "intencion": "sector",
+        "termino": "impermeabilización para saneamiento y agua",
+        "variantes": 6,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "decision-gramaje-lona",
+        "canonica": "/biblioteca/gramaje-lona-industrial",
+        "intencion": "decision",
+        "termino": "qué gramaje de lona usar",
+        "variantes": 5,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "decision-geomembrana",
+        "canonica": "/biblioteca/seleccion-geomembrana",
+        "intencion": "decision",
+        "termino": "cómo elegir una geomembrana",
+        "variantes": 5,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "decision-fibc",
+        "canonica": "/biblioteca/especificacion-fibc",
+        "intencion": "decision",
+        "termino": "cómo especificar un big bag",
+        "variantes": 5,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "decision-mangas",
+        "canonica": "/biblioteca/seleccion-mangas-ventilacion",
+        "intencion": "decision",
+        "termino": "cómo elegir mangas de ventilación",
+        "variantes": 4,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "decision-malla",
+        "canonica": "/biblioteca/seleccion-malla-agricola",
+        "intencion": "decision",
+        "termino": "cómo elegir una malla agrícola",
+        "variantes": 5,
+        "preguntas": 2,
+        "apoyos": 5
+      },
+      {
+        "id": "calc-caudal",
+        "canonica": "/calculadoras/caudal-ventilacion-mina",
+        "intencion": "calculo",
+        "termino": "calcular caudal de ventilación en mina",
+        "variantes": 4,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "calc-geomembrana",
+        "canonica": "/calculadoras/geomembrana-poza",
+        "intencion": "calculo",
+        "termino": "calcular geomembrana para una poza",
+        "variantes": 4,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "calc-rollos",
+        "canonica": "/calculadoras/rollos-por-superficie",
+        "intencion": "calculo",
+        "termino": "calcular rollos por superficie",
+        "variantes": 4,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "calc-bigbags-viaje",
+        "canonica": "/calculadoras/big-bags-por-viaje",
+        "intencion": "calculo",
+        "termino": "cuántos big bags entran por viaje",
+        "variantes": 4,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "calc-capacidad-bigbag",
+        "canonica": "/calculadoras/capacidad-big-bag",
+        "intencion": "calculo",
+        "termino": "capacidad de un big bag",
+        "variantes": 4,
+        "preguntas": 2,
+        "apoyos": 3
+      },
+      {
+        "id": "entidad",
+        "canonica": "/nosotros",
+        "intencion": "entidad",
+        "termino": "Plastilonas Peruanas SAC",
+        "variantes": 8,
+        "preguntas": 3,
+        "apoyos": 5
+      },
+      {
+        "id": "evaluacion-proveedor",
+        "canonica": "/marco",
+        "intencion": "decision",
+        "termino": "cómo evaluar un proveedor de textiles industriales",
+        "variantes": 6,
+        "preguntas": 3,
+        "apoyos": 5
+      },
+      {
+        "id": "cotizacion",
+        "canonica": "/cotizacion",
+        "intencion": "transaccional",
+        "termino": "cotizar textiles industriales",
+        "variantes": 7,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "cobertura-nacional",
+        "canonica": "/local",
+        "intencion": "local",
+        "termino": "cobertura nacional de textiles industriales",
+        "variantes": 5,
+        "preguntas": 2,
+        "apoyos": 4
+      },
+      {
+        "id": "servicio-instalacion",
+        "canonica": "/servicios",
+        "intencion": "comercial",
+        "termino": "instalación de coberturas y geosintéticos",
+        "variantes": 8,
+        "preguntas": 3,
+        "apoyos": 5
+      }
+    ],
+    "terminos": 647
+  },
+  "afirmaciones": [
+    {
+      "id": "anio-fundacion",
+      "valor": "2009",
+      "fuente": "lib/site.ts › SITE.foundingYear"
+    },
+    {
+      "id": "ruc",
+      "valor": "20523135385",
+      "fuente": "lib/site.ts › SITE.ruc"
+    },
+    {
+      "id": "productos",
+      "valor": "36",
+      "fuente": "lib/facts.ts › PRODUCT_COUNT (deriva de lib/products.ts)"
+    },
+    {
+      "id": "familias",
+      "valor": "11",
+      "fuente": "lib/facts.ts › FAMILY_COUNT (deriva de lib/families.ts)"
+    },
+    {
+      "id": "industrias",
+      "valor": "5",
+      "fuente": "lib/industrias.ts › INDUSTRIAS"
+    },
+    {
+      "id": "proyectos-redactados",
+      "valor": "5",
+      "fuente": "lib/projects.ts"
+    },
+    {
+      "id": "proyectos-publicados",
+      "valor": "0",
+      "fuente": "lib/projects.ts › verificado: true"
+    },
+    {
+      "id": "terminos-glosario",
+      "valor": "43",
+      "fuente": "lib/glosario.ts"
+    },
+    {
+      "id": "guias",
+      "valor": "5",
+      "fuente": "lib/guides.ts"
+    },
+    {
+      "id": "ciudades",
+      "valor": "12",
+      "fuente": "data/ciudades.json"
+    }
+  ],
+  "grafoEnlaces": {
+    "nodos": [
+      "/aplicaciones/[slug]",
+      "/aplicaciones",
+      "/biblioteca/[slug]",
+      "/biblioteca",
+      "/calculadoras/[slug]",
+      "/calculadoras",
+      "/calidad",
+      "/carrito",
+      "/checkout/exito",
+      "/checkout",
+      "/compradores",
+      "/compras",
+      "/confianza",
+      "/configurador",
+      "/contacto",
+      "/cotizacion",
+      "/dashboard",
+      "/descargas",
+      "/distribuidores",
+      "/en",
+      "/exportacion",
+      "/glosario/[slug]",
+      "/glosario",
+      "/indicadores",
+      "/industria/[sector]",
+      "/industria",
+      "/informes/[slug]",
+      "/informes",
+      "/local/[ciudad]",
+      "/local",
+      "/login",
+      "/marco/evaluacion",
+      "/marco",
+      "/nosotros",
+      "/novedades/[slug]",
+      "/novedades",
+      "/",
+      "/privacidad",
+      "/productos/[slug]",
+      "/productos/familia/[slug]/comparar",
+      "/productos/familia/[slug]",
+      "/productos",
+      "/proyectos",
+      "/pt",
+      "/recursos/[slug]",
+      "/recursos",
+      "/servicios",
+      "/socios",
+      "/soluciones/[slug]",
+      "/soluciones",
+      "/terminos"
+    ],
+    "aristas": 197,
+    "enlacesGlobales": [
+      "/",
+      "/aplicaciones",
+      "/biblioteca",
+      "/calculadoras",
+      "/calidad",
+      "/carrito",
+      "/compradores",
+      "/compras",
+      "/confianza",
+      "/configurador",
+      "/contacto",
+      "/cotizacion",
+      "/dashboard",
+      "/descargas",
+      "/distribuidores",
+      "/en",
+      "/exportacion",
+      "/glosario",
+      "/indicadores",
+      "/industria",
+      "/industria/[slug]",
+      "/industria/agroexportacion",
+      "/industria/construccion",
+      "/industria/mineria",
+      "/industria/saneamiento-y-agua",
+      "/industria/transporte-logistica",
+      "/informes",
+      "/local",
+      "/login",
+      "/marco",
+      "/nosotros",
+      "/novedades",
+      "/privacidad",
+      "/productos",
+      "/productos/familia/envases-embalaje",
+      "/productos/familia/estructuras-arquitectura-textil",
+      "/productos/familia/geosinteticos",
+      "/productos/familia/lonas-cobertores",
+      "/productos/familia/ventilacion-industrial",
+      "/proyectos",
+      "/pt",
+      "/recursos",
+      "/servicios",
+      "/socios",
+      "/soluciones",
+      "/terminos"
+    ],
+    "profundidad": {
+      "/": 0,
+      "/aplicaciones": 1,
+      "/aplicaciones/[slug]": 2,
+      "/biblioteca": 1,
+      "/biblioteca/[slug]": 2,
+      "/calculadoras": 1,
+      "/calculadoras/[slug]": 2,
+      "/calidad": 1,
+      "/carrito": 1,
+      "/checkout": 2,
+      "/compradores": 1,
+      "/compras": 1,
+      "/confianza": 1,
+      "/configurador": 1,
+      "/contacto": 1,
+      "/cotizacion": 1,
+      "/dashboard": 1,
+      "/descargas": 1,
+      "/distribuidores": 1,
+      "/en": 1,
+      "/exportacion": 1,
+      "/glosario": 1,
+      "/glosario/[slug]": 2,
+      "/indicadores": 1,
+      "/indicadores/datos.json": 2,
+      "/industria": 1,
+      "/industria/[sector]": 1,
+      "/informes": 1,
+      "/informes/[slug]": 2,
+      "/informes/[slug]/informe.pdf": 3,
+      "/local": 1,
+      "/local/[ciudad]": 2,
+      "/login": 1,
+      "/marco#[slug]": 3,
+      "/marco": 1,
+      "/marco/evaluacion": 2,
+      "/marco/marco.pdf": 2,
+      "/nosotros": 1,
+      "/novedades": 1,
+      "/novedades/[slug]": 2,
+      "/privacidad": 1,
+      "/productos": 1,
+      "/productos/[slug]": 2,
+      "/productos/familia/[slug]": 1,
+      "/productos/familia/[slug]/comparar": 2,
+      "/proyectos": 1,
+      "/pt": 1,
+      "/recursos": 1,
+      "/recursos/[slug]": 2,
+      "/recursos/[slug]/guia.pdf": 3,
+      "/servicios": 1,
+      "/socios": 1,
+      "/soluciones": 1,
+      "/soluciones/[slug]": 2,
+      "/soluciones/[slug]/arquitectura.pdf": 3,
+      "/terminos": 1
+    },
+    "huerfanas": [
+      "/checkout/exito"
+    ],
+    "aMasDeTresClics": [
+      {
+        "ruta": "/checkout/exito",
+        "profundidad": null,
+        "nota": "sin enlace literal entrante"
+      }
+    ]
+  },
+  "hallazgos": {
+    "sinCanonical": [
+      "/dashboard",
+      "/login"
+    ],
+    "sinEsquema": [
+      "/carrito",
+      "/checkout/exito",
+      "/checkout",
+      "/configurador",
+      "/dashboard",
+      "/en",
+      "/login",
+      "/privacidad",
+      "/pt",
+      "/terminos"
+    ],
+    "profundasSinBreadcrumbSchema": [
+      "/checkout/exito"
+    ],
+    "inconsistencias": []
+  }
+}

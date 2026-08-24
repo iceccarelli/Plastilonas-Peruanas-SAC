@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SITE } from '@/lib/site';
+import { YEARS_OPERATING } from '@/lib/facts';
 import Link from 'next/link';
 import { ArrowRight, Phone, ShieldCheck, MapPin, Truck, FileText } from 'lucide-react';
 import { products, productFamilies, sectors } from '@/lib/products';
@@ -72,18 +73,21 @@ export default function Home() {
     .map((sec) => ({ sector: sec, count: products.filter((p) => p.sector.includes(sec)).length }))
     .filter((s) => s.count > 0)
     .sort((a, b) => b.count - a.count);
-  // Años reales fabricando (desde 2009). Se actualiza solo cada 1 de enero.
-  const anios = new Date().getFullYear() - 2009;
+  // Años reales fabricando. YEARS_OPERATING los deriva de SITE.foundingYear:
+  // el día que se corrija el año de constitución, esta cifra y la de abajo
+  // cambian solas. Escribirlo a mano fue lo que hizo que la portada dijera
+  // «desde 2009» mientras lib/site.ts era la única fuente que podía saberlo.
+  const anios = YEARS_OPERATING;
   // Cifras calculadas del catálogo: nunca quedan desfasadas ni se inventan.
   const stats = [
     { to: 100, suffix: '%', label: 'A medida', sub: 'Cada pieza a su especificación' },
     { to: products.length, label: 'Soluciones', sub: `En ${productFamilies.length} líneas de producto` },
-    { to: anios, label: 'Años fabricando', sub: 'En el Perú desde 2009' },
+    { to: anios, label: 'Años fabricando', sub: `En el Perú desde ${SITE.foundingYear}` },
     { display: '24/7', label: 'WhatsApp', sub: 'Respuesta directa de fábrica' },
   ];
   // Franja de legitimidad: datos verificables, no repite las cifras de arriba.
   const trust = [
-    { icon: ShieldCheck, text: 'RUC 20523135385' },
+    { icon: ShieldCheck, text: `RUC ${SITE.ruc}` },
     { icon: MapPin, text: 'Chorrillos, Lima — Perú' },
     { icon: Truck, text: 'Entrega a todo el país' },
     { icon: FileText, text: 'Ficha técnica en cada cotización' },

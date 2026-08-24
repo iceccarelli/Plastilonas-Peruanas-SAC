@@ -1,0 +1,1995 @@
+{
+  "$schema": "./topic-map.schema.md",
+  "version": "1.0.0",
+  "revisado": "2026-08-24",
+  "nota": "MAPA DE CONSULTAS → PÁGINA CANÓNICA. Una consulta comercial tiene UNA página que la contesta; el resto la refuerza y enlaza hacia ella. Este archivo existe para impedir la canibalización: si dos páginas compiten por el mismo término, el buscador elige por su cuenta y suele elegir mal. Ningún término de aquí autoriza a crear una página nueva: todos apuntan a páginas que YA existen y que ya tienen contenido propio. test/mapa-consultas.test.ts hace fallar el build si un término se repite en dos clústeres, si una canónica se repite, o si una ruta no existe.",
+  "intenciones": {
+    "comercial": "compra directa de un producto o familia",
+    "sector": "comprador que llega por su industria, no por el SKU",
+    "decision": "el comprador aún no sabe qué pedir",
+    "calculo": "necesita un número antes de cotizar",
+    "transaccional": "quiere cotizar ahora",
+    "entidad": "busca a la empresa por su nombre",
+    "local": "pregunta por cobertura geográfica"
+  },
+  "clusters": [
+    {
+      "id": "big-bags",
+      "canonica": "/productos/big-bags-bolsones-polipropileno",
+      "intencion": "comercial",
+      "termino": "big bags",
+      "variantes": [
+        "big bag",
+        "bigbags",
+        "bolsones",
+        "bolsón",
+        "bolsones de polipropileno",
+        "bolsones polipropileno",
+        "sacos big bag",
+        "fibc",
+        "fibc perú",
+        "flexible intermediate bulk container",
+        "contenedores flexibles",
+        "contenedor intermedio flexible para granel",
+        "big bags perú",
+        "big bags lima",
+        "big bags minería",
+        "bolsones para minería",
+        "bolsones para agroexportación",
+        "saco de una tonelada",
+        "sacos de 1 tonelada",
+        "bolsones de 2 toneladas",
+        "big bag con boquilla",
+        "big bag con falda",
+        "big bag antiestático",
+        "fabricante de big bags",
+        "proveedor de big bags"
+      ],
+      "erratas": [
+        "bigbag",
+        "bolson polipropileno",
+        "big bag peru",
+        "bolsones polipropilieno"
+      ],
+      "preguntas": [
+        "¿quién fabrica big bags en el Perú?",
+        "¿cuánto pesa un big bag de 1 tonelada?",
+        "¿qué factor de seguridad debe tener un big bag para mina?",
+        "¿dónde comprar bolsones de polipropileno en Lima?",
+        "¿qué diferencia hay entre un big bag tipo A, B, C y D?"
+      ],
+      "apoyos": [
+        "/biblioteca/especificacion-fibc",
+        "/calculadoras/capacidad-big-bag",
+        "/calculadoras/big-bags-por-viaje",
+        "/glosario/big-bag-fibc",
+        "/glosario/carga-de-trabajo-segura",
+        "/glosario/tipo-electrostatico-fibc",
+        "/aplicaciones/granel-embalaje",
+        "/industria/mineria",
+        "/recursos/big-bags-mineria-peru-normativa-errores-estiba",
+        "/soluciones/despacho-concentrado-granel",
+        "/productos/familia/envases-embalaje"
+      ]
+    },
+    {
+      "id": "sacos-polytarp",
+      "canonica": "/productos/sacos-polytarp-embarque-granel",
+      "intencion": "comercial",
+      "termino": "sacos polytarp",
+      "variantes": [
+        "saco polytarp",
+        "sacos para embarque a granel",
+        "sacos de estiba",
+        "sacos portuarios",
+        "embalaje de estiba",
+        "sacos para embarque"
+      ],
+      "erratas": [
+        "sacos polytar",
+        "saco poly tarp"
+      ],
+      "preguntas": [
+        "¿qué saco se usa para embarque a granel en puerto?",
+        "¿cuándo conviene un saco polytarp en vez de un big bag?"
+      ],
+      "apoyos": [
+        "/aplicaciones/granel-embalaje",
+        "/industria/transporte-logistica",
+        "/productos/familia/envases-embalaje",
+        "/glosario/gramaje"
+      ]
+    },
+    {
+      "id": "bolsas-pe",
+      "canonica": "/productos/bolsas-laminas-pebd-pead",
+      "intencion": "comercial",
+      "termino": "bolsas de polietileno industrial",
+      "variantes": [
+        "láminas de polietileno",
+        "lámina pebd",
+        "lámina pead",
+        "bolsas pebd",
+        "bolsas pead",
+        "plástico industrial en lámina",
+        "bolsas industriales a medida",
+        "forro de polietileno"
+      ],
+      "erratas": [
+        "laminas polietileno",
+        "bolsa pead"
+      ],
+      "preguntas": [
+        "¿fabrican bolsas de polietileno a medida en el Perú?",
+        "¿qué calibre de lámina de polietileno necesito?"
+      ],
+      "apoyos": [
+        "/productos/familia/envases-embalaje",
+        "/glosario/liner-interior",
+        "/aplicaciones/granel-embalaje"
+      ]
+    },
+    {
+      "id": "films-shrink",
+      "canonica": "/productos/films-termocontraibles-shrink",
+      "intencion": "comercial",
+      "termino": "film termocontraíble",
+      "variantes": [
+        "films termocontraíbles",
+        "shrink",
+        "film shrink",
+        "termoencogible",
+        "mangas de polietileno",
+        "embalaje termocontraíble",
+        "film para paletizado"
+      ],
+      "erratas": [
+        "termocontraible",
+        "shrink wrap peru"
+      ],
+      "preguntas": [
+        "¿qué film termocontraíble se usa para paletizar carga?",
+        "¿cómo se protege un pallet para exportación?"
+      ],
+      "apoyos": [
+        "/productos/familia/envases-embalaje",
+        "/industria/transporte-logistica",
+        "/aplicaciones/granel-embalaje"
+      ]
+    },
+    {
+      "id": "familia-envases",
+      "canonica": "/productos/familia/envases-embalaje",
+      "intencion": "comercial",
+      "termino": "envases y embalaje industrial",
+      "variantes": [
+        "embalaje industrial",
+        "envases a granel",
+        "envases industriales",
+        "embalaje a granel",
+        "empaque industrial perú",
+        "soluciones de embalaje industrial",
+        "embalaje para exportación"
+      ],
+      "erratas": [
+        "envases embalaje industrial peru"
+      ],
+      "preguntas": [
+        "¿qué opciones hay para embalar carga a granel en el Perú?",
+        "¿qué envase industrial conviene para concentrado mineral?"
+      ],
+      "apoyos": [
+        "/productos/big-bags-bolsones-polipropileno",
+        "/productos/sacos-polytarp-embarque-granel",
+        "/aplicaciones/granel-embalaje",
+        "/industria/transporte-logistica",
+        "/biblioteca/especificacion-fibc"
+      ]
+    },
+    {
+      "id": "lona-plastificada",
+      "canonica": "/productos/lona-plastificada-rafia-polytarp",
+      "intencion": "comercial",
+      "termino": "lona plastificada",
+      "variantes": [
+        "lona",
+        "lonas plastificadas",
+        "rafia",
+        "rafia plastificada",
+        "polytarp",
+        "lona de rafia",
+        "lona impermeable",
+        "lonas impermeables",
+        "lona a medida",
+        "lonas a medida",
+        "lona pvc",
+        "lona industrial",
+        "lona reforzada",
+        "fabricante de lonas",
+        "lona por metro",
+        "lonas lima"
+      ],
+      "erratas": [
+        "lona plastifcada",
+        "lona plastificda",
+        "lonas plastifcadas",
+        "rafia plastifcada",
+        "polytarp peru"
+      ],
+      "preguntas": [
+        "¿qué gramaje de lona necesito para intemperie?",
+        "¿dónde compro lona plastificada a medida en Lima?",
+        "¿cuánto dura una lona de rafia al sol de la costa peruana?",
+        "¿qué diferencia hay entre lona de rafia y lona de PVC?"
+      ],
+      "apoyos": [
+        "/biblioteca/gramaje-lona-industrial",
+        "/glosario/lona-plastificada",
+        "/glosario/gramaje",
+        "/glosario/denier",
+        "/glosario/estabilizacion-uv",
+        "/calculadoras/rollos-por-superficie",
+        "/aplicaciones/coberturas-obra",
+        "/productos/familia/lonas-cobertores"
+      ]
+    },
+    {
+      "id": "mantas-toldos-camion",
+      "canonica": "/productos/mantas-cobertores-toldos-camiones",
+      "intencion": "comercial",
+      "termino": "toldos para camiones",
+      "variantes": [
+        "manta cobertora",
+        "mantas cobertores",
+        "cobertor de camión",
+        "cobertores de camión",
+        "toldo para camión",
+        "cobertor de tolva",
+        "mantas para volquete",
+        "cobertor de carga",
+        "lona para camión",
+        "encarpado de camión",
+        "cobertor para concentrado"
+      ],
+      "erratas": [
+        "toldos camiones peru",
+        "cobertor camion",
+        "manta cobertor"
+      ],
+      "preguntas": [
+        "¿qué cobertor exige el MTC para transportar concentrado?",
+        "¿cómo se cubre la tolva de un volquete?",
+        "¿dónde mandar a hacer toldos para camión en el Perú?"
+      ],
+      "apoyos": [
+        "/aplicaciones/toldos-camion",
+        "/industria/transporte-logistica",
+        "/recursos/cobertores-transporte-concentrado-mineral",
+        "/productos/siders-tolderas-camiones",
+        "/glosario/ojal",
+        "/productos/familia/lonas-cobertores"
+      ]
+    },
+    {
+      "id": "siders-tolderas",
+      "canonica": "/productos/siders-tolderas-camiones",
+      "intencion": "comercial",
+      "termino": "siders y tolderas",
+      "variantes": [
+        "sider",
+        "siders",
+        "toldera",
+        "tolderas",
+        "carrocería con sider",
+        "cortina lateral de camión",
+        "lona lateral para semirremolque"
+      ],
+      "erratas": [
+        "sider camion",
+        "tolderas camion"
+      ],
+      "preguntas": [
+        "¿qué es un sider en un camión de carga?",
+        "¿se puede confeccionar una toldera a medida de mi carrocería?"
+      ],
+      "apoyos": [
+        "/productos/mantas-cobertores-toldos-camiones",
+        "/industria/transporte-logistica",
+        "/productos/familia/lonas-cobertores",
+        "/aplicaciones/toldos-camion"
+      ]
+    },
+    {
+      "id": "cobertores-agricolas",
+      "canonica": "/productos/cobertores-agricolas-multimaterial",
+      "intencion": "comercial",
+      "termino": "cobertores agrícolas",
+      "variantes": [
+        "cobertor agrícola",
+        "cobertores multimaterial",
+        "cobertor para cultivo",
+        "manta agrícola",
+        "cobertor de cosecha",
+        "cobertor térmico agrícola"
+      ],
+      "erratas": [
+        "cobertores agricolas peru"
+      ],
+      "preguntas": [
+        "¿qué cobertor conviene para proteger cosecha en campo?",
+        "¿qué material se usa para cubrir cultivos de la lluvia?"
+      ],
+      "apoyos": [
+        "/industria/agroexportacion",
+        "/aplicaciones/proteccion-cultivo",
+        "/productos/familia/lonas-cobertores",
+        "/biblioteca/seleccion-malla-agricola"
+      ]
+    },
+    {
+      "id": "arpilleras-granjas",
+      "canonica": "/productos/mantas-arpilleras-granjas",
+      "intencion": "comercial",
+      "termino": "arpilleras para granjas",
+      "variantes": [
+        "manta arpillera",
+        "mantas arpilleras",
+        "arpillera avícola",
+        "cortina de granja",
+        "cortina para galpón avícola",
+        "arpillera para establo"
+      ],
+      "erratas": [
+        "arpilleras granja",
+        "manta arpillera avicola"
+      ],
+      "preguntas": [
+        "¿qué cortina se usa en un galpón avícola?",
+        "¿cómo se controla la ventilación en una granja con arpillera?"
+      ],
+      "apoyos": [
+        "/productos/familia/lonas-cobertores",
+        "/productos/galpones-invernaderos-estructurados",
+        "/industria/agroexportacion"
+      ]
+    },
+    {
+      "id": "mantas-termicas",
+      "canonica": "/productos/mantas-aislantes-termicas-termoacusticas",
+      "intencion": "comercial",
+      "termino": "mantas aislantes térmicas",
+      "variantes": [
+        "manta térmica industrial",
+        "mantas termoacústicas",
+        "aislamiento térmico flexible",
+        "manta antiacústica",
+        "aislante acústico flexible",
+        "manta aislante para tuberías"
+      ],
+      "erratas": [
+        "mantas termoacusticas peru"
+      ],
+      "preguntas": [
+        "¿qué manta aísla ruido y calor en planta industrial?",
+        "¿se puede confeccionar aislamiento térmico a medida de un equipo?"
+      ],
+      "apoyos": [
+        "/productos/barreras-acusticas",
+        "/productos/familia/lonas-cobertores",
+        "/productos/familia/seguridad-industrial"
+      ]
+    },
+    {
+      "id": "familia-lonas",
+      "canonica": "/productos/familia/lonas-cobertores",
+      "intencion": "comercial",
+      "termino": "lonas y cobertores industriales",
+      "variantes": [
+        "lonas industriales",
+        "cobertores industriales",
+        "cobertor",
+        "cobertores",
+        "manta",
+        "mantas",
+        "coberturas de carga",
+        "línea de lonas",
+        "catálogo de lonas"
+      ],
+      "erratas": [
+        "lonas cobertores peru"
+      ],
+      "preguntas": [
+        "¿qué tipos de lona y cobertor fabrica una empresa peruana?",
+        "¿qué cobertor conviene para cada tipo de carga?"
+      ],
+      "apoyos": [
+        "/productos/lona-plastificada-rafia-polytarp",
+        "/productos/mantas-cobertores-toldos-camiones",
+        "/biblioteca/gramaje-lona-industrial",
+        "/industria/transporte-logistica",
+        "/aplicaciones/coberturas-obra"
+      ]
+    },
+    {
+      "id": "carpas",
+      "canonica": "/productos/carpas-lona-estructuras-metalicas",
+      "intencion": "comercial",
+      "termino": "carpas industriales",
+      "variantes": [
+        "carpa",
+        "carpas",
+        "carpa industrial",
+        "carpas de lona",
+        "carpa con estructura metálica",
+        "galpón de lona",
+        "carpa de almacén",
+        "carpa para obra",
+        "hangar textil",
+        "carpa desmontable"
+      ],
+      "erratas": [
+        "carpas industriales peru",
+        "carpa lona peru"
+      ],
+      "preguntas": [
+        "¿cuánto viento resiste una carpa industrial?",
+        "¿se puede instalar una carpa de almacén temporal en obra?",
+        "¿qué norma rige la carga de viento de una carpa en el Perú?"
+      ],
+      "apoyos": [
+        "/recursos/carpas-industriales-carga-viento-norma-e020",
+        "/glosario/carga-de-viento",
+        "/aplicaciones/coberturas-obra",
+        "/aplicaciones/campamentos-mineros",
+        "/industria/construccion",
+        "/productos/familia/estructuras-arquitectura-textil"
+      ]
+    },
+    {
+      "id": "tensionadas",
+      "canonica": "/productos/coberturas-tensionadas-arquitectura-textil",
+      "intencion": "comercial",
+      "termino": "coberturas tensionadas",
+      "variantes": [
+        "cobertura tensionada",
+        "tensoestructura",
+        "tensoestructuras",
+        "velaria",
+        "velarias",
+        "membrana tensada",
+        "cubierta tensada",
+        "sombra tensionada"
+      ],
+      "erratas": [
+        "coberturas tensionadas peru",
+        "tenso estructura"
+      ],
+      "preguntas": [
+        "¿qué es una cobertura tensionada y cuánto dura?",
+        "¿cómo se calcula el pretensado de una membrana?"
+      ],
+      "apoyos": [
+        "/glosario/arquitectura-textil",
+        "/glosario/pretensado",
+        "/glosario/carga-de-viento",
+        "/productos/familia/estructuras-arquitectura-textil",
+        "/industria/construccion"
+      ]
+    },
+    {
+      "id": "inflables",
+      "canonica": "/productos/coberturas-inflables",
+      "intencion": "comercial",
+      "termino": "estructuras inflables",
+      "variantes": [
+        "cobertura inflable",
+        "coberturas inflables",
+        "domo inflable",
+        "carpa inflable",
+        "estructura neumática"
+      ],
+      "erratas": [
+        "estructuras inflables peru"
+      ],
+      "preguntas": [
+        "¿para qué sirve una cobertura inflable en industria?",
+        "¿qué mantenimiento pide una estructura inflable?"
+      ],
+      "apoyos": [
+        "/productos/familia/estructuras-arquitectura-textil",
+        "/aplicaciones/coberturas-obra"
+      ]
+    },
+    {
+      "id": "campamentos",
+      "canonica": "/productos/modulos-albergues-campamentos",
+      "intencion": "comercial",
+      "termino": "módulos para campamentos",
+      "variantes": [
+        "albergues para campamento",
+        "campamento minero",
+        "módulos habitables textiles",
+        "carpa dormitorio",
+        "albergue temporal",
+        "campamento de obra"
+      ],
+      "erratas": [
+        "campamento minero peru",
+        "modulos campamento"
+      ],
+      "preguntas": [
+        "¿qué se necesita para montar un campamento minero temporal?",
+        "¿qué módulos textiles hay para faenas remotas?"
+      ],
+      "apoyos": [
+        "/aplicaciones/campamentos-mineros",
+        "/soluciones/campamento-almacen-temporal",
+        "/industria/mineria",
+        "/productos/familia/estructuras-arquitectura-textil"
+      ]
+    },
+    {
+      "id": "invernaderos",
+      "canonica": "/productos/galpones-invernaderos-estructurados",
+      "intencion": "comercial",
+      "termino": "invernaderos",
+      "variantes": [
+        "invernadero",
+        "galpón",
+        "galpones",
+        "techo ligero",
+        "techos ligeros",
+        "galpón agrícola",
+        "invernadero estructurado",
+        "cobertura de invernadero",
+        "plástico para invernadero"
+      ],
+      "erratas": [
+        "invernaderos peru"
+      ],
+      "preguntas": [
+        "¿cuánto cuesta cubrir un invernadero por metro cuadrado?",
+        "¿qué plástico se usa para un invernadero en la costa?",
+        "¿qué diferencia hay entre galpón y invernadero?"
+      ],
+      "apoyos": [
+        "/industria/agroexportacion",
+        "/calculadoras/rollos-por-superficie",
+        "/productos/familia/estructuras-arquitectura-textil",
+        "/productos/malla-raschel-sombra"
+      ]
+    },
+    {
+      "id": "toldos-cerramientos",
+      "canonica": "/productos/toldos-cerramientos",
+      "intencion": "comercial",
+      "termino": "toldos y cerramientos industriales",
+      "variantes": [
+        "toldo",
+        "toldos",
+        "cerramiento",
+        "cerramientos",
+        "cortina industrial",
+        "cortinas industriales",
+        "toldo enrollable",
+        "cerramiento de nave",
+        "cortina de andén",
+        "toldo para patio industrial"
+      ],
+      "erratas": [
+        "toldos peru",
+        "cerramientos industriales peru"
+      ],
+      "preguntas": [
+        "¿qué toldo se usa para cerrar un patio de maniobras?",
+        "¿se fabrican cortinas industriales a medida?"
+      ],
+      "apoyos": [
+        "/productos/familia/estructuras-arquitectura-textil",
+        "/industria/construccion",
+        "/aplicaciones/coberturas-obra",
+        "/productos/carpas-lona-estructuras-metalicas"
+      ]
+    },
+    {
+      "id": "familia-estructuras",
+      "canonica": "/productos/familia/estructuras-arquitectura-textil",
+      "intencion": "comercial",
+      "termino": "estructuras textiles",
+      "variantes": [
+        "estructura textil",
+        "arquitectura textil",
+        "estructuras metálicas textiles",
+        "coberturas industriales",
+        "cubiertas textiles",
+        "soluciones estructurales textiles"
+      ],
+      "erratas": [
+        "estructuras textiles peru",
+        "arquitectura textil peru"
+      ],
+      "preguntas": [
+        "¿qué es una estructura textil y para qué sirve en industria?",
+        "¿qué tipos de cobertura estructural existen para obra y mina?"
+      ],
+      "apoyos": [
+        "/productos/carpas-lona-estructuras-metalicas",
+        "/productos/coberturas-tensionadas-arquitectura-textil",
+        "/glosario/arquitectura-textil",
+        "/industria/construccion",
+        "/aplicaciones/coberturas-obra"
+      ]
+    },
+    {
+      "id": "mallas-antiafidas",
+      "canonica": "/productos/mallas-antiafidas",
+      "intencion": "comercial",
+      "termino": "malla antiáfida",
+      "variantes": [
+        "mallas antiáfidas",
+        "malla antiáfidos",
+        "malla anti insectos",
+        "malla antiinsectos",
+        "malla para invernadero",
+        "malla de exclusión de plagas",
+        "mesh 50",
+        "malla anti trips"
+      ],
+      "erratas": [
+        "mallas antiafidas peru",
+        "malla antiafido",
+        "malla anti afida"
+      ],
+      "preguntas": [
+        "¿qué mesh de malla antiáfida detiene la mosca blanca?",
+        "¿la malla antiáfida reduce la ventilación del invernadero?",
+        "¿qué malla protege el cultivo sin bajar el rendimiento?"
+      ],
+      "apoyos": [
+        "/biblioteca/seleccion-malla-agricola",
+        "/glosario/malla-antiafida",
+        "/glosario/mesh",
+        "/aplicaciones/proteccion-cultivo",
+        "/recursos/mallas-antiafidas-densidad-trama-ventilacion",
+        "/industria/agroexportacion",
+        "/productos/familia/mallas-agricolas"
+      ]
+    },
+    {
+      "id": "malla-raschel",
+      "canonica": "/productos/malla-raschel-sombra",
+      "intencion": "comercial",
+      "termino": "malla raschel",
+      "variantes": [
+        "malla sombra",
+        "malla de sombra",
+        "raschel",
+        "malla rashel",
+        "sombra 35%",
+        "sombra 50%",
+        "sombra 80%",
+        "malla sombreadora",
+        "malla para sombra",
+        "porcentaje de sombra"
+      ],
+      "erratas": [
+        "malla raschel peru",
+        "malla rachel",
+        "malla sombra peru"
+      ],
+      "preguntas": [
+        "¿qué porcentaje de sombra necesita mi cultivo?",
+        "¿cuánto dura una malla raschel al sol?",
+        "¿dónde comprar malla sombra por rollo en el Perú?"
+      ],
+      "apoyos": [
+        "/glosario/malla-raschel",
+        "/glosario/porcentaje-de-sombra",
+        "/biblioteca/seleccion-malla-agricola",
+        "/calculadoras/rollos-por-superficie",
+        "/aplicaciones/proteccion-cultivo",
+        "/productos/familia/mallas-agricolas"
+      ]
+    },
+    {
+      "id": "malla-antipajaro",
+      "canonica": "/productos/malla-anti-pajaro-anti-granizo",
+      "intencion": "comercial",
+      "termino": "malla anti pájaro",
+      "variantes": [
+        "malla antipájaro",
+        "malla anti granizo",
+        "malla antigranizo",
+        "malla para aves",
+        "protección contra granizo",
+        "malla para frutales"
+      ],
+      "erratas": [
+        "malla antipajaro peru",
+        "malla anti-granizo"
+      ],
+      "preguntas": [
+        "¿cómo proteger un frutal del granizo y de las aves?",
+        "¿qué malla se usa en parronal de uva de mesa?"
+      ],
+      "apoyos": [
+        "/aplicaciones/proteccion-cultivo",
+        "/industria/agroexportacion",
+        "/productos/familia/mallas-agricolas",
+        "/biblioteca/seleccion-malla-agricola"
+      ]
+    },
+    {
+      "id": "familia-mallas",
+      "canonica": "/productos/familia/mallas-agricolas",
+      "intencion": "comercial",
+      "termino": "mallas agrícolas",
+      "variantes": [
+        "malla",
+        "mallas",
+        "mallas agrícolas perú",
+        "malla agrícola",
+        "coberturas agrícolas",
+        "mallas para agricultura",
+        "protección de cultivos"
+      ],
+      "erratas": [],
+      "preguntas": [
+        "¿qué mallas existen para proteger cultivos en el Perú?",
+        "¿qué malla elijo: raschel, antiáfida o anti-granizo?"
+      ],
+      "apoyos": [
+        "/productos/malla-raschel-sombra",
+        "/productos/mallas-antiafidas",
+        "/biblioteca/seleccion-malla-agricola",
+        "/industria/agroexportacion",
+        "/aplicaciones/proteccion-cultivo"
+      ]
+    },
+    {
+      "id": "mangas-ventilacion",
+      "canonica": "/productos/mangas-ventilacion-minas-tuneles",
+      "intencion": "comercial",
+      "termino": "mangas de ventilación",
+      "variantes": [
+        "manga de ventilación",
+        "manga",
+        "mangas",
+        "mangas para minas",
+        "mangas para túneles",
+        "manga de ventilación minera",
+        "ducto flexible de ventilación",
+        "manga impelente",
+        "manga aspirante",
+        "manga con refuerzo espiral",
+        "mangas ventilación mina"
+      ],
+      "erratas": [
+        "mangas ventilacion",
+        "manga ventilacion mina",
+        "mangas de ventilacion peru",
+        "mangas minas"
+      ],
+      "preguntas": [
+        "¿qué diámetro de manga de ventilación necesito para mi labor?",
+        "¿cuál es la diferencia entre ventilación impelente y aspirante?",
+        "¿quién fabrica mangas de ventilación en el Perú?",
+        "¿cómo calculo el caudal de aire de un frente de avance?"
+      ],
+      "apoyos": [
+        "/biblioteca/seleccion-mangas-ventilacion",
+        "/calculadoras/caudal-ventilacion-mina",
+        "/glosario/manga-de-ventilacion",
+        "/glosario/ventilacion-impelente",
+        "/glosario/ventilacion-aspirante",
+        "/glosario/factor-de-fuga",
+        "/aplicaciones/ventilacion-subterranea",
+        "/soluciones/frente-avance-ventilado",
+        "/industria/mineria",
+        "/recursos/calculo-caudal-mangas-ventilacion-mina-subterranea",
+        "/productos/familia/ventilacion-industrial"
+      ]
+    },
+    {
+      "id": "familia-ventilacion",
+      "canonica": "/productos/familia/ventilacion-industrial",
+      "intencion": "comercial",
+      "termino": "ventilación industrial",
+      "variantes": [
+        "ventilación minera",
+        "ductos de ventilación",
+        "ducto de ventilación",
+        "ventilación de túneles",
+        "ventilación subterránea",
+        "sistemas de ventilación industrial",
+        "accesorios de ventilación"
+      ],
+      "erratas": [
+        "ventilacion industrial peru",
+        "ventilacion minera peru",
+        "ductos ventilacion minera"
+      ],
+      "preguntas": [
+        "¿qué componentes forman un sistema de ventilación en mina subterránea?",
+        "¿cómo se ventila un túnel en construcción?"
+      ],
+      "apoyos": [
+        "/productos/mangas-ventilacion-minas-tuneles",
+        "/calculadoras/caudal-ventilacion-mina",
+        "/industria/mineria",
+        "/aplicaciones/ventilacion-subterranea",
+        "/glosario/perdida-de-carga"
+      ]
+    },
+    {
+      "id": "geosinteticos",
+      "canonica": "/productos/familia/geosinteticos",
+      "intencion": "comercial",
+      "termino": "geomembranas",
+      "variantes": [
+        "geomembrana",
+        "geosintéticos",
+        "geosintético",
+        "geosintéticos perú",
+        "impermeabilización",
+        "impermeabilizar",
+        "revestimiento de pozas",
+        "forro de poza",
+        "línea de geosintéticos",
+        "impermeabilización industrial",
+        "membrana impermeable"
+      ],
+      "erratas": [
+        "geomembranas peru",
+        "geo membrana",
+        "impermeabilizacion pozas"
+      ],
+      "preguntas": [
+        "¿qué geomembrana conviene para una poza de agua?",
+        "¿quién instala geomembranas en el Perú?",
+        "¿cuánto cuesta impermeabilizar una poza?",
+        "¿qué espesor de geomembrana necesito?"
+      ],
+      "apoyos": [
+        "/biblioteca/seleccion-geomembrana",
+        "/calculadoras/geomembrana-poza",
+        "/glosario/geomembrana",
+        "/glosario/geosintetico",
+        "/aplicaciones/impermeabilizacion-pozas",
+        "/soluciones/poza-revestida-impermeabilizacion",
+        "/recursos/instalacion-geomembranas-hdpe-pozas-canales",
+        "/industria/saneamiento-y-agua",
+        "/productos/geomembrana-polietileno-pe-hdpe"
+      ]
+    },
+    {
+      "id": "geomembrana-pvc",
+      "canonica": "/productos/geomembranas-pvc",
+      "intencion": "comercial",
+      "termino": "geomembrana de PVC",
+      "variantes": [
+        "geomembrana pvc",
+        "membrana de pvc",
+        "revestimiento pvc para poza",
+        "lámina pvc impermeable"
+      ],
+      "erratas": [
+        "geomembrana pvc peru",
+        "geo membrana pvc"
+      ],
+      "preguntas": [
+        "¿cuándo se usa geomembrana de PVC en vez de HDPE?",
+        "¿qué espesor de geomembrana de PVC se especifica?"
+      ],
+      "apoyos": [
+        "/biblioteca/seleccion-geomembrana",
+        "/productos/familia/geosinteticos",
+        "/aplicaciones/impermeabilizacion-pozas",
+        "/glosario/geomembrana"
+      ]
+    },
+    {
+      "id": "geomembrana-hdpe",
+      "canonica": "/productos/geomembrana-polietileno-pe-hdpe",
+      "intencion": "comercial",
+      "termino": "geomembrana HDPE",
+      "variantes": [
+        "geomembrana de polietileno",
+        "geomembrana pead",
+        "hdpe",
+        "lámina hdpe",
+        "hdpe 1.5 mm",
+        "geomembrana 1.0 mm",
+        "geomembrana 2.0 mm",
+        "soldadura de geomembrana",
+        "cuña caliente"
+      ],
+      "erratas": [
+        "geomembrana hdpe peru",
+        "geomembrana pe",
+        "geomembrana hdp"
+      ],
+      "preguntas": [
+        "¿qué espesor de geomembrana HDPE se usa en poza de relaves?",
+        "¿cómo se sueldan las láminas de HDPE en obra?",
+        "¿qué es una zanja de anclaje y por qué importa?"
+      ],
+      "apoyos": [
+        "/glosario/hdpe",
+        "/glosario/soldadura-por-cuna-caliente",
+        "/glosario/zanja-de-anclaje",
+        "/glosario/subrasante",
+        "/biblioteca/seleccion-geomembrana",
+        "/calculadoras/geomembrana-poza",
+        "/recursos/instalacion-geomembranas-hdpe-pozas-canales",
+        "/industria/mineria",
+        "/productos/familia/geosinteticos"
+      ]
+    },
+    {
+      "id": "geomembrana-fortificada",
+      "canonica": "/productos/geomembrana-pe-fortificada",
+      "intencion": "comercial",
+      "termino": "geomembrana fortificada",
+      "variantes": [
+        "geomembrana reforzada",
+        "geomembrana pe fortificada",
+        "membrana reforzada con malla",
+        "geomembrana con refuerzo"
+      ],
+      "erratas": [
+        "geomembrana fortificada peru"
+      ],
+      "preguntas": [
+        "¿cuándo conviene una geomembrana reforzada?",
+        "¿qué gana una geomembrana con refuerzo interno?"
+      ],
+      "apoyos": [
+        "/productos/familia/geosinteticos",
+        "/biblioteca/seleccion-geomembrana",
+        "/glosario/resistencia-al-desgarro"
+      ]
+    },
+    {
+      "id": "geomembrana-bituminosa",
+      "canonica": "/productos/geomembrana-bituminosa",
+      "intencion": "comercial",
+      "termino": "geomembrana bituminosa",
+      "variantes": [
+        "membrana bituminosa",
+        "geomembrana asfáltica",
+        "lámina bituminosa"
+      ],
+      "erratas": [
+        "geomembrana bituminosa peru",
+        "membrana bituminosa peru"
+      ],
+      "preguntas": [
+        "¿en qué casos se especifica geomembrana bituminosa?",
+        "¿la geomembrana bituminosa sirve para túneles?"
+      ],
+      "apoyos": [
+        "/productos/familia/geosinteticos",
+        "/biblioteca/seleccion-geomembrana",
+        "/aplicaciones/impermeabilizacion-pozas"
+      ]
+    },
+    {
+      "id": "geotextiles",
+      "canonica": "/productos/geotextiles",
+      "intencion": "comercial",
+      "termino": "geotextiles",
+      "variantes": [
+        "geotextil",
+        "geotextil no tejido",
+        "geotextil tejido",
+        "geotextil punzonado",
+        "separación de suelos",
+        "geotextil para drenaje",
+        "geotextil 200 gr",
+        "filtro geotextil"
+      ],
+      "erratas": [
+        "geotextiles peru",
+        "geo textil",
+        "geotextil no tejido peru"
+      ],
+      "preguntas": [
+        "¿qué geotextil elijo para separación, drenaje o refuerzo?",
+        "¿qué gramaje de geotextil se usa bajo una geomembrana?",
+        "¿cuál es la diferencia entre geotextil tejido y no tejido?"
+      ],
+      "apoyos": [
+        "/glosario/geotextil",
+        "/glosario/no-tejido-punzonado",
+        "/glosario/permitividad",
+        "/glosario/resistencia-al-punzonamiento",
+        "/recursos/como-elegir-geotextil-separacion-drenaje-refuerzo",
+        "/productos/familia/geosinteticos",
+        "/industria/construccion"
+      ]
+    },
+    {
+      "id": "geomallas",
+      "canonica": "/productos/geomallas-geogrids",
+      "intencion": "comercial",
+      "termino": "geomallas",
+      "variantes": [
+        "geomalla",
+        "geogrid",
+        "geogrids",
+        "estabilización de suelos",
+        "refuerzo de suelo",
+        "geomalla biaxial",
+        "geomalla uniaxial",
+        "refuerzo de terraplén"
+      ],
+      "erratas": [
+        "geomallas peru",
+        "geo malla",
+        "geogrid peru"
+      ],
+      "preguntas": [
+        "¿cómo se estabiliza una plataforma con geomalla?",
+        "¿qué geomalla se usa en carretera afirmada?"
+      ],
+      "apoyos": [
+        "/glosario/geomalla",
+        "/glosario/subrasante",
+        "/productos/familia/geosinteticos",
+        "/industria/construccion"
+      ]
+    },
+    {
+      "id": "geocompuestos",
+      "canonica": "/productos/geocompuestos-drenaje",
+      "intencion": "comercial",
+      "termino": "geocompuestos de drenaje",
+      "variantes": [
+        "geocompuesto",
+        "geocompuesto drenante",
+        "geored",
+        "dren geosintético",
+        "drenaje geosintético"
+      ],
+      "erratas": [
+        "geocompuestos drenaje peru",
+        "geo compuesto"
+      ],
+      "preguntas": [
+        "¿qué es un geocompuesto de drenaje y dónde se usa?",
+        "¿el geocompuesto reemplaza a la capa de grava drenante?"
+      ],
+      "apoyos": [
+        "/productos/familia/geosinteticos",
+        "/glosario/permitividad",
+        "/industria/saneamiento-y-agua",
+        "/productos/geotextiles"
+      ]
+    },
+    {
+      "id": "tanques-flexibles",
+      "canonica": "/productos/tanques-flexibles-bladders",
+      "intencion": "comercial",
+      "termino": "tanques flexibles",
+      "variantes": [
+        "tanque flexible",
+        "bladder",
+        "bladders",
+        "tanque de agua flexible",
+        "reservorio flexible",
+        "cisterna flexible",
+        "almacenamiento flexible de agua",
+        "tanque hdpe",
+        "tanques hdpe"
+      ],
+      "erratas": [
+        "tanques flexibles peru",
+        "tanque bladder",
+        "tanques hdpe peru"
+      ],
+      "preguntas": [
+        "¿cuánta agua almacena un tanque flexible?",
+        "¿qué se usa para almacenar agua en una operación remota?",
+        "¿un tanque flexible sirve para combustible?"
+      ],
+      "apoyos": [
+        "/aplicaciones/contencion-fluidos",
+        "/soluciones/almacenamiento-agua-operacion-remota",
+        "/industria/saneamiento-y-agua",
+        "/recursos/tanques-flexibles-almacenamiento-agua-operaciones-remotas",
+        "/productos/familia/ambientales-fluidos"
+      ]
+    },
+    {
+      "id": "biodigestores",
+      "canonica": "/productos/biodigestores",
+      "intencion": "comercial",
+      "termino": "biodigestores",
+      "variantes": [
+        "biodigestor",
+        "biodigestor de geomembrana",
+        "tratamiento de residuos orgánicos",
+        "biogás",
+        "laguna anaerobia"
+      ],
+      "erratas": [
+        "biodigestores peru",
+        "bio digestor"
+      ],
+      "preguntas": [
+        "¿qué biodigestor se usa en fundo o granja?",
+        "¿cómo se impermeabiliza una laguna anaerobia?"
+      ],
+      "apoyos": [
+        "/productos/familia/ambientales-fluidos",
+        "/industria/saneamiento-y-agua",
+        "/aplicaciones/contencion-fluidos",
+        "/productos/geomembrana-polietileno-pe-hdpe"
+      ]
+    },
+    {
+      "id": "tuberias-hdpe",
+      "canonica": "/productos/tuberias-hdpe",
+      "intencion": "comercial",
+      "termino": "tuberías HDPE",
+      "variantes": [
+        "tubería hdpe",
+        "tubo hdpe",
+        "accesorios hdpe",
+        "tubería de polietileno",
+        "termofusión",
+        "tubería para conducción de agua"
+      ],
+      "erratas": [
+        "tuberias hdpe peru"
+      ],
+      "preguntas": [
+        "¿qué tubería HDPE se usa para conducción de agua en mina?",
+        "¿cómo se une una tubería HDPE en campo?"
+      ],
+      "apoyos": [
+        "/glosario/hdpe",
+        "/productos/familia/ambientales-fluidos",
+        "/industria/saneamiento-y-agua",
+        "/aplicaciones/contencion-fluidos"
+      ]
+    },
+    {
+      "id": "familia-ambientales",
+      "canonica": "/productos/familia/ambientales-fluidos",
+      "intencion": "comercial",
+      "termino": "soluciones ambientales y de fluidos",
+      "variantes": [
+        "contención de fluidos",
+        "almacenamiento de agua industrial",
+        "manejo de fluidos",
+        "contención secundaria",
+        "soluciones ambientales industriales"
+      ],
+      "erratas": [
+        "contencion de fluidos peru"
+      ],
+      "preguntas": [
+        "¿qué opciones hay para contener y almacenar fluidos en operación?",
+        "¿cómo se hace una contención secundaria de derrames?"
+      ],
+      "apoyos": [
+        "/productos/tanques-flexibles-bladders",
+        "/productos/biodigestores",
+        "/aplicaciones/contencion-fluidos",
+        "/industria/saneamiento-y-agua",
+        "/productos/familia/geosinteticos"
+      ]
+    },
+    {
+      "id": "biombos",
+      "canonica": "/productos/biombos-protectores-soldadura",
+      "intencion": "comercial",
+      "termino": "biombos protectores",
+      "variantes": [
+        "biombo",
+        "biombos",
+        "biombo de soldadura",
+        "cortina de soldadura",
+        "pantalla de soldadura",
+        "protección de soldadura",
+        "biombo protector para taller"
+      ],
+      "erratas": [
+        "biombos soldadura peru",
+        "biombo soldadura"
+      ],
+      "preguntas": [
+        "¿qué biombo protege del arco de soldadura?",
+        "¿qué cortina se usa en un taller de soldadura?"
+      ],
+      "apoyos": [
+        "/productos/familia/seguridad-industrial",
+        "/industria/construccion"
+      ]
+    },
+    {
+      "id": "barreras-acusticas",
+      "canonica": "/productos/barreras-acusticas",
+      "intencion": "comercial",
+      "termino": "barreras acústicas",
+      "variantes": [
+        "barrera acústica",
+        "cortina antirruido",
+        "barrera antirruido",
+        "control de ruido industrial",
+        "pantalla acústica",
+        "aislamiento de ruido en obra"
+      ],
+      "erratas": [
+        "barreras acusticas peru",
+        "cortina anti ruido"
+      ],
+      "preguntas": [
+        "¿cómo se reduce el ruido de una obra hacia el vecindario?",
+        "¿qué barrera acústica se usa alrededor de un generador?"
+      ],
+      "apoyos": [
+        "/productos/mantas-aislantes-termicas-termoacusticas",
+        "/productos/familia/seguridad-industrial",
+        "/industria/construccion"
+      ]
+    },
+    {
+      "id": "familia-seguridad",
+      "canonica": "/productos/familia/seguridad-industrial",
+      "intencion": "comercial",
+      "termino": "protección y seguridad industrial",
+      "variantes": [
+        "protección industrial",
+        "seguridad industrial textil",
+        "elementos de protección en planta",
+        "protección de personal en obra"
+      ],
+      "erratas": [
+        "seguridad industrial textil peru"
+      ],
+      "preguntas": [
+        "¿qué soluciones textiles hay para seguridad en planta?",
+        "¿cómo se protege un frente de trabajo del ruido y las chispas?"
+      ],
+      "apoyos": [
+        "/productos/biombos-protectores-soldadura",
+        "/productos/barreras-acusticas",
+        "/industria/construccion"
+      ]
+    },
+    {
+      "id": "accesorios-instalacion",
+      "canonica": "/productos/accesorios-instalacion",
+      "intencion": "comercial",
+      "termino": "accesorios de instalación",
+      "variantes": [
+        "ojalillos",
+        "ojalillo",
+        "sogas",
+        "tensores",
+        "tubos para cobertura",
+        "kit de instalación",
+        "herrajes para lona",
+        "accesorios para toldo"
+      ],
+      "erratas": [
+        "ojalillos peru",
+        "accesorios instalacion lona"
+      ],
+      "preguntas": [
+        "¿qué accesorios necesito para instalar una lona o carpa?",
+        "¿cada cuánto se colocan los ojalillos en una lona?"
+      ],
+      "apoyos": [
+        "/glosario/ojal",
+        "/productos/familia/accesorios",
+        "/productos/lona-plastificada-rafia-polytarp"
+      ]
+    },
+    {
+      "id": "familia-accesorios",
+      "canonica": "/productos/familia/accesorios",
+      "intencion": "comercial",
+      "termino": "accesorios y complementos",
+      "variantes": [
+        "complementos de instalación",
+        "repuestos para cobertura",
+        "insumos de montaje textil"
+      ],
+      "erratas": [
+        "accesorios complementos peru"
+      ],
+      "preguntas": [
+        "¿qué complementos entrega el fabricante junto con la cobertura?",
+        "¿venden accesorios sueltos para reparar una lona?"
+      ],
+      "apoyos": [
+        "/productos/accesorios-instalacion",
+        "/productos/familia/lonas-cobertores"
+      ]
+    },
+    {
+      "id": "gigantografias",
+      "canonica": "/productos/gigantografias-senaletica",
+      "intencion": "comercial",
+      "termino": "gigantografías",
+      "variantes": [
+        "gigantografía",
+        "letreros",
+        "señalética",
+        "banner publicitario",
+        "impresión de gran formato",
+        "letrero de obra",
+        "panel publicitario"
+      ],
+      "erratas": [
+        "gigantografias peru",
+        "gigantografia lima"
+      ],
+      "preguntas": [
+        "¿dónde imprimir una gigantografía para obra en Lima?",
+        "¿qué material se usa para un letrero a la intemperie?"
+      ],
+      "apoyos": [
+        "/productos/familia/publicidad",
+        "/productos/revestimiento-vehicular-toldos-publicitarios"
+      ]
+    },
+    {
+      "id": "revestimiento-vehicular",
+      "canonica": "/productos/revestimiento-vehicular-toldos-publicitarios",
+      "intencion": "comercial",
+      "termino": "revestimiento vehicular",
+      "variantes": [
+        "rotulación vehicular",
+        "toldo publicitario",
+        "vinilo vehicular",
+        "branding de flota",
+        "publicidad en camiones"
+      ],
+      "erratas": [
+        "revestimiento vehicular peru"
+      ],
+      "preguntas": [
+        "¿se puede rotular la lona de un camión con la marca?",
+        "¿cuánto dura una rotulación vehicular a la intemperie?"
+      ],
+      "apoyos": [
+        "/productos/familia/publicidad",
+        "/productos/mantas-cobertores-toldos-camiones",
+        "/industria/transporte-logistica"
+      ]
+    },
+    {
+      "id": "familia-publicidad",
+      "canonica": "/productos/familia/publicidad",
+      "intencion": "comercial",
+      "termino": "publicidad y comunicación visual",
+      "variantes": [
+        "comunicación visual industrial",
+        "publicidad exterior en lona",
+        "señalización de obra"
+      ],
+      "erratas": [
+        "publicidad comunicacion visual peru"
+      ],
+      "preguntas": [
+        "¿qué soluciones de comunicación visual fabrica una empresa de lonas?",
+        "¿cómo se señaliza una obra con material resistente a la intemperie?"
+      ],
+      "apoyos": [
+        "/productos/gigantografias-senaletica",
+        "/productos/revestimiento-vehicular-toldos-publicitarios"
+      ]
+    },
+    {
+      "id": "mulch",
+      "canonica": "/productos/mulch-madera-picada",
+      "intencion": "comercial",
+      "termino": "mulch",
+      "variantes": [
+        "mulching",
+        "mulch de madera",
+        "madera picada",
+        "cobertura de suelo",
+        "acolchado de suelo",
+        "corteza para jardín"
+      ],
+      "erratas": [
+        "mulch peru",
+        "mulch madera picada"
+      ],
+      "preguntas": [
+        "¿cuánto mulch necesito por metro cuadrado?",
+        "¿qué espesor de mulch conserva la humedad del suelo?"
+      ],
+      "apoyos": [
+        "/recursos/mulch-madera-espesor-calculo-cobertura-suelo",
+        "/productos/familia/especialidades",
+        "/industria/agroexportacion"
+      ]
+    },
+    {
+      "id": "familia-especialidades",
+      "canonica": "/productos/familia/especialidades",
+      "intencion": "comercial",
+      "termino": "líneas especiales",
+      "variantes": [
+        "productos especiales a medida",
+        "desarrollos a medida",
+        "líneas especiales de fabricación"
+      ],
+      "erratas": [
+        "lineas especiales peru"
+      ],
+      "preguntas": [
+        "¿fabrican productos fuera de catálogo bajo especificación?",
+        "¿cómo se cotiza un desarrollo a medida?"
+      ],
+      "apoyos": [
+        "/productos/mulch-madera-picada",
+        "/glosario/fabricacion-a-medida"
+      ]
+    },
+    {
+      "id": "sector-mineria",
+      "canonica": "/industria/mineria",
+      "intencion": "sector",
+      "termino": "textiles industriales para minería",
+      "variantes": [
+        "proveedor minero de lonas",
+        "insumos textiles mina",
+        "cobertura mina tajo abierto",
+        "mina subterránea insumos",
+        "soluciones para minería perú",
+        "proveedor para unidad minera",
+        "corredor minero"
+      ],
+      "erratas": [
+        "mineria peru lonas",
+        "proveedor minero peru"
+      ],
+      "preguntas": [
+        "¿qué proveedor de textiles industriales atiende unidades mineras en el Perú?",
+        "¿qué se necesita para homologarse como proveedor minero?",
+        "¿qué falla al comprar cobertura para mina?"
+      ],
+      "apoyos": [
+        "/productos/mangas-ventilacion-minas-tuneles",
+        "/productos/big-bags-bolsones-polipropileno",
+        "/productos/geomembrana-polietileno-pe-hdpe",
+        "/aplicaciones/ventilacion-subterranea",
+        "/aplicaciones/campamentos-mineros",
+        "/biblioteca/seleccion-mangas-ventilacion",
+        "/marco"
+      ]
+    },
+    {
+      "id": "sector-agro",
+      "canonica": "/industria/agroexportacion",
+      "intencion": "sector",
+      "termino": "protección de cultivos para agroexportación",
+      "variantes": [
+        "agroexportación perú",
+        "fundo agroexportador",
+        "packing agroexportación",
+        "insumos para fundo",
+        "valles agroexportadores",
+        "campaña agrícola insumos"
+      ],
+      "erratas": [
+        "agroexportacion peru mallas",
+        "fundo agroexportador peru"
+      ],
+      "preguntas": [
+        "¿qué insumos textiles necesita un fundo agroexportador?",
+        "¿cómo se protege un cultivo de exportación de plagas y radiación?"
+      ],
+      "apoyos": [
+        "/productos/mallas-antiafidas",
+        "/productos/malla-raschel-sombra",
+        "/productos/cobertores-agricolas-multimaterial",
+        "/aplicaciones/proteccion-cultivo",
+        "/biblioteca/seleccion-malla-agricola",
+        "/soluciones/proteccion-cultivo-agroexportacion"
+      ]
+    },
+    {
+      "id": "sector-transporte",
+      "canonica": "/industria/transporte-logistica",
+      "intencion": "sector",
+      "termino": "cobertura de carga para transporte y logística",
+      "variantes": [
+        "logística de carga perú",
+        "protección de carga",
+        "transporte de concentrado",
+        "operador logístico insumos",
+        "estiba y desestiba",
+        "carga a granel transporte"
+      ],
+      "erratas": [
+        "transporte logistica peru lonas",
+        "proteccion de carga camion"
+      ],
+      "preguntas": [
+        "¿cómo se protege la carga de un camión en ruta?",
+        "¿qué exige el transporte de concentrado mineral por carretera?"
+      ],
+      "apoyos": [
+        "/productos/mantas-cobertores-toldos-camiones",
+        "/productos/siders-tolderas-camiones",
+        "/productos/big-bags-bolsones-polipropileno",
+        "/aplicaciones/toldos-camion",
+        "/aplicaciones/granel-embalaje",
+        "/soluciones/despacho-concentrado-granel"
+      ]
+    },
+    {
+      "id": "sector-construccion",
+      "canonica": "/industria/construccion",
+      "intencion": "sector",
+      "termino": "coberturas temporales para construcción",
+      "variantes": [
+        "obra civil insumos",
+        "cobertura temporal de obra",
+        "estructuras temporales construcción",
+        "protección de obra",
+        "encofrado y protección",
+        "frente de obra"
+      ],
+      "erratas": [
+        "construccion peru lonas",
+        "cobertura temporal obra"
+      ],
+      "preguntas": [
+        "¿qué cobertura temporal se usa en una obra en Lima?",
+        "¿qué se necesita para cubrir un frente de obra en época de lluvia?"
+      ],
+      "apoyos": [
+        "/productos/carpas-lona-estructuras-metalicas",
+        "/productos/toldos-cerramientos",
+        "/productos/geotextiles",
+        "/aplicaciones/coberturas-obra",
+        "/glosario/carga-de-viento"
+      ]
+    },
+    {
+      "id": "sector-saneamiento",
+      "canonica": "/industria/saneamiento-y-agua",
+      "intencion": "sector",
+      "termino": "impermeabilización para saneamiento y agua",
+      "variantes": [
+        "saneamiento perú",
+        "planta de tratamiento insumos",
+        "reservorio de agua",
+        "canal revestido",
+        "lagunas de oxidación",
+        "revestimiento de canales"
+      ],
+      "erratas": [
+        "saneamiento agua peru",
+        "reservorio agua peru"
+      ],
+      "preguntas": [
+        "¿cómo se impermeabiliza un reservorio de agua?",
+        "¿qué geosintético se usa en una planta de tratamiento?"
+      ],
+      "apoyos": [
+        "/productos/geomembrana-polietileno-pe-hdpe",
+        "/productos/tanques-flexibles-bladders",
+        "/productos/geocompuestos-drenaje",
+        "/aplicaciones/impermeabilizacion-pozas",
+        "/soluciones/poza-revestida-impermeabilizacion"
+      ]
+    },
+    {
+      "id": "decision-gramaje-lona",
+      "canonica": "/biblioteca/gramaje-lona-industrial",
+      "intencion": "decision",
+      "termino": "qué gramaje de lona usar",
+      "variantes": [
+        "cómo elegir el gramaje de una lona",
+        "gramaje de lona para intemperie",
+        "qué lona aguanta más",
+        "especificar una lona industrial",
+        "cuánto pesa una lona por m2"
+      ],
+      "erratas": [
+        "gramaje lona industrial"
+      ],
+      "preguntas": [
+        "¿qué gramaje de lona necesito para cubrir a la intemperie todo el año?",
+        "¿un gramaje mayor siempre dura más?"
+      ],
+      "apoyos": [
+        "/productos/lona-plastificada-rafia-polytarp",
+        "/glosario/gramaje",
+        "/glosario/denier",
+        "/glosario/estabilizacion-uv",
+        "/productos/familia/lonas-cobertores"
+      ]
+    },
+    {
+      "id": "decision-geomembrana",
+      "canonica": "/biblioteca/seleccion-geomembrana",
+      "intencion": "decision",
+      "termino": "cómo elegir una geomembrana",
+      "variantes": [
+        "qué espesor de geomembrana",
+        "seleccionar geomembrana",
+        "pvc o hdpe para poza",
+        "especificar geomembrana",
+        "comparar geomembranas"
+      ],
+      "erratas": [
+        "como elegir geomembrana"
+      ],
+      "preguntas": [
+        "¿cómo elijo entre geomembrana de PVC y de HDPE?",
+        "¿qué datos necesito antes de cotizar una impermeabilización?"
+      ],
+      "apoyos": [
+        "/productos/geomembrana-polietileno-pe-hdpe",
+        "/productos/geomembranas-pvc",
+        "/calculadoras/geomembrana-poza",
+        "/glosario/geomembrana",
+        "/aplicaciones/impermeabilizacion-pozas"
+      ]
+    },
+    {
+      "id": "decision-fibc",
+      "canonica": "/biblioteca/especificacion-fibc",
+      "intencion": "decision",
+      "termino": "cómo especificar un big bag",
+      "variantes": [
+        "especificación de fibc",
+        "elegir big bag",
+        "datos para cotizar big bags",
+        "ficha técnica de big bag",
+        "cómo pedir bolsones"
+      ],
+      "erratas": [
+        "especificacion fibc"
+      ],
+      "preguntas": [
+        "¿qué datos necesito para pedir una cotización de big bags?",
+        "¿cómo se define la carga de trabajo segura de un bolsón?"
+      ],
+      "apoyos": [
+        "/productos/big-bags-bolsones-polipropileno",
+        "/glosario/carga-de-trabajo-segura",
+        "/glosario/factor-de-seguridad",
+        "/calculadoras/capacidad-big-bag",
+        "/glosario/densidad-aparente"
+      ]
+    },
+    {
+      "id": "decision-mangas",
+      "canonica": "/biblioteca/seleccion-mangas-ventilacion",
+      "intencion": "decision",
+      "termino": "cómo elegir mangas de ventilación",
+      "variantes": [
+        "seleccionar manga de ventilación",
+        "qué diámetro de manga",
+        "especificar ventilación minera",
+        "datos para cotizar mangas"
+      ],
+      "erratas": [
+        "que diametro de manga ventilacion"
+      ],
+      "preguntas": [
+        "¿qué diámetro y largo de manga pide mi labor?",
+        "¿qué pérdida de carga admite el ventilador instalado?"
+      ],
+      "apoyos": [
+        "/productos/mangas-ventilacion-minas-tuneles",
+        "/calculadoras/caudal-ventilacion-mina",
+        "/glosario/perdida-de-carga",
+        "/glosario/caudal",
+        "/aplicaciones/ventilacion-subterranea"
+      ]
+    },
+    {
+      "id": "decision-malla",
+      "canonica": "/biblioteca/seleccion-malla-agricola",
+      "intencion": "decision",
+      "termino": "cómo elegir una malla agrícola",
+      "variantes": [
+        "seleccionar malla agrícola",
+        "qué mesh de malla",
+        "qué sombra elegir",
+        "datos para cotizar malla",
+        "comparar mallas agrícolas"
+      ],
+      "erratas": [
+        "como elegir malla agricola"
+      ],
+      "preguntas": [
+        "¿qué malla necesito según la plaga y la radiación de mi zona?",
+        "¿cómo afecta el mesh a la ventilación del cultivo?"
+      ],
+      "apoyos": [
+        "/productos/mallas-antiafidas",
+        "/productos/malla-raschel-sombra",
+        "/glosario/mesh",
+        "/glosario/porcentaje-de-sombra",
+        "/aplicaciones/proteccion-cultivo"
+      ]
+    },
+    {
+      "id": "calc-caudal",
+      "canonica": "/calculadoras/caudal-ventilacion-mina",
+      "intencion": "calculo",
+      "termino": "calcular caudal de ventilación en mina",
+      "variantes": [
+        "cálculo de caudal de aire",
+        "caudal para frente de avance",
+        "m3 por minuto en labor",
+        "calculadora de ventilación minera"
+      ],
+      "erratas": [
+        "calcular caudal ventilacion mina",
+        "calculo caudal aire mina"
+      ],
+      "preguntas": [
+        "¿cuánto aire necesita un frente de avance con equipo diésel?",
+        "¿cómo se calcula el caudal de una labor subterránea?"
+      ],
+      "apoyos": [
+        "/productos/mangas-ventilacion-minas-tuneles",
+        "/glosario/caudal",
+        "/glosario/factor-de-fuga",
+        "/biblioteca/seleccion-mangas-ventilacion"
+      ]
+    },
+    {
+      "id": "calc-geomembrana",
+      "canonica": "/calculadoras/geomembrana-poza",
+      "intencion": "calculo",
+      "termino": "calcular geomembrana para una poza",
+      "variantes": [
+        "metros de geomembrana para poza",
+        "cuánta geomembrana necesito",
+        "cálculo de revestimiento",
+        "calculadora de geomembrana"
+      ],
+      "erratas": [
+        "calcular geomembrana poza"
+      ],
+      "preguntas": [
+        "¿cuántos metros cuadrados de geomembrana necesita mi poza?",
+        "¿cuánto material se pierde en traslapes y anclaje?"
+      ],
+      "apoyos": [
+        "/productos/geomembrana-polietileno-pe-hdpe",
+        "/glosario/zanja-de-anclaje",
+        "/biblioteca/seleccion-geomembrana",
+        "/aplicaciones/impermeabilizacion-pozas"
+      ]
+    },
+    {
+      "id": "calc-rollos",
+      "canonica": "/calculadoras/rollos-por-superficie",
+      "intencion": "calculo",
+      "termino": "calcular rollos por superficie",
+      "variantes": [
+        "cuántos rollos necesito",
+        "metros lineales por área",
+        "cálculo de rollos de malla",
+        "cálculo de rollos de lona"
+      ],
+      "erratas": [],
+      "preguntas": [
+        "¿cuántos rollos de malla cubren una hectárea?",
+        "¿cómo paso de metros cuadrados a rollos?"
+      ],
+      "apoyos": [
+        "/productos/malla-raschel-sombra",
+        "/productos/lona-plastificada-rafia-polytarp",
+        "/calculadoras/geomembrana-poza"
+      ]
+    },
+    {
+      "id": "calc-bigbags-viaje",
+      "canonica": "/calculadoras/big-bags-por-viaje",
+      "intencion": "calculo",
+      "termino": "cuántos big bags entran por viaje",
+      "variantes": [
+        "big bags por camión",
+        "carga de bolsones por viaje",
+        "cubicaje de big bags",
+        "cuántos bolsones caben"
+      ],
+      "erratas": [
+        "cuantos big bags por viaje"
+      ],
+      "preguntas": [
+        "¿cuántos big bags de 1 tonelada entran en un camión?",
+        "¿me limita el peso o el volumen al cargar bolsones?"
+      ],
+      "apoyos": [
+        "/productos/big-bags-bolsones-polipropileno",
+        "/calculadoras/capacidad-big-bag",
+        "/industria/transporte-logistica"
+      ]
+    },
+    {
+      "id": "calc-capacidad-bigbag",
+      "canonica": "/calculadoras/capacidad-big-bag",
+      "intencion": "calculo",
+      "termino": "capacidad de un big bag",
+      "variantes": [
+        "volumen de big bag",
+        "cuánto carga un bolsón",
+        "densidad aparente y big bag",
+        "medidas de big bag por tonelaje"
+      ],
+      "erratas": [
+        "capacidad big bag",
+        "cuanto carga un big bag"
+      ],
+      "preguntas": [
+        "¿qué medida de big bag necesito para mi material?",
+        "¿por qué dos materiales de igual peso piden bolsones distintos?"
+      ],
+      "apoyos": [
+        "/glosario/densidad-aparente",
+        "/productos/big-bags-bolsones-polipropileno",
+        "/biblioteca/especificacion-fibc"
+      ]
+    },
+    {
+      "id": "entidad",
+      "canonica": "/nosotros",
+      "intencion": "entidad",
+      "termino": "Plastilonas Peruanas SAC",
+      "variantes": [
+        "plastilonas",
+        "plastilonas peruanas",
+        "plastilonas perú",
+        "fabricante de textil industrial perú",
+        "fábrica de lonas en lima",
+        "empresa de textiles industriales perú",
+        "fabricante peruano de geosintéticos",
+        "planta en chorrillos"
+      ],
+      "erratas": [
+        "plastilonas peru sac",
+        "plastilonas peruanas sac ruc"
+      ],
+      "preguntas": [
+        "¿quién es Plastilonas Peruanas SAC?",
+        "¿desde cuándo fabrica Plastilonas en el Perú?",
+        "¿dónde queda la planta de Plastilonas?"
+      ],
+      "apoyos": [
+        "/servicios",
+        "/calidad",
+        "/confianza",
+        "/proyectos",
+        "/contacto"
+      ]
+    },
+    {
+      "id": "evaluacion-proveedor",
+      "canonica": "/marco",
+      "intencion": "decision",
+      "termino": "cómo evaluar un proveedor de textiles industriales",
+      "variantes": [
+        "comparar proveedores de lonas",
+        "criterios para elegir proveedor industrial",
+        "evaluar una cotización de geosintéticos",
+        "homologación de proveedor textil",
+        "un solo proveedor o varios",
+        "qué preguntar antes de comprar cobertura"
+      ],
+      "erratas": [
+        "como evaluar proveedor textil industrial",
+        "comparar cotizaciones lonas"
+      ],
+      "preguntas": [
+        "¿cómo comparo dos cotizaciones de textiles industriales?",
+        "¿qué debe traer una cotización seria de geosintéticos?",
+        "¿conviene un proveedor único o varios especializados?"
+      ],
+      "apoyos": [
+        "/marco/evaluacion",
+        "/calidad",
+        "/confianza",
+        "/compras",
+        "/servicios"
+      ]
+    },
+    {
+      "id": "cotizacion",
+      "canonica": "/cotizacion",
+      "intencion": "transaccional",
+      "termino": "cotizar textiles industriales",
+      "variantes": [
+        "pedir cotización",
+        "solicitar cotización",
+        "cotización de lonas",
+        "cotización de big bags",
+        "rfq textil industrial",
+        "precio de lonas industriales",
+        "cuánto cuesta una cobertura industrial"
+      ],
+      "erratas": [
+        "cotizacion lonas peru",
+        "pedir cotizacion big bags"
+      ],
+      "preguntas": [
+        "¿cómo pido una cotización de textiles industriales en el Perú?",
+        "¿qué datos hacen falta para que me coticen?"
+      ],
+      "apoyos": [
+        "/contacto",
+        "/compras",
+        "/configurador",
+        "/marco"
+      ]
+    },
+    {
+      "id": "cobertura-nacional",
+      "canonica": "/local",
+      "intencion": "local",
+      "termino": "cobertura nacional de textiles industriales",
+      "variantes": [
+        "proveedor en provincias",
+        "despacho a regiones",
+        "atención a nivel nacional",
+        "textiles industriales en provincias",
+        "envío a mina"
+      ],
+      "erratas": [
+        "cobertura nacional lonas peru",
+        "despacho provincias lonas"
+      ],
+      "preguntas": [
+        "¿atienden fuera de Lima?",
+        "¿despachan a operaciones en provincia?"
+      ],
+      "apoyos": [
+        "/contacto",
+        "/servicios",
+        "/industria/mineria",
+        "/industria/agroexportacion"
+      ]
+    },
+    {
+      "id": "servicio-instalacion",
+      "canonica": "/servicios",
+      "intencion": "comercial",
+      "termino": "instalación de coberturas y geosintéticos",
+      "variantes": [
+        "instalación de geomembranas",
+        "instalación de lonas",
+        "instalación de big bags",
+        "montaje de carpas",
+        "servicio de instalación industrial",
+        "equipo propio de instalación",
+        "mantenimiento de coberturas",
+        "reparación de lonas"
+      ],
+      "erratas": [
+        "instalacion geomembranas peru",
+        "instalacion de lonas lima"
+      ],
+      "preguntas": [
+        "¿instalan lo que fabrican o solo venden el material?",
+        "¿quién instala geomembranas en obra en el Perú?",
+        "¿hacen mantenimiento de coberturas ya instaladas?"
+      ],
+      "apoyos": [
+        "/productos/familia/geosinteticos",
+        "/productos/carpas-lona-estructuras-metalicas",
+        "/marco",
+        "/calidad",
+        "/aplicaciones/impermeabilizacion-pozas"
+      ]
+    }
+  ]
+}

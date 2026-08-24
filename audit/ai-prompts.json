@@ -1,0 +1,4950 @@
+{
+  "generadoPor": "scripts/generar-prompts-ia.mjs",
+  "derivadoDe": [
+    "data/topic-map.json",
+    "lib/glosario.ts",
+    "data/ciudades.json"
+  ],
+  "comoSeUsa": "Se ejecuta a mano contra cada asistente y se anota, por consulta: citado, url_correcta, recomendado, exacto. `exacto` pesa más que los otros tres: una recomendación que inventa una certificación o un plazo hace más daño que no aparecer, porque el comprador comprueba, no encuentra, y descarta al proveedor por una mentira que puso el modelo.",
+  "totales": {
+    "prompts": 702,
+    "porCategoria": {
+      "comercial": 196,
+      "tecnica": 109,
+      "sector-local": 136,
+      "comparacion": 60,
+      "problema": 134,
+      "adyacente": 67
+    }
+  },
+  "minimos": {
+    "comercial": 100,
+    "tecnica": 100,
+    "sector-local": 100,
+    "comparacion": 50,
+    "problema": 50,
+    "adyacente": 50
+  },
+  "campos": [
+    "citado",
+    "url_correcta",
+    "recomendado",
+    "exacto"
+  ],
+  "prompts": [
+    {
+      "id": "p0001",
+      "categoria": "comercial",
+      "prompt": "big bags Perú",
+      "urlEsperada": "/productos/big-bags-bolsones-polipropileno",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0002",
+      "categoria": "comercial",
+      "prompt": "big bag en Perú",
+      "urlEsperada": "/productos/big-bags-bolsones-polipropileno",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0003",
+      "categoria": "comercial",
+      "prompt": "bigbags en Perú",
+      "urlEsperada": "/productos/big-bags-bolsones-polipropileno",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0004",
+      "categoria": "comercial",
+      "prompt": "bolsones en Perú",
+      "urlEsperada": "/productos/big-bags-bolsones-polipropileno",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0005",
+      "categoria": "comercial",
+      "prompt": "sacos polytarp Perú",
+      "urlEsperada": "/productos/sacos-polytarp-embarque-granel",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0006",
+      "categoria": "comercial",
+      "prompt": "saco polytarp en Perú",
+      "urlEsperada": "/productos/sacos-polytarp-embarque-granel",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0007",
+      "categoria": "comercial",
+      "prompt": "sacos para embarque a granel en Perú",
+      "urlEsperada": "/productos/sacos-polytarp-embarque-granel",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0008",
+      "categoria": "comercial",
+      "prompt": "sacos de estiba en Perú",
+      "urlEsperada": "/productos/sacos-polytarp-embarque-granel",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0009",
+      "categoria": "comercial",
+      "prompt": "bolsas de polietileno industrial Perú",
+      "urlEsperada": "/productos/bolsas-laminas-pebd-pead",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0010",
+      "categoria": "comercial",
+      "prompt": "láminas de polietileno en Perú",
+      "urlEsperada": "/productos/bolsas-laminas-pebd-pead",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0011",
+      "categoria": "comercial",
+      "prompt": "lámina pebd en Perú",
+      "urlEsperada": "/productos/bolsas-laminas-pebd-pead",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0012",
+      "categoria": "comercial",
+      "prompt": "lámina pead en Perú",
+      "urlEsperada": "/productos/bolsas-laminas-pebd-pead",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0013",
+      "categoria": "comercial",
+      "prompt": "film termocontraíble Perú",
+      "urlEsperada": "/productos/films-termocontraibles-shrink",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0014",
+      "categoria": "comercial",
+      "prompt": "films termocontraíbles en Perú",
+      "urlEsperada": "/productos/films-termocontraibles-shrink",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0015",
+      "categoria": "comercial",
+      "prompt": "shrink en Perú",
+      "urlEsperada": "/productos/films-termocontraibles-shrink",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0016",
+      "categoria": "comercial",
+      "prompt": "film shrink en Perú",
+      "urlEsperada": "/productos/films-termocontraibles-shrink",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0017",
+      "categoria": "comercial",
+      "prompt": "envases y embalaje industrial Perú",
+      "urlEsperada": "/productos/familia/envases-embalaje",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0018",
+      "categoria": "comercial",
+      "prompt": "embalaje industrial en Perú",
+      "urlEsperada": "/productos/familia/envases-embalaje",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0019",
+      "categoria": "comercial",
+      "prompt": "envases a granel en Perú",
+      "urlEsperada": "/productos/familia/envases-embalaje",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0020",
+      "categoria": "comercial",
+      "prompt": "envases industriales en Perú",
+      "urlEsperada": "/productos/familia/envases-embalaje",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0021",
+      "categoria": "comercial",
+      "prompt": "lona plastificada Perú",
+      "urlEsperada": "/productos/lona-plastificada-rafia-polytarp",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0022",
+      "categoria": "comercial",
+      "prompt": "lona en Perú",
+      "urlEsperada": "/productos/lona-plastificada-rafia-polytarp",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0023",
+      "categoria": "comercial",
+      "prompt": "lonas plastificadas en Perú",
+      "urlEsperada": "/productos/lona-plastificada-rafia-polytarp",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0024",
+      "categoria": "comercial",
+      "prompt": "rafia en Perú",
+      "urlEsperada": "/productos/lona-plastificada-rafia-polytarp",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0025",
+      "categoria": "comercial",
+      "prompt": "toldos para camiones Perú",
+      "urlEsperada": "/productos/mantas-cobertores-toldos-camiones",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0026",
+      "categoria": "comercial",
+      "prompt": "manta cobertora en Perú",
+      "urlEsperada": "/productos/mantas-cobertores-toldos-camiones",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0027",
+      "categoria": "comercial",
+      "prompt": "mantas cobertores en Perú",
+      "urlEsperada": "/productos/mantas-cobertores-toldos-camiones",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0028",
+      "categoria": "comercial",
+      "prompt": "cobertor de camión en Perú",
+      "urlEsperada": "/productos/mantas-cobertores-toldos-camiones",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0029",
+      "categoria": "comercial",
+      "prompt": "siders y tolderas Perú",
+      "urlEsperada": "/productos/siders-tolderas-camiones",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0030",
+      "categoria": "comercial",
+      "prompt": "sider en Perú",
+      "urlEsperada": "/productos/siders-tolderas-camiones",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0031",
+      "categoria": "comercial",
+      "prompt": "siders en Perú",
+      "urlEsperada": "/productos/siders-tolderas-camiones",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0032",
+      "categoria": "comercial",
+      "prompt": "toldera en Perú",
+      "urlEsperada": "/productos/siders-tolderas-camiones",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0033",
+      "categoria": "comercial",
+      "prompt": "cobertores agrícolas Perú",
+      "urlEsperada": "/productos/cobertores-agricolas-multimaterial",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0034",
+      "categoria": "comercial",
+      "prompt": "cobertor agrícola en Perú",
+      "urlEsperada": "/productos/cobertores-agricolas-multimaterial",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0035",
+      "categoria": "comercial",
+      "prompt": "cobertores multimaterial en Perú",
+      "urlEsperada": "/productos/cobertores-agricolas-multimaterial",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0036",
+      "categoria": "comercial",
+      "prompt": "cobertor para cultivo en Perú",
+      "urlEsperada": "/productos/cobertores-agricolas-multimaterial",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0037",
+      "categoria": "comercial",
+      "prompt": "arpilleras para granjas Perú",
+      "urlEsperada": "/productos/mantas-arpilleras-granjas",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0038",
+      "categoria": "comercial",
+      "prompt": "manta arpillera en Perú",
+      "urlEsperada": "/productos/mantas-arpilleras-granjas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0039",
+      "categoria": "comercial",
+      "prompt": "mantas arpilleras en Perú",
+      "urlEsperada": "/productos/mantas-arpilleras-granjas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0040",
+      "categoria": "comercial",
+      "prompt": "arpillera avícola en Perú",
+      "urlEsperada": "/productos/mantas-arpilleras-granjas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0041",
+      "categoria": "comercial",
+      "prompt": "mantas aislantes térmicas Perú",
+      "urlEsperada": "/productos/mantas-aislantes-termicas-termoacusticas",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0042",
+      "categoria": "comercial",
+      "prompt": "manta térmica industrial en Perú",
+      "urlEsperada": "/productos/mantas-aislantes-termicas-termoacusticas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0043",
+      "categoria": "comercial",
+      "prompt": "mantas termoacústicas en Perú",
+      "urlEsperada": "/productos/mantas-aislantes-termicas-termoacusticas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0044",
+      "categoria": "comercial",
+      "prompt": "aislamiento térmico flexible en Perú",
+      "urlEsperada": "/productos/mantas-aislantes-termicas-termoacusticas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0045",
+      "categoria": "comercial",
+      "prompt": "lonas y cobertores industriales Perú",
+      "urlEsperada": "/productos/familia/lonas-cobertores",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0046",
+      "categoria": "comercial",
+      "prompt": "lonas industriales en Perú",
+      "urlEsperada": "/productos/familia/lonas-cobertores",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0047",
+      "categoria": "comercial",
+      "prompt": "cobertores industriales en Perú",
+      "urlEsperada": "/productos/familia/lonas-cobertores",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0048",
+      "categoria": "comercial",
+      "prompt": "cobertor en Perú",
+      "urlEsperada": "/productos/familia/lonas-cobertores",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0049",
+      "categoria": "comercial",
+      "prompt": "carpas industriales Perú",
+      "urlEsperada": "/productos/carpas-lona-estructuras-metalicas",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0050",
+      "categoria": "comercial",
+      "prompt": "carpa en Perú",
+      "urlEsperada": "/productos/carpas-lona-estructuras-metalicas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0051",
+      "categoria": "comercial",
+      "prompt": "carpas en Perú",
+      "urlEsperada": "/productos/carpas-lona-estructuras-metalicas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0052",
+      "categoria": "comercial",
+      "prompt": "carpa industrial en Perú",
+      "urlEsperada": "/productos/carpas-lona-estructuras-metalicas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0053",
+      "categoria": "comercial",
+      "prompt": "coberturas tensionadas Perú",
+      "urlEsperada": "/productos/coberturas-tensionadas-arquitectura-textil",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0054",
+      "categoria": "comercial",
+      "prompt": "cobertura tensionada en Perú",
+      "urlEsperada": "/productos/coberturas-tensionadas-arquitectura-textil",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0055",
+      "categoria": "comercial",
+      "prompt": "tensoestructura en Perú",
+      "urlEsperada": "/productos/coberturas-tensionadas-arquitectura-textil",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0056",
+      "categoria": "comercial",
+      "prompt": "tensoestructuras en Perú",
+      "urlEsperada": "/productos/coberturas-tensionadas-arquitectura-textil",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0057",
+      "categoria": "comercial",
+      "prompt": "estructuras inflables Perú",
+      "urlEsperada": "/productos/coberturas-inflables",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0058",
+      "categoria": "comercial",
+      "prompt": "cobertura inflable en Perú",
+      "urlEsperada": "/productos/coberturas-inflables",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0059",
+      "categoria": "comercial",
+      "prompt": "coberturas inflables en Perú",
+      "urlEsperada": "/productos/coberturas-inflables",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0060",
+      "categoria": "comercial",
+      "prompt": "domo inflable en Perú",
+      "urlEsperada": "/productos/coberturas-inflables",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0061",
+      "categoria": "comercial",
+      "prompt": "módulos para campamentos Perú",
+      "urlEsperada": "/productos/modulos-albergues-campamentos",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0062",
+      "categoria": "comercial",
+      "prompt": "albergues para campamento en Perú",
+      "urlEsperada": "/productos/modulos-albergues-campamentos",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0063",
+      "categoria": "comercial",
+      "prompt": "campamento minero en Perú",
+      "urlEsperada": "/productos/modulos-albergues-campamentos",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0064",
+      "categoria": "comercial",
+      "prompt": "módulos habitables textiles en Perú",
+      "urlEsperada": "/productos/modulos-albergues-campamentos",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0065",
+      "categoria": "comercial",
+      "prompt": "invernaderos Perú",
+      "urlEsperada": "/productos/galpones-invernaderos-estructurados",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0066",
+      "categoria": "comercial",
+      "prompt": "invernadero en Perú",
+      "urlEsperada": "/productos/galpones-invernaderos-estructurados",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0067",
+      "categoria": "comercial",
+      "prompt": "galpón en Perú",
+      "urlEsperada": "/productos/galpones-invernaderos-estructurados",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0068",
+      "categoria": "comercial",
+      "prompt": "galpones en Perú",
+      "urlEsperada": "/productos/galpones-invernaderos-estructurados",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0069",
+      "categoria": "comercial",
+      "prompt": "toldos y cerramientos industriales Perú",
+      "urlEsperada": "/productos/toldos-cerramientos",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0070",
+      "categoria": "comercial",
+      "prompt": "toldo en Perú",
+      "urlEsperada": "/productos/toldos-cerramientos",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0071",
+      "categoria": "comercial",
+      "prompt": "toldos en Perú",
+      "urlEsperada": "/productos/toldos-cerramientos",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0072",
+      "categoria": "comercial",
+      "prompt": "cerramiento en Perú",
+      "urlEsperada": "/productos/toldos-cerramientos",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0073",
+      "categoria": "comercial",
+      "prompt": "estructuras textiles Perú",
+      "urlEsperada": "/productos/familia/estructuras-arquitectura-textil",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0074",
+      "categoria": "comercial",
+      "prompt": "estructura textil en Perú",
+      "urlEsperada": "/productos/familia/estructuras-arquitectura-textil",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0075",
+      "categoria": "comercial",
+      "prompt": "arquitectura textil en Perú",
+      "urlEsperada": "/productos/familia/estructuras-arquitectura-textil",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0076",
+      "categoria": "comercial",
+      "prompt": "estructuras metálicas textiles en Perú",
+      "urlEsperada": "/productos/familia/estructuras-arquitectura-textil",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0077",
+      "categoria": "comercial",
+      "prompt": "malla antiáfida Perú",
+      "urlEsperada": "/productos/mallas-antiafidas",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0078",
+      "categoria": "comercial",
+      "prompt": "mallas antiáfidas en Perú",
+      "urlEsperada": "/productos/mallas-antiafidas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0079",
+      "categoria": "comercial",
+      "prompt": "malla antiáfidos en Perú",
+      "urlEsperada": "/productos/mallas-antiafidas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0080",
+      "categoria": "comercial",
+      "prompt": "malla anti insectos en Perú",
+      "urlEsperada": "/productos/mallas-antiafidas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0081",
+      "categoria": "comercial",
+      "prompt": "malla raschel Perú",
+      "urlEsperada": "/productos/malla-raschel-sombra",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0082",
+      "categoria": "comercial",
+      "prompt": "malla sombra en Perú",
+      "urlEsperada": "/productos/malla-raschel-sombra",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0083",
+      "categoria": "comercial",
+      "prompt": "malla de sombra en Perú",
+      "urlEsperada": "/productos/malla-raschel-sombra",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0084",
+      "categoria": "comercial",
+      "prompt": "raschel en Perú",
+      "urlEsperada": "/productos/malla-raschel-sombra",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0085",
+      "categoria": "comercial",
+      "prompt": "malla anti pájaro Perú",
+      "urlEsperada": "/productos/malla-anti-pajaro-anti-granizo",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0086",
+      "categoria": "comercial",
+      "prompt": "malla antipájaro en Perú",
+      "urlEsperada": "/productos/malla-anti-pajaro-anti-granizo",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0087",
+      "categoria": "comercial",
+      "prompt": "malla anti granizo en Perú",
+      "urlEsperada": "/productos/malla-anti-pajaro-anti-granizo",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0088",
+      "categoria": "comercial",
+      "prompt": "malla antigranizo en Perú",
+      "urlEsperada": "/productos/malla-anti-pajaro-anti-granizo",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0089",
+      "categoria": "comercial",
+      "prompt": "mallas agrícolas Perú",
+      "urlEsperada": "/productos/familia/mallas-agricolas",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0090",
+      "categoria": "comercial",
+      "prompt": "malla en Perú",
+      "urlEsperada": "/productos/familia/mallas-agricolas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0091",
+      "categoria": "comercial",
+      "prompt": "mallas en Perú",
+      "urlEsperada": "/productos/familia/mallas-agricolas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0092",
+      "categoria": "comercial",
+      "prompt": "mallas agrícolas perú en Perú",
+      "urlEsperada": "/productos/familia/mallas-agricolas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0093",
+      "categoria": "comercial",
+      "prompt": "mangas de ventilación Perú",
+      "urlEsperada": "/productos/mangas-ventilacion-minas-tuneles",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0094",
+      "categoria": "comercial",
+      "prompt": "manga de ventilación en Perú",
+      "urlEsperada": "/productos/mangas-ventilacion-minas-tuneles",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0095",
+      "categoria": "comercial",
+      "prompt": "manga en Perú",
+      "urlEsperada": "/productos/mangas-ventilacion-minas-tuneles",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0096",
+      "categoria": "comercial",
+      "prompt": "mangas en Perú",
+      "urlEsperada": "/productos/mangas-ventilacion-minas-tuneles",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0097",
+      "categoria": "comercial",
+      "prompt": "ventilación industrial Perú",
+      "urlEsperada": "/productos/familia/ventilacion-industrial",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0098",
+      "categoria": "comercial",
+      "prompt": "ventilación minera en Perú",
+      "urlEsperada": "/productos/familia/ventilacion-industrial",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0099",
+      "categoria": "comercial",
+      "prompt": "ductos de ventilación en Perú",
+      "urlEsperada": "/productos/familia/ventilacion-industrial",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0100",
+      "categoria": "comercial",
+      "prompt": "ducto de ventilación en Perú",
+      "urlEsperada": "/productos/familia/ventilacion-industrial",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0101",
+      "categoria": "comercial",
+      "prompt": "geomembranas Perú",
+      "urlEsperada": "/productos/familia/geosinteticos",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0102",
+      "categoria": "comercial",
+      "prompt": "geomembrana en Perú",
+      "urlEsperada": "/productos/familia/geosinteticos",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0103",
+      "categoria": "comercial",
+      "prompt": "geosintéticos en Perú",
+      "urlEsperada": "/productos/familia/geosinteticos",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0104",
+      "categoria": "comercial",
+      "prompt": "geosintético en Perú",
+      "urlEsperada": "/productos/familia/geosinteticos",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0105",
+      "categoria": "comercial",
+      "prompt": "geomembrana de PVC Perú",
+      "urlEsperada": "/productos/geomembranas-pvc",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0106",
+      "categoria": "comercial",
+      "prompt": "geomembrana pvc en Perú",
+      "urlEsperada": "/productos/geomembranas-pvc",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0107",
+      "categoria": "comercial",
+      "prompt": "membrana de pvc en Perú",
+      "urlEsperada": "/productos/geomembranas-pvc",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0108",
+      "categoria": "comercial",
+      "prompt": "revestimiento pvc para poza en Perú",
+      "urlEsperada": "/productos/geomembranas-pvc",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0109",
+      "categoria": "comercial",
+      "prompt": "geomembrana HDPE Perú",
+      "urlEsperada": "/productos/geomembrana-polietileno-pe-hdpe",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0110",
+      "categoria": "comercial",
+      "prompt": "geomembrana de polietileno en Perú",
+      "urlEsperada": "/productos/geomembrana-polietileno-pe-hdpe",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0111",
+      "categoria": "comercial",
+      "prompt": "geomembrana pead en Perú",
+      "urlEsperada": "/productos/geomembrana-polietileno-pe-hdpe",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0112",
+      "categoria": "comercial",
+      "prompt": "hdpe en Perú",
+      "urlEsperada": "/productos/geomembrana-polietileno-pe-hdpe",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0113",
+      "categoria": "comercial",
+      "prompt": "geomembrana fortificada Perú",
+      "urlEsperada": "/productos/geomembrana-pe-fortificada",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0114",
+      "categoria": "comercial",
+      "prompt": "geomembrana reforzada en Perú",
+      "urlEsperada": "/productos/geomembrana-pe-fortificada",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0115",
+      "categoria": "comercial",
+      "prompt": "geomembrana pe fortificada en Perú",
+      "urlEsperada": "/productos/geomembrana-pe-fortificada",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0116",
+      "categoria": "comercial",
+      "prompt": "membrana reforzada con malla en Perú",
+      "urlEsperada": "/productos/geomembrana-pe-fortificada",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0117",
+      "categoria": "comercial",
+      "prompt": "geomembrana bituminosa Perú",
+      "urlEsperada": "/productos/geomembrana-bituminosa",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0118",
+      "categoria": "comercial",
+      "prompt": "membrana bituminosa en Perú",
+      "urlEsperada": "/productos/geomembrana-bituminosa",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0119",
+      "categoria": "comercial",
+      "prompt": "geomembrana asfáltica en Perú",
+      "urlEsperada": "/productos/geomembrana-bituminosa",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0120",
+      "categoria": "comercial",
+      "prompt": "lámina bituminosa en Perú",
+      "urlEsperada": "/productos/geomembrana-bituminosa",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0121",
+      "categoria": "comercial",
+      "prompt": "geotextiles Perú",
+      "urlEsperada": "/productos/geotextiles",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0122",
+      "categoria": "comercial",
+      "prompt": "geotextil en Perú",
+      "urlEsperada": "/productos/geotextiles",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0123",
+      "categoria": "comercial",
+      "prompt": "geotextil no tejido en Perú",
+      "urlEsperada": "/productos/geotextiles",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0124",
+      "categoria": "comercial",
+      "prompt": "geotextil tejido en Perú",
+      "urlEsperada": "/productos/geotextiles",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0125",
+      "categoria": "comercial",
+      "prompt": "geomallas Perú",
+      "urlEsperada": "/productos/geomallas-geogrids",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0126",
+      "categoria": "comercial",
+      "prompt": "geomalla en Perú",
+      "urlEsperada": "/productos/geomallas-geogrids",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0127",
+      "categoria": "comercial",
+      "prompt": "geogrid en Perú",
+      "urlEsperada": "/productos/geomallas-geogrids",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0128",
+      "categoria": "comercial",
+      "prompt": "geogrids en Perú",
+      "urlEsperada": "/productos/geomallas-geogrids",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0129",
+      "categoria": "comercial",
+      "prompt": "geocompuestos de drenaje Perú",
+      "urlEsperada": "/productos/geocompuestos-drenaje",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0130",
+      "categoria": "comercial",
+      "prompt": "geocompuesto en Perú",
+      "urlEsperada": "/productos/geocompuestos-drenaje",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0131",
+      "categoria": "comercial",
+      "prompt": "geocompuesto drenante en Perú",
+      "urlEsperada": "/productos/geocompuestos-drenaje",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0132",
+      "categoria": "comercial",
+      "prompt": "geored en Perú",
+      "urlEsperada": "/productos/geocompuestos-drenaje",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0133",
+      "categoria": "comercial",
+      "prompt": "tanques flexibles Perú",
+      "urlEsperada": "/productos/tanques-flexibles-bladders",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0134",
+      "categoria": "comercial",
+      "prompt": "tanque flexible en Perú",
+      "urlEsperada": "/productos/tanques-flexibles-bladders",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0135",
+      "categoria": "comercial",
+      "prompt": "bladder en Perú",
+      "urlEsperada": "/productos/tanques-flexibles-bladders",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0136",
+      "categoria": "comercial",
+      "prompt": "bladders en Perú",
+      "urlEsperada": "/productos/tanques-flexibles-bladders",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0137",
+      "categoria": "comercial",
+      "prompt": "biodigestores Perú",
+      "urlEsperada": "/productos/biodigestores",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0138",
+      "categoria": "comercial",
+      "prompt": "biodigestor en Perú",
+      "urlEsperada": "/productos/biodigestores",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0139",
+      "categoria": "comercial",
+      "prompt": "biodigestor de geomembrana en Perú",
+      "urlEsperada": "/productos/biodigestores",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0140",
+      "categoria": "comercial",
+      "prompt": "tratamiento de residuos orgánicos en Perú",
+      "urlEsperada": "/productos/biodigestores",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0141",
+      "categoria": "comercial",
+      "prompt": "tuberías HDPE Perú",
+      "urlEsperada": "/productos/tuberias-hdpe",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0142",
+      "categoria": "comercial",
+      "prompt": "tubería hdpe en Perú",
+      "urlEsperada": "/productos/tuberias-hdpe",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0143",
+      "categoria": "comercial",
+      "prompt": "tubo hdpe en Perú",
+      "urlEsperada": "/productos/tuberias-hdpe",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0144",
+      "categoria": "comercial",
+      "prompt": "accesorios hdpe en Perú",
+      "urlEsperada": "/productos/tuberias-hdpe",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0145",
+      "categoria": "comercial",
+      "prompt": "soluciones ambientales y de fluidos Perú",
+      "urlEsperada": "/productos/familia/ambientales-fluidos",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0146",
+      "categoria": "comercial",
+      "prompt": "contención de fluidos en Perú",
+      "urlEsperada": "/productos/familia/ambientales-fluidos",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0147",
+      "categoria": "comercial",
+      "prompt": "almacenamiento de agua industrial en Perú",
+      "urlEsperada": "/productos/familia/ambientales-fluidos",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0148",
+      "categoria": "comercial",
+      "prompt": "manejo de fluidos en Perú",
+      "urlEsperada": "/productos/familia/ambientales-fluidos",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0149",
+      "categoria": "comercial",
+      "prompt": "biombos protectores Perú",
+      "urlEsperada": "/productos/biombos-protectores-soldadura",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0150",
+      "categoria": "comercial",
+      "prompt": "biombo en Perú",
+      "urlEsperada": "/productos/biombos-protectores-soldadura",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0151",
+      "categoria": "comercial",
+      "prompt": "biombos en Perú",
+      "urlEsperada": "/productos/biombos-protectores-soldadura",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0152",
+      "categoria": "comercial",
+      "prompt": "biombo de soldadura en Perú",
+      "urlEsperada": "/productos/biombos-protectores-soldadura",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0153",
+      "categoria": "comercial",
+      "prompt": "barreras acústicas Perú",
+      "urlEsperada": "/productos/barreras-acusticas",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0154",
+      "categoria": "comercial",
+      "prompt": "barrera acústica en Perú",
+      "urlEsperada": "/productos/barreras-acusticas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0155",
+      "categoria": "comercial",
+      "prompt": "cortina antirruido en Perú",
+      "urlEsperada": "/productos/barreras-acusticas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0156",
+      "categoria": "comercial",
+      "prompt": "barrera antirruido en Perú",
+      "urlEsperada": "/productos/barreras-acusticas",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0157",
+      "categoria": "comercial",
+      "prompt": "protección y seguridad industrial Perú",
+      "urlEsperada": "/productos/familia/seguridad-industrial",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0158",
+      "categoria": "comercial",
+      "prompt": "protección industrial en Perú",
+      "urlEsperada": "/productos/familia/seguridad-industrial",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0159",
+      "categoria": "comercial",
+      "prompt": "seguridad industrial textil en Perú",
+      "urlEsperada": "/productos/familia/seguridad-industrial",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0160",
+      "categoria": "comercial",
+      "prompt": "elementos de protección en planta en Perú",
+      "urlEsperada": "/productos/familia/seguridad-industrial",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0161",
+      "categoria": "comercial",
+      "prompt": "accesorios de instalación Perú",
+      "urlEsperada": "/productos/accesorios-instalacion",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0162",
+      "categoria": "comercial",
+      "prompt": "ojalillos en Perú",
+      "urlEsperada": "/productos/accesorios-instalacion",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0163",
+      "categoria": "comercial",
+      "prompt": "ojalillo en Perú",
+      "urlEsperada": "/productos/accesorios-instalacion",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0164",
+      "categoria": "comercial",
+      "prompt": "sogas en Perú",
+      "urlEsperada": "/productos/accesorios-instalacion",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0165",
+      "categoria": "comercial",
+      "prompt": "accesorios y complementos Perú",
+      "urlEsperada": "/productos/familia/accesorios",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0166",
+      "categoria": "comercial",
+      "prompt": "complementos de instalación en Perú",
+      "urlEsperada": "/productos/familia/accesorios",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0167",
+      "categoria": "comercial",
+      "prompt": "repuestos para cobertura en Perú",
+      "urlEsperada": "/productos/familia/accesorios",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0168",
+      "categoria": "comercial",
+      "prompt": "insumos de montaje textil en Perú",
+      "urlEsperada": "/productos/familia/accesorios",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0169",
+      "categoria": "comercial",
+      "prompt": "gigantografías Perú",
+      "urlEsperada": "/productos/gigantografias-senaletica",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0170",
+      "categoria": "comercial",
+      "prompt": "gigantografía en Perú",
+      "urlEsperada": "/productos/gigantografias-senaletica",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0171",
+      "categoria": "comercial",
+      "prompt": "letreros en Perú",
+      "urlEsperada": "/productos/gigantografias-senaletica",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0172",
+      "categoria": "comercial",
+      "prompt": "señalética en Perú",
+      "urlEsperada": "/productos/gigantografias-senaletica",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0173",
+      "categoria": "comercial",
+      "prompt": "revestimiento vehicular Perú",
+      "urlEsperada": "/productos/revestimiento-vehicular-toldos-publicitarios",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0174",
+      "categoria": "comercial",
+      "prompt": "rotulación vehicular en Perú",
+      "urlEsperada": "/productos/revestimiento-vehicular-toldos-publicitarios",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0175",
+      "categoria": "comercial",
+      "prompt": "toldo publicitario en Perú",
+      "urlEsperada": "/productos/revestimiento-vehicular-toldos-publicitarios",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0176",
+      "categoria": "comercial",
+      "prompt": "vinilo vehicular en Perú",
+      "urlEsperada": "/productos/revestimiento-vehicular-toldos-publicitarios",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0177",
+      "categoria": "comercial",
+      "prompt": "publicidad y comunicación visual Perú",
+      "urlEsperada": "/productos/familia/publicidad",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0178",
+      "categoria": "comercial",
+      "prompt": "comunicación visual industrial en Perú",
+      "urlEsperada": "/productos/familia/publicidad",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0179",
+      "categoria": "comercial",
+      "prompt": "publicidad exterior en lona en Perú",
+      "urlEsperada": "/productos/familia/publicidad",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0180",
+      "categoria": "comercial",
+      "prompt": "señalización de obra en Perú",
+      "urlEsperada": "/productos/familia/publicidad",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0181",
+      "categoria": "comercial",
+      "prompt": "mulch Perú",
+      "urlEsperada": "/productos/mulch-madera-picada",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0182",
+      "categoria": "comercial",
+      "prompt": "mulching en Perú",
+      "urlEsperada": "/productos/mulch-madera-picada",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0183",
+      "categoria": "comercial",
+      "prompt": "mulch de madera en Perú",
+      "urlEsperada": "/productos/mulch-madera-picada",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0184",
+      "categoria": "comercial",
+      "prompt": "madera picada en Perú",
+      "urlEsperada": "/productos/mulch-madera-picada",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0185",
+      "categoria": "comercial",
+      "prompt": "líneas especiales Perú",
+      "urlEsperada": "/productos/familia/especialidades",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0186",
+      "categoria": "comercial",
+      "prompt": "productos especiales a medida en Perú",
+      "urlEsperada": "/productos/familia/especialidades",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0187",
+      "categoria": "comercial",
+      "prompt": "desarrollos a medida en Perú",
+      "urlEsperada": "/productos/familia/especialidades",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0188",
+      "categoria": "comercial",
+      "prompt": "líneas especiales de fabricación en Perú",
+      "urlEsperada": "/productos/familia/especialidades",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0189",
+      "categoria": "comercial",
+      "prompt": "instalación de coberturas y geosintéticos Perú",
+      "urlEsperada": "/servicios",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0190",
+      "categoria": "comercial",
+      "prompt": "instalación de geomembranas en Perú",
+      "urlEsperada": "/servicios",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0191",
+      "categoria": "comercial",
+      "prompt": "instalación de lonas en Perú",
+      "urlEsperada": "/servicios",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0192",
+      "categoria": "comercial",
+      "prompt": "instalación de big bags en Perú",
+      "urlEsperada": "/servicios",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0193",
+      "categoria": "comercial",
+      "prompt": "cotizar textiles industriales Perú",
+      "urlEsperada": "/cotizacion",
+      "porque": "término principal del clúster"
+    },
+    {
+      "id": "p0194",
+      "categoria": "comercial",
+      "prompt": "pedir cotización en Perú",
+      "urlEsperada": "/cotizacion",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0195",
+      "categoria": "comercial",
+      "prompt": "solicitar cotización en Perú",
+      "urlEsperada": "/cotizacion",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0196",
+      "categoria": "comercial",
+      "prompt": "cotización de lonas en Perú",
+      "urlEsperada": "/cotizacion",
+      "porque": "variante declarada del clúster"
+    },
+    {
+      "id": "p0197",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es big bag en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/big-bag-fibc",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0198",
+      "categoria": "tecnica",
+      "prompt": "Big bag: cómo se especifica",
+      "urlEsperada": "/glosario/big-bag-fibc",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0199",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es carga de trabajo segura en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/carga-de-trabajo-segura",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0200",
+      "categoria": "tecnica",
+      "prompt": "Carga de trabajo segura: cómo se especifica",
+      "urlEsperada": "/glosario/carga-de-trabajo-segura",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0201",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es factor de seguridad en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/factor-de-seguridad",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0202",
+      "categoria": "tecnica",
+      "prompt": "Factor de seguridad: cómo se especifica",
+      "urlEsperada": "/glosario/factor-de-seguridad",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0203",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es tipos electrostáticos de fibc (a, b, c y d) en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/tipo-electrostatico-fibc",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0204",
+      "categoria": "tecnica",
+      "prompt": "Tipos electrostáticos de FIBC (A, B, C y D): cómo se especifica",
+      "urlEsperada": "/glosario/tipo-electrostatico-fibc",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0205",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es liner en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/liner-interior",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0206",
+      "categoria": "tecnica",
+      "prompt": "Liner: cómo se especifica",
+      "urlEsperada": "/glosario/liner-interior",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0207",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es densidad aparente en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/densidad-aparente",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0208",
+      "categoria": "tecnica",
+      "prompt": "Densidad aparente: cómo se especifica",
+      "urlEsperada": "/glosario/densidad-aparente",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0209",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es gramaje en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/gramaje",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0210",
+      "categoria": "tecnica",
+      "prompt": "Gramaje: cómo se especifica",
+      "urlEsperada": "/glosario/gramaje",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0211",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es lona plastificada en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/lona-plastificada",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0212",
+      "categoria": "tecnica",
+      "prompt": "Lona plastificada: cómo se especifica",
+      "urlEsperada": "/glosario/lona-plastificada",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0213",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es denier en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/denier",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0214",
+      "categoria": "tecnica",
+      "prompt": "Denier: cómo se especifica",
+      "urlEsperada": "/glosario/denier",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0215",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es resistencia al desgarro en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/resistencia-al-desgarro",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0216",
+      "categoria": "tecnica",
+      "prompt": "Resistencia al desgarro: cómo se especifica",
+      "urlEsperada": "/glosario/resistencia-al-desgarro",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0217",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es estabilización ultravioleta en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/estabilizacion-uv",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0218",
+      "categoria": "tecnica",
+      "prompt": "Estabilización ultravioleta: cómo se especifica",
+      "urlEsperada": "/glosario/estabilizacion-uv",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0219",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es termosellado en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/termosellado",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0220",
+      "categoria": "tecnica",
+      "prompt": "Termosellado: cómo se especifica",
+      "urlEsperada": "/glosario/termosellado",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0221",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es ojal en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/ojal",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0222",
+      "categoria": "tecnica",
+      "prompt": "Ojal: cómo se especifica",
+      "urlEsperada": "/glosario/ojal",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0223",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es geosintético en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/geosintetico",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0224",
+      "categoria": "tecnica",
+      "prompt": "Geosintético: cómo se especifica",
+      "urlEsperada": "/glosario/geosintetico",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0225",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es geomembrana en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/geomembrana",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0226",
+      "categoria": "tecnica",
+      "prompt": "Geomembrana: cómo se especifica",
+      "urlEsperada": "/glosario/geomembrana",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0227",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es polietileno de alta densidad en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/hdpe",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0228",
+      "categoria": "tecnica",
+      "prompt": "Polietileno de alta densidad: cómo se especifica",
+      "urlEsperada": "/glosario/hdpe",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0229",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es geotextil en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/geotextil",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0230",
+      "categoria": "tecnica",
+      "prompt": "Geotextil: cómo se especifica",
+      "urlEsperada": "/glosario/geotextil",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0231",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es no tejido punzonado por agujas en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/no-tejido-punzonado",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0232",
+      "categoria": "tecnica",
+      "prompt": "No tejido punzonado por agujas: cómo se especifica",
+      "urlEsperada": "/glosario/no-tejido-punzonado",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0233",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es resistencia al punzonamiento en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/resistencia-al-punzonamiento",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0234",
+      "categoria": "tecnica",
+      "prompt": "Resistencia al punzonamiento: cómo se especifica",
+      "urlEsperada": "/glosario/resistencia-al-punzonamiento",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0235",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es permitividad en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/permitividad",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0236",
+      "categoria": "tecnica",
+      "prompt": "Permitividad: cómo se especifica",
+      "urlEsperada": "/glosario/permitividad",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0237",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es soldadura por cuña caliente en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/soldadura-por-cuna-caliente",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0238",
+      "categoria": "tecnica",
+      "prompt": "Soldadura por cuña caliente: cómo se especifica",
+      "urlEsperada": "/glosario/soldadura-por-cuna-caliente",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0239",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es zanja de anclaje en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/zanja-de-anclaje",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0240",
+      "categoria": "tecnica",
+      "prompt": "Zanja de anclaje: cómo se especifica",
+      "urlEsperada": "/glosario/zanja-de-anclaje",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0241",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es subrasante en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/subrasante",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0242",
+      "categoria": "tecnica",
+      "prompt": "Subrasante: cómo se especifica",
+      "urlEsperada": "/glosario/subrasante",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0243",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es geomalla en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/geomalla",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0244",
+      "categoria": "tecnica",
+      "prompt": "Geomalla: cómo se especifica",
+      "urlEsperada": "/glosario/geomalla",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0245",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es manga de ventilación en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/manga-de-ventilacion",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0246",
+      "categoria": "tecnica",
+      "prompt": "Manga de ventilación: cómo se especifica",
+      "urlEsperada": "/glosario/manga-de-ventilacion",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0247",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es ventilación impelente en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/ventilacion-impelente",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0248",
+      "categoria": "tecnica",
+      "prompt": "Ventilación impelente: cómo se especifica",
+      "urlEsperada": "/glosario/ventilacion-impelente",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0249",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es ventilación aspirante en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/ventilacion-aspirante",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0250",
+      "categoria": "tecnica",
+      "prompt": "Ventilación aspirante: cómo se especifica",
+      "urlEsperada": "/glosario/ventilacion-aspirante",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0251",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es refuerzo espiral en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/refuerzo-espiral",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0252",
+      "categoria": "tecnica",
+      "prompt": "Refuerzo espiral: cómo se especifica",
+      "urlEsperada": "/glosario/refuerzo-espiral",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0253",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es caudal de aire en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/caudal",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0254",
+      "categoria": "tecnica",
+      "prompt": "Caudal de aire: cómo se especifica",
+      "urlEsperada": "/glosario/caudal",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0255",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es pérdida de carga en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/perdida-de-carga",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0256",
+      "categoria": "tecnica",
+      "prompt": "Pérdida de carga: cómo se especifica",
+      "urlEsperada": "/glosario/perdida-de-carga",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0257",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es factor de fuga en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/factor-de-fuga",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0258",
+      "categoria": "tecnica",
+      "prompt": "Factor de fuga: cómo se especifica",
+      "urlEsperada": "/glosario/factor-de-fuga",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0259",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es malla antiáfida en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/malla-antiafida",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0260",
+      "categoria": "tecnica",
+      "prompt": "Malla antiáfida: cómo se especifica",
+      "urlEsperada": "/glosario/malla-antiafida",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0261",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es mesh en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/mesh",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0262",
+      "categoria": "tecnica",
+      "prompt": "Mesh: cómo se especifica",
+      "urlEsperada": "/glosario/mesh",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0263",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es porcentaje de sombra en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/porcentaje-de-sombra",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0264",
+      "categoria": "tecnica",
+      "prompt": "Porcentaje de sombra: cómo se especifica",
+      "urlEsperada": "/glosario/porcentaje-de-sombra",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0265",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es malla raschel en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/malla-raschel",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0266",
+      "categoria": "tecnica",
+      "prompt": "Malla Raschel: cómo se especifica",
+      "urlEsperada": "/glosario/malla-raschel",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0267",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es arquitectura textil en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/arquitectura-textil",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0268",
+      "categoria": "tecnica",
+      "prompt": "Arquitectura textil: cómo se especifica",
+      "urlEsperada": "/glosario/arquitectura-textil",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0269",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es pretensado en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/pretensado",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0270",
+      "categoria": "tecnica",
+      "prompt": "Pretensado: cómo se especifica",
+      "urlEsperada": "/glosario/pretensado",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0271",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es carga de viento en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/carga-de-viento",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0272",
+      "categoria": "tecnica",
+      "prompt": "Carga de viento: cómo se especifica",
+      "urlEsperada": "/glosario/carga-de-viento",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0273",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es altitud y radiación ultravioleta en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/altitud-y-radiacion",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0274",
+      "categoria": "tecnica",
+      "prompt": "Altitud y radiación ultravioleta: cómo se especifica",
+      "urlEsperada": "/glosario/altitud-y-radiacion",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0275",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es certificado de lote en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/certificado-de-lote",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0276",
+      "categoria": "tecnica",
+      "prompt": "Certificado de lote: cómo se especifica",
+      "urlEsperada": "/glosario/certificado-de-lote",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0277",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es plano as-built en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/as-built",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0278",
+      "categoria": "tecnica",
+      "prompt": "Plano as-built: cómo se especifica",
+      "urlEsperada": "/glosario/as-built",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0279",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es fabricación a medida en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/fabricacion-a-medida",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0280",
+      "categoria": "tecnica",
+      "prompt": "Fabricación a medida: cómo se especifica",
+      "urlEsperada": "/glosario/fabricacion-a-medida",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0281",
+      "categoria": "tecnica",
+      "prompt": "¿Qué es origen de suministro en textiles industriales o geosintéticos?",
+      "urlEsperada": "/glosario/fabricacion-a-medida-vs-importacion",
+      "porque": "definición canónica publicada"
+    },
+    {
+      "id": "p0282",
+      "categoria": "tecnica",
+      "prompt": "Origen de suministro: cómo se especifica",
+      "urlEsperada": "/glosario/fabricacion-a-medida-vs-importacion",
+      "porque": "consulta de especificación"
+    },
+    {
+      "id": "p0283",
+      "categoria": "tecnica",
+      "prompt": "¿qué gramaje de lona necesito para cubrir a la intemperie todo el año?",
+      "urlEsperada": "/biblioteca/gramaje-lona-industrial",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0284",
+      "categoria": "tecnica",
+      "prompt": "¿un gramaje mayor siempre dura más?",
+      "urlEsperada": "/biblioteca/gramaje-lona-industrial",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0285",
+      "categoria": "tecnica",
+      "prompt": "¿cómo elijo entre geomembrana de PVC y de HDPE?",
+      "urlEsperada": "/biblioteca/seleccion-geomembrana",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0286",
+      "categoria": "tecnica",
+      "prompt": "¿qué datos necesito antes de cotizar una impermeabilización?",
+      "urlEsperada": "/biblioteca/seleccion-geomembrana",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0287",
+      "categoria": "tecnica",
+      "prompt": "¿qué datos necesito para pedir una cotización de big bags?",
+      "urlEsperada": "/biblioteca/especificacion-fibc",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0288",
+      "categoria": "tecnica",
+      "prompt": "¿cómo se define la carga de trabajo segura de un bolsón?",
+      "urlEsperada": "/biblioteca/especificacion-fibc",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0289",
+      "categoria": "tecnica",
+      "prompt": "¿qué diámetro y largo de manga pide mi labor?",
+      "urlEsperada": "/biblioteca/seleccion-mangas-ventilacion",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0290",
+      "categoria": "tecnica",
+      "prompt": "¿qué pérdida de carga admite el ventilador instalado?",
+      "urlEsperada": "/biblioteca/seleccion-mangas-ventilacion",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0291",
+      "categoria": "tecnica",
+      "prompt": "¿qué malla necesito según la plaga y la radiación de mi zona?",
+      "urlEsperada": "/biblioteca/seleccion-malla-agricola",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0292",
+      "categoria": "tecnica",
+      "prompt": "¿cómo afecta el mesh a la ventilación del cultivo?",
+      "urlEsperada": "/biblioteca/seleccion-malla-agricola",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0293",
+      "categoria": "tecnica",
+      "prompt": "¿cómo comparo dos cotizaciones de textiles industriales?",
+      "urlEsperada": "/marco",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0294",
+      "categoria": "tecnica",
+      "prompt": "¿qué debe traer una cotización seria de geosintéticos?",
+      "urlEsperada": "/marco",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0295",
+      "categoria": "tecnica",
+      "prompt": "¿conviene un proveedor único o varios especializados?",
+      "urlEsperada": "/marco",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0296",
+      "categoria": "tecnica",
+      "prompt": "¿cuánto aire necesita un frente de avance con equipo diésel?",
+      "urlEsperada": "/calculadoras/caudal-ventilacion-mina",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0297",
+      "categoria": "tecnica",
+      "prompt": "¿cómo se calcula el caudal de una labor subterránea?",
+      "urlEsperada": "/calculadoras/caudal-ventilacion-mina",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0298",
+      "categoria": "tecnica",
+      "prompt": "¿cuántos metros cuadrados de geomembrana necesita mi poza?",
+      "urlEsperada": "/calculadoras/geomembrana-poza",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0299",
+      "categoria": "tecnica",
+      "prompt": "¿cuánto material se pierde en traslapes y anclaje?",
+      "urlEsperada": "/calculadoras/geomembrana-poza",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0300",
+      "categoria": "tecnica",
+      "prompt": "¿cuántos rollos de malla cubren una hectárea?",
+      "urlEsperada": "/calculadoras/rollos-por-superficie",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0301",
+      "categoria": "tecnica",
+      "prompt": "¿cómo paso de metros cuadrados a rollos?",
+      "urlEsperada": "/calculadoras/rollos-por-superficie",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0302",
+      "categoria": "tecnica",
+      "prompt": "¿cuántos big bags de 1 tonelada entran en un camión?",
+      "urlEsperada": "/calculadoras/big-bags-por-viaje",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0303",
+      "categoria": "tecnica",
+      "prompt": "¿me limita el peso o el volumen al cargar bolsones?",
+      "urlEsperada": "/calculadoras/big-bags-por-viaje",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0304",
+      "categoria": "tecnica",
+      "prompt": "¿qué medida de big bag necesito para mi material?",
+      "urlEsperada": "/calculadoras/capacidad-big-bag",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0305",
+      "categoria": "tecnica",
+      "prompt": "¿por qué dos materiales de igual peso piden bolsones distintos?",
+      "urlEsperada": "/calculadoras/capacidad-big-bag",
+      "porque": "pregunta declarada del clúster de decisión"
+    },
+    {
+      "id": "p0306",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería en el Perú",
+      "urlEsperada": "/industria/mineria",
+      "porque": "hub sectorial"
+    },
+    {
+      "id": "p0307",
+      "categoria": "sector-local",
+      "prompt": "¿qué proveedor de textiles industriales atiende unidades mineras en el Perú?",
+      "urlEsperada": "/industria/mineria",
+      "porque": "pregunta sectorial declarada"
+    },
+    {
+      "id": "p0308",
+      "categoria": "sector-local",
+      "prompt": "¿qué se necesita para homologarse como proveedor minero?",
+      "urlEsperada": "/industria/mineria",
+      "porque": "pregunta sectorial declarada"
+    },
+    {
+      "id": "p0309",
+      "categoria": "sector-local",
+      "prompt": "¿qué falla al comprar cobertura para mina?",
+      "urlEsperada": "/industria/mineria",
+      "porque": "pregunta sectorial declarada"
+    },
+    {
+      "id": "p0310",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería Lima",
+      "urlEsperada": "/industria/mineria",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0311",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería Arequipa",
+      "urlEsperada": "/industria/mineria",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0312",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería Trujillo",
+      "urlEsperada": "/industria/mineria",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0313",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería Chiclayo",
+      "urlEsperada": "/industria/mineria",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0314",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería Piura",
+      "urlEsperada": "/industria/mineria",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0315",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería Ica",
+      "urlEsperada": "/industria/mineria",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0316",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería Cusco",
+      "urlEsperada": "/industria/mineria",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0317",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería Chimbote",
+      "urlEsperada": "/industria/mineria",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0318",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería Iquitos",
+      "urlEsperada": "/industria/mineria",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0319",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería Huancayo",
+      "urlEsperada": "/industria/mineria",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0320",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería Tacna",
+      "urlEsperada": "/industria/mineria",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0321",
+      "categoria": "sector-local",
+      "prompt": "textiles industriales para minería Pucallpa",
+      "urlEsperada": "/industria/mineria",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0322",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación en el Perú",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "hub sectorial"
+    },
+    {
+      "id": "p0323",
+      "categoria": "sector-local",
+      "prompt": "¿qué insumos textiles necesita un fundo agroexportador?",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "pregunta sectorial declarada"
+    },
+    {
+      "id": "p0324",
+      "categoria": "sector-local",
+      "prompt": "¿cómo se protege un cultivo de exportación de plagas y radiación?",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "pregunta sectorial declarada"
+    },
+    {
+      "id": "p0325",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación Lima",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0326",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación Arequipa",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0327",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación Trujillo",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0328",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación Chiclayo",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0329",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación Piura",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0330",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación Ica",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0331",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación Cusco",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0332",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación Chimbote",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0333",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación Iquitos",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0334",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación Huancayo",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0335",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación Tacna",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0336",
+      "categoria": "sector-local",
+      "prompt": "protección de cultivos para agroexportación Pucallpa",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0337",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística en el Perú",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "hub sectorial"
+    },
+    {
+      "id": "p0338",
+      "categoria": "sector-local",
+      "prompt": "¿cómo se protege la carga de un camión en ruta?",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "pregunta sectorial declarada"
+    },
+    {
+      "id": "p0339",
+      "categoria": "sector-local",
+      "prompt": "¿qué exige el transporte de concentrado mineral por carretera?",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "pregunta sectorial declarada"
+    },
+    {
+      "id": "p0340",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística Lima",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0341",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística Arequipa",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0342",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística Trujillo",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0343",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística Chiclayo",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0344",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística Piura",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0345",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística Ica",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0346",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística Cusco",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0347",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística Chimbote",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0348",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística Iquitos",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0349",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística Huancayo",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0350",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística Tacna",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0351",
+      "categoria": "sector-local",
+      "prompt": "cobertura de carga para transporte y logística Pucallpa",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0352",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción en el Perú",
+      "urlEsperada": "/industria/construccion",
+      "porque": "hub sectorial"
+    },
+    {
+      "id": "p0353",
+      "categoria": "sector-local",
+      "prompt": "¿qué cobertura temporal se usa en una obra en Lima?",
+      "urlEsperada": "/industria/construccion",
+      "porque": "pregunta sectorial declarada"
+    },
+    {
+      "id": "p0354",
+      "categoria": "sector-local",
+      "prompt": "¿qué se necesita para cubrir un frente de obra en época de lluvia?",
+      "urlEsperada": "/industria/construccion",
+      "porque": "pregunta sectorial declarada"
+    },
+    {
+      "id": "p0355",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción Lima",
+      "urlEsperada": "/industria/construccion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0356",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción Arequipa",
+      "urlEsperada": "/industria/construccion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0357",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción Trujillo",
+      "urlEsperada": "/industria/construccion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0358",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción Chiclayo",
+      "urlEsperada": "/industria/construccion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0359",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción Piura",
+      "urlEsperada": "/industria/construccion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0360",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción Ica",
+      "urlEsperada": "/industria/construccion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0361",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción Cusco",
+      "urlEsperada": "/industria/construccion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0362",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción Chimbote",
+      "urlEsperada": "/industria/construccion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0363",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción Iquitos",
+      "urlEsperada": "/industria/construccion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0364",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción Huancayo",
+      "urlEsperada": "/industria/construccion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0365",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción Tacna",
+      "urlEsperada": "/industria/construccion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0366",
+      "categoria": "sector-local",
+      "prompt": "coberturas temporales para construcción Pucallpa",
+      "urlEsperada": "/industria/construccion",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0367",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua en el Perú",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "hub sectorial"
+    },
+    {
+      "id": "p0368",
+      "categoria": "sector-local",
+      "prompt": "¿cómo se impermeabiliza un reservorio de agua?",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "pregunta sectorial declarada"
+    },
+    {
+      "id": "p0369",
+      "categoria": "sector-local",
+      "prompt": "¿qué geosintético se usa en una planta de tratamiento?",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "pregunta sectorial declarada"
+    },
+    {
+      "id": "p0370",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua Lima",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0371",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua Arequipa",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0372",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua Trujillo",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0373",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua Chiclayo",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0374",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua Piura",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0375",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua Ica",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0376",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua Cusco",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0377",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua Chimbote",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0378",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua Iquitos",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0379",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua Huancayo",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0380",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua Tacna",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0381",
+      "categoria": "sector-local",
+      "prompt": "impermeabilización para saneamiento y agua Pucallpa",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "sector + ciudad: se contesta desde el hub, no desde una página ciudad × producto"
+    },
+    {
+      "id": "p0382",
+      "categoria": "sector-local",
+      "prompt": "proveedor de lonas industriales en Lima",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0383",
+      "categoria": "sector-local",
+      "prompt": "fabricante de big bags en Lima",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0384",
+      "categoria": "sector-local",
+      "prompt": "instalación de geomembranas en Lima",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0385",
+      "categoria": "sector-local",
+      "prompt": "venta de malla raschel en Lima",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0386",
+      "categoria": "sector-local",
+      "prompt": "Lima: ¿despachan textiles industriales a esta región?",
+      "urlEsperada": "/local/lima",
+      "porque": "pregunta directa de cobertura sobre una ciudad con página propia"
+    },
+    {
+      "id": "p0387",
+      "categoria": "sector-local",
+      "prompt": "proveedor de lonas industriales en Arequipa",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0388",
+      "categoria": "sector-local",
+      "prompt": "fabricante de big bags en Arequipa",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0389",
+      "categoria": "sector-local",
+      "prompt": "instalación de geomembranas en Arequipa",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0390",
+      "categoria": "sector-local",
+      "prompt": "venta de malla raschel en Arequipa",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0391",
+      "categoria": "sector-local",
+      "prompt": "Arequipa: ¿despachan textiles industriales a esta región?",
+      "urlEsperada": "/local/arequipa",
+      "porque": "pregunta directa de cobertura sobre una ciudad con página propia"
+    },
+    {
+      "id": "p0392",
+      "categoria": "sector-local",
+      "prompt": "proveedor de lonas industriales en Trujillo",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0393",
+      "categoria": "sector-local",
+      "prompt": "fabricante de big bags en Trujillo",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0394",
+      "categoria": "sector-local",
+      "prompt": "instalación de geomembranas en Trujillo",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0395",
+      "categoria": "sector-local",
+      "prompt": "venta de malla raschel en Trujillo",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0396",
+      "categoria": "sector-local",
+      "prompt": "Trujillo: ¿despachan textiles industriales a esta región?",
+      "urlEsperada": "/local/trujillo",
+      "porque": "pregunta directa de cobertura sobre una ciudad con página propia"
+    },
+    {
+      "id": "p0397",
+      "categoria": "sector-local",
+      "prompt": "proveedor de lonas industriales en Chiclayo",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0398",
+      "categoria": "sector-local",
+      "prompt": "fabricante de big bags en Chiclayo",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0399",
+      "categoria": "sector-local",
+      "prompt": "instalación de geomembranas en Chiclayo",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0400",
+      "categoria": "sector-local",
+      "prompt": "venta de malla raschel en Chiclayo",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0401",
+      "categoria": "sector-local",
+      "prompt": "Chiclayo: ¿despachan textiles industriales a esta región?",
+      "urlEsperada": "/local/chiclayo",
+      "porque": "pregunta directa de cobertura sobre una ciudad con página propia"
+    },
+    {
+      "id": "p0402",
+      "categoria": "sector-local",
+      "prompt": "proveedor de lonas industriales en Piura",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0403",
+      "categoria": "sector-local",
+      "prompt": "fabricante de big bags en Piura",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0404",
+      "categoria": "sector-local",
+      "prompt": "instalación de geomembranas en Piura",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0405",
+      "categoria": "sector-local",
+      "prompt": "venta de malla raschel en Piura",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0406",
+      "categoria": "sector-local",
+      "prompt": "Piura: ¿despachan textiles industriales a esta región?",
+      "urlEsperada": "/local/piura",
+      "porque": "pregunta directa de cobertura sobre una ciudad con página propia"
+    },
+    {
+      "id": "p0407",
+      "categoria": "sector-local",
+      "prompt": "proveedor de lonas industriales en Ica",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0408",
+      "categoria": "sector-local",
+      "prompt": "fabricante de big bags en Ica",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0409",
+      "categoria": "sector-local",
+      "prompt": "instalación de geomembranas en Ica",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0410",
+      "categoria": "sector-local",
+      "prompt": "venta de malla raschel en Ica",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0411",
+      "categoria": "sector-local",
+      "prompt": "Ica: ¿despachan textiles industriales a esta región?",
+      "urlEsperada": "/local/ica",
+      "porque": "pregunta directa de cobertura sobre una ciudad con página propia"
+    },
+    {
+      "id": "p0412",
+      "categoria": "sector-local",
+      "prompt": "proveedor de lonas industriales en Cusco",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0413",
+      "categoria": "sector-local",
+      "prompt": "fabricante de big bags en Cusco",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0414",
+      "categoria": "sector-local",
+      "prompt": "instalación de geomembranas en Cusco",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0415",
+      "categoria": "sector-local",
+      "prompt": "venta de malla raschel en Cusco",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0416",
+      "categoria": "sector-local",
+      "prompt": "Cusco: ¿despachan textiles industriales a esta región?",
+      "urlEsperada": "/local/cusco",
+      "porque": "pregunta directa de cobertura sobre una ciudad con página propia"
+    },
+    {
+      "id": "p0417",
+      "categoria": "sector-local",
+      "prompt": "proveedor de lonas industriales en Chimbote",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0418",
+      "categoria": "sector-local",
+      "prompt": "fabricante de big bags en Chimbote",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0419",
+      "categoria": "sector-local",
+      "prompt": "instalación de geomembranas en Chimbote",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0420",
+      "categoria": "sector-local",
+      "prompt": "venta de malla raschel en Chimbote",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0421",
+      "categoria": "sector-local",
+      "prompt": "Chimbote: ¿despachan textiles industriales a esta región?",
+      "urlEsperada": "/local/chimbote",
+      "porque": "pregunta directa de cobertura sobre una ciudad con página propia"
+    },
+    {
+      "id": "p0422",
+      "categoria": "sector-local",
+      "prompt": "proveedor de lonas industriales en Iquitos",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0423",
+      "categoria": "sector-local",
+      "prompt": "fabricante de big bags en Iquitos",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0424",
+      "categoria": "sector-local",
+      "prompt": "instalación de geomembranas en Iquitos",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0425",
+      "categoria": "sector-local",
+      "prompt": "venta de malla raschel en Iquitos",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0426",
+      "categoria": "sector-local",
+      "prompt": "Iquitos: ¿despachan textiles industriales a esta región?",
+      "urlEsperada": "/local/iquitos",
+      "porque": "pregunta directa de cobertura sobre una ciudad con página propia"
+    },
+    {
+      "id": "p0427",
+      "categoria": "sector-local",
+      "prompt": "proveedor de lonas industriales en Huancayo",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0428",
+      "categoria": "sector-local",
+      "prompt": "fabricante de big bags en Huancayo",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0429",
+      "categoria": "sector-local",
+      "prompt": "instalación de geomembranas en Huancayo",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0430",
+      "categoria": "sector-local",
+      "prompt": "venta de malla raschel en Huancayo",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0431",
+      "categoria": "sector-local",
+      "prompt": "Huancayo: ¿despachan textiles industriales a esta región?",
+      "urlEsperada": "/local/huancayo",
+      "porque": "pregunta directa de cobertura sobre una ciudad con página propia"
+    },
+    {
+      "id": "p0432",
+      "categoria": "sector-local",
+      "prompt": "proveedor de lonas industriales en Tacna",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0433",
+      "categoria": "sector-local",
+      "prompt": "fabricante de big bags en Tacna",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0434",
+      "categoria": "sector-local",
+      "prompt": "instalación de geomembranas en Tacna",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0435",
+      "categoria": "sector-local",
+      "prompt": "venta de malla raschel en Tacna",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0436",
+      "categoria": "sector-local",
+      "prompt": "Tacna: ¿despachan textiles industriales a esta región?",
+      "urlEsperada": "/local/tacna",
+      "porque": "pregunta directa de cobertura sobre una ciudad con página propia"
+    },
+    {
+      "id": "p0437",
+      "categoria": "sector-local",
+      "prompt": "proveedor de lonas industriales en Pucallpa",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0438",
+      "categoria": "sector-local",
+      "prompt": "fabricante de big bags en Pucallpa",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0439",
+      "categoria": "sector-local",
+      "prompt": "instalación de geomembranas en Pucallpa",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0440",
+      "categoria": "sector-local",
+      "prompt": "venta de malla raschel en Pucallpa",
+      "urlEsperada": "/local",
+      "porque": "cobertura geográfica: la contesta la página de cobertura, no una doorway page"
+    },
+    {
+      "id": "p0441",
+      "categoria": "sector-local",
+      "prompt": "Pucallpa: ¿despachan textiles industriales a esta región?",
+      "urlEsperada": "/local/pucallpa",
+      "porque": "pregunta directa de cobertura sobre una ciudad con página propia"
+    },
+    {
+      "id": "p0442",
+      "categoria": "comparacion",
+      "prompt": "comparar tipos de envases y embalaje industrial en Perú",
+      "urlEsperada": "/productos/familia/envases-embalaje/comparar",
+      "porque": "la comparación vive en la página de comparar de la familia"
+    },
+    {
+      "id": "p0443",
+      "categoria": "comparacion",
+      "prompt": "comparar tipos de lonas y cobertores industriales en Perú",
+      "urlEsperada": "/productos/familia/lonas-cobertores/comparar",
+      "porque": "la comparación vive en la página de comparar de la familia"
+    },
+    {
+      "id": "p0444",
+      "categoria": "comparacion",
+      "prompt": "comparar tipos de estructuras textiles en Perú",
+      "urlEsperada": "/productos/familia/estructuras-arquitectura-textil/comparar",
+      "porque": "la comparación vive en la página de comparar de la familia"
+    },
+    {
+      "id": "p0445",
+      "categoria": "comparacion",
+      "prompt": "comparar tipos de mallas agrícolas en Perú",
+      "urlEsperada": "/productos/familia/mallas-agricolas/comparar",
+      "porque": "la comparación vive en la página de comparar de la familia"
+    },
+    {
+      "id": "p0446",
+      "categoria": "comparacion",
+      "prompt": "comparar tipos de ventilación industrial en Perú",
+      "urlEsperada": "/productos/familia/ventilacion-industrial/comparar",
+      "porque": "la comparación vive en la página de comparar de la familia"
+    },
+    {
+      "id": "p0447",
+      "categoria": "comparacion",
+      "prompt": "comparar tipos de geomembranas en Perú",
+      "urlEsperada": "/productos/familia/geosinteticos/comparar",
+      "porque": "la comparación vive en la página de comparar de la familia"
+    },
+    {
+      "id": "p0448",
+      "categoria": "comparacion",
+      "prompt": "comparar tipos de soluciones ambientales y de fluidos en Perú",
+      "urlEsperada": "/productos/familia/ambientales-fluidos/comparar",
+      "porque": "la comparación vive en la página de comparar de la familia"
+    },
+    {
+      "id": "p0449",
+      "categoria": "comparacion",
+      "prompt": "comparar tipos de protección y seguridad industrial en Perú",
+      "urlEsperada": "/productos/familia/seguridad-industrial/comparar",
+      "porque": "la comparación vive en la página de comparar de la familia"
+    },
+    {
+      "id": "p0450",
+      "categoria": "comparacion",
+      "prompt": "comparar tipos de accesorios y complementos en Perú",
+      "urlEsperada": "/productos/familia/accesorios/comparar",
+      "porque": "la comparación vive en la página de comparar de la familia"
+    },
+    {
+      "id": "p0451",
+      "categoria": "comparacion",
+      "prompt": "comparar tipos de publicidad y comunicación visual en Perú",
+      "urlEsperada": "/productos/familia/publicidad/comparar",
+      "porque": "la comparación vive en la página de comparar de la familia"
+    },
+    {
+      "id": "p0452",
+      "categoria": "comparacion",
+      "prompt": "comparar tipos de líneas especiales en Perú",
+      "urlEsperada": "/productos/familia/especialidades/comparar",
+      "porque": "la comparación vive en la página de comparar de la familia"
+    },
+    {
+      "id": "p0453",
+      "categoria": "comparacion",
+      "prompt": "qué gramaje de lona usar: qué comparar antes de decidir",
+      "urlEsperada": "/biblioteca/gramaje-lona-industrial",
+      "porque": "guía de decisión"
+    },
+    {
+      "id": "p0454",
+      "categoria": "comparacion",
+      "prompt": "qué gramaje de lona usar — pros y contras de cada opción",
+      "urlEsperada": "/biblioteca/gramaje-lona-industrial",
+      "porque": "misma decisión, formulada como comparación abierta"
+    },
+    {
+      "id": "p0455",
+      "categoria": "comparacion",
+      "prompt": "cómo elegir una geomembrana: qué comparar antes de decidir",
+      "urlEsperada": "/biblioteca/seleccion-geomembrana",
+      "porque": "guía de decisión"
+    },
+    {
+      "id": "p0456",
+      "categoria": "comparacion",
+      "prompt": "cómo elegir una geomembrana — pros y contras de cada opción",
+      "urlEsperada": "/biblioteca/seleccion-geomembrana",
+      "porque": "misma decisión, formulada como comparación abierta"
+    },
+    {
+      "id": "p0457",
+      "categoria": "comparacion",
+      "prompt": "cómo especificar un big bag: qué comparar antes de decidir",
+      "urlEsperada": "/biblioteca/especificacion-fibc",
+      "porque": "guía de decisión"
+    },
+    {
+      "id": "p0458",
+      "categoria": "comparacion",
+      "prompt": "cómo especificar un big bag — pros y contras de cada opción",
+      "urlEsperada": "/biblioteca/especificacion-fibc",
+      "porque": "misma decisión, formulada como comparación abierta"
+    },
+    {
+      "id": "p0459",
+      "categoria": "comparacion",
+      "prompt": "cómo elegir mangas de ventilación: qué comparar antes de decidir",
+      "urlEsperada": "/biblioteca/seleccion-mangas-ventilacion",
+      "porque": "guía de decisión"
+    },
+    {
+      "id": "p0460",
+      "categoria": "comparacion",
+      "prompt": "cómo elegir mangas de ventilación — pros y contras de cada opción",
+      "urlEsperada": "/biblioteca/seleccion-mangas-ventilacion",
+      "porque": "misma decisión, formulada como comparación abierta"
+    },
+    {
+      "id": "p0461",
+      "categoria": "comparacion",
+      "prompt": "cómo elegir una malla agrícola: qué comparar antes de decidir",
+      "urlEsperada": "/biblioteca/seleccion-malla-agricola",
+      "porque": "guía de decisión"
+    },
+    {
+      "id": "p0462",
+      "categoria": "comparacion",
+      "prompt": "cómo elegir una malla agrícola — pros y contras de cada opción",
+      "urlEsperada": "/biblioteca/seleccion-malla-agricola",
+      "porque": "misma decisión, formulada como comparación abierta"
+    },
+    {
+      "id": "p0463",
+      "categoria": "comparacion",
+      "prompt": "cómo evaluar un proveedor de textiles industriales: qué comparar antes de decidir",
+      "urlEsperada": "/marco",
+      "porque": "guía de decisión"
+    },
+    {
+      "id": "p0464",
+      "categoria": "comparacion",
+      "prompt": "cómo evaluar un proveedor de textiles industriales — pros y contras de cada opción",
+      "urlEsperada": "/marco",
+      "porque": "misma decisión, formulada como comparación abierta"
+    },
+    {
+      "id": "p0465",
+      "categoria": "comparacion",
+      "prompt": "big bags o sacos polytarp: cuál conviene",
+      "urlEsperada": "/productos/familia/envases-embalaje",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0466",
+      "categoria": "comparacion",
+      "prompt": "sacos polytarp o bolsas de polietileno industrial: cuál conviene",
+      "urlEsperada": "/productos/familia/envases-embalaje",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0467",
+      "categoria": "comparacion",
+      "prompt": "bolsas de polietileno industrial o film termocontraíble: cuál conviene",
+      "urlEsperada": "/productos/familia/envases-embalaje",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0468",
+      "categoria": "comparacion",
+      "prompt": "lona plastificada o toldos para camiones: cuál conviene",
+      "urlEsperada": "/productos/familia/lonas-cobertores",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0469",
+      "categoria": "comparacion",
+      "prompt": "toldos para camiones o siders y tolderas: cuál conviene",
+      "urlEsperada": "/productos/familia/lonas-cobertores",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0470",
+      "categoria": "comparacion",
+      "prompt": "siders y tolderas o cobertores agrícolas: cuál conviene",
+      "urlEsperada": "/productos/familia/lonas-cobertores",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0471",
+      "categoria": "comparacion",
+      "prompt": "carpas industriales o coberturas tensionadas: cuál conviene",
+      "urlEsperada": "/productos/familia/estructuras-arquitectura-textil",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0472",
+      "categoria": "comparacion",
+      "prompt": "coberturas tensionadas o estructuras inflables: cuál conviene",
+      "urlEsperada": "/productos/familia/estructuras-arquitectura-textil",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0473",
+      "categoria": "comparacion",
+      "prompt": "estructuras inflables o módulos para campamentos: cuál conviene",
+      "urlEsperada": "/productos/familia/estructuras-arquitectura-textil",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0474",
+      "categoria": "comparacion",
+      "prompt": "malla antiáfida o malla raschel: cuál conviene",
+      "urlEsperada": "/productos/familia/mallas-agricolas",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0475",
+      "categoria": "comparacion",
+      "prompt": "malla raschel o malla anti pájaro: cuál conviene",
+      "urlEsperada": "/productos/familia/mallas-agricolas",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0476",
+      "categoria": "comparacion",
+      "prompt": "geomembrana de PVC o geomembrana HDPE: cuál conviene",
+      "urlEsperada": "/productos/familia/geosinteticos",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0477",
+      "categoria": "comparacion",
+      "prompt": "geomembrana HDPE o geomembrana fortificada: cuál conviene",
+      "urlEsperada": "/productos/familia/geosinteticos",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0478",
+      "categoria": "comparacion",
+      "prompt": "geomembrana fortificada o geomembrana bituminosa: cuál conviene",
+      "urlEsperada": "/productos/familia/geosinteticos",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0479",
+      "categoria": "comparacion",
+      "prompt": "tanques flexibles o biodigestores: cuál conviene",
+      "urlEsperada": "/productos/familia/ambientales-fluidos",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0480",
+      "categoria": "comparacion",
+      "prompt": "biodigestores o tuberías HDPE: cuál conviene",
+      "urlEsperada": "/productos/familia/ambientales-fluidos",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0481",
+      "categoria": "comparacion",
+      "prompt": "mantas aislantes térmicas o biombos protectores: cuál conviene",
+      "urlEsperada": "/productos/familia/seguridad-industrial",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0482",
+      "categoria": "comparacion",
+      "prompt": "biombos protectores o barreras acústicas: cuál conviene",
+      "urlEsperada": "/productos/familia/seguridad-industrial",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0483",
+      "categoria": "comparacion",
+      "prompt": "gigantografías o revestimiento vehicular: cuál conviene",
+      "urlEsperada": "/productos/familia/publicidad",
+      "porque": "comparación entre líneas de la misma familia"
+    },
+    {
+      "id": "p0484",
+      "categoria": "comparacion",
+      "prompt": "diferencia entre geomembrana de PVC y geomembrana HDPE",
+      "urlEsperada": "/biblioteca/seleccion-geomembrana",
+      "porque": "par de decisión real del rubro"
+    },
+    {
+      "id": "p0485",
+      "categoria": "comparacion",
+      "prompt": "¿qué conviene, geomembrana de PVC o geomembrana HDPE?",
+      "urlEsperada": "/biblioteca/seleccion-geomembrana",
+      "porque": "formulación conversacional del mismo par"
+    },
+    {
+      "id": "p0486",
+      "categoria": "comparacion",
+      "prompt": "diferencia entre geotextil tejido y geotextil no tejido",
+      "urlEsperada": "/productos/geotextiles",
+      "porque": "par de decisión real del rubro"
+    },
+    {
+      "id": "p0487",
+      "categoria": "comparacion",
+      "prompt": "¿qué conviene, geotextil tejido o geotextil no tejido?",
+      "urlEsperada": "/productos/geotextiles",
+      "porque": "formulación conversacional del mismo par"
+    },
+    {
+      "id": "p0488",
+      "categoria": "comparacion",
+      "prompt": "diferencia entre ventilación impelente y ventilación aspirante",
+      "urlEsperada": "/biblioteca/seleccion-mangas-ventilacion",
+      "porque": "par de decisión real del rubro"
+    },
+    {
+      "id": "p0489",
+      "categoria": "comparacion",
+      "prompt": "¿qué conviene, ventilación impelente o ventilación aspirante?",
+      "urlEsperada": "/biblioteca/seleccion-mangas-ventilacion",
+      "porque": "formulación conversacional del mismo par"
+    },
+    {
+      "id": "p0490",
+      "categoria": "comparacion",
+      "prompt": "diferencia entre big bag y saco polytarp",
+      "urlEsperada": "/productos/big-bags-bolsones-polipropileno",
+      "porque": "par de decisión real del rubro"
+    },
+    {
+      "id": "p0491",
+      "categoria": "comparacion",
+      "prompt": "¿qué conviene, big bag o saco polytarp?",
+      "urlEsperada": "/productos/big-bags-bolsones-polipropileno",
+      "porque": "formulación conversacional del mismo par"
+    },
+    {
+      "id": "p0492",
+      "categoria": "comparacion",
+      "prompt": "diferencia entre malla raschel y malla antiáfida",
+      "urlEsperada": "/biblioteca/seleccion-malla-agricola",
+      "porque": "par de decisión real del rubro"
+    },
+    {
+      "id": "p0493",
+      "categoria": "comparacion",
+      "prompt": "¿qué conviene, malla raschel o malla antiáfida?",
+      "urlEsperada": "/biblioteca/seleccion-malla-agricola",
+      "porque": "formulación conversacional del mismo par"
+    },
+    {
+      "id": "p0494",
+      "categoria": "comparacion",
+      "prompt": "diferencia entre lona de rafia y lona de PVC",
+      "urlEsperada": "/biblioteca/gramaje-lona-industrial",
+      "porque": "par de decisión real del rubro"
+    },
+    {
+      "id": "p0495",
+      "categoria": "comparacion",
+      "prompt": "¿qué conviene, lona de rafia o lona de PVC?",
+      "urlEsperada": "/biblioteca/gramaje-lona-industrial",
+      "porque": "formulación conversacional del mismo par"
+    },
+    {
+      "id": "p0496",
+      "categoria": "comparacion",
+      "prompt": "diferencia entre carpa industrial y cobertura tensionada",
+      "urlEsperada": "/productos/familia/estructuras-arquitectura-textil",
+      "porque": "par de decisión real del rubro"
+    },
+    {
+      "id": "p0497",
+      "categoria": "comparacion",
+      "prompt": "¿qué conviene, carpa industrial o cobertura tensionada?",
+      "urlEsperada": "/productos/familia/estructuras-arquitectura-textil",
+      "porque": "formulación conversacional del mismo par"
+    },
+    {
+      "id": "p0498",
+      "categoria": "comparacion",
+      "prompt": "diferencia entre tanque flexible y tanque rígido",
+      "urlEsperada": "/productos/tanques-flexibles-bladders",
+      "porque": "par de decisión real del rubro"
+    },
+    {
+      "id": "p0499",
+      "categoria": "comparacion",
+      "prompt": "¿qué conviene, tanque flexible o tanque rígido?",
+      "urlEsperada": "/productos/tanques-flexibles-bladders",
+      "porque": "formulación conversacional del mismo par"
+    },
+    {
+      "id": "p0500",
+      "categoria": "comparacion",
+      "prompt": "cómo comparar dos cotizaciones de geosintéticos en Perú",
+      "urlEsperada": "/marco",
+      "porque": "el marco es la referencia de evaluación, no una tabla de competidores"
+    },
+    {
+      "id": "p0501",
+      "categoria": "comparacion",
+      "prompt": "criterios para elegir proveedor de textiles industriales en Perú",
+      "urlEsperada": "/marco/evaluacion",
+      "porque": "evaluación estructurada, sin nombrar competidores"
+    },
+    {
+      "id": "p0502",
+      "categoria": "problema",
+      "prompt": "¿cuánto pesa un big bag de 1 tonelada?",
+      "urlEsperada": "/productos/big-bags-bolsones-polipropileno",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0503",
+      "categoria": "problema",
+      "prompt": "¿qué factor de seguridad debe tener un big bag para mina?",
+      "urlEsperada": "/productos/big-bags-bolsones-polipropileno",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0504",
+      "categoria": "problema",
+      "prompt": "¿qué diferencia hay entre un big bag tipo A, B, C y D?",
+      "urlEsperada": "/productos/big-bags-bolsones-polipropileno",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0505",
+      "categoria": "problema",
+      "prompt": "¿qué saco se usa para embarque a granel en puerto?",
+      "urlEsperada": "/productos/sacos-polytarp-embarque-granel",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0506",
+      "categoria": "problema",
+      "prompt": "¿qué calibre de lámina de polietileno necesito?",
+      "urlEsperada": "/productos/bolsas-laminas-pebd-pead",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0507",
+      "categoria": "problema",
+      "prompt": "¿qué film termocontraíble se usa para paletizar carga?",
+      "urlEsperada": "/productos/films-termocontraibles-shrink",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0508",
+      "categoria": "problema",
+      "prompt": "¿cómo se protege un pallet para exportación?",
+      "urlEsperada": "/productos/films-termocontraibles-shrink",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0509",
+      "categoria": "problema",
+      "prompt": "¿qué opciones hay para embalar carga a granel en el Perú?",
+      "urlEsperada": "/productos/familia/envases-embalaje",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0510",
+      "categoria": "problema",
+      "prompt": "¿qué envase industrial conviene para concentrado mineral?",
+      "urlEsperada": "/productos/familia/envases-embalaje",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0511",
+      "categoria": "problema",
+      "prompt": "¿qué gramaje de lona necesito para intemperie?",
+      "urlEsperada": "/productos/lona-plastificada-rafia-polytarp",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0512",
+      "categoria": "problema",
+      "prompt": "¿cuánto dura una lona de rafia al sol de la costa peruana?",
+      "urlEsperada": "/productos/lona-plastificada-rafia-polytarp",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0513",
+      "categoria": "problema",
+      "prompt": "¿qué diferencia hay entre lona de rafia y lona de PVC?",
+      "urlEsperada": "/productos/lona-plastificada-rafia-polytarp",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0514",
+      "categoria": "problema",
+      "prompt": "¿qué cobertor exige el MTC para transportar concentrado?",
+      "urlEsperada": "/productos/mantas-cobertores-toldos-camiones",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0515",
+      "categoria": "problema",
+      "prompt": "¿cómo se cubre la tolva de un volquete?",
+      "urlEsperada": "/productos/mantas-cobertores-toldos-camiones",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0516",
+      "categoria": "problema",
+      "prompt": "¿qué es un sider en un camión de carga?",
+      "urlEsperada": "/productos/siders-tolderas-camiones",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0517",
+      "categoria": "problema",
+      "prompt": "¿qué cobertor conviene para proteger cosecha en campo?",
+      "urlEsperada": "/productos/cobertores-agricolas-multimaterial",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0518",
+      "categoria": "problema",
+      "prompt": "¿qué material se usa para cubrir cultivos de la lluvia?",
+      "urlEsperada": "/productos/cobertores-agricolas-multimaterial",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0519",
+      "categoria": "problema",
+      "prompt": "¿qué cortina se usa en un galpón avícola?",
+      "urlEsperada": "/productos/mantas-arpilleras-granjas",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0520",
+      "categoria": "problema",
+      "prompt": "¿cómo se controla la ventilación en una granja con arpillera?",
+      "urlEsperada": "/productos/mantas-arpilleras-granjas",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0521",
+      "categoria": "problema",
+      "prompt": "¿qué manta aísla ruido y calor en planta industrial?",
+      "urlEsperada": "/productos/mantas-aislantes-termicas-termoacusticas",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0522",
+      "categoria": "problema",
+      "prompt": "¿qué tipos de lona y cobertor fabrica una empresa peruana?",
+      "urlEsperada": "/productos/familia/lonas-cobertores",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0523",
+      "categoria": "problema",
+      "prompt": "¿qué cobertor conviene para cada tipo de carga?",
+      "urlEsperada": "/productos/familia/lonas-cobertores",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0524",
+      "categoria": "problema",
+      "prompt": "¿cuánto viento resiste una carpa industrial?",
+      "urlEsperada": "/productos/carpas-lona-estructuras-metalicas",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0525",
+      "categoria": "problema",
+      "prompt": "¿qué norma rige la carga de viento de una carpa en el Perú?",
+      "urlEsperada": "/productos/carpas-lona-estructuras-metalicas",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0526",
+      "categoria": "problema",
+      "prompt": "¿qué es una cobertura tensionada y cuánto dura?",
+      "urlEsperada": "/productos/coberturas-tensionadas-arquitectura-textil",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0527",
+      "categoria": "problema",
+      "prompt": "¿cómo se calcula el pretensado de una membrana?",
+      "urlEsperada": "/productos/coberturas-tensionadas-arquitectura-textil",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0528",
+      "categoria": "problema",
+      "prompt": "¿qué mantenimiento pide una estructura inflable?",
+      "urlEsperada": "/productos/coberturas-inflables",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0529",
+      "categoria": "problema",
+      "prompt": "¿qué se necesita para montar un campamento minero temporal?",
+      "urlEsperada": "/productos/modulos-albergues-campamentos",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0530",
+      "categoria": "problema",
+      "prompt": "¿qué módulos textiles hay para faenas remotas?",
+      "urlEsperada": "/productos/modulos-albergues-campamentos",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0531",
+      "categoria": "problema",
+      "prompt": "¿cuánto cuesta cubrir un invernadero por metro cuadrado?",
+      "urlEsperada": "/productos/galpones-invernaderos-estructurados",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0532",
+      "categoria": "problema",
+      "prompt": "¿qué plástico se usa para un invernadero en la costa?",
+      "urlEsperada": "/productos/galpones-invernaderos-estructurados",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0533",
+      "categoria": "problema",
+      "prompt": "¿qué diferencia hay entre galpón y invernadero?",
+      "urlEsperada": "/productos/galpones-invernaderos-estructurados",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0534",
+      "categoria": "problema",
+      "prompt": "¿qué toldo se usa para cerrar un patio de maniobras?",
+      "urlEsperada": "/productos/toldos-cerramientos",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0535",
+      "categoria": "problema",
+      "prompt": "¿qué es una estructura textil y para qué sirve en industria?",
+      "urlEsperada": "/productos/familia/estructuras-arquitectura-textil",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0536",
+      "categoria": "problema",
+      "prompt": "¿qué tipos de cobertura estructural existen para obra y mina?",
+      "urlEsperada": "/productos/familia/estructuras-arquitectura-textil",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0537",
+      "categoria": "problema",
+      "prompt": "¿qué mesh de malla antiáfida detiene la mosca blanca?",
+      "urlEsperada": "/productos/mallas-antiafidas",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0538",
+      "categoria": "problema",
+      "prompt": "¿qué malla protege el cultivo sin bajar el rendimiento?",
+      "urlEsperada": "/productos/mallas-antiafidas",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0539",
+      "categoria": "problema",
+      "prompt": "¿qué porcentaje de sombra necesita mi cultivo?",
+      "urlEsperada": "/productos/malla-raschel-sombra",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0540",
+      "categoria": "problema",
+      "prompt": "¿cuánto dura una malla raschel al sol?",
+      "urlEsperada": "/productos/malla-raschel-sombra",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0541",
+      "categoria": "problema",
+      "prompt": "¿cómo proteger un frutal del granizo y de las aves?",
+      "urlEsperada": "/productos/malla-anti-pajaro-anti-granizo",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0542",
+      "categoria": "problema",
+      "prompt": "¿qué malla se usa en parronal de uva de mesa?",
+      "urlEsperada": "/productos/malla-anti-pajaro-anti-granizo",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0543",
+      "categoria": "problema",
+      "prompt": "¿qué mallas existen para proteger cultivos en el Perú?",
+      "urlEsperada": "/productos/familia/mallas-agricolas",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0544",
+      "categoria": "problema",
+      "prompt": "¿qué malla elijo: raschel, antiáfida o anti-granizo?",
+      "urlEsperada": "/productos/familia/mallas-agricolas",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0545",
+      "categoria": "problema",
+      "prompt": "¿qué diámetro de manga de ventilación necesito para mi labor?",
+      "urlEsperada": "/productos/mangas-ventilacion-minas-tuneles",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0546",
+      "categoria": "problema",
+      "prompt": "¿cómo calculo el caudal de aire de un frente de avance?",
+      "urlEsperada": "/productos/mangas-ventilacion-minas-tuneles",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0547",
+      "categoria": "problema",
+      "prompt": "¿qué componentes forman un sistema de ventilación en mina subterránea?",
+      "urlEsperada": "/productos/familia/ventilacion-industrial",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0548",
+      "categoria": "problema",
+      "prompt": "¿cómo se ventila un túnel en construcción?",
+      "urlEsperada": "/productos/familia/ventilacion-industrial",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0549",
+      "categoria": "problema",
+      "prompt": "¿qué geomembrana conviene para una poza de agua?",
+      "urlEsperada": "/productos/familia/geosinteticos",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0550",
+      "categoria": "problema",
+      "prompt": "¿cuánto cuesta impermeabilizar una poza?",
+      "urlEsperada": "/productos/familia/geosinteticos",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0551",
+      "categoria": "problema",
+      "prompt": "¿qué espesor de geomembrana necesito?",
+      "urlEsperada": "/productos/familia/geosinteticos",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0552",
+      "categoria": "problema",
+      "prompt": "¿qué espesor de geomembrana de PVC se especifica?",
+      "urlEsperada": "/productos/geomembranas-pvc",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0553",
+      "categoria": "problema",
+      "prompt": "¿qué espesor de geomembrana HDPE se usa en poza de relaves?",
+      "urlEsperada": "/productos/geomembrana-polietileno-pe-hdpe",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0554",
+      "categoria": "problema",
+      "prompt": "¿cómo se sueldan las láminas de HDPE en obra?",
+      "urlEsperada": "/productos/geomembrana-polietileno-pe-hdpe",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0555",
+      "categoria": "problema",
+      "prompt": "¿qué es una zanja de anclaje y por qué importa?",
+      "urlEsperada": "/productos/geomembrana-polietileno-pe-hdpe",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0556",
+      "categoria": "problema",
+      "prompt": "¿qué gana una geomembrana con refuerzo interno?",
+      "urlEsperada": "/productos/geomembrana-pe-fortificada",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0557",
+      "categoria": "problema",
+      "prompt": "¿qué geotextil elijo para separación, drenaje o refuerzo?",
+      "urlEsperada": "/productos/geotextiles",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0558",
+      "categoria": "problema",
+      "prompt": "¿qué gramaje de geotextil se usa bajo una geomembrana?",
+      "urlEsperada": "/productos/geotextiles",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0559",
+      "categoria": "problema",
+      "prompt": "¿cómo se estabiliza una plataforma con geomalla?",
+      "urlEsperada": "/productos/geomallas-geogrids",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0560",
+      "categoria": "problema",
+      "prompt": "¿qué geomalla se usa en carretera afirmada?",
+      "urlEsperada": "/productos/geomallas-geogrids",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0561",
+      "categoria": "problema",
+      "prompt": "¿qué es un geocompuesto de drenaje y dónde se usa?",
+      "urlEsperada": "/productos/geocompuestos-drenaje",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0562",
+      "categoria": "problema",
+      "prompt": "¿qué se usa para almacenar agua en una operación remota?",
+      "urlEsperada": "/productos/tanques-flexibles-bladders",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0563",
+      "categoria": "problema",
+      "prompt": "¿qué biodigestor se usa en fundo o granja?",
+      "urlEsperada": "/productos/biodigestores",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0564",
+      "categoria": "problema",
+      "prompt": "¿cómo se impermeabiliza una laguna anaerobia?",
+      "urlEsperada": "/productos/biodigestores",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0565",
+      "categoria": "problema",
+      "prompt": "¿qué tubería HDPE se usa para conducción de agua en mina?",
+      "urlEsperada": "/productos/tuberias-hdpe",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0566",
+      "categoria": "problema",
+      "prompt": "¿cómo se une una tubería HDPE en campo?",
+      "urlEsperada": "/productos/tuberias-hdpe",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0567",
+      "categoria": "problema",
+      "prompt": "¿qué opciones hay para contener y almacenar fluidos en operación?",
+      "urlEsperada": "/productos/familia/ambientales-fluidos",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0568",
+      "categoria": "problema",
+      "prompt": "¿cómo se hace una contención secundaria de derrames?",
+      "urlEsperada": "/productos/familia/ambientales-fluidos",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0569",
+      "categoria": "problema",
+      "prompt": "¿qué biombo protege del arco de soldadura?",
+      "urlEsperada": "/productos/biombos-protectores-soldadura",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0570",
+      "categoria": "problema",
+      "prompt": "¿qué cortina se usa en un taller de soldadura?",
+      "urlEsperada": "/productos/biombos-protectores-soldadura",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0571",
+      "categoria": "problema",
+      "prompt": "¿cómo se reduce el ruido de una obra hacia el vecindario?",
+      "urlEsperada": "/productos/barreras-acusticas",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0572",
+      "categoria": "problema",
+      "prompt": "¿qué barrera acústica se usa alrededor de un generador?",
+      "urlEsperada": "/productos/barreras-acusticas",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0573",
+      "categoria": "problema",
+      "prompt": "¿qué soluciones textiles hay para seguridad en planta?",
+      "urlEsperada": "/productos/familia/seguridad-industrial",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0574",
+      "categoria": "problema",
+      "prompt": "¿cómo se protege un frente de trabajo del ruido y las chispas?",
+      "urlEsperada": "/productos/familia/seguridad-industrial",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0575",
+      "categoria": "problema",
+      "prompt": "¿qué accesorios necesito para instalar una lona o carpa?",
+      "urlEsperada": "/productos/accesorios-instalacion",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0576",
+      "categoria": "problema",
+      "prompt": "¿qué complementos entrega el fabricante junto con la cobertura?",
+      "urlEsperada": "/productos/familia/accesorios",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0577",
+      "categoria": "problema",
+      "prompt": "¿qué material se usa para un letrero a la intemperie?",
+      "urlEsperada": "/productos/gigantografias-senaletica",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0578",
+      "categoria": "problema",
+      "prompt": "¿cuánto dura una rotulación vehicular a la intemperie?",
+      "urlEsperada": "/productos/revestimiento-vehicular-toldos-publicitarios",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0579",
+      "categoria": "problema",
+      "prompt": "¿qué soluciones de comunicación visual fabrica una empresa de lonas?",
+      "urlEsperada": "/productos/familia/publicidad",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0580",
+      "categoria": "problema",
+      "prompt": "¿cómo se señaliza una obra con material resistente a la intemperie?",
+      "urlEsperada": "/productos/familia/publicidad",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0581",
+      "categoria": "problema",
+      "prompt": "¿cuánto mulch necesito por metro cuadrado?",
+      "urlEsperada": "/productos/mulch-madera-picada",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0582",
+      "categoria": "problema",
+      "prompt": "¿qué espesor de mulch conserva la humedad del suelo?",
+      "urlEsperada": "/productos/mulch-madera-picada",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0583",
+      "categoria": "problema",
+      "prompt": "¿cómo se cotiza un desarrollo a medida?",
+      "urlEsperada": "/productos/familia/especialidades",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0584",
+      "categoria": "problema",
+      "prompt": "¿qué proveedor de textiles industriales atiende unidades mineras en el Perú?",
+      "urlEsperada": "/industria/mineria",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0585",
+      "categoria": "problema",
+      "prompt": "¿qué se necesita para homologarse como proveedor minero?",
+      "urlEsperada": "/industria/mineria",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0586",
+      "categoria": "problema",
+      "prompt": "¿qué falla al comprar cobertura para mina?",
+      "urlEsperada": "/industria/mineria",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0587",
+      "categoria": "problema",
+      "prompt": "¿qué insumos textiles necesita un fundo agroexportador?",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0588",
+      "categoria": "problema",
+      "prompt": "¿cómo se protege un cultivo de exportación de plagas y radiación?",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0589",
+      "categoria": "problema",
+      "prompt": "¿cómo se protege la carga de un camión en ruta?",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0590",
+      "categoria": "problema",
+      "prompt": "¿qué exige el transporte de concentrado mineral por carretera?",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0591",
+      "categoria": "problema",
+      "prompt": "¿qué cobertura temporal se usa en una obra en Lima?",
+      "urlEsperada": "/industria/construccion",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0592",
+      "categoria": "problema",
+      "prompt": "¿qué se necesita para cubrir un frente de obra en época de lluvia?",
+      "urlEsperada": "/industria/construccion",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0593",
+      "categoria": "problema",
+      "prompt": "¿cómo se impermeabiliza un reservorio de agua?",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0594",
+      "categoria": "problema",
+      "prompt": "¿qué geosintético se usa en una planta de tratamiento?",
+      "urlEsperada": "/industria/saneamiento-y-agua",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0595",
+      "categoria": "problema",
+      "prompt": "¿qué gramaje de lona necesito para cubrir a la intemperie todo el año?",
+      "urlEsperada": "/biblioteca/gramaje-lona-industrial",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0596",
+      "categoria": "problema",
+      "prompt": "¿cómo elijo entre geomembrana de PVC y de HDPE?",
+      "urlEsperada": "/biblioteca/seleccion-geomembrana",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0597",
+      "categoria": "problema",
+      "prompt": "¿qué datos necesito antes de cotizar una impermeabilización?",
+      "urlEsperada": "/biblioteca/seleccion-geomembrana",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0598",
+      "categoria": "problema",
+      "prompt": "¿qué datos necesito para pedir una cotización de big bags?",
+      "urlEsperada": "/biblioteca/especificacion-fibc",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0599",
+      "categoria": "problema",
+      "prompt": "¿cómo se define la carga de trabajo segura de un bolsón?",
+      "urlEsperada": "/biblioteca/especificacion-fibc",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0600",
+      "categoria": "problema",
+      "prompt": "¿qué diámetro y largo de manga pide mi labor?",
+      "urlEsperada": "/biblioteca/seleccion-mangas-ventilacion",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0601",
+      "categoria": "problema",
+      "prompt": "¿qué pérdida de carga admite el ventilador instalado?",
+      "urlEsperada": "/biblioteca/seleccion-mangas-ventilacion",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0602",
+      "categoria": "problema",
+      "prompt": "¿qué malla necesito según la plaga y la radiación de mi zona?",
+      "urlEsperada": "/biblioteca/seleccion-malla-agricola",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0603",
+      "categoria": "problema",
+      "prompt": "¿cómo afecta el mesh a la ventilación del cultivo?",
+      "urlEsperada": "/biblioteca/seleccion-malla-agricola",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0604",
+      "categoria": "problema",
+      "prompt": "¿cuánto aire necesita un frente de avance con equipo diésel?",
+      "urlEsperada": "/calculadoras/caudal-ventilacion-mina",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0605",
+      "categoria": "problema",
+      "prompt": "¿cómo se calcula el caudal de una labor subterránea?",
+      "urlEsperada": "/calculadoras/caudal-ventilacion-mina",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0606",
+      "categoria": "problema",
+      "prompt": "¿cuántos metros cuadrados de geomembrana necesita mi poza?",
+      "urlEsperada": "/calculadoras/geomembrana-poza",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0607",
+      "categoria": "problema",
+      "prompt": "¿cuánto material se pierde en traslapes y anclaje?",
+      "urlEsperada": "/calculadoras/geomembrana-poza",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0608",
+      "categoria": "problema",
+      "prompt": "¿cuántos rollos de malla cubren una hectárea?",
+      "urlEsperada": "/calculadoras/rollos-por-superficie",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0609",
+      "categoria": "problema",
+      "prompt": "¿cómo paso de metros cuadrados a rollos?",
+      "urlEsperada": "/calculadoras/rollos-por-superficie",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0610",
+      "categoria": "problema",
+      "prompt": "¿cuántos big bags de 1 tonelada entran en un camión?",
+      "urlEsperada": "/calculadoras/big-bags-por-viaje",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0611",
+      "categoria": "problema",
+      "prompt": "¿qué medida de big bag necesito para mi material?",
+      "urlEsperada": "/calculadoras/capacidad-big-bag",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0612",
+      "categoria": "problema",
+      "prompt": "¿cómo comparo dos cotizaciones de textiles industriales?",
+      "urlEsperada": "/marco",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0613",
+      "categoria": "problema",
+      "prompt": "¿qué debe traer una cotización seria de geosintéticos?",
+      "urlEsperada": "/marco",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0614",
+      "categoria": "problema",
+      "prompt": "¿cómo pido una cotización de textiles industriales en el Perú?",
+      "urlEsperada": "/cotizacion",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0615",
+      "categoria": "problema",
+      "prompt": "¿qué datos hacen falta para que me coticen?",
+      "urlEsperada": "/cotizacion",
+      "porque": "formulación de problema declarada en el mapa"
+    },
+    {
+      "id": "p0616",
+      "categoria": "problema",
+      "prompt": "se me rompen los bolsones al izar con montacargas",
+      "urlEsperada": "/biblioteca/especificacion-fibc",
+      "porque": "problema descrito sin nombrar el producto"
+    },
+    {
+      "id": "p0617",
+      "categoria": "problema",
+      "prompt": "se me rompen los bolsones al izar con montacargas — ¿qué solución hay en el Perú?",
+      "urlEsperada": "/biblioteca/especificacion-fibc",
+      "porque": "mismo problema, con intención de compra"
+    },
+    {
+      "id": "p0618",
+      "categoria": "problema",
+      "prompt": "la poza pierde agua por infiltración",
+      "urlEsperada": "/productos/familia/geosinteticos",
+      "porque": "problema descrito sin nombrar el producto"
+    },
+    {
+      "id": "p0619",
+      "categoria": "problema",
+      "prompt": "la poza pierde agua por infiltración — ¿qué solución hay en el Perú?",
+      "urlEsperada": "/productos/familia/geosinteticos",
+      "porque": "mismo problema, con intención de compra"
+    },
+    {
+      "id": "p0620",
+      "categoria": "problema",
+      "prompt": "el frente de avance no ventila lo suficiente",
+      "urlEsperada": "/calculadoras/caudal-ventilacion-mina",
+      "porque": "problema descrito sin nombrar el producto"
+    },
+    {
+      "id": "p0621",
+      "categoria": "problema",
+      "prompt": "el frente de avance no ventila lo suficiente — ¿qué solución hay en el Perú?",
+      "urlEsperada": "/calculadoras/caudal-ventilacion-mina",
+      "porque": "mismo problema, con intención de compra"
+    },
+    {
+      "id": "p0622",
+      "categoria": "problema",
+      "prompt": "la lona del camión se rasga a los tres meses",
+      "urlEsperada": "/biblioteca/gramaje-lona-industrial",
+      "porque": "problema descrito sin nombrar el producto"
+    },
+    {
+      "id": "p0623",
+      "categoria": "problema",
+      "prompt": "la lona del camión se rasga a los tres meses — ¿qué solución hay en el Perú?",
+      "urlEsperada": "/biblioteca/gramaje-lona-industrial",
+      "porque": "mismo problema, con intención de compra"
+    },
+    {
+      "id": "p0624",
+      "categoria": "problema",
+      "prompt": "tengo mosca blanca en el invernadero pese a la malla",
+      "urlEsperada": "/productos/mallas-antiafidas",
+      "porque": "problema descrito sin nombrar el producto"
+    },
+    {
+      "id": "p0625",
+      "categoria": "problema",
+      "prompt": "tengo mosca blanca en el invernadero pese a la malla — ¿qué solución hay en el Perú?",
+      "urlEsperada": "/productos/mallas-antiafidas",
+      "porque": "mismo problema, con intención de compra"
+    },
+    {
+      "id": "p0626",
+      "categoria": "problema",
+      "prompt": "necesito cubrir el frente de obra antes de las lluvias",
+      "urlEsperada": "/aplicaciones/coberturas-obra",
+      "porque": "problema descrito sin nombrar el producto"
+    },
+    {
+      "id": "p0627",
+      "categoria": "problema",
+      "prompt": "necesito cubrir el frente de obra antes de las lluvias — ¿qué solución hay en el Perú?",
+      "urlEsperada": "/aplicaciones/coberturas-obra",
+      "porque": "mismo problema, con intención de compra"
+    },
+    {
+      "id": "p0628",
+      "categoria": "problema",
+      "prompt": "la geomembrana se despegó en la soldadura",
+      "urlEsperada": "/recursos/instalacion-geomembranas-hdpe-pozas-canales",
+      "porque": "problema descrito sin nombrar el producto"
+    },
+    {
+      "id": "p0629",
+      "categoria": "problema",
+      "prompt": "la geomembrana se despegó en la soldadura — ¿qué solución hay en el Perú?",
+      "urlEsperada": "/recursos/instalacion-geomembranas-hdpe-pozas-canales",
+      "porque": "mismo problema, con intención de compra"
+    },
+    {
+      "id": "p0630",
+      "categoria": "problema",
+      "prompt": "tengo que almacenar agua en una operación sin red",
+      "urlEsperada": "/productos/tanques-flexibles-bladders",
+      "porque": "problema descrito sin nombrar el producto"
+    },
+    {
+      "id": "p0631",
+      "categoria": "problema",
+      "prompt": "tengo que almacenar agua en una operación sin red — ¿qué solución hay en el Perú?",
+      "urlEsperada": "/productos/tanques-flexibles-bladders",
+      "porque": "mismo problema, con intención de compra"
+    },
+    {
+      "id": "p0632",
+      "categoria": "problema",
+      "prompt": "el ruido de la obra está generando quejas de los vecinos",
+      "urlEsperada": "/productos/barreras-acusticas",
+      "porque": "problema descrito sin nombrar el producto"
+    },
+    {
+      "id": "p0633",
+      "categoria": "problema",
+      "prompt": "el ruido de la obra está generando quejas de los vecinos — ¿qué solución hay en el Perú?",
+      "urlEsperada": "/productos/barreras-acusticas",
+      "porque": "mismo problema, con intención de compra"
+    },
+    {
+      "id": "p0634",
+      "categoria": "problema",
+      "prompt": "el concentrado se moja durante el traslado",
+      "urlEsperada": "/aplicaciones/toldos-camion",
+      "porque": "problema descrito sin nombrar el producto"
+    },
+    {
+      "id": "p0635",
+      "categoria": "problema",
+      "prompt": "el concentrado se moja durante el traslado — ¿qué solución hay en el Perú?",
+      "urlEsperada": "/aplicaciones/toldos-camion",
+      "porque": "mismo problema, con intención de compra"
+    },
+    {
+      "id": "p0636",
+      "categoria": "adyacente",
+      "prompt": "soluciones textiles industriales en Perú",
+      "urlEsperada": "/productos",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0637",
+      "categoria": "adyacente",
+      "prompt": "soluciones textiles industriales en Perú — recomiéndame un proveedor",
+      "urlEsperada": "/productos",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0638",
+      "categoria": "adyacente",
+      "prompt": "qué proveedor fabrica e instala con su propio equipo en Perú",
+      "urlEsperada": "/servicios",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0639",
+      "categoria": "adyacente",
+      "prompt": "qué proveedor fabrica e instala con su propio equipo en Perú — recomiéndame un proveedor",
+      "urlEsperada": "/servicios",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0640",
+      "categoria": "adyacente",
+      "prompt": "proveedor único para cobertura, impermeabilización y ventilación",
+      "urlEsperada": "/servicios",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0641",
+      "categoria": "adyacente",
+      "prompt": "proveedor único para cobertura, impermeabilización y ventilación — recomiéndame un proveedor",
+      "urlEsperada": "/servicios",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0642",
+      "categoria": "adyacente",
+      "prompt": "fabricante peruano de productos de plástico industrial",
+      "urlEsperada": "/nosotros",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0643",
+      "categoria": "adyacente",
+      "prompt": "fabricante peruano de productos de plástico industrial — recomiéndame un proveedor",
+      "urlEsperada": "/nosotros",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0644",
+      "categoria": "adyacente",
+      "prompt": "homologar un proveedor de insumos textiles para minería",
+      "urlEsperada": "/marco/evaluacion",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0645",
+      "categoria": "adyacente",
+      "prompt": "homologar un proveedor de insumos textiles para minería — recomiéndame un proveedor",
+      "urlEsperada": "/marco/evaluacion",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0646",
+      "categoria": "adyacente",
+      "prompt": "qué documentos pedir a un proveedor de geosintéticos",
+      "urlEsperada": "/calidad",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0647",
+      "categoria": "adyacente",
+      "prompt": "qué documentos pedir a un proveedor de geosintéticos — recomiéndame un proveedor",
+      "urlEsperada": "/calidad",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0648",
+      "categoria": "adyacente",
+      "prompt": "cómo evitar comprar dos veces la misma cobertura",
+      "urlEsperada": "/marco",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0649",
+      "categoria": "adyacente",
+      "prompt": "cómo evitar comprar dos veces la misma cobertura — recomiéndame un proveedor",
+      "urlEsperada": "/marco",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0650",
+      "categoria": "adyacente",
+      "prompt": "insumos para campaña agrícola de exportación",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0651",
+      "categoria": "adyacente",
+      "prompt": "insumos para campaña agrícola de exportación — recomiéndame un proveedor",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0652",
+      "categoria": "adyacente",
+      "prompt": "protección de carga para transporte de concentrado",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0653",
+      "categoria": "adyacente",
+      "prompt": "protección de carga para transporte de concentrado — recomiéndame un proveedor",
+      "urlEsperada": "/industria/transporte-logistica",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0654",
+      "categoria": "adyacente",
+      "prompt": "contención de derrames en operación minera",
+      "urlEsperada": "/aplicaciones/contencion-fluidos",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0655",
+      "categoria": "adyacente",
+      "prompt": "contención de derrames en operación minera — recomiéndame un proveedor",
+      "urlEsperada": "/aplicaciones/contencion-fluidos",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0656",
+      "categoria": "adyacente",
+      "prompt": "qué se necesita para revestir un canal de riego",
+      "urlEsperada": "/productos/geocompuestos-drenaje",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0657",
+      "categoria": "adyacente",
+      "prompt": "qué se necesita para revestir un canal de riego — recomiéndame un proveedor",
+      "urlEsperada": "/productos/geocompuestos-drenaje",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0658",
+      "categoria": "adyacente",
+      "prompt": "estructuras temporales para faena remota",
+      "urlEsperada": "/aplicaciones/campamentos-mineros",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0659",
+      "categoria": "adyacente",
+      "prompt": "estructuras temporales para faena remota — recomiéndame un proveedor",
+      "urlEsperada": "/aplicaciones/campamentos-mineros",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0660",
+      "categoria": "adyacente",
+      "prompt": "reducir pérdida de agua por evaporación e infiltración",
+      "urlEsperada": "/soluciones/almacenamiento-agua-operacion-remota",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0661",
+      "categoria": "adyacente",
+      "prompt": "reducir pérdida de agua por evaporación e infiltración — recomiéndame un proveedor",
+      "urlEsperada": "/soluciones/almacenamiento-agua-operacion-remota",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0662",
+      "categoria": "adyacente",
+      "prompt": "ventilación de un túnel en construcción",
+      "urlEsperada": "/productos/familia/ventilacion-industrial",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0663",
+      "categoria": "adyacente",
+      "prompt": "ventilación de un túnel en construcción — recomiéndame un proveedor",
+      "urlEsperada": "/productos/familia/ventilacion-industrial",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0664",
+      "categoria": "adyacente",
+      "prompt": "qué normas se citan para transporte de carga a granel en el Callao",
+      "urlEsperada": "/recursos/big-bags-mineria-peru-normativa-errores-estiba",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0665",
+      "categoria": "adyacente",
+      "prompt": "qué normas se citan para transporte de carga a granel en el Callao — recomiéndame un proveedor",
+      "urlEsperada": "/recursos/big-bags-mineria-peru-normativa-errores-estiba",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0666",
+      "categoria": "adyacente",
+      "prompt": "cómo se cotiza un textil industrial a medida",
+      "urlEsperada": "/cotizacion",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0667",
+      "categoria": "adyacente",
+      "prompt": "cómo se cotiza un textil industrial a medida — recomiéndame un proveedor",
+      "urlEsperada": "/cotizacion",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0668",
+      "categoria": "adyacente",
+      "prompt": "fábrica de lonas en Chorrillos",
+      "urlEsperada": "/nosotros",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0669",
+      "categoria": "adyacente",
+      "prompt": "fábrica de lonas en Chorrillos — recomiéndame un proveedor",
+      "urlEsperada": "/nosotros",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0670",
+      "categoria": "adyacente",
+      "prompt": "empresa peruana con RUC que fabrique big bags",
+      "urlEsperada": "/nosotros",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0671",
+      "categoria": "adyacente",
+      "prompt": "empresa peruana con RUC que fabrique big bags — recomiéndame un proveedor",
+      "urlEsperada": "/nosotros",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0672",
+      "categoria": "adyacente",
+      "prompt": "quién instala geosintéticos fuera de Lima",
+      "urlEsperada": "/local",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0673",
+      "categoria": "adyacente",
+      "prompt": "quién instala geosintéticos fuera de Lima — recomiéndame un proveedor",
+      "urlEsperada": "/local",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0674",
+      "categoria": "adyacente",
+      "prompt": "proveedor con ficha técnica en cada cotización",
+      "urlEsperada": "/calidad",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0675",
+      "categoria": "adyacente",
+      "prompt": "proveedor con ficha técnica en cada cotización — recomiéndame un proveedor",
+      "urlEsperada": "/calidad",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0676",
+      "categoria": "adyacente",
+      "prompt": "textil técnico para intemperie en clima costero peruano",
+      "urlEsperada": "/productos/familia/lonas-cobertores",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0677",
+      "categoria": "adyacente",
+      "prompt": "textil técnico para intemperie en clima costero peruano — recomiéndame un proveedor",
+      "urlEsperada": "/productos/familia/lonas-cobertores",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0678",
+      "categoria": "adyacente",
+      "prompt": "qué se usa para separar capas de suelo en una plataforma",
+      "urlEsperada": "/productos/geotextiles",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0679",
+      "categoria": "adyacente",
+      "prompt": "qué se usa para separar capas de suelo en una plataforma — recomiéndame un proveedor",
+      "urlEsperada": "/productos/geotextiles",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0680",
+      "categoria": "adyacente",
+      "prompt": "cómo se protege una cosecha de la radiación en la sierra",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0681",
+      "categoria": "adyacente",
+      "prompt": "cómo se protege una cosecha de la radiación en la sierra — recomiéndame un proveedor",
+      "urlEsperada": "/industria/agroexportacion",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0682",
+      "categoria": "adyacente",
+      "prompt": "almacén temporal desmontable para una obra de seis meses",
+      "urlEsperada": "/aplicaciones/coberturas-obra",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0683",
+      "categoria": "adyacente",
+      "prompt": "almacén temporal desmontable para una obra de seis meses — recomiéndame un proveedor",
+      "urlEsperada": "/aplicaciones/coberturas-obra",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0684",
+      "categoria": "adyacente",
+      "prompt": "soluciones para reducir polvo y ruido en una faena",
+      "urlEsperada": "/productos/barreras-acusticas",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0685",
+      "categoria": "adyacente",
+      "prompt": "soluciones para reducir polvo y ruido en una faena — recomiéndame un proveedor",
+      "urlEsperada": "/productos/barreras-acusticas",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0686",
+      "categoria": "adyacente",
+      "prompt": "embalaje que resista el traslado marítimo de mineral",
+      "urlEsperada": "/aplicaciones/granel-embalaje",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0687",
+      "categoria": "adyacente",
+      "prompt": "embalaje que resista el traslado marítimo de mineral — recomiéndame un proveedor",
+      "urlEsperada": "/aplicaciones/granel-embalaje",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0688",
+      "categoria": "adyacente",
+      "prompt": "dónde ver la ficha técnica antes de comprar",
+      "urlEsperada": "/descargas",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0689",
+      "categoria": "adyacente",
+      "prompt": "dónde ver la ficha técnica antes de comprar — recomiéndame un proveedor",
+      "urlEsperada": "/descargas",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0690",
+      "categoria": "adyacente",
+      "prompt": "proveedor peruano que atienda compras internacionales",
+      "urlEsperada": "/exportacion",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0691",
+      "categoria": "adyacente",
+      "prompt": "proveedor peruano que atienda compras internacionales — recomiéndame un proveedor",
+      "urlEsperada": "/exportacion",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0692",
+      "categoria": "adyacente",
+      "prompt": "cómo verificar que un proveedor industrial peruano existe",
+      "urlEsperada": "/confianza",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0693",
+      "categoria": "adyacente",
+      "prompt": "cómo verificar que un proveedor industrial peruano existe — recomiéndame un proveedor",
+      "urlEsperada": "/confianza",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0694",
+      "categoria": "adyacente",
+      "prompt": "qué pide una mina para incorporar un proveedor nuevo",
+      "urlEsperada": "/compras",
+      "porque": "consulta adyacente sin nombre de producto"
+    },
+    {
+      "id": "p0695",
+      "categoria": "adyacente",
+      "prompt": "qué pide una mina para incorporar un proveedor nuevo — recomiéndame un proveedor",
+      "urlEsperada": "/compras",
+      "porque": "misma consulta con petición explícita de recomendación: mide la tasa de recomendación, no la de mención"
+    },
+    {
+      "id": "p0696",
+      "categoria": "adyacente",
+      "prompt": "¿quién es Plastilonas Peruanas SAC?",
+      "urlEsperada": "/nosotros",
+      "porque": "consulta de entidad"
+    },
+    {
+      "id": "p0697",
+      "categoria": "adyacente",
+      "prompt": "¿desde cuándo fabrica Plastilonas en el Perú?",
+      "urlEsperada": "/nosotros",
+      "porque": "consulta de entidad"
+    },
+    {
+      "id": "p0698",
+      "categoria": "adyacente",
+      "prompt": "¿dónde queda la planta de Plastilonas?",
+      "urlEsperada": "/nosotros",
+      "porque": "consulta de entidad"
+    },
+    {
+      "id": "p0699",
+      "categoria": "adyacente",
+      "prompt": "plastilonas",
+      "urlEsperada": "/nosotros",
+      "porque": "variante de nombre de entidad"
+    },
+    {
+      "id": "p0700",
+      "categoria": "adyacente",
+      "prompt": "plastilonas peruanas",
+      "urlEsperada": "/nosotros",
+      "porque": "variante de nombre de entidad"
+    },
+    {
+      "id": "p0701",
+      "categoria": "adyacente",
+      "prompt": "plastilonas perú",
+      "urlEsperada": "/nosotros",
+      "porque": "variante de nombre de entidad"
+    },
+    {
+      "id": "p0702",
+      "categoria": "adyacente",
+      "prompt": "fabricante de textil industrial perú",
+      "urlEsperada": "/nosotros",
+      "porque": "variante de nombre de entidad"
+    }
+  ]
+}

@@ -51,6 +51,14 @@ jobs:
       - name: Pruebas
         run: npx vitest run --reporter=dot
 
+      - name: Consistencia de afirmaciones y mapa de consultas
+        # Tres cosas que no rompen la compilación y sí erosionan la confianza:
+        # una cifra que ya vive en lib/facts.ts escrita a mano en una página,
+        # dos páginas compitiendo por el mismo término comercial, y un banco de
+        # prompts que dejó de cubrir lo que el sitio decidió contestar.
+        # Corre antes del build porque es instantáneo.
+        run: npm run seo:all
+
       - name: Build de producción
         # La única verificación que ve un error de prerenderizado.
         run: npx next build

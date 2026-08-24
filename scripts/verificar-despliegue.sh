@@ -129,6 +129,10 @@ ruta /productos/catalogo.json
 ruta /calculadoras/formulas.json
 ruta /indexnow-key.txt
 ruta /version.json
+# Superficies de recuperación por máquina añadidas con el mapa de consultas.
+ruta /mapa-consultas.json
+ruta /llms-full.txt
+ruta /productos/big-bags-bolsones-polipropileno/contenido.md
 
 echo "— Documentos descargables —"
 # Un PDF que responde 200 pero devuelve HTML es un enlace roto que no lo parece.
@@ -175,6 +179,14 @@ contiene "/llms.txt" 'Documentos descargables' "llms.txt declara los documentos"
 contiene "/llms.txt" 'Informes del sector' "llms.txt declara los informes"
 contiene "/llms.txt" 'Indicadores en vivo' "llms.txt declara los indicadores"
 contiene "/llms.txt" 'Calculadoras de predimensionamiento' "llms.txt declara las calculadoras"
+# El mapa de consultas va ANTES del catálogo en llms.txt: es la tabla de
+# decisión que evita que un agente elija entre ocho páginas parecidas.
+contiene "/llms.txt" 'Mapa de consultas comerciales' "llms.txt declara el mapa de consultas"
+contiene "/mapa-consultas.json" '"canonica"' "el mapa declara una canónica por clúster"
+contiene "/mapa-consultas.json" 'Una consulta, una página' "el mapa declara su propia regla"
+contiene "/llms-full.txt" 'corpus completo para agentes' "el corpus se sirve entero"
+contiene "/productos/big-bags-bolsones-polipropileno/contenido.md" 'Hechos citables' "el espejo trae el bloque de citación"
+contiene "/productos/big-bags-bolsones-polipropileno" '"@type":"BreadcrumbList"' "la ficha de producto declara su jerarquía"
 
 # La prueba de propiedad de IndexNow. Sin ella, el envío obtiene 403 y el sitio
 # es invisible para Bing, Yandex, Seznam, Naver y Yep — y, por la vía de Bing,
