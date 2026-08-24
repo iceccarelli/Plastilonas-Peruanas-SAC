@@ -1,0 +1,1423 @@
+diff --git a/app/en/page.tsx b/app/en/page.tsx
+index 5dd95ed..b2acf9a 100644
+--- a/app/en/page.tsx
++++ b/app/en/page.tsx
+@@ -44,7 +44,7 @@ export default function EnglishPage() {
+       <figure className="mt-8">
+         <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl bg-gray-100">
+           <Image
+-            src="/images/servicio-fabricacion.jpg"
++            src="/images/servicio-fabricacion.webp"
+             alt="Manufacturing floor at the Chorrillos plant, Lima."
+             fill
+             sizes="(min-width: 768px) 720px, 100vw"
+diff --git a/app/llms.txt/route.ts b/app/llms.txt/route.ts
+index bd4fc92..4b3c1b6 100644
+--- a/app/llms.txt/route.ts
++++ b/app/llms.txt/route.ts
+@@ -442,7 +442,23 @@ Atribución sugerida al citar: ${SITE.legalName} (RUC ${SITE.ruc}), ${base}
+   return new Response(body, {
+     headers: {
+       "Content-Type": "text/plain; charset=utf-8",
+-      "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
++      /**
++       * Se acortó de 86.400 a 900 segundos, y no es una preferencia.
++       *
++       * Este archivo existe para decirle a un agente qué contiene el sitio
++       * HOY. Con 24 horas de caché en el CDN y siete días de
++       * `stale-while-revalidate`, un despliegue que publica trece secciones
++       * nuevas seguía sirviendo el mapa anterior durante un día entero. Se
++       * midió: minutos después de publicar, el sitio servía el commit nuevo y
++       * un llms.txt de 37 KB que era el viejo; el bueno pesa 56 KB y anuncia
++       * seis secciones que aquél no mencionaba. Justo el fallo que este
++       * archivo debería impedir, causado por su propia cabecera.
++       *
++       * Quince minutos es tiempo de sobra para que el CDN absorba el tráfico
++       * y lo bastante corto para que un mapa desactualizado no sobreviva a la
++       * siguiente visita de un rastreador.
++       */
++      "Cache-Control": "public, max-age=300, s-maxage=900, stale-while-revalidate=3600",
+       "X-Robots-Tag": "all",
+     },
+   });
+diff --git a/app/nosotros/page.tsx b/app/nosotros/page.tsx
+index 1dc5879..30ea903 100644
+--- a/app/nosotros/page.tsx
++++ b/app/nosotros/page.tsx
+@@ -61,8 +61,8 @@ export default function NosotrosPage() {
+           la única parte de la página que la sostiene sin pedir confianza. */}
+       <div className="mt-12 grid gap-4 sm:grid-cols-2">
+         {[
+-          { src: '/images/servicio-fabricacion.jpg', alt: 'Confección de textil técnico en la planta de Chorrillos.', pie: 'Fabricación en planta propia.' },
+-          { src: '/images/servicio-instalacion.jpg', alt: 'Personal propio montando una estructura textil en obra.', pie: 'Instalación en obra con equipo propio.' },
++          { src: '/images/servicio-fabricacion.webp', alt: 'Confección de textil técnico en la planta de Chorrillos.', pie: 'Fabricación en planta propia.' },
++          { src: '/images/servicio-instalacion.webp', alt: 'Personal propio montando una estructura textil en obra.', pie: 'Instalación en obra con equipo propio.' },
+         ].map((f) => (
+           <figure key={f.src}>
+             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl bg-gray-100">
+diff --git a/app/page.tsx b/app/page.tsx
+index a825546..cd0c44d 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -16,10 +16,10 @@ import { tomasDe } from '@/lib/galeria';
+  * Aquí sí: esta página es de servidor.
+  */
+ const FOTO_SERVICIO: Record<string, string> = {
+-  ruler: '/images/servicio-fabricacion.jpg',
+-  hardhat: '/images/servicio-instalacion.jpg',
+-  ship: '/images/servicio-importacion.jpg',
+-  lightbulb: '/images/servicio-asesoria.jpg',
++  ruler: '/images/servicio-fabricacion.webp',
++  hardhat: '/images/servicio-instalacion.webp',
++  ship: '/images/servicio-importacion.webp',
++  lightbulb: '/images/servicio-asesoria.webp',
+ };
+ import HeroCarousel from '@/components/HeroCarousel';
+ import SectionHeading from '@/components/SectionHeading';
+diff --git a/app/pt/page.tsx b/app/pt/page.tsx
+index dabcc4e..0fab35c 100644
+--- a/app/pt/page.tsx
++++ b/app/pt/page.tsx
+@@ -42,7 +42,7 @@ export default function PortuguesePage() {
+       <figure className="mt-8">
+         <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl bg-gray-100">
+           <Image
+-            src="/images/servicio-fabricacion.jpg"
++            src="/images/servicio-fabricacion.webp"
+             alt="Chão de fábrica na planta de Chorrillos, Lima."
+             fill
+             sizes="(min-width: 768px) 720px, 100vw"
+diff --git a/app/servicios/page.tsx b/app/servicios/page.tsx
+index 8a6aee8..e760d61 100644
+--- a/app/servicios/page.tsx
++++ b/app/servicios/page.tsx
+@@ -31,28 +31,28 @@ export default function ServiciosPage() {
+       title: "Fabricación a Medida",
+       description: "Diseñamos y fabricamos productos textiles industriales exactamente según sus especificaciones técnicas, medidas y requerimientos de resistencia.",
+       features: ["Asesoría técnica especializada", "Diseño CAD y prototipos", "Materiales importados con ficha técnica", "Control de calidad en cada lote", "Entrega en todo el Perú"],
+-      foto: '/images/servicio-fabricacion.jpg',
++      foto: '/images/servicio-fabricacion.webp',
+       alt: 'Corte y confección de textil técnico industrial en planta.',
+     },
+     {
+       title: "Instalación Profesional",
+       description: "Contamos con un equipo técnico altamente capacitado para la instalación de carpas, estructuras, geomembranas y sistemas de ventilación en obra.",
+       features: ["Instalación profesional", "Supervisión de calidad", "Capacitación al personal del cliente", "Mantenimiento preventivo", "Soporte post-venta"],
+-      foto: '/images/servicio-instalacion.jpg',
++      foto: '/images/servicio-instalacion.webp',
+       alt: 'Montaje en obra de una estructura textil por personal propio.',
+     },
+     {
+       title: "Importación Directa",
+       description: "Accedemos directamente a proveedores internacionales de materiales técnicos, con precios competitivos y ficha técnica del material en cada cotización.",
+       features: ["Materiales de primera línea", "Precios sin intermediarios", "Trazabilidad completa", "Ficha técnica del fabricante", "Stock estratégico"],
+-      foto: '/images/servicio-importacion.jpg',
++      foto: '/images/servicio-importacion.webp',
+       alt: 'Rollos de material técnico importado, almacenados en planta.',
+     },
+     {
+       title: "Soluciones Personalizadas",
+       description: "Desde el diagnóstico de su necesidad hasta la entrega final, le acompañamos en todo el proceso de desarrollo de soluciones textiles a medida.",
+       features: ["Análisis de requerimientos", "Propuesta técnica y económica", "Seguimiento de proyecto", "Soporte post-venta", "Reposición y mantenimiento"],
+-      foto: '/images/servicio-asesoria.jpg',
++      foto: '/images/servicio-asesoria.webp',
+       alt: 'Revisión de especificación técnica sobre plano antes de cotizar.',
+     }
+   ];
+diff --git a/components/HeroCarousel.tsx b/components/HeroCarousel.tsx
+index 4825662..28a6a5a 100644
+--- a/components/HeroCarousel.tsx
++++ b/components/HeroCarousel.tsx
+@@ -11,22 +11,22 @@ interface Slide {
+ // se muestra hero-01 como elemento LCP; al montar, el orden se baraja para que
+ // cada visita empiece en una imagen distinta.
+ const SLIDES: Slide[] = [
+-  { src: '/images/hero/hero-01.jpg', alt: 'Paisaje industrial minero en los Andes peruanos' },
+-  { src: '/images/hero/hero-02.jpg', alt: 'Carga de big bags (FIBC) en planta industrial' },
+-  { src: '/images/hero/hero-03.jpg', alt: 'Instalación de geomembrana HDPE en poza de contención' },
+-  { src: '/images/hero/hero-04.jpg', alt: 'Geotextil y geomalla en obra de movimiento de tierras' },
+-  { src: '/images/hero/hero-05.jpg', alt: 'Estructura tensada de arquitectura textil' },
+-  { src: '/images/hero/hero-06.jpg', alt: 'Malla agrícola de sombra y anti-granizo sobre cultivo' },
+-  { src: '/images/hero/hero-07.jpg', alt: 'Tanque flexible (bladder) para almacenamiento de agua' },
+-  { src: '/images/hero/hero-08.jpg', alt: 'Camión con siders y tolderas en carretera peruana' },
+-  { src: '/images/hero/hero-09.jpg', alt: 'Mangas de ventilación industrial en planta' },
+-  { src: '/images/hero/hero-10.jpg', alt: 'Almacén con rollos de lonas industriales' },
+-  { src: '/images/hero/hero-11.jpg', alt: 'Operarios en línea de fabricación de lonas' },
+-  { src: '/images/hero/hero-12.jpg', alt: 'Acopio minero cubierto con lona en altura' },
+-  { src: '/images/hero/hero-13.jpg', alt: 'Invernadero con film técnico agrícola' },
+-  { src: '/images/hero/hero-14.jpg', alt: 'Cosecha de café con sacos de yute y big bags' },
+-  { src: '/images/hero/hero-15.jpg', alt: 'Geosintéticos para control de erosión en talud' },
+-  { src: '/images/hero/hero-16.jpg', alt: 'Patio logístico con cargas paletizadas y embaladas' },
++  { src: '/images/hero/hero-01.webp', alt: 'Paisaje industrial minero en los Andes peruanos' },
++  { src: '/images/hero/hero-02.webp', alt: 'Carga de big bags (FIBC) en planta industrial' },
++  { src: '/images/hero/hero-03.webp', alt: 'Instalación de geomembrana HDPE en poza de contención' },
++  { src: '/images/hero/hero-04.webp', alt: 'Geotextil y geomalla en obra de movimiento de tierras' },
++  { src: '/images/hero/hero-05.webp', alt: 'Estructura tensada de arquitectura textil' },
++  { src: '/images/hero/hero-06.webp', alt: 'Malla agrícola de sombra y anti-granizo sobre cultivo' },
++  { src: '/images/hero/hero-07.webp', alt: 'Tanque flexible (bladder) para almacenamiento de agua' },
++  { src: '/images/hero/hero-08.webp', alt: 'Camión con siders y tolderas en carretera peruana' },
++  { src: '/images/hero/hero-09.webp', alt: 'Mangas de ventilación industrial en planta' },
++  { src: '/images/hero/hero-10.webp', alt: 'Almacén con rollos de lonas industriales' },
++  { src: '/images/hero/hero-11.webp', alt: 'Operarios en línea de fabricación de lonas' },
++  { src: '/images/hero/hero-12.webp', alt: 'Acopio minero cubierto con lona en altura' },
++  { src: '/images/hero/hero-13.webp', alt: 'Invernadero con film técnico agrícola' },
++  { src: '/images/hero/hero-14.webp', alt: 'Cosecha de café con sacos de yute y big bags' },
++  { src: '/images/hero/hero-15.webp', alt: 'Geosintéticos para control de erosión en talud' },
++  { src: '/images/hero/hero-16.webp', alt: 'Patio logístico con cargas paletizadas y embaladas' },
+ ];
+ 
+ const INTERVAL_MS = 6000;
+diff --git a/components/ServiceTabs.tsx b/components/ServiceTabs.tsx
+index 34a6dde..63feb9e 100644
+--- a/components/ServiceTabs.tsx
++++ b/components/ServiceTabs.tsx
+@@ -16,7 +16,7 @@ const ICONS: Record<string, LucideIcon> = { ruler: Ruler, hardhat: HardHat, ship
+  * roto)». No caía: nunca existieron servicio-fabricacion-2.jpg ni
+  * servicio-instalacion-2.jpg, y cada carga de la portada lanzaba
+  *
+- *   ⨯ The requested resource isn't a valid image for /images/servicio-instalacion-2.jpg
++ *   ⨯ The requested resource isn't a valid image for /images/servicio-instalacion-2.webp
+  *
+  * Un componente de cliente no puede mirar el disco, así que la promesa era
+  * imposible de cumplir desde aquí. Ahora el servidor resuelve qué tomas
+diff --git a/docs/encargo-imagenes.md b/docs/encargo-imagenes.md
+index 7ead8e8..8b1b7f8 100644
+--- a/docs/encargo-imagenes.md
++++ b/docs/encargo-imagenes.md
+@@ -97,11 +97,11 @@ como `public/images/familias/geosinteticos.jpg`.
+ 
+ 9 pendientes de 13.
+ 
+-### 1. `/images/proceso/compras-homologacion.png`
++### 1. `/images/proceso/compras-homologacion.webp`
+ 
+ | | |
+ |---|---|
+-| **Archivo** | `public/images/proceso/compras-homologacion.png` |
++| **Archivo** | `public/images/proceso/compras-homologacion.webp` |
+ | **Tamaño** | 1600 × 800 px |
+ | **Tipo** | diagrama |
+ | **Dónde se usa** | Cuerpo de /compras |
+@@ -118,11 +118,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente
+ 
+ ---
+ 
+-### 2. `/images/proceso/confianza-identidad.png`
++### 2. `/images/proceso/confianza-identidad.webp`
+ 
+ | | |
+ |---|---|
+-| **Archivo** | `public/images/proceso/confianza-identidad.png` |
++| **Archivo** | `public/images/proceso/confianza-identidad.webp` |
+ | **Tamaño** | 1600 × 800 px |
+ | **Tipo** | diagrama |
+ | **Dónde se usa** | Cuerpo de /confianza |
+@@ -139,11 +139,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente
+ 
+ ---
+ 
+-### 3. `/images/proceso/compradores-incoterm.png`
++### 3. `/images/proceso/compradores-incoterm.webp`
+ 
+ | | |
+ |---|---|
+-| **Archivo** | `public/images/proceso/compradores-incoterm.png` |
++| **Archivo** | `public/images/proceso/compradores-incoterm.webp` |
+ | **Tamaño** | 1600 × 700 px |
+ | **Tipo** | diagrama |
+ | **Dónde se usa** | Cuerpo de /compradores |
+@@ -160,11 +160,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente
+ 
+ ---
+ 
+-### 4. `/images/proceso/distribuidores-canal.png`
++### 4. `/images/proceso/distribuidores-canal.webp`
+ 
+ | | |
+ |---|---|
+-| **Archivo** | `public/images/proceso/distribuidores-canal.png` |
++| **Archivo** | `public/images/proceso/distribuidores-canal.webp` |
+ | **Tamaño** | 1600 × 800 px |
+ | **Tipo** | diagrama |
+ | **Dónde se usa** | Cuerpo de /distribuidores |
+@@ -181,11 +181,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente
+ 
+ ---
+ 
+-### 5. `/images/proceso/socios-especificacion.png`
++### 5. `/images/proceso/socios-especificacion.webp`
+ 
+ | | |
+ |---|---|
+-| **Archivo** | `public/images/proceso/socios-especificacion.png` |
++| **Archivo** | `public/images/proceso/socios-especificacion.webp` |
+ | **Tamaño** | 1600 × 800 px |
+ | **Tipo** | diagrama |
+ | **Dónde se usa** | Cuerpo de /socios |
+@@ -202,11 +202,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente
+ 
+ ---
+ 
+-### 6. `/images/proceso/proyectos-verificacion.png`
++### 6. `/images/proceso/proyectos-verificacion.webp`
+ 
+ | | |
+ |---|---|
+-| **Archivo** | `public/images/proceso/proyectos-verificacion.png` |
++| **Archivo** | `public/images/proceso/proyectos-verificacion.webp` |
+ | **Tamaño** | 1600 × 700 px |
+ | **Tipo** | diagrama |
+ | **Dónde se usa** | Cuerpo de /proyectos |
+@@ -223,11 +223,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente
+ 
+ ---
+ 
+-### 7. `/images/proceso/marco-pilares.png`
++### 7. `/images/proceso/marco-pilares.webp`
+ 
+ | | |
+ |---|---|
+-| **Archivo** | `public/images/proceso/marco-pilares.png` |
++| **Archivo** | `public/images/proceso/marco-pilares.webp` |
+ | **Tamaño** | 1600 × 900 px |
+ | **Tipo** | diagrama |
+ | **Dónde se usa** | Cuerpo de /marco |
+@@ -244,11 +244,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente
+ 
+ ---
+ 
+-### 8. `/images/proceso/informes-metodo.png`
++### 8. `/images/proceso/informes-metodo.webp`
+ 
+ | | |
+ |---|---|
+-| **Archivo** | `public/images/proceso/informes-metodo.png` |
++| **Archivo** | `public/images/proceso/informes-metodo.webp` |
+ | **Tamaño** | 1600 × 800 px |
+ | **Tipo** | diagrama |
+ | **Dónde se usa** | Cuerpo de /informes |
+@@ -265,11 +265,11 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente
+ 
+ ---
+ 
+-### 9. `/images/proceso/local-cobertura.png`
++### 9. `/images/proceso/local-cobertura.webp`
+ 
+ | | |
+ |---|---|
+-| **Archivo** | `public/images/proceso/local-cobertura.png` |
++| **Archivo** | `public/images/proceso/local-cobertura.webp` |
+ | **Tamaño** | 1600 × 1000 px |
+ | **Tipo** | diagrama |
+ | **Dónde se usa** | Cuerpo de /local |
+diff --git a/lib/galeria.ts b/lib/galeria.ts
+index eae040d..9dffc00 100644
+--- a/lib/galeria.ts
++++ b/lib/galeria.ts
+@@ -9,9 +9,9 @@ import { join } from 'node:path';
+  * instalación y escala— y el glosario declara un diagrama por término. Cada
+  * una de esas ranuras puede tener VARIAS TOMAS que se alternan entre sí:
+  *
+- *   /images/galeria/geomembranas-pvc-general.jpg      toma 1
+- *   /images/galeria/geomembranas-pvc-general-2.jpg    toma 2 (opcional)
+- *   /images/galeria/geomembranas-pvc-general-3.jpg    toma 3 (opcional)
++ *   /images/galeria/geomembranas-pvc-general.webp      toma 1
++ *   /images/galeria/geomembranas-pvc-general-2.webp    toma 2 (opcional)
++ *   /images/galeria/geomembranas-pvc-general-3.webp    toma 3 (opcional)
+  *
+  * Por qué el sufijo numérico y no una entrada más en `gallery`. Las
+  * miniaturas se derivan de `gallery`, y su leyenda sale del sufijo de vista:
+diff --git a/lib/imagenes.ts b/lib/imagenes.ts
+index f050088..d49b271 100644
+--- a/lib/imagenes.ts
++++ b/lib/imagenes.ts
+@@ -11,7 +11,7 @@ import { calculadoras } from './calculadoras';
+  * REGISTRO DE IMÁGENES.
+  *
+  * Qué resuelve. El catálogo ya declara 155 rutas de imagen con una convención
+- * estable —/images/galeria/{slug}-{variante}.jpg— y 116 de esos archivos ya
++ * estable —/images/galeria/{slug}-{variante}.webp— y 116 de esos archivos ya
+  * existen. Lo que faltaba no era una convención: era saber CUÁLES faltan y
+  * poder pedirlas sin que el nombre se desvíe.
+  *
+@@ -120,7 +120,7 @@ export const VARIANTES = [
+ ] as const;
+ 
+ const rutaGaleria = (slug: string, variante: string) =>
+-  `/images/galeria/${slug}-${variante}.jpg`;
++  `/images/galeria/${slug}-${variante}.webp`;
+ 
+ /* ------------------------------------------------------------------ */
+ /* Ranuras derivadas de los datos reales                              */
+@@ -192,7 +192,7 @@ export function ranurasFamilia(): RanuraImagen[] {
+     const items = products.filter((p) => p.category === f.name);
+     return {
+       id: `familia:${f.slug}`,
+-      ruta: `/images/familias/${f.slug}.jpg`,
++      ruta: `/images/familias/${f.slug}.webp`,
+       ancho: 1920,
+       alto: 1080,
+       alt: `${f.name}: ${f.tagline}`,
+@@ -218,7 +218,7 @@ export function ranurasFamilia(): RanuraImagen[] {
+ export function ranurasSolucion(): RanuraImagen[] {
+   return solutions.map((s) => ({
+     id: `solucion:${s.slug}`,
+-    ruta: `/images/soluciones/${s.slug}.png`,
++    ruta: `/images/soluciones/${s.slug}.webp`,
+     ancho: 1600,
+     alto: 900,
+     alt: `Esquema de la arquitectura de referencia: ${s.titulo}`,
+@@ -245,7 +245,7 @@ export function ranurasSolucion(): RanuraImagen[] {
+ export function ranurasGuia(): RanuraImagen[] {
+   return articles.map((a) => ({
+     id: `guia:${a.slug}`,
+-    ruta: `/images/recursos/${a.slug}.jpg`,
++    ruta: `/images/recursos/${a.slug}.webp`,
+     ancho: 1920,
+     alto: 1080,
+     // El título de una guía puede ser largo; el alt se acota para no
+@@ -427,7 +427,7 @@ export function ranurasGlosario(): RanuraImagen[] {
+     .filter((t) => TERMINOS_ILUSTRABLES.includes(t.slug))
+     .map((t) => ({
+       id: `glosario:${t.slug}`,
+-      ruta: `/images/glosario/${t.slug}.png`,
++      ruta: `/images/glosario/${t.slug}.webp`,
+       ancho: 1200,
+       alto: 900,
+       alt: `Esquema explicativo del término ${t.termino}`,
+@@ -461,7 +461,7 @@ export function ranurasGlosario(): RanuraImagen[] {
+ export function ranurasBiblioteca(): RanuraImagen[] {
+   return guides.map((g) => ({
+     id: `biblioteca:${g.slug}`,
+-    ruta: `/images/biblioteca/${g.slug}.png`,
++    ruta: `/images/biblioteca/${g.slug}.webp`,
+     ancho: 1600,
+     alto: 900,
+     alt: `Diagrama de especificación: ${g.title}`,
+@@ -486,7 +486,7 @@ export function ranurasBiblioteca(): RanuraImagen[] {
+ export function ranurasCalculadora(): RanuraImagen[] {
+   return calculadoras.map((c) => ({
+     id: `calculadora:${c.slug}`,
+-    ruta: `/images/calculadoras/${c.slug}.png`,
++    ruta: `/images/calculadoras/${c.slug}.webp`,
+     ancho: 1600,
+     alto: 900,
+     alt: `Geometría del cálculo: ${c.titulo}`,
+@@ -533,7 +533,7 @@ export function ranurasErrorCompra(): RanuraImagen[] {
+       if (!slug) return;
+       salida.push({
+         id: `error:${ind.slug}:${slug}`,
+-        ruta: `/images/industria/${ind.slug}-${slug}.png`,
++        ruta: `/images/industria/${ind.slug}-${slug}.webp`,
+         ancho: 1400,
+         alto: 800,
+         alt: `${p.titulo} — comparación de la compra mal especificada frente a la correcta`,
+@@ -555,7 +555,7 @@ export function ranurasErrorCompra(): RanuraImagen[] {
+ export function ranurasAplicacion(): RanuraImagen[] {
+   return applications.map((a) => ({
+     id: `aplicacion:${a.slug}`,
+-    ruta: `/images/aplicaciones/${a.slug}.jpg`,
++    ruta: `/images/aplicaciones/${a.slug}.webp`,
+     ancho: 1920,
+     alto: 1080,
+     alt: `${a.name}: la situación de obra donde esta aplicación se resuelve`,
+@@ -689,7 +689,7 @@ const PROCESOS = [
+ export function ranurasProceso(): RanuraImagen[] {
+   return PROCESOS.map((p) => ({
+     id: `proceso:${p.slug}`,
+-    ruta: `/images/proceso/${p.slug}.png`,
++    ruta: `/images/proceso/${p.slug}.webp`,
+     ancho: p.ancho,
+     alto: p.alto,
+     alt: p.alt,
+diff --git a/lib/products.ts b/lib/products.ts
+index cf85d31..47dd767 100644
+--- a/lib/products.ts
++++ b/lib/products.ts
+@@ -54,13 +54,13 @@ export const products: Product[] = [
+       'Personalizables con logo y especificaciones del cliente',
+       'Reutilizables y reciclables, opción eco-friendly'
+     ],
+-    image: '/images/galeria/big-bags-bolsones-polipropileno-general.jpg',
++    image: '/images/galeria/big-bags-bolsones-polipropileno-general.webp',
+     gallery: [
+-      '/images/galeria/big-bags-bolsones-polipropileno-general.jpg',
+-      '/images/galeria/big-bags-bolsones-polipropileno-detalle.jpg',
+-      '/images/galeria/big-bags-bolsones-polipropileno-instalacion.jpg',
+-      '/images/galeria/big-bags-bolsones-polipropileno-escala.jpg',
+-      '/images/big-bags.jpg',
++      '/images/galeria/big-bags-bolsones-polipropileno-general.webp',
++      '/images/galeria/big-bags-bolsones-polipropileno-detalle.webp',
++      '/images/galeria/big-bags-bolsones-polipropileno-instalacion.webp',
++      '/images/galeria/big-bags-bolsones-polipropileno-escala.webp',
++      '/images/big-bags.webp',
+     ],
+     featured: true,
+     popular: true,
+@@ -99,13 +99,13 @@ export const products: Product[] = [
+       'Personalizable en medida, color y rotulado',
+       'Abastecimiento ágil con respaldo técnico local'
+     ],
+-    image: '/images/galeria/sacos-polytarp-embarque-granel-general.jpg',
++    image: '/images/galeria/sacos-polytarp-embarque-granel-general.webp',
+     gallery: [
+-      '/images/galeria/sacos-polytarp-embarque-granel-general.jpg',
+-      '/images/galeria/sacos-polytarp-embarque-granel-detalle.jpg',
+-      '/images/galeria/sacos-polytarp-embarque-granel-instalacion.jpg',
+-      '/images/galeria/sacos-polytarp-embarque-granel-escala.jpg',
+-      '/images/sacos-polytarp.jpg',
++      '/images/galeria/sacos-polytarp-embarque-granel-general.webp',
++      '/images/galeria/sacos-polytarp-embarque-granel-detalle.webp',
++      '/images/galeria/sacos-polytarp-embarque-granel-instalacion.webp',
++      '/images/galeria/sacos-polytarp-embarque-granel-escala.webp',
++      '/images/sacos-polytarp.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -140,13 +140,13 @@ export const products: Product[] = [
+       'Opción de impresión y personalización',
+       'Producción nacional con tiempos de entrega competitivos'
+     ],
+-    image: '/images/galeria/bolsas-laminas-pebd-pead-general.jpg',
++    image: '/images/galeria/bolsas-laminas-pebd-pead-general.webp',
+     gallery: [
+-      '/images/galeria/bolsas-laminas-pebd-pead-general.jpg',
+-      '/images/galeria/bolsas-laminas-pebd-pead-detalle.jpg',
+-      '/images/galeria/bolsas-laminas-pebd-pead-instalacion.jpg',
+-      '/images/galeria/bolsas-laminas-pebd-pead-escala.jpg',
+-      '/images/bolsas-laminas.jpg',
++      '/images/galeria/bolsas-laminas-pebd-pead-general.webp',
++      '/images/galeria/bolsas-laminas-pebd-pead-detalle.webp',
++      '/images/galeria/bolsas-laminas-pebd-pead-instalacion.webp',
++      '/images/galeria/bolsas-laminas-pebd-pead-escala.webp',
++      '/images/bolsas-laminas.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -180,13 +180,13 @@ export const products: Product[] = [
+       'Optimiza espacio y presentación de la mercadería',
+       'Calibres a medida para cada tipo de carga'
+     ],
+-    image: '/images/galeria/films-termocontraibles-shrink-general.jpg',
++    image: '/images/galeria/films-termocontraibles-shrink-general.webp',
+     gallery: [
+-      '/images/galeria/films-termocontraibles-shrink-general.jpg',
+-      '/images/galeria/films-termocontraibles-shrink-detalle.jpg',
+-      '/images/galeria/films-termocontraibles-shrink-instalacion.jpg',
+-      '/images/galeria/films-termocontraibles-shrink-escala.jpg',
+-      '/images/films-shrink.jpg',
++      '/images/galeria/films-termocontraibles-shrink-general.webp',
++      '/images/galeria/films-termocontraibles-shrink-detalle.webp',
++      '/images/galeria/films-termocontraibles-shrink-instalacion.webp',
++      '/images/galeria/films-termocontraibles-shrink-escala.webp',
++      '/images/films-shrink.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -227,14 +227,14 @@ export const products: Product[] = [
+       'Entregas rápidas y precios competitivos',
+       'Soporte post-venta y reposición de partes'
+     ],
+-    image: '/images/galeria/lona-plastificada-rafia-polytarp-general.jpg',
++    image: '/images/galeria/lona-plastificada-rafia-polytarp-general.webp',
+     gallery: [
+-      '/images/galeria/lona-plastificada-rafia-polytarp-general.jpg',
+-      '/images/galeria/lona-plastificada-rafia-polytarp-detalle.jpg',
+-      '/images/galeria/lona-plastificada-rafia-polytarp-instalacion.jpg',
+-      '/images/galeria/lona-plastificada-rafia-polytarp-escala.jpg',
+-      '/images/lona-a-medida.jpg',
+-      '/images/ojalillo-rafia.jpg',
++      '/images/galeria/lona-plastificada-rafia-polytarp-general.webp',
++      '/images/galeria/lona-plastificada-rafia-polytarp-detalle.webp',
++      '/images/galeria/lona-plastificada-rafia-polytarp-instalacion.webp',
++      '/images/galeria/lona-plastificada-rafia-polytarp-escala.webp',
++      '/images/lona-a-medida.webp',
++      '/images/ojalillo-rafia.webp',
+     ],
+     featured: true,
+     popular: true,
+@@ -272,13 +272,13 @@ export const products: Product[] = [
+       'Personalización con logo de la empresa transportista',
+       'Opción de lona encerada tradicional de máxima impermeabilidad'
+     ],
+-    image: '/images/galeria/mantas-cobertores-toldos-camiones-general.jpg',
++    image: '/images/galeria/mantas-cobertores-toldos-camiones-general.webp',
+     gallery: [
+-      '/images/galeria/mantas-cobertores-toldos-camiones-general.jpg',
+-      '/images/galeria/mantas-cobertores-toldos-camiones-detalle.jpg',
+-      '/images/galeria/mantas-cobertores-toldos-camiones-instalacion.jpg',
+-      '/images/galeria/mantas-cobertores-toldos-camiones-escala.jpg',
+-      '/images/mantas-camiones.jpg',
++      '/images/galeria/mantas-cobertores-toldos-camiones-general.webp',
++      '/images/galeria/mantas-cobertores-toldos-camiones-detalle.webp',
++      '/images/galeria/mantas-cobertores-toldos-camiones-instalacion.webp',
++      '/images/galeria/mantas-cobertores-toldos-camiones-escala.webp',
++      '/images/mantas-camiones.webp',
+     ],
+     featured: true,
+     popular: true,
+@@ -312,13 +312,13 @@ export const products: Product[] = [
+       'Instalación profesional y soporte post-venta',
+       'Doble función: protección de carga + imagen de marca'
+     ],
+-    image: '/images/galeria/siders-tolderas-camiones-general.jpg',
++    image: '/images/galeria/siders-tolderas-camiones-general.webp',
+     gallery: [
+-      '/images/galeria/siders-tolderas-camiones-general.jpg',
+-      '/images/galeria/siders-tolderas-camiones-detalle.jpg',
+-      '/images/galeria/siders-tolderas-camiones-instalacion.jpg',
+-      '/images/galeria/siders-tolderas-camiones-escala.jpg',
+-      '/images/siders-tolderas.jpg',
++      '/images/galeria/siders-tolderas-camiones-general.webp',
++      '/images/galeria/siders-tolderas-camiones-detalle.webp',
++      '/images/galeria/siders-tolderas-camiones-instalacion.webp',
++      '/images/galeria/siders-tolderas-camiones-escala.webp',
++      '/images/siders-tolderas.webp',
+     ],
+     featured: true,
+     popular: false,
+@@ -352,13 +352,13 @@ export const products: Product[] = [
+       'Confección a medida con acabados profesionales',
+       'Asesoría para elegir el material óptimo por clima y uso'
+     ],
+-    image: '/images/galeria/cobertores-agricolas-multimaterial-general.jpg',
++    image: '/images/galeria/cobertores-agricolas-multimaterial-general.webp',
+     gallery: [
+-      '/images/galeria/cobertores-agricolas-multimaterial-general.jpg',
+-      '/images/galeria/cobertores-agricolas-multimaterial-detalle.jpg',
+-      '/images/galeria/cobertores-agricolas-multimaterial-instalacion.jpg',
+-      '/images/galeria/cobertores-agricolas-multimaterial-escala.jpg',
+-      '/images/cobertores-multimaterial.jpg',
++      '/images/galeria/cobertores-agricolas-multimaterial-general.webp',
++      '/images/galeria/cobertores-agricolas-multimaterial-detalle.webp',
++      '/images/galeria/cobertores-agricolas-multimaterial-instalacion.webp',
++      '/images/galeria/cobertores-agricolas-multimaterial-escala.webp',
++      '/images/cobertores-multimaterial.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -395,13 +395,13 @@ export const products: Product[] = [
+       'Fácil manejo y disposición al final del ciclo',
+       'Mejora el bienestar animal y reduce mortalidad'
+     ],
+-    image: '/images/galeria/mantas-arpilleras-granjas-general.jpg',
++    image: '/images/galeria/mantas-arpilleras-granjas-general.webp',
+     gallery: [
+-      '/images/galeria/mantas-arpilleras-granjas-general.jpg',
+-      '/images/galeria/mantas-arpilleras-granjas-detalle.jpg',
+-      '/images/galeria/mantas-arpilleras-granjas-instalacion.jpg',
+-      '/images/galeria/mantas-arpilleras-granjas-escala.jpg',
+-      '/images/mantas-arpilleras.jpg',
++      '/images/galeria/mantas-arpilleras-granjas-general.webp',
++      '/images/galeria/mantas-arpilleras-granjas-detalle.webp',
++      '/images/galeria/mantas-arpilleras-granjas-instalacion.webp',
++      '/images/galeria/mantas-arpilleras-granjas-escala.webp',
++      '/images/mantas-arpilleras.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -440,13 +440,13 @@ export const products: Product[] = [
+       'Resistente a humedad, hongos y roedores',
+       'Larga vida útil y bajo mantenimiento'
+     ],
+-    image: '/images/galeria/mantas-aislantes-termicas-termoacusticas-general.jpg',
++    image: '/images/galeria/mantas-aislantes-termicas-termoacusticas-general.webp',
+     gallery: [
+-      '/images/galeria/mantas-aislantes-termicas-termoacusticas-general.jpg',
+-      '/images/galeria/mantas-aislantes-termicas-termoacusticas-detalle.jpg',
+-      '/images/galeria/mantas-aislantes-termicas-termoacusticas-instalacion.jpg',
+-      '/images/galeria/mantas-aislantes-termicas-termoacusticas-escala.jpg',
+-      '/images/mantas-aislantes.jpg',
++      '/images/galeria/mantas-aislantes-termicas-termoacusticas-general.webp',
++      '/images/galeria/mantas-aislantes-termicas-termoacusticas-detalle.webp',
++      '/images/galeria/mantas-aislantes-termicas-termoacusticas-instalacion.webp',
++      '/images/galeria/mantas-aislantes-termicas-termoacusticas-escala.webp',
++      '/images/mantas-aislantes.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -489,14 +489,14 @@ export const products: Product[] = [
+       'Personalización completa de dimensiones, color y accesorios',
+       'Alta durabilidad (10+ años) con mantenimiento mínimo'
+     ],
+-    image: '/images/galeria/carpas-lona-estructuras-metalicas-general.jpg',
++    image: '/images/galeria/carpas-lona-estructuras-metalicas-general.webp',
+     gallery: [
+-      '/images/galeria/carpas-lona-estructuras-metalicas-general.jpg',
+-      '/images/galeria/carpas-lona-estructuras-metalicas-detalle.jpg',
+-      '/images/galeria/carpas-lona-estructuras-metalicas-instalacion.jpg',
+-      '/images/galeria/carpas-lona-estructuras-metalicas-escala.jpg',
+-      '/images/carpas.jpg',
+-      '/images/techos-escolares.jpg',
++      '/images/galeria/carpas-lona-estructuras-metalicas-general.webp',
++      '/images/galeria/carpas-lona-estructuras-metalicas-detalle.webp',
++      '/images/galeria/carpas-lona-estructuras-metalicas-instalacion.webp',
++      '/images/galeria/carpas-lona-estructuras-metalicas-escala.webp',
++      '/images/carpas.webp',
++      '/images/techos-escolares.webp',
+     ],
+     featured: true,
+     popular: true,
+@@ -530,14 +530,14 @@ export const products: Product[] = [
+       'Instalación profesional con herrajes de calidad',
+       'Alternativa ligera y de rápida ejecución'
+     ],
+-    image: '/images/galeria/coberturas-tensionadas-arquitectura-textil-general.jpg',
++    image: '/images/galeria/coberturas-tensionadas-arquitectura-textil-general.webp',
+     gallery: [
+-      '/images/galeria/coberturas-tensionadas-arquitectura-textil-general.jpg',
+-      '/images/galeria/coberturas-tensionadas-arquitectura-textil-detalle.jpg',
+-      '/images/galeria/coberturas-tensionadas-arquitectura-textil-instalacion.jpg',
+-      '/images/galeria/coberturas-tensionadas-arquitectura-textil-escala.jpg',
+-      '/images/tensoestructuras.jpg',
+-      '/images/toldos-cerramientos.jpg',
++      '/images/galeria/coberturas-tensionadas-arquitectura-textil-general.webp',
++      '/images/galeria/coberturas-tensionadas-arquitectura-textil-detalle.webp',
++      '/images/galeria/coberturas-tensionadas-arquitectura-textil-instalacion.webp',
++      '/images/galeria/coberturas-tensionadas-arquitectura-textil-escala.webp',
++      '/images/tensoestructuras.webp',
++      '/images/toldos-cerramientos.webp',
+     ],
+     featured: true,
+     popular: false,
+@@ -571,13 +571,13 @@ export const products: Product[] = [
+       'Solución temporal o semipermanente',
+       'Dimensionamiento y ficha técnica por proyecto'
+     ],
+-    image: '/images/galeria/coberturas-inflables-general.jpg',
++    image: '/images/galeria/coberturas-inflables-general.webp',
+     gallery: [
+-      '/images/galeria/coberturas-inflables-general.jpg',
+-      '/images/galeria/coberturas-inflables-detalle.jpg',
+-      '/images/galeria/coberturas-inflables-instalacion.jpg',
+-      '/images/galeria/coberturas-inflables-escala.jpg',
+-      '/images/inflables.jpg',
++      '/images/galeria/coberturas-inflables-general.webp',
++      '/images/galeria/coberturas-inflables-detalle.webp',
++      '/images/galeria/coberturas-inflables-instalacion.webp',
++      '/images/galeria/coberturas-inflables-escala.webp',
++      '/images/inflables.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -612,13 +612,13 @@ export const products: Product[] = [
+       'Adaptado al clima del emplazamiento',
+       'Configuración a medida del personal y la operación'
+     ],
+-    image: '/images/galeria/modulos-albergues-campamentos-general.jpg',
++    image: '/images/galeria/modulos-albergues-campamentos-general.webp',
+     gallery: [
+-      '/images/galeria/modulos-albergues-campamentos-general.jpg',
+-      '/images/galeria/modulos-albergues-campamentos-detalle.jpg',
+-      '/images/galeria/modulos-albergues-campamentos-instalacion.jpg',
+-      '/images/galeria/modulos-albergues-campamentos-escala.jpg',
+-      '/images/modulos-campamentos.jpg',
++      '/images/galeria/modulos-albergues-campamentos-general.webp',
++      '/images/galeria/modulos-albergues-campamentos-detalle.webp',
++      '/images/galeria/modulos-albergues-campamentos-instalacion.webp',
++      '/images/galeria/modulos-albergues-campamentos-escala.webp',
++      '/images/modulos-campamentos.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -652,13 +652,13 @@ export const products: Product[] = [
+       'Diseño e instalación a medida del sitio',
+       'Integrable con nuestra línea de mallas agrícolas'
+     ],
+-    image: '/images/galeria/galpones-invernaderos-estructurados-general.jpg',
++    image: '/images/galeria/galpones-invernaderos-estructurados-general.webp',
+     gallery: [
+-      '/images/galeria/galpones-invernaderos-estructurados-general.jpg',
+-      '/images/galeria/galpones-invernaderos-estructurados-detalle.jpg',
+-      '/images/galeria/galpones-invernaderos-estructurados-instalacion.jpg',
+-      '/images/galeria/galpones-invernaderos-estructurados-escala.jpg',
+-      '/images/invernaderos.jpg',
++      '/images/galeria/galpones-invernaderos-estructurados-general.webp',
++      '/images/galeria/galpones-invernaderos-estructurados-detalle.webp',
++      '/images/galeria/galpones-invernaderos-estructurados-instalacion.webp',
++      '/images/galeria/galpones-invernaderos-estructurados-escala.webp',
++      '/images/invernaderos.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -692,13 +692,13 @@ export const products: Product[] = [
+       'Materiales durables para intemperie',
+       'Instalación profesional y soporte'
+     ],
+-    image: '/images/galeria/toldos-cerramientos-general.jpg',
++    image: '/images/galeria/toldos-cerramientos-general.webp',
+     gallery: [
+-      '/images/galeria/toldos-cerramientos-general.jpg',
+-      '/images/galeria/toldos-cerramientos-detalle.jpg',
+-      '/images/galeria/toldos-cerramientos-instalacion.jpg',
+-      '/images/galeria/toldos-cerramientos-escala.jpg',
+-      '/images/toldos-cerramientos.jpg',
++      '/images/galeria/toldos-cerramientos-general.webp',
++      '/images/galeria/toldos-cerramientos-detalle.webp',
++      '/images/galeria/toldos-cerramientos-instalacion.webp',
++      '/images/galeria/toldos-cerramientos-escala.webp',
++      '/images/toldos-cerramientos.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -740,13 +740,13 @@ export const products: Product[] = [
+       'Fácil instalación y larga vida útil',
+       'Compatible con producción orgánica y exportación'
+     ],
+-    image: '/images/galeria/mallas-antiafidas-general.jpg',
++    image: '/images/galeria/mallas-antiafidas-general.webp',
+     gallery: [
+-      '/images/galeria/mallas-antiafidas-general.jpg',
+-      '/images/galeria/mallas-antiafidas-detalle.jpg',
+-      '/images/galeria/mallas-antiafidas-instalacion.jpg',
+-      '/images/galeria/mallas-antiafidas-escala.jpg',
+-      '/images/mallas-antiafidas.jpg',
++      '/images/galeria/mallas-antiafidas-general.webp',
++      '/images/galeria/mallas-antiafidas-detalle.webp',
++      '/images/galeria/mallas-antiafidas-instalacion.webp',
++      '/images/galeria/mallas-antiafidas-escala.webp',
++      '/images/mallas-antiafidas.webp',
+     ],
+     featured: true,
+     popular: false,
+@@ -785,13 +785,13 @@ export const products: Product[] = [
+       'Versátil para agro, comercio y construcción',
+       'Confección con acabados a medida'
+     ],
+-    image: '/images/galeria/malla-raschel-sombra-general.jpg',
++    image: '/images/galeria/malla-raschel-sombra-general.webp',
+     gallery: [
+-      '/images/galeria/malla-raschel-sombra-general.jpg',
+-      '/images/galeria/malla-raschel-sombra-detalle.jpg',
+-      '/images/galeria/malla-raschel-sombra-instalacion.jpg',
+-      '/images/galeria/malla-raschel-sombra-escala.jpg',
+-      '/images/malla-raschel.jpg',
++      '/images/galeria/malla-raschel-sombra-general.webp',
++      '/images/galeria/malla-raschel-sombra-detalle.webp',
++      '/images/galeria/malla-raschel-sombra-instalacion.webp',
++      '/images/galeria/malla-raschel-sombra-escala.webp',
++      '/images/malla-raschel.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -825,13 +825,13 @@ export const products: Product[] = [
+       'Confección a medida del huerto',
+       'Larga vida útil con tratamiento UV'
+     ],
+-    image: '/images/galeria/malla-anti-pajaro-anti-granizo-general.jpg',
++    image: '/images/galeria/malla-anti-pajaro-anti-granizo-general.webp',
+     gallery: [
+-      '/images/galeria/malla-anti-pajaro-anti-granizo-general.jpg',
+-      '/images/galeria/malla-anti-pajaro-anti-granizo-detalle.jpg',
+-      '/images/galeria/malla-anti-pajaro-anti-granizo-instalacion.jpg',
+-      '/images/galeria/malla-anti-pajaro-anti-granizo-escala.jpg',
+-      '/images/malla-anti-pajaro.jpg',
++      '/images/galeria/malla-anti-pajaro-anti-granizo-general.webp',
++      '/images/galeria/malla-anti-pajaro-anti-granizo-detalle.webp',
++      '/images/galeria/malla-anti-pajaro-anti-granizo-instalacion.webp',
++      '/images/galeria/malla-anti-pajaro-anti-granizo-escala.webp',
++      '/images/malla-anti-pajaro.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -873,15 +873,15 @@ export const products: Product[] = [
+       'Personalización total de diámetro, longitud y accesorios',
+       'Cumplimiento de normas de seguridad minera (OIT, MINEM)'
+     ],
+-    image: '/images/galeria/mangas-ventilacion-minas-tuneles-general.jpg',
++    image: '/images/galeria/mangas-ventilacion-minas-tuneles-general.webp',
+     gallery: [
+-      '/images/galeria/mangas-ventilacion-minas-tuneles-general.jpg',
+-      '/images/galeria/mangas-ventilacion-minas-tuneles-detalle.jpg',
+-      '/images/galeria/mangas-ventilacion-minas-tuneles-instalacion.jpg',
+-      '/images/galeria/mangas-ventilacion-minas-tuneles-escala.jpg',
+-      '/images/mangas-ventilacion.jpg',
+-      '/images/mangas-ventilacion-y.jpg',
+-      '/images/mangas-produccion.jpg',
++      '/images/galeria/mangas-ventilacion-minas-tuneles-general.webp',
++      '/images/galeria/mangas-ventilacion-minas-tuneles-detalle.webp',
++      '/images/galeria/mangas-ventilacion-minas-tuneles-instalacion.webp',
++      '/images/galeria/mangas-ventilacion-minas-tuneles-escala.webp',
++      '/images/mangas-ventilacion.webp',
++      '/images/mangas-ventilacion-y.webp',
++      '/images/mangas-produccion.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -927,13 +927,13 @@ export const products: Product[] = [
+       'Resistente a rayos UV y condiciones climáticas extremas',
+       'Cumplimiento de normas ambientales y de seguridad'
+     ],
+-    image: '/images/galeria/geomembranas-pvc-general.jpg',
++    image: '/images/galeria/geomembranas-pvc-general.webp',
+     gallery: [
+-      '/images/galeria/geomembranas-pvc-general.jpg',
+-      '/images/galeria/geomembranas-pvc-detalle.jpg',
+-      '/images/galeria/geomembranas-pvc-instalacion.jpg',
+-      '/images/galeria/geomembranas-pvc-escala.jpg',
+-      '/images/geomembranas.jpg',
++      '/images/galeria/geomembranas-pvc-general.webp',
++      '/images/galeria/geomembranas-pvc-detalle.webp',
++      '/images/galeria/geomembranas-pvc-instalacion.webp',
++      '/images/galeria/geomembranas-pvc-escala.webp',
++      '/images/geomembranas.webp',
+     ],
+     featured: true,
+     popular: false,
+@@ -968,13 +968,13 @@ export const products: Product[] = [
+       'Espesores y ficha ajustados a cada proyecto',
+       'Documentación de respaldo entregada en la cotización'
+     ],
+-    image: '/images/galeria/geomembrana-polietileno-pe-hdpe-general.jpg',
++    image: '/images/galeria/geomembrana-polietileno-pe-hdpe-general.webp',
+     gallery: [
+-      '/images/galeria/geomembrana-polietileno-pe-hdpe-general.jpg',
+-      '/images/galeria/geomembrana-polietileno-pe-hdpe-detalle.jpg',
+-      '/images/galeria/geomembrana-polietileno-pe-hdpe-instalacion.jpg',
+-      '/images/galeria/geomembrana-polietileno-pe-hdpe-escala.jpg',
+-      '/images/geomembrana-hdpe.jpg',
++      '/images/galeria/geomembrana-polietileno-pe-hdpe-general.webp',
++      '/images/galeria/geomembrana-polietileno-pe-hdpe-detalle.webp',
++      '/images/galeria/geomembrana-polietileno-pe-hdpe-instalacion.webp',
++      '/images/galeria/geomembrana-polietileno-pe-hdpe-escala.webp',
++      '/images/geomembrana-hdpe.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1010,13 +1010,13 @@ export const products: Product[] = [
+       'Especificación ajustada al proyecto',
+       'Documentación técnica de respaldo en cotización'
+     ],
+-    image: '/images/galeria/geomembrana-pe-fortificada-general.jpg',
++    image: '/images/galeria/geomembrana-pe-fortificada-general.webp',
+     gallery: [
+-      '/images/galeria/geomembrana-pe-fortificada-general.jpg',
+-      '/images/galeria/geomembrana-pe-fortificada-detalle.jpg',
+-      '/images/galeria/geomembrana-pe-fortificada-instalacion.jpg',
+-      '/images/galeria/geomembrana-pe-fortificada-escala.jpg',
+-      '/images/geomembrana-fortificada.jpg',
++      '/images/galeria/geomembrana-pe-fortificada-general.webp',
++      '/images/galeria/geomembrana-pe-fortificada-detalle.webp',
++      '/images/galeria/geomembrana-pe-fortificada-instalacion.webp',
++      '/images/galeria/geomembrana-pe-fortificada-escala.webp',
++      '/images/geomembrana-fortificada.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1052,13 +1052,13 @@ export const products: Product[] = [
+       'Especificación por proyecto',
+       'Documentación de respaldo en cotización'
+     ],
+-    image: '/images/galeria/geomembrana-bituminosa-general.jpg',
++    image: '/images/galeria/geomembrana-bituminosa-general.webp',
+     gallery: [
+-      '/images/galeria/geomembrana-bituminosa-general.jpg',
+-      '/images/galeria/geomembrana-bituminosa-detalle.jpg',
+-      '/images/galeria/geomembrana-bituminosa-instalacion.jpg',
+-      '/images/galeria/geomembrana-bituminosa-escala.jpg',
+-      '/images/geomembrana-bituminosa.jpg',
++      '/images/galeria/geomembrana-bituminosa-general.webp',
++      '/images/galeria/geomembrana-bituminosa-detalle.webp',
++      '/images/galeria/geomembrana-bituminosa-instalacion.webp',
++      '/images/galeria/geomembrana-bituminosa-escala.webp',
++      '/images/geomembrana-bituminosa.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1094,13 +1094,13 @@ export const products: Product[] = [
+       'Sistemas integrados de un solo proveedor',
+       'Documentación técnica en cotización'
+     ],
+-    image: '/images/galeria/geotextiles-general.jpg',
++    image: '/images/galeria/geotextiles-general.webp',
+     gallery: [
+-      '/images/galeria/geotextiles-general.jpg',
+-      '/images/galeria/geotextiles-detalle.jpg',
+-      '/images/galeria/geotextiles-instalacion.jpg',
+-      '/images/galeria/geotextiles-escala.jpg',
+-      '/images/geotextiles.jpg',
++      '/images/galeria/geotextiles-general.webp',
++      '/images/galeria/geotextiles-detalle.webp',
++      '/images/galeria/geotextiles-instalacion.webp',
++      '/images/galeria/geotextiles-escala.webp',
++      '/images/geotextiles.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1136,13 +1136,13 @@ export const products: Product[] = [
+       'Complementa geotextiles y geomembranas',
+       'Documentación técnica en cotización'
+     ],
+-    image: '/images/galeria/geomallas-geogrids-general.jpg',
++    image: '/images/galeria/geomallas-geogrids-general.webp',
+     gallery: [
+-      '/images/galeria/geomallas-geogrids-general.jpg',
+-      '/images/galeria/geomallas-geogrids-detalle.jpg',
+-      '/images/galeria/geomallas-geogrids-instalacion.jpg',
+-      '/images/galeria/geomallas-geogrids-escala.jpg',
+-      '/images/geomallas.jpg',
++      '/images/galeria/geomallas-geogrids-general.webp',
++      '/images/galeria/geomallas-geogrids-detalle.webp',
++      '/images/galeria/geomallas-geogrids-instalacion.webp',
++      '/images/galeria/geomallas-geogrids-escala.webp',
++      '/images/geomallas.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1182,13 +1182,13 @@ export const products: Product[] = [
+       'Capacidad y membrana a medida del uso',
+       'Ficha técnica entregada en cotización'
+     ],
+-    image: '/images/galeria/tanques-flexibles-bladders-general.jpg',
++    image: '/images/galeria/tanques-flexibles-bladders-general.webp',
+     gallery: [
+-      '/images/galeria/tanques-flexibles-bladders-general.jpg',
+-      '/images/galeria/tanques-flexibles-bladders-detalle.jpg',
+-      '/images/galeria/tanques-flexibles-bladders-instalacion.jpg',
+-      '/images/galeria/tanques-flexibles-bladders-escala.jpg',
+-      '/images/tanques-flexibles.jpg',
++      '/images/galeria/tanques-flexibles-bladders-general.webp',
++      '/images/galeria/tanques-flexibles-bladders-detalle.webp',
++      '/images/galeria/tanques-flexibles-bladders-instalacion.webp',
++      '/images/galeria/tanques-flexibles-bladders-escala.webp',
++      '/images/tanques-flexibles.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1224,13 +1224,13 @@ export const products: Product[] = [
+       'Diseño según el caso, con aliado técnico',
+       'Evaluación previa para asegurar viabilidad'
+     ],
+-    image: '/images/galeria/biodigestores-general.jpg',
++    image: '/images/galeria/biodigestores-general.webp',
+     gallery: [
+-      '/images/galeria/biodigestores-general.jpg',
+-      '/images/galeria/biodigestores-detalle.jpg',
+-      '/images/galeria/biodigestores-instalacion.jpg',
+-      '/images/galeria/biodigestores-escala.jpg',
+-      '/images/biodigestores.jpg',
++      '/images/galeria/biodigestores-general.webp',
++      '/images/galeria/biodigestores-detalle.webp',
++      '/images/galeria/biodigestores-instalacion.webp',
++      '/images/galeria/biodigestores-escala.webp',
++      '/images/biodigestores.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1266,13 +1266,13 @@ export const products: Product[] = [
+       'Especificación por diseño hidráulico',
+       'Documentación técnica en cotización'
+     ],
+-    image: '/images/galeria/tuberias-hdpe-general.jpg',
++    image: '/images/galeria/tuberias-hdpe-general.webp',
+     gallery: [
+-      '/images/galeria/tuberias-hdpe-general.jpg',
+-      '/images/galeria/tuberias-hdpe-detalle.jpg',
+-      '/images/galeria/tuberias-hdpe-instalacion.jpg',
+-      '/images/galeria/tuberias-hdpe-escala.jpg',
+-      '/images/tuberias-hdpe.jpg',
++      '/images/galeria/tuberias-hdpe-general.webp',
++      '/images/galeria/tuberias-hdpe-detalle.webp',
++      '/images/galeria/tuberias-hdpe-instalacion.webp',
++      '/images/galeria/tuberias-hdpe-escala.webp',
++      '/images/tuberias-hdpe.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1316,14 +1316,14 @@ export const products: Product[] = [
+       'Durabilidad extrema en ambientes industriales agresivos',
+       'Cumplimiento de normas de seguridad y salud en el trabajo'
+     ],
+-    image: '/images/galeria/biombos-protectores-soldadura-general.jpg',
++    image: '/images/galeria/biombos-protectores-soldadura-general.webp',
+     gallery: [
+-      '/images/galeria/biombos-protectores-soldadura-general.jpg',
+-      '/images/galeria/biombos-protectores-soldadura-detalle.jpg',
+-      '/images/galeria/biombos-protectores-soldadura-instalacion.jpg',
+-      '/images/galeria/biombos-protectores-soldadura-escala.jpg',
+-      '/images/biombos.jpg',
+-      '/images/biombos-proteccion.jpg',
++      '/images/galeria/biombos-protectores-soldadura-general.webp',
++      '/images/galeria/biombos-protectores-soldadura-detalle.webp',
++      '/images/galeria/biombos-protectores-soldadura-instalacion.webp',
++      '/images/galeria/biombos-protectores-soldadura-escala.webp',
++      '/images/biombos.webp',
++      '/images/biombos-proteccion.webp',
+     ],
+     featured: true,
+     popular: false,
+@@ -1361,14 +1361,14 @@ export const products: Product[] = [
+       'Disponibilidad en stock',
+       'Asesoría para el kit correcto por aplicación'
+     ],
+-    image: '/images/galeria/accesorios-instalacion-general.jpg',
++    image: '/images/galeria/accesorios-instalacion-general.webp',
+     gallery: [
+-      '/images/galeria/accesorios-instalacion-general.jpg',
+-      '/images/galeria/accesorios-instalacion-detalle.jpg',
+-      '/images/galeria/accesorios-instalacion-instalacion.jpg',
+-      '/images/galeria/accesorios-instalacion-escala.jpg',
+-      '/images/accesorios.jpg',
+-      '/images/ojalillo-rafia.jpg',
++      '/images/galeria/accesorios-instalacion-general.webp',
++      '/images/galeria/accesorios-instalacion-detalle.webp',
++      '/images/galeria/accesorios-instalacion-instalacion.webp',
++      '/images/galeria/accesorios-instalacion-escala.webp',
++      '/images/accesorios.webp',
++      '/images/ojalillo-rafia.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1406,13 +1406,13 @@ export const products: Product[] = [
+       'Piezas listas para instalar',
+       'Un proveedor para lona técnica y publicidad'
+     ],
+-    image: '/images/galeria/gigantografias-senaletica-general.jpg',
++    image: '/images/galeria/gigantografias-senaletica-general.webp',
+     gallery: [
+-      '/images/galeria/gigantografias-senaletica-general.jpg',
+-      '/images/galeria/gigantografias-senaletica-detalle.jpg',
+-      '/images/galeria/gigantografias-senaletica-instalacion.jpg',
+-      '/images/galeria/gigantografias-senaletica-escala.jpg',
+-      '/images/gigantografias.jpg',
++      '/images/galeria/gigantografias-senaletica-general.webp',
++      '/images/galeria/gigantografias-senaletica-detalle.webp',
++      '/images/galeria/gigantografias-senaletica-instalacion.webp',
++      '/images/galeria/gigantografias-senaletica-escala.webp',
++      '/images/gigantografias.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1446,13 +1446,13 @@ export const products: Product[] = [
+       'Servicio integral diseño-impresión-instalación',
+       'Sinergia con rotulado de siders/tolderas'
+     ],
+-    image: '/images/galeria/revestimiento-vehicular-toldos-publicitarios-general.jpg',
++    image: '/images/galeria/revestimiento-vehicular-toldos-publicitarios-general.webp',
+     gallery: [
+-      '/images/galeria/revestimiento-vehicular-toldos-publicitarios-general.jpg',
+-      '/images/galeria/revestimiento-vehicular-toldos-publicitarios-detalle.jpg',
+-      '/images/galeria/revestimiento-vehicular-toldos-publicitarios-instalacion.jpg',
+-      '/images/galeria/revestimiento-vehicular-toldos-publicitarios-escala.jpg',
+-      '/images/revestimiento-vehicular.jpg',
++      '/images/galeria/revestimiento-vehicular-toldos-publicitarios-general.webp',
++      '/images/galeria/revestimiento-vehicular-toldos-publicitarios-detalle.webp',
++      '/images/galeria/revestimiento-vehicular-toldos-publicitarios-instalacion.webp',
++      '/images/galeria/revestimiento-vehicular-toldos-publicitarios-escala.webp',
++      '/images/revestimiento-vehicular.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1493,13 +1493,13 @@ export const products: Product[] = [
+       'Mejora la estructura y fertilidad del suelo al descomponerse',
+       'Estética profesional y natural'
+     ],
+-    image: '/images/galeria/mulch-madera-picada-general.jpg',
++    image: '/images/galeria/mulch-madera-picada-general.webp',
+     gallery: [
+-      '/images/galeria/mulch-madera-picada-general.jpg',
+-      '/images/galeria/mulch-madera-picada-detalle.jpg',
+-      '/images/galeria/mulch-madera-picada-instalacion.jpg',
+-      '/images/galeria/mulch-madera-picada-escala.jpg',
+-      '/images/mulch.jpg',
++      '/images/galeria/mulch-madera-picada-general.webp',
++      '/images/galeria/mulch-madera-picada-detalle.webp',
++      '/images/galeria/mulch-madera-picada-instalacion.webp',
++      '/images/galeria/mulch-madera-picada-escala.webp',
++      '/images/mulch.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1545,12 +1545,12 @@ export const products: Product[] = [
+       'Sistema de drenaje integrado de un solo proveedor',
+       'Documentación técnica del fabricante en cotización'
+     ],
+-    image: '/images/galeria/geocompuestos-drenaje-general.jpg',
++    image: '/images/galeria/geocompuestos-drenaje-general.webp',
+     gallery: [
+-      '/images/galeria/geocompuestos-drenaje-general.jpg',
+-      '/images/galeria/geocompuestos-drenaje-detalle.jpg',
+-      '/images/galeria/geocompuestos-drenaje-instalacion.jpg',
+-      '/images/galeria/geocompuestos-drenaje-escala.jpg',
++      '/images/galeria/geocompuestos-drenaje-general.webp',
++      '/images/galeria/geocompuestos-drenaje-detalle.webp',
++      '/images/galeria/geocompuestos-drenaje-instalacion.webp',
++      '/images/galeria/geocompuestos-drenaje-escala.webp',
+     ],
+     featured: false,
+     popular: false,
+@@ -1593,12 +1593,12 @@ export const products: Product[] = [
+       'Se integra con biombos y protecciones de obra del catálogo',
+       'Documentación técnica del material en cotización'
+     ],
+-    image: '/images/galeria/barreras-acusticas-general.jpg',
++    image: '/images/galeria/barreras-acusticas-general.webp',
+     gallery: [
+-      '/images/galeria/barreras-acusticas-general.jpg',
+-      '/images/galeria/barreras-acusticas-detalle.jpg',
+-      '/images/galeria/barreras-acusticas-instalacion.jpg',
+-      '/images/galeria/barreras-acusticas-escala.jpg',
++      '/images/galeria/barreras-acusticas-general.webp',
++      '/images/galeria/barreras-acusticas-detalle.webp',
++      '/images/galeria/barreras-acusticas-instalacion.webp',
++      '/images/galeria/barreras-acusticas-escala.webp',
+     ],
+     featured: false,
+     popular: false,
+diff --git a/lib/schema.ts b/lib/schema.ts
+index 95bd545..4d6bb4d 100644
+--- a/lib/schema.ts
++++ b/lib/schema.ts
+@@ -501,6 +501,15 @@ export function datasetSchema(d: {
+  * un agente que construye un índice visual, esa distinción es la diferencia
+  * entre citar un diagrama como esquema y citarlo como evidencia fotográfica.
+  */
++/** Tipo MIME a partir de la extensión del archivo. */
++function formatoDeImagen(ruta: string): string {
++  const ext = ruta.split(".").pop()?.toLowerCase() ?? "";
++  return (
++    { webp: "image/webp", avif: "image/avif", png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", svg: "image/svg+xml" }[ext] ??
++    "image/webp"
++  );
++}
++
+ export function imageObjectSchema(img: {
+   url: string;
+   ancho: number;
+@@ -537,7 +546,17 @@ export function imageObjectSchema(img: {
+     // Un esquema no es una fotografía de una obra ejecutada, y conviene que
+     // eso viaje con la imagen y no solo en el pie de la página.
+     ...(img.esDiagrama
+-      ? { creditText: `Esquema explicativo de ${SITE.legalName}`, encodingFormat: "image/png" }
++      ? {
++          creditText: `Esquema explicativo de ${SITE.legalName}`,
++          /**
++           * Derivado de la ruta, no escrito a mano. Estuvo fijo en "image/png"
++           * y dejó de ser cierto el día que los 77 esquemas pasaron a WebP:
++           * el grafo declaraba un formato que el servidor no servía. Un dato
++           * estructurado que contradice la respuesta HTTP es peor que no
++           * declararlo, porque invita a comprobarlo y falla la comprobación.
++           */
++          encodingFormat: formatoDeImagen(img.url),
++        }
+       : { creditText: `Imagen referencial de ${SITE.legalName}` }),
+   };
+ }
+diff --git a/next.config.ts b/next.config.ts
+index c86f1c0..4df376f 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -31,6 +31,44 @@ const securityHeaders = [
+ const nextConfig: NextConfig = {
+   images: {
+     formats: ['image/avif', 'image/webp'],
++
++    /**
++     * PRESUPUESTO DE TRANSFORMACIONES.
++     *
++     * Cada combinación distinta de (imagen, ancho, calidad) es una
++     * transformación que el optimizador ejecuta y que Vercel cuenta. Con los
++     * ocho `deviceSizes` por defecto —640, 750, 828, 1080, 1200, 1920, 2048 y
++     * 3840— y 459 imágenes, el techo teórico son unas 3.700 sólo para cubrir
++     * el catálogo una vez, y se vuelve a pagar en cada despliegue que invalide
++     * la caché.
++     *
++     * Estos seis anchos salen de los `sizes` que el sitio declara de verdad:
++     * ninguna imagen se pinta por encima de 900px de ancho CSS, así que 2048 y
++     * 3840 nunca se piden salvo en pantallas retina muy grandes, donde 1920 ya
++     * basta. Recortar la lista baja el techo a la mitad sin que se vea
++     * distinto: el navegador elige el primer ancho que cubra su necesidad.
++     *
++     * `imageSizes` son los tamaños pequeños —miniaturas de índice, logo, pies
++     * de tarjeta— que no deben resolverse contra la lista grande.
++     */
++    deviceSizes: [640, 828, 1080, 1200, 1600, 1920],
++    imageSizes: [96, 176, 256, 384],
++
++    /**
++     * 31 días. El valor por defecto hace que el optimizador vuelva a
++     * transformar la misma imagen mucho antes de que haga falta: estas
++     * imágenes son estáticas y cambian sólo cuando se despliega, y un
++     * despliegue ya invalida por sí mismo. Alargar la caché no arriesga a
++     * servir algo viejo y quita trabajo repetido.
++     */
++    minimumCacheTTL: 2678400,
++
++    /**
++     * Una sola calidad. Next 15 permite declararlas y advierte si se pide una
++     * que no está en la lista; fijar una evita que un `quality` suelto en
++     * cualquier componente duplique todas las variantes de esa imagen.
++     */
++    qualities: [75],
+     remotePatterns: [
+       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+       { protocol: 'https', hostname: 'platform-lookaside.fbsbx.com' },
+diff --git a/test/imagenes-registro.test.ts b/test/imagenes-registro.test.ts
+index ec598c0..5cdd9f3 100644
+--- a/test/imagenes-registro.test.ts
++++ b/test/imagenes-registro.test.ts
+@@ -79,10 +79,10 @@ describe('registro de imágenes: toda ranura de portada se resuelve', () => {
+ 
+ describe('fotos de servicio de la portada', () => {
+   const BASES = [
+-    '/images/servicio-fabricacion.jpg',
+-    '/images/servicio-instalacion.jpg',
+-    '/images/servicio-importacion.jpg',
+-    '/images/servicio-asesoria.jpg',
++    '/images/servicio-fabricacion.webp',
++    '/images/servicio-instalacion.webp',
++    '/images/servicio-importacion.webp',
++    '/images/servicio-asesoria.webp',
+   ];
+ 
+   it('las cuatro fotos base existen', () => {
+diff --git a/test/imagenes.test.ts b/test/imagenes.test.ts
+index cc75cbb..b92f58e 100644
+--- a/test/imagenes.test.ts
++++ b/test/imagenes.test.ts
+@@ -8,6 +8,7 @@ import { products, productFamilies } from '@/lib/products';
+ import { articles } from '@/lib/articles';
+ import { solutions } from '@/lib/solutions';
+ import { terminos } from '@/lib/glosario';
++import { rutaToma, MAX_TOMAS } from '@/lib/galeria';
+ 
+ /**
+  * El registro solo sirve si el nombre del archivo encargado es EXACTAMENTE el
+@@ -17,25 +18,37 @@ import { terminos } from '@/lib/glosario';
+ 
+ describe('registro de imágenes: los nombres no pueden divergir', () => {
+   it('cada ranura deriva su ruta del slug real de su entidad', () => {
++    /**
++     * Se comprueba la CARPETA y el NOMBRE, no la extensión.
++     *
++     * Antes esta prueba fijaba `.png` literal, y rompió el día que los 77
++     * esquemas pasaron a WebP —una conversión que quitó 46 MB sin cambiar una
++     * sola imagen de sitio—. La prueba tenía razón en vigilar que el nombre
++     * salga del slug de la entidad y no de una lista paralela; no la tenía en
++     * decidir en qué formato se guarda, que es una decisión de rendimiento y
++     * cambiará otra vez. Una prueba que fija el detalle en vez de la regla
++     * convierte cada mejora en un fallo rojo, y enseña a editarla sin leerla.
++     */
++    const rutaDe = (r: { ruta: string }) => r.ruta.replace(/\.[a-z0-9]+$/i, '');
+     for (const r of ranurasSolucion()) {
+       const slug = r.id.split(':')[1];
+       expect(solutions.some((s) => s.slug === slug), slug).toBe(true);
+-      expect(r.ruta).toBe(`/images/soluciones/${slug}.png`);
++      expect(rutaDe(r)).toBe(`/images/soluciones/${slug}`);
+     }
+     for (const r of ranurasFamilia()) {
+       const slug = r.id.split(':')[1];
+       expect(productFamilies.some((f) => f.slug === slug), slug).toBe(true);
+-      expect(r.ruta).toBe(`/images/familias/${slug}.jpg`);
++      expect(rutaDe(r)).toBe(`/images/familias/${slug}`);
+     }
+     for (const r of ranurasGuia()) {
+       const slug = r.id.split(':')[1];
+       expect(articles.some((a) => a.slug === slug), slug).toBe(true);
+-      expect(r.ruta).toBe(`/images/recursos/${slug}.jpg`);
++      expect(rutaDe(r)).toBe(`/images/recursos/${slug}`);
+     }
+     for (const r of ranurasGlosario()) {
+       const slug = r.id.split(':')[1];
+       expect(terminos.some((t) => t.slug === slug), slug).toBe(true);
+-      expect(r.ruta).toBe(`/images/glosario/${slug}.png`);
++      expect(rutaDe(r)).toBe(`/images/glosario/${slug}`);
+     }
+   });
+ 
+@@ -178,7 +191,12 @@ describe('imágenes: integridad del árbol de archivos', () => {
+     // ser el rastro de un renombrado a medias.
+     const ref = rutasDelCatalogo();
+     for (const r of todasLasRanuras()) ref.add(r.ruta);
+-    for (const r of [...ref]) ref.add(r.replace(/\.jpg$/, '-2.jpg'));
++    // Las tomas alternas se expanden con el MISMO ayudante que usa el sitio,
++    // no con un regex propio. El que había fijaba `.jpg`, y el día que las
++    // imágenes pasaron a WebP dejó de reconocer las tomas `-2`: cuatro
++    // archivos perfectamente referenciados aparecieron como huérfanos. Una
++    // prueba con su propia copia de la regla acaba comprobando su copia.
++    for (const r of [...ref]) for (let n = 2; n <= MAX_TOMAS; n++) ref.add(rutaToma(r, n));
+ 
+     const huerfanos: string[] = [];
+     for (const dir of ['galeria', 'glosario']) {
+diff --git a/test/peso-imagenes.test.ts b/test/peso-imagenes.test.ts
+new file mode 100644
+index 0000000..b2830a8
+--- /dev/null
++++ b/test/peso-imagenes.test.ts
+@@ -0,0 +1,76 @@
++import { describe, it, expect } from 'vitest';
++import { readdirSync, statSync } from 'node:fs';
++import { join, extname } from 'node:path';
++
++/**
++ * PRESUPUESTO DE PESO DE LAS IMÁGENES.
++ *
++ * El repositorio llegó a tener 128 MB de imágenes, de los cuales 70 eran PNG:
++ * 126 archivos con una media de 560 KB y picos de 1,9 MB. Ninguno era una
++ * fotografía que necesitara PNG — son ilustraciones y esquemas generados, que
++ * en WebP pesan la décima parte sin diferencia visible: 548 KB pasaron a 53 KB.
++ *
++ * Por qué importa más allá del disco. El optimizador de Next lee el archivo
++ * ORIGEN para cada transformación; un origen de 1,9 MB tarda y consume memoria
++ * en cada ancho que se pida, en cada despliegue que invalide la caché. Y 48 de
++ * aquellos PNG ni siquiera se usaban: eran los originales que quedaron detrás
++ * de una conversión anterior, 20 MB que nadie referenciaba y que igualmente se
++ * clonaban, se subían y se desplegaban.
++ *
++ * Esta prueba mide el disco, no el HTML. Es la única que se entera de un
++ * archivo pesado ANTES de que llegue a un navegador, y de un archivo huérfano
++ * que no aparecería en ninguna otra comprobación porque, precisamente, no lo
++ * cita nadie.
++ */
++
++const RAIZ = join(process.cwd(), 'public');
++
++/** Techo por archivo. Generoso: una foto de catálogo bien comprimida no pasa de 300 KB. */
++const MAXIMO_KB = 700;
++
++/** Formatos que no deberían aparecer para contenido nuevo. */
++const DESACONSEJADOS = new Set(['.png', '.bmp', '.tiff']);
++
++/** Excepciones con motivo escrito. */
++const PERMITIDOS_PNG = new Set(['logo.png', 'icon.png', 'apple-icon.png']);
++
++function archivos(dir: string, out: string[] = []): string[] {
++  for (const e of readdirSync(dir, { withFileTypes: true })) {
++    const p = join(dir, e.name);
++    if (e.isDirectory()) archivos(p, out);
++    else out.push(p);
++  }
++  return out;
++}
++
++const imagenes = archivos(RAIZ).filter((f) =>
++  ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.bmp', '.tiff'].includes(extname(f).toLowerCase()),
++);
++
++describe('peso de las imágenes en disco', () => {
++  it('ninguna imagen supera el presupuesto por archivo', () => {
++    const pesadas = imagenes
++      .map((f) => ({ f: f.replace(RAIZ, ''), kb: Math.round(statSync(f).size / 1024) }))
++      .filter((x) => x.kb > MAXIMO_KB)
++      .sort((a, b) => b.kb - a.kb);
++    expect(
++      pesadas.map((x) => `${x.kb}KB ${x.f}`),
++      `comprima o convierta a WebP: el máximo son ${MAXIMO_KB} KB`,
++    ).toEqual([]);
++  });
++
++  it('no se usan formatos desaconsejados para contenido', () => {
++    const malos = imagenes
++      .filter((f) => DESACONSEJADOS.has(extname(f).toLowerCase()))
++      .filter((f) => !PERMITIDOS_PNG.has(f.split('/').pop() ?? ''))
++      .map((f) => f.replace(RAIZ, ''));
++    expect(malos, 'use WebP: pesa una décima parte con la misma calidad visible').toEqual([]);
++  });
++
++  it('el total de imágenes se mantiene bajo control', () => {
++    const mb = imagenes.reduce((t, f) => t + statSync(f).size, 0) / 1048576;
++    // 90 MB deja sitio de sobra para crecer; a 128 MB el repositorio ya
++    // molestaba en cada clon y en cada build.
++    expect(Math.round(mb), `el repositorio sirve ${Math.round(mb)} MB de imágenes`).toBeLessThan(90);
++  });
++});
