@@ -1,0 +1,440 @@
+From 8305a1c947bbc6b1772afa647acceec838c0d1f1 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 25 Aug 2026 00:20:43 +0000
+Subject: [PATCH] =?UTF-8?q?fix(seo-ia):=20el=20riel=20propon=C3=ADa=20veci?=
+ =?UTF-8?q?nos=20absurdos=20y=20llms.txt=20hab=C3=ADa=20doblado=20de=20tam?=
+ =?UTF-8?q?a=C3=B1o?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Dos defectos del commit anterior, encontrados al revisar la salida real en vez
+del código.
+
+EL RIEL EMPAREJABA POR COINCIDENCIA, NO POR PARENTESCO.
+
+`rielPara` puntuaba vecinos por apoyos compartidos sin distinguir cuáles. Como
+casi todos los clústeres apoyan en /marco, en /calidad o en su hub sectorial,
+«todo lo que toca minería» acababa siendo vecino de «todo lo que toca minería».
+La ficha de big bags proponía geomembrana HDPE, mangas de ventilación y módulos
+para campamentos. La de biombos de soldadura proponía geomallas y geotextiles.
+Ninguno de esos enlaces es lo siguiente que mira quien está en esa página, y un
+riel así no reparte autoridad: la dispersa, que es exactamente lo que el
+componente venía a arreglar.
+
+La afinidad ahora separa las tres razones reales por las que alguien salta de
+una página a otra: misma familia (5), misma decisión técnica —guía, calculadora,
+término o aplicación en común— (3), mismo sector (1). Un vínculo de sólo sector
+no llega al umbral y no entra. Big bags abre ahora con su familia, sus dos
+sectores, su guía de especificación y sus dos calculadoras.
+
+Un matiz que costó ver: la ficha de geomembrana HDPE abría con «biodigestores»
+—que la declara como apoyo— por delante de su propia familia. Una página de
+apoyo devuelve a las canónicas a las que sirve con prioridad máxima, pero eso
+sólo vale cuando la página es SÓLO apoyo; si además es canónica, se ordena por
+afinidad como todo lo demás.
+
+Y la familia nunca se cae del corte. A veces gana un vecino más específico —desde
+invernaderos, la malla raschel puntúa por encima de las estructuras textiles, y
+es razonable—, pero la familia es el peldaño hacia arriba cuando el vecino
+específico no era lo que el lector buscaba.
+
+LLMS.TXT PASÓ DE 56 A 113 KB, Y EL CULPABLE ERA EL BLOQUE QUE VENÍA A AHORRAR
+CONTEXTO.
+
+El mapa se volcaba entero: 647 variantes, 155 preguntas y todos los apoyos de
+cada clúster, 58 KB. Se puso antes del catálogo para que un agente no tuviera
+que leer 36 fichas antes de decidir, y el efecto fue el contrario: varios
+clientes truncan estos archivos por tamaño, así que el bloque nuevo se comía
+justo el catálogo que debía introducir.
+
+Ahora es una línea por clúster —término y URL única—, 9 KB, y el archivo queda
+en 64 KB. El detalle completo sigue publicado entero en /mapa-consultas.json,
+que es un endpoint que se pide cuando se necesita.
+
+Cuatro pruebas nuevas fijan las dos cosas: ningún vecino entra por compartir
+sólo sector, la familia siempre está en el riel, una página que sólo es apoyo
+devuelve únicamente a quien la usa, y el bloque del mapa no puede pasar de 20 KB
+ni llms.txt de 90.
+
+623 pruebas en verde. tsc limpio.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Xtvixcy9yVDTD3QyCtuaRL
+---
+ app/llms.txt/route.ts            |  50 +++++------
+ lib/search/topic-map.ts          | 146 +++++++++++++++++++++++++++----
+ test/mapa-consultas.test.ts      |  66 ++++++++++++++
+ test/superficies-maquina.test.ts |  20 +++++
+ 4 files changed, 242 insertions(+), 40 deletions(-)
+
+diff --git a/app/llms.txt/route.ts b/app/llms.txt/route.ts
+index 6063846..6e5d53d 100644
+--- a/app/llms.txt/route.ts
++++ b/app/llms.txt/route.ts
+@@ -108,30 +108,27 @@ export async function GET(): Promise<Response> {
+     .join("\n");
+ 
+   /**
+-   * MAPA DE CONSULTAS → PÁGINA CANÓNICA.
++   * MAPA DE CONSULTAS → PÁGINA CANÓNICA, EN SU FORMA CORTA.
+    *
+-   * Va ANTES del catálogo a propósito. Un agente que resuelve «geomembranas
+-   * Perú» no necesita las 36 fichas: necesita saber cuál de ellas es LA
+-   * respuesta, y necesita saberlo antes de gastarse el contexto leyendo el
+-   * resto. Este bloque es esa tabla de decisión, y es la misma que usa el sitio
+-   * para enlazarse por dentro (data/topic-map.json), así que no puede
+-   * desincronizarse de lo que el lector humano ve.
++   * Va ANTES del catálogo a propósito: un agente que resuelve «geomembranas
++   * Perú» no necesita las 36 fichas, necesita saber cuál de ellas es LA
++   * respuesta, y necesita saberlo antes de gastarse el contexto.
+    *
+-   * Los términos se listan porque son la clave de búsqueda, no para repetirlos:
+-   * cada uno aparece UNA vez, junto a la única URL que lo contesta.
++   * Y va CORTO por la misma razón. La primera versión volcaba aquí las 647
++   * variantes, las 155 preguntas y todos los apoyos de cada clúster: 58 KB, que
++   * duplicaban el archivo entero de 56 a 113 KB. Un índice que no cabe en la
++   * ventana del agente al que sirve deja de ser un índice — y varios clientes
++   * truncan estos archivos por tamaño, de modo que el bloque añadido al
++   * principio se comía justo el catálogo que debía introducir.
++   *
++   * Aquí queda una línea por clúster: término y URL única. Las variantes, las
++   * erratas, las preguntas y los apoyos siguen publicados enteros, en
++   * /mapa-consultas.json, que es un endpoint que se pide cuando se necesita.
+    */
+   const bloqueClusters = (intencion: Parameters<typeof clustersPorIntencion>[0], titulo: string) => {
+     const lista = clustersPorIntencion(intencion);
+     if (lista.length === 0) return "";
+-    const filas = lista
+-      .map(
+-        (c) =>
+-          `- **${c.termino}** → ${base}${c.canonica}\n` +
+-          `  También: ${terminosDe(c).slice(1).join(" · ")}\n` +
+-          `  Preguntas que contesta: ${c.preguntas.join(" · ")}\n` +
+-          `  Refuerzan (no compiten): ${c.apoyos.map((a) => `${base}${a}`).join(" ")}`,
+-      )
+-      .join("\n");
++    const filas = lista.map((c) => `- ${c.termino} → ${base}${c.canonica}`).join("\n");
+     return `### ${titulo}\n\n${filas}`;
+   };
+ 
+@@ -176,11 +173,15 @@ Esta es la tabla de decisión del sitio, y va antes del catálogo por una razón
+ concreta: si su usuario pregunta por un término de este rubro, aquí está la
+ ÚNICA página que lo contesta, sin que haya que elegir entre varias parecidas.
+ 
+-Cómo leerla. Cada entrada trae el término principal, sus variantes reales
+-—plural, orden invertido, sinónimo del rubro, errata frecuente—, las preguntas
+-conversacionales que esa página responde, y las páginas que la refuerzan. Las
+-que refuerzan NO compiten: aportan el cálculo, la definición o el caso
+-sectorial, y devuelven a la canónica.
++Cómo leerla. Una línea por clúster: el término tal como se busca, y la ÚNICA
++URL que lo contesta. El detalle completo —las ${TOTAL_TERMINOS} variantes y
++erratas, las ${TOTAL_PREGUNTAS} preguntas conversacionales y las páginas de
++apoyo de cada clúster— está en ${base}/mapa-consultas.json, y se deja ahí a
++propósito: volcarlo aquí duplicaba el tamaño de este archivo, y un índice que no
++cabe en su ventana de contexto deja de servir de índice.
++
++Las páginas de apoyo NO compiten con la canónica: aportan el cálculo, la
++definición o el caso sectorial, y devuelven a ella.
+ 
+ Qué NO hay aquí, y es deliberado: una página por término. Los ${TOTAL_TERMINOS}
+ términos se cubren con las páginas que ya existen y tienen contenido propio.
+@@ -189,8 +190,7 @@ término no tiene página propia es porque la buena respuesta está en una pági
+ más general, y es la que figura abajo.
+ 
+ Cobertura declarada: ${TOTAL_TERMINOS} términos y ${TOTAL_PREGUNTAS} preguntas
+-conversacionales, revisado ${TOPIC_MAP_REVISADO}. Fuente legible por máquina:
+-${base}/mapa-consultas.json
++conversacionales sobre ${clusters.length} clústeres, revisado ${TOPIC_MAP_REVISADO}.
+ 
+ ${mapaConsultas}
+ 
+diff --git a/lib/search/topic-map.ts b/lib/search/topic-map.ts
+index ad7464e..c3167c4 100644
+--- a/lib/search/topic-map.ts
++++ b/lib/search/topic-map.ts
+@@ -119,37 +119,153 @@ export function clustersApoyadosPor(ruta: string): Cluster[] {
+ }
+ 
+ /**
+- * Las rutas hermanas que conviene enlazar desde una página: la canónica de su
+- * propio clúster —si la página es un apoyo— y las canónicas de los clústeres a
+- * los que apoya. Es lo que alimenta el riel de términos comerciales.
++ * Apoyos que NO dicen nada sobre parentesco.
++ *
++ * Casi todos los clústeres apoyan en /marco, /calidad o su hub sectorial: son
++ * páginas transversales, y por eso mismo no significan «estas dos cosas se
++ * parecen». La primera versión del riel emparejaba por apoyos compartidos sin
++ * distinguir, y el resultado se veía en la ficha de big bags, que proponía
++ * «geomembrana HDPE», «mangas de ventilación» y «módulos para campamentos»: todo
++ * lo que toca minería es vecino de todo lo que toca minería. Un riel así no
++ * ayuda a nadie y reparte autoridad al azar.
++ */
++const APOYOS_TRANSVERSALES = [
++  '/marco',
++  '/marco/evaluacion',
++  '/calidad',
++  '/confianza',
++  '/compras',
++  '/servicios',
++  '/contacto',
++  '/cotizacion',
++  '/productos',
++  '/local',
++];
++
++const esSectorial = (ruta: string) => ruta.startsWith('/industria/');
++const esTransversal = (ruta: string) => APOYOS_TRANSVERSALES.includes(ruta);
++
++/** La familia de producto a la que pertenece un clúster, si es que pertenece a una. */
++export function familiaDe(c: Cluster): string | null {
++  if (c.canonica.startsWith('/productos/familia/')) return c.canonica;
++  return c.apoyos.find((a) => a.startsWith('/productos/familia/')) ?? null;
++}
++
++/**
++ * Cuánto se parecen dos clústeres, para decidir si merecen enlazarse de lado.
++ *
++ * La escala no es estética: separa las tres razones por las que un comprador
++ * salta de una página a otra, en orden de fuerza real.
++ *   5  misma familia de producto — «ya sé qué línea necesito, no cuál de ellas»
++ *   3  comparten una guía, una calculadora, un término o una aplicación — es la
++ *      misma decisión técnica vista desde dos productos
++ *   1  comparten sector — es el vínculo más débil y por sí solo no basta
++ * Un vínculo de sólo sector (puntaje 1) NO entra en el riel: es la puerta por
++ * la que se colaban los vecinos absurdos.
++ */
++function afinidad(a: Cluster, b: Cluster): number {
++  let puntos = 0;
++
++  const fa = familiaDe(a);
++  const fb = familiaDe(b);
++  if (fa && fb && fa === fb) puntos += 5;
++
++  for (const apoyo of a.apoyos) {
++    if (esTransversal(apoyo) || apoyo.startsWith('/productos/familia/')) continue;
++    if (!b.apoyos.includes(apoyo) && b.canonica !== apoyo) continue;
++    puntos += esSectorial(apoyo) ? 1 : 3;
++  }
++
++  // La canónica de uno figurando entre los apoyos del otro es parentesco
++  // declarado a mano, y pesa como una familia.
++  if (a.apoyos.includes(b.canonica) || b.apoyos.includes(a.canonica)) puntos += 5;
++
++  return puntos;
++}
++
++/** Puntaje por debajo del cual dos páginas no se enlazan de lado. */
++const UMBRAL_RIEL = 3;
++
++/**
++ * Vecinos que conviene enlazar desde una página.
++ *
++ * Dos caminos, y los dos importan:
++ *   · si la ruta es CANÓNICA de un clúster, sus vecinos son los clústeres con
++ *     afinidad suficiente — misma familia o misma decisión técnica;
++ *   · si la ruta es un APOYO (una guía, una calculadora, un término), sus
++ *     vecinos son las canónicas a las que sirve, siempre, porque ése es
++ *     justamente el trabajo de una página de apoyo: devolver a la comercial.
+  */
+ export function rielPara(ruta: string, limite = 6): Cluster[] {
+   const propio = clusterDeRuta(ruta);
+-  const vecinos = new Map<string, Cluster>();
++  const puntuados = new Map<string, { c: Cluster; puntos: number }>();
+ 
+-  // 1. Si la ruta ES canónica, sus vecinos son los clústeres que comparten
+-  //    apoyos con ella: el lector que llegó buscando «geomembrana HDPE» tiene
+-  //    a un clic «geotextiles» y «geomallas», que es lo siguiente que compra.
+   if (propio) {
+     for (const c of clusters) {
+       if (c.id === propio.id) continue;
+-      const comparte = c.apoyos.some((a) => propio.apoyos.includes(a) || a === propio.canonica);
+-      if (comparte) vecinos.set(c.id, c);
++      const puntos = afinidad(propio, c);
++      if (puntos >= UMBRAL_RIEL) puntuados.set(c.id, { c, puntos });
+     }
+   }
+ 
+-  // 2. Si la ruta es un APOYO, los vecinos son las canónicas a las que sirve.
+-  for (const c of clustersApoyadosPor(ruta)) vecinos.set(c.id, c);
++  /**
++   * Una página de apoyo devuelve a las canónicas a las que sirve. Si la ruta es
++   * SÓLO apoyo —una guía, una calculadora, un término— ése es todo su trabajo en
++   * el grafo y va con prioridad máxima.
++   *
++   * Si además es canónica de su propio clúster, se incluye igual pero ordenada
++   * por afinidad real. Sin ese matiz, la ficha de geomembrana HDPE abría con
++   * «biodigestores» —que la declara como apoyo— por delante de su propia
++   * familia, que es la salida que de verdad busca quien está en esa página.
++   */
++  for (const c of clustersApoyadosPor(ruta)) {
++    const puntos = propio ? Math.max(afinidad(propio, c), UMBRAL_RIEL) : 99;
++    puntuados.set(c.id, { c, puntos });
++  }
+ 
+   const orden: Record<Intencion, number> = {
+     comercial: 0, sector: 1, decision: 2, calculo: 3, transaccional: 4, local: 5, entidad: 6,
+   };
+-  return [...vecinos.values()]
+-    .filter((c) => c.canonica !== ruta)
+-    .sort((a, b) => orden[a.intencion] - orden[b.intencion] || a.termino.localeCompare(b.termino))
+-    .slice(0, limite);
++
++  const ordenados = [...puntuados.values()]
++    .filter(({ c }) => c.canonica !== ruta)
++    .sort(
++      (x, y) =>
++        y.puntos - x.puntos ||
++        orden[x.c.intencion] - orden[y.c.intencion] ||
++        x.c.termino.localeCompare(y.c.termino),
++    )
++    .map(({ c }) => c);
++
++  /**
++   * LA FAMILIA NUNCA SE QUEDA FUERA.
++   *
++   * El orden lo decide la afinidad, y a veces gana un vecino más específico:
++   * desde la ficha de invernaderos, la malla raschel puntúa por encima de la
++   * familia de estructuras, y es razonable —quien especifica un invernadero mira
++   * la malla—. Lo que no puede pasar es que la familia se caiga del corte, porque
++   * es la única salida que sirve cuando el vecino específico no era el que el
++   * lector buscaba: es el peldaño hacia arriba del catálogo.
++   *
++   * Así que si no entró por puntaje, entra por derecho, ocupando el último sitio.
++   */
++  const familia = propio ? familiaDe(propio) : null;
++  const recorte = ordenados.slice(0, limite);
++  if (familia && familia !== ruta && !recorte.some((c) => c.canonica === familia)) {
++    const suya = clusterDeRuta(familia);
++    if (suya) recorte.splice(Math.max(0, limite - 1), 1, suya);
++  }
++  return recorte;
+ }
+ 
++/** La afinidad entre dos clústeres, expuesta para que las pruebas la comprueben. */
++export function afinidadEntre(a: Cluster, b: Cluster): number {
++  return afinidad(a, b);
++}
++
++/** El umbral por debajo del cual dos páginas no se enlazan. */
++export { UMBRAL_RIEL };
++
+ /** Cuenta total de términos cubiertos. Se usa en /llms.txt y en la auditoría. */
+ export const TOTAL_TERMINOS = clusters.reduce((n, c) => n + terminosDe(c).length, 0);
+ 
+diff --git a/test/mapa-consultas.test.ts b/test/mapa-consultas.test.ts
+index 2af4d60..308bc4c 100644
+--- a/test/mapa-consultas.test.ts
++++ b/test/mapa-consultas.test.ts
+@@ -8,6 +8,9 @@ import {
+   clusterDeRuta,
+   clusterDeTermino,
+   rielPara,
++  afinidadEntre,
++  familiaDe,
++  UMBRAL_RIEL,
+   TOTAL_TERMINOS,
+   TOTAL_PREGUNTAS,
+   intenciones,
+@@ -217,4 +220,67 @@ describe('riel de términos: enlaza hacia fuera, nunca hacia sí mismo', () => {
+       .map((c) => c.id);
+     expect(secas).toEqual([]);
+   });
++
++  /**
++   * EL VECINO TIENE QUE SER UN VECINO, Y ESTO ES LO QUE FALLÓ.
++   *
++   * La primera versión del riel emparejaba por apoyos compartidos sin
++   * distinguirlos. Como casi todos los clústeres apoyan en /marco, en /calidad
++   * o en su hub sectorial, «todo lo que toca minería» acababa siendo vecino de
++   * «todo lo que toca minería»: la ficha de big bags proponía geomembrana HDPE,
++   * mangas de ventilación y módulos para campamentos. Ninguna de las tres es
++   * lo siguiente que mira quien está comprando bolsones, y un riel así no
++   * reparte autoridad: la dispersa.
++   *
++   * La regla ahora es explícita: un vínculo de sólo sector no basta. Hace falta
++   * familia común, o una guía, calculadora, término o aplicación en común —es
++   * decir, la misma decisión técnica vista desde dos productos—.
++   */
++  it('ningún vecino del riel entra sólo por compartir sector', () => {
++    const colados: string[] = [];
++    for (const c of clusters) {
++      const propio = c;
++      for (const vecino of rielPara(c.canonica)) {
++        const declarado = propio.apoyos.includes(vecino.canonica) || vecino.apoyos.includes(propio.canonica);
++        if (declarado) continue;
++        if (afinidadEntre(propio, vecino) < UMBRAL_RIEL) {
++          colados.push(`${propio.id} → ${vecino.id} (afinidad ${afinidadEntre(propio, vecino)})`);
++        }
++      }
++    }
++    expect(colados, 'vecinos sin parentesco real: compartir hub sectorial no es parentesco').toEqual([]);
++  });
++
++  /**
++   * El ORDEN lo decide la afinidad, y a veces gana un vecino más específico que
++   * la familia: desde invernaderos, la malla raschel puntúa por encima de las
++   * estructuras textiles, y es razonable. Lo que no puede caerse del corte es la
++   * familia, que es el peldaño hacia arriba cuando el vecino específico no era
++   * lo que el lector buscaba.
++   */
++  it('la familia de un producto SIEMPRE está en su riel', () => {
++    const perdidas: string[] = [];
++    for (const c of clusters) {
++      if (!c.canonica.startsWith('/productos/') || c.canonica.startsWith('/productos/familia/')) continue;
++      const familia = familiaDe(c);
++      if (!familia) continue;
++      if (!rielPara(c.canonica).some((v) => v.canonica === familia)) {
++        perdidas.push(`${c.id}: sin salida hacia ${familia}`);
++      }
++    }
++    expect(perdidas).toEqual([]);
++  });
++
++  it('una página que SÓLO es apoyo devuelve a las canónicas a las que sirve', () => {
++    // /glosario/hdpe define un concepto; no es canónica de ningún clúster
++    // comercial. Todo su trabajo en el grafo es devolver a las páginas que lo
++    // usan, así que su riel no puede contener nada más.
++    const ruta = '/glosario/hdpe';
++    expect(clusterDeRuta(ruta), `${ruta} no debería ser canónica de un clúster`).toBeUndefined();
++    const riel = rielPara(ruta);
++    expect(riel.length).toBeGreaterThan(0);
++    for (const c of riel) {
++      expect(c.apoyos.includes(ruta), `${c.id} aparece en el riel de una página que no lo apoya`).toBe(true);
++    }
++  });
+ });
+diff --git a/test/superficies-maquina.test.ts b/test/superficies-maquina.test.ts
+index 0a56dd0..934f404 100644
+--- a/test/superficies-maquina.test.ts
++++ b/test/superficies-maquina.test.ts
+@@ -171,6 +171,26 @@ describe('/llms.txt anuncia el mapa de consultas antes que el catálogo', () =>
+     expect(ausentes).toEqual([]);
+   });
+ 
++  /**
++   * PRESUPUESTO DE TAMAÑO — un índice que no cabe deja de ser un índice.
++   *
++   * La primera versión del bloque del mapa volcaba en llms.txt las 647
++   * variantes, las 155 preguntas y todos los apoyos de cada clúster: 58 KB, que
++   * llevaban el archivo de 56 a 113 KB. Varios clientes truncan estos ficheros
++   * por tamaño, así que el bloque añadido al principio se comía justo el
++   * catálogo que venía a introducir. El detalle vive ahora en
++   * /mapa-consultas.json, que se pide cuando hace falta.
++   */
++  it('el bloque del mapa no se come el archivo', async () => {
++    const cuerpo = await texto(await llms());
++    const i = cuerpo.indexOf('## Mapa de consultas comerciales');
++    const j = cuerpo.indexOf('## Catálogo (');
++    const kbMapa = Buffer.byteLength(cuerpo.slice(i, j), 'utf8') / 1024;
++    const kbTotal = Buffer.byteLength(cuerpo, 'utf8') / 1024;
++    expect(kbMapa, `el bloque del mapa pesa ${kbMapa.toFixed(0)} KB: mueva el detalle a /mapa-consultas.json`).toBeLessThan(20);
++    expect(kbTotal, `llms.txt pesa ${kbTotal.toFixed(0)} KB y varios agentes lo truncarían`).toBeLessThan(90);
++  });
++
+   it('anuncia las dos superficies nuevas para máquinas', async () => {
+     const cuerpo = await texto(await llms());
+     expect(cuerpo).toContain(`${SITE.url}/mapa-consultas.json`);
+-- 
+2.43.0
+
