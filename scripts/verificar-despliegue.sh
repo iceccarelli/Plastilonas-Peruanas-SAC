@@ -20,12 +20,43 @@
 # =============================================================================
 set -uo pipefail
 
-# El origen sale de lib/site.ts, la única fuente de verdad del dominio: el día
-# de la migración a plastilonas.com este script la sigue sin tocarse.
-# Se ancla a principio de línea para no capturar la URL de ejemplo que vive
-# dentro del comentario de migración a plastilonas.com.
-SITE_URL=$(grep -oE '^[[:space:]]*url:[[:space:]]*"[^"]+"' lib/site.ts | head -1 | sed 's/.*"\(.*\)"/\1/')
+# ─────────────────────────────────────────────────────────────────────────────
+# EL ORIGEN, RESUELTO COMO LO RESUELVE lib/site.ts — Y NO COMO SOLÍA ESTAR
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# Esto estuvo roto veintiséis commits, en silencio, y es el peor fallo posible
+# en un verificador: no avisaba de nada, y encima siempre daba error, así que
+# se aprendió a ignorarlo.
+#
+# La versión anterior buscaba una línea `url: "https://…"` en lib/site.ts. Esa
+# línea existió hasta que la fase 29 introdujo el interruptor de dominio y la
+# convirtió en `url: originFromEnv()`. Desde entonces el grep no casaba con
+# nada, BASE_URL quedaba VACÍA, y cada `curl "$BASE_URL/version.json"` pedía una
+# ruta relativa que no existe. El script informaba «sirviendo desconocido»
+# durante 300 segundos y concluía que el despliegue no había llegado — mientras
+# el sitio servía perfectamente el commit correcto.
+#
+# Ahora se resuelve en el mismo orden que originFromEnv(): las dos variables de
+# entorno primero, y si no hay ninguna, el literal de reserva que ese archivo
+# declara. No se escribe ningún host a mano aquí: test/dominio.test.ts rompe el
+# build si alguien lo intenta, y con razón — un verificador con su propia copia
+# del dominio es el archivo que se queda atrás el día de la migración.
+SITE_URL="${CANONICAL_ORIGIN:-${NEXT_PUBLIC_SITE_URL:-}}"
+if [ -z "$SITE_URL" ]; then
+  SITE_URL=$(grep -A2 'process.env.NEXT_PUBLIC_SITE_URL' lib/site.ts \
+    | grep -oE '"https://[^"]+"' | head -1 | tr -d '"')
+fi
 BASE_URL="${BASE_URL:-$SITE_URL}"
+
+# Fallar RUIDOSAMENTE si no hay origen. El defecto real no fue que el grep
+# dejara de casar: fue que al no casar el script siguió adelante con una cadena
+# vacía en vez de parar. Un verificador que no puede verificar tiene que decirlo
+# en la primera línea, no en la línea trescientos.
+if [ -z "$BASE_URL" ]; then
+  printf '\033[31mNo se pudo resolver el origen del sitio desde lib/site.ts.\033[0m\n'
+  echo "Pase BASE_URL=https://… al ejecutar, o revise originFromEnv() en lib/site.ts."
+  exit 2
+fi
 ESPERA_MAX="${ESPERA_MAX:-300}"   # segundos
 INTERVALO="${INTERVALO:-10}"
 

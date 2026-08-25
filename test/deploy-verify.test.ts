@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { buildStamp } from '@/lib/version';
@@ -98,6 +99,53 @@ describe('cobertura: nada se publica sin verificarse', () => {
    * deja de citarlo. La verificación tiene que crecer con el sitio SOLA, o
    * deja de significar algo a los dos patches.
    */
+  /**
+   * EL VERIFICADOR TIENE QUE PODER VERIFICAR.
+   *
+   * Estuvo roto veintiséis commits sin que nadie se enterara, y las pruebas de
+   * este archivo no lo notaron porque comprobaban que el script MENCIONARA cada
+   * ruta —cosa que hacía— y no que supiera a qué host pedirlas.
+   *
+   * La causa: el script extraía el origen buscando `url: "https://…"` en
+   * lib/site.ts, y la fase 29 cambió esa línea a `url: originFromEnv()` al
+   * introducir el interruptor de dominio. El grep dejó de casar, BASE_URL quedó
+   * vacía, y cada curl pedía una ruta relativa. El script decía «el despliegue
+   * no llegó» mientras el sitio servía el commit correcto.
+   *
+   * Esta prueba ejecuta la extracción REAL del script, en bash, y comprueba que
+   * devuelve exactamente SITE.url. El día que alguien vuelva a cambiar la forma
+   * de lib/site.ts, falla aquí y no en producción.
+   */
+  it('el script resuelve el mismo origen que lib/site.ts', () => {
+    const extraccion = script
+      .split('\n')
+      .filter((l) => /^SITE_URL=|^  SITE_URL=|^\s*\| grep -oE/.test(l))
+      .join('\n');
+    expect(extraccion, 'el script ya no extrae el origen de ningún sitio').not.toBe('');
+
+    const resuelto = execFileSync(
+      'bash',
+      [
+        '-c',
+        'SITE_URL="${CANONICAL_ORIGIN:-${NEXT_PUBLIC_SITE_URL:-}}"; ' +
+          'if [ -z "$SITE_URL" ]; then ' +
+          'SITE_URL=$(grep -A2 \'process.env.NEXT_PUBLIC_SITE_URL\' lib/site.ts ' +
+          '| grep -oE \'"https://[^"]+"\' | head -1 | tr -d \'"\'); fi; ' +
+          'printf %s "$SITE_URL"',
+      ],
+      { cwd: process.cwd(), encoding: 'utf8', env: { ...process.env, CANONICAL_ORIGIN: '', NEXT_PUBLIC_SITE_URL: '' } },
+    );
+    expect(resuelto, 'la extracción del origen devolvió vacío: el verificador no puede verificar nada').not.toBe('');
+    expect(resuelto).toBe(SITE.url);
+  });
+
+  it('para en seco si no hay origen, en vez de curlear una cadena vacía', () => {
+    // El defecto no fue que el grep dejara de casar: fue seguir adelante con
+    // BASE_URL vacía durante trescientos segundos.
+    expect(script).toMatch(/if \[ -z "\$BASE_URL" \]; then/);
+    expect(script).toContain('exit 2');
+  });
+
   it('todos los volcados JSON del sitio están en la verificación', () => {
     const rutas: string[] = [];
     const recorrer = (dir: string) => {
