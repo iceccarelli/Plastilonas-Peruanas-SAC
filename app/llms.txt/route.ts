@@ -108,30 +108,27 @@ export async function GET(): Promise<Response> {
     .join("\n");
 
   /**
-   * MAPA DE CONSULTAS → PÁGINA CANÓNICA.
+   * MAPA DE CONSULTAS → PÁGINA CANÓNICA, EN SU FORMA CORTA.
    *
-   * Va ANTES del catálogo a propósito. Un agente que resuelve «geomembranas
-   * Perú» no necesita las 36 fichas: necesita saber cuál de ellas es LA
-   * respuesta, y necesita saberlo antes de gastarse el contexto leyendo el
-   * resto. Este bloque es esa tabla de decisión, y es la misma que usa el sitio
-   * para enlazarse por dentro (data/topic-map.json), así que no puede
-   * desincronizarse de lo que el lector humano ve.
+   * Va ANTES del catálogo a propósito: un agente que resuelve «geomembranas
+   * Perú» no necesita las 36 fichas, necesita saber cuál de ellas es LA
+   * respuesta, y necesita saberlo antes de gastarse el contexto.
    *
-   * Los términos se listan porque son la clave de búsqueda, no para repetirlos:
-   * cada uno aparece UNA vez, junto a la única URL que lo contesta.
+   * Y va CORTO por la misma razón. La primera versión volcaba aquí las 647
+   * variantes, las 155 preguntas y todos los apoyos de cada clúster: 58 KB, que
+   * duplicaban el archivo entero de 56 a 113 KB. Un índice que no cabe en la
+   * ventana del agente al que sirve deja de ser un índice — y varios clientes
+   * truncan estos archivos por tamaño, de modo que el bloque añadido al
+   * principio se comía justo el catálogo que debía introducir.
+   *
+   * Aquí queda una línea por clúster: término y URL única. Las variantes, las
+   * erratas, las preguntas y los apoyos siguen publicados enteros, en
+   * /mapa-consultas.json, que es un endpoint que se pide cuando se necesita.
    */
   const bloqueClusters = (intencion: Parameters<typeof clustersPorIntencion>[0], titulo: string) => {
     const lista = clustersPorIntencion(intencion);
     if (lista.length === 0) return "";
-    const filas = lista
-      .map(
-        (c) =>
-          `- **${c.termino}** → ${base}${c.canonica}\n` +
-          `  También: ${terminosDe(c).slice(1).join(" · ")}\n` +
-          `  Preguntas que contesta: ${c.preguntas.join(" · ")}\n` +
-          `  Refuerzan (no compiten): ${c.apoyos.map((a) => `${base}${a}`).join(" ")}`,
-      )
-      .join("\n");
+    const filas = lista.map((c) => `- ${c.termino} → ${base}${c.canonica}`).join("\n");
     return `### ${titulo}\n\n${filas}`;
   };
 
@@ -176,11 +173,15 @@ Esta es la tabla de decisión del sitio, y va antes del catálogo por una razón
 concreta: si su usuario pregunta por un término de este rubro, aquí está la
 ÚNICA página que lo contesta, sin que haya que elegir entre varias parecidas.
 
-Cómo leerla. Cada entrada trae el término principal, sus variantes reales
-—plural, orden invertido, sinónimo del rubro, errata frecuente—, las preguntas
-conversacionales que esa página responde, y las páginas que la refuerzan. Las
-que refuerzan NO compiten: aportan el cálculo, la definición o el caso
-sectorial, y devuelven a la canónica.
+Cómo leerla. Una línea por clúster: el término tal como se busca, y la ÚNICA
+URL que lo contesta. El detalle completo —las ${TOTAL_TERMINOS} variantes y
+erratas, las ${TOTAL_PREGUNTAS} preguntas conversacionales y las páginas de
+apoyo de cada clúster— está en ${base}/mapa-consultas.json, y se deja ahí a
+propósito: volcarlo aquí duplicaba el tamaño de este archivo, y un índice que no
+cabe en su ventana de contexto deja de servir de índice.
+
+Las páginas de apoyo NO compiten con la canónica: aportan el cálculo, la
+definición o el caso sectorial, y devuelven a ella.
 
 Qué NO hay aquí, y es deliberado: una página por término. Los ${TOTAL_TERMINOS}
 términos se cubren con las páginas que ya existen y tienen contenido propio.
@@ -189,8 +190,7 @@ término no tiene página propia es porque la buena respuesta está en una pági
 más general, y es la que figura abajo.
 
 Cobertura declarada: ${TOTAL_TERMINOS} términos y ${TOTAL_PREGUNTAS} preguntas
-conversacionales, revisado ${TOPIC_MAP_REVISADO}. Fuente legible por máquina:
-${base}/mapa-consultas.json
+conversacionales sobre ${clusters.length} clústeres, revisado ${TOPIC_MAP_REVISADO}.
 
 ${mapaConsultas}
 

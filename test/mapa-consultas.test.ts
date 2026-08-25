@@ -8,6 +8,9 @@ import {
   clusterDeRuta,
   clusterDeTermino,
   rielPara,
+  afinidadEntre,
+  familiaDe,
+  UMBRAL_RIEL,
   TOTAL_TERMINOS,
   TOTAL_PREGUNTAS,
   intenciones,
@@ -216,5 +219,68 @@ describe('riel de términos: enlaza hacia fuera, nunca hacia sí mismo', () => {
       .filter((c) => rielPara(c.canonica).length === 0)
       .map((c) => c.id);
     expect(secas).toEqual([]);
+  });
+
+  /**
+   * EL VECINO TIENE QUE SER UN VECINO, Y ESTO ES LO QUE FALLÓ.
+   *
+   * La primera versión del riel emparejaba por apoyos compartidos sin
+   * distinguirlos. Como casi todos los clústeres apoyan en /marco, en /calidad
+   * o en su hub sectorial, «todo lo que toca minería» acababa siendo vecino de
+   * «todo lo que toca minería»: la ficha de big bags proponía geomembrana HDPE,
+   * mangas de ventilación y módulos para campamentos. Ninguna de las tres es
+   * lo siguiente que mira quien está comprando bolsones, y un riel así no
+   * reparte autoridad: la dispersa.
+   *
+   * La regla ahora es explícita: un vínculo de sólo sector no basta. Hace falta
+   * familia común, o una guía, calculadora, término o aplicación en común —es
+   * decir, la misma decisión técnica vista desde dos productos—.
+   */
+  it('ningún vecino del riel entra sólo por compartir sector', () => {
+    const colados: string[] = [];
+    for (const c of clusters) {
+      const propio = c;
+      for (const vecino of rielPara(c.canonica)) {
+        const declarado = propio.apoyos.includes(vecino.canonica) || vecino.apoyos.includes(propio.canonica);
+        if (declarado) continue;
+        if (afinidadEntre(propio, vecino) < UMBRAL_RIEL) {
+          colados.push(`${propio.id} → ${vecino.id} (afinidad ${afinidadEntre(propio, vecino)})`);
+        }
+      }
+    }
+    expect(colados, 'vecinos sin parentesco real: compartir hub sectorial no es parentesco').toEqual([]);
+  });
+
+  /**
+   * El ORDEN lo decide la afinidad, y a veces gana un vecino más específico que
+   * la familia: desde invernaderos, la malla raschel puntúa por encima de las
+   * estructuras textiles, y es razonable. Lo que no puede caerse del corte es la
+   * familia, que es el peldaño hacia arriba cuando el vecino específico no era
+   * lo que el lector buscaba.
+   */
+  it('la familia de un producto SIEMPRE está en su riel', () => {
+    const perdidas: string[] = [];
+    for (const c of clusters) {
+      if (!c.canonica.startsWith('/productos/') || c.canonica.startsWith('/productos/familia/')) continue;
+      const familia = familiaDe(c);
+      if (!familia) continue;
+      if (!rielPara(c.canonica).some((v) => v.canonica === familia)) {
+        perdidas.push(`${c.id}: sin salida hacia ${familia}`);
+      }
+    }
+    expect(perdidas).toEqual([]);
+  });
+
+  it('una página que SÓLO es apoyo devuelve a las canónicas a las que sirve', () => {
+    // /glosario/hdpe define un concepto; no es canónica de ningún clúster
+    // comercial. Todo su trabajo en el grafo es devolver a las páginas que lo
+    // usan, así que su riel no puede contener nada más.
+    const ruta = '/glosario/hdpe';
+    expect(clusterDeRuta(ruta), `${ruta} no debería ser canónica de un clúster`).toBeUndefined();
+    const riel = rielPara(ruta);
+    expect(riel.length).toBeGreaterThan(0);
+    for (const c of riel) {
+      expect(c.apoyos.includes(ruta), `${c.id} aparece en el riel de una página que no lo apoya`).toBe(true);
+    }
   });
 });

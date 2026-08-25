@@ -119,36 +119,152 @@ export function clustersApoyadosPor(ruta: string): Cluster[] {
 }
 
 /**
- * Las rutas hermanas que conviene enlazar desde una página: la canónica de su
- * propio clúster —si la página es un apoyo— y las canónicas de los clústeres a
- * los que apoya. Es lo que alimenta el riel de términos comerciales.
+ * Apoyos que NO dicen nada sobre parentesco.
+ *
+ * Casi todos los clústeres apoyan en /marco, /calidad o su hub sectorial: son
+ * páginas transversales, y por eso mismo no significan «estas dos cosas se
+ * parecen». La primera versión del riel emparejaba por apoyos compartidos sin
+ * distinguir, y el resultado se veía en la ficha de big bags, que proponía
+ * «geomembrana HDPE», «mangas de ventilación» y «módulos para campamentos»: todo
+ * lo que toca minería es vecino de todo lo que toca minería. Un riel así no
+ * ayuda a nadie y reparte autoridad al azar.
+ */
+const APOYOS_TRANSVERSALES = [
+  '/marco',
+  '/marco/evaluacion',
+  '/calidad',
+  '/confianza',
+  '/compras',
+  '/servicios',
+  '/contacto',
+  '/cotizacion',
+  '/productos',
+  '/local',
+];
+
+const esSectorial = (ruta: string) => ruta.startsWith('/industria/');
+const esTransversal = (ruta: string) => APOYOS_TRANSVERSALES.includes(ruta);
+
+/** La familia de producto a la que pertenece un clúster, si es que pertenece a una. */
+export function familiaDe(c: Cluster): string | null {
+  if (c.canonica.startsWith('/productos/familia/')) return c.canonica;
+  return c.apoyos.find((a) => a.startsWith('/productos/familia/')) ?? null;
+}
+
+/**
+ * Cuánto se parecen dos clústeres, para decidir si merecen enlazarse de lado.
+ *
+ * La escala no es estética: separa las tres razones por las que un comprador
+ * salta de una página a otra, en orden de fuerza real.
+ *   5  misma familia de producto — «ya sé qué línea necesito, no cuál de ellas»
+ *   3  comparten una guía, una calculadora, un término o una aplicación — es la
+ *      misma decisión técnica vista desde dos productos
+ *   1  comparten sector — es el vínculo más débil y por sí solo no basta
+ * Un vínculo de sólo sector (puntaje 1) NO entra en el riel: es la puerta por
+ * la que se colaban los vecinos absurdos.
+ */
+function afinidad(a: Cluster, b: Cluster): number {
+  let puntos = 0;
+
+  const fa = familiaDe(a);
+  const fb = familiaDe(b);
+  if (fa && fb && fa === fb) puntos += 5;
+
+  for (const apoyo of a.apoyos) {
+    if (esTransversal(apoyo) || apoyo.startsWith('/productos/familia/')) continue;
+    if (!b.apoyos.includes(apoyo) && b.canonica !== apoyo) continue;
+    puntos += esSectorial(apoyo) ? 1 : 3;
+  }
+
+  // La canónica de uno figurando entre los apoyos del otro es parentesco
+  // declarado a mano, y pesa como una familia.
+  if (a.apoyos.includes(b.canonica) || b.apoyos.includes(a.canonica)) puntos += 5;
+
+  return puntos;
+}
+
+/** Puntaje por debajo del cual dos páginas no se enlazan de lado. */
+const UMBRAL_RIEL = 3;
+
+/**
+ * Vecinos que conviene enlazar desde una página.
+ *
+ * Dos caminos, y los dos importan:
+ *   · si la ruta es CANÓNICA de un clúster, sus vecinos son los clústeres con
+ *     afinidad suficiente — misma familia o misma decisión técnica;
+ *   · si la ruta es un APOYO (una guía, una calculadora, un término), sus
+ *     vecinos son las canónicas a las que sirve, siempre, porque ése es
+ *     justamente el trabajo de una página de apoyo: devolver a la comercial.
  */
 export function rielPara(ruta: string, limite = 6): Cluster[] {
   const propio = clusterDeRuta(ruta);
-  const vecinos = new Map<string, Cluster>();
+  const puntuados = new Map<string, { c: Cluster; puntos: number }>();
 
-  // 1. Si la ruta ES canónica, sus vecinos son los clústeres que comparten
-  //    apoyos con ella: el lector que llegó buscando «geomembrana HDPE» tiene
-  //    a un clic «geotextiles» y «geomallas», que es lo siguiente que compra.
   if (propio) {
     for (const c of clusters) {
       if (c.id === propio.id) continue;
-      const comparte = c.apoyos.some((a) => propio.apoyos.includes(a) || a === propio.canonica);
-      if (comparte) vecinos.set(c.id, c);
+      const puntos = afinidad(propio, c);
+      if (puntos >= UMBRAL_RIEL) puntuados.set(c.id, { c, puntos });
     }
   }
 
-  // 2. Si la ruta es un APOYO, los vecinos son las canónicas a las que sirve.
-  for (const c of clustersApoyadosPor(ruta)) vecinos.set(c.id, c);
+  /**
+   * Una página de apoyo devuelve a las canónicas a las que sirve. Si la ruta es
+   * SÓLO apoyo —una guía, una calculadora, un término— ése es todo su trabajo en
+   * el grafo y va con prioridad máxima.
+   *
+   * Si además es canónica de su propio clúster, se incluye igual pero ordenada
+   * por afinidad real. Sin ese matiz, la ficha de geomembrana HDPE abría con
+   * «biodigestores» —que la declara como apoyo— por delante de su propia
+   * familia, que es la salida que de verdad busca quien está en esa página.
+   */
+  for (const c of clustersApoyadosPor(ruta)) {
+    const puntos = propio ? Math.max(afinidad(propio, c), UMBRAL_RIEL) : 99;
+    puntuados.set(c.id, { c, puntos });
+  }
 
   const orden: Record<Intencion, number> = {
     comercial: 0, sector: 1, decision: 2, calculo: 3, transaccional: 4, local: 5, entidad: 6,
   };
-  return [...vecinos.values()]
-    .filter((c) => c.canonica !== ruta)
-    .sort((a, b) => orden[a.intencion] - orden[b.intencion] || a.termino.localeCompare(b.termino))
-    .slice(0, limite);
+
+  const ordenados = [...puntuados.values()]
+    .filter(({ c }) => c.canonica !== ruta)
+    .sort(
+      (x, y) =>
+        y.puntos - x.puntos ||
+        orden[x.c.intencion] - orden[y.c.intencion] ||
+        x.c.termino.localeCompare(y.c.termino),
+    )
+    .map(({ c }) => c);
+
+  /**
+   * LA FAMILIA NUNCA SE QUEDA FUERA.
+   *
+   * El orden lo decide la afinidad, y a veces gana un vecino más específico:
+   * desde la ficha de invernaderos, la malla raschel puntúa por encima de la
+   * familia de estructuras, y es razonable —quien especifica un invernadero mira
+   * la malla—. Lo que no puede pasar es que la familia se caiga del corte, porque
+   * es la única salida que sirve cuando el vecino específico no era el que el
+   * lector buscaba: es el peldaño hacia arriba del catálogo.
+   *
+   * Así que si no entró por puntaje, entra por derecho, ocupando el último sitio.
+   */
+  const familia = propio ? familiaDe(propio) : null;
+  const recorte = ordenados.slice(0, limite);
+  if (familia && familia !== ruta && !recorte.some((c) => c.canonica === familia)) {
+    const suya = clusterDeRuta(familia);
+    if (suya) recorte.splice(Math.max(0, limite - 1), 1, suya);
+  }
+  return recorte;
 }
+
+/** La afinidad entre dos clústeres, expuesta para que las pruebas la comprueben. */
+export function afinidadEntre(a: Cluster, b: Cluster): number {
+  return afinidad(a, b);
+}
+
+/** El umbral por debajo del cual dos páginas no se enlazan. */
+export { UMBRAL_RIEL };
 
 /** Cuenta total de términos cubiertos. Se usa en /llms.txt y en la auditoría. */
 export const TOTAL_TERMINOS = clusters.reduce((n, c) => n + terminosDe(c).length, 0);

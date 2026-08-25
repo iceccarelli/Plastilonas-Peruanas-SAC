@@ -171,6 +171,26 @@ describe('/llms.txt anuncia el mapa de consultas antes que el catálogo', () => 
     expect(ausentes).toEqual([]);
   });
 
+  /**
+   * PRESUPUESTO DE TAMAÑO — un índice que no cabe deja de ser un índice.
+   *
+   * La primera versión del bloque del mapa volcaba en llms.txt las 647
+   * variantes, las 155 preguntas y todos los apoyos de cada clúster: 58 KB, que
+   * llevaban el archivo de 56 a 113 KB. Varios clientes truncan estos ficheros
+   * por tamaño, así que el bloque añadido al principio se comía justo el
+   * catálogo que venía a introducir. El detalle vive ahora en
+   * /mapa-consultas.json, que se pide cuando hace falta.
+   */
+  it('el bloque del mapa no se come el archivo', async () => {
+    const cuerpo = await texto(await llms());
+    const i = cuerpo.indexOf('## Mapa de consultas comerciales');
+    const j = cuerpo.indexOf('## Catálogo (');
+    const kbMapa = Buffer.byteLength(cuerpo.slice(i, j), 'utf8') / 1024;
+    const kbTotal = Buffer.byteLength(cuerpo, 'utf8') / 1024;
+    expect(kbMapa, `el bloque del mapa pesa ${kbMapa.toFixed(0)} KB: mueva el detalle a /mapa-consultas.json`).toBeLessThan(20);
+    expect(kbTotal, `llms.txt pesa ${kbTotal.toFixed(0)} KB y varios agentes lo truncarían`).toBeLessThan(90);
+  });
+
   it('anuncia las dos superficies nuevas para máquinas', async () => {
     const cuerpo = await texto(await llms());
     expect(cuerpo).toContain(`${SITE.url}/mapa-consultas.json`);
