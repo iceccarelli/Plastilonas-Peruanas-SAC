@@ -18,6 +18,7 @@ import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import WhatsAppLink from '@/components/WhatsAppLink';
 import ImagenContenido from '@/components/ImagenContenido';
+import RielComercial from '@/components/RielComercial';
 import { ranurasErrorCompra } from '@/lib/imagenes';
 import {
   breadcrumbSchema,
@@ -312,6 +313,8 @@ export default async function IndustriaPage({ params }: Props) {
           ))}
         </dl>
       </section>
+
+      <RielComercial ruta={`/industria/${ind.slug}`} className="mb-10" />
 
       <div className="flex flex-wrap gap-3">
         <WhatsAppLink

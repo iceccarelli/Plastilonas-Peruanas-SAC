@@ -16,7 +16,8 @@ import { solutionsForProduct } from '@/lib/solutions';
 import { terminosParaProducto } from '@/lib/glosario';
 import { productFaqs } from '@/lib/product-faq';
 import { JsonLd } from '@/components/JsonLd';
-import { faqSchema } from '@/lib/schema';
+import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
+import RielComercial from '@/components/RielComercial';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -69,6 +70,7 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
+  const rutaProducto = `/productos/${product.slug}`;
   const faqs = productFaqs(product);
   const arquitecturas = solutionsForProduct(product.slug);
   const glosarioRel = terminosParaProducto(product.slug);
@@ -83,6 +85,21 @@ export default async function ProductDetailPage({ params }: Props) {
       {/* FAQPage derivado del catálogo (lib/product-faq.ts): cero respuestas
           inventadas — cada una sale de un campo real del producto. */}
       <JsonLd data={faqSchema(faqs, `${SITE.url}/productos/${product.slug}`)} />
+      {/* WebPage + BreadcrumbList. Faltaban: la ficha pintaba una miga de pan
+          visible —Productos / Familia / Producto— que ningún agente podía leer,
+          porque no se emitía como datos. Es la página comercial más importante
+          del sitio y era la única profunda sin jerarquía declarada. */}
+      <JsonLd data={webPageSchema({
+        url: `${SITE.url}${rutaProducto}`,
+        name: product.name,
+        description: product.shortDescription,
+      })} />
+      <JsonLd data={breadcrumbSchema([
+        { name: 'Inicio', url: `${SITE.url}/` },
+        { name: 'Productos', url: `${SITE.url}/productos` },
+        { name: product.category, url: `${SITE.url}/productos` },
+        { name: product.name, url: `${SITE.url}${rutaProducto}` },
+      ])} />
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm mb-8 text-gray-500">
         <Link href="/productos" className="hover:text-[#059669]">Productos</Link>
@@ -275,6 +292,10 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
         </div>
       )}
+
+      {/* Enlace lateral entre páginas comerciales: lo que le falta al grafo
+          interno cuando todo enlaza hacia arriba y nada hacia el lado. */}
+      <RielComercial ruta={rutaProducto} />
 
       {/* Final CTA */}
       <div className="mt-16 bg-[#0A2540] text-white rounded-3xl p-10 text-center">

@@ -12,6 +12,7 @@ import { ranurasFamilia } from '@/lib/imagenes';
 import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, faqSchema, itemListSchema, webPageSchema, imageObjectSchema } from '@/lib/schema';
 import { descripcionDeTexto } from '@/lib/meta';
+import RielComercial from '@/components/RielComercial';
 
 /**
  * Página de familia (/productos/familia/[slug]).
@@ -282,6 +283,8 @@ export default async function FamilyPage({ params }: Props) {
           ))}
         </div>
       </section>
+
+      <RielComercial ruta={`/productos/familia/${slug}`} className="mb-12" />
 
       <div className="rounded-3xl bg-[#0A2540] p-10 text-center text-white">
         <h2 className="mb-3 text-3xl font-semibold tracking-tight">

@@ -49,3 +49,7 @@ gallery-code.patch
 *.zip
 _to_delete/
 public/images/_pruebas-tomas/
+
+# Diagnóstico del verificador de dominio: depende de la red y del DNS del día.
+# Se regenera con `npm run seo:dominio`; versionarlo guardaría un estado falso.
+audit/domain-redirect.json

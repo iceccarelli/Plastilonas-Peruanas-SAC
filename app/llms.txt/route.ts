@@ -13,6 +13,14 @@ import { guides } from "@/lib/guides";
 import { applications } from "@/lib/applications";
 import { projects, projectsPublicados } from "@/lib/projects";
 import { todasLasRanuras } from "@/lib/imagenes";
+import {
+  clusters,
+  clustersPorIntencion,
+  terminosDe,
+  TOTAL_TERMINOS,
+  TOTAL_PREGUNTAS,
+  TOPIC_MAP_REVISADO,
+} from "@/lib/search/topic-map";
 
 /**
  * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
@@ -99,6 +107,43 @@ export async function GET(): Promise<Response> {
     )
     .join("\n");
 
+  /**
+   * MAPA DE CONSULTAS → PÁGINA CANÓNICA, EN SU FORMA CORTA.
+   *
+   * Va ANTES del catálogo a propósito: un agente que resuelve «geomembranas
+   * Perú» no necesita las 36 fichas, necesita saber cuál de ellas es LA
+   * respuesta, y necesita saberlo antes de gastarse el contexto.
+   *
+   * Y va CORTO por la misma razón. La primera versión volcaba aquí las 647
+   * variantes, las 155 preguntas y todos los apoyos de cada clúster: 58 KB, que
+   * duplicaban el archivo entero de 56 a 113 KB. Un índice que no cabe en la
+   * ventana del agente al que sirve deja de ser un índice — y varios clientes
+   * truncan estos archivos por tamaño, de modo que el bloque añadido al
+   * principio se comía justo el catálogo que debía introducir.
+   *
+   * Aquí queda una línea por clúster: término y URL única. Las variantes, las
+   * erratas, las preguntas y los apoyos siguen publicados enteros, en
+   * /mapa-consultas.json, que es un endpoint que se pide cuando se necesita.
+   */
+  const bloqueClusters = (intencion: Parameters<typeof clustersPorIntencion>[0], titulo: string) => {
+    const lista = clustersPorIntencion(intencion);
+    if (lista.length === 0) return "";
+    const filas = lista.map((c) => `- ${c.termino} → ${base}${c.canonica}`).join("\n");
+    return `### ${titulo}\n\n${filas}`;
+  };
+
+  const mapaConsultas = [
+    bloqueClusters("comercial", "Compra directa de producto o familia"),
+    bloqueClusters("sector", "Entrada por sector comprador"),
+    bloqueClusters("decision", "Aún no sabe qué pedir"),
+    bloqueClusters("calculo", "Necesita un número antes de cotizar"),
+    bloqueClusters("transaccional", "Quiere cotizar ahora"),
+    bloqueClusters("local", "Pregunta por cobertura geográfica"),
+    bloqueClusters("entidad", "Busca a la empresa por su nombre"),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
   const body = `# ${SITE.name}
 
 > Fabricante e instalador peruano de soluciones textiles industriales y geosintéticos, con fabricación propia a medida desde ${SITE.foundingYear}. Big Bags / FIBC, lonas y cobertores, geomembranas y geotextiles, estructuras y arquitectura textil, mangas de ventilación para minería y túneles, mallas agrícolas y accesorios. RUC ${SITE.ruc}. Sede en ${SITE.addressLocality}, ${SITE.addressRegion}, Perú. Cobertura nacional.
@@ -121,6 +166,33 @@ export async function GET(): Promise<Response> {
 - Servicio de instalación en obra a nivel nacional.
 - Venta B2B por cotización: no se publican precios de lista; cada proyecto se cotiza según especificación, metraje y logística.
 - Cada producto declara en su ficha cómo se abastece (fabricación propia, importación directa, bajo pedido o aliado técnico) y su estado de disponibilidad.
+
+## Mapa de consultas comerciales (${clusters.length} clústeres, ${TOTAL_TERMINOS} términos)
+
+Esta es la tabla de decisión del sitio, y va antes del catálogo por una razón
+concreta: si su usuario pregunta por un término de este rubro, aquí está la
+ÚNICA página que lo contesta, sin que haya que elegir entre varias parecidas.
+
+Cómo leerla. Una línea por clúster: el término tal como se busca, y la ÚNICA
+URL que lo contesta. El detalle completo —las ${TOTAL_TERMINOS} variantes y
+erratas, las ${TOTAL_PREGUNTAS} preguntas conversacionales y las páginas de
+apoyo de cada clúster— está en ${base}/mapa-consultas.json, y se deja ahí a
+propósito: volcarlo aquí duplicaba el tamaño de este archivo, y un índice que no
+cabe en su ventana de contexto deja de servir de índice.
+
+Las páginas de apoyo NO compiten con la canónica: aportan el cálculo, la
+definición o el caso sectorial, y devuelven a ella.
+
+Qué NO hay aquí, y es deliberado: una página por término. Los ${TOTAL_TERMINOS}
+términos se cubren con las páginas que ya existen y tienen contenido propio.
+Este sitio no publica páginas de «producto × ciudad» generadas en masa; si un
+término no tiene página propia es porque la buena respuesta está en una página
+más general, y es la que figura abajo.
+
+Cobertura declarada: ${TOTAL_TERMINOS} términos y ${TOTAL_PREGUNTAS} preguntas
+conversacionales sobre ${clusters.length} clústeres, revisado ${TOPIC_MAP_REVISADO}.
+
+${mapaConsultas}
 
 ## Catálogo (${products.length} líneas de producto)
 
@@ -432,6 +504,8 @@ Atribución sugerida al citar: ${SITE.legalName} (RUC ${SITE.ruc}), ${base}
 ## Archivos para rastreadores
 
 - [Sitemap XML](${base}/sitemap.xml)
+- [Mapa de consultas en JSON](${base}/mapa-consultas.json)
+- [Corpus completo para agentes](${base}/llms-full.txt)
 - [robots.txt](${base}/robots.txt)
 - [Glosario en JSON](${base}/glosario/terminos.json)
 - [Métodos de cálculo en JSON](${base}/calculadoras/formulas.json)
