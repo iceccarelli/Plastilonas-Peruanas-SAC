@@ -139,6 +139,18 @@ describe('cobertura: nada se publica sin verificarse', () => {
     expect(resuelto).toBe(SITE.url);
   });
 
+  /**
+   * No esperar trescientos segundos a un commit que sólo existe en el disco.
+   * Ese mensaje —«lo más probable es que el BUILD FALLÓ»— mandó a buscar el
+   * fallo donde no estaba, dos veces. Un verificador que se equivoca con
+   * seguridad es peor que uno que calla.
+   */
+  it('avisa si el commit esperado no está en el remoto', () => {
+    expect(script).toContain('no está en el remoto todavía');
+    expect(script).toMatch(/merge-base --is-ancestor/);
+    expect(script).toContain('exit 3');
+  });
+
   it('para en seco si no hay origen, en vez de curlear una cadena vacía', () => {
     // El defecto no fue que el grep dejara de casar: fue seguir adelante con
     // BASE_URL vacía durante trescientos segundos.

@@ -73,6 +73,25 @@ echo "Verificando $BASE_URL"
 if [ -z "$COMMIT" ]; then
   echo "  ! Sin commit esperado (¿fuera de un repo git?): se verifica lo que haya en línea."
 else
+  # ───────────────────────────────────────────────────────────────────────────
+  # ¿ESTÁ EL COMMIT EN EL REMOTO? PORQUE VERCEL CONSTRUYE LO QUE HAY EN GITHUB
+  # ───────────────────────────────────────────────────────────────────────────
+  #
+  # Este script esperaba trescientos segundos a un commit que sólo existía en el
+  # disco local, y después culpaba al build. El mensaje era largo, detallado y
+  # convincente —hablaba de errores de prerenderizado— y llevó a buscar el fallo
+  # exactamente donde no estaba, dos veces.
+  #
+  # Un verificador que se equivoca con seguridad es peor que uno que calla.
+  git fetch -q 2>/dev/null || true
+  if git rev-parse --verify --quiet '@{u}' >/dev/null 2>&1 \
+     && ! git merge-base --is-ancestor "$COMMIT" '@{u}' 2>/dev/null; then
+    printf '  \033[33m! El commit %s no está en el remoto todavía.\033[0m\n' "$COMMIT"
+    echo "    Vercel construye lo que hay en GitHub, no lo que hay en su disco."
+    echo "    Haga «git push» y vuelva a ejecutar esto."
+    exit 3
+  fi
+
   echo "  Esperando al commit $COMMIT (máximo ${ESPERA_MAX}s)…"
   transcurrido=0
   servido=""
@@ -98,7 +117,10 @@ else
     else
       echo "  Sirviendo todavía: $servido"
       echo ""
-      echo "  Lo más probable NO es que Vercel vaya lento: es que el BUILD FALLÓ."
+      echo "  Antes de culpar al build: compruebe que $COMMIT está en el remoto"
+      echo "  («git log origin/main -1»). Vercel construye GitHub, no su disco."
+      echo ""
+      echo "  Si sí está, lo más probable es que el BUILD FALLÓ."
       echo "  Un error de prerenderizado —por ejemplo, pasar una función como"
       echo "  prop a un componente de cliente— pasa limpiamente por tsc y por"
       echo "  las pruebas, y solo revienta al construir. El sitio se queda"
