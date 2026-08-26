@@ -1,7 +1,7 @@
 {
   "$schema": "./topic-map.schema.md",
   "version": "1.0.0",
-  "revisado": "2026-08-24",
+  "revisado": "2026-08-26",
   "nota": "MAPA DE CONSULTAS → PÁGINA CANÓNICA. Una consulta comercial tiene UNA página que la contesta; el resto la refuerza y enlaza hacia ella. Este archivo existe para impedir la canibalización: si dos páginas compiten por el mismo término, el buscador elige por su cuenta y suele elegir mal. Ningún término de aquí autoriza a crear una página nueva: todos apuntan a páginas que YA existen y que ya tienen contenido propio. test/mapa-consultas.test.ts hace fallar el build si un término se repite en dos clústeres, si una canónica se repite, o si una ruta no existe.",
   "intenciones": {
     "comercial": "compra directa de un producto o familia",
@@ -56,7 +56,11 @@
         "¿cuánto pesa un big bag de 1 tonelada?",
         "¿qué factor de seguridad debe tener un big bag para mina?",
         "¿dónde comprar bolsones de polipropileno en Lima?",
-        "¿qué diferencia hay entre un big bag tipo A, B, C y D?"
+        "¿qué diferencia hay entre un big bag tipo A, B, C y D?",
+        "¿Dónde fabrican big bags para minería en Lima?",
+        "¿Quién vende big bags para concentrado de cobre en el Perú?",
+        "Necesito cotizar big bags de 1 tonelada con boquilla de descarga",
+        "¿Cómo cotizo big bags para un proyecto industrial?"
       ],
       "apoyos": [
         "/biblioteca/especificacion-fibc",
@@ -91,7 +95,9 @@
       ],
       "preguntas": [
         "¿qué saco se usa para embarque a granel en puerto?",
-        "¿cuándo conviene un saco polytarp en vez de un big bag?"
+        "¿cuándo conviene un saco polytarp en vez de un big bag?",
+        "¿Quién fabrica sacos polytarp en el Perú?",
+        "¿Cómo cotizo sacos polytarp para un proyecto industrial?"
       ],
       "apoyos": [
         "/aplicaciones/granel-embalaje",
@@ -121,7 +127,9 @@
       ],
       "preguntas": [
         "¿fabrican bolsas de polietileno a medida en el Perú?",
-        "¿qué calibre de lámina de polietileno necesito?"
+        "¿qué calibre de lámina de polietileno necesito?",
+        "¿Quién fabrica bolsas de polietileno industrial en el Perú?",
+        "¿Cómo cotizo bolsas de polietileno industrial para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/familia/envases-embalaje",
@@ -149,7 +157,9 @@
       ],
       "preguntas": [
         "¿qué film termocontraíble se usa para paletizar carga?",
-        "¿cómo se protege un pallet para exportación?"
+        "¿cómo se protege un pallet para exportación?",
+        "¿Quién fabrica film termocontraíble en el Perú?",
+        "¿Cómo cotizo film termocontraíble para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/familia/envases-embalaje",
@@ -176,7 +186,9 @@
       ],
       "preguntas": [
         "¿qué opciones hay para embalar carga a granel en el Perú?",
-        "¿qué envase industrial conviene para concentrado mineral?"
+        "¿qué envase industrial conviene para concentrado mineral?",
+        "¿Quién fabrica envases y embalaje industrial en el Perú?",
+        "¿Cómo cotizo envases y embalaje industrial para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/big-bags-bolsones-polipropileno",
@@ -220,7 +232,9 @@
         "¿qué gramaje de lona necesito para intemperie?",
         "¿dónde compro lona plastificada a medida en Lima?",
         "¿cuánto dura una lona de rafia al sol de la costa peruana?",
-        "¿qué diferencia hay entre lona de rafia y lona de PVC?"
+        "¿qué diferencia hay entre lona de rafia y lona de PVC?",
+        "¿Quién fabrica lona plastificada en el Perú?",
+        "¿Cómo cotizo lona plastificada para un proyecto industrial?"
       ],
       "apoyos": [
         "/biblioteca/gramaje-lona-industrial",
@@ -259,7 +273,9 @@
       "preguntas": [
         "¿qué cobertor exige el MTC para transportar concentrado?",
         "¿cómo se cubre la tolva de un volquete?",
-        "¿dónde mandar a hacer toldos para camión en el Perú?"
+        "¿dónde mandar a hacer toldos para camión en el Perú?",
+        "¿Quién fabrica toldos para camiones en el Perú?",
+        "¿Cómo cotizo toldos para camiones para un proyecto industrial?"
       ],
       "apoyos": [
         "/aplicaciones/toldos-camion",
@@ -290,7 +306,9 @@
       ],
       "preguntas": [
         "¿qué es un sider en un camión de carga?",
-        "¿se puede confeccionar una toldera a medida de mi carrocería?"
+        "¿se puede confeccionar una toldera a medida de mi carrocería?",
+        "¿Quién fabrica siders y tolderas en el Perú?",
+        "¿Cómo cotizo siders y tolderas para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/mantas-cobertores-toldos-camiones",
@@ -317,7 +335,9 @@
       ],
       "preguntas": [
         "¿qué cobertor conviene para proteger cosecha en campo?",
-        "¿qué material se usa para cubrir cultivos de la lluvia?"
+        "¿qué material se usa para cubrir cultivos de la lluvia?",
+        "¿Quién fabrica cobertores agrícolas en el Perú?",
+        "¿Cómo cotizo cobertores agrícolas para un proyecto industrial?"
       ],
       "apoyos": [
         "/industria/agroexportacion",
@@ -345,7 +365,9 @@
       ],
       "preguntas": [
         "¿qué cortina se usa en un galpón avícola?",
-        "¿cómo se controla la ventilación en una granja con arpillera?"
+        "¿cómo se controla la ventilación en una granja con arpillera?",
+        "¿Quién fabrica arpilleras para granjas en el Perú?",
+        "¿Cómo cotizo arpilleras para granjas para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/familia/lonas-cobertores",
@@ -371,7 +393,9 @@
       ],
       "preguntas": [
         "¿qué manta aísla ruido y calor en planta industrial?",
-        "¿se puede confeccionar aislamiento térmico a medida de un equipo?"
+        "¿se puede confeccionar aislamiento térmico a medida de un equipo?",
+        "¿Quién fabrica mantas aislantes térmicas en el Perú?",
+        "¿Cómo cotizo mantas aislantes térmicas para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/barreras-acusticas",
@@ -400,7 +424,9 @@
       ],
       "preguntas": [
         "¿qué tipos de lona y cobertor fabrica una empresa peruana?",
-        "¿qué cobertor conviene para cada tipo de carga?"
+        "¿qué cobertor conviene para cada tipo de carga?",
+        "¿Quién fabrica lonas y cobertores industriales en el Perú?",
+        "¿Cómo cotizo lonas y cobertores industriales para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/lona-plastificada-rafia-polytarp",
@@ -434,7 +460,9 @@
       "preguntas": [
         "¿cuánto viento resiste una carpa industrial?",
         "¿se puede instalar una carpa de almacén temporal en obra?",
-        "¿qué norma rige la carga de viento de una carpa en el Perú?"
+        "¿qué norma rige la carga de viento de una carpa en el Perú?",
+        "¿Quién fabrica carpas industriales en el Perú?",
+        "¿Cómo cotizo carpas industriales para un proyecto industrial?"
       ],
       "apoyos": [
         "/recursos/carpas-industriales-carga-viento-norma-e020",
@@ -466,7 +494,9 @@
       ],
       "preguntas": [
         "¿qué es una cobertura tensionada y cuánto dura?",
-        "¿cómo se calcula el pretensado de una membrana?"
+        "¿cómo se calcula el pretensado de una membrana?",
+        "¿Quién fabrica coberturas tensionadas en el Perú?",
+        "¿Cómo cotizo coberturas tensionadas para un proyecto industrial?"
       ],
       "apoyos": [
         "/glosario/arquitectura-textil",
@@ -493,7 +523,9 @@
       ],
       "preguntas": [
         "¿para qué sirve una cobertura inflable en industria?",
-        "¿qué mantenimiento pide una estructura inflable?"
+        "¿qué mantenimiento pide una estructura inflable?",
+        "¿Quién fabrica estructuras inflables en el Perú?",
+        "¿Cómo cotizo estructuras inflables para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/familia/estructuras-arquitectura-textil",
@@ -519,7 +551,9 @@
       ],
       "preguntas": [
         "¿qué se necesita para montar un campamento minero temporal?",
-        "¿qué módulos textiles hay para faenas remotas?"
+        "¿qué módulos textiles hay para faenas remotas?",
+        "¿Quién fabrica módulos para campamentos en el Perú?",
+        "¿Cómo cotizo módulos para campamentos para un proyecto industrial?"
       ],
       "apoyos": [
         "/aplicaciones/campamentos-mineros",
@@ -550,7 +584,9 @@
       "preguntas": [
         "¿cuánto cuesta cubrir un invernadero por metro cuadrado?",
         "¿qué plástico se usa para un invernadero en la costa?",
-        "¿qué diferencia hay entre galpón y invernadero?"
+        "¿qué diferencia hay entre galpón y invernadero?",
+        "¿Quién fabrica invernaderos en el Perú?",
+        "¿Cómo cotizo invernaderos para un proyecto industrial?"
       ],
       "apoyos": [
         "/industria/agroexportacion",
@@ -582,7 +618,9 @@
       ],
       "preguntas": [
         "¿qué toldo se usa para cerrar un patio de maniobras?",
-        "¿se fabrican cortinas industriales a medida?"
+        "¿se fabrican cortinas industriales a medida?",
+        "¿Quién fabrica toldos y cerramientos industriales en el Perú?",
+        "¿Cómo cotizo toldos y cerramientos industriales para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/familia/estructuras-arquitectura-textil",
@@ -610,7 +648,9 @@
       ],
       "preguntas": [
         "¿qué es una estructura textil y para qué sirve en industria?",
-        "¿qué tipos de cobertura estructural existen para obra y mina?"
+        "¿qué tipos de cobertura estructural existen para obra y mina?",
+        "¿Quién fabrica estructuras textiles en el Perú?",
+        "¿Cómo cotizo estructuras textiles para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/carpas-lona-estructuras-metalicas",
@@ -643,7 +683,9 @@
       "preguntas": [
         "¿qué mesh de malla antiáfida detiene la mosca blanca?",
         "¿la malla antiáfida reduce la ventilación del invernadero?",
-        "¿qué malla protege el cultivo sin bajar el rendimiento?"
+        "¿qué malla protege el cultivo sin bajar el rendimiento?",
+        "¿Quién fabrica malla antiáfida en el Perú?",
+        "¿Cómo cotizo malla antiáfida para un proyecto industrial?"
       ],
       "apoyos": [
         "/biblioteca/seleccion-malla-agricola",
@@ -680,7 +722,9 @@
       "preguntas": [
         "¿qué porcentaje de sombra necesita mi cultivo?",
         "¿cuánto dura una malla raschel al sol?",
-        "¿dónde comprar malla sombra por rollo en el Perú?"
+        "¿dónde comprar malla sombra por rollo en el Perú?",
+        "¿Quién fabrica malla raschel en el Perú?",
+        "¿Cómo cotizo malla raschel para un proyecto industrial?"
       ],
       "apoyos": [
         "/glosario/malla-raschel",
@@ -710,7 +754,9 @@
       ],
       "preguntas": [
         "¿cómo proteger un frutal del granizo y de las aves?",
-        "¿qué malla se usa en parronal de uva de mesa?"
+        "¿qué malla se usa en parronal de uva de mesa?",
+        "¿Quién fabrica malla anti pájaro en el Perú?",
+        "¿Cómo cotizo malla anti pájaro para un proyecto industrial?"
       ],
       "apoyos": [
         "/aplicaciones/proteccion-cultivo",
@@ -736,7 +782,9 @@
       "erratas": [],
       "preguntas": [
         "¿qué mallas existen para proteger cultivos en el Perú?",
-        "¿qué malla elijo: raschel, antiáfida o anti-granizo?"
+        "¿qué malla elijo: raschel, antiáfida o anti-granizo?",
+        "¿Quién fabrica mallas agrícolas en el Perú?",
+        "¿Cómo cotizo mallas agrícolas para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/malla-raschel-sombra",
@@ -774,7 +822,11 @@
         "¿qué diámetro de manga de ventilación necesito para mi labor?",
         "¿cuál es la diferencia entre ventilación impelente y aspirante?",
         "¿quién fabrica mangas de ventilación en el Perú?",
-        "¿cómo calculo el caudal de aire de un frente de avance?"
+        "¿cómo calculo el caudal de aire de un frente de avance?",
+        "Mangas de ventilación para mina subterránea: cómo cotizar",
+        "¿Quién fabrica mangas de ventilación a medida de tramo en el Perú?",
+        "¿Cómo se define el diámetro de una manga de ventilación de mina?",
+        "¿Cómo cotizo mangas de ventilación para un proyecto industrial?"
       ],
       "apoyos": [
         "/biblioteca/seleccion-mangas-ventilacion",
@@ -811,7 +863,9 @@
       ],
       "preguntas": [
         "¿qué componentes forman un sistema de ventilación en mina subterránea?",
-        "¿cómo se ventila un túnel en construcción?"
+        "¿cómo se ventila un túnel en construcción?",
+        "¿Quién fabrica ventilación industrial en el Perú?",
+        "¿Cómo cotizo ventilación industrial para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/mangas-ventilacion-minas-tuneles",
@@ -848,7 +902,9 @@
         "¿qué geomembrana conviene para una poza de agua?",
         "¿quién instala geomembranas en el Perú?",
         "¿cuánto cuesta impermeabilizar una poza?",
-        "¿qué espesor de geomembrana necesito?"
+        "¿qué espesor de geomembrana necesito?",
+        "¿Quién fabrica geomembranas en el Perú?",
+        "¿Cómo cotizo geomembranas para un proyecto industrial?"
       ],
       "apoyos": [
         "/biblioteca/seleccion-geomembrana",
@@ -879,7 +935,9 @@
       ],
       "preguntas": [
         "¿cuándo se usa geomembrana de PVC en vez de HDPE?",
-        "¿qué espesor de geomembrana de PVC se especifica?"
+        "¿qué espesor de geomembrana de PVC se especifica?",
+        "¿Quién fabrica geomembrana de PVC en el Perú?",
+        "¿Cómo cotizo geomembrana de PVC para un proyecto industrial?"
       ],
       "apoyos": [
         "/biblioteca/seleccion-geomembrana",
@@ -912,7 +970,12 @@
       "preguntas": [
         "¿qué espesor de geomembrana HDPE se usa en poza de relaves?",
         "¿cómo se sueldan las láminas de HDPE en obra?",
-        "¿qué es una zanja de anclaje y por qué importa?"
+        "¿qué es una zanja de anclaje y por qué importa?",
+        "Proveedor de geomembrana HDPE para reservorios en Perú",
+        "¿Qué espesor de geomembrana HDPE necesito para una poza de relaves?",
+        "¿Quién instala geomembrana en obra en el Perú?",
+        "¿Quién fabrica geomembrana HDPE en el Perú?",
+        "¿Cómo cotizo geomembrana HDPE para un proyecto industrial?"
       ],
       "apoyos": [
         "/glosario/hdpe",
@@ -942,7 +1005,9 @@
       ],
       "preguntas": [
         "¿cuándo conviene una geomembrana reforzada?",
-        "¿qué gana una geomembrana con refuerzo interno?"
+        "¿qué gana una geomembrana con refuerzo interno?",
+        "¿Quién fabrica geomembrana fortificada en el Perú?",
+        "¿Cómo cotizo geomembrana fortificada para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/familia/geosinteticos",
@@ -966,7 +1031,9 @@
       ],
       "preguntas": [
         "¿en qué casos se especifica geomembrana bituminosa?",
-        "¿la geomembrana bituminosa sirve para túneles?"
+        "¿la geomembrana bituminosa sirve para túneles?",
+        "¿Quién fabrica geomembrana bituminosa en el Perú?",
+        "¿Cómo cotizo geomembrana bituminosa para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/familia/geosinteticos",
@@ -997,7 +1064,9 @@
       "preguntas": [
         "¿qué geotextil elijo para separación, drenaje o refuerzo?",
         "¿qué gramaje de geotextil se usa bajo una geomembrana?",
-        "¿cuál es la diferencia entre geotextil tejido y no tejido?"
+        "¿cuál es la diferencia entre geotextil tejido y no tejido?",
+        "¿Quién fabrica geotextiles en el Perú?",
+        "¿Cómo cotizo geotextiles para un proyecto industrial?"
       ],
       "apoyos": [
         "/glosario/geotextil",
@@ -1031,7 +1100,9 @@
       ],
       "preguntas": [
         "¿cómo se estabiliza una plataforma con geomalla?",
-        "¿qué geomalla se usa en carretera afirmada?"
+        "¿qué geomalla se usa en carretera afirmada?",
+        "¿Quién fabrica geomallas en el Perú?",
+        "¿Cómo cotizo geomallas para un proyecto industrial?"
       ],
       "apoyos": [
         "/glosario/geomalla",
@@ -1058,7 +1129,9 @@
       ],
       "preguntas": [
         "¿qué es un geocompuesto de drenaje y dónde se usa?",
-        "¿el geocompuesto reemplaza a la capa de grava drenante?"
+        "¿el geocompuesto reemplaza a la capa de grava drenante?",
+        "¿Quién fabrica geocompuestos de drenaje en el Perú?",
+        "¿Cómo cotizo geocompuestos de drenaje para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/familia/geosinteticos",
@@ -1091,7 +1164,9 @@
       "preguntas": [
         "¿cuánta agua almacena un tanque flexible?",
         "¿qué se usa para almacenar agua en una operación remota?",
-        "¿un tanque flexible sirve para combustible?"
+        "¿un tanque flexible sirve para combustible?",
+        "¿Quién fabrica tanques flexibles en el Perú?",
+        "¿Cómo cotizo tanques flexibles para un proyecto industrial?"
       ],
       "apoyos": [
         "/aplicaciones/contencion-fluidos",
@@ -1119,7 +1194,9 @@
       ],
       "preguntas": [
         "¿qué biodigestor se usa en fundo o granja?",
-        "¿cómo se impermeabiliza una laguna anaerobia?"
+        "¿cómo se impermeabiliza una laguna anaerobia?",
+        "¿Quién fabrica biodigestores en el Perú?",
+        "¿Cómo cotizo biodigestores para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/familia/ambientales-fluidos",
@@ -1146,7 +1223,9 @@
       ],
       "preguntas": [
         "¿qué tubería HDPE se usa para conducción de agua en mina?",
-        "¿cómo se une una tubería HDPE en campo?"
+        "¿cómo se une una tubería HDPE en campo?",
+        "¿Quién fabrica tuberías HDPE en el Perú?",
+        "¿Cómo cotizo tuberías HDPE para un proyecto industrial?"
       ],
       "apoyos": [
         "/glosario/hdpe",
@@ -1172,7 +1251,9 @@
       ],
       "preguntas": [
         "¿qué opciones hay para contener y almacenar fluidos en operación?",
-        "¿cómo se hace una contención secundaria de derrames?"
+        "¿cómo se hace una contención secundaria de derrames?",
+        "¿Quién fabrica soluciones ambientales y de fluidos en el Perú?",
+        "¿Cómo cotizo soluciones ambientales y de fluidos para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/tanques-flexibles-bladders",
@@ -1202,7 +1283,9 @@
       ],
       "preguntas": [
         "¿qué biombo protege del arco de soldadura?",
-        "¿qué cortina se usa en un taller de soldadura?"
+        "¿qué cortina se usa en un taller de soldadura?",
+        "¿Quién fabrica biombos protectores en el Perú?",
+        "¿Cómo cotizo biombos protectores para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/familia/seguridad-industrial",
@@ -1228,7 +1311,9 @@
       ],
       "preguntas": [
         "¿cómo se reduce el ruido de una obra hacia el vecindario?",
-        "¿qué barrera acústica se usa alrededor de un generador?"
+        "¿qué barrera acústica se usa alrededor de un generador?",
+        "¿Quién fabrica barreras acústicas en el Perú?",
+        "¿Cómo cotizo barreras acústicas para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/mantas-aislantes-termicas-termoacusticas",
@@ -1252,7 +1337,9 @@
       ],
       "preguntas": [
         "¿qué soluciones textiles hay para seguridad en planta?",
-        "¿cómo se protege un frente de trabajo del ruido y las chispas?"
+        "¿cómo se protege un frente de trabajo del ruido y las chispas?",
+        "¿Quién fabrica protección y seguridad industrial en el Perú?",
+        "¿Cómo cotizo protección y seguridad industrial para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/biombos-protectores-soldadura",
@@ -1281,7 +1368,9 @@
       ],
       "preguntas": [
         "¿qué accesorios necesito para instalar una lona o carpa?",
-        "¿cada cuánto se colocan los ojalillos en una lona?"
+        "¿cada cuánto se colocan los ojalillos en una lona?",
+        "¿Quién fabrica accesorios de instalación en el Perú?",
+        "¿Cómo cotizo accesorios de instalación para un proyecto industrial?"
       ],
       "apoyos": [
         "/glosario/ojal",
@@ -1304,7 +1393,9 @@
       ],
       "preguntas": [
         "¿qué complementos entrega el fabricante junto con la cobertura?",
-        "¿venden accesorios sueltos para reparar una lona?"
+        "¿venden accesorios sueltos para reparar una lona?",
+        "¿Quién fabrica accesorios y complementos en el Perú?",
+        "¿Cómo cotizo accesorios y complementos para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/accesorios-instalacion",
@@ -1331,7 +1422,9 @@
       ],
       "preguntas": [
         "¿dónde imprimir una gigantografía para obra en Lima?",
-        "¿qué material se usa para un letrero a la intemperie?"
+        "¿qué material se usa para un letrero a la intemperie?",
+        "¿Quién fabrica gigantografías en el Perú?",
+        "¿Cómo cotizo gigantografías para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/familia/publicidad",
@@ -1355,7 +1448,9 @@
       ],
       "preguntas": [
         "¿se puede rotular la lona de un camión con la marca?",
-        "¿cuánto dura una rotulación vehicular a la intemperie?"
+        "¿cuánto dura una rotulación vehicular a la intemperie?",
+        "¿Quién fabrica revestimiento vehicular en el Perú?",
+        "¿Cómo cotizo revestimiento vehicular para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/familia/publicidad",
@@ -1378,7 +1473,9 @@
       ],
       "preguntas": [
         "¿qué soluciones de comunicación visual fabrica una empresa de lonas?",
-        "¿cómo se señaliza una obra con material resistente a la intemperie?"
+        "¿cómo se señaliza una obra con material resistente a la intemperie?",
+        "¿Quién fabrica publicidad y comunicación visual en el Perú?",
+        "¿Cómo cotizo publicidad y comunicación visual para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/gigantografias-senaletica",
@@ -1404,7 +1501,9 @@
       ],
       "preguntas": [
         "¿cuánto mulch necesito por metro cuadrado?",
-        "¿qué espesor de mulch conserva la humedad del suelo?"
+        "¿qué espesor de mulch conserva la humedad del suelo?",
+        "¿Quién fabrica mulch en el Perú?",
+        "¿Cómo cotizo mulch para un proyecto industrial?"
       ],
       "apoyos": [
         "/recursos/mulch-madera-espesor-calculo-cobertura-suelo",
@@ -1427,7 +1526,9 @@
       ],
       "preguntas": [
         "¿fabrican productos fuera de catálogo bajo especificación?",
-        "¿cómo se cotiza un desarrollo a medida?"
+        "¿cómo se cotiza un desarrollo a medida?",
+        "¿Quién fabrica líneas especiales en el Perú?",
+        "¿Cómo cotizo líneas especiales para un proyecto industrial?"
       ],
       "apoyos": [
         "/productos/mulch-madera-picada",
@@ -1950,7 +2051,10 @@
       ],
       "preguntas": [
         "¿atienden fuera de Lima?",
-        "¿despachan a operaciones en provincia?"
+        "¿despachan a operaciones en provincia?",
+        "¿Despachan a Cerro de Pasco, Puno o Moquegua?",
+        "¿Atienden el parque industrial de Villa El Salvador?",
+        "¿Entregan en el Callao para embarque de exportación?"
       ],
       "apoyos": [
         "/contacto",

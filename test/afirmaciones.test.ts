@@ -23,7 +23,14 @@ import { join } from 'node:path';
  */
 
 const raiz = process.cwd();
-const MIRAR = ['app', 'components', 'lib', 'data'];
+/**
+ * `public` entró después: el sitio servía /entidad.json, un archivo estático que
+ * declaraba cobertura en cinco países mientras /confianza publicaba que eso no
+ * se afirma. No lo cazó nadie porque esta lista no incluía la carpeta desde la
+ * que se sirven los archivos tal cual. Lo que se publica se audita, esté escrito
+ * en TypeScript o en JSON suelto.
+ */
+const MIRAR = ['app', 'components', 'lib', 'data', 'public'];
 
 /**
  * Cada patrón es una forma concreta de afirmar algo que esta empresa no puede
@@ -52,8 +59,28 @@ const PROHIBIDO: { re: RegExp; porque: string }[] = [
     porque: 'garantía sin plazo ni condiciones escritas',
   },
   {
-    re: /\b(oficinas?|sedes?|filiales?|sucursales?)\s+en\s+(chile|colombia|ecuador|bolivia|brasil|m[eé]xico|todo el pa[ií]s)/i,
-    porque: 'sedes que no existen: hay una planta, en Chorrillos',
+    re: /\b(oficinas?|sedes?|filiales?|sucursales?|distribuidores?)\s+en\s+(chile|colombia|ecuador|bolivia|brasil|m[eé]xico|todo el pa[ií]s)/i,
+    porque: 'sedes o red de distribución que no existen: hay una planta, en Chorrillos',
+  },
+  {
+    // La página de contacto prometía «atención inmediata 24/7» veinticinco
+    // líneas encima de su propio horario: lunes a viernes de 8 a 18 y sábados
+    // de 8 a 13. WhatsApp aquí es un canal humano, no un bot: no hay turno de
+    // noche que lo atienda. Un comprador que escribe un domingo y no recibe
+    // respuesta ya sabe que este sitio exagera, y lee el resto con esa sospecha.
+    re: /\b24\s*[\/x]\s*7\b/i,
+    porque: 'disponibilidad 24/7 que el horario publicado desmiente en la misma página',
+  },
+  {
+    // «Cumplimiento de normas ambientales y de seguridad», sin norma citable ni
+    // documento, es una credencial propia disfrazada de beneficio. La regla del
+    // sitio permite citar la norma AJENA que el comprador debe cumplir; lo que
+    // prohíbe es atribuírsela. Se exige nombrar la norma o no invocarla.
+    re: /\bcumpl(?:e|en|imiento)\b[^.]{0,40}?\b(?:normas?|normativas?)\b/i,
+    porque:
+      'cumplimiento normativo afirmado sin apuntar al documento que lo respalda. ' +
+      'Cite la norma ajena que el comprador debe cumplir y diga qué documentación se entrega ' +
+      'en la cotización — nunca se atribuya el cumplimiento como credencial propia',
   },
 ];
 
@@ -79,6 +106,25 @@ describe('el sitio no afirma lo que no puede sostener', () => {
           // es la frase. Documentar el error es parte de no repetirlo.
           const t = linea.trim();
           if (t.startsWith('*') || t.startsWith('//') || t.startsWith('{/*')) continue;
+          // Una PREGUNTA no es una afirmación. «¿Las cortinas cumplen alguna
+          // norma?» es exactamente la duda que el comprador trae, y la respuesta
+          // que sigue en lib/families.ts se niega a atribuirse nada. Perseguir la
+          // pregunta obligaría a borrar el contenido bueno para pasar la prueba,
+          // que es como se termina debilitando una regla.
+          if (t.includes('¿')) continue;
+          // Tampoco lo es una frase que remite al documento: ése es justamente
+          // el patrón honesto que el resto del catálogo ya usa.
+          if (/documentaci[óo]n|cotizaci[óo]n|ficha t[ée]cnica|certificado de lote|a solicitud/i.test(linea))
+            continue;
+          // Ni una NEGACIÓN. lib/guides.ts declara que la calculadora «no
+          // entrega pérdida de carga certificada ni cumple NFPA»: eso es
+          // publicar un límite, que es la conducta que el sitio persigue, no
+          // la que castiga.
+          if (/\b(?:no|ni|sin)\b[^.]{0,60}\bcumpl/i.test(linea)) continue;
+          // Ni ayudar a que el COMPRADOR cumpla lo suyo. «Apoya el cumplimiento
+          // de normativa ambiental» describe para qué sirve el producto en la
+          // obra del cliente; no se atribuye ninguna credencial a esta empresa.
+          if (/\b(?:apoya|ayuda a|facilita|permite|para el)\b[^.]{0,20}\bcumpl/i.test(linea)) continue;
           if (re.test(linea)) hallazgos.push(`${f}:${n + 1}  ${t.slice(0, 120)}`);
         }
       }

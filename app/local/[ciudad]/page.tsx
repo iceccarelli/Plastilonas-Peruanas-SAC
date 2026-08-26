@@ -11,8 +11,21 @@ import { JsonLd } from "@/components/JsonLd";
 import WhatsAppLink from "@/components/WhatsAppLink";
 import TrackView from "@/components/TrackView";
 
+type Corredor = { nombre: string; contexto: string };
 type Ciudad = { slug: string; ciudad: string; departamento: string; region: string;
-  clima: string; contextoLocal: string; usosPrincipales: string[]; sectoresDemanda: string[]; };
+  clima: string; contextoLocal: string; usosPrincipales: string[]; sectoresDemanda: string[];
+  /**
+   * Corredores industriales dentro de la misma ciudad. Sólo Lima los declara.
+   *
+   * Por qué van aquí y no en tres páginas propias: Villa El Salvador, Ate y
+   * Lurín comparten el clima de Lima al detalle, de modo que tres páginas de
+   * ciudad se diferenciarían únicamente en el nombre del distrito. Eso es una
+   * doorway page, y lib/search/topic-map.ts ya lo prohíbe por escrito: «añadir
+   * un término no autoriza a fabricar una página delgada de producto × ciudad».
+   * Una sola página fuerte responde a las tres consultas; tres páginas débiles
+   * se reparten la señal y no posicionan ninguna.
+   */
+  corredores?: Corredor[]; };
 const CIUDADES = ciudades as Ciudad[];
 
 export const revalidate = 86400;   // ISR: daily
@@ -43,6 +56,14 @@ function faqsFor(c: Ciudad) {
       a: `Sí. Atendemos pedidos en ${c.ciudad} y todo ${c.departamento} con despacho nacional. Escríbenos por WhatsApp para cotizar medidas y cantidades.` },
     { q: `¿Qué productos se usan más en ${c.ciudad}?`,
       a: `Predominan usos como ${c.usosPrincipales.join(", ").toLowerCase()}. Contexto local: ${c.clima.toLowerCase()}` },
+    ...(c.corredores?.length
+      ? [{
+          q: `¿Atienden los corredores industriales de ${c.ciudad}?`,
+          a: `Sí. Despachamos desde la planta de ${SITE.addressLocality} a ${c.corredores
+            .map((k) => k.nombre)
+            .join(', ')}. No tenemos local en cada uno: la fabricación y las oficinas están en ${SITE.addressLocality}.`,
+        }]
+      : []),
     { q: `¿Hacen medidas a pedido?`,
       a: `Sí, fabricamos a medida. Las especificaciones exactas (espesor, color, resistencia UV) se confirman por cotización según disponibilidad.` },
   ];
@@ -86,6 +107,23 @@ export default async function CiudadPage({ params }: { params: Promise<{ ciudad:
         plásticas, cobertores e impermeabilización para {c.ciudad}, {c.departamento}. {c.contextoLocal}</p>
       <section className="mb-8"><h2 className="mb-3 text-2xl font-semibold">Usos más frecuentes en {c.ciudad}</h2>
         <ul className="list-disc space-y-1 pl-6">{c.usosPrincipales.map((u) => <li key={u}>{u}</li>)}</ul></section>
+      {c.corredores && c.corredores.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-2xl font-semibold">Corredores industriales de {c.ciudad}</h2>
+          <p className="mb-4 text-neutral-600">
+            La demanda no se reparte igual por toda la ciudad. Éstos son los ejes
+            desde los que llegan la mayoría de los requerimientos, con lo que pide cada uno.
+          </p>
+          <dl className="space-y-4">
+            {c.corredores.map((k) => (
+              <div key={k.nombre} className="rounded-2xl border border-neutral-200 p-4">
+                <dt className="font-semibold text-[#0A2540]">{k.nombre}</dt>
+                <dd className="mt-1 text-neutral-700">{k.contexto}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
       <section className="mb-8"><h2 className="mb-3 text-2xl font-semibold">Sectores que atendemos</h2>
         <p>{c.sectoresDemanda.join(" · ")}</p><p className="mt-2 text-neutral-600">Clima local: {c.clima}</p></section>
       <section className="mb-8"><h2 className="mb-3 text-2xl font-semibold">Preguntas frecuentes</h2>

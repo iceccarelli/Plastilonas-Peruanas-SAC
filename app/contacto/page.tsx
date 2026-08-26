@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import WhatsAppLink from '@/components/WhatsAppLink';
+import { SITE } from '@/lib/site';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -101,12 +102,12 @@ export default function ContactoPage() {
                 <Phone className="mt-0.5 text-[#047857]" /> 
                 <div>
                   <div className="font-medium text-[#047857]">+51 946 085 270 (WhatsApp)</div>
-                  <div className="text-xs text-gray-500">Atención inmediata 24/7</div>
+                  <div className="text-xs text-gray-500">Respuesta en horario comercial</div>
                 </div>
               </WhatsAppLink>
-              <a href="mailto:ventas@plastilonas.com" className="flex gap-4 group">
+              <a href={`mailto:${SITE.email}`} className="flex gap-4 group">
                 <Mail className="mt-0.5 text-[#059669]" /> 
-                <div>ventas@plastilonas.com</div>
+                <div>{SITE.email}</div>
               </a>
             </div>
           </div>
@@ -116,7 +117,7 @@ export default function ContactoPage() {
             <div className="flex gap-4">
               <MapPin className="mt-0.5 text-[#059669] flex-shrink-0" />
               <div className="text-gray-600 leading-snug">
-                Calle Alameda del Remero Mz - V, Lt - 2<br />
+                {SITE.addressStreet}<br />
                 Urb. Los Huertos de Villa, Chorrillos<br />
                 Lima, Perú
               </div>

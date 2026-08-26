@@ -8,6 +8,8 @@ import { ranurasAplicacion } from '@/lib/imagenes';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import { webPageSchema, breadcrumbSchema, imageObjectSchema, itemListSchema } from '@/lib/schema';
+import WhatsAppLink from '@/components/WhatsAppLink';
+import { respuestaDirectaAplicacion, rfqWhatsAppAplicacion } from '@/lib/respuesta-directa';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -32,6 +34,8 @@ export default async function AplicacionPage({ params }: Props) {
   const foto = ranurasAplicacion().find((r) => r.id === `aplicacion:${app.slug}`);
 
   const url = `${SITE.url}/aplicaciones/${app.slug}`;
+  const respuestaDirecta = respuestaDirectaAplicacion(app);
+  const rfq = rfqWhatsAppAplicacion(app);
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-14">
@@ -43,7 +47,10 @@ export default async function AplicacionPage({ params }: Props) {
           webPageSchema({
             url,
             name: app.name,
-            description: app.problem,
+            description: respuestaDirecta,
+            // El párrafo citable de esta página es el que dice qué define el
+            // alcance, no el que describe el problema.
+            speakable: ['.respuesta-directa'],
             breadcrumbId: `${url}#breadcrumb`,
           }),
           breadcrumbSchema(
@@ -77,11 +84,29 @@ export default async function AplicacionPage({ params }: Props) {
       <p className="mt-4 text-gray-600 max-w-3xl leading-relaxed">{app.problem}</p>
       <p className="mt-4 text-gray-700 max-w-3xl leading-relaxed">{app.approach}</p>
 
+      {/* Respuesta directa: compuesta del problema y de los tres primeros datos
+          que definen el alcance. Es lo que un asistente puede citar entero
+          cuando alguien pregunta por esta aplicación. */}
+      <p className="respuesta-directa mt-6 max-w-3xl text-[15px] leading-relaxed text-[#0A2540] bg-emerald-50/60 border border-emerald-100 rounded-2xl p-5">
+        {respuestaDirecta}
+      </p>
+
       {/* La fotografía después del planteamiento: primero se nombra el problema
           con palabras, luego se enseña dónde ocurre. Prioritaria porque es la
           imagen que mide el LCP de esta página. */}
       {foto && <ImagenContenido ranura={foto} prioridad className="mt-8" sizes="(min-width: 1024px) 900px, 100vw" />}
-      <Link href={`/cotizacion?notas=${encodeURIComponent('Aplicación: ' + app.name)}`} className="btn mt-8 inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">RFQ de esta aplicación</Link>
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Link href={`/cotizacion?notas=${encodeURIComponent('Aplicación: ' + app.name)}`} className="btn inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">RFQ de esta aplicación</Link>
+        {/* El RFQ llega con las preguntas de alcance ya listadas: el comprador
+            las completa antes de enviar y el primer mensaje ya sirve. */}
+        <WhatsAppLink
+          context={`rfq-aplicacion:${app.slug}`}
+          message={rfq}
+          className="inline-flex items-center border border-gray-200 hover:bg-gray-50 px-5 py-3 rounded-2xl font-medium"
+        >
+          RFQ por WhatsApp
+        </WhatsAppLink>
+      </div>
       <h2 className="mt-12 text-xl font-semibold text-[#0A2540]">Qué preguntamos</h2>
       <ol className="mt-3 list-decimal pl-5 text-gray-700 space-y-1">
         {app.questions.map((q) => <li key={q}>{q}</li>)}

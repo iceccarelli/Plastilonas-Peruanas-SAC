@@ -78,12 +78,21 @@ export default function Home() {
   // cambian solas. Escribirlo a mano fue lo que hizo que la portada dijera
   // «desde 2009» mientras lib/site.ts era la única fuente que podía saberlo.
   const anios = YEARS_OPERATING;
+  /**
+   * Líneas que se confeccionan en la planta de Chorrillos, contadas del propio
+   * catálogo. Sustituye a un «100% a medida» escrito a mano que el catálogo
+   * desmentía: 16 de las 36 líneas son importación directa y una es de aliado
+   * técnico, y el sitio entero —el campo `sourcing`, el badge de cada ficha, el
+   * prompt del chatbot— existe para declararlo. Una cifra falsa sentada junto a
+   * dos verdaderas les roba la credibilidad a las dos.
+   */
+  const fabricacionPropia = products.filter((p) => p.sourcing === 'fabricacion_propia').length;
   // Cifras calculadas del catálogo: nunca quedan desfasadas ni se inventan.
   const stats = [
-    { to: 100, suffix: '%', label: 'A medida', sub: 'Cada pieza a su especificación' },
+    { to: fabricacionPropia, label: 'Líneas de fabricación propia', sub: `De ${products.length} en catálogo, confeccionadas aquí` },
     { to: products.length, label: 'Soluciones', sub: `En ${productFamilies.length} líneas de producto` },
     { to: anios, label: 'Años fabricando', sub: `En el Perú desde ${SITE.foundingYear}` },
-    { display: '24/7', label: 'WhatsApp', sub: 'Respuesta directa de fábrica' },
+    { display: 'L–V', label: 'Atención comercial', sub: '8:00–18:00 · sábados 8:00–13:00' },
   ];
   // Franja de legitimidad: datos verificables, no repite las cifras de arriba.
   const trust = [
@@ -95,7 +104,7 @@ export default function Home() {
   const whyus = [
     { title: 'Fabricación e instalación propias', content: 'Confeccionamos e instalamos con nuestro propio equipo: una sola responsabilidad, del diseño a la obra.' },
     { title: 'Un solo proveedor para todo', content: 'Envases, lonas, estructuras, mallas, ventilación y geosintéticos en un mismo lugar. Menos coordinación, menos riesgo.' },
-    { title: 'Rapidez y WhatsApp 24/7', content: 'Su solicitud llega directo a nuestro equipo comercial y recibe respuesta ágil, con entregas a todo el país.' },
+    { title: 'Respuesta directa por WhatsApp', content: 'Su solicitud llega directo a nuestro equipo comercial en horario de atención, y se despacha a todo el país desde la planta de Chorrillos.' },
     { title: 'Asesoría técnica real', content: 'Le ayudamos a elegir el material y la especificación correcta antes de comprar, no después.' },
   ];
   const services = [
@@ -115,7 +124,7 @@ export default function Home() {
             <div className="inline-flex items-center gap-2 bg-white/10 text-white/90 text-xs tracking-[2px] font-medium px-5 py-2 rounded-full mb-6 border border-white/20">SOLUCIONES TEXTILES E INDUSTRIALES INTEGRALES EN EL PERÚ</div>
           </Reveal>
           <Reveal delay={0.05}>
-            <h1 className="t-display font-semibold mb-6">Fabricación 100% a medida.<br />Instalación propia.<br />Un solo proveedor.</h1>
+            <h1 className="t-display font-semibold mb-6">Fabricación a medida.<br />Instalación propia.<br />Un solo proveedor.</h1>
           </Reveal>
           <Reveal delay={0.1}>
             <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">Big Bags, geomembranas, estructuras, mallas, ventilación y geosintéticos: {products.length} soluciones en {productFamilies.length} líneas de producto, fabricadas e instaladas por nuestro propio equipo en el Perú.</p>

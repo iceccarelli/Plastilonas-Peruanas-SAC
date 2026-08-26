@@ -871,7 +871,7 @@ export const products: Product[] = [
       'Fácil instalación, transporte y reconfiguración',
       'Excelente flujo de aire con mínima pérdida de presión',
       'Personalización total de diámetro, longitud y accesorios',
-      'Cumplimiento de normas de seguridad minera (OIT, MINEM)'
+      'La normativa de seguridad minera del MINEM y el reglamento interno de la operación fijan el requisito de ventilación; entregamos la ficha técnica del material en cotización'
     ],
     image: '/images/galeria/mangas-ventilacion-minas-tuneles-general.webp',
     gallery: [
@@ -925,7 +925,7 @@ export const products: Product[] = [
       'Soldadura en obra con garantía de hermeticidad',
       'Alta flexibilidad y adaptabilidad a todo tipo de terreno',
       'Resistente a rayos UV y condiciones climáticas extremas',
-      'Cumplimiento de normas ambientales y de seguridad'
+      'Ficha técnica del material y certificado de lote del fabricante, entregados con la cotización'
     ],
     image: '/images/galeria/geomembranas-pvc-general.webp',
     gallery: [
@@ -1292,7 +1292,7 @@ export const products: Product[] = [
     category: 'Protección y Seguridad Industrial',
     sector: ['Industrial', 'Construcción', 'Minería'],
     shortDescription: 'Biombos portátiles y fijos de lona ignífuga para protección contra chispas, radiación UV y proyecciones en trabajos de soldadura.',
-    description: 'Biombos protectores fabricados con lona de fibra de vidrio recubierta de silicona o PVC ignífugo de alta calidad. Diseñados para crear zonas seguras en talleres de soldadura, astilleros, construcción y mantenimiento industrial. Disponibles en versiones portátiles con estructura metálica plegable o fijos para instalación permanente. Cumplen con normativas de seguridad industrial peruana e internacional.',
+    description: 'Biombos protectores fabricados con lona de fibra de vidrio recubierta de silicona o PVC ignífugo de alta calidad. Diseñados para crear zonas seguras en talleres de soldadura, astilleros, construcción y mantenimiento industrial. Disponibles en versiones portátiles con estructura metálica plegable o fijos para instalación permanente. La ficha técnica del material —autoextinguibilidad y temperatura máxima— se entrega en la cotización, para que el responsable de seguridad contraste el paño contra la norma que le aplique a su taller.',
     specifications: [
       { label: 'Material', value: 'Lona de fibra de vidrio con recubrimiento de silicona/PVC ignífugo' },
       { label: 'Resistencia al fuego', value: 'Material autoextinguible / retardante de llama; ficha técnica del material en cotización' },
@@ -1314,7 +1314,7 @@ export const products: Product[] = [
       'Reduce riesgos de incendio y lesiones oculares',
       'Fácil instalación y reconfiguración del espacio de trabajo',
       'Durabilidad extrema en ambientes industriales agresivos',
-      'Cumplimiento de normas de seguridad y salud en el trabajo'
+      'Ficha técnica de resistencia al fuego del material, entregada con la cotización'
     ],
     image: '/images/galeria/biombos-protectores-soldadura-general.webp',
     gallery: [
@@ -1477,7 +1477,7 @@ export const products: Product[] = [
       { label: 'Presentación', value: 'Sacos de 50 litros, Big Bags de 1m³, a granel' },
       { label: 'Humedad', value: '15-25% (estabilizado)' },
       { label: 'pH', value: '5.5 - 7.0' },
-      { label: 'Certificación', value: 'Libre de semillas de malezas y patógenos' }
+      { label: 'Control de proceso', value: 'Cribado y secado antes del despacho para reducir semillas de malezas; sin certificado fitosanitario propio' }
     ],
     applications: [
       'Cobertura de suelos en cultivos de berries, frutales y hortalizas',
