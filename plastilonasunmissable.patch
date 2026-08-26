@@ -1,0 +1,2233 @@
+diff --git a/app/aplicaciones/[slug]/page.tsx b/app/aplicaciones/[slug]/page.tsx
+index 9fba3f7..46a26d9 100644
+--- a/app/aplicaciones/[slug]/page.tsx
++++ b/app/aplicaciones/[slug]/page.tsx
+@@ -8,6 +8,8 @@ import { ranurasAplicacion } from '@/lib/imagenes';
+ import { SITE } from '@/lib/site';
+ import { JsonLd } from '@/components/JsonLd';
+ import { webPageSchema, breadcrumbSchema, imageObjectSchema, itemListSchema } from '@/lib/schema';
++import WhatsAppLink from '@/components/WhatsAppLink';
++import { respuestaDirectaAplicacion, rfqWhatsAppAplicacion } from '@/lib/respuesta-directa';
+ 
+ type Props = { params: Promise<{ slug: string }> };
+ 
+@@ -32,6 +34,8 @@ export default async function AplicacionPage({ params }: Props) {
+   const foto = ranurasAplicacion().find((r) => r.id === `aplicacion:${app.slug}`);
+ 
+   const url = `${SITE.url}/aplicaciones/${app.slug}`;
++  const respuestaDirecta = respuestaDirectaAplicacion(app);
++  const rfq = rfqWhatsAppAplicacion(app);
+ 
+   return (
+     <div className="max-w-5xl mx-auto px-6 py-14">
+@@ -43,7 +47,10 @@ export default async function AplicacionPage({ params }: Props) {
+           webPageSchema({
+             url,
+             name: app.name,
+-            description: app.problem,
++            description: respuestaDirecta,
++            // El párrafo citable de esta página es el que dice qué define el
++            // alcance, no el que describe el problema.
++            speakable: ['.respuesta-directa'],
+             breadcrumbId: `${url}#breadcrumb`,
+           }),
+           breadcrumbSchema(
+@@ -77,11 +84,29 @@ export default async function AplicacionPage({ params }: Props) {
+       <p className="mt-4 text-gray-600 max-w-3xl leading-relaxed">{app.problem}</p>
+       <p className="mt-4 text-gray-700 max-w-3xl leading-relaxed">{app.approach}</p>
+ 
++      {/* Respuesta directa: compuesta del problema y de los tres primeros datos
++          que definen el alcance. Es lo que un asistente puede citar entero
++          cuando alguien pregunta por esta aplicación. */}
++      <p className="respuesta-directa mt-6 max-w-3xl text-[15px] leading-relaxed text-[#0A2540] bg-emerald-50/60 border border-emerald-100 rounded-2xl p-5">
++        {respuestaDirecta}
++      </p>
++
+       {/* La fotografía después del planteamiento: primero se nombra el problema
+           con palabras, luego se enseña dónde ocurre. Prioritaria porque es la
+           imagen que mide el LCP de esta página. */}
+       {foto && <ImagenContenido ranura={foto} prioridad className="mt-8" sizes="(min-width: 1024px) 900px, 100vw" />}
+-      <Link href={`/cotizacion?notas=${encodeURIComponent('Aplicación: ' + app.name)}`} className="btn mt-8 inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">RFQ de esta aplicación</Link>
++      <div className="mt-8 flex flex-wrap gap-3">
++        <Link href={`/cotizacion?notas=${encodeURIComponent('Aplicación: ' + app.name)}`} className="btn inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">RFQ de esta aplicación</Link>
++        {/* El RFQ llega con las preguntas de alcance ya listadas: el comprador
++            las completa antes de enviar y el primer mensaje ya sirve. */}
++        <WhatsAppLink
++          context={`rfq-aplicacion:${app.slug}`}
++          message={rfq}
++          className="inline-flex items-center border border-gray-200 hover:bg-gray-50 px-5 py-3 rounded-2xl font-medium"
++        >
++          RFQ por WhatsApp
++        </WhatsAppLink>
++      </div>
+       <h2 className="mt-12 text-xl font-semibold text-[#0A2540]">Qué preguntamos</h2>
+       <ol className="mt-3 list-decimal pl-5 text-gray-700 space-y-1">
+         {app.questions.map((q) => <li key={q}>{q}</li>)}
+diff --git a/app/contacto/page.tsx b/app/contacto/page.tsx
+index 2eabd0d..e115f56 100644
+--- a/app/contacto/page.tsx
++++ b/app/contacto/page.tsx
+@@ -2,6 +2,7 @@
+ 
+ import Link from 'next/link';
+ import WhatsAppLink from '@/components/WhatsAppLink';
++import { SITE } from '@/lib/site';
+ import { Phone, Mail, MapPin, Clock } from 'lucide-react';
+ import { useForm } from 'react-hook-form';
+ import { zodResolver } from '@hookform/resolvers/zod';
+@@ -101,12 +102,12 @@ export default function ContactoPage() {
+                 <Phone className="mt-0.5 text-[#047857]" /> 
+                 <div>
+                   <div className="font-medium text-[#047857]">+51 946 085 270 (WhatsApp)</div>
+-                  <div className="text-xs text-gray-500">Atención inmediata 24/7</div>
++                  <div className="text-xs text-gray-500">Respuesta en horario comercial</div>
+                 </div>
+               </WhatsAppLink>
+-              <a href="mailto:ventas@plastilonas.com" className="flex gap-4 group">
++              <a href={`mailto:${SITE.email}`} className="flex gap-4 group">
+                 <Mail className="mt-0.5 text-[#059669]" /> 
+-                <div>ventas@plastilonas.com</div>
++                <div>{SITE.email}</div>
+               </a>
+             </div>
+           </div>
+@@ -116,7 +117,7 @@ export default function ContactoPage() {
+             <div className="flex gap-4">
+               <MapPin className="mt-0.5 text-[#059669] flex-shrink-0" />
+               <div className="text-gray-600 leading-snug">
+-                Calle Alameda del Remero Mz - V, Lt - 2<br />
++                {SITE.addressStreet}<br />
+                 Urb. Los Huertos de Villa, Chorrillos<br />
+                 Lima, Perú
+               </div>
+diff --git a/app/entidad.json/route.ts b/app/entidad.json/route.ts
+new file mode 100644
+index 0000000..5b027b5
+--- /dev/null
++++ b/app/entidad.json/route.ts
+@@ -0,0 +1,22 @@
++import { buildEntidadJson } from '@/lib/entidad-feed';
++
++export const dynamic = 'force-static';
++
++/**
++ * /entidad.json — la tarjeta de identidad legible por máquina.
++ *
++ * Sustituye al antiguo archivo estático de public/, que declaraba otro dominio
++ * y cinco países de cobertura. La razón de que ahora sea una ruta y no un
++ * archivo es que una ruta puede derivar de lib/site.ts; un archivo en public/
++ * sólo puede copiarlo, y una copia se queda atrás sin avisar.
++ */
++export async function GET(): Promise<Response> {
++  return new Response(buildEntidadJson(), {
++    headers: {
++      'Content-Type': 'application/ld+json; charset=utf-8',
++      'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
++      'X-Robots-Tag': 'all',
++      'Access-Control-Allow-Origin': '*',
++    },
++  });
++}
+diff --git a/app/exportacion/page.tsx b/app/exportacion/page.tsx
+index ef522be..448a935 100644
+--- a/app/exportacion/page.tsx
++++ b/app/exportacion/page.tsx
+@@ -2,6 +2,11 @@ import type { Metadata } from 'next';
+ import Link from 'next/link';
+ import ImagenContenido from '@/components/ImagenContenido';
+ import { ranurasProceso } from '@/lib/imagenes';
++import { SITE } from '@/lib/site';
++import { JsonLd } from '@/components/JsonLd';
++import { webPageSchema, breadcrumbSchema, faqSchema, businessRef } from '@/lib/schema';
++import { INCOTERMS_SALIDA } from '@/lib/entidad-feed';
++import WhatsAppLink from '@/components/WhatsAppLink';
+ 
+ export const metadata: Metadata = {
+   title: 'Exportación desde el Perú',
+@@ -20,14 +25,114 @@ const MARKETS = [
+   ['México', 'MXN', 'Solo pedidos calificados por volumen.'],
+ ];
+ 
++/**
++ * ALCANCE INTERNACIONAL, DECLARADO SIN INVENTAR COBERTURA.
++ *
++ * La tentación evidente en esta página es meter Chile, Colombia, Ecuador y
++ * Bolivia en un `areaServed` y quedarse tranquilo. No se hace, y el motivo está
++ * publicado dos clics más allá: /confianza enumera «Envío mundial o instalación
++ * continental» entre las cosas que esta empresa NO afirma, y de esos cuatro
++ * mercados sólo Colombia tiene evidencia pública de comercio. Un `areaServed`
++ * con cinco países es una afirmación de cobertura en un campo tipado, y un
++ * comprador que la contrasta con /confianza encuentra al sitio contradiciéndose.
++ *
++ * Lo que sí se declara —y es MÁS útil para quien pregunta— es el mecanismo: de
++ * dónde sale la carga, bajo qué Incoterm, y qué hay que definir para que exista
++ * una cotización. Un agente que lea esto puede contestar «¿exportan a Chile?»
++ * con la verdad completa: se fabrica en Chorrillos, se embarca EXW Lima o FOB
++ * Callao, y cada operación se evalúa por partida, volumen y destino.
++ */
++const FAQS = [
++  {
++    q: '¿Exportan a otros países de Sudamérica?',
++    a: 'La fabricación ocurre en Chorrillos, Lima. Cada operación internacional se evalúa por partida arancelaria, volumen mínimo, destino e Incoterm: no hay envío mundial automático ni tarifa publicada. Existe evidencia pública de comercio exterior hacia Colombia; el resto de destinos se confirma operación por operación.',
++  },
++  {
++    q: '¿Bajo qué Incoterm entregan?',
++    a: `Cotizamos ${INCOTERMS_SALIDA.map((i) => `${i.codigo} (${i.punto})`).join(', ')}. El Incoterm decide dónde cambia la responsabilidad sobre la carga, así que se define antes del precio, no después.`,
++  },
++  {
++    q: '¿Instalan fuera del Perú?',
++    a: 'La instalación con equipo propio se coordina dentro del Perú. Fuera del país el alcance se define en la cotización, proyecto por proyecto: no se ofrece como cobertura continental automática.',
++  },
++  {
++    q: '¿Publican precios para exportación?',
++    a: 'No. La venta es B2B por cotización y no hay lista de precios en ninguna moneda. El precio depende de especificación, volumen, Incoterm y destino.',
++  },
++];
++
+ export default function ExportacionPage() {
+   const esquema = ranurasProceso().find((r) => r.id === 'proceso:exportacion-flujo');
++  const url = `${SITE.url}/exportacion`;
++  const rfq = [
++    '*RFQ EXPORTACIÓN*',
++    '',
++    'Para evaluar la operación necesito indicar:',
++    '· País y ciudad de destino: ',
++    '· Producto y especificación: ',
++    '· Volumen / cantidad: ',
++    '· Incoterm preferido (EXW Lima / FCA Lima / FOB Callao): ',
++    '· Fecha requerida: ',
++  ].join('\n');
+ 
+   return (
+     <div className="max-w-3xl mx-auto px-6 py-14">
++      <JsonLd
++        data={[
++          webPageSchema({
++            url,
++            name: 'Exportación de textil industrial y geosintéticos desde el Perú',
++            description:
++              'Fabricación en Chorrillos, Lima. Suministro internacional evaluado por RFQ: partida, volumen mínimo, destino e Incoterm. Sin envío mundial automático.',
++            speakable: ['.respuesta-directa'],
++            breadcrumbId: `${url}#breadcrumb`,
++          }),
++          breadcrumbSchema(
++            [
++              { name: 'Inicio', url: `${SITE.url}/` },
++              { name: 'Exportación', url },
++            ],
++            `${url}#breadcrumb`,
++          ),
++          {
++            '@context': 'https://schema.org',
++            '@type': 'Service',
++            '@id': `${url}#servicio`,
++            name: 'Suministro internacional evaluado por RFQ',
++            serviceType: 'Exportación de textil industrial y geosintéticos',
++            provider: businessRef(),
++            url,
++            // Una sola cobertura sin matices: donde se fabrica. Lo internacional
++            // va como condición del servicio, no como área de servicio.
++            areaServed: { '@type': 'Country', name: 'Perú' },
++            termsOfService: `${SITE.url}/confianza`,
++            availableChannel: {
++              '@type': 'ServiceChannel',
++              serviceUrl: `${SITE.url}/cotizacion`,
++              name: 'Solicitud de cotización (RFQ)',
++            },
++            hasOfferCatalog: {
++              '@type': 'OfferCatalog',
++              name: 'Puntos de entrega cotizables',
++              itemListElement: INCOTERMS_SALIDA.map((i) => ({
++                '@type': 'Offer',
++                name: `${i.codigo} — ${i.punto}`,
++                description: i.nota,
++                eligibleCustomerType: 'https://schema.org/Business',
++              })),
++            },
++          },
++          faqSchema(FAQS, url),
++        ]}
++      />
+       <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">SUMINISTRO INTERNACIONAL</div>
+       <h1 className="t-display font-semibold text-[#0A2540]">Exportación desde el Perú</h1>
+-      <p className="mt-4 text-gray-600">Fabricamos en Perú. Evaluamos destino, partida y MOQ. No operamos un e-commerce mundial.</p>
++      <p className="respuesta-directa mt-4 text-gray-700 bg-emerald-50/60 border border-emerald-100 rounded-2xl p-5 leading-relaxed">
++        Plastilonas Peruanas SAC fabrica textil industrial y geosintéticos en su planta de {SITE.addressLocality}, Lima,
++        y embarca {INCOTERMS_SALIDA.map((i) => i.codigo).join(' / ')} desde Lima y el Callao. Cada operación internacional
++        se evalúa por partida arancelaria, volumen mínimo, destino e Incoterm. No operamos un comercio electrónico
++        mundial y no publicamos precios en ninguna moneda.
++      </p>
+       {/* El punto donde cambia la responsabilidad es lo que un comprador
+           extranjero necesita ver antes de leer la tabla de mercados: EXW Lima y
+           FOB Callao son dos puntos distintos de la misma cadena. */}
+@@ -44,7 +149,36 @@ export default function ExportacionPage() {
+           ))}
+         </tbody>
+       </table>
+-      <Link href="/compradores" className="mt-8 inline-block text-[#059669]">Portal del comprador →</Link>
++      <h2 className="mt-12 text-xl font-semibold text-[#0A2540]">Punto de entrega cotizable</h2>
++      <dl className="mt-4 space-y-3">
++        {INCOTERMS_SALIDA.map((i) => (
++          <div key={i.codigo} className="rounded-2xl border border-gray-100 p-4">
++            <dt className="font-semibold text-[#0A2540]">{i.codigo} — {i.punto}</dt>
++            <dd className="mt-1 text-sm text-gray-600">{i.nota}</dd>
++          </div>
++        ))}
++      </dl>
++
++      <h2 className="mt-12 text-xl font-semibold text-[#0A2540]">Preguntas frecuentes</h2>
++      <dl className="mt-4 space-y-5">
++        {FAQS.map((f) => (
++          <div key={f.q}>
++            <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
++            <dd className="mt-1 text-gray-700">{f.a}</dd>
++          </div>
++        ))}
++      </dl>
++
++      <div className="mt-10 flex flex-wrap gap-3">
++        <WhatsAppLink
++          context="rfq-exportacion"
++          message={rfq}
++          className="inline-flex items-center bg-[#0A2540] text-white px-5 py-3 rounded-2xl font-semibold hover:bg-[#059669]"
++        >
++          RFQ de exportación por WhatsApp
++        </WhatsAppLink>
++        <Link href="/compradores" className="inline-flex items-center border border-gray-200 px-5 py-3 rounded-2xl font-medium text-gray-700 hover:border-[#059669]/40 hover:text-[#059669]">Portal del comprador →</Link>
++      </div>
+     </div>
+   );
+ }
+diff --git a/app/local/[ciudad]/page.tsx b/app/local/[ciudad]/page.tsx
+index 9e424d6..ee1072c 100644
+--- a/app/local/[ciudad]/page.tsx
++++ b/app/local/[ciudad]/page.tsx
+@@ -11,8 +11,21 @@ import { JsonLd } from "@/components/JsonLd";
+ import WhatsAppLink from "@/components/WhatsAppLink";
+ import TrackView from "@/components/TrackView";
+ 
++type Corredor = { nombre: string; contexto: string };
+ type Ciudad = { slug: string; ciudad: string; departamento: string; region: string;
+-  clima: string; contextoLocal: string; usosPrincipales: string[]; sectoresDemanda: string[]; };
++  clima: string; contextoLocal: string; usosPrincipales: string[]; sectoresDemanda: string[];
++  /**
++   * Corredores industriales dentro de la misma ciudad. Sólo Lima los declara.
++   *
++   * Por qué van aquí y no en tres páginas propias: Villa El Salvador, Ate y
++   * Lurín comparten el clima de Lima al detalle, de modo que tres páginas de
++   * ciudad se diferenciarían únicamente en el nombre del distrito. Eso es una
++   * doorway page, y lib/search/topic-map.ts ya lo prohíbe por escrito: «añadir
++   * un término no autoriza a fabricar una página delgada de producto × ciudad».
++   * Una sola página fuerte responde a las tres consultas; tres páginas débiles
++   * se reparten la señal y no posicionan ninguna.
++   */
++  corredores?: Corredor[]; };
+ const CIUDADES = ciudades as Ciudad[];
+ 
+ export const revalidate = 86400;   // ISR: daily
+@@ -43,6 +56,14 @@ function faqsFor(c: Ciudad) {
+       a: `Sí. Atendemos pedidos en ${c.ciudad} y todo ${c.departamento} con despacho nacional. Escríbenos por WhatsApp para cotizar medidas y cantidades.` },
+     { q: `¿Qué productos se usan más en ${c.ciudad}?`,
+       a: `Predominan usos como ${c.usosPrincipales.join(", ").toLowerCase()}. Contexto local: ${c.clima.toLowerCase()}` },
++    ...(c.corredores?.length
++      ? [{
++          q: `¿Atienden los corredores industriales de ${c.ciudad}?`,
++          a: `Sí. Despachamos desde la planta de ${SITE.addressLocality} a ${c.corredores
++            .map((k) => k.nombre)
++            .join(', ')}. No tenemos local en cada uno: la fabricación y las oficinas están en ${SITE.addressLocality}.`,
++        }]
++      : []),
+     { q: `¿Hacen medidas a pedido?`,
+       a: `Sí, fabricamos a medida. Las especificaciones exactas (espesor, color, resistencia UV) se confirman por cotización según disponibilidad.` },
+   ];
+@@ -86,6 +107,23 @@ export default async function CiudadPage({ params }: { params: Promise<{ ciudad:
+         plásticas, cobertores e impermeabilización para {c.ciudad}, {c.departamento}. {c.contextoLocal}</p>
+       <section className="mb-8"><h2 className="mb-3 text-2xl font-semibold">Usos más frecuentes en {c.ciudad}</h2>
+         <ul className="list-disc space-y-1 pl-6">{c.usosPrincipales.map((u) => <li key={u}>{u}</li>)}</ul></section>
++      {c.corredores && c.corredores.length > 0 && (
++        <section className="mb-8">
++          <h2 className="mb-3 text-2xl font-semibold">Corredores industriales de {c.ciudad}</h2>
++          <p className="mb-4 text-neutral-600">
++            La demanda no se reparte igual por toda la ciudad. Éstos son los ejes
++            desde los que llegan la mayoría de los requerimientos, con lo que pide cada uno.
++          </p>
++          <dl className="space-y-4">
++            {c.corredores.map((k) => (
++              <div key={k.nombre} className="rounded-2xl border border-neutral-200 p-4">
++                <dt className="font-semibold text-[#0A2540]">{k.nombre}</dt>
++                <dd className="mt-1 text-neutral-700">{k.contexto}</dd>
++              </div>
++            ))}
++          </dl>
++        </section>
++      )}
+       <section className="mb-8"><h2 className="mb-3 text-2xl font-semibold">Sectores que atendemos</h2>
+         <p>{c.sectoresDemanda.join(" · ")}</p><p className="mt-2 text-neutral-600">Clima local: {c.clima}</p></section>
+       <section className="mb-8"><h2 className="mb-3 text-2xl font-semibold">Preguntas frecuentes</h2>
+diff --git a/app/page.tsx b/app/page.tsx
+index 3c4cec7..097de49 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -78,12 +78,21 @@ export default function Home() {
+   // cambian solas. Escribirlo a mano fue lo que hizo que la portada dijera
+   // «desde 2009» mientras lib/site.ts era la única fuente que podía saberlo.
+   const anios = YEARS_OPERATING;
++  /**
++   * Líneas que se confeccionan en la planta de Chorrillos, contadas del propio
++   * catálogo. Sustituye a un «100% a medida» escrito a mano que el catálogo
++   * desmentía: 16 de las 36 líneas son importación directa y una es de aliado
++   * técnico, y el sitio entero —el campo `sourcing`, el badge de cada ficha, el
++   * prompt del chatbot— existe para declararlo. Una cifra falsa sentada junto a
++   * dos verdaderas les roba la credibilidad a las dos.
++   */
++  const fabricacionPropia = products.filter((p) => p.sourcing === 'fabricacion_propia').length;
+   // Cifras calculadas del catálogo: nunca quedan desfasadas ni se inventan.
+   const stats = [
+-    { to: 100, suffix: '%', label: 'A medida', sub: 'Cada pieza a su especificación' },
++    { to: fabricacionPropia, label: 'Líneas de fabricación propia', sub: `De ${products.length} en catálogo, confeccionadas aquí` },
+     { to: products.length, label: 'Soluciones', sub: `En ${productFamilies.length} líneas de producto` },
+     { to: anios, label: 'Años fabricando', sub: `En el Perú desde ${SITE.foundingYear}` },
+-    { display: '24/7', label: 'WhatsApp', sub: 'Respuesta directa de fábrica' },
++    { display: 'L–V', label: 'Atención comercial', sub: '8:00–18:00 · sábados 8:00–13:00' },
+   ];
+   // Franja de legitimidad: datos verificables, no repite las cifras de arriba.
+   const trust = [
+@@ -95,7 +104,7 @@ export default function Home() {
+   const whyus = [
+     { title: 'Fabricación e instalación propias', content: 'Confeccionamos e instalamos con nuestro propio equipo: una sola responsabilidad, del diseño a la obra.' },
+     { title: 'Un solo proveedor para todo', content: 'Envases, lonas, estructuras, mallas, ventilación y geosintéticos en un mismo lugar. Menos coordinación, menos riesgo.' },
+-    { title: 'Rapidez y WhatsApp 24/7', content: 'Su solicitud llega directo a nuestro equipo comercial y recibe respuesta ágil, con entregas a todo el país.' },
++    { title: 'Respuesta directa por WhatsApp', content: 'Su solicitud llega directo a nuestro equipo comercial en horario de atención, y se despacha a todo el país desde la planta de Chorrillos.' },
+     { title: 'Asesoría técnica real', content: 'Le ayudamos a elegir el material y la especificación correcta antes de comprar, no después.' },
+   ];
+   const services = [
+@@ -115,7 +124,7 @@ export default function Home() {
+             <div className="inline-flex items-center gap-2 bg-white/10 text-white/90 text-xs tracking-[2px] font-medium px-5 py-2 rounded-full mb-6 border border-white/20">SOLUCIONES TEXTILES E INDUSTRIALES INTEGRALES EN EL PERÚ</div>
+           </Reveal>
+           <Reveal delay={0.05}>
+-            <h1 className="t-display font-semibold mb-6">Fabricación 100% a medida.<br />Instalación propia.<br />Un solo proveedor.</h1>
++            <h1 className="t-display font-semibold mb-6">Fabricación a medida.<br />Instalación propia.<br />Un solo proveedor.</h1>
+           </Reveal>
+           <Reveal delay={0.1}>
+             <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">Big Bags, geomembranas, estructuras, mallas, ventilación y geosintéticos: {products.length} soluciones en {productFamilies.length} líneas de producto, fabricadas e instaladas por nuestro propio equipo en el Perú.</p>
+diff --git a/app/productos/[slug]/page.tsx b/app/productos/[slug]/page.tsx
+index e9c2023..2f773d9 100644
+--- a/app/productos/[slug]/page.tsx
++++ b/app/productos/[slug]/page.tsx
+@@ -18,6 +18,7 @@ import { productFaqs } from '@/lib/product-faq';
+ import { JsonLd } from '@/components/JsonLd';
+ import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
+ import RielComercial from '@/components/RielComercial';
++import { respuestaDirectaProducto, rfqWhatsAppProducto } from '@/lib/respuesta-directa';
+ 
+ interface Props {
+   params: Promise<{ slug: string }>;
+@@ -71,6 +72,8 @@ export default async function ProductDetailPage({ params }: Props) {
+   }
+ 
+   const rutaProducto = `/productos/${product.slug}`;
++  const respuestaDirecta = respuestaDirectaProducto(product);
++  const rfq = rfqWhatsAppProducto(product);
+   const faqs = productFaqs(product);
+   const arquitecturas = solutionsForProduct(product.slug);
+   const glosarioRel = terminosParaProducto(product.slug);
+@@ -89,10 +92,14 @@ export default async function ProductDetailPage({ params }: Props) {
+           visible —Productos / Familia / Producto— que ningún agente podía leer,
+           porque no se emitía como datos. Es la página comercial más importante
+           del sitio y era la única profunda sin jerarquía declarada. */}
++      {/* `speakable` marca el párrafo que un asistente de voz puede leer en voz
++          alta tal cual. Apunta a la respuesta directa —compuesta de campos
++          reales del catálogo— y no al hero comercial, que no contesta nada. */}
+       <JsonLd data={webPageSchema({
+         url: `${SITE.url}${rutaProducto}`,
+         name: product.name,
+-        description: product.shortDescription,
++        description: respuestaDirecta,
++        speakable: ['.respuesta-directa'],
+       })} />
+       <JsonLd data={breadcrumbSchema([
+         { name: 'Inicio', url: `${SITE.url}/` },
+@@ -123,7 +130,17 @@ export default async function ProductDetailPage({ params }: Props) {
+ 
+           <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold text-[#0A2540] leading-tight md:leading-none mb-5">{product.name}</h1>
+           
+-          <p className="text-xl text-gray-600 leading-snug mb-8">{product.shortDescription}</p>
++          <p className="text-xl text-gray-600 leading-snug mb-6">{product.shortDescription}</p>
++
++          {/* RESPUESTA DIRECTA. El fragmento que un motor de respuestas cita
++              entero en lugar de resumir por su cuenta. Se compone en
++              lib/respuesta-directa.ts a partir de campos reales: no hay texto
++              libre que alguien pueda rellenar con una cifra inventada, y en las
++              líneas bajo pedido dice de qué depende la especificación en vez de
++              dar un número que este repositorio no puede sostener. */}
++          <p className="respuesta-directa text-[15px] leading-relaxed text-[#0A2540] bg-emerald-50/60 border border-emerald-100 rounded-2xl p-5 mb-8">
++            {respuestaDirecta}
++          </p>
+ 
+           <ProductAvailability product={product} />
+ 
+@@ -133,12 +150,16 @@ export default async function ProductDetailPage({ params }: Props) {
+             <Link href={`/cotizacion?producto=${encodeURIComponent(product.name)}`} className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 bg-[#0A2540] hover:bg-[#059669] text-white px-9 py-4 rounded-2xl font-semibold text-sm transition-all active:scale-[0.985]">
+               Solicitar Cotización para este producto <ArrowRight className="w-4 h-4" />
+             </Link>
++            {/* El mensaje llega con el SKU y con los campos que la cotización
++                necesita, sacados de las etiquetas de especificación reales.
++                Antes decía sólo «necesito una cotización de X» y el comercial
++                tenía que pedir todo lo demás; cada ida y vuelta pierde gente. */}
+             <WhatsAppLink
+-              context={`producto:${product.slug}`}
+-              message={`Hola, necesito una cotización de ${product.name}.`}
++              context={`rfq-producto:${product.slug}`}
++              message={rfq}
+               className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 border border-gray-200 hover:bg-gray-50 px-7 py-4 rounded-2xl font-medium text-sm"
+             >
+-              <Phone className="w-4 h-4" /> Consultar por WhatsApp
++              <Phone className="w-4 h-4" /> RFQ por WhatsApp
+             </WhatsAppLink>
+             <DatasheetButton slug={product.slug} nombre={product.name} />
+           </div>
+@@ -169,12 +190,19 @@ export default async function ProductDetailPage({ params }: Props) {
+       {/* Specifications Table */}
+       <div className="mt-14">
+         <h2 className="font-semibold text-2xl tracking-tight mb-6">Especificaciones técnicas</h2>
++        {/* `th scope="row"` no es decoración: convierte dos columnas de texto en
++            pares clave/valor legibles para un lector de pantalla y para
++            cualquier extractor de tablas. El mismo par viaja además como
++            additionalProperty en el JSON-LD de ProductStructuredData. */}
+         <div className="overflow-x-auto">
+           <table className="specs-table w-full border-collapse">
++            <caption className="sr-only">
++              Especificaciones técnicas de {product.name} (SKU {product.id})
++            </caption>
+             <tbody>
+               {product.specifications.map((spec, index) => (
+                 <tr key={index} className="border-b border-gray-100 last:border-none">
+-                  <td className="py-4 pr-8 font-medium text-gray-600 w-64 align-top">{spec.label}</td>
++                  <th scope="row" className="py-4 pr-8 text-left font-medium text-gray-600 w-64 align-top">{spec.label}</th>
+                   <td className="py-4 text-[#0A2540] font-medium">{spec.value}</td>
+                 </tr>
+               ))}
+diff --git a/components/Footer.tsx b/components/Footer.tsx
+index 19725f0..03ee527 100644
+--- a/components/Footer.tsx
++++ b/components/Footer.tsx
+@@ -1,6 +1,7 @@
+ import Link from 'next/link';
+ import WhatsAppLink from './WhatsAppLink';
+ import { WHATSAPP_DISPLAY } from '@/lib/whatsapp';
++import { SITE } from '@/lib/site';
+ import Image from 'next/image';
+ import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
+ import SocialIcons from '@/components/SocialIcons';
+@@ -59,7 +60,7 @@ export default function Footer() {
+     ]},
+     { title: 'CONTACTO', links: [
+       { label: '+51 998 117 065 · Central', href: 'tel:+51998117065', external: true },
+-      { label: 'ventas@plastilonas.com', href: 'mailto:ventas@plastilonas.com', external: true },
++      { label: SITE.email, href: `mailto:${SITE.email}`, external: true },
+       { label: 'Chorrillos, Lima — Perú', href: '/contacto' },
+     ]},
+   ];
+@@ -77,7 +78,7 @@ export default function Footer() {
+           </div>
+           <p className="text-white/60 text-sm leading-relaxed mb-5">Fabricación e instalación propias. En el Perú desde 2009.</p>
+           <WhatsAppLink context="footer-cta" message="Hola, quisiera información sobre sus productos." className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-[#0A2540] font-semibold py-3.5 rounded-2xl mb-6 active:scale-[0.99] transition">
+-            <Phone className="w-4 h-4" /> WhatsApp 24/7 · {WHATSAPP_DISPLAY}
++            <Phone className="w-4 h-4" /> WhatsApp comercial · {WHATSAPP_DISPLAY}
+           </WhatsAppLink>
+           <FooterAccordion sections={sections} />
+           <div className="py-6">
+@@ -158,17 +159,17 @@ export default function Footer() {
+                 <Phone className="w-4 h-4 mt-0.5 text-[#25D366] group-hover:text-[#059669]" />
+                 <div>
+                   <div className="text-[#25D366]">+51 946 085 270</div>
+-                  <div className="text-xs text-white/50">WhatsApp 24/7</div>
++                  <div className="text-xs text-white/50">WhatsApp comercial</div>
+                 </div>
+               </WhatsAppLink>
+-              <a href="mailto:ventas@plastilonas.com" className="flex items-start gap-3 group">
++              <a href={`mailto:${SITE.email}`} className="flex items-start gap-3 group">
+                 <Mail className="w-4 h-4 mt-0.5 text-white/50 group-hover:text-[#059669]" />
+-                <div>ventas@plastilonas.com</div>
++                <div>{SITE.email}</div>
+               </a>
+               <div className="flex items-start gap-3 pt-1">
+                 <MapPin className="w-4 h-4 mt-0.5 text-white/50 flex-shrink-0" />
+                 <div className="text-xs leading-snug">
+-                  Calle Alameda del Remero Mz - V, Lt - 2<br />
++                  {SITE.addressStreet}<br />
+                   Urb. Los Huertos de Villa, Chorrillos<br />
+                   Lima, Perú
+                 </div>
+diff --git a/data/ciudades.json b/data/ciudades.json
+index a2c6fb7..b2518ec 100644
+--- a/data/ciudades.json
++++ b/data/ciudades.json
+@@ -1,14 +1,345 @@
+ [
+-  {"slug":"lima","ciudad":"Lima","departamento":"Lima","region":"costa","clima":"Desértico costero: húmedo con garúa buena parte del año y prácticamente sin lluvias intensas.","contextoLocal":"Lima concentra la mayor actividad de construcción del país, con obras civiles durante todo el año. La alta humedad costera y la ausencia de lluvias fuertes orientan los usos a protección de obra, cerramientos y cobertores de maquinaria.","usosPrincipales":["Cerramientos y mallas de obra","Cobertores de maquinaria y equipos","Techos temporales de construcción","Protección de materiales en almacén"],"sectoresDemanda":["Construcción","Logística","Industria"]},
+-  {"slug":"arequipa","ciudad":"Arequipa","departamento":"Arequipa","region":"sierra","clima":"Seco de altura, con radiación solar intensa y marcada amplitud térmica.","contextoLocal":"Arequipa combina un fuerte sector minero y de construcción con alta radiación UV, lo que orienta la demanda hacia lonas y cobertores con resistencia ultravioleta y a la abrasión.","usosPrincipales":["Cobertores con resistencia UV","Aplicaciones mineras","Protección de obra civil","Cubiertas para almacenamiento exterior"],"sectoresDemanda":["Minería","Construcción","Industria"]},
+-  {"slug":"trujillo","ciudad":"Trujillo","departamento":"La Libertad","region":"costa","clima":"Costa norte, cálido y seco durante casi todo el año.","contextoLocal":"La Libertad es uno de los principales polos agroexportadores del Perú (espárrago, arándano, caña). La demanda se orienta a agroplásticos, cobertores y soluciones para packing y campo.","usosPrincipales":["Agroplásticos para cultivo","Cobertores para packing y acopio","Protección de cosecha","Cubiertas para almacenamiento"],"sectoresDemanda":["Agroexportación","Agroindustria","Logística"]},
+-  {"slug":"chiclayo","ciudad":"Chiclayo","departamento":"Lambayeque","region":"costa","clima":"Cálido y seco, con valles arroceros y cañaverales.","contextoLocal":"Lambayeque tiene una economía agrícola marcada por el arroz y la caña, con un activo comercio regional. Usos habituales: cobertores para acopio de grano y protección de mercadería.","usosPrincipales":["Cobertores para acopio de grano","Protección de mercadería en transporte","Agroplásticos","Cubiertas de almacén"],"sectoresDemanda":["Agricultura","Comercio","Transporte"]},
+-  {"slug":"piura","ciudad":"Piura","departamento":"Piura","region":"costa","clima":"Muy cálido; en años de El Niño hay lluvias intensas e inundaciones.","contextoLocal":"Piura es una región agrícola clave (mango, banano, uva) muy expuesta a lluvias intensas durante El Niño, lo que genera demanda estacional fuerte de impermeabilización y cubiertas de emergencia.","usosPrincipales":["Impermeabilización ante lluvias","Cobertores de cultivo","Cubiertas de emergencia","Protección de mercadería"],"sectoresDemanda":["Agricultura","Construcción","Prevención de riesgos"]},
+-  {"slug":"ica","ciudad":"Ica","departamento":"Ica","region":"costa","clima":"Desértico con muy alta radiación solar y escasas precipitaciones.","contextoLocal":"Ica es un centro de agricultura intensiva de exportación (uva, espárrago, paprika) con amplio uso de invernaderos y acolchado. La alta radiación UV prioriza agroplásticos con protección ultravioleta.","usosPrincipales":["Plástico para invernadero","Acolchado (mulching)","Agroplásticos con protección UV","Cobertores de campo"],"sectoresDemanda":["Agroexportación","Agroindustria"]},
+-  {"slug":"cusco","ciudad":"Cusco","departamento":"Cusco","region":"sierra","clima":"De altura, con temporada de lluvias marcada entre noviembre y marzo.","contextoLocal":"En Cusco la estacionalidad de lluvias y la actividad turística y de construcción impulsan la demanda de impermeabilización y cobertores para obra durante la temporada húmeda.","usosPrincipales":["Impermeabilización en temporada de lluvias","Cobertores para obra","Protección de materiales","Cubiertas temporales"],"sectoresDemanda":["Construcción","Turismo","Comercio"]},
+-  {"slug":"chimbote","ciudad":"Chimbote","departamento":"Áncash","region":"costa","clima":"Costero cálido; fuerte presencia industrial y portuaria.","contextoLocal":"Chimbote es un centro pesquero y siderúrgico. La demanda se concentra en aplicaciones industriales: cobertores resistentes, protección de equipos y cubiertas de proceso.","usosPrincipales":["Aplicaciones industriales","Protección de equipos","Cubiertas de proceso y almacén","Cobertores resistentes"],"sectoresDemanda":["Pesca","Industria","Logística portuaria"]},
+-  {"slug":"iquitos","ciudad":"Iquitos","departamento":"Loreto","region":"selva","clima":"Tropical húmedo, con lluvias abundantes todo el año.","contextoLocal":"En la Amazonía la lluvia constante hace crítica la impermeabilización y la protección de mercadería. La logística fluvial eleva la necesidad de cobertores duraderos.","usosPrincipales":["Impermeabilización permanente","Protección de mercadería","Cobertores para transporte fluvial","Techos temporales"],"sectoresDemanda":["Comercio","Transporte fluvial","Construcción"]},
+-  {"slug":"huancayo","ciudad":"Huancayo","departamento":"Junín","region":"sierra","clima":"Valle de altura, con heladas y temporada de lluvias definida.","contextoLocal":"El valle del Mantaro es una zona agrícola de altura donde heladas y lluvias estacionales orientan la demanda hacia protección de cultivos y cobertores de acopio.","usosPrincipales":["Protección de cultivos frente a heladas","Cobertores de acopio","Agroplásticos","Cubiertas de transporte"],"sectoresDemanda":["Agricultura","Comercio","Transporte"]},
+-  {"slug":"tacna","ciudad":"Tacna","departamento":"Tacna","region":"costa","clima":"Seco, con comercio fronterizo y minería regional.","contextoLocal":"Tacna combina comercio fronterizo con minería en el sur. La demanda se orienta a cobertores para transporte de carga y aplicaciones industriales.","usosPrincipales":["Cobertores para transporte de carga","Protección de mercadería","Aplicaciones mineras","Cubiertas de almacén"],"sectoresDemanda":["Comercio","Minería","Transporte"]},
+-  {"slug":"pucallpa","ciudad":"Pucallpa","departamento":"Ucayali","region":"selva","clima":"Tropical lluvioso, con alta humedad la mayor parte del año.","contextoLocal":"Ucayali concentra actividad maderera y agroindustrial en clima lluvioso, lo que sostiene demanda constante de impermeabilización y cubiertas de acopio a la intemperie.","usosPrincipales":["Impermeabilización","Cobertores para producto maderero y agrícola","Cubiertas de acopio","Protección frente a humedad"],"sectoresDemanda":["Industria maderera","Agroindustria","Comercio"]}
++  {
++    "slug": "lima",
++    "ciudad": "Lima",
++    "departamento": "Lima",
++    "region": "costa",
++    "clima": "Desértico costero: húmedo con garúa buena parte del año y prácticamente sin lluvias intensas.",
++    "contextoLocal": "Lima concentra la mayor actividad de construcción del país, con obras civiles durante todo el año. La alta humedad costera y la ausencia de lluvias fuertes orientan los usos a protección de obra, cerramientos y cobertores de maquinaria.",
++    "usosPrincipales": [
++      "Cerramientos y mallas de obra",
++      "Cobertores de maquinaria y equipos",
++      "Techos temporales de construcción",
++      "Protección de materiales en almacén"
++    ],
++    "sectoresDemanda": [
++      "Construcción",
++      "Logística",
++      "Industria"
++    ],
++    "corredores": [
++      {
++        "nombre": "Villa El Salvador",
++        "contexto": "Parque industrial con fuerte concentración de metalmecánica, carpintería y manufactura ligera. Demanda cerramientos de taller, biombos de protección para soldadura y cobertores de producto terminado."
++      },
++      {
++        "nombre": "Ate y la Carretera Central",
++        "contexto": "Corredor de manufactura y almacenaje por donde entra la carga del centro del país. Demanda toldos y siders de flota, cerramientos de nave y protección de mercadería en patio."
++      },
++      {
++        "nombre": "Lurín y la Panamericana Sur",
++        "contexto": "Cemento, agroindustria y plantas de gran formato hacia el sur de Lima. Demanda geomembranas para pozas, coberturas de acopio y estructuras textiles de almacenamiento temporal."
++      }
++    ]
++  },
++  {
++    "slug": "arequipa",
++    "ciudad": "Arequipa",
++    "departamento": "Arequipa",
++    "region": "sierra",
++    "clima": "Seco de altura, con radiación solar intensa y marcada amplitud térmica.",
++    "contextoLocal": "Arequipa combina un fuerte sector minero y de construcción con alta radiación UV, lo que orienta la demanda hacia lonas y cobertores con resistencia ultravioleta y a la abrasión.",
++    "usosPrincipales": [
++      "Cobertores con resistencia UV",
++      "Aplicaciones mineras",
++      "Protección de obra civil",
++      "Cubiertas para almacenamiento exterior"
++    ],
++    "sectoresDemanda": [
++      "Minería",
++      "Construcción",
++      "Industria"
++    ]
++  },
++  {
++    "slug": "trujillo",
++    "ciudad": "Trujillo",
++    "departamento": "La Libertad",
++    "region": "costa",
++    "clima": "Costa norte, cálido y seco durante casi todo el año.",
++    "contextoLocal": "La Libertad es uno de los principales polos agroexportadores del Perú (espárrago, arándano, caña). La demanda se orienta a agroplásticos, cobertores y soluciones para packing y campo.",
++    "usosPrincipales": [
++      "Agroplásticos para cultivo",
++      "Cobertores para packing y acopio",
++      "Protección de cosecha",
++      "Cubiertas para almacenamiento"
++    ],
++    "sectoresDemanda": [
++      "Agroexportación",
++      "Agroindustria",
++      "Logística"
++    ]
++  },
++  {
++    "slug": "chiclayo",
++    "ciudad": "Chiclayo",
++    "departamento": "Lambayeque",
++    "region": "costa",
++    "clima": "Cálido y seco, con valles arroceros y cañaverales.",
++    "contextoLocal": "Lambayeque tiene una economía agrícola marcada por el arroz y la caña, con un activo comercio regional. Usos habituales: cobertores para acopio de grano y protección de mercadería.",
++    "usosPrincipales": [
++      "Cobertores para acopio de grano",
++      "Protección de mercadería en transporte",
++      "Agroplásticos",
++      "Cubiertas de almacén"
++    ],
++    "sectoresDemanda": [
++      "Agricultura",
++      "Comercio",
++      "Transporte"
++    ]
++  },
++  {
++    "slug": "piura",
++    "ciudad": "Piura",
++    "departamento": "Piura",
++    "region": "costa",
++    "clima": "Muy cálido; en años de El Niño hay lluvias intensas e inundaciones.",
++    "contextoLocal": "Piura es una región agrícola clave (mango, banano, uva) muy expuesta a lluvias intensas durante El Niño, lo que genera demanda estacional fuerte de impermeabilización y cubiertas de emergencia.",
++    "usosPrincipales": [
++      "Impermeabilización ante lluvias",
++      "Cobertores de cultivo",
++      "Cubiertas de emergencia",
++      "Protección de mercadería"
++    ],
++    "sectoresDemanda": [
++      "Agricultura",
++      "Construcción",
++      "Prevención de riesgos"
++    ]
++  },
++  {
++    "slug": "ica",
++    "ciudad": "Ica",
++    "departamento": "Ica",
++    "region": "costa",
++    "clima": "Desértico con muy alta radiación solar y escasas precipitaciones.",
++    "contextoLocal": "Ica es un centro de agricultura intensiva de exportación (uva, espárrago, paprika) con amplio uso de invernaderos y acolchado. La alta radiación UV prioriza agroplásticos con protección ultravioleta.",
++    "usosPrincipales": [
++      "Plástico para invernadero",
++      "Acolchado (mulching)",
++      "Agroplásticos con protección UV",
++      "Cobertores de campo"
++    ],
++    "sectoresDemanda": [
++      "Agroexportación",
++      "Agroindustria"
++    ]
++  },
++  {
++    "slug": "cusco",
++    "ciudad": "Cusco",
++    "departamento": "Cusco",
++    "region": "sierra",
++    "clima": "De altura, con temporada de lluvias marcada entre noviembre y marzo.",
++    "contextoLocal": "En Cusco la estacionalidad de lluvias y la actividad turística y de construcción impulsan la demanda de impermeabilización y cobertores para obra durante la temporada húmeda.",
++    "usosPrincipales": [
++      "Impermeabilización en temporada de lluvias",
++      "Cobertores para obra",
++      "Protección de materiales",
++      "Cubiertas temporales"
++    ],
++    "sectoresDemanda": [
++      "Construcción",
++      "Turismo",
++      "Comercio"
++    ]
++  },
++  {
++    "slug": "chimbote",
++    "ciudad": "Chimbote",
++    "departamento": "Áncash",
++    "region": "costa",
++    "clima": "Costero cálido; fuerte presencia industrial y portuaria.",
++    "contextoLocal": "Chimbote es un centro pesquero y siderúrgico. La demanda se concentra en aplicaciones industriales: cobertores resistentes, protección de equipos y cubiertas de proceso.",
++    "usosPrincipales": [
++      "Aplicaciones industriales",
++      "Protección de equipos",
++      "Cubiertas de proceso y almacén",
++      "Cobertores resistentes"
++    ],
++    "sectoresDemanda": [
++      "Pesca",
++      "Industria",
++      "Logística portuaria"
++    ]
++  },
++  {
++    "slug": "iquitos",
++    "ciudad": "Iquitos",
++    "departamento": "Loreto",
++    "region": "selva",
++    "clima": "Tropical húmedo, con lluvias abundantes todo el año.",
++    "contextoLocal": "En la Amazonía la lluvia constante hace crítica la impermeabilización y la protección de mercadería. La logística fluvial eleva la necesidad de cobertores duraderos.",
++    "usosPrincipales": [
++      "Impermeabilización permanente",
++      "Protección de mercadería",
++      "Cobertores para transporte fluvial",
++      "Techos temporales"
++    ],
++    "sectoresDemanda": [
++      "Comercio",
++      "Transporte fluvial",
++      "Construcción"
++    ]
++  },
++  {
++    "slug": "huancayo",
++    "ciudad": "Huancayo",
++    "departamento": "Junín",
++    "region": "sierra",
++    "clima": "Valle interandino sobre los 3 200 metros: lluvias de verano, heladas de invierno y granizo ocasional, con alta radiación. Las operaciones mineras del departamento trabajan por encima de los 4 000 metros, donde el ciclo de hielo y deshielo manda sobre la especificación.",
++    "contextoLocal": "El valle del Mantaro es una zona agrícola de altura donde heladas y lluvias estacionales orientan la demanda hacia protección de cultivos y cobertores de acopio. Junín suma además dos ejes que no son agrícolas: la minería de altura del departamento, que pide ventilación de labor y contención por encima de los 4 000 metros, y la Carretera Central, la vía por la que sale la carga del centro del país hacia Lima y donde la cobertura de flota trabaja fría y expuesta.",
++    "usosPrincipales": [
++      "Protección de cultivos frente a heladas",
++      "Cobertores de acopio",
++      "Agroplásticos",
++      "Mangas de ventilación y geosintéticos para operaciones de altura",
++      "Mantas y toldos de carga para el corredor de la Carretera Central"
++    ],
++    "sectoresDemanda": [
++      "Agricultura",
++      "Minería",
++      "Transporte",
++      "Comercio"
++    ]
++  },
++  {
++    "slug": "tacna",
++    "ciudad": "Tacna",
++    "departamento": "Tacna",
++    "region": "costa",
++    "clima": "Seco, con comercio fronterizo y minería regional.",
++    "contextoLocal": "Tacna combina comercio fronterizo con minería en el sur. La demanda se orienta a cobertores para transporte de carga y aplicaciones industriales.",
++    "usosPrincipales": [
++      "Cobertores para transporte de carga",
++      "Protección de mercadería",
++      "Aplicaciones mineras",
++      "Cubiertas de almacén"
++    ],
++    "sectoresDemanda": [
++      "Comercio",
++      "Minería",
++      "Transporte"
++    ]
++  },
++  {
++    "slug": "pucallpa",
++    "ciudad": "Pucallpa",
++    "departamento": "Ucayali",
++    "region": "selva",
++    "clima": "Tropical lluvioso, con alta humedad la mayor parte del año.",
++    "contextoLocal": "Ucayali concentra actividad maderera y agroindustrial en clima lluvioso, lo que sostiene demanda constante de impermeabilización y cubiertas de acopio a la intemperie.",
++    "usosPrincipales": [
++      "Impermeabilización",
++      "Cobertores para producto maderero y agrícola",
++      "Cubiertas de acopio",
++      "Protección frente a humedad"
++    ],
++    "sectoresDemanda": [
++      "Industria maderera",
++      "Agroindustria",
++      "Comercio"
++    ]
++  },
++  {
++    "slug": "callao",
++    "ciudad": "Callao",
++    "departamento": "Provincia Constitucional del Callao",
++    "region": "costa",
++    "clima": "Desértico costero con humedad alta y brisa marina cargada de sal: el ambiente más corrosivo de la costa central, con garúa invernal y sin lluvias intensas.",
++    "contextoLocal": "El Callao concentra el primer puerto del país y el aeropuerto internacional, y con ellos la carga de exportación e importación de todo el centro del Perú. La demanda se orienta al embalaje de granel para embarque, la cobertura de carga en patio y la protección de mercadería contra salinidad y humedad. Es también el punto de salida FOB de los despachos internacionales que se cotizan por RFQ.",
++    "usosPrincipales": [
++      "Big bags FIBC para embarque de concentrados y granos",
++      "Mantas y cobertores de carga en patio de maniobras",
++      "Cerramientos de almacén y separación de zonas de acopio",
++      "Protección de mercadería contra salinidad y humedad"
++    ],
++    "sectoresDemanda": [
++      "Logística",
++      "Industrial",
++      "Comercio",
++      "Minería"
++    ]
++  },
++  {
++    "slug": "moquegua",
++    "ciudad": "Moquegua",
++    "departamento": "Moquegua",
++    "region": "costa y sierra",
++    "clima": "Árido con cielo despejado casi todo el año y radiación ultravioleta muy alta; fuerte oscilación térmica entre el día y la noche y viento sostenido en quebrada.",
++    "contextoLocal": "Moquegua articula el puerto de Ilo con las operaciones de cobre del sur, incluida Quellaveco, y con la fundición y refinería de la costa. La combinación de radiación intensa, viento y polvo define los materiales: la degradación por ultravioleta manda sobre casi todo lo demás, y la impermeabilización de pozas y canales es una decisión de proceso, no de acabado.",
++    "usosPrincipales": [
++      "Geomembranas para pozas de proceso y canales",
++      "Big bags para concentrado de cobre",
++      "Mangas de ventilación para labores subterráneas",
++      "Coberturas con tratamiento anti-ultravioleta reforzado"
++    ],
++    "sectoresDemanda": [
++      "Minería",
++      "Construcción",
++      "Industrial",
++      "Energía"
++    ]
++  },
++  {
++    "slug": "cajamarca",
++    "ciudad": "Cajamarca",
++    "departamento": "Cajamarca",
++    "region": "sierra",
++    "clima": "Sierra templada con estación de lluvias marcada entre octubre y abril, neblina frecuente y suelos que se saturan; la escorrentía, no el calor, es la variable que manda.",
++    "contextoLocal": "Cajamarca combina minería de oro a tajo abierto con una cuenca lechera y agrícola de las más importantes del norte. La temporada de lluvias condiciona el calendario de obra y el manejo de aguas: la impermeabilización, el drenaje y la contención temporal se especifican contra la lluvia acumulada, y los cobertores de acopio se piden por su comportamiento cuando el agua ya cayó.",
++    "usosPrincipales": [
++      "Geomembranas y geotextiles para manejo de aguas y contención",
++      "Cobertores de acopio de mineral y de insumos",
++      "Cerramientos y techos temporales de obra en temporada de lluvia",
++      "Coberturas para establo y almacenamiento de forraje"
++    ],
++    "sectoresDemanda": [
++      "Minería",
++      "Agricultura",
++      "Construcción",
++      "Saneamiento"
++    ]
++  },
++  {
++    "slug": "pasco",
++    "ciudad": "Cerro de Pasco",
++    "departamento": "Pasco",
++    "region": "sierra",
++    "clima": "Una de las ciudades habitadas más altas del mundo, por encima de los 4 000 metros: frío permanente, heladas nocturnas, granizo y ciclos diarios de hielo y deshielo con radiación ultravioleta extrema.",
++    "contextoLocal": "Pasco es minería polimetálica de altura, con labores subterráneas y tajo conviviendo con la ciudad. La altitud cambia el problema: un material que se comporta bien en costa se vuelve quebradizo con el ciclo de hielo y deshielo, y la ventilación de interior mina deja de ser un accesorio para volverse una condición de operación. Aquí la especificación se decide por temperatura de servicio y por resistencia al ultravioleta, no por precio de rollo.",
++    "usosPrincipales": [
++      "Mangas de ventilación para labores subterráneas",
++      "Geomembranas para pozas con ciclo de hielo y deshielo",
++      "Big bags para concentrado polimetálico",
++      "Coberturas resistentes a granizo y a helada"
++    ],
++    "sectoresDemanda": [
++      "Minería",
++      "Industrial",
++      "Construcción",
++      "Energía"
++    ]
++  },
++  {
++    "slug": "puno",
++    "ciudad": "Puno",
++    "departamento": "Puno",
++    "region": "altiplano",
++    "clima": "Altiplano sobre los 3 800 metros junto al lago Titicaca: noches bajo cero buena parte del año, heladas, granizo y radiación ultravioleta extrema por la altura y el cielo limpio.",
++    "contextoLocal": "Puno mezcla ganadería altoandina y agricultura de altura con minería y comercio de frontera hacia Bolivia. El ciclo de helada nocturna y sol intenso de mediodía castiga los materiales más que la temperatura media: la protección de cultivo y de ganado se especifica contra la helada, y las coberturas se piden por su comportamiento tras cientos de ciclos térmicos, no por su aspecto el primer día.",
++    "usosPrincipales": [
++      "Mallas y cobertores de protección contra helada y granizo",
++      "Coberturas para cobertizos de ganado altoandino",
++      "Geomembranas para reservorios y bebederos",
++      "Cerramientos con resistencia reforzada al ultravioleta"
++    ],
++    "sectoresDemanda": [
++      "Agricultura",
++      "Minería",
++      "Construcción",
++      "Comercio"
++    ]
++  }
+ ]
+diff --git a/data/topic-map.json b/data/topic-map.json
+index db10a46..daa3b92 100644
+--- a/data/topic-map.json
++++ b/data/topic-map.json
+@@ -1,7 +1,7 @@
+ {
+   "$schema": "./topic-map.schema.md",
+   "version": "1.0.0",
+-  "revisado": "2026-08-24",
++  "revisado": "2026-08-26",
+   "nota": "MAPA DE CONSULTAS → PÁGINA CANÓNICA. Una consulta comercial tiene UNA página que la contesta; el resto la refuerza y enlaza hacia ella. Este archivo existe para impedir la canibalización: si dos páginas compiten por el mismo término, el buscador elige por su cuenta y suele elegir mal. Ningún término de aquí autoriza a crear una página nueva: todos apuntan a páginas que YA existen y que ya tienen contenido propio. test/mapa-consultas.test.ts hace fallar el build si un término se repite en dos clústeres, si una canónica se repite, o si una ruta no existe.",
+   "intenciones": {
+     "comercial": "compra directa de un producto o familia",
+@@ -56,7 +56,11 @@
+         "¿cuánto pesa un big bag de 1 tonelada?",
+         "¿qué factor de seguridad debe tener un big bag para mina?",
+         "¿dónde comprar bolsones de polipropileno en Lima?",
+-        "¿qué diferencia hay entre un big bag tipo A, B, C y D?"
++        "¿qué diferencia hay entre un big bag tipo A, B, C y D?",
++        "¿Dónde fabrican big bags para minería en Lima?",
++        "¿Quién vende big bags para concentrado de cobre en el Perú?",
++        "Necesito cotizar big bags de 1 tonelada con boquilla de descarga",
++        "¿Cómo cotizo big bags para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/biblioteca/especificacion-fibc",
+@@ -91,7 +95,9 @@
+       ],
+       "preguntas": [
+         "¿qué saco se usa para embarque a granel en puerto?",
+-        "¿cuándo conviene un saco polytarp en vez de un big bag?"
++        "¿cuándo conviene un saco polytarp en vez de un big bag?",
++        "¿Quién fabrica sacos polytarp en el Perú?",
++        "¿Cómo cotizo sacos polytarp para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/aplicaciones/granel-embalaje",
+@@ -121,7 +127,9 @@
+       ],
+       "preguntas": [
+         "¿fabrican bolsas de polietileno a medida en el Perú?",
+-        "¿qué calibre de lámina de polietileno necesito?"
++        "¿qué calibre de lámina de polietileno necesito?",
++        "¿Quién fabrica bolsas de polietileno industrial en el Perú?",
++        "¿Cómo cotizo bolsas de polietileno industrial para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/familia/envases-embalaje",
+@@ -149,7 +157,9 @@
+       ],
+       "preguntas": [
+         "¿qué film termocontraíble se usa para paletizar carga?",
+-        "¿cómo se protege un pallet para exportación?"
++        "¿cómo se protege un pallet para exportación?",
++        "¿Quién fabrica film termocontraíble en el Perú?",
++        "¿Cómo cotizo film termocontraíble para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/familia/envases-embalaje",
+@@ -176,7 +186,9 @@
+       ],
+       "preguntas": [
+         "¿qué opciones hay para embalar carga a granel en el Perú?",
+-        "¿qué envase industrial conviene para concentrado mineral?"
++        "¿qué envase industrial conviene para concentrado mineral?",
++        "¿Quién fabrica envases y embalaje industrial en el Perú?",
++        "¿Cómo cotizo envases y embalaje industrial para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/big-bags-bolsones-polipropileno",
+@@ -220,7 +232,9 @@
+         "¿qué gramaje de lona necesito para intemperie?",
+         "¿dónde compro lona plastificada a medida en Lima?",
+         "¿cuánto dura una lona de rafia al sol de la costa peruana?",
+-        "¿qué diferencia hay entre lona de rafia y lona de PVC?"
++        "¿qué diferencia hay entre lona de rafia y lona de PVC?",
++        "¿Quién fabrica lona plastificada en el Perú?",
++        "¿Cómo cotizo lona plastificada para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/biblioteca/gramaje-lona-industrial",
+@@ -259,7 +273,9 @@
+       "preguntas": [
+         "¿qué cobertor exige el MTC para transportar concentrado?",
+         "¿cómo se cubre la tolva de un volquete?",
+-        "¿dónde mandar a hacer toldos para camión en el Perú?"
++        "¿dónde mandar a hacer toldos para camión en el Perú?",
++        "¿Quién fabrica toldos para camiones en el Perú?",
++        "¿Cómo cotizo toldos para camiones para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/aplicaciones/toldos-camion",
+@@ -290,7 +306,9 @@
+       ],
+       "preguntas": [
+         "¿qué es un sider en un camión de carga?",
+-        "¿se puede confeccionar una toldera a medida de mi carrocería?"
++        "¿se puede confeccionar una toldera a medida de mi carrocería?",
++        "¿Quién fabrica siders y tolderas en el Perú?",
++        "¿Cómo cotizo siders y tolderas para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/mantas-cobertores-toldos-camiones",
+@@ -317,7 +335,9 @@
+       ],
+       "preguntas": [
+         "¿qué cobertor conviene para proteger cosecha en campo?",
+-        "¿qué material se usa para cubrir cultivos de la lluvia?"
++        "¿qué material se usa para cubrir cultivos de la lluvia?",
++        "¿Quién fabrica cobertores agrícolas en el Perú?",
++        "¿Cómo cotizo cobertores agrícolas para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/industria/agroexportacion",
+@@ -345,7 +365,9 @@
+       ],
+       "preguntas": [
+         "¿qué cortina se usa en un galpón avícola?",
+-        "¿cómo se controla la ventilación en una granja con arpillera?"
++        "¿cómo se controla la ventilación en una granja con arpillera?",
++        "¿Quién fabrica arpilleras para granjas en el Perú?",
++        "¿Cómo cotizo arpilleras para granjas para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/familia/lonas-cobertores",
+@@ -371,7 +393,9 @@
+       ],
+       "preguntas": [
+         "¿qué manta aísla ruido y calor en planta industrial?",
+-        "¿se puede confeccionar aislamiento térmico a medida de un equipo?"
++        "¿se puede confeccionar aislamiento térmico a medida de un equipo?",
++        "¿Quién fabrica mantas aislantes térmicas en el Perú?",
++        "¿Cómo cotizo mantas aislantes térmicas para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/barreras-acusticas",
+@@ -400,7 +424,9 @@
+       ],
+       "preguntas": [
+         "¿qué tipos de lona y cobertor fabrica una empresa peruana?",
+-        "¿qué cobertor conviene para cada tipo de carga?"
++        "¿qué cobertor conviene para cada tipo de carga?",
++        "¿Quién fabrica lonas y cobertores industriales en el Perú?",
++        "¿Cómo cotizo lonas y cobertores industriales para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/lona-plastificada-rafia-polytarp",
+@@ -434,7 +460,9 @@
+       "preguntas": [
+         "¿cuánto viento resiste una carpa industrial?",
+         "¿se puede instalar una carpa de almacén temporal en obra?",
+-        "¿qué norma rige la carga de viento de una carpa en el Perú?"
++        "¿qué norma rige la carga de viento de una carpa en el Perú?",
++        "¿Quién fabrica carpas industriales en el Perú?",
++        "¿Cómo cotizo carpas industriales para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/recursos/carpas-industriales-carga-viento-norma-e020",
+@@ -466,7 +494,9 @@
+       ],
+       "preguntas": [
+         "¿qué es una cobertura tensionada y cuánto dura?",
+-        "¿cómo se calcula el pretensado de una membrana?"
++        "¿cómo se calcula el pretensado de una membrana?",
++        "¿Quién fabrica coberturas tensionadas en el Perú?",
++        "¿Cómo cotizo coberturas tensionadas para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/glosario/arquitectura-textil",
+@@ -493,7 +523,9 @@
+       ],
+       "preguntas": [
+         "¿para qué sirve una cobertura inflable en industria?",
+-        "¿qué mantenimiento pide una estructura inflable?"
++        "¿qué mantenimiento pide una estructura inflable?",
++        "¿Quién fabrica estructuras inflables en el Perú?",
++        "¿Cómo cotizo estructuras inflables para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/familia/estructuras-arquitectura-textil",
+@@ -519,7 +551,9 @@
+       ],
+       "preguntas": [
+         "¿qué se necesita para montar un campamento minero temporal?",
+-        "¿qué módulos textiles hay para faenas remotas?"
++        "¿qué módulos textiles hay para faenas remotas?",
++        "¿Quién fabrica módulos para campamentos en el Perú?",
++        "¿Cómo cotizo módulos para campamentos para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/aplicaciones/campamentos-mineros",
+@@ -550,7 +584,9 @@
+       "preguntas": [
+         "¿cuánto cuesta cubrir un invernadero por metro cuadrado?",
+         "¿qué plástico se usa para un invernadero en la costa?",
+-        "¿qué diferencia hay entre galpón y invernadero?"
++        "¿qué diferencia hay entre galpón y invernadero?",
++        "¿Quién fabrica invernaderos en el Perú?",
++        "¿Cómo cotizo invernaderos para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/industria/agroexportacion",
+@@ -582,7 +618,9 @@
+       ],
+       "preguntas": [
+         "¿qué toldo se usa para cerrar un patio de maniobras?",
+-        "¿se fabrican cortinas industriales a medida?"
++        "¿se fabrican cortinas industriales a medida?",
++        "¿Quién fabrica toldos y cerramientos industriales en el Perú?",
++        "¿Cómo cotizo toldos y cerramientos industriales para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/familia/estructuras-arquitectura-textil",
+@@ -610,7 +648,9 @@
+       ],
+       "preguntas": [
+         "¿qué es una estructura textil y para qué sirve en industria?",
+-        "¿qué tipos de cobertura estructural existen para obra y mina?"
++        "¿qué tipos de cobertura estructural existen para obra y mina?",
++        "¿Quién fabrica estructuras textiles en el Perú?",
++        "¿Cómo cotizo estructuras textiles para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/carpas-lona-estructuras-metalicas",
+@@ -643,7 +683,9 @@
+       "preguntas": [
+         "¿qué mesh de malla antiáfida detiene la mosca blanca?",
+         "¿la malla antiáfida reduce la ventilación del invernadero?",
+-        "¿qué malla protege el cultivo sin bajar el rendimiento?"
++        "¿qué malla protege el cultivo sin bajar el rendimiento?",
++        "¿Quién fabrica malla antiáfida en el Perú?",
++        "¿Cómo cotizo malla antiáfida para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/biblioteca/seleccion-malla-agricola",
+@@ -680,7 +722,9 @@
+       "preguntas": [
+         "¿qué porcentaje de sombra necesita mi cultivo?",
+         "¿cuánto dura una malla raschel al sol?",
+-        "¿dónde comprar malla sombra por rollo en el Perú?"
++        "¿dónde comprar malla sombra por rollo en el Perú?",
++        "¿Quién fabrica malla raschel en el Perú?",
++        "¿Cómo cotizo malla raschel para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/glosario/malla-raschel",
+@@ -710,7 +754,9 @@
+       ],
+       "preguntas": [
+         "¿cómo proteger un frutal del granizo y de las aves?",
+-        "¿qué malla se usa en parronal de uva de mesa?"
++        "¿qué malla se usa en parronal de uva de mesa?",
++        "¿Quién fabrica malla anti pájaro en el Perú?",
++        "¿Cómo cotizo malla anti pájaro para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/aplicaciones/proteccion-cultivo",
+@@ -736,7 +782,9 @@
+       "erratas": [],
+       "preguntas": [
+         "¿qué mallas existen para proteger cultivos en el Perú?",
+-        "¿qué malla elijo: raschel, antiáfida o anti-granizo?"
++        "¿qué malla elijo: raschel, antiáfida o anti-granizo?",
++        "¿Quién fabrica mallas agrícolas en el Perú?",
++        "¿Cómo cotizo mallas agrícolas para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/malla-raschel-sombra",
+@@ -774,7 +822,11 @@
+         "¿qué diámetro de manga de ventilación necesito para mi labor?",
+         "¿cuál es la diferencia entre ventilación impelente y aspirante?",
+         "¿quién fabrica mangas de ventilación en el Perú?",
+-        "¿cómo calculo el caudal de aire de un frente de avance?"
++        "¿cómo calculo el caudal de aire de un frente de avance?",
++        "Mangas de ventilación para mina subterránea: cómo cotizar",
++        "¿Quién fabrica mangas de ventilación a medida de tramo en el Perú?",
++        "¿Cómo se define el diámetro de una manga de ventilación de mina?",
++        "¿Cómo cotizo mangas de ventilación para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/biblioteca/seleccion-mangas-ventilacion",
+@@ -811,7 +863,9 @@
+       ],
+       "preguntas": [
+         "¿qué componentes forman un sistema de ventilación en mina subterránea?",
+-        "¿cómo se ventila un túnel en construcción?"
++        "¿cómo se ventila un túnel en construcción?",
++        "¿Quién fabrica ventilación industrial en el Perú?",
++        "¿Cómo cotizo ventilación industrial para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/mangas-ventilacion-minas-tuneles",
+@@ -848,7 +902,9 @@
+         "¿qué geomembrana conviene para una poza de agua?",
+         "¿quién instala geomembranas en el Perú?",
+         "¿cuánto cuesta impermeabilizar una poza?",
+-        "¿qué espesor de geomembrana necesito?"
++        "¿qué espesor de geomembrana necesito?",
++        "¿Quién fabrica geomembranas en el Perú?",
++        "¿Cómo cotizo geomembranas para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/biblioteca/seleccion-geomembrana",
+@@ -879,7 +935,9 @@
+       ],
+       "preguntas": [
+         "¿cuándo se usa geomembrana de PVC en vez de HDPE?",
+-        "¿qué espesor de geomembrana de PVC se especifica?"
++        "¿qué espesor de geomembrana de PVC se especifica?",
++        "¿Quién fabrica geomembrana de PVC en el Perú?",
++        "¿Cómo cotizo geomembrana de PVC para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/biblioteca/seleccion-geomembrana",
+@@ -912,7 +970,12 @@
+       "preguntas": [
+         "¿qué espesor de geomembrana HDPE se usa en poza de relaves?",
+         "¿cómo se sueldan las láminas de HDPE en obra?",
+-        "¿qué es una zanja de anclaje y por qué importa?"
++        "¿qué es una zanja de anclaje y por qué importa?",
++        "Proveedor de geomembrana HDPE para reservorios en Perú",
++        "¿Qué espesor de geomembrana HDPE necesito para una poza de relaves?",
++        "¿Quién instala geomembrana en obra en el Perú?",
++        "¿Quién fabrica geomembrana HDPE en el Perú?",
++        "¿Cómo cotizo geomembrana HDPE para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/glosario/hdpe",
+@@ -942,7 +1005,9 @@
+       ],
+       "preguntas": [
+         "¿cuándo conviene una geomembrana reforzada?",
+-        "¿qué gana una geomembrana con refuerzo interno?"
++        "¿qué gana una geomembrana con refuerzo interno?",
++        "¿Quién fabrica geomembrana fortificada en el Perú?",
++        "¿Cómo cotizo geomembrana fortificada para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/familia/geosinteticos",
+@@ -966,7 +1031,9 @@
+       ],
+       "preguntas": [
+         "¿en qué casos se especifica geomembrana bituminosa?",
+-        "¿la geomembrana bituminosa sirve para túneles?"
++        "¿la geomembrana bituminosa sirve para túneles?",
++        "¿Quién fabrica geomembrana bituminosa en el Perú?",
++        "¿Cómo cotizo geomembrana bituminosa para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/familia/geosinteticos",
+@@ -997,7 +1064,9 @@
+       "preguntas": [
+         "¿qué geotextil elijo para separación, drenaje o refuerzo?",
+         "¿qué gramaje de geotextil se usa bajo una geomembrana?",
+-        "¿cuál es la diferencia entre geotextil tejido y no tejido?"
++        "¿cuál es la diferencia entre geotextil tejido y no tejido?",
++        "¿Quién fabrica geotextiles en el Perú?",
++        "¿Cómo cotizo geotextiles para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/glosario/geotextil",
+@@ -1031,7 +1100,9 @@
+       ],
+       "preguntas": [
+         "¿cómo se estabiliza una plataforma con geomalla?",
+-        "¿qué geomalla se usa en carretera afirmada?"
++        "¿qué geomalla se usa en carretera afirmada?",
++        "¿Quién fabrica geomallas en el Perú?",
++        "¿Cómo cotizo geomallas para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/glosario/geomalla",
+@@ -1058,7 +1129,9 @@
+       ],
+       "preguntas": [
+         "¿qué es un geocompuesto de drenaje y dónde se usa?",
+-        "¿el geocompuesto reemplaza a la capa de grava drenante?"
++        "¿el geocompuesto reemplaza a la capa de grava drenante?",
++        "¿Quién fabrica geocompuestos de drenaje en el Perú?",
++        "¿Cómo cotizo geocompuestos de drenaje para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/familia/geosinteticos",
+@@ -1091,7 +1164,9 @@
+       "preguntas": [
+         "¿cuánta agua almacena un tanque flexible?",
+         "¿qué se usa para almacenar agua en una operación remota?",
+-        "¿un tanque flexible sirve para combustible?"
++        "¿un tanque flexible sirve para combustible?",
++        "¿Quién fabrica tanques flexibles en el Perú?",
++        "¿Cómo cotizo tanques flexibles para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/aplicaciones/contencion-fluidos",
+@@ -1119,7 +1194,9 @@
+       ],
+       "preguntas": [
+         "¿qué biodigestor se usa en fundo o granja?",
+-        "¿cómo se impermeabiliza una laguna anaerobia?"
++        "¿cómo se impermeabiliza una laguna anaerobia?",
++        "¿Quién fabrica biodigestores en el Perú?",
++        "¿Cómo cotizo biodigestores para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/familia/ambientales-fluidos",
+@@ -1146,7 +1223,9 @@
+       ],
+       "preguntas": [
+         "¿qué tubería HDPE se usa para conducción de agua en mina?",
+-        "¿cómo se une una tubería HDPE en campo?"
++        "¿cómo se une una tubería HDPE en campo?",
++        "¿Quién fabrica tuberías HDPE en el Perú?",
++        "¿Cómo cotizo tuberías HDPE para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/glosario/hdpe",
+@@ -1172,7 +1251,9 @@
+       ],
+       "preguntas": [
+         "¿qué opciones hay para contener y almacenar fluidos en operación?",
+-        "¿cómo se hace una contención secundaria de derrames?"
++        "¿cómo se hace una contención secundaria de derrames?",
++        "¿Quién fabrica soluciones ambientales y de fluidos en el Perú?",
++        "¿Cómo cotizo soluciones ambientales y de fluidos para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/tanques-flexibles-bladders",
+@@ -1202,7 +1283,9 @@
+       ],
+       "preguntas": [
+         "¿qué biombo protege del arco de soldadura?",
+-        "¿qué cortina se usa en un taller de soldadura?"
++        "¿qué cortina se usa en un taller de soldadura?",
++        "¿Quién fabrica biombos protectores en el Perú?",
++        "¿Cómo cotizo biombos protectores para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/familia/seguridad-industrial",
+@@ -1228,7 +1311,9 @@
+       ],
+       "preguntas": [
+         "¿cómo se reduce el ruido de una obra hacia el vecindario?",
+-        "¿qué barrera acústica se usa alrededor de un generador?"
++        "¿qué barrera acústica se usa alrededor de un generador?",
++        "¿Quién fabrica barreras acústicas en el Perú?",
++        "¿Cómo cotizo barreras acústicas para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/mantas-aislantes-termicas-termoacusticas",
+@@ -1252,7 +1337,9 @@
+       ],
+       "preguntas": [
+         "¿qué soluciones textiles hay para seguridad en planta?",
+-        "¿cómo se protege un frente de trabajo del ruido y las chispas?"
++        "¿cómo se protege un frente de trabajo del ruido y las chispas?",
++        "¿Quién fabrica protección y seguridad industrial en el Perú?",
++        "¿Cómo cotizo protección y seguridad industrial para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/biombos-protectores-soldadura",
+@@ -1281,7 +1368,9 @@
+       ],
+       "preguntas": [
+         "¿qué accesorios necesito para instalar una lona o carpa?",
+-        "¿cada cuánto se colocan los ojalillos en una lona?"
++        "¿cada cuánto se colocan los ojalillos en una lona?",
++        "¿Quién fabrica accesorios de instalación en el Perú?",
++        "¿Cómo cotizo accesorios de instalación para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/glosario/ojal",
+@@ -1304,7 +1393,9 @@
+       ],
+       "preguntas": [
+         "¿qué complementos entrega el fabricante junto con la cobertura?",
+-        "¿venden accesorios sueltos para reparar una lona?"
++        "¿venden accesorios sueltos para reparar una lona?",
++        "¿Quién fabrica accesorios y complementos en el Perú?",
++        "¿Cómo cotizo accesorios y complementos para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/accesorios-instalacion",
+@@ -1331,7 +1422,9 @@
+       ],
+       "preguntas": [
+         "¿dónde imprimir una gigantografía para obra en Lima?",
+-        "¿qué material se usa para un letrero a la intemperie?"
++        "¿qué material se usa para un letrero a la intemperie?",
++        "¿Quién fabrica gigantografías en el Perú?",
++        "¿Cómo cotizo gigantografías para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/familia/publicidad",
+@@ -1355,7 +1448,9 @@
+       ],
+       "preguntas": [
+         "¿se puede rotular la lona de un camión con la marca?",
+-        "¿cuánto dura una rotulación vehicular a la intemperie?"
++        "¿cuánto dura una rotulación vehicular a la intemperie?",
++        "¿Quién fabrica revestimiento vehicular en el Perú?",
++        "¿Cómo cotizo revestimiento vehicular para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/familia/publicidad",
+@@ -1378,7 +1473,9 @@
+       ],
+       "preguntas": [
+         "¿qué soluciones de comunicación visual fabrica una empresa de lonas?",
+-        "¿cómo se señaliza una obra con material resistente a la intemperie?"
++        "¿cómo se señaliza una obra con material resistente a la intemperie?",
++        "¿Quién fabrica publicidad y comunicación visual en el Perú?",
++        "¿Cómo cotizo publicidad y comunicación visual para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/gigantografias-senaletica",
+@@ -1404,7 +1501,9 @@
+       ],
+       "preguntas": [
+         "¿cuánto mulch necesito por metro cuadrado?",
+-        "¿qué espesor de mulch conserva la humedad del suelo?"
++        "¿qué espesor de mulch conserva la humedad del suelo?",
++        "¿Quién fabrica mulch en el Perú?",
++        "¿Cómo cotizo mulch para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/recursos/mulch-madera-espesor-calculo-cobertura-suelo",
+@@ -1427,7 +1526,9 @@
+       ],
+       "preguntas": [
+         "¿fabrican productos fuera de catálogo bajo especificación?",
+-        "¿cómo se cotiza un desarrollo a medida?"
++        "¿cómo se cotiza un desarrollo a medida?",
++        "¿Quién fabrica líneas especiales en el Perú?",
++        "¿Cómo cotizo líneas especiales para un proyecto industrial?"
+       ],
+       "apoyos": [
+         "/productos/mulch-madera-picada",
+@@ -1950,7 +2051,10 @@
+       ],
+       "preguntas": [
+         "¿atienden fuera de Lima?",
+-        "¿despachan a operaciones en provincia?"
++        "¿despachan a operaciones en provincia?",
++        "¿Despachan a Cerro de Pasco, Puno o Moquegua?",
++        "¿Atienden el parque industrial de Villa El Salvador?",
++        "¿Entregan en el Callao para embarque de exportación?"
+       ],
+       "apoyos": [
+         "/contacto",
+diff --git a/lib/entidad-feed.ts b/lib/entidad-feed.ts
+new file mode 100644
+index 0000000..2f7e8af
+--- /dev/null
++++ b/lib/entidad-feed.ts
+@@ -0,0 +1,142 @@
++import { SITE } from './site';
++import { ORGANIZATION_ID, BUSINESS_ID, WEBSITE_ID } from './schema';
++import { PRODUCT_COUNT, FAMILY_COUNT, YEARS_STATEMENT } from './facts';
++import { productFamilies } from './products';
++
++/**
++ * TARJETA DE ENTIDAD PARA AGENTES — derivada, no escrita a mano.
++ *
++ * POR QUÉ EXISTE ESTE ARCHIVO. Antes había un `public/entidad.json` estático
++ * con la identidad de la empresa copiada a mano. Tenía tres problemas y los
++ * tres eran del mismo tipo —una copia que nadie regenera envejece sola—:
++ *
++ *   1. Declaraba `"@id": "https://plastilonas.com/#organization"` y
++ *      `"url": "https://plastilonas.com"` mientras el sitio se sirve desde el
++ *      host de Vercel. Un `@id` que no coincide con el origen que el rastreador
++ *      tiene delante NO consolida la entidad: la parte en dos. Era la misma
++ *      escisión que lib/site.ts prohíbe en su primera línea, sólo que fuera del
++ *      alcance de test/dominio.ts, porque `public/` estaba en su lista de
++ *      omisiones.
++ *   2. Declaraba `areaServed: ["PE","CL","CO","EC","BO"]`. /confianza publica
++ *      exactamente lo contrario —«Envío mundial o instalación continental» está
++ *      en la lista de lo que NO se afirma— y sólo Colombia tiene evidencia
++ *      pública de comercio. Cinco países en un campo tipado es una afirmación
++ *      de cobertura, no un matiz comercial.
++ *   3. Usaba `disclaimer`, que no es una propiedad de schema.org. Vocabulario
++ *      inventado en el nodo raíz de la empresa.
++ *
++ * QUÉ HACE AHORA. Todo sale de lib/site.ts, lib/facts.ts y lib/products.ts, de
++ * modo que el día que cambie el RUC, el teléfono, el domicilio o el dominio,
++ * esta tarjeta cambia con ellos y no hay una segunda copia que corregir.
++ *
++ * EL ALCANCE INTERNACIONAL, DICHO CON PRECISIÓN. `areaServed` sigue siendo Perú
++ * —es la única cobertura que la empresa puede sostener sin matices— y la
++ * exportación se declara donde de verdad pertenece: como un `Service` con su
++ * punto de entrega (EXW Lima / FOB Callao) y su condición explícita de
++ * evaluación por RFQ. Un agente que lea esto obtiene una respuesta MÁS útil que
++ * una lista de países: sabe desde dónde sale la carga, bajo qué Incoterm y qué
++ * tiene que preguntar. Y no hay nada que un comprador pueda desmentir.
++ */
++
++/** Incoterms que la empresa cotiza de verdad, con su punto de entrega. */
++export const INCOTERMS_SALIDA = [
++  { codigo: 'EXW', punto: 'Planta Chorrillos, Lima', nota: 'El comprador toma la carga en planta.' },
++  { codigo: 'FCA', punto: 'Lima', nota: 'Entrega al transportista designado por el comprador.' },
++  { codigo: 'FOB', punto: 'Puerto del Callao', nota: 'Embarque marítimo desde el Callao.' },
++] as const;
++
++export function buildEntidadJson(): string {
++  const doc = {
++    '@context': 'https://schema.org',
++    '@graph': [
++      {
++        '@type': 'Organization',
++        '@id': ORGANIZATION_ID,
++        name: SITE.name,
++        legalName: SITE.legalName,
++        url: SITE.url,
++        email: SITE.email,
++        telephone: [SITE.phoneCentral, SITE.phoneWhatsApp],
++        foundingDate: SITE.foundingYear,
++        taxID: SITE.ruc,
++        identifier: { '@type': 'PropertyValue', propertyID: 'RUC', value: SITE.ruc },
++        isicV4: SITE.isicV4,
++        naics: SITE.naics,
++        description: SITE.description,
++        address: {
++          '@type': 'PostalAddress',
++          streetAddress: SITE.addressStreet,
++          addressLocality: SITE.addressLocality,
++          addressRegion: SITE.addressRegion,
++          postalCode: SITE.addressPostalCode,
++          addressCountry: SITE.addressCountry,
++        },
++        // Una sola cobertura sin matices. La internacional se declara abajo,
++        // como servicio evaluado por operación, que es lo que realmente es.
++        areaServed: { '@type': 'Country', name: 'Perú' },
++        knowsAbout: productFamilies.map((f) => f.name),
++        knowsLanguage: [SITE.language],
++        ...(SITE.sameAs.length ? { sameAs: SITE.sameAs } : {}),
++      },
++      {
++        '@type': 'Service',
++        '@id': `${SITE.url}/exportacion#servicio`,
++        name: 'Suministro internacional evaluado por RFQ',
++        serviceType: 'Exportación de textil industrial y geosintéticos',
++        provider: { '@id': ORGANIZATION_ID },
++        url: `${SITE.url}/exportacion`,
++        areaServed: { '@type': 'Country', name: 'Perú' },
++        description:
++          'La fabricación ocurre en Chorrillos, Lima. Cada operación internacional se evalúa por ' +
++          'partida arancelaria, volumen mínimo, destino e Incoterm; no hay envío mundial automático ' +
++          'ni tarifa publicada. Existe evidencia pública de comercio exterior hacia Colombia; el ' +
++          'resto de destinos se confirma operación por operación.',
++        termsOfService: `${SITE.url}/confianza`,
++        availableChannel: {
++          '@type': 'ServiceChannel',
++          serviceUrl: `${SITE.url}/cotizacion`,
++          name: 'Solicitud de cotización (RFQ)',
++        },
++        offers: {
++          '@type': 'Offer',
++          '@id': `${SITE.url}/exportacion#oferta`,
++          availability: 'https://schema.org/LimitedAvailability',
++          priceSpecification: {
++            '@type': 'PriceSpecification',
++            // No hay lista de precios: la venta es B2B por cotización. Declararlo
++            // con vocabulario tipado es más honesto que omitir el campo.
++            valueAddedTaxIncluded: false,
++            description: 'Precio por cotización. No se publica lista de precios.',
++          },
++          eligibleCustomerType: 'https://schema.org/Business',
++          additionalProperty: INCOTERMS_SALIDA.map((i) => ({
++            '@type': 'PropertyValue',
++            name: `Incoterm ${i.codigo}`,
++            value: `${i.punto} — ${i.nota}`,
++          })),
++        },
++      },
++      {
++        '@type': 'WebSite',
++        '@id': WEBSITE_ID,
++        url: SITE.url,
++        name: SITE.name,
++        inLanguage: SITE.language,
++        publisher: { '@id': ORGANIZATION_ID },
++      },
++      {
++        '@type': 'Dataset',
++        '@id': `${SITE.url}/productos/catalogo.json#dataset`,
++        name: `Catálogo Plastilonas — ${PRODUCT_COUNT} soluciones en ${FAMILY_COUNT} líneas de producto`,
++        description: `${YEARS_STATEMENT}. Catálogo completo en JSON abierto, sin registro y sin precios.`,
++        creator: { '@id': ORGANIZATION_ID },
++        distribution: {
++          '@type': 'DataDownload',
++          encodingFormat: 'application/json',
++          contentUrl: `${SITE.url}/productos/catalogo.json`,
++        },
++      },
++    ],
++  };
++  return JSON.stringify(doc, null, 2);
++}
+diff --git a/lib/products.ts b/lib/products.ts
+index 47dd767..c8f8f9e 100644
+--- a/lib/products.ts
++++ b/lib/products.ts
+@@ -871,7 +871,7 @@ export const products: Product[] = [
+       'Fácil instalación, transporte y reconfiguración',
+       'Excelente flujo de aire con mínima pérdida de presión',
+       'Personalización total de diámetro, longitud y accesorios',
+-      'Cumplimiento de normas de seguridad minera (OIT, MINEM)'
++      'La normativa de seguridad minera del MINEM y el reglamento interno de la operación fijan el requisito de ventilación; entregamos la ficha técnica del material en cotización'
+     ],
+     image: '/images/galeria/mangas-ventilacion-minas-tuneles-general.webp',
+     gallery: [
+@@ -925,7 +925,7 @@ export const products: Product[] = [
+       'Soldadura en obra con garantía de hermeticidad',
+       'Alta flexibilidad y adaptabilidad a todo tipo de terreno',
+       'Resistente a rayos UV y condiciones climáticas extremas',
+-      'Cumplimiento de normas ambientales y de seguridad'
++      'Ficha técnica del material y certificado de lote del fabricante, entregados con la cotización'
+     ],
+     image: '/images/galeria/geomembranas-pvc-general.webp',
+     gallery: [
+@@ -1292,7 +1292,7 @@ export const products: Product[] = [
+     category: 'Protección y Seguridad Industrial',
+     sector: ['Industrial', 'Construcción', 'Minería'],
+     shortDescription: 'Biombos portátiles y fijos de lona ignífuga para protección contra chispas, radiación UV y proyecciones en trabajos de soldadura.',
+-    description: 'Biombos protectores fabricados con lona de fibra de vidrio recubierta de silicona o PVC ignífugo de alta calidad. Diseñados para crear zonas seguras en talleres de soldadura, astilleros, construcción y mantenimiento industrial. Disponibles en versiones portátiles con estructura metálica plegable o fijos para instalación permanente. Cumplen con normativas de seguridad industrial peruana e internacional.',
++    description: 'Biombos protectores fabricados con lona de fibra de vidrio recubierta de silicona o PVC ignífugo de alta calidad. Diseñados para crear zonas seguras en talleres de soldadura, astilleros, construcción y mantenimiento industrial. Disponibles en versiones portátiles con estructura metálica plegable o fijos para instalación permanente. La ficha técnica del material —autoextinguibilidad y temperatura máxima— se entrega en la cotización, para que el responsable de seguridad contraste el paño contra la norma que le aplique a su taller.',
+     specifications: [
+       { label: 'Material', value: 'Lona de fibra de vidrio con recubrimiento de silicona/PVC ignífugo' },
+       { label: 'Resistencia al fuego', value: 'Material autoextinguible / retardante de llama; ficha técnica del material en cotización' },
+@@ -1314,7 +1314,7 @@ export const products: Product[] = [
+       'Reduce riesgos de incendio y lesiones oculares',
+       'Fácil instalación y reconfiguración del espacio de trabajo',
+       'Durabilidad extrema en ambientes industriales agresivos',
+-      'Cumplimiento de normas de seguridad y salud en el trabajo'
++      'Ficha técnica de resistencia al fuego del material, entregada con la cotización'
+     ],
+     image: '/images/galeria/biombos-protectores-soldadura-general.webp',
+     gallery: [
+@@ -1477,7 +1477,7 @@ export const products: Product[] = [
+       { label: 'Presentación', value: 'Sacos de 50 litros, Big Bags de 1m³, a granel' },
+       { label: 'Humedad', value: '15-25% (estabilizado)' },
+       { label: 'pH', value: '5.5 - 7.0' },
+-      { label: 'Certificación', value: 'Libre de semillas de malezas y patógenos' }
++      { label: 'Control de proceso', value: 'Cribado y secado antes del despacho para reducir semillas de malezas; sin certificado fitosanitario propio' }
+     ],
+     applications: [
+       'Cobertura de suelos en cultivos de berries, frutales y hortalizas',
+diff --git a/lib/respuesta-directa.ts b/lib/respuesta-directa.ts
+new file mode 100644
+index 0000000..68c046f
+--- /dev/null
++++ b/lib/respuesta-directa.ts
+@@ -0,0 +1,115 @@
++import type { Product } from './types';
++import type { Application } from './applications';
++import { SITE } from './site';
++
++/**
++ * RESPUESTA DIRECTA — el párrafo que un motor de respuestas puede citar entero.
++ *
++ * EL PROBLEMA. Un asistente que recibe «¿quién fabrica big bags para minería en
++ * Lima?» no lee la página: extrae el fragmento más corto que conteste la
++ * pregunta. Si el único texto citable es una descripción de marketing de 90
++ * palabras, el asistente resume por su cuenta —y al resumir, redondea. Redondear
++ * una especificación es exactamente el fallo que este sitio no puede permitirse.
++ *
++ * LA REGLA. Esta respuesta se COMPONE de campos reales del catálogo. No hay un
++ * campo de texto libre que alguien pueda rellenar a mano, porque ése sería el
++ * sitio por donde volvería a entrar una cifra inventada.
++ *
++ * EL LÍMITE QUE HEREDA. lib/products.ts declara que las líneas `bajo_pedido`
++ * —geosintéticos importados, geomembranas, geotextiles, geomallas— NO publican
++ * especificaciones numéricas concretas: se definen por proyecto y la ficha
++ * técnica la emite el fabricante en la cotización. La misma regla gobierna el
++ * prompt del chatbot (app/api/chat/route.ts). Aquí se aplica igual: si el
++ * producto es bajo pedido, la respuesta directa dice de qué depende la
++ * especificación en vez de dar un número que este repositorio no puede sostener.
++ *
++ * NUNCA aparece un precio: la venta es B2B por cotización.
++ */
++
++const SOURCING_FRASE: Record<string, string> = {
++  fabricacion_propia: `Fabricación propia en la planta de ${SITE.addressLocality}, Lima`,
++  importacion_directa: 'Importación directa bajo control de la empresa',
++  bajo_pedido: 'Línea bajo pedido, producida contra orden',
++  partner: 'Suministrado mediante aliado técnico especializado',
++};
++
++/** Corta a un número de palabras sin partir una palabra por la mitad. */
++export function recortarPalabras(texto: string, maximo: number): string {
++  const palabras = texto.trim().split(/\s+/);
++  if (palabras.length <= maximo) return texto.trim();
++  return `${palabras.slice(0, maximo).join(' ')}…`;
++}
++
++export function contarPalabras(texto: string): number {
++  return texto.trim().split(/\s+/).filter(Boolean).length;
++}
++
++/**
++ * Respuesta directa de un producto. Objetivo ~40 palabras: lo que cabe en un
++ * fragmento destacado y en la respuesta hablada de un asistente.
++ */
++export function respuestaDirectaProducto(p: Product): string {
++  const esBajoPedido = (p.availability ?? 'a_medida') === 'bajo_pedido';
++  const origen = SOURCING_FRASE[p.sourcing ?? 'fabricacion_propia'] ?? SOURCING_FRASE.fabricacion_propia;
++
++  const detalle = esBajoPedido
++    ? 'Las especificaciones se definen por proyecto; la ficha técnica y el certificado de lote del fabricante se entregan con la cotización'
++    : p.specifications
++        .slice(0, 2)
++        .map((s) => `${s.label}: ${s.value}`)
++        .join('. ');
++
++  const frase = `${p.name}: ${p.category.toLowerCase()} para ${p.sector
++    .slice(0, 3)
++    .join(', ')
++    .toLowerCase()}. ${origen}. ${detalle}. Venta B2B por cotización, sin precio de lista.`;
++
++  return recortarPalabras(frase.replace(/\s+/g, ' '), 55);
++}
++
++/** Respuesta directa de un hub de aplicación: el problema y qué decide el alcance. */
++export function respuestaDirectaAplicacion(a: Application): string {
++  const frase = `${a.name}: ${a.problem} Se resuelve a medida desde la planta de ${SITE.addressLocality}, Lima. Para cotizar definimos ${a.questions
++    .slice(0, 3)
++    .join(', ')
++    .toLowerCase()}.`;
++  return recortarPalabras(frase.replace(/\s+/g, ' '), 55);
++}
++
++/**
++ * Mensaje de WhatsApp con el SKU y los campos que hay que definir.
++ *
++ * Antes decía «Hola, necesito una cotización de X». El comercial recibía un
++ * nombre y tenía que pedir todo lo demás, y cada ida y vuelta pierde una parte
++ * de los interesados. Ahora el propio mensaje trae el SKU —que es lo que
++ * identifica la ficha sin ambigüedad— y la lista de datos que la cotización
++ * necesita, sacada de las etiquetas de especificación reales del producto: el
++ * comprador la completa antes de enviar y el primer mensaje ya sirve para
++ * cotizar.
++ */
++export function rfqWhatsAppProducto(p: Product): string {
++  const campos = p.specifications.slice(0, 4).map((s) => `· ${s.label}: `);
++  return [
++    `*SOLICITUD DE COTIZACIÓN (RFQ)*`,
++    `Producto: ${p.name}`,
++    `SKU: ${p.id} — ${p.slug}`,
++    '',
++    'Para cotizar necesito indicar:',
++    ...campos,
++    '· Cantidad: ',
++    '· Ciudad de entrega: ',
++    '· Fecha requerida: ',
++  ].join('\n');
++}
++
++/** El mismo mecanismo para un hub de aplicación: sus preguntas son el formulario. */
++export function rfqWhatsAppAplicacion(a: Application): string {
++  return [
++    `*SOLICITUD DE COTIZACIÓN (RFQ)*`,
++    `Aplicación: ${a.name}`,
++    '',
++    'Para definir el alcance necesito indicar:',
++    ...a.questions.map((q) => `· ${q}: `),
++    '· Ciudad de entrega: ',
++  ].join('\n');
++}
+diff --git a/public/entidad.json b/public/entidad.json
+deleted file mode 100644
+index 4eaf9c3..0000000
+--- a/public/entidad.json
++++ /dev/null
+@@ -1,39 +0,0 @@
+-{
+-  "@context": "https://schema.org",
+-  "@id": "https://plastilonas.com/#organization",
+-  "@type": ["Organization", "LocalBusiness"],
+-  "name": "Plastilonas Peruanas SAC",
+-  "legalName": "Plastilonas Peruanas SAC",
+-  "taxID": "20523135385",
+-  "foundingDate": "2009",
+-  "url": "https://plastilonas.com",
+-  "email": "ventas@plastilonas.com",
+-  "telephone": ["+51998117065", "+51946085270"],
+-  "address": {
+-    "@type": "PostalAddress",
+-    "streetAddress": "Calle Alameda del Remero Mz. V, Lt. 2, Urb. Los Huertos de Villa",
+-    "addressLocality": "Chorrillos",
+-    "addressRegion": "Lima",
+-    "postalCode": "15067",
+-    "addressCountry": "PE"
+-  },
+-  "sameAs": [
+-    "https://www.facebook.com/plastilonasperuanas",
+-    "https://www.linkedin.com/company/plastilonas-peruanas-sac"
+-  ],
+-  "description": "Peruvian manufacturer of custom industrial textiles: FIBC / big bags, PVC and PE tarpaulins, mining ventilation ducts, agricultural mesh, textile structures, geomembranes and industrial containment. Plant in Chorrillos, Lima. International supply evaluated per RFQ. No worldwide shipping claim. No invented ISO/ASTM/CE certifications.",
+-  "knowsAbout": [
+-    "FIBC",
+-    "industrial tarpaulins",
+-    "mining ventilation ducts",
+-    "geomembranes",
+-    "agricultural mesh",
+-    "textile structures"
+-  ],
+-  "areaServed": ["PE", "CL", "CO", "EC", "BO"],
+-  "disclaimer": {
+-    "noWorldwideShipping": true,
+-    "noInventedCertifications": true,
+-    "installationOutsidePeru": "evaluated per project, not claimed as continental coverage"
+-  }
+-}
+diff --git a/scripts/verificar-despliegue.sh b/scripts/verificar-despliegue.sh
+index 5831da5..b3887b1 100755
+--- a/scripts/verificar-despliegue.sh
++++ b/scripts/verificar-despliegue.sh
+@@ -184,6 +184,9 @@ ruta /indexnow-key.txt
+ ruta /version.json
+ # Superficies de recuperación por máquina añadidas con el mapa de consultas.
+ ruta /mapa-consultas.json
++# Tarjeta de entidad. Sustituye al antiguo public/entidad.json estático, que
++# declaraba otro dominio en su @id y cobertura en cinco países.
++ruta /entidad.json
+ ruta /llms-full.txt
+ ruta /productos/big-bags-bolsones-polipropileno/contenido.md
+ 
+@@ -237,6 +240,14 @@ contiene "/llms.txt" 'Calculadoras de predimensionamiento' "llms.txt declara las
+ contiene "/llms.txt" 'Mapa de consultas comerciales' "llms.txt declara el mapa de consultas"
+ contiene "/mapa-consultas.json" '"canonica"' "el mapa declara una canónica por clúster"
+ contiene "/mapa-consultas.json" 'Una consulta, una página' "el mapa declara su propia regla"
++# La escisión de identidad se comprueba contra el HTML servido, no contra el
++# repositorio: es el único sitio donde se ve qué origen declara de verdad.
++contiene "/entidad.json" '#organization' "la tarjeta de entidad declara el nodo de organización"
++if grep -q 'plastilonas\.com/#' <<< "$(cuerpo /entidad.json)"; then
++  fallo "/entidad.json declara un @id en el dominio de marca mientras el sitio se sirve desde otro host"
++else
++  ok "/entidad.json declara su @id en el origen que se rastrea"
++fi
+ contiene "/llms-full.txt" 'corpus completo para agentes' "el corpus se sirve entero"
+ contiene "/productos/big-bags-bolsones-polipropileno/contenido.md" 'Hechos citables' "el espejo trae el bloque de citación"
+ contiene "/productos/big-bags-bolsones-polipropileno" '"@type":"BreadcrumbList"' "la ficha de producto declara su jerarquía"
+diff --git a/test/afirmaciones.test.ts b/test/afirmaciones.test.ts
+index 8512706..5ee860e 100644
+--- a/test/afirmaciones.test.ts
++++ b/test/afirmaciones.test.ts
+@@ -23,7 +23,14 @@ import { join } from 'node:path';
+  */
+ 
+ const raiz = process.cwd();
+-const MIRAR = ['app', 'components', 'lib', 'data'];
++/**
++ * `public` entró después: el sitio servía /entidad.json, un archivo estático que
++ * declaraba cobertura en cinco países mientras /confianza publicaba que eso no
++ * se afirma. No lo cazó nadie porque esta lista no incluía la carpeta desde la
++ * que se sirven los archivos tal cual. Lo que se publica se audita, esté escrito
++ * en TypeScript o en JSON suelto.
++ */
++const MIRAR = ['app', 'components', 'lib', 'data', 'public'];
+ 
+ /**
+  * Cada patrón es una forma concreta de afirmar algo que esta empresa no puede
+@@ -52,8 +59,28 @@ const PROHIBIDO: { re: RegExp; porque: string }[] = [
+     porque: 'garantía sin plazo ni condiciones escritas',
+   },
+   {
+-    re: /\b(oficinas?|sedes?|filiales?|sucursales?)\s+en\s+(chile|colombia|ecuador|bolivia|brasil|m[eé]xico|todo el pa[ií]s)/i,
+-    porque: 'sedes que no existen: hay una planta, en Chorrillos',
++    re: /\b(oficinas?|sedes?|filiales?|sucursales?|distribuidores?)\s+en\s+(chile|colombia|ecuador|bolivia|brasil|m[eé]xico|todo el pa[ií]s)/i,
++    porque: 'sedes o red de distribución que no existen: hay una planta, en Chorrillos',
++  },
++  {
++    // La página de contacto prometía «atención inmediata 24/7» veinticinco
++    // líneas encima de su propio horario: lunes a viernes de 8 a 18 y sábados
++    // de 8 a 13. WhatsApp aquí es un canal humano, no un bot: no hay turno de
++    // noche que lo atienda. Un comprador que escribe un domingo y no recibe
++    // respuesta ya sabe que este sitio exagera, y lee el resto con esa sospecha.
++    re: /\b24\s*[\/x]\s*7\b/i,
++    porque: 'disponibilidad 24/7 que el horario publicado desmiente en la misma página',
++  },
++  {
++    // «Cumplimiento de normas ambientales y de seguridad», sin norma citable ni
++    // documento, es una credencial propia disfrazada de beneficio. La regla del
++    // sitio permite citar la norma AJENA que el comprador debe cumplir; lo que
++    // prohíbe es atribuírsela. Se exige nombrar la norma o no invocarla.
++    re: /\bcumpl(?:e|en|imiento)\b[^.]{0,40}?\b(?:normas?|normativas?)\b/i,
++    porque:
++      'cumplimiento normativo afirmado sin apuntar al documento que lo respalda. ' +
++      'Cite la norma ajena que el comprador debe cumplir y diga qué documentación se entrega ' +
++      'en la cotización — nunca se atribuya el cumplimiento como credencial propia',
+   },
+ ];
+ 
+@@ -79,6 +106,25 @@ describe('el sitio no afirma lo que no puede sostener', () => {
+           // es la frase. Documentar el error es parte de no repetirlo.
+           const t = linea.trim();
+           if (t.startsWith('*') || t.startsWith('//') || t.startsWith('{/*')) continue;
++          // Una PREGUNTA no es una afirmación. «¿Las cortinas cumplen alguna
++          // norma?» es exactamente la duda que el comprador trae, y la respuesta
++          // que sigue en lib/families.ts se niega a atribuirse nada. Perseguir la
++          // pregunta obligaría a borrar el contenido bueno para pasar la prueba,
++          // que es como se termina debilitando una regla.
++          if (t.includes('¿')) continue;
++          // Tampoco lo es una frase que remite al documento: ése es justamente
++          // el patrón honesto que el resto del catálogo ya usa.
++          if (/documentaci[óo]n|cotizaci[óo]n|ficha t[ée]cnica|certificado de lote|a solicitud/i.test(linea))
++            continue;
++          // Ni una NEGACIÓN. lib/guides.ts declara que la calculadora «no
++          // entrega pérdida de carga certificada ni cumple NFPA»: eso es
++          // publicar un límite, que es la conducta que el sitio persigue, no
++          // la que castiga.
++          if (/\b(?:no|ni|sin)\b[^.]{0,60}\bcumpl/i.test(linea)) continue;
++          // Ni ayudar a que el COMPRADOR cumpla lo suyo. «Apoya el cumplimiento
++          // de normativa ambiental» describe para qué sirve el producto en la
++          // obra del cliente; no se atribuye ninguna credencial a esta empresa.
++          if (/\b(?:apoya|ayuda a|facilita|permite|para el)\b[^.]{0,20}\bcumpl/i.test(linea)) continue;
+           if (re.test(linea)) hallazgos.push(`${f}:${n + 1}  ${t.slice(0, 120)}`);
+         }
+       }
+diff --git a/test/dominio.test.ts b/test/dominio.test.ts
+index 7eea9f7..d0404f8 100644
+--- a/test/dominio.test.ts
++++ b/test/dominio.test.ts
+@@ -23,7 +23,7 @@ import { SITE } from '@/lib/site';
+ 
+ const raiz = process.cwd();
+ const EXTS = /\.(ts|tsx|mjs|js|yml|yaml)$/;
+-const OMITIR = new Set(['node_modules', '.next', '.git', 'test', 'docs', 'public']);
++const OMITIR = new Set(['node_modules', '.next', '.git', 'test', 'docs']);
+ 
+ function fuentes(dir: string, out: string[] = []): string[] {
+   for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
+@@ -68,6 +68,59 @@ describe('el origen canónico se declara una sola vez', () => {
+     ).toEqual([]);
+   });
+ 
++  /**
++   * EL HOST DE MARCA TAMBIÉN SE VIGILA, Y NO SÓLO EL VIGENTE.
++   *
++   * La prueba de arriba busca el host que SITE.url tiene hoy. Eso deja pasar lo
++   * contrario, que es el error que de verdad ocurrió: `public/entidad.json`
++   * declaraba `"@id": "https://plastilonas.com/#organization"` mientras el sitio
++   * se servía desde el host de Vercel, y se servía tal cual en /entidad.json. Un
++   * `@id` que no coincide con el origen rastreado no consolida la entidad: la
++   * parte en dos y desperdicia las señales de las dos mitades.
++   *
++   * Se miran sólo las carpetas cuyo contenido SE SIRVE. scripts/ queda fuera a
++   * propósito: verify-domain-redirect.mjs necesita nombrar el dominio antiguo
++   * porque su trabajo es justamente comprobar la redirección desde él.
++   */
++  it('ningún archivo servido escribe el host de marca a mano', () => {
++    const servidas = ['app', 'lib', 'components', 'public'].flatMap((d) => {
++      try {
++        return fuentes(d);
++      } catch {
++        return [];
++      }
++    });
++    const jsonServido = (() => {
++      try {
++        return readdirSync(join(raiz, 'public'), { withFileTypes: true })
++          .filter((e) => e.isFile() && e.name.endsWith('.json'))
++          .map((e) => `public/${e.name}`);
++      } catch {
++        return [];
++      }
++    })();
++    const culpables: string[] = [];
++    for (const r of [...servidas, ...jsonServido]) {
++      if (r === 'lib/site.ts') continue;
++      const src = readFileSync(join(raiz, r), 'utf8');
++      const codigo = src
++        .replace(/\/\*[\s\S]*?\*\//g, '')
++        .replace(/^\s*\/\/.*$/gm, '')
++        // El correo comercial vive de verdad en el dominio de marca —el MX ya
++        // apunta ahí aunque el sitio todavía no—, así que una dirección de
++        // correo no es una URL canónica mal escrita. Lo que se persigue es un
++        // HOST emitido como origen, no una cuenta de correo.
++        .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/g, '');
++      if (codigo.includes(SITE.brandHost)) culpables.push(r);
++    }
++    expect(
++      culpables,
++      `emiten «${SITE.brandHost}» mientras el origen canónico es ${SITE.url}: ` +
++        `un @id que no coincide con el host rastreado parte la entidad. ` +
++        `Derive de SITE.url. Culpables: ${culpables.join(', ')}`,
++    ).toEqual([]);
++  });
++
+   it('lib/site.ts documenta cómo se hace la mudanza', () => {
+     const src = readFileSync(join(raiz, 'lib/site.ts'), 'utf8');
+     expect(src).toMatch(/plastilonas\.com/);
+diff --git a/test/entidad-y-respuesta.test.ts b/test/entidad-y-respuesta.test.ts
+new file mode 100644
+index 0000000..b588618
+--- /dev/null
++++ b/test/entidad-y-respuesta.test.ts
+@@ -0,0 +1,198 @@
++import { describe, it, expect } from 'vitest';
++import { readFileSync, existsSync } from 'node:fs';
++import { join } from 'node:path';
++import { SITE } from '@/lib/site';
++import { buildEntidadJson, INCOTERMS_SALIDA } from '@/lib/entidad-feed';
++import { products } from '@/lib/products';
++import { applications } from '@/lib/applications';
++import {
++  respuestaDirectaProducto,
++  respuestaDirectaAplicacion,
++  contarPalabras,
++  rfqWhatsAppProducto,
++} from '@/lib/respuesta-directa';
++import ciudades from '@/data/ciudades.json';
++
++/**
++ * LA ENTIDAD SE CIERRA, Y LA RESPUESTA DIRECTA NO INVENTA.
++ *
++ * Estas pruebas nacen de un defecto concreto y de un riesgo concreto.
++ *
++ * EL DEFECTO. El sitio servía `public/entidad.json`, un archivo estático que
++ * declaraba `"@id": "https://plastilonas.com/#organization"` mientras el sitio
++ * se rastreaba desde el host de Vercel, y `areaServed: ["PE","CL","CO","EC","BO"]`
++ * mientras /confianza publicaba que la cobertura continental NO se afirma. No lo
++ * cazó nadie porque estaba en `public/`, que era el único directorio servido que
++ * ni test/afirmaciones.ts ni test/dominio.ts miraban. Ahora lo miran las dos, y
++ * además la tarjeta se genera de lib/ en vez de copiarse a mano.
++ *
++ * EL RIESGO. La «respuesta directa» es un párrafo pensado para que un motor de
++ * respuestas lo cite entero. Es, por construcción, el texto de este sitio con
++ * más probabilidad de ser repetido por una máquina delante de un comprador. Si
++ * algún día alguien lo convierte en un campo de texto libre, será la puerta por
++ * la que vuelva a entrar una cifra que nadie puede sostener. Se comprueba que
++ * siga siendo compuesto, sin precio, y que respete el límite de las líneas bajo
++ * pedido.
++ */
++
++describe('la tarjeta de entidad cierra la entidad en vez de partirla', () => {
++  const doc = JSON.parse(buildEntidadJson());
++  const nodos: Record<string, unknown>[] = doc['@graph'];
++  const org = nodos.find((n) => n['@type'] === 'Organization') as Record<string, unknown>;
++
++  it('el archivo estático que declaraba otro dominio ya no existe', () => {
++    expect(
++      existsSync(join(process.cwd(), 'public/entidad.json')),
++      'public/entidad.json volvió: era una copia a mano que declaraba otro host',
++    ).toBe(false);
++  });
++
++  it('el @id de la organización vive en el origen que se rastrea', () => {
++    expect(org['@id']).toBe(`${SITE.url}/#organization`);
++    expect(org.url).toBe(SITE.url);
++  });
++
++  it('no escribe el host de marca en ninguna parte mientras no sea el canónico', () => {
++    const sinCorreos = buildEntidadJson().replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/g, '');
++    if (new URL(SITE.url).host !== SITE.brandHost) {
++      expect(sinCorreos).not.toContain(SITE.brandHost);
++    }
++  });
++
++  it('declara una sola área de servicio: donde se fabrica', () => {
++    expect(org.areaServed).toEqual({ '@type': 'Country', name: 'Perú' });
++    const texto = JSON.stringify(doc);
++    for (const pais of ['Chile', 'Ecuador', 'Bolivia', 'Brasil', 'México']) {
++      expect(
++        texto,
++        `${pais} aparece como área de servicio: /confianza declara que la cobertura continental no se afirma`,
++      ).not.toContain(`"${pais}"`);
++    }
++  });
++
++  it('la identidad sale de lib/site.ts y no de una copia', () => {
++    expect(org.taxID).toBe(SITE.ruc);
++    expect(org.email).toBe(SITE.email);
++    expect((org.address as Record<string, string>).streetAddress).toBe(SITE.addressStreet);
++    expect(org.foundingDate).toBe(SITE.foundingYear);
++  });
++
++  it('no usa vocabulario inventado en el nodo raíz', () => {
++    // El archivo anterior traía `disclaimer`, que no existe en schema.org.
++    expect(Object.keys(org)).not.toContain('disclaimer');
++  });
++
++  it('la exportación se declara como servicio evaluado, no como cobertura', () => {
++    const servicio = nodos.find((n) => n['@type'] === 'Service') as Record<string, unknown>;
++    expect(servicio, 'falta el nodo de suministro internacional').toBeDefined();
++    expect(servicio.areaServed).toEqual({ '@type': 'Country', name: 'Perú' });
++    expect(String(servicio.description)).toMatch(/eval[úu]a|evaluada|por operaci[óo]n/i);
++    expect(INCOTERMS_SALIDA.length).toBeGreaterThanOrEqual(2);
++  });
++
++  it('no publica precio en ninguna forma', () => {
++    const texto = buildEntidadJson();
++    expect(texto).not.toMatch(/"price"\s*:/);
++    expect(texto).not.toMatch(/S\/\s?\d|USD\s?\d/);
++  });
++});
++
++describe('la respuesta directa se compone, no se escribe', () => {
++  it('ninguna respuesta de producto publica un precio', () => {
++    const culpables = products
++      .filter((p) => /S\/\s?\d|USD\s?\d|\bprecio de\s+\d/i.test(respuestaDirectaProducto(p)))
++      .map((p) => p.slug);
++    expect(culpables, 'la venta es B2B por cotización').toEqual([]);
++  });
++
++  it('las líneas bajo pedido no reciben especificaciones numéricas', () => {
++    // La regla es de lib/products.ts y la obedece también el chatbot: en esas
++    // líneas la ficha la emite el fabricante, no este repositorio.
++    const culpables = products
++      .filter((p) => (p.availability ?? 'a_medida') === 'bajo_pedido')
++      .filter((p) => !/se definen por proyecto/i.test(respuestaDirectaProducto(p)))
++      .map((p) => p.slug);
++    expect(culpables, 'una línea bajo pedido no publica su especificación aquí').toEqual([]);
++  });
++
++  it('cada respuesta cabe en un fragmento citable', () => {
++    for (const p of products) {
++      const n = contarPalabras(respuestaDirectaProducto(p));
++      expect(n, `${p.slug}: ${n} palabras`).toBeLessThanOrEqual(56);
++      expect(n, `${p.slug}: demasiado corta para contestar nada`).toBeGreaterThanOrEqual(20);
++    }
++    for (const a of applications) {
++      expect(contarPalabras(respuestaDirectaAplicacion(a))).toBeLessThanOrEqual(56);
++    }
++  });
++
++  it('el RFQ de WhatsApp lleva el SKU que identifica la ficha', () => {
++    for (const p of products.slice(0, 8)) {
++      const m = rfqWhatsAppProducto(p);
++      expect(m).toContain(p.slug);
++      expect(m).toContain(p.id);
++      expect(m).toContain('Ciudad de entrega');
++    }
++  });
++
++  it('la ficha y el hub de aplicación marcan el párrafo como speakable', () => {
++    for (const ruta of ['app/productos/[slug]/page.tsx', 'app/aplicaciones/[slug]/page.tsx']) {
++      const src = readFileSync(join(process.cwd(), ruta), 'utf8');
++      expect(src, `${ruta} no declara speakable`).toContain("speakable: ['.respuesta-directa']");
++      expect(src, `${ruta} no pinta el párrafo citable`).toContain('respuesta-directa');
++    }
++  });
++});
++
++describe('la cobertura geográfica describe sitios reales, no páginas de relleno', () => {
++  type Ciudad = {
++    slug: string; ciudad: string; departamento: string; clima: string;
++    contextoLocal: string; usosPrincipales: string[]; sectoresDemanda: string[];
++    corredores?: { nombre: string; contexto: string }[];
++  };
++  const CIUDADES = ciudades as Ciudad[];
++
++  it('ninguna ciudad se repite y ninguna comparte nombre con otra', () => {
++    const slugs = CIUDADES.map((c) => c.slug);
++    expect(slugs.filter((s, i) => slugs.indexOf(s) !== i)).toEqual([]);
++    const nombres = CIUDADES.map((c) => c.ciudad.toLowerCase());
++    expect(
++      nombres.filter((n, i) => nombres.indexOf(n) !== i),
++      'dos páginas sobre la misma ciudad compiten entre sí',
++    ).toEqual([]);
++  });
++
++  it('cada ciudad trae contexto propio y suficiente para justificar su página', () => {
++    for (const c of CIUDADES) {
++      expect(c.clima.length, `${c.slug}: clima demasiado breve`).toBeGreaterThan(40);
++      expect(c.contextoLocal.length, `${c.slug}: contexto demasiado breve`).toBeGreaterThan(120);
++      expect(c.usosPrincipales.length, `${c.slug}: sin usos`).toBeGreaterThanOrEqual(3);
++      expect(c.sectoresDemanda.length, `${c.slug}: sin sectores`).toBeGreaterThanOrEqual(2);
++    }
++  });
++
++  it('ningún contexto local es copia de otro', () => {
++    const vistos = new Map<string, string>();
++    const choques: string[] = [];
++    for (const c of CIUDADES) {
++      const clave = c.contextoLocal.slice(0, 80).toLowerCase();
++      const previo = vistos.get(clave);
++      if (previo) choques.push(`${previo} ≈ ${c.slug}`);
++      else vistos.set(clave, c.slug);
++    }
++    expect(choques, 'contexto duplicado: eso es una doorway page').toEqual([]);
++  });
++
++  it('los corredores viven dentro de su ciudad y no como páginas propias', () => {
++    const conCorredores = CIUDADES.filter((c) => c.corredores?.length);
++    for (const c of conCorredores) {
++      for (const k of c.corredores!) {
++        expect(k.contexto.length, `${c.slug}/${k.nombre}: corredor sin contexto`).toBeGreaterThan(60);
++        expect(
++          CIUDADES.some((o) => o.ciudad.toLowerCase() === k.nombre.toLowerCase()),
++          `${k.nombre} tiene además página propia: elija una de las dos`,
++        ).toBe(false);
++      }
++    }
++  });
++});
+diff --git a/test/repositorio-limpio.test.ts b/test/repositorio-limpio.test.ts
+index d56d808..4aa76a9 100644
+--- a/test/repositorio-limpio.test.ts
++++ b/test/repositorio-limpio.test.ts
+@@ -50,6 +50,10 @@ const RAIZ_PERMITIDA = new Set<string>([
+   'tailwind.config.ts',
+   'tsconfig.json',
+   'vitest.config.ts',
++  // Marcador de atribución de Gemini Code Assist. Vive en la raíz porque es
++  // donde la herramienta lo busca; moverlo a docs/ lo haría invisible para
++  // ella. Se añade aquí con su motivo, que es lo que esta prueba exige.
++  '.gemini-contributor.md',
+ ]);
+ 
+ const ARTEFACTO = [
