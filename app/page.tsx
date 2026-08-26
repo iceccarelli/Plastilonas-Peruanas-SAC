@@ -87,8 +87,19 @@ export default function Home() {
    * dos verdaderas les roba la credibilidad a las dos.
    */
   const fabricacionPropia = products.filter((p) => p.sourcing === 'fabricacion_propia').length;
-  // Cifras calculadas del catálogo: nunca quedan desfasadas ni se inventan.
-  const stats = [
+  /**
+   * Cifras calculadas del catálogo: nunca quedan desfasadas ni se inventan.
+   *
+   * El tipo se declara a mano a propósito. Sin él, TypeScript infiere la unión
+   * de las formas que HAY en el arreglo, de modo que `stat.suffix` sólo compila
+   * mientras alguna tarjeta lleve `suffix`. Al retirar la de «100 %» —que era
+   * la única— la propiedad desapareció de la unión y el build se cayó en
+   * `CountUp suffix={stat.suffix}`, con las pruebas en verde: es un fallo que
+   * sólo ve `tsc`. Declarar el contrato lo vuelve estable frente a cualquier
+   * tarjeta que se añada o se quite después.
+   */
+  type Stat = { to?: number; suffix?: string; display?: string; label: string; sub: string };
+  const stats: Stat[] = [
     { to: fabricacionPropia, label: 'Líneas de fabricación propia', sub: `De ${products.length} en catálogo, confeccionadas aquí` },
     { to: products.length, label: 'Soluciones', sub: `En ${productFamilies.length} líneas de producto` },
     { to: anios, label: 'Años fabricando', sub: `En el Perú desde ${SITE.foundingYear}` },
