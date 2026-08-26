@@ -8,6 +8,8 @@ import { solutions } from '@/lib/solutions';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
+import ImagenContenido from '@/components/ImagenContenido';
+import { ranurasProceso } from '@/lib/imagenes';
 import { breadcrumbSchema, dataCatalogSchema, webPageSchema } from '@/lib/schema';
 
 /**
@@ -46,6 +48,10 @@ const formatoColor: Record<string, string> = {
 };
 
 export default function DescargasPage() {
+  // Esquema de esta página. `ImagenContenido` degrada solo: mientras el
+  // archivo no exista no se pinta nada roto, y en cuanto se publique
+  // aparece aquí sin tocar esta página.
+  const esquema = ranurasProceso().find((r) => r.id === 'proceso:descargas-inventario');
   const bloques = grupos();
 
   return (
@@ -92,6 +98,9 @@ export default function DescargasPage() {
       <h1 className="mb-4 text-4xl font-semibold tracking-tight text-[#0A2540]">
         Centro de documentación
       </h1>
+      {esquema && (
+        <ImagenContenido ranura={esquema} className="mb-8 mt-6" sizes="(min-width: 1024px) 900px, 100vw" />
+      )}
 
       <p className="speakable-intro mb-6 max-w-3xl text-lg text-gray-700">
         Todo lo que se puede descargar de este sitio, en un solo lugar y sin dejar un

@@ -95,9 +95,93 @@ como `public/images/familias/geosinteticos.jpg`.
 
 ## Procesos y flujos del sitio (diagramas)
 
-9 pendientes de 13.
+13 pendientes de 17.
 
-### 1. `/images/proceso/compras-homologacion.webp`
+### 1. `/images/proceso/glosario-mapa.webp`
+
+| | |
+|---|---|
+| **Archivo** | `public/images/proceso/glosario-mapa.webp` |
+| **Tamaño** | 1600 × 800 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /glosario |
+| **Texto alternativo** | Cómo se relacionan los términos del glosario con los productos y las guías |
+
+**Prompt:**
+
+```
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
+
+TEMA: red de vocabulario técnico: un término central conectado a los productos que gobierna, a las guías que lo desarrollan y a los términos vecinos, mostrando que definir bien una palabra decide una compra.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
+```
+
+---
+
+### 2. `/images/proceso/descargas-inventario.webp`
+
+| | |
+|---|---|
+| **Archivo** | `public/images/proceso/descargas-inventario.webp` |
+| **Tamaño** | 1600 × 700 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /descargas |
+| **Texto alternativo** | Qué documentos se pueden descargar y de qué fuente sale cada uno |
+
+**Prompt:**
+
+```
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
+
+TEMA: inventario de documentos descargables agrupados por tipo —ficha técnica de producto, guía, arquitectura de solución, informe sectorial, glosario— con una línea que va de cada uno a la fuente de datos de la que se genera, sin registro previo.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
+```
+
+---
+
+### 3. `/images/proceso/novedades-registro.webp`
+
+| | |
+|---|---|
+| **Archivo** | `public/images/proceso/novedades-registro.webp` |
+| **Tamaño** | 1600 × 700 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /novedades |
+| **Texto alternativo** | Registro fechado de cambios del sitio y de su catálogo |
+
+**Prompt:**
+
+```
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
+
+TEMA: línea de tiempo horizontal con entradas fechadas de distinto tipo —catálogo, documentación, dato sectorial— mostrando que cada cambio publicado queda registrado con su fecha y no se reescribe en silencio.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
+```
+
+---
+
+### 4. `/images/proceso/indicadores-fuente.webp`
+
+| | |
+|---|---|
+| **Archivo** | `public/images/proceso/indicadores-fuente.webp` |
+| **Tamaño** | 1600 × 800 px |
+| **Tipo** | diagrama |
+| **Dónde se usa** | Cuerpo de /indicadores |
+| **Texto alternativo** | De dónde sale cada indicador y cada cuánto se actualiza |
+
+**Prompt:**
+
+```
+Diagrama técnico en vector plano, vista isométrica o corte transversal según convenga. Paleta sobria: azul profundo #0A2540 para estructura, verde #059669 solo para el elemento que se explica, grises neutros para el contexto. Fondo blanco liso. Líneas limpias de grosor uniforme. Sin texto ni etiquetas de ningún idioma dentro de la imagen: las leyendas las pone la página. Sin logotipos ni marcas de agua. Estilo de manual de ingeniería, no de infografía comercial.
+
+TEMA: camino de un indicador macroeconómico desde el organismo oficial que lo publica hasta la tarjeta que lo muestra, marcando el periodo del dato y el punto en que el sitio recurre a su valor de respaldo si la fuente no responde.
+IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente correctas; el valor del dibujo es que un ingeniero pueda verificarlo de un vistazo.
+```
+
+---
+
+### 5. `/images/proceso/compras-homologacion.webp`
 
 | | |
 |---|---|
@@ -118,7 +202,7 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 2. `/images/proceso/confianza-identidad.webp`
+### 6. `/images/proceso/confianza-identidad.webp`
 
 | | |
 |---|---|
@@ -139,7 +223,7 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 3. `/images/proceso/compradores-incoterm.webp`
+### 7. `/images/proceso/compradores-incoterm.webp`
 
 | | |
 |---|---|
@@ -160,7 +244,7 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 4. `/images/proceso/distribuidores-canal.webp`
+### 8. `/images/proceso/distribuidores-canal.webp`
 
 | | |
 |---|---|
@@ -181,7 +265,7 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 5. `/images/proceso/socios-especificacion.webp`
+### 9. `/images/proceso/socios-especificacion.webp`
 
 | | |
 |---|---|
@@ -202,7 +286,7 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 6. `/images/proceso/proyectos-verificacion.webp`
+### 10. `/images/proceso/proyectos-verificacion.webp`
 
 | | |
 |---|---|
@@ -223,7 +307,7 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 7. `/images/proceso/marco-pilares.webp`
+### 11. `/images/proceso/marco-pilares.webp`
 
 | | |
 |---|---|
@@ -244,7 +328,7 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 8. `/images/proceso/informes-metodo.webp`
+### 12. `/images/proceso/informes-metodo.webp`
 
 | | |
 |---|---|
@@ -265,7 +349,7 @@ IMPORTANTE: la posición y la proporción de cada parte deben ser técnicamente 
 
 ---
 
-### 9. `/images/proceso/local-cobertura.webp`
+### 13. `/images/proceso/local-cobertura.webp`
 
 | | |
 |---|---|

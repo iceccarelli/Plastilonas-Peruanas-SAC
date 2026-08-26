@@ -576,6 +576,47 @@ export function ranurasAplicacion(): RanuraImagen[] {
  * cuatro se lee mejor en prosa.
  */
 const PROCESOS = [
+  /**
+   * Cuatro páginas índice servían HTML sin una sola imagen: /glosario,
+   * /descargas, /novedades e /indicadores. No es un defecto de estilo —el
+   * sitio degrada bien— sino de comprensión: son las páginas que explican CÓMO
+   * funciona algo, y un comprador que llega a un índice de 43 términos o a un
+   * centro de descargas sin un esquema tiene que leerlo entero para saber si
+   * le sirve. Se declaran aquí, y hasta que existan los archivos la página
+   * muestra el marcador sobrio de ImagenContenido, nunca un relleno genérico.
+   */
+  {
+    slug: 'glosario-mapa',
+    ruta: '/glosario',
+    ancho: 1600,
+    alto: 800,
+    alt: 'Cómo se relacionan los términos del glosario con los productos y las guías',
+    tema: 'red de vocabulario técnico: un término central conectado a los productos que gobierna, a las guías que lo desarrollan y a los términos vecinos, mostrando que definir bien una palabra decide una compra',
+  },
+  {
+    slug: 'descargas-inventario',
+    ruta: '/descargas',
+    ancho: 1600,
+    alto: 700,
+    alt: 'Qué documentos se pueden descargar y de qué fuente sale cada uno',
+    tema: 'inventario de documentos descargables agrupados por tipo —ficha técnica de producto, guía, arquitectura de solución, informe sectorial, glosario— con una línea que va de cada uno a la fuente de datos de la que se genera, sin registro previo',
+  },
+  {
+    slug: 'novedades-registro',
+    ruta: '/novedades',
+    ancho: 1600,
+    alto: 700,
+    alt: 'Registro fechado de cambios del sitio y de su catálogo',
+    tema: 'línea de tiempo horizontal con entradas fechadas de distinto tipo —catálogo, documentación, dato sectorial— mostrando que cada cambio publicado queda registrado con su fecha y no se reescribe en silencio',
+  },
+  {
+    slug: 'indicadores-fuente',
+    ruta: '/indicadores',
+    ancho: 1600,
+    alto: 800,
+    alt: 'De dónde sale cada indicador y cada cuánto se actualiza',
+    tema: 'camino de un indicador macroeconómico desde el organismo oficial que lo publica hasta la tarjeta que lo muestra, marcando el periodo del dato y el punto en que el sitio recurre a su valor de respaldo si la fuente no responde',
+  },
   {
     slug: 'configurador-fibc',
     ruta: '/configurador',
