@@ -50,6 +50,10 @@ const RAIZ_PERMITIDA = new Set<string>([
   'tailwind.config.ts',
   'tsconfig.json',
   'vitest.config.ts',
+  // Marcador de atribución de Gemini Code Assist. Vive en la raíz porque es
+  // donde la herramienta lo busca; moverlo a docs/ lo haría invisible para
+  // ella. Se añade aquí con su motivo, que es lo que esta prueba exige.
+  '.gemini-contributor.md',
 ]);
 
 const ARTEFACTO = [

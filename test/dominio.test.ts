@@ -23,7 +23,7 @@ import { SITE } from '@/lib/site';
 
 const raiz = process.cwd();
 const EXTS = /\.(ts|tsx|mjs|js|yml|yaml)$/;
-const OMITIR = new Set(['node_modules', '.next', '.git', 'test', 'docs', 'public']);
+const OMITIR = new Set(['node_modules', '.next', '.git', 'test', 'docs']);
 
 function fuentes(dir: string, out: string[] = []): string[] {
   for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
@@ -65,6 +65,59 @@ describe('el origen canónico se declara una sola vez', () => {
     expect(
       culpables,
       `escriben «${host}» a mano y romperían la mudanza a plastilonas.com: ${culpables.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  /**
+   * EL HOST DE MARCA TAMBIÉN SE VIGILA, Y NO SÓLO EL VIGENTE.
+   *
+   * La prueba de arriba busca el host que SITE.url tiene hoy. Eso deja pasar lo
+   * contrario, que es el error que de verdad ocurrió: `public/entidad.json`
+   * declaraba `"@id": "https://plastilonas.com/#organization"` mientras el sitio
+   * se servía desde el host de Vercel, y se servía tal cual en /entidad.json. Un
+   * `@id` que no coincide con el origen rastreado no consolida la entidad: la
+   * parte en dos y desperdicia las señales de las dos mitades.
+   *
+   * Se miran sólo las carpetas cuyo contenido SE SIRVE. scripts/ queda fuera a
+   * propósito: verify-domain-redirect.mjs necesita nombrar el dominio antiguo
+   * porque su trabajo es justamente comprobar la redirección desde él.
+   */
+  it('ningún archivo servido escribe el host de marca a mano', () => {
+    const servidas = ['app', 'lib', 'components', 'public'].flatMap((d) => {
+      try {
+        return fuentes(d);
+      } catch {
+        return [];
+      }
+    });
+    const jsonServido = (() => {
+      try {
+        return readdirSync(join(raiz, 'public'), { withFileTypes: true })
+          .filter((e) => e.isFile() && e.name.endsWith('.json'))
+          .map((e) => `public/${e.name}`);
+      } catch {
+        return [];
+      }
+    })();
+    const culpables: string[] = [];
+    for (const r of [...servidas, ...jsonServido]) {
+      if (r === 'lib/site.ts') continue;
+      const src = readFileSync(join(raiz, r), 'utf8');
+      const codigo = src
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/^\s*\/\/.*$/gm, '')
+        // El correo comercial vive de verdad en el dominio de marca —el MX ya
+        // apunta ahí aunque el sitio todavía no—, así que una dirección de
+        // correo no es una URL canónica mal escrita. Lo que se persigue es un
+        // HOST emitido como origen, no una cuenta de correo.
+        .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/g, '');
+      if (codigo.includes(SITE.brandHost)) culpables.push(r);
+    }
+    expect(
+      culpables,
+      `emiten «${SITE.brandHost}» mientras el origen canónico es ${SITE.url}: ` +
+        `un @id que no coincide con el host rastreado parte la entidad. ` +
+        `Derive de SITE.url. Culpables: ${culpables.join(', ')}`,
     ).toEqual([]);
   });
 

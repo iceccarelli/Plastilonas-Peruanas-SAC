@@ -18,6 +18,7 @@ import { productFaqs } from '@/lib/product-faq';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
 import RielComercial from '@/components/RielComercial';
+import { respuestaDirectaProducto, rfqWhatsAppProducto } from '@/lib/respuesta-directa';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -71,6 +72,8 @@ export default async function ProductDetailPage({ params }: Props) {
   }
 
   const rutaProducto = `/productos/${product.slug}`;
+  const respuestaDirecta = respuestaDirectaProducto(product);
+  const rfq = rfqWhatsAppProducto(product);
   const faqs = productFaqs(product);
   const arquitecturas = solutionsForProduct(product.slug);
   const glosarioRel = terminosParaProducto(product.slug);
@@ -89,10 +92,14 @@ export default async function ProductDetailPage({ params }: Props) {
           visible —Productos / Familia / Producto— que ningún agente podía leer,
           porque no se emitía como datos. Es la página comercial más importante
           del sitio y era la única profunda sin jerarquía declarada. */}
+      {/* `speakable` marca el párrafo que un asistente de voz puede leer en voz
+          alta tal cual. Apunta a la respuesta directa —compuesta de campos
+          reales del catálogo— y no al hero comercial, que no contesta nada. */}
       <JsonLd data={webPageSchema({
         url: `${SITE.url}${rutaProducto}`,
         name: product.name,
-        description: product.shortDescription,
+        description: respuestaDirecta,
+        speakable: ['.respuesta-directa'],
       })} />
       <JsonLd data={breadcrumbSchema([
         { name: 'Inicio', url: `${SITE.url}/` },
@@ -123,7 +130,17 @@ export default async function ProductDetailPage({ params }: Props) {
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold text-[#0A2540] leading-tight md:leading-none mb-5">{product.name}</h1>
           
-          <p className="text-xl text-gray-600 leading-snug mb-8">{product.shortDescription}</p>
+          <p className="text-xl text-gray-600 leading-snug mb-6">{product.shortDescription}</p>
+
+          {/* RESPUESTA DIRECTA. El fragmento que un motor de respuestas cita
+              entero en lugar de resumir por su cuenta. Se compone en
+              lib/respuesta-directa.ts a partir de campos reales: no hay texto
+              libre que alguien pueda rellenar con una cifra inventada, y en las
+              líneas bajo pedido dice de qué depende la especificación en vez de
+              dar un número que este repositorio no puede sostener. */}
+          <p className="respuesta-directa text-[15px] leading-relaxed text-[#0A2540] bg-emerald-50/60 border border-emerald-100 rounded-2xl p-5 mb-8">
+            {respuestaDirecta}
+          </p>
 
           <ProductAvailability product={product} />
 
@@ -133,12 +150,16 @@ export default async function ProductDetailPage({ params }: Props) {
             <Link href={`/cotizacion?producto=${encodeURIComponent(product.name)}`} className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 bg-[#0A2540] hover:bg-[#059669] text-white px-9 py-4 rounded-2xl font-semibold text-sm transition-all active:scale-[0.985]">
               Solicitar Cotización para este producto <ArrowRight className="w-4 h-4" />
             </Link>
+            {/* El mensaje llega con el SKU y con los campos que la cotización
+                necesita, sacados de las etiquetas de especificación reales.
+                Antes decía sólo «necesito una cotización de X» y el comercial
+                tenía que pedir todo lo demás; cada ida y vuelta pierde gente. */}
             <WhatsAppLink
-              context={`producto:${product.slug}`}
-              message={`Hola, necesito una cotización de ${product.name}.`}
+              context={`rfq-producto:${product.slug}`}
+              message={rfq}
               className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 border border-gray-200 hover:bg-gray-50 px-7 py-4 rounded-2xl font-medium text-sm"
             >
-              <Phone className="w-4 h-4" /> Consultar por WhatsApp
+              <Phone className="w-4 h-4" /> RFQ por WhatsApp
             </WhatsAppLink>
             <DatasheetButton slug={product.slug} nombre={product.name} />
           </div>
@@ -169,12 +190,19 @@ export default async function ProductDetailPage({ params }: Props) {
       {/* Specifications Table */}
       <div className="mt-14">
         <h2 className="font-semibold text-2xl tracking-tight mb-6">Especificaciones técnicas</h2>
+        {/* `th scope="row"` no es decoración: convierte dos columnas de texto en
+            pares clave/valor legibles para un lector de pantalla y para
+            cualquier extractor de tablas. El mismo par viaja además como
+            additionalProperty en el JSON-LD de ProductStructuredData. */}
         <div className="overflow-x-auto">
           <table className="specs-table w-full border-collapse">
+            <caption className="sr-only">
+              Especificaciones técnicas de {product.name} (SKU {product.id})
+            </caption>
             <tbody>
               {product.specifications.map((spec, index) => (
                 <tr key={index} className="border-b border-gray-100 last:border-none">
-                  <td className="py-4 pr-8 font-medium text-gray-600 w-64 align-top">{spec.label}</td>
+                  <th scope="row" className="py-4 pr-8 text-left font-medium text-gray-600 w-64 align-top">{spec.label}</th>
                   <td className="py-4 text-[#0A2540] font-medium">{spec.value}</td>
                 </tr>
               ))}

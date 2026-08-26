@@ -184,6 +184,9 @@ ruta /indexnow-key.txt
 ruta /version.json
 # Superficies de recuperación por máquina añadidas con el mapa de consultas.
 ruta /mapa-consultas.json
+# Tarjeta de entidad. Sustituye al antiguo public/entidad.json estático, que
+# declaraba otro dominio en su @id y cobertura en cinco países.
+ruta /entidad.json
 ruta /llms-full.txt
 ruta /productos/big-bags-bolsones-polipropileno/contenido.md
 
@@ -237,6 +240,14 @@ contiene "/llms.txt" 'Calculadoras de predimensionamiento' "llms.txt declara las
 contiene "/llms.txt" 'Mapa de consultas comerciales' "llms.txt declara el mapa de consultas"
 contiene "/mapa-consultas.json" '"canonica"' "el mapa declara una canónica por clúster"
 contiene "/mapa-consultas.json" 'Una consulta, una página' "el mapa declara su propia regla"
+# La escisión de identidad se comprueba contra el HTML servido, no contra el
+# repositorio: es el único sitio donde se ve qué origen declara de verdad.
+contiene "/entidad.json" '#organization' "la tarjeta de entidad declara el nodo de organización"
+if grep -q 'plastilonas\.com/#' <<< "$(cuerpo /entidad.json)"; then
+  fallo "/entidad.json declara un @id en el dominio de marca mientras el sitio se sirve desde otro host"
+else
+  ok "/entidad.json declara su @id en el origen que se rastrea"
+fi
 contiene "/llms-full.txt" 'corpus completo para agentes' "el corpus se sirve entero"
 contiene "/productos/big-bags-bolsones-polipropileno/contenido.md" 'Hechos citables' "el espejo trae el bloque de citación"
 contiene "/productos/big-bags-bolsones-polipropileno" '"@type":"BreadcrumbList"' "la ficha de producto declara su jerarquía"

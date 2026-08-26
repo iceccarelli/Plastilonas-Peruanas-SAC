@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import WhatsAppLink from './WhatsAppLink';
 import { WHATSAPP_DISPLAY } from '@/lib/whatsapp';
+import { SITE } from '@/lib/site';
 import Image from 'next/image';
 import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
 import SocialIcons from '@/components/SocialIcons';
@@ -59,7 +60,7 @@ export default function Footer() {
     ]},
     { title: 'CONTACTO', links: [
       { label: '+51 998 117 065 · Central', href: 'tel:+51998117065', external: true },
-      { label: 'ventas@plastilonas.com', href: 'mailto:ventas@plastilonas.com', external: true },
+      { label: SITE.email, href: `mailto:${SITE.email}`, external: true },
       { label: 'Chorrillos, Lima — Perú', href: '/contacto' },
     ]},
   ];
@@ -77,7 +78,7 @@ export default function Footer() {
           </div>
           <p className="text-white/60 text-sm leading-relaxed mb-5">Fabricación e instalación propias. En el Perú desde 2009.</p>
           <WhatsAppLink context="footer-cta" message="Hola, quisiera información sobre sus productos." className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-[#0A2540] font-semibold py-3.5 rounded-2xl mb-6 active:scale-[0.99] transition">
-            <Phone className="w-4 h-4" /> WhatsApp 24/7 · {WHATSAPP_DISPLAY}
+            <Phone className="w-4 h-4" /> WhatsApp comercial · {WHATSAPP_DISPLAY}
           </WhatsAppLink>
           <FooterAccordion sections={sections} />
           <div className="py-6">
@@ -158,17 +159,17 @@ export default function Footer() {
                 <Phone className="w-4 h-4 mt-0.5 text-[#25D366] group-hover:text-[#059669]" />
                 <div>
                   <div className="text-[#25D366]">+51 946 085 270</div>
-                  <div className="text-xs text-white/50">WhatsApp 24/7</div>
+                  <div className="text-xs text-white/50">WhatsApp comercial</div>
                 </div>
               </WhatsAppLink>
-              <a href="mailto:ventas@plastilonas.com" className="flex items-start gap-3 group">
+              <a href={`mailto:${SITE.email}`} className="flex items-start gap-3 group">
                 <Mail className="w-4 h-4 mt-0.5 text-white/50 group-hover:text-[#059669]" />
-                <div>ventas@plastilonas.com</div>
+                <div>{SITE.email}</div>
               </a>
               <div className="flex items-start gap-3 pt-1">
                 <MapPin className="w-4 h-4 mt-0.5 text-white/50 flex-shrink-0" />
                 <div className="text-xs leading-snug">
-                  Calle Alameda del Remero Mz - V, Lt - 2<br />
+                  {SITE.addressStreet}<br />
                   Urb. Los Huertos de Villa, Chorrillos<br />
                   Lima, Perú
                 </div>
