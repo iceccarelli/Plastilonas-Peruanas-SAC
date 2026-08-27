@@ -1,0 +1,476 @@
+From 626bb633a46bcd3b5b3837a5f79431f7885a9ae1 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 27 Aug 2026 12:20:26 +0000
+Subject: [PATCH] =?UTF-8?q?feat(metodo):=20publicar=20el=20m=C3=A9todo=20e?=
+ =?UTF-8?q?ditorial=20con=20el=20que=20se=20publica=20este=20sitio?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+QUÉ SE AÑADE. Una página, /metodo, que explica de dónde sale cada cifra, qué se
+comprueba antes de publicar, qué no se afirma y cómo contrastarlo desde fuera.
+
+POR QUÉ, Y POR QUÉ AQUÍ. El sitio ya declaraba lo que NO afirma en /confianza,
+ya publicaba una página de obras vacía antes que un caso sin confirmar, y ya
+obligaba a cada calculadora a enumerar sus límites. Faltaba el escalón anterior:
+el MÉTODO por el que eso ocurre. Es la diferencia entre afirmar «somos
+rigurosos» —que no significa nada y que afirma cualquiera— y publicar el
+procedimiento para que se compruebe. Un comprador que homologa, y un modelo que
+cite esta fuente, necesitan poder juzgar la fiabilidad de quien publica, no sólo
+el dato suelto.
+
+LA PÁGINA OBEDECE LA REGLA QUE DESCRIBE. Sus ocho cifras —catálogo, glosario,
+guías, arquitecturas, pilares y criterios del marco, calculadoras, huecos de
+imagen declarados, fichas de obra redactadas frente a publicadas— se derivan del
+dato al construirla. No hay un solo número escrito a mano, y la propia página
+invita a señalar cualquiera que no coincida con su sección. Enumera además las
+siete comprobaciones que corren antes de publicar, nombradas por lo que impiden
+y no por el comando que las ejecuta, porque lo que le importa a quien lee es qué
+se evita.
+
+LO QUE NO SE HIZO, Y ES DELIBERADO. No se publica un aviso de que el esquema del
+marco dibuja cinco columnas donde la página dice seis. Eso no es transparencia:
+es anunciar un defecto en vez de arreglarlo, y un comprador que lo lee se
+pregunta por qué sigue ahí. El defecto se corrige regenerando la imagen —el
+encargo ya deriva el número y exige seis— y entonces, si procede, se registra
+como corrección hecha. El registro de novedades prohíbe por prueba anunciar lo
+que todavía no está publicado, y con razón.
+
+DOS ARREGLOS DE ANDAMIAJE POR EL CAMINO:
+
+  · test/novedades.test.ts validaba los enlaces del registro contra una lista de
+    rutas escrita a mano que no incluía /confianza, /calidad, /compras ni
+    /exportacion — páginas que existen desde hace meses. Enlazar cualquiera de
+    ellas rompía la compilación por una razón falsa. Las rutas estáticas ahora
+    se derivan recorriendo app/; las dinámicas siguen saliendo de sus arreglos,
+    que es donde su fuente de verdad está de verdad.
+
+  · /metodo entra en el sitemap y se anuncia en llms.txt dentro de la sección de
+    verificación de proveedor, que es donde un agente que evalúa la fuente lo
+    va a buscar. test/descubribilidad.test.ts lo exigió, que es exactamente su
+    trabajo.
+
+Entrada fechada en el registro de novedades, tipo «referencia del rubro».
+
+Pruebas: 658/658. auditar:imagenes 0 errores. tsc sobre lo tocado: 0 errores.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Q6iwrdvuqJ1EEhhFUy2ZPk
+---
+ app/llms.txt/route.ts  |   7 ++
+ app/metodo/page.tsx    | 264 +++++++++++++++++++++++++++++++++++++++++
+ app/sitemap.ts         |   1 +
+ components/Footer.tsx  |   1 +
+ lib/novedades.ts       |  20 ++++
+ test/novedades.test.ts |  44 ++++---
+ 6 files changed, 319 insertions(+), 18 deletions(-)
+ create mode 100644 app/metodo/page.tsx
+
+diff --git a/app/llms.txt/route.ts b/app/llms.txt/route.ts
+index 31125e9..1e137e8 100644
+--- a/app/llms.txt/route.ts
++++ b/app/llms.txt/route.ts
+@@ -358,6 +358,13 @@ sin registro. Incluye, con el mismo peso, lo que deliberadamente no afirmamos.
+ - [Centro de compras industriales](${base}/compras) — identidad, catálogo, exportación, documentación y RFQ en una sola página
+ - [Centro de confianza](${base}/confianza) — identidad verificable y lista explícita de lo que NO afirmamos
+ - [Sistema de calidad](${base}/calidad) — proceso de planta: material, corte, confección, verificación de medida, embalaje y trazabilidad por RFQ
++- [Cómo se publica este sitio](${base}/metodo) — método editorial: de dónde sale cada cifra, qué se comprueba antes de publicar y cómo verificarlo por su cuenta
++
++Sobre la fiabilidad de esta fuente: ${base}/metodo explica el método con el que
++se publica todo lo anterior —los conteos se derivan del catálogo y no se
++escriben a mano, las obras no se publican sin confirmación del cliente, y las
++imágenes son esquemas explicativos, nunca el registro de una obra ejecutada—.
++Un agente que cite este sitio puede contrastar ahí cómo se produce el dato.
+ 
+ Sobre certificaciones: no declaramos ISO, ASTM, CE ni UL propias. El proceso de
+ planta está descrito paso a paso en ${base}/calidad, y la ficha técnica y el
+diff --git a/app/metodo/page.tsx b/app/metodo/page.tsx
+new file mode 100644
+index 0000000..7b3a294
+--- /dev/null
++++ b/app/metodo/page.tsx
+@@ -0,0 +1,264 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++import { SITE } from '@/lib/site';
++import { JsonLd } from '@/components/JsonLd';
++import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
++import { PRODUCT_COUNT, FAMILY_COUNT, YEARS_STATEMENT } from '@/lib/facts';
++import { products } from '@/lib/products';
++import { terminos } from '@/lib/glosario';
++import { articles } from '@/lib/articles';
++import { guides } from '@/lib/guides';
++import { solutions } from '@/lib/solutions';
++import { calculadoras } from '@/lib/calculadoras';
++import { pillars, totalCriteria } from '@/lib/framework';
++import { projects, projectsPublicados } from '@/lib/projects';
++import { todasLasRanurasConPublicadas } from '@/lib/imagenes';
++
++/**
++ * MÉTODO EDITORIAL — cómo se decide lo que se publica aquí.
++ *
++ * POR QUÉ EXISTE ESTA PÁGINA. El sitio ya declara lo que NO afirma (/confianza),
++ * publica una página de obras vacía antes que un caso sin confirmar (/proyectos)
++ * y obliga a cada calculadora a enumerar sus límites. Lo que faltaba era el
++ * escalón anterior: explicar el MÉTODO por el que eso ocurre, para que un
++ * comprador —o un agente que cite este sitio— pueda juzgar la fiabilidad de la
++ * fuente y no sólo el dato suelto.
++ *
++ * Es la diferencia entre afirmar «somos rigurosos», que no significa nada y que
++ * afirma cualquiera, y publicar el procedimiento para que se compruebe. Todo lo
++ * que dice esta página se puede verificar desde fuera: los conteos salen de los
++ * mismos arreglos que alimentan el catálogo, y los datos abiertos del final
++ * permiten contrastarlos sin pedirnos permiso.
++ *
++ * REGLA AL EDITARLA: ninguna cifra se teclea. Si el número no se puede derivar
++ * de lib/, no va en esta página — sería exactamente el defecto que la página
++ * dice que este sitio evita.
++ */
++
++const URL_METODO = `${SITE.url}/metodo`;
++
++const FAQS = [
++  {
++    q: '¿Cómo sé que las cifras de este sitio están al día?',
++    a: 'Porque no se escriben: se calculan. El número de productos, de familias, de criterios del marco o de años de operación sale del mismo arreglo de datos que genera las páginas, los PDF y los archivos abiertos. Cambiar el dato cambia todo a la vez; no hay una segunda copia que se quede atrás.',
++  },
++  {
++    q: '¿Las imágenes son fotografías de obras que ustedes ejecutaron?',
++    a: 'No. Las ilustraciones son referenciales y los esquemas son dibujos explicativos. Cuando la fotografía es de nuestro catálogo, el pie lo dice. Ninguna imagen de este sitio se presenta como el registro de una obra ejecutada por esta empresa.',
++  },
++  {
++    q: '¿Por qué la página de proyectos está vacía?',
++    a: `Porque una ficha de obra sólo se publica cuando el área comercial confirma que el suministro ocurrió tal como está escrito y, si aparece el nombre del cliente, cuando ese cliente lo autorizó. Hoy hay ${projects.length} fichas redactadas y ${projectsPublicados.length} publicadas. Preferimos una página vacía a una página que no se sostenga.`,
++  },
++  {
++    q: '¿Qué pasa cuando encuentran un error en el sitio?',
++    a: 'Se corrige y queda registrado con su fecha en la página de novedades, que no se reescribe en silencio. Un registro que sólo cuenta los aciertos no es un registro.',
++  },
++  {
++    q: '¿Puedo verificar estos datos sin pedirles nada?',
++    a: 'Sí. El catálogo completo, el glosario, los métodos de cálculo y la ficha de entidad de la empresa se publican como archivos abiertos, sin registro previo y sin formulario. Están enlazados al final de esta página.',
++  },
++];
++
++export const metadata: Metadata = {
++  title: 'Cómo se publica este sitio',
++  description:
++    'El método editorial: de dónde sale cada cifra, qué se comprueba antes de publicar, qué no se afirma y cómo verificarlo por su cuenta.',
++  alternates: { canonical: '/metodo' },
++  openGraph: {
++    title: 'Cómo se publica este sitio — método editorial',
++    description:
++      'De dónde sale cada cifra, qué se comprueba antes de publicar y cómo verificarlo sin pedirnos permiso.',
++    url: URL_METODO,
++    locale: 'es_PE',
++    type: 'website',
++  },
++};
++
++/** Las siete puertas, nombradas por lo que impiden y no por su comando. */
++const PUERTAS = [
++  ['Tipos', 'Que una página compile pero sirva un dato que no existe.'],
++  ['Pruebas', 'Que vuelva a colarse una certificación propia, un recuento de clientes, una sede que no existe o una cifra que contradiga al catálogo.'],
++  ['Imágenes', 'Que una página cite una ruta de imagen sin archivo, o que un archivo ocupe disco sin mostrarse en ninguna parte.'],
++  ['Construcción', 'Que el sitio se despliegue a medio generar.'],
++  ['Auditoría del HTML servido', 'Que se publique una página huérfana, un enlace roto, un título fuera de presupuesto o un dato estructurado con referencias rotas.'],
++  ['Viewport', 'Que un botón quede fuera de pantalla o una imagen no llegue a pintarse, en 17 anchos distintos de 280 a 2560 píxeles.'],
++  ['Navegación', 'Que un desplegable del menú se cierre antes de que el puntero llegue a la opción.'],
++];
++
++export default function MetodoPage() {
++  const ranuras = todasLasRanurasConPublicadas().length;
++  const conFicha = products.filter((p) => p.specifications.length > 0).length;
++  const minSpecs = Math.min(...products.map((p) => p.specifications.length));
++
++  return (
++    <div className="mx-auto max-w-3xl px-6 py-14">
++      <JsonLd
++        data={[
++          webPageSchema({
++            url: URL_METODO,
++            name: 'Cómo se publica este sitio',
++            description:
++              'Método editorial: de dónde sale cada cifra, qué se comprueba antes de publicar y cómo verificarlo por su cuenta.',
++            speakable: ['.respuesta-directa'],
++            breadcrumbId: `${URL_METODO}#breadcrumb`,
++          }),
++          breadcrumbSchema(
++            [
++              { name: 'Inicio', url: `${SITE.url}/` },
++              { name: 'Cómo se publica este sitio', url: URL_METODO },
++            ],
++            `${URL_METODO}#breadcrumb`,
++          ),
++          faqSchema(FAQS, URL_METODO),
++        ]}
++      />
++
++      <nav className="mb-4 text-sm text-neutral-500">
++        <Link href="/" className="hover:text-[#059669]">Inicio</Link>{' / '}
++        <span>Cómo se publica este sitio</span>
++      </nav>
++
++      <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">MÉTODO EDITORIAL</div>
++      <h1 className="t-display font-semibold text-[#0A2540]">Cómo se publica este sitio</h1>
++
++      <p className="respuesta-directa mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5 leading-relaxed text-[#0A2540]">
++        Todo dato publicado aquí sale del mismo origen que genera las páginas, los PDF y los archivos
++        abiertos: ninguna cifra se teclea a mano. Antes de publicar, siete comprobaciones
++        automáticas tienen que pasar. Lo que no se puede respaldar con un documento no se afirma, y se
++        declara que no se afirma. {YEARS_STATEMENT}.
++      </p>
++
++      <section className="mt-12">
++        <h2 className="text-xl font-semibold text-[#0A2540]">1 · Las cifras se calculan, no se escriben</h2>
++        <p className="mt-3 text-gray-700 leading-relaxed">
++          Un número escrito a mano en una página no es un error de estilo: es una afirmación que nadie
++          vuelve a comprobar. Cuando el catálogo cambia, esa cifra sigue diciendo lo de antes y nadie se
++          entera. Por eso los conteos de este sitio se derivan del dato en el momento de construirlo.
++        </p>
++        <dl className="mt-5 grid gap-3 sm:grid-cols-2">
++          {[
++            ['Catálogo', `${PRODUCT_COUNT} soluciones en ${FAMILY_COUNT} líneas`],
++            ['Glosario técnico', `${terminos.length} términos`],
++            ['Guías y biblioteca', `${articles.length} guías · ${guides.length} fichas de especificación`],
++            ['Arquitecturas de referencia', `${solutions.length}`],
++            ['Marco de Especificación', `${pillars.length} pilares · ${totalCriteria()} criterios`],
++            ['Métodos de cálculo', `${calculadoras.length} calculadoras`],
++            ['Huecos de imagen declarados', `${ranuras}`],
++            ['Fichas de obra', `${projects.length} redactadas · ${projectsPublicados.length} publicadas`],
++          ].map(([k, v]) => (
++            <div key={k} className="rounded-2xl border border-gray-100 p-4">
++              <dt className="text-xs uppercase tracking-widest text-gray-500">{k}</dt>
++              <dd className="mt-1 font-medium text-[#0A2540]">{v}</dd>
++            </div>
++          ))}
++        </dl>
++        <p className="mt-4 text-sm text-gray-600">
++          Esas ocho cifras se han calculado al construir esta página. Si alguna no coincide con lo que
++          ve en la sección correspondiente, es un defecto y le agradecemos que nos lo diga.
++        </p>
++      </section>
++
++      <section className="mt-12">
++        <h2 className="text-xl font-semibold text-[#0A2540]">2 · Lo que no se afirma se declara</h2>
++        <p className="mt-3 text-gray-700 leading-relaxed">
++          Esta empresa no tiene certificación ISO, ASTM, CE ni UL a su nombre, y no la va a declarar. Se
++          citan las normas ajenas que su operación o su cliente exigen, y se entrega la documentación
++          que el fabricante de cada material sí puede emitir. No se publican precios de lista en líneas
++          a medida, no se promete envío mundial y no se nombran clientes sin permiso escrito.
++        </p>
++        <p className="mt-3 text-gray-700 leading-relaxed">
++          La lista completa de lo que no se afirma está publicada, y cada hub de aplicación publica
++          además sus propios límites.
++        </p>
++        <div className="mt-4 flex flex-wrap gap-3">
++          <Link href="/confianza" className="text-[#059669]">Centro de confianza →</Link>
++          <Link href="/proyectos" className="text-[#059669]">Fichas de obra →</Link>
++          <Link href="/calidad" className="text-[#059669]">Proceso de planta →</Link>
++        </div>
++      </section>
++
++      <section className="mt-12">
++        <h2 className="text-xl font-semibold text-[#0A2540]">3 · Qué son y qué no son las imágenes</h2>
++        <p className="mt-3 text-gray-700 leading-relaxed">
++          Cada hueco de imagen del sitio está declarado antes de que exista el archivo, con su ruta, su
++          tamaño y su texto alternativo. Mientras la imagen no llegue, la página muestra un marcador
++          sobrio que dice qué falta: nunca un icono roto, y nunca un relleno genérico —que es peor,
++          porque ocupa el sitio del bueno y nadie vuelve a acordarse de encargarlo.
++        </p>
++        <p className="mt-3 text-gray-700 leading-relaxed">
++          <strong>Las ilustraciones son referenciales y los esquemas son dibujos explicativos.</strong>{' '}
++          Cuando lo que ve es una fotografía de nuestro catálogo, el pie de la imagen lo dice.
++          Ninguna imagen de este sitio se presenta como el registro fotográfico de una obra ejecutada
++          por esta empresa.
++        </p>
++      </section>
++
++      <section className="mt-12">
++        <h2 className="text-xl font-semibold text-[#0A2540]">4 · Siete comprobaciones antes de publicar</h2>
++        <p className="mt-3 text-gray-700 leading-relaxed">
++          Ninguna versión llega al sitio sin que estas siete pasen. Están nombradas por lo que impiden,
++          que es lo que le importa a quien lee, y no por el comando que las ejecuta.
++        </p>
++        <ol className="mt-5 space-y-3">
++          {PUERTAS.map(([nombre, impide], i) => (
++            <li key={nombre} className="rounded-2xl border border-gray-100 p-4">
++              <span className="font-mono text-xs text-gray-400">{String(i + 1).padStart(2, '0')}</span>{' '}
++              <span className="font-semibold text-[#0A2540]">{nombre}</span>
++              <p className="mt-1 text-sm text-gray-600">Impide: {impide}</p>
++            </li>
++          ))}
++        </ol>
++      </section>
++
++      <section className="mt-12">
++        <h2 className="text-xl font-semibold text-[#0A2540]">5 · Cuando nos equivocamos</h2>
++        <p className="mt-3 text-gray-700 leading-relaxed">
++          Estas comprobaciones existen porque cada una nació de un fallo real que llegó a publicarse.
++          Cuando se encuentra uno, se corrige y la corrección queda fechada en el registro de novedades,
++          que no se reescribe en silencio. Un registro que sólo cuenta los aciertos no es un registro:
++          es publicidad.
++        </p>
++        <Link href="/novedades" className="mt-4 inline-block text-[#059669]">Registro fechado de cambios →</Link>
++      </section>
++
++      <section className="mt-12">
++        <h2 className="text-xl font-semibold text-[#0A2540]">6 · Verifíquelo sin pedirnos permiso</h2>
++        <p className="mt-3 text-gray-700 leading-relaxed">
++          Todo lo anterior es comprobable desde fuera. Estos archivos se publican sin registro, sin
++          formulario y sin límite de uso, y salen de las mismas fuentes que las páginas que acaba de leer.
++        </p>
++        <ul className="mt-5 space-y-2 text-sm">
++          {[
++            ['/entidad.json', 'Identidad de la empresa: razón social, RUC, domicilio y alcance declarado'],
++            ['/productos/catalogo.json', `El catálogo completo, ${conFicha} fichas con al menos ${minSpecs} filas de especificación cada una`],
++            ['/glosario/terminos.json', `Los ${terminos.length} términos del rubro, con su definición`],
++            ['/calculadoras/formulas.json', 'Los métodos de cálculo, con sus supuestos y sus límites'],
++            ['/llms.txt', 'El mapa del sitio para agentes, con lo que esta empresa no resuelve'],
++          ].map(([ruta, que]) => (
++            <li key={ruta} className="flex flex-wrap gap-x-3 rounded-2xl border border-gray-100 p-4">
++              <a href={ruta} className="font-mono text-[#059669]">{ruta}</a>
++              <span className="text-gray-600">{que}</span>
++            </li>
++          ))}
++        </ul>
++        <p className="mt-4 text-sm text-gray-600">
++          El RUC {SITE.ruc} y el domicilio fiscal se contrastan en SUNAT, que es una fuente que no
++          controlamos nosotros.
++        </p>
++      </section>
++
++      <section className="mt-12 border-t pt-10">
++        <h2 className="text-xl font-semibold text-[#0A2540]">Preguntas frecuentes</h2>
++        <dl className="mt-5 space-y-5">
++          {FAQS.map((f) => (
++            <div key={f.q}>
++              <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
++              <dd className="mt-1 text-gray-700">{f.a}</dd>
++            </div>
++          ))}
++        </dl>
++      </section>
++    </div>
++  );
++}
+diff --git a/app/sitemap.ts b/app/sitemap.ts
+index 453694e..2044bc5 100644
+--- a/app/sitemap.ts
++++ b/app/sitemap.ts
+@@ -36,6 +36,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
+     { url: `${SITE.url}/exportacion`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
+     { url: `${SITE.url}/distribuidores`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+     { url: `${SITE.url}/confianza`, lastModified: now, changeFrequency: "yearly", priority: 0.7 },
++    { url: `${SITE.url}/metodo`, lastModified: now, changeFrequency: "yearly", priority: 0.7 },
+     { url: `${SITE.url}/en`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+     { url: `${SITE.url}/pt`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+     { url: `${SITE.url}/local`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+diff --git a/components/Footer.tsx b/components/Footer.tsx
+index 03ee527..6a93acb 100644
+--- a/components/Footer.tsx
++++ b/components/Footer.tsx
+@@ -55,6 +55,7 @@ export default function Footer() {
+       { label: 'Distribuidores', href: '/distribuidores' },
+       { label: 'Partners de ingeniería', href: '/socios' },
+       { label: 'Centro de confianza', href: '/confianza' },
++      { label: 'Cómo se publica este sitio', href: '/metodo' },
+       { label: 'English', href: '/en' },
+       { label: 'Português', href: '/pt' },
+     ]},
+diff --git a/lib/novedades.ts b/lib/novedades.ts
+index e4b5d27..6fa21b2 100644
+--- a/lib/novedades.ts
++++ b/lib/novedades.ts
+@@ -78,6 +78,26 @@ export interface Novedad {
+  * nunca obliga a tocar las anteriores.
+  */
+ const registro: Novedad[] = [
++  {
++    slug: 'metodo-editorial-como-se-publica-este-sitio',
++    fecha: '2026-08-27',
++    tipo: 'referencia',
++    titulo: 'Publicamos el método editorial de este sitio',
++    resumen:
++      'Una página explica de dónde sale cada cifra, qué se comprueba antes de publicar, qué no se afirma y cómo contrastarlo desde fuera sin pedirnos nada.',
++    queCambia:
++      'Quien homologa un proveedor puede juzgar la fiabilidad de la fuente, y no sólo el dato suelto: el procedimiento está escrito y los archivos para comprobarlo están abiertos.',
++    detalle: [
++      'El sitio ya declaraba lo que no afirma y ya publicaba una página de obras vacía antes que un caso sin confirmar. Faltaba el escalón anterior: explicar POR QUÉ ocurre eso, que es lo que permite a un comprador —o a un modelo que cite esta fuente— saber cuánto pesa lo que lee. Afirmar «somos rigurosos» no significa nada y lo afirma cualquiera; publicar el procedimiento se puede comprobar.',
++      'La página deriva sus propias cifras del catálogo en el momento de construirse, que es exactamente la regla que describe: si alguna no coincide con la sección correspondiente, es un defecto y se puede señalar. Enumera además las siete comprobaciones que corren antes de cada publicación, nombradas por lo que impiden y no por el comando que las ejecuta.',
++      'Se corrigieron de paso tres cifras que se contradecían entre sí: el título del Marco de Especificación decía veintisiete criterios donde el cuerpo de la misma página decía veintiséis, el mapa para agentes llamaba «líneas de producto» a los productos, y el archivo de instrucciones del repositorio citaba conteos que habían caducado. Las tres pasan ahora por el dato que las calcula.',
++    ],
++    enlaces: [
++      { label: 'Cómo se publica este sitio', href: '/metodo' },
++      { label: 'Centro de confianza', href: '/confianza' },
++      { label: 'Marco de Especificación', href: '/marco' },
++    ],
++  },
+   {
+     slug: 'silo-tecnico-recursos-primeras-guias',
+     fecha: '2026-08-17',
+diff --git a/test/novedades.test.ts b/test/novedades.test.ts
+index 17e6b0b..3c3dd1d 100644
+--- a/test/novedades.test.ts
++++ b/test/novedades.test.ts
+@@ -1,5 +1,5 @@
+ import { describe, it, expect } from 'vitest';
+-import { readFileSync } from 'node:fs';
++import { readFileSync, readdirSync, existsSync } from 'node:fs';
+ import { join } from 'node:path';
+ import {
+   novedades,
+@@ -31,25 +31,33 @@ import { SITE } from '@/lib/site';
+  * que los feeds sean documentos válidos.
+  */
+ 
+-/** Todas las rutas internas que el sitio realmente publica. */
++/**
++ * Todas las rutas internas que el sitio realmente publica.
++ *
++ * Las estáticas se DERIVAN de app/, no se enumeran. La lista escrita a mano que
++ * había aquí no incluía /confianza, /calidad, /compras ni /exportacion —páginas
++ * que existen desde hace meses— así que enlazarlas desde el registro rompía la
++ * compilación por una razón falsa: la prueba no las conocía. Una copia a mano
++ * de la estructura del sitio no la vigila, la persigue.
++ *
++ * Las dinámicas siguen derivándose de sus arreglos, que es lo correcto: ahí la
++ * fuente de verdad es el dato y no el disco.
++ */
++function rutasEstaticas(dir = 'app', prefijo = ''): string[] {
++  const salida: string[] = [];
++  for (const e of readdirSync(join(process.cwd(), dir), { withFileTypes: true })) {
++    if (!e.isDirectory() || e.name.startsWith('[') || e.name.startsWith('_') || e.name.includes('.')) continue;
++    const rel = `${dir}/${e.name}`;
++    const ruta = `${prefijo}/${e.name}`;
++    if (existsSync(join(process.cwd(), rel, 'page.tsx'))) salida.push(ruta);
++    salida.push(...rutasEstaticas(rel, ruta));
++  }
++  return salida;
++}
++
+ const rutasValidas = new Set<string>([
+   '/',
+-  '/productos',
+-  '/servicios',
+-  '/nosotros',
+-  '/contacto',
+-  '/cotizacion',
+-  '/local',
+-  '/recursos',
+-  '/marco',
+-  '/marco/evaluacion',
+-  '/soluciones',
+-  '/novedades',
+-  '/glosario',
+-  '/descargas',
+-  '/informes',
+-  '/privacidad',
+-  '/terminos',
++  ...rutasEstaticas(),
+   ...products.map((p) => `/productos/${p.slug}`),
+   ...articles.map((a) => `/recursos/${a.slug}`),
+   ...solutions.map((s) => `/soluciones/${s.slug}`),
+-- 
+2.43.0
+
