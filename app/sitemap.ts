@@ -36,6 +36,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE.url}/exportacion`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
     { url: `${SITE.url}/distribuidores`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE.url}/confianza`, lastModified: now, changeFrequency: "yearly", priority: 0.7 },
+    { url: `${SITE.url}/metodo`, lastModified: now, changeFrequency: "yearly", priority: 0.7 },
     { url: `${SITE.url}/en`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE.url}/pt`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE.url}/local`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },

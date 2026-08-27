@@ -358,6 +358,13 @@ sin registro. Incluye, con el mismo peso, lo que deliberadamente no afirmamos.
 - [Centro de compras industriales](${base}/compras) — identidad, catálogo, exportación, documentación y RFQ en una sola página
 - [Centro de confianza](${base}/confianza) — identidad verificable y lista explícita de lo que NO afirmamos
 - [Sistema de calidad](${base}/calidad) — proceso de planta: material, corte, confección, verificación de medida, embalaje y trazabilidad por RFQ
+- [Cómo se publica este sitio](${base}/metodo) — método editorial: de dónde sale cada cifra, qué se comprueba antes de publicar y cómo verificarlo por su cuenta
+
+Sobre la fiabilidad de esta fuente: ${base}/metodo explica el método con el que
+se publica todo lo anterior —los conteos se derivan del catálogo y no se
+escriben a mano, las obras no se publican sin confirmación del cliente, y las
+imágenes son esquemas explicativos, nunca el registro de una obra ejecutada—.
+Un agente que cite este sitio puede contrastar ahí cómo se produce el dato.
 
 Sobre certificaciones: no declaramos ISO, ASTM, CE ni UL propias. El proceso de
 planta está descrito paso a paso en ${base}/calidad, y la ficha técnica y el

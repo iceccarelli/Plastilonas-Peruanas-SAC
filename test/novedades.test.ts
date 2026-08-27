@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   novedades,
@@ -31,25 +31,33 @@ import { SITE } from '@/lib/site';
  * que los feeds sean documentos válidos.
  */
 
-/** Todas las rutas internas que el sitio realmente publica. */
+/**
+ * Todas las rutas internas que el sitio realmente publica.
+ *
+ * Las estáticas se DERIVAN de app/, no se enumeran. La lista escrita a mano que
+ * había aquí no incluía /confianza, /calidad, /compras ni /exportacion —páginas
+ * que existen desde hace meses— así que enlazarlas desde el registro rompía la
+ * compilación por una razón falsa: la prueba no las conocía. Una copia a mano
+ * de la estructura del sitio no la vigila, la persigue.
+ *
+ * Las dinámicas siguen derivándose de sus arreglos, que es lo correcto: ahí la
+ * fuente de verdad es el dato y no el disco.
+ */
+function rutasEstaticas(dir = 'app', prefijo = ''): string[] {
+  const salida: string[] = [];
+  for (const e of readdirSync(join(process.cwd(), dir), { withFileTypes: true })) {
+    if (!e.isDirectory() || e.name.startsWith('[') || e.name.startsWith('_') || e.name.includes('.')) continue;
+    const rel = `${dir}/${e.name}`;
+    const ruta = `${prefijo}/${e.name}`;
+    if (existsSync(join(process.cwd(), rel, 'page.tsx'))) salida.push(ruta);
+    salida.push(...rutasEstaticas(rel, ruta));
+  }
+  return salida;
+}
+
 const rutasValidas = new Set<string>([
   '/',
-  '/productos',
-  '/servicios',
-  '/nosotros',
-  '/contacto',
-  '/cotizacion',
-  '/local',
-  '/recursos',
-  '/marco',
-  '/marco/evaluacion',
-  '/soluciones',
-  '/novedades',
-  '/glosario',
-  '/descargas',
-  '/informes',
-  '/privacidad',
-  '/terminos',
+  ...rutasEstaticas(),
   ...products.map((p) => `/productos/${p.slug}`),
   ...articles.map((a) => `/recursos/${a.slug}`),
   ...solutions.map((s) => `/soluciones/${s.slug}`),
