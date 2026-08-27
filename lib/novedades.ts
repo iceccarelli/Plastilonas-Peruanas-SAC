@@ -79,6 +79,26 @@ export interface Novedad {
  */
 const registro: Novedad[] = [
   {
+    slug: 'metodo-editorial-como-se-publica-este-sitio',
+    fecha: '2026-08-27',
+    tipo: 'referencia',
+    titulo: 'Publicamos el método editorial de este sitio',
+    resumen:
+      'Una página explica de dónde sale cada cifra, qué se comprueba antes de publicar, qué no se afirma y cómo contrastarlo desde fuera sin pedirnos nada.',
+    queCambia:
+      'Quien homologa un proveedor puede juzgar la fiabilidad de la fuente, y no sólo el dato suelto: el procedimiento está escrito y los archivos para comprobarlo están abiertos.',
+    detalle: [
+      'El sitio ya declaraba lo que no afirma y ya publicaba una página de obras vacía antes que un caso sin confirmar. Faltaba el escalón anterior: explicar POR QUÉ ocurre eso, que es lo que permite a un comprador —o a un modelo que cite esta fuente— saber cuánto pesa lo que lee. Afirmar «somos rigurosos» no significa nada y lo afirma cualquiera; publicar el procedimiento se puede comprobar.',
+      'La página deriva sus propias cifras del catálogo en el momento de construirse, que es exactamente la regla que describe: si alguna no coincide con la sección correspondiente, es un defecto y se puede señalar. Enumera además las siete comprobaciones que corren antes de cada publicación, nombradas por lo que impiden y no por el comando que las ejecuta.',
+      'Se corrigieron de paso tres cifras que se contradecían entre sí: el título del Marco de Especificación decía veintisiete criterios donde el cuerpo de la misma página decía veintiséis, el mapa para agentes llamaba «líneas de producto» a los productos, y el archivo de instrucciones del repositorio citaba conteos que habían caducado. Las tres pasan ahora por el dato que las calcula.',
+    ],
+    enlaces: [
+      { label: 'Cómo se publica este sitio', href: '/metodo' },
+      { label: 'Centro de confianza', href: '/confianza' },
+      { label: 'Marco de Especificación', href: '/marco' },
+    ],
+  },
+  {
     slug: 'silo-tecnico-recursos-primeras-guias',
     fecha: '2026-08-17',
     tipo: 'guia',

@@ -55,6 +55,7 @@ export default function Footer() {
       { label: 'Distribuidores', href: '/distribuidores' },
       { label: 'Partners de ingeniería', href: '/socios' },
       { label: 'Centro de confianza', href: '/confianza' },
+      { label: 'Cómo se publica este sitio', href: '/metodo' },
       { label: 'English', href: '/en' },
       { label: 'Português', href: '/pt' },
     ]},
