@@ -84,7 +84,7 @@ const registro: Novedad[] = [
     tipo: 'guia',
     titulo: 'Serie «El ecosistema»: cinco artículos del rubro',
     resumen:
-      'Cinco artículos explican la industria en la que este catálogo existe: la cadena de la rafia, el ecosistema peruano, los tres polímeros, la vida útil y la compra transfronteriza.',
+      'Cinco artículos explican la industria detrás del catálogo: la cadena de la rafia, el ecosistema peruano, los polímeros y la compra transfronteriza.',
     queCambia:
       'Las preguntas que un comprador hace antes de saber qué producto necesita —de qué está hecho esto, qué material elegir, qué pasa al final de la vida útil, cómo comprar desde otro país— tienen ahora respuesta propia, citable y con fuente.',
     detalle: [

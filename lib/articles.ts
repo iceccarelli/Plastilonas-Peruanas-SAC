@@ -1848,7 +1848,7 @@ export const articles: Article[] = [
     title: 'Comprar textil industrial desde Sudamérica: homologación, Incoterms y el pedido que sí llega',
     metaTitle: 'Importar textil industrial desde el Perú',
     description:
-      'La ruta completa para un comprador de la región andina: verificar al proveedor peruano, especificar sin ambigüedad, elegir el Incoterm y documentar el lote.',
+      'La ruta para un comprador andino: verificar al proveedor peruano, especificar sin ambigüedad, elegir el Incoterm y documentar el lote antes del embarque.',
     datePublished: '2026-08-27',
     dateModified: '2026-08-27',
     readingMinutes: 11,
