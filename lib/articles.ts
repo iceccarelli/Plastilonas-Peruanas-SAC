@@ -1372,6 +1372,623 @@ export const articles: Article[] = [
       },
     ],
   },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SERIE «EL ECOSISTEMA» — de dónde sale este rubro y cómo se decide en él.
+  //
+  // Estos cinco artículos no venden un SKU: explican la industria en la que
+  // los SKU existen. Son la respuesta a las preguntas que un comprador hace
+  // ANTES de saber qué producto necesita —de qué está hecho esto, por qué el
+  // material importa, qué pasa al final de la vida útil, cómo se compra desde
+  // otro país— y por eso son los primeros artículos del silo cuya página es
+  // canónica en el mapa de consultas en vez de apoyo.
+  //
+  // REGLA DE LA SERIE, más estricta que la general: aquí no hay ninguna cifra
+  // de mercado. Ni toneladas importadas, ni cuota, ni tamaño del sector. Cada
+  // número que aparece es una propiedad física o una relación normativa con su
+  // fuente citada. Un artículo de ecosistema con estadísticas inventadas es el
+  // camino más corto para que un modelo de lenguaje cite basura con nuestro
+  // nombre al lado.
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    slug: 'de-la-resina-a-la-rafia-cadena-productiva-textil-industrial',
+    title: 'De la resina a la rafia: la cadena productiva del textil industrial, etapa por etapa',
+    metaTitle: 'De la resina a la rafia: cómo se fabrica',
+    description:
+      'El recorrido completo: gránulo de polipropileno, extrusión de cinta, estiraje, telar circular, laminado y confección. Qué gobierna la calidad en cada etapa.',
+    datePublished: '2026-08-27',
+    dateModified: '2026-08-27',
+    readingMinutes: 12,
+    category: 'Especialidades',
+    sectors: ['Industrial', 'Minería', 'Agricultura'],
+    keyTakeaways: [
+      'La rafia no es un plástico distinto: es polipropileno cuya resistencia se construye mecánicamente, estirando la cinta extruida para orientar las cadenas del polímero en la dirección de la carga.',
+      'La calidad de un tejido de rafia se decide en cuatro variables que rara vez aparecen en una orden de compra: título de la cinta (denier), relación de estiraje, densidad de trama y tratamiento ultravioleta.',
+      'El gramaje por sí solo no describe un tejido: dos telas del mismo peso por metro cuadrado pueden diferir en resistencia real según cómo se repartió ese peso entre urdimbre y trama.',
+      'Cada etapa de la cadena —extrusión, tejido, laminado, confección— tiene un defecto típico que se detecta en planta y no en el producto terminado; por eso la trazabilidad por lote importa más que la marca.',
+    ],
+    intro: [
+      'Casi todo lo que este rubro vende —big bags, lonas de rafia, mallas, sacos— empieza igual: un gránulo de polipropileno del tamaño de una lenteja. Entre ese gránulo y un bolsón capaz de izar una tonelada hay cuatro transformaciones, y en cada una se decide una parte de la calidad que el comprador después no puede ver.',
+      'Este artículo recorre la cadena completa tal como ocurre en una planta de textiles industriales, con las variables que gobiernan cada etapa y el defecto típico que produce cada una cuando se hace mal. No hace falta ser ingeniero de polímeros para comprarlo bien: hace falta saber qué preguntar.',
+    ],
+    sections: [
+      {
+        heading: 'Qué es exactamente la rafia (y qué no es)',
+        body: [
+          'La rafia industrial es una cinta plana de polipropileno de unos pocos milímetros de ancho, obtenida por extrusión y estirada en caliente. El estiraje es el paso decisivo: al traccionar la cinta a temperatura controlada, las cadenas moleculares del polímero se orientan en la dirección del estiramiento, y la resistencia a tracción en esa dirección se multiplica respecto a la del film sin orientar.',
+          'Por eso un tejido de rafia resiste tanto pesando tan poco: la resistencia no viene de acumular material sino de ordenarlo. Y por eso mismo la rafia es fuerte a lo largo de la cinta y comparativamente débil en el sentido transversal — el tejido posterior, cruzando urdimbre y trama, es lo que reparte esa resistencia en las dos direcciones.',
+        ],
+        callout:
+          'Consecuencia práctica: una cinta mal estirada produce un tejido que pesa lo mismo y resiste menos. El gramaje de la ficha técnica no detecta este defecto; el ensayo de tracción, sí.',
+      },
+      {
+        heading: 'Etapa 1 — Extrusión: del gránulo a la cinta',
+        body: [
+          'La resina llega a la planta como gránulo y se funde en una extrusora junto con los aditivos que definen el comportamiento del producto final: masterbatch de color, estabilizantes ultravioleta y, según el uso, antiestáticos o retardantes. La masa fundida sale como un film plano que se enfría en agua, se corta en cintas y se estira en un horno de orientación.',
+          'En el Perú esta etapa parte de resina importada: el país no cuenta con producción petroquímica de polipropileno a escala industrial, de modo que el gránulo entra por puerto —principalmente el Callao— y la transformación local comienza en la extrusión. Es un dato de estructura, no de coyuntura: condiciona plazos, lotes mínimos y la lógica de fabricar localmente frente a importar tejido o producto terminado.',
+        ],
+        table: {
+          caption: 'Variables de extrusión y su efecto en el producto final',
+          headers: ['Variable', 'Qué define', 'Defecto típico si falla'],
+          rows: [
+            ['Relación de estiraje', 'Resistencia a tracción de la cinta', 'Cinta que pesa igual y resiste menos; rotura prematura en servicio'],
+            ['Título (denier)', 'Peso por longitud de cinta; junto a la trama, el gramaje', 'Tejido fuera de especificación aunque «se vea igual»'],
+            ['Dosis de estabilizante UV', 'Vida útil a la intemperie', 'Fragilización y cuarteo acelerados bajo sol de altura'],
+            ['Homogeneidad del fundido', 'Regularidad de la cinta', 'Puntos débiles aleatorios que ningún control visual detecta'],
+          ],
+        },
+      },
+      {
+        heading: 'Etapa 2 — Telar circular: el tejido tubular',
+        body: [
+          'Las bobinas de cinta alimentan telares circulares, donde un conjunto de cintas longitudinales (urdimbre) se cruza con una cinta transversal (trama) que gira insertándose entre ellas. El resultado es un tejido tubular continuo — ideal para sacos y cuerpos de big bag porque el tubo no tiene costura lateral.',
+          'La variable comercial aquí es la densidad de trama: cuántas cintas por pulgada en cada dirección. Con el mismo denier, más trama significa más resistencia, más peso y más costo. Dos proveedores pueden cotizar «el mismo» tejido de idéntico gramaje con densidades distintas, y el comportamiento en servicio no será el mismo.',
+        ],
+        list: [
+          'Pida la especificación como denier × trama (por ejemplo, cintas por pulgada en urdimbre y trama), no solo el gramaje.',
+          'En productos de izaje, la resistencia de costura importa tanto como la del tejido: pregunte por ambas.',
+          'Un tejido tubular sin costura lateral no es automáticamente mejor: depende de si el diseño del producto aprovecha esa continuidad.',
+        ],
+      },
+      {
+        heading: 'Etapa 3 — Laminado y acabados',
+        body: [
+          'El tejido de rafia respira: entre cinta y cinta quedan microaberturas. Cuando el producto exige estanqueidad al polvo o barrera a la humedad —concentrados finos, fertilizantes, harinas— el tejido se lamina con una película delgada de polipropileno fundido que sella la superficie. La lona de rafia laminada de uso general en el Perú se conoce comercialmente como polytarp.',
+          'El laminado añade función, no resistencia estructural: la carga la sigue llevando el tejido orientado. Por eso evaluar una lona laminada solo por su espesor total confunde dos cosas distintas — cuánta película tiene y cuánto tejido tiene.',
+        ],
+      },
+      {
+        heading: 'Etapa 4 — Corte, confección y soldadura: donde el tejido se vuelve producto',
+        body: [
+          'La última etapa convierte metros de tejido en un producto con geometría y costuras: corte según patrón, confección con hilo de alta tenacidad y, en productos que exigen continuidad de barrera, unión por soldadura térmica en lugar de costura.',
+          'Es la etapa con más intervención humana y, en productos de izaje, la más crítica para la seguridad: la mayoría de los ensayos de un FIBC fallan por costura o por asa antes que por tejido. Un certificado de fabricación por lote existe precisamente porque la confección puede variar de lote a lote aunque el tejido sea idéntico.',
+        ],
+        callout:
+          'La regla de compra que resume toda la cadena: especifique el tejido por sus variables (denier, trama, estiraje, UV), el producto por su ensayo (tracción, costura, izaje) y el lote por su documento. Marca y gramaje, solos, no aseguran ninguna de las tres cosas.',
+      },
+    ],
+    faqs: [
+      {
+        q: '¿Por qué la rafia de polipropileno resiste tanto si pesa tan poco?',
+        a: 'Porque su resistencia se construye orientando las cadenas moleculares del polímero durante el estiraje en caliente, no acumulando espesor. Una cinta bien orientada multiplica la resistencia a tracción del film original en la dirección de la carga, y el tejido cruza cintas en dos direcciones para repartir esa resistencia.',
+      },
+      {
+        q: '¿Qué debo pedir en una cotización de tejido de rafia además del gramaje?',
+        a: 'Denier de la cinta, densidad de trama en ambas direcciones, tratamiento ultravioleta declarado y, si el producto se iza o soporta carga, la resistencia de costura junto a la del tejido. El gramaje solo dice cuánto material hay, no cómo está ordenado ni cosido.',
+      },
+      {
+        q: '¿La resina de polipropileno se produce en el Perú?',
+        a: 'No a escala industrial: la resina llega importada, principalmente por el puerto del Callao, y la transformación local comienza en la extrusión de la cinta. Por eso la cadena local convive con la importación directa de tejido o producto terminado, y un catálogo honesto declara qué línea sigue cada camino.',
+      },
+      {
+        q: '¿Qué es el polytarp?',
+        a: 'Es el nombre comercial de la lona de rafia de polipropileno laminada: un tejido de cintas orientadas que aporta la resistencia, sellado con una película delgada del mismo polímero que aporta estanqueidad al polvo y barrera a la humedad. Se evalúa por las variables del tejido y del laminado por separado.',
+      },
+    ],
+    relatedProducts: [
+      'big-bags-bolsones-polipropileno',
+      'lona-plastificada-rafia-polytarp',
+      'sacos-polytarp-embarque-granel',
+      'malla-raschel-sombra',
+    ],
+    relatedCities: ['lima', 'callao'],
+    sources: [
+      {
+        label: 'FPI — proceso estándar de fabricación de FIBC (extrusión de cinta, tejido, confección)',
+        url: 'https://fpi-bd.com/manufacturing-process/',
+        supports: 'La secuencia de etapas descrita: extrusión y estiraje de cintas de PP, tejido en telar y confección del producto.',
+      },
+      {
+        label: 'Encyclopaedia Britannica — Polypropylene',
+        url: 'https://www.britannica.com/science/polypropylene',
+        supports: 'Naturaleza del polipropileno y el papel de la orientación molecular en las propiedades de fibras y cintas.',
+      },
+      {
+        label: 'APM Terminals Callao — estandarización de bolsones (ISO 21898)',
+        url: 'https://www.apmterminals.com/es/callao/customer-zone/news-and-alerts/2022/28112022-recordatorio-estandarizacion-de-bolsones',
+        supports: 'Por qué la certificación de fabricación por lote es un requisito operativo real en la cadena de exportación peruana.',
+      },
+    ],
+  },
+  {
+    slug: 'ecosistema-plastico-industrial-peru-quien-fabrica-quien-compra',
+    title: 'El ecosistema del plástico industrial en el Perú: quién fabrica, quién importa y quién compra',
+    metaTitle: 'Plástico industrial en el Perú: el ecosistema',
+    description:
+      'Cómo se estructura el rubro: resina importada, transformación local, importación directa de líneas terminadas, y los sectores que demandan cada cosa.',
+    datePublished: '2026-08-27',
+    dateModified: '2026-08-27',
+    readingMinutes: 11,
+    category: 'Especialidades',
+    sectors: ['Industrial', 'Minería', 'Agricultura', 'Construcción'],
+    keyTakeaways: [
+      'El rubro peruano del textil plástico industrial se organiza en tres eslabones: resina importada que entra por puerto, transformadores locales que extruyen, tejen y confeccionan, e importación directa de líneas terminadas que no se fabrican localmente a escala.',
+      'La pregunta correcta ante un proveedor no es «¿lo fabrican ustedes?» sino «¿qué camino sigue esta línea y qué documento lo respalda?» — fabricación propia, importación directa y suministro bajo pedido tienen ventajas distintas y verificaciones distintas.',
+      'La demanda se concentra por sectores con lógicas de compra diferentes: la minería compra contra especificación y normativa, la agroexportación contra campaña y clima, la construcción contra cronograma de obra.',
+      'La geografía del ecosistema es asimétrica: la transformación se concentra en Lima y el Callao por el acceso al puerto y a la resina, mientras la demanda se reparte por corredores mineros y agrícolas de todo el país.',
+    ],
+    intro: [
+      'Quien compra textil plástico industrial en el Perú está comprando, sin verlo, una cadena que empieza en una planta petroquímica de otro continente y termina en un taller de confección de Lima o en un contenedor que llega directo de fábrica asiática. Entender esa cadena no es cultura general: cambia qué se le exige a cada proveedor y qué documento respalda cada afirmación.',
+      'Este artículo describe la estructura del ecosistema —sin cifras de mercado, porque las publicables con fuente no existen a nivel del rubro— y ofrece el mapa de decisión que un área de compras puede aplicar: qué conviene que sea de fabricación local, qué conviene que sea importación directa, y qué preguntas separan a un proveedor integrado de un revendedor.',
+    ],
+    sections: [
+      {
+        heading: 'Los tres eslabones del ecosistema',
+        body: [
+          'Primer eslabón: la materia prima. El Perú no produce resina de polipropileno ni de polietileno a escala industrial, de modo que el gránulo llega importado y entra principalmente por el Callao. Todo transformador local está, por estructura, aguas abajo de una cadena logística internacional.',
+          'Segundo eslabón: la transformación local. Extrusión de cinta y film, telares circulares y planos, laminadoras, y el eslabón de más valor para el comprador a medida: corte, confección y soldadura. Aquí es donde «a la medida del proyecto» es posible — un paño con la geometría exacta de la caja del camión, una manga al diámetro del tramo de mina.',
+          'Tercer eslabón: la importación directa de producto terminado. Hay líneas —geomembranas de gran ancho, geomallas, algunas familias técnicas— cuya escala eficiente de producción no existe localmente. Para esas líneas, el valor del proveedor local no está en fabricar sino en especificar, verificar el certificado del fabricante y responder por el conjunto.',
+        ],
+      },
+      {
+        heading: 'Fabricar, importar o ambas: el mapa de decisión',
+        table: {
+          caption: 'Qué camino conviene a qué necesidad',
+          headers: ['Situación de compra', 'Camino natural', 'Qué verificar'],
+          rows: [
+            ['Geometría a medida (toldos de flota, mangas por tramo, paños de cuadro agrícola)', 'Fabricación local', 'Capacidad real de confección: máquinas, soldadura, control dimensional'],
+            ['Línea técnica estandarizada de gran escala (geomembrana, geomalla)', 'Importación directa', 'Ficha técnica y certificado de lote del fabricante, entregados con la cotización'],
+            ['Volumen estandarizado con especificación normativa (FIBC para exportación)', 'Cualquiera de los dos', 'Certificación de fabricación conforme a la norma que el terminal exige, por lote'],
+            ['Urgencia de reposición sobre medida existente', 'Stock local', 'Que el proveedor conserve el patrón y la trazabilidad del pedido anterior'],
+          ],
+        },
+        callout:
+          'Un proveedor que declara qué camino sigue cada línea de su catálogo está entregando información de compra, no una debilidad. El que presenta todo como «fabricación propia» sin distinguir, obliga a verificar todo dos veces.',
+      },
+      {
+        heading: 'Quién demanda: cuatro sectores, cuatro lógicas',
+        list: [
+          'Minería: compra contra especificación y contra normativa —ventilación de labor, contención, izaje— y castiga la falla con paradas cuyo costo no guarda proporción con el precio del textil. Exige documento por lote y trazabilidad.',
+          'Agroexportación: compra contra campaña y contra clima. La malla se especifica por plaga, radiación y viento del fundo; el calendario agrícola no negocia con el plazo de importación.',
+          'Construcción e infraestructura: compra contra cronograma de obra. Cerramientos, techos temporales y geosintéticos entran y salen del proyecto en fechas que definen si conviene comprar o alquilar, fabricar o traer.',
+          'Logística y comercio: compra reposición —cobertura de carga, embalaje de granel— donde la variable dominante es la disponibilidad y la consistencia entre lotes.',
+        ],
+      },
+      {
+        heading: 'La geografía: transformación concentrada, demanda repartida',
+        body: [
+          'La transformación se concentra donde está el puerto y la resina: Lima y el Callao. La demanda, en cambio, vive donde están las operaciones — los corredores mineros del centro y del sur, los valles agroexportadores de la costa, la obra pública en todo el territorio.',
+          'Esa asimetría define el modelo de despacho del rubro: fabricación centralizada y envío nacional, con instalación que se coordina por proyecto. Un proveedor que afirme presencia fabril en cada región está describiendo un ecosistema que en este rubro no existe; lo verificable es planta única y logística de alcance nacional.',
+        ],
+      },
+      {
+        heading: 'Cómo distinguir a un proveedor integrado de un revendedor',
+        steps: [
+          'Pida la especificación del tejido en variables de proceso (denier, trama, tratamiento UV), no solo el nombre comercial. Quien fabrica, las conoce; quien revende sin control técnico, suele no poder responderlas.',
+          'Pida un producto con una medida no estándar. La respuesta —«se puede, con este plazo y este patrón» frente a «solo tenemos lo del catálogo»— revela si hay confección real detrás.',
+          'Pida el documento del lote en la cotización, no en la entrega. El proveedor integrado con su cadena lo obtiene antes de vender; el intermediario lo persigue después.',
+          'Verifique la identidad fiscal y la planta declarada por fuentes que el proveedor no controla: el registro tributario público y la dirección física contrastable.',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: '¿Por qué en el Perú conviven fabricación local e importación directa en el mismo catálogo?',
+        a: 'Porque la estructura del ecosistema lo impone: la resina es importada y hay líneas técnicas cuya escala eficiente de producción no existe en el país. La fabricación local aporta la medida exacta y el plazo corto; la importación directa aporta líneas que localmente no se producen. Un catálogo que declara qué camino sigue cada línea está siendo preciso, no débil.',
+      },
+      {
+        q: '¿Qué sector es más exigente al comprar textil industrial?',
+        a: 'Exigen cosas distintas. La minería exige documento y trazabilidad porque su costo de falla es el mayor; la agroexportación exige calendario porque la campaña no espera; la construcción exige coordinación con obra. El error es tratarlas igual: la misma lona puede ser una compra correcta para un sector y una imprudencia para otro.',
+      },
+      {
+        q: '¿Cómo verifico que un proveedor peruano de este rubro existe de verdad?',
+        a: 'Con fuentes que él no controla: el RUC en el padrón público de SUNAT, la dirección de planta contrastable en un mapa, y el catálogo con especificaciones que respondan a variables de proceso. La verificación de identidad es el primer paso de cualquier homologación, y en este rubro se puede hacer completa sin pedirle nada al proveedor.',
+      },
+    ],
+    relatedProducts: [
+      'big-bags-bolsones-polipropileno',
+      'geomembrana-polietileno-pe-hdpe',
+      'mangas-ventilacion-minas-tuneles',
+      'mallas-antiafidas',
+      'mantas-cobertores-toldos-camiones',
+    ],
+    relatedCities: ['lima', 'callao', 'arequipa', 'cajamarca'],
+    sources: [
+      {
+        label: 'APM Terminals Callao — requisitos de ingreso para bolsones',
+        url: 'https://www.apmterminals.com/es/callao/customer-zone/news-and-alerts/2022/28112022-recordatorio-estandarizacion-de-bolsones',
+        supports: 'El papel del terminal portuario como eslabón normativo real de la cadena de exportación del rubro.',
+      },
+      {
+        label: 'FPI — proceso de fabricación de FIBC',
+        url: 'https://fpi-bd.com/manufacturing-process/',
+        supports: 'Qué etapas componen la transformación local: extrusión, tejido, laminado y confección.',
+      },
+      {
+        label: 'SUNAT — consulta pública de RUC',
+        url: 'https://e-consultaruc.sunat.gob.pe/',
+        supports: 'La verificación de identidad fiscal de un proveedor por una fuente que el proveedor no controla.',
+      },
+    ],
+  },
+  {
+    slug: 'polipropileno-polietileno-pvc-que-material-para-que-trabajo',
+    title: 'Polipropileno, polietileno o PVC: qué material para qué trabajo',
+    metaTitle: 'PP, PE o PVC: qué plástico para qué trabajo',
+    description:
+      'Los tres polímeros del textil industrial comparados por lo que decide una compra: comportamiento mecánico, química, soldadura, sol de altura y fin de vida.',
+    datePublished: '2026-08-27',
+    dateModified: '2026-08-27',
+    readingMinutes: 10,
+    category: 'Especialidades',
+    sectors: ['Industrial', 'Minería', 'Construcción', 'Saneamiento'],
+    keyTakeaways: [
+      'No existe el «mejor plástico»: existe el polímero cuya combinación de rigidez, química, soldabilidad y comportamiento al sol corresponde al trabajo. Los tres dominantes del rubro —PP, PE y PVC— fallan cuando se usan fuera de su terreno.',
+      'El polipropileno domina donde la relación resistencia/peso manda (rafia, tejidos, izaje); el polietileno donde manda la barrera y la química (geomembranas, contención); el PVC donde manda la flexibilidad permanente y la confección soldada de precisión (lonas técnicas, ductos flexibles).',
+      'La soldadura no es un detalle de fábrica sino un criterio de diseño: PP y PE se unen por termofusión, el PVC admite además alta frecuencia — y esa diferencia decide qué geometrías y qué reparaciones en campo son posibles.',
+      'Ninguno de los tres sobrevive al sol de altura peruano sin estabilización ultravioleta declarada: la pregunta «¿qué tratamiento UV tiene?» aplica a los tres por igual.',
+    ],
+    intro: [
+      'Tres polímeros concentran casi todo el textil plástico industrial que se compra en el Perú: polipropileno, polietileno y PVC. Se parecen lo bastante para confundirse en una orden de compra y se comportan lo bastante distinto para que esa confusión termine en una poza que filtra o una lona que se agrieta en su primera temporada en sierra.',
+      'Esta guía los compara por los criterios que de verdad deciden una compra industrial — no por sus fichas de polímero, sino por lo que hacen bajo carga, bajo químico, bajo soldadora y bajo el sol.',
+    ],
+    sections: [
+      {
+        heading: 'El mapa de los tres, en una tabla',
+        table: {
+          caption: 'Comparación orientativa por criterio de compra (el proyecto concreto manda)',
+          headers: ['Criterio', 'Polipropileno (PP)', 'Polietileno (PE/HDPE)', 'PVC flexible'],
+          rows: [
+            ['Terreno natural', 'Tejidos y rafia: sacos, big bags, mallas', 'Barreras y contención: geomembranas, tanques', 'Lonas técnicas soldadas, ductos flexibles, cobertores'],
+            ['Carácter mecánico', 'Rígido y liviano; excelente relación resistencia/peso orientado', 'Tenaz y flexible; alta resistencia a punzonado en espesores de membrana', 'Flexible de forma permanente por plastificantes; muy confeccionable'],
+            ['Resistencia química general', 'Muy buena a ácidos y álcalis', 'Referencia del rubro para contención', 'Buena, con sensibilidad a algunos solventes'],
+            ['Unión', 'Termofusión y costura', 'Termofusión (cuña caliente, extrusión)', 'Termofusión y alta frecuencia'],
+            ['Comportamiento al frío de altura', 'Se fragiliza antes que el PE', 'El mejor de los tres a baja temperatura', 'Depende fuertemente de la formulación'],
+            ['Reciclabilidad práctica', 'Alta en mono-material (clase 5)', 'Alta en mono-material (clases 2 y 4)', 'Más limitada; cadena separada'],
+          ],
+        },
+        callout:
+          'Esta tabla orienta la conversación técnica; no reemplaza la ficha del material del lote. Los tres polímeros se formulan: dos PVC o dos PE de distinta receta no se comportan igual.',
+      },
+      {
+        heading: 'Polipropileno: el rey del tejido',
+        body: [
+          'El PP es el polímero del textil propiamente dicho. Orientado en cinta, ofrece la mejor relación resistencia/peso de los tres, y por eso domina todo lo que se teje: sacos, big bags, mallas agrícolas, lonas de rafia. Flota en agua —dato útil en faena— y resiste bien ácidos y álcalis.',
+          'Sus límites: se fragiliza a baja temperatura antes que el polietileno —relevante en operaciones altoandinas— y sin estabilización es de los más sensibles a la fotodegradación. Un tejido de PP para sierra se especifica con el tratamiento UV como variable de primera línea, no como acabado opcional.',
+        ],
+      },
+      {
+        heading: 'Polietileno: el rey de la barrera',
+        body: [
+          'El PE de alta densidad es el material de referencia mundial para geomembranas de contención: combina resistencia química amplia, tenacidad a baja temperatura y un cuerpo de especificación técnica maduro —la serie GRI-GM del Geosynthetic Institute— que permite comprarlo contra ensayo y no contra promesa.',
+          'Su lógica es distinta a la del tejido: en membrana no hay trama que reparta esfuerzos, de modo que el espesor, la resina y la soldadura en obra concentran toda la función. De ahí que en PE la instalación certificada pese tanto como el material.',
+        ],
+      },
+      {
+        heading: 'PVC: el rey de la confección',
+        body: [
+          'El PVC flexible debe su lugar a dos propiedades: permanece flexible sin memoria de pliegue y admite soldadura por alta frecuencia, que produce uniones limpias y repetibles en geometrías complejas. Por eso domina la lona técnica confeccionada —cobertores de precisión, ductos de ventilación flexibles, estructuras tensadas de detalle fino.',
+          'Sus contrapartes: la flexibilidad viene de plastificantes que forman parte de la receta —dos PVC del mismo espesor pueden envejecer muy distinto—, su química tiene sensibilidades que el PE no tiene, y su cadena de reciclaje es separada y más limitada que la de las poliolefinas.',
+        ],
+      },
+      {
+        heading: 'Cómo se elige, en la práctica',
+        steps: [
+          'Nombre primero la función dominante: ¿carga tejida, barrera continua o confección flexible? Esa respuesta sola descarta a uno o dos candidatos.',
+          'Cruce con el ambiente: altitud y frío favorecen al PE; sol intenso exige declarar UV en cualquiera; contacto químico se verifica contra tabla de compatibilidad del material concreto, no del polímero genérico.',
+          'Cruce con la unión: si el producto vivirá de reparaciones en campo, pregunte con qué se suelda y quién puede soldarlo allí.',
+          'Cierre con el documento: ficha técnica del material del lote y, en contención, especificación de ensayo reconocida. El nombre del polímero no es una especificación.',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: '¿Qué es mejor para una lona: PP, PE o PVC?',
+        a: 'Depende de qué trabajo hace la lona. Si es cobertura liviana de gran superficie, la rafia de PP laminada ofrece la mejor relación resistencia/peso/costo. Si es contención o barrera continua, el terreno es del PE. Si es confección de precisión con soldaduras complejas o un producto que vive plegándose, el PVC flexible es el candidato natural.',
+      },
+      {
+        q: '¿Por qué importa tanto el frío de altura al elegir el polímero?',
+        a: 'Porque los plásticos se fragilizan al bajar la temperatura y no todos al mismo ritmo: el PE conserva tenacidad donde el PP ya se vuelve quebradizo, y el PVC depende de su formulación. En operaciones sobre los tres o cuatro mil metros, el ciclo diario de helada y sol convierte esa diferencia en vida útil real.',
+      },
+      {
+        q: '¿Se pueden soldar entre sí el PP, el PE y el PVC?',
+        a: 'No de forma confiable: la soldadura térmica une material con material compatible. PP con PP, PE con PE, PVC con PVC. Esa restricción es un criterio de diseño — un sistema que mezcle polímeros necesitará uniones mecánicas en las transiciones, y cada unión mecánica es un punto de mantenimiento.',
+      },
+      {
+        q: '¿El polímero define la calidad del producto?',
+        a: 'Define el terreno de juego, no el resultado. Dentro de cada polímero, la resina concreta, los aditivos, el proceso y la confección separan un producto correcto de uno mediocre. Por eso la pregunta útil no es «¿es HDPE?» sino «¿qué ficha técnica y qué ensayo respaldan este HDPE?».',
+      },
+    ],
+    relatedProducts: [
+      'lona-plastificada-rafia-polytarp',
+      'geomembrana-polietileno-pe-hdpe',
+      'geomembranas-pvc',
+      'mangas-ventilacion-minas-tuneles',
+      'tuberias-hdpe',
+    ],
+    sources: [
+      {
+        label: 'Encyclopaedia Britannica — Polypropylene',
+        url: 'https://www.britannica.com/science/polypropylene',
+        supports: 'Propiedades generales del PP: rigidez, baja densidad, uso dominante en fibras y cintas.',
+      },
+      {
+        label: 'Encyclopaedia Britannica — Polyethylene',
+        url: 'https://www.britannica.com/science/polyethylene',
+        supports: 'Propiedades generales del PE y su tenacidad, base de su uso en membranas de contención.',
+      },
+      {
+        label: 'Encyclopaedia Britannica — Polyvinyl chloride (PVC)',
+        url: 'https://www.britannica.com/science/polyvinyl-chloride',
+        supports: 'El papel de los plastificantes en el PVC flexible y sus implicancias de formulación.',
+      },
+      {
+        label: 'GRI-GM13 — especificación de geomembranas HDPE (Geosynthetic Institute)',
+        url: 'https://geosynthetic-institute.org/grispecs/gm13.pdf',
+        supports: 'La existencia de un cuerpo de especificación por ensayo para PE de contención, citado como criterio de compra.',
+      },
+    ],
+  },
+  {
+    slug: 'vida-util-degradacion-uv-reciclaje-textil-industrial',
+    title: 'Vida útil, sol de altura y fin de vida: lo que le pasa al textil industrial con los años',
+    metaTitle: 'Vida útil y reciclaje del textil industrial',
+    description:
+      'Cómo degrada el sol a los plásticos industriales, qué señales anuncian el fin de la vida útil, qué se recicla de verdad y qué no — sin promesas verdes.',
+    datePublished: '2026-08-27',
+    dateModified: '2026-08-27',
+    readingMinutes: 10,
+    category: 'Especialidades',
+    sectors: ['Industrial', 'Agricultura', 'Minería'],
+    keyTakeaways: [
+      'El enemigo principal del textil plástico a la intemperie no es la lluvia ni el uso: es la radiación ultravioleta, que rompe las cadenas del polímero y convierte un material tenaz en uno quebradizo. En la sierra peruana este proceso se acelera por altitud y cielo despejado.',
+      'La estabilización UV es una decisión de fórmula que se toma en la extrusión y no puede añadirse después: dos productos idénticos a la vista pueden tener vidas útiles muy distintas según su dosis de estabilizante.',
+      'Las señales de fin de vida se pueden inspeccionar sin laboratorio: pérdida de color con superficie tiza, rigidez nueva donde había flexibilidad, y cuarteo fino en pliegues y bordes son avisos de retiro, no defectos cosméticos.',
+      'La durabilidad es la primera política ambiental honesta de un plástico industrial: cada temporada adicional de servicio es material que no se repone. El reciclaje real depende del diseño mono-material y de la cadena local, y prometerlo en genérico es marketing, no gestión.',
+    ],
+    intro: [
+      'Un plástico industrial no se gasta como un metal: no se oxida, no se corroe, y durante años parece intacto. Después, en apariencia de golpe, se agrieta al doblarlo. Ese comportamiento —degradación silenciosa y falla súbita— es la razón por la que la vida útil del textil plástico se gestiona con inspección y criterio, no con la memoria de cuándo se compró.',
+      'Este artículo explica el mecanismo de esa degradación, las señales que la anuncian, y la parte del final de la vida útil de la que un proveedor puede hablar con honestidad: qué se recicla de verdad en la práctica, qué no, y por qué la durabilidad —no el eslogan— es la primera variable ambiental de esta industria.',
+    ],
+    sections: [
+      {
+        heading: 'El mecanismo: qué le hace el sol a un polímero',
+        body: [
+          'La radiación ultravioleta aporta energía suficiente para romper enlaces en las cadenas del polímero. Con cada corte, las cadenas se acortan; el material pierde la capacidad de deformarse sin romperse y gana rigidez y fragilidad. El proceso es acumulativo e invisible durante la mayor parte de su desarrollo — el material «funciona» hasta que deja de hacerlo.',
+          'En el Perú este mecanismo tiene geografía: a mayor altitud, más radiación; a cielo más despejado, más horas efectivas de exposición. La misma lona no envejece igual en la garúa de Lima que en una cancha de acopio a cuatro mil metros — y por eso la ciudad de destino es una variable de especificación, no un dato logístico.',
+        ],
+        callout:
+          'La estabilización UV se decide en la fórmula, durante la extrusión. No existe el «tratamiento posterior» que rescate un material que se extruyó sin protección: lo que se compra sin UV, se reemplaza antes.',
+      },
+      {
+        heading: 'Las señales de fin de vida que cualquiera puede inspeccionar',
+        list: [
+          'Superficie tiza: el color pierde intensidad y al pasar el dedo queda polvillo del propio material. Es la capa superficial ya degradada.',
+          'Rigidez nueva: un paño que antes caía flexible y ahora se sostiene tieso ha perdido plastificante o acortado cadenas. En PVC es la señal dominante.',
+          'Cuarteo fino en pliegues y bordes: las microgrietas aparecen primero donde el material se dobla, porque la flexión exige la elasticidad que la degradación quitó.',
+          'Rasgado fácil desde un corte: si una incisión pequeña se propaga con poca fuerza, la tenacidad estructural ya no está. En productos de izaje, esta señal exige retiro inmediato.',
+        ],
+      },
+      {
+        heading: 'Reutilizar no siempre es la opción segura',
+        body: [
+          'La intuición ambiental dice que reutilizar es siempre mejor. En textil industrial de carga, la regla es más fina: los productos de izaje se diseñan para un régimen de uso declarado, y reutilizar fuera de ese régimen traslada el riesgo al operario. Un bolsón concebido para un solo uso que se recarga «porque se ve bien» es exactamente el caso donde la apariencia no informa del estado de las costuras ni del historial de carga.',
+          'La reutilización segura existe, pero es un procedimiento: productos diseñados para uso múltiple, inspección documentada entre ciclos, y retiro ante cualquiera de las señales de la sección anterior. Lo demás no es economía circular; es transferencia de riesgo.',
+        ],
+      },
+      {
+        heading: 'Qué se recicla de verdad, y qué no',
+        body: [
+          'Las poliolefinas del rubro —polipropileno y polietileno— son termoplásticos reciclables por refundido, identificados en el sistema internacional de códigos de resina (clase 5 el PP; clases 2 y 4 el PE). Un producto mono-material limpio es el mejor candidato: un big bag íntegramente de PP puede volver a ser gránulo.',
+          'Los límites son igual de reales: los compuestos multicapa y los productos con inserciones de otro material complican la separación; la contaminación con el contenido transportado puede excluir un lote entero del reciclado; y la existencia de cadena de acopio y molienda depende de cada ciudad. Por eso la afirmación honesta de un fabricante no es «nuestros productos se reciclan» sino «diseñamos mono-material donde el producto lo permite, y el destino final depende de la cadena local del comprador».',
+        ],
+      },
+      {
+        heading: 'La política ambiental que sí se puede verificar',
+        body: [
+          'En esta industria, el impacto ambiental por año de servicio se reduce sobre todo alargando el servicio: especificar el UV correcto para la zona, elegir el polímero del terreno adecuado, inspeccionar a tiempo y reparar lo reparable. Una lona que cumple ocho temporadas donde otra cumple tres ha evitado más plástico que cualquier eslogan.',
+          'Lo que este rubro no puede afirmar con honestidad: porcentajes de reciclado sin cadena documentada, biodegradabilidad de poliolefinas convencionales, o neutralidad de ninguna clase. Cuando un proveedor los afirme, pida el documento; cuando no exista, ya sabe qué clase de proveedor es.',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: '¿Cuánto dura una lona industrial a la intemperie en el Perú?',
+        a: 'No hay un número honesto sin conocer la zona y la fórmula: la vida útil depende de la dosis de estabilizante UV, del polímero y de la exposición real — y entre la costa con garúa y la sierra sobre cuatro mil metros la radiación cambia drásticamente. La pregunta correcta al cotizar es qué tratamiento UV lleva el material y qué experiencia hay en la zona de destino.',
+      },
+      {
+        q: '¿Cómo sé si un textil plástico ya debe retirarse?',
+        a: 'Cuatro señales inspeccionables: superficie que entiza al pasar el dedo, rigidez donde había flexibilidad, cuarteo fino en pliegues y bordes, y rasgado que se propaga con poca fuerza desde un corte. En productos de izaje, cualquiera de ellas exige retiro; en cobertura general, anuncian que la reposición debe programarse.',
+      },
+      {
+        q: '¿Los big bags se pueden reciclar?',
+        a: 'Un big bag mono-material de polipropileno, limpio, es técnicamente reciclable por refundido (clase 5 del código de resinas). En la práctica depende de dos cosas que el fabricante no controla: qué transportó —la contaminación puede excluir el lote— y si existe cadena de acopio y molienda en la zona. Lo verificable es el diseño mono-material; el destino final es del comprador y su cadena local.',
+      },
+      {
+        q: '¿Existe la lona biodegradable industrial?',
+        a: 'Para las cargas y exposiciones de este rubro, no como producto establecido: la biodegradabilidad y la durabilidad estructural a la intemperie son objetivos en tensión. La vía ambiental real del textil industrial es durar más, diseñarse mono-material y entrar a reciclado mecánico donde la cadena existe.',
+      },
+    ],
+    relatedProducts: [
+      'big-bags-bolsones-polipropileno',
+      'lona-plastificada-rafia-polytarp',
+      'malla-raschel-sombra',
+      'geomembrana-polietileno-pe-hdpe',
+    ],
+    relatedCities: ['puno', 'pasco', 'lima'],
+    sources: [
+      {
+        label: 'Resin identification code — sistema internacional de clases de resina',
+        url: 'https://en.wikipedia.org/wiki/Resin_identification_code',
+        supports: 'Las clases citadas: PP clase 5, HDPE clase 2, LDPE clase 4, y el papel del código en la separación para reciclado.',
+      },
+      {
+        label: 'GRI-GM13 (Geosynthetic Institute) — especificación HDPE, requisitos de estabilización',
+        url: 'https://geosynthetic-institute.org/grispecs/gm13.pdf',
+        supports: 'Que la resistencia UV y oxidativa se especifica y ensaya como propiedad de fórmula del material.',
+      },
+      {
+        label: 'Encyclopaedia Britannica — Polypropylene',
+        url: 'https://www.britannica.com/science/polypropylene',
+        supports: 'La sensibilidad del PP a la degradación y la necesidad de estabilización para uso a la intemperie.',
+      },
+    ],
+  },
+  {
+    slug: 'comprar-textil-industrial-peru-sudamerica-incoterms-homologacion',
+    title: 'Comprar textil industrial desde Sudamérica: homologación, Incoterms y el pedido que sí llega',
+    metaTitle: 'Importar textil industrial desde el Perú',
+    description:
+      'La ruta completa para un comprador de la región andina: verificar al proveedor peruano, especificar sin ambigüedad, elegir el Incoterm y documentar el lote.',
+    datePublished: '2026-08-27',
+    dateModified: '2026-08-27',
+    readingMinutes: 11,
+    category: 'Especialidades',
+    sectors: ['Logística', 'Industrial', 'Minería'],
+    keyTakeaways: [
+      'Comprar textil industrial a través de una frontera falla casi siempre en tres puntos evitables: identidad del proveedor sin verificar, especificación ambigua que cada parte entiende distinto, e Incoterm elegido por costumbre y no por capacidad logística real del comprador.',
+      'La verificación de un proveedor peruano puede completarse con fuentes públicas que él no controla: el padrón de SUNAT para la identidad fiscal, la dirección de planta contrastable, y el catálogo con especificaciones que respondan a variables técnicas.',
+      'El Incoterm no es una formalidad del contrato: define físicamente dónde deja de ser problema del vendedor y empieza a serlo del comprador. EXW, FCA y FOB trasladan ese punto de la planta al transportista y al buque, y cada traslado cambia quién contrata qué.',
+      'El documento del lote —ficha técnica y certificado del fabricante— se exige en la cotización. Pedirlo con la carga ya embarcada convierte cualquier discrepancia en un problema sin buena solución.',
+    ],
+    intro: [
+      'Un comprador industrial de Quito, La Paz o Santiago que evalúa proveedor peruano enfrenta el mismo problema tres veces: no puede caminar la planta, no puede tocar el material y no puede resolver un malentendido con una visita. Todo lo que en una compra local se arregla con presencia, en una compra transfronteriza se arregla con documento — o no se arregla.',
+      'Esta guía ordena el proceso completo desde el lado del comprador: cómo verificar que el proveedor existe y es quien dice ser, cómo especificar para que ambas partes entiendan lo mismo, qué decide de verdad la elección del Incoterm, y qué papeles deben existir antes de que el contenedor se cierre. No promete plazos ni tarifas: cada operación se cotiza contra su partida, su volumen y su destino.',
+    ],
+    sections: [
+      {
+        heading: 'Paso previo: verificar sin viajar',
+        body: [
+          'La homologación a distancia empieza por fuentes que el proveedor no controla. En el Perú, la identidad fiscal es pública: el RUC se consulta en el padrón de SUNAT, que devuelve razón social, estado del contribuyente y domicilio fiscal. Una dirección de planta verificable en un mapa, un catálogo cuyas fichas respondan variables técnicas y no adjetivos, y la disposición a entregar documentación en la etapa de cotización completan el cuadro mínimo.',
+          'La señal de alarma más fiable es la asimetría entre lo que el proveedor afirma y lo que puede documentar: certificaciones nombradas sin número ni emisor, obras enumeradas sin autorización verificable del cliente, cobertura continental declarada sin estructura que la explique.',
+        ],
+      },
+      {
+        heading: 'La especificación que cruza fronteras sin romperse',
+        list: [
+          'Especifique en variables, no en nombres comerciales: gramaje con tolerancia, denier y trama en tejidos, espesor y resina en membranas, tratamiento UV declarado. Los nombres comerciales cambian de país a país; las variables no.',
+          'Fije unidades y norma de ensayo para cada valor: un mismo número medido con métodos distintos no es el mismo número.',
+          'Adjunte el uso final y la zona de destino: altitud, radiación y química de contacto cambian la fórmula correcta, y el proveedor solo puede advertirlo si lo sabe.',
+          'Acuerde el criterio de aceptación antes de producir: qué se mide en recepción, con qué tolerancia, y qué pasa si un valor sale fuera.',
+        ],
+        callout:
+          'La regla de oro transfronteriza: todo lo que no esté escrito en la especificación no existe. La versión hablada de la videollamada no cruza la aduana.',
+      },
+      {
+        heading: 'Incoterms: dónde cambia de manos el problema',
+        body: [
+          'Los Incoterms de la Cámara de Comercio Internacional definen el punto físico donde el riesgo y el costo pasan del vendedor al comprador. Para carga peruana de este rubro, tres términos concentran la práctica: EXW (el comprador recoge en planta y asume todo desde ahí), FCA (el vendedor entrega al transportista designado) y FOB (el vendedor pone la carga a bordo en el puerto de embarque, típicamente el Callao).',
+          'La elección correcta depende de la estructura del comprador, no de la costumbre: EXW solo conviene a quien tiene operador logístico propio en el Perú; FOB conviene a quien controla el flete marítimo; FCA es el punto medio para carga consolidada. Elegir EXW «porque es más barato» y descubrir después que nadie de su lado puede gestionar el transporte interno peruano es el error clásico de la primera importación.',
+        ],
+        table: {
+          caption: 'Los tres términos habituales para carga de este rubro desde el Perú',
+          headers: ['Término', 'El vendedor entrega', 'El comprador asume desde', 'Conviene cuando'],
+          rows: [
+            ['EXW', 'En su planta (Chorrillos, Lima)', 'La puerta de la planta: transporte interno, aduana, flete', 'El comprador tiene operador logístico propio en el Perú'],
+            ['FCA', 'Al transportista designado, en Lima', 'La entrega al transportista', 'Carga consolidada o forwarder del comprador con presencia local'],
+            ['FOB', 'A bordo del buque, puerto del Callao', 'El flete marítimo y el destino', 'El comprador controla su flete marítimo y su aduana de llegada'],
+          ],
+        },
+      },
+      {
+        heading: 'Los papeles que deben existir antes de cerrar el contenedor',
+        list: [
+          'Ficha técnica del material del lote, no del catálogo genérico.',
+          'Certificado del fabricante por lote cuando la línea lo tiene — y la exigencia normativa del punto de llegada verificada antes de producir, no después.',
+          'Factura y packing list coherentes con la especificación acordada, partida arancelaria incluida.',
+          'El criterio de aceptación en destino, por escrito, con el procedimiento pactado para discrepancias.',
+        ],
+      },
+      {
+        heading: 'Lo que un proveedor honesto no le va a prometer',
+        body: [
+          'Desconfíe de las promesas que la estructura del rubro no sostiene: cobertura continental automática, tarifas planas a cualquier destino, plazos garantizados sin conocer la partida ni el volumen. La operación transfronteriza seria se evalúa caso por caso, y el proveedor que lo dice está describiendo cómo funciona el comercio real, no poniendo obstáculos.',
+          'La contraparte de esa honestidad es la exigencia simétrica: el comprador que especifica en variables, elige el Incoterm según su capacidad real y pide los documentos en la cotización, convierte una primera importación en una operación repetible. Los desastres transfronterizos de este rubro casi nunca son de mala fe — son de ambigüedad.',
+        ],
+      },
+    ],
+    howTo: {
+      name: 'Homologar un proveedor peruano de textil industrial a distancia',
+      steps: [
+        {
+          name: 'Verifique la identidad fiscal',
+          text: 'Consulte el RUC del proveedor en el padrón público de SUNAT y contraste razón social, estado activo y domicilio fiscal con lo que el proveedor declara en su sitio.',
+        },
+        {
+          name: 'Contraste la planta',
+          text: 'Ubique la dirección declarada en un mapa y verifique que corresponde a una instalación industrial plausible, no a una oficina virtual.',
+        },
+        {
+          name: 'Audite el catálogo con tres preguntas técnicas',
+          text: 'Pida denier y trama de un tejido, el tratamiento UV de una lona y la resistencia de costura de un producto de izaje. Las respuestas separan fabricante de revendedor.',
+        },
+        {
+          name: 'Exija el documento en la cotización',
+          text: 'Solicite ficha técnica del material y certificado del fabricante por lote como condición de la oferta, no como trámite posterior al embarque.',
+        },
+        {
+          name: 'Elija el Incoterm según su estructura',
+          text: 'Decida EXW, FCA o FOB en función de qué puede gestionar realmente su organización en el Perú, y deje el punto de traspaso escrito en la orden.',
+        },
+        {
+          name: 'Pacte el criterio de aceptación',
+          text: 'Acuerde por escrito qué se mide en destino, con qué tolerancia y qué ocurre ante una discrepancia, antes de autorizar producción.',
+        },
+      ],
+    },
+    faqs: [
+      {
+        q: '¿Cómo verifico a un proveedor peruano sin viajar al Perú?',
+        a: 'Con fuentes públicas que el proveedor no controla: el RUC en el padrón de SUNAT (razón social, estado, domicilio fiscal), la dirección de planta contrastada en un mapa, y un catálogo que responda preguntas técnicas en variables — denier, trama, tratamiento UV, resistencia de costura. Un proveedor serio además entrega la documentación del material en la etapa de cotización.',
+      },
+      {
+        q: '¿Qué Incoterm conviene para importar textil industrial desde el Perú?',
+        a: 'El que corresponda a su capacidad logística real: EXW solo si tiene operador propio en el Perú, FCA si trabaja con un forwarder con presencia local, FOB Callao si controla su flete marítimo. El error habitual es elegir por precio aparente un término cuyas obligaciones el comprador no puede ejecutar.',
+      },
+      {
+        q: '¿Un proveedor peruano puede garantizarme plazo y tarifa a cualquier país de Sudamérica?',
+        a: 'No con honestidad: cada operación depende de la partida arancelaria, el volumen, el destino y el Incoterm, y la estructura del rubro —fabricación concentrada en Lima, salida por el Callao o por frontera terrestre— hace que la promesa de cobertura continental automática sea una señal de alarma, no de capacidad.',
+      },
+      {
+        q: '¿Qué documento es imprescindible pedir antes del embarque?',
+        a: 'La ficha técnica del material del lote y, donde la línea lo tiene, el certificado del fabricante por lote — además de verificar la exigencia normativa del punto de llegada antes de producir. Con la carga embarcada, cualquier discrepancia documental se convierte en un problema sin buena solución.',
+      },
+    ],
+    relatedProducts: [
+      'sacos-polytarp-embarque-granel',
+      'big-bags-bolsones-polipropileno',
+      'mangas-ventilacion-minas-tuneles',
+      'geomembrana-polietileno-pe-hdpe',
+    ],
+    relatedCities: ['callao', 'lima', 'tacna', 'puno'],
+    sources: [
+      {
+        label: 'ICC — Incoterms® rules (Cámara de Comercio Internacional)',
+        url: 'https://iccwbo.org/business-solutions/incoterms-rules/',
+        supports: 'La definición y el propósito de los términos EXW, FCA y FOB citados: puntos de traspaso de riesgo y costo.',
+      },
+      {
+        label: 'SUNAT — consulta pública de RUC',
+        url: 'https://e-consultaruc.sunat.gob.pe/',
+        supports: 'La verificación de identidad fiscal del proveedor descrita en el paso 1 de la homologación.',
+      },
+      {
+        label: 'APM Terminals Callao — requisitos documentales para bolsones',
+        url: 'https://www.apmterminals.com/es/callao/customer-zone/news-and-alerts/2022/28112022-recordatorio-estandarizacion-de-bolsones',
+        supports: 'Un ejemplo real de exigencia normativa del punto de tránsito que debe verificarse antes de producir.',
+      },
+    ],
+  },
+
 ];
 
 export const articleBySlug = (slug: string): Article | undefined =>

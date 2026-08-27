@@ -1,7 +1,7 @@
 {
   "$schema": "./topic-map.schema.md",
   "version": "1.0.0",
-  "revisado": "2026-08-26",
+  "revisado": "2026-08-27",
   "nota": "MAPA DE CONSULTAS → PÁGINA CANÓNICA. Una consulta comercial tiene UNA página que la contesta; el resto la refuerza y enlaza hacia ella. Este archivo existe para impedir la canibalización: si dos páginas compiten por el mismo término, el buscador elige por su cuenta y suele elegir mal. Ningún término de aquí autoriza a crear una página nueva: todos apuntan a páginas que YA existen y que ya tienen contenido propio. test/mapa-consultas.test.ts hace fallar el build si un término se repite en dos clústeres, si una canónica se repite, o si una ruta no existe.",
   "intenciones": {
     "comercial": "compra directa de un producto o familia",
@@ -2093,6 +2093,163 @@
         "/marco",
         "/calidad",
         "/aplicaciones/impermeabilizacion-pozas"
+      ]
+    },
+    {
+      "id": "cadena-productiva-rafia",
+      "canonica": "/recursos/de-la-resina-a-la-rafia-cadena-productiva-textil-industrial",
+      "intencion": "decision",
+      "termino": "cadena productiva del plastico industrial",
+      "variantes": [
+        "como se fabrica la rafia",
+        "rafia de polipropileno",
+        "extrusion de rafia",
+        "telar circular",
+        "fabricacion de rafia",
+        "proceso de fabricacion de big bags",
+        "como se hace una lona de rafia",
+        "laminado de rafia",
+        "denier rafia",
+        "cinta de polipropileno"
+      ],
+      "erratas": [
+        "raffia",
+        "rafia polipropileno como se hace"
+      ],
+      "preguntas": [
+        "¿cómo se fabrica la rafia de polipropileno?",
+        "¿qué es el denier en un tejido de rafia?",
+        "¿por qué la rafia resiste tanto si pesa tan poco?",
+        "¿qué debo pedir en una cotización de tejido de rafia además del gramaje?"
+      ],
+      "apoyos": [
+        "/productos/big-bags-bolsones-polipropileno",
+        "/productos/lona-plastificada-rafia-polytarp",
+        "/glosario/big-bag-fibc",
+        "/productos/familia/envases-embalaje"
+      ]
+    },
+    {
+      "id": "ecosistema-plastico-peru",
+      "canonica": "/recursos/ecosistema-plastico-industrial-peru-quien-fabrica-quien-compra",
+      "intencion": "decision",
+      "termino": "industria del plastico industrial en el peru",
+      "variantes": [
+        "ecosistema del plastico en el peru",
+        "fabricantes de textil industrial peru",
+        "transformadores de plastico peru",
+        "fabricar o importar textil industrial",
+        "proveedores de plastico industrial lima",
+        "industria del textil plastico peruano"
+      ],
+      "erratas": [
+        "industria plastico peru",
+        "fabricantes textil industrial en peru"
+      ],
+      "preguntas": [
+        "¿quién fabrica textil plástico industrial en el Perú?",
+        "¿conviene fabricar localmente o importar textil industrial?",
+        "¿cómo distingo a un fabricante de un revendedor de plásticos industriales?"
+      ],
+      "apoyos": [
+        "/productos",
+        "/confianza",
+        "/compras",
+        "/metodo"
+      ]
+    },
+    {
+      "id": "pp-pe-pvc-material",
+      "canonica": "/recursos/polipropileno-polietileno-pvc-que-material-para-que-trabajo",
+      "intencion": "decision",
+      "termino": "polipropileno o polietileno",
+      "variantes": [
+        "pp vs pe",
+        "pp o pvc",
+        "polietileno vs pvc",
+        "que plastico elegir",
+        "diferencia entre polipropileno y polietileno",
+        "que material para una lona",
+        "pvc o hdpe",
+        "polimeros industriales comparacion"
+      ],
+      "erratas": [
+        "polipropileno vs polietileno cual es mejor",
+        "diferencia pp pe"
+      ],
+      "preguntas": [
+        "¿qué es mejor para una lona: PP, PE o PVC?",
+        "¿qué diferencia hay entre polipropileno y polietileno?",
+        "¿se pueden soldar entre sí el PP, el PE y el PVC?",
+        "¿qué plástico resiste mejor el frío de altura?"
+      ],
+      "apoyos": [
+        "/productos/geomembrana-polietileno-pe-hdpe",
+        "/productos/geomembranas-pvc",
+        "/productos/lona-plastificada-rafia-polytarp",
+        "/glosario/altitud-y-radiacion"
+      ]
+    },
+    {
+      "id": "vida-util-reciclaje",
+      "canonica": "/recursos/vida-util-degradacion-uv-reciclaje-textil-industrial",
+      "intencion": "decision",
+      "termino": "vida util de una lona industrial",
+      "variantes": [
+        "degradacion uv del plastico",
+        "cuanto dura una lona a la intemperie",
+        "reciclaje de big bags",
+        "reciclaje de textil industrial",
+        "tratamiento uv lonas",
+        "cuando cambiar una lona",
+        "fin de vida del plastico industrial",
+        "lona quebradiza sol"
+      ],
+      "erratas": [
+        "vida util lona",
+        "cuanto dura lona sol"
+      ],
+      "preguntas": [
+        "¿cuánto dura una lona industrial a la intemperie en el Perú?",
+        "¿cómo sé si un textil plástico ya debe retirarse?",
+        "¿los big bags se pueden reciclar?",
+        "¿existe la lona biodegradable industrial?"
+      ],
+      "apoyos": [
+        "/productos/lona-plastificada-rafia-polytarp",
+        "/productos/big-bags-bolsones-polipropileno",
+        "/glosario/altitud-y-radiacion",
+        "/local"
+      ]
+    },
+    {
+      "id": "importar-desde-peru",
+      "canonica": "/recursos/comprar-textil-industrial-peru-sudamerica-incoterms-homologacion",
+      "intencion": "decision",
+      "termino": "importar textil industrial desde peru",
+      "variantes": [
+        "comprar big bags desde chile",
+        "proveedor peruano de lonas para bolivia",
+        "incoterms para importar de peru",
+        "homologar proveedor peruano",
+        "exw fca fob peru",
+        "comprar textil industrial sudamerica",
+        "como importar desde peru"
+      ],
+      "erratas": [
+        "incoterm peru",
+        "importar de peru textil"
+      ],
+      "preguntas": [
+        "¿cómo verifico a un proveedor peruano sin viajar al Perú?",
+        "¿qué Incoterm conviene para importar textil industrial desde el Perú?",
+        "¿qué documento es imprescindible pedir antes del embarque?"
+      ],
+      "apoyos": [
+        "/exportacion",
+        "/compradores",
+        "/confianza",
+        "/cotizacion"
       ]
     }
   ]
