@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { SITE } from '@/lib/site';
 import { buildEntidadJson, INCOTERMS_SALIDA } from '@/lib/entidad-feed';
@@ -14,7 +14,6 @@ import {
 import ciudades from '@/data/ciudades.json';
 import { todasLasRanurasConPublicadas, ranurasProceso } from '@/lib/imagenes';
 import { machinery } from '@/lib/machinery';
-import { readdirSync, statSync, existsSync } from 'node:fs';
 
 /**
  * LA ENTIDAD SE CIERRA, Y LA RESPUESTA DIRECTA NO INVENTA.
@@ -149,7 +148,7 @@ describe('la respuesta directa se compone, no se escribe', () => {
 
 describe('la cobertura geográfica describe sitios reales, no páginas de relleno', () => {
   type Ciudad = {
-    slug: string; ciudad: string; departamento: string; clima: string;
+    slug: string; ciudad: string; departamento: string; region: string; clima: string;
     contextoLocal: string; usosPrincipales: string[]; sectoresDemanda: string[];
     corredores?: { nombre: string; contexto: string }[];
   };
