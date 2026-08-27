@@ -79,6 +79,26 @@ export interface Novedad {
  */
 const registro: Novedad[] = [
   {
+    slug: 'serie-ecosistema-cinco-articulos-del-rubro',
+    fecha: '2026-08-27',
+    tipo: 'guia',
+    titulo: 'Serie «El ecosistema»: cinco artículos del rubro',
+    resumen:
+      'Cinco artículos explican la industria en la que este catálogo existe: la cadena de la rafia, el ecosistema peruano, los tres polímeros, la vida útil y la compra transfronteriza.',
+    queCambia:
+      'Las preguntas que un comprador hace antes de saber qué producto necesita —de qué está hecho esto, qué material elegir, qué pasa al final de la vida útil, cómo comprar desde otro país— tienen ahora respuesta propia, citable y con fuente.',
+    detalle: [
+      'El silo técnico respondía cómo especificar cada producto; no respondía la capa anterior, que es donde empieza la búsqueda real: cómo se fabrica la rafia, quién fabrica y quién importa en el Perú, qué polímero corresponde a qué trabajo, qué le hace el sol de altura al plástico y cómo se homologa a un proveedor peruano desde otro país de la región.',
+      'La regla de la serie es más estricta que la general del silo: ninguna cifra de mercado. No hay toneladas, cuotas ni tamaños de sector, porque no existen publicables con fuente a nivel del rubro. Cada número que aparece es una propiedad física o una relación normativa citada — y donde el dato honesto es «depende de la zona y de la fórmula», el artículo lo dice así en lugar de inventar un promedio.',
+      'La serie declara también lo que el rubro no puede afirmar: biodegradabilidad de poliolefinas convencionales, porcentajes de reciclado sin cadena documentada, cobertura continental automática. Explicar la industria incluye explicar sus límites.',
+    ],
+    enlaces: [
+      { label: 'De la resina a la rafia', href: '/recursos/de-la-resina-a-la-rafia-cadena-productiva-textil-industrial' },
+      { label: 'PP, PE o PVC: qué material para qué trabajo', href: '/recursos/polipropileno-polietileno-pvc-que-material-para-que-trabajo' },
+      { label: 'Todas las guías técnicas', href: '/recursos' },
+    ],
+  },
+  {
     slug: 'metodo-editorial-como-se-publica-este-sitio',
     fecha: '2026-08-27',
     tipo: 'referencia',

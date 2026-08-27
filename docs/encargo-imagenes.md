@@ -75,7 +75,117 @@ como `public/images/familias/geosinteticos.jpg`.
 
 ## Encabezados de guía
 
-0 pendientes de 10.
+5 pendientes de 15.
+
+### 1. `/images/recursos/de-la-resina-a-la-rafia-cadena-productiva-textil-industrial.webp`
+
+| | |
+|---|---|
+| **Archivo** | `public/images/recursos/de-la-resina-a-la-rafia-cadena-productiva-textil-industrial.webp` |
+| **Tamaño** | 1920 × 1080 px |
+| **Tipo** | ilustracion |
+| **Dónde se usa** | Encabezado de /recursos/de-la-resina-a-la-rafia-cadena-productiva-textil-industrial |
+| **Texto alternativo** | Apertura de la guía: De la resina a la rafia: la cadena productiva del textil industrial, etapa por etapa |
+
+**Prompt:**
+
+```
+Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+
+TEMA: De la resina a la rafia: la cadena productiva del textil industrial, etapa por etapa
+DE QUÉ TRATA: El recorrido completo: gránulo de polipropileno, extrusión de cinta, estiraje, telar circular, laminado y confección. Qué gobierna la calidad en cada etapa.
+ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+```
+
+---
+
+### 2. `/images/recursos/ecosistema-plastico-industrial-peru-quien-fabrica-quien-compra.webp`
+
+| | |
+|---|---|
+| **Archivo** | `public/images/recursos/ecosistema-plastico-industrial-peru-quien-fabrica-quien-compra.webp` |
+| **Tamaño** | 1920 × 1080 px |
+| **Tipo** | ilustracion |
+| **Dónde se usa** | Encabezado de /recursos/ecosistema-plastico-industrial-peru-quien-fabrica-quien-compra |
+| **Texto alternativo** | Apertura de la guía: El ecosistema del plástico industrial en el Perú: quién fabrica, quién importa y quién compra |
+
+**Prompt:**
+
+```
+Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+
+TEMA: El ecosistema del plástico industrial en el Perú: quién fabrica, quién importa y quién compra
+DE QUÉ TRATA: Cómo se estructura el rubro: resina importada, transformación local, importación directa de líneas terminadas, y los sectores que demandan cada cosa.
+ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+```
+
+---
+
+### 3. `/images/recursos/polipropileno-polietileno-pvc-que-material-para-que-trabajo.webp`
+
+| | |
+|---|---|
+| **Archivo** | `public/images/recursos/polipropileno-polietileno-pvc-que-material-para-que-trabajo.webp` |
+| **Tamaño** | 1920 × 1080 px |
+| **Tipo** | ilustracion |
+| **Dónde se usa** | Encabezado de /recursos/polipropileno-polietileno-pvc-que-material-para-que-trabajo |
+| **Texto alternativo** | Apertura de la guía: Polipropileno, polietileno o PVC: qué material para qué trabajo |
+
+**Prompt:**
+
+```
+Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+
+TEMA: Polipropileno, polietileno o PVC: qué material para qué trabajo
+DE QUÉ TRATA: Los tres polímeros del textil industrial comparados por lo que decide una compra: comportamiento mecánico, química, soldadura, sol de altura y fin de vida.
+ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+```
+
+---
+
+### 4. `/images/recursos/vida-util-degradacion-uv-reciclaje-textil-industrial.webp`
+
+| | |
+|---|---|
+| **Archivo** | `public/images/recursos/vida-util-degradacion-uv-reciclaje-textil-industrial.webp` |
+| **Tamaño** | 1920 × 1080 px |
+| **Tipo** | ilustracion |
+| **Dónde se usa** | Encabezado de /recursos/vida-util-degradacion-uv-reciclaje-textil-industrial |
+| **Texto alternativo** | Apertura de la guía: Vida útil, sol de altura y fin de vida: lo que le pasa al textil industrial con los años |
+
+**Prompt:**
+
+```
+Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+
+TEMA: Vida útil, sol de altura y fin de vida: lo que le pasa al textil industrial con los años
+DE QUÉ TRATA: Cómo degrada el sol a los plásticos industriales, qué señales anuncian el fin de la vida útil, qué se recicla de verdad y qué no — sin promesas verdes.
+ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+```
+
+---
+
+### 5. `/images/recursos/comprar-textil-industrial-peru-sudamerica-incoterms-homologacion.webp`
+
+| | |
+|---|---|
+| **Archivo** | `public/images/recursos/comprar-textil-industrial-peru-sudamerica-incoterms-homologacion.webp` |
+| **Tamaño** | 1920 × 1080 px |
+| **Tipo** | ilustracion |
+| **Dónde se usa** | Encabezado de /recursos/comprar-textil-industrial-peru-sudamerica-incoterms-homologacion |
+| **Texto alternativo** | Apertura de la guía: Comprar textil industrial desde Sudamérica: homologación, Incoterms y el pedido que sí llega |
+
+**Prompt:**
+
+```
+Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
+
+TEMA: Comprar textil industrial desde Sudamérica: homologación, Incoterms y el pedido que sí llega
+DE QUÉ TRATA: La ruta completa para un comprador de la región andina: verificar al proveedor peruano, especificar sin ambigüedad, elegir el Incoterm y documentar el lote.
+ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
+```
+
+---
 
 ## Guías de especificación (diagramas)
 
