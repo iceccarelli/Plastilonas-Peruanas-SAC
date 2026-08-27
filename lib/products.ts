@@ -359,6 +359,12 @@ export const products: Product[] = [
       '/images/galeria/cobertores-agricolas-multimaterial-instalacion.webp',
       '/images/galeria/cobertores-agricolas-multimaterial-escala.webp',
       '/images/cobertores-multimaterial.webp',
+      // Fotografía de manta agrotextil sobre cama de siembra con cobertura de
+      // suelo. Estaba en public/ desde el lote de conversión a webp y no la
+      // mostraba ninguna página: se perdió al reestructurar las galerías.
+      // Corresponde a «protección de cultivos, camas de siembra y almácigos»,
+      // que es la primera aplicación declarada de este producto.
+      '/images/agrotextiles.webp',
     ],
     featured: false,
     popular: false,

@@ -266,7 +266,7 @@
     "slug": "moquegua",
     "ciudad": "Moquegua",
     "departamento": "Moquegua",
-    "region": "costa y sierra",
+    "region": "costa",
     "clima": "Árido con cielo despejado casi todo el año y radiación ultravioleta muy alta; fuerte oscilación térmica entre el día y la noche y viento sostenido en quebrada.",
     "contextoLocal": "Moquegua articula el puerto de Ilo con las operaciones de cobre del sur, incluida Quellaveco, y con la fundición y refinería de la costa. La combinación de radiación intensa, viento y polvo define los materiales: la degradación por ultravioleta manda sobre casi todo lo demás, y la impermeabilización de pozas y canales es una decisión de proceso, no de acabado.",
     "usosPrincipales": [
@@ -326,7 +326,7 @@
     "slug": "puno",
     "ciudad": "Puno",
     "departamento": "Puno",
-    "region": "altiplano",
+    "region": "sierra",
     "clima": "Altiplano sobre los 3 800 metros junto al lago Titicaca: noches bajo cero buena parte del año, heladas, granizo y radiación ultravioleta extrema por la altura y el cielo limpio.",
     "contextoLocal": "Puno mezcla ganadería altoandina y agricultura de altura con minería y comercio de frontera hacia Bolivia. El ciclo de helada nocturna y sol intenso de mediodía castiga los materiales más que la temperatura media: la protección de cultivo y de ganado se especifica contra la helada, y las coberturas se piden por su comportamiento tras cientos de ciclos térmicos, no por su aspecto el primer día.",
     "usosPrincipales": [

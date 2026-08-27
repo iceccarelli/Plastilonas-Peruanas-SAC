@@ -94,6 +94,24 @@ export default function ImagenContenido({
   const capas = tomas.slice(1);
   const ciclo = claseCiclo(tomas.length);
 
+  /**
+   * EL ZOOM ES PARA FOTOGRAFÍAS, NO PARA ESQUEMAS.
+   *
+   * `.ken-burns` va de scale(1.01) a scale(1.06) con un pequeño desplazamiento.
+   * En una fotografía de catálogo eso da vida sin coste: el encuadre tiene aire
+   * y lo que se recorta es fondo. En un DIAGRAMA no hay aire — la composición
+   * llega hasta el borde a propósito, porque cada elemento está colocado donde
+   * significa algo. Un 6 % de zoom se come alrededor de un 3 % por lado, y ese
+   * 3 % es la primera columna de los pilares del marco, el borde de la silueta
+   * del Perú o la tercera banda del método de los informes.
+   *
+   * El comentario de globals.css ya razona esto para las fotos —«en un catálogo
+   * técnico ese detalle ES el argumento»—; en un esquema el argumento es el
+   * dibujo entero. Así que el diagrama conserva el CRUCE entre tomas, que es lo
+   * que aporta, y renuncia al zoom, que sólo le quita información.
+   */
+  const animar = ranura.tipo !== 'diagrama';
+
   return (
     <figure className={className}>
       <div
@@ -106,7 +124,7 @@ export default function ImagenContenido({
           fill
           sizes={sizes}
           priority={prioridad}
-          className="ken-burns object-cover"
+          className={`${animar ? 'ken-burns' : ''} object-cover`}
         />
         {/* Tomas adicionales del MISMO concepto. aria-hidden porque el alt de
             la primera ya las describe: repetirlo es ruido para quien escucha
@@ -117,7 +135,7 @@ export default function ImagenContenido({
             className={`toma-cruce toma-capa-${k + 2} absolute inset-0`}
             aria-hidden="true"
           >
-            <Image src={toma} alt="" fill sizes={sizes} className="ken-burns object-cover" />
+            <Image src={toma} alt="" fill sizes={sizes} className={`${animar ? 'ken-burns' : ''} object-cover`} />
           </div>
         ))}
       </div>

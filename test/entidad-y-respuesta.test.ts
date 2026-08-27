@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { SITE } from '@/lib/site';
 import { buildEntidadJson, INCOTERMS_SALIDA } from '@/lib/entidad-feed';
@@ -12,6 +12,8 @@ import {
   rfqWhatsAppProducto,
 } from '@/lib/respuesta-directa';
 import ciudades from '@/data/ciudades.json';
+import { todasLasRanurasConPublicadas, ranurasProceso } from '@/lib/imagenes';
+import { machinery } from '@/lib/machinery';
 
 /**
  * LA ENTIDAD SE CIERRA, Y LA RESPUESTA DIRECTA NO INVENTA.
@@ -146,7 +148,7 @@ describe('la respuesta directa se compone, no se escribe', () => {
 
 describe('la cobertura geográfica describe sitios reales, no páginas de relleno', () => {
   type Ciudad = {
-    slug: string; ciudad: string; departamento: string; clima: string;
+    slug: string; ciudad: string; departamento: string; region: string; clima: string;
     contextoLocal: string; usosPrincipales: string[]; sectoresDemanda: string[];
     corredores?: { nombre: string; contexto: string }[];
   };
@@ -183,6 +185,28 @@ describe('la cobertura geográfica describe sitios reales, no páginas de rellen
     expect(choques, 'contexto duplicado: eso es una doorway page').toEqual([]);
   });
 
+  it('toda ciudad cae en una región que /local sabe agrupar', () => {
+    /**
+     * /local agrupa por la división clásica del Perú —costa, sierra, selva— y
+     * recorre REGION_ORDER para pintar los grupos. Una ciudad con una región
+     * fuera de esa lista genera su página, entra en el sitemap… y no la enlaza
+     * NADIE, porque no cae en ningún grupo. Pasó al añadir Moquegua como
+     * «costa y sierra» y Puno como «altiplano»: dos huérfanas que sólo cazó
+     * `npm run auditar` sobre el HTML servido. Aquí se caza antes.
+     */
+    const src = readFileSync(join(process.cwd(), 'app/local/page.tsx'), 'utf8');
+    const declaradas = /const REGION_ORDER = \[([^\]]+)\]/.exec(src)?.[1] ?? '';
+    const validas = new Set(
+      declaradas.split(',').map((r) => r.trim().replace(/^["']|["']$/g, '')).filter(Boolean),
+    );
+    expect(validas.size, 'no se pudo leer REGION_ORDER de app/local/page.tsx').toBeGreaterThan(0);
+    const fuera = CIUDADES.filter((c) => !validas.has(c.region)).map((c) => `${c.slug} (${c.region})`);
+    expect(
+      fuera,
+      `estas ciudades no caen en ningún grupo de /local y quedarían huérfanas: ${fuera.join(', ')}`,
+    ).toEqual([]);
+  });
+
   it('los corredores viven dentro de su ciudad y no como páginas propias', () => {
     const conCorredores = CIUDADES.filter((c) => c.corredores?.length);
     for (const c of conCorredores) {
@@ -194,5 +218,124 @@ describe('la cobertura geográfica describe sitios reales, no páginas de rellen
         ).toBe(false);
       }
     }
+  });
+});
+
+describe('ninguna imagen del repositorio se queda sin mostrar', () => {
+  /**
+   * TODA IMAGEN EN public/ SE VE EN ALGUNA PÁGINA.
+   *
+   * lib/imagenes.ts parte de que la ranura se declara ANTES de que exista el
+   * archivo: por eso una ranura pendiente no es un error y la página degrada
+   * sola. La consecuencia es que el sentido contrario —un archivo que existe
+   * y que nadie declara— no lo detectaba nada. `auditar:imagenes` comprueba
+   * que toda ruta citada tenga archivo, que es la otra dirección.
+   *
+   * Se coló así una fotografía real de manta agrotextil: entró en el lote de
+   * conversión a webp, se perdió al reestructurar las galerías y siguió
+   * ocupando disco sin que ninguna página la mostrara. Un archivo que no se
+   * ve es peso muerto en el despliegue y, peor, contenido bueno perdido.
+   */
+  it('no queda ningún archivo en public/images que ninguna página muestre', () => {
+    const enDisco: string[] = [];
+    const recorrer = (d: string) => {
+      for (const e of readdirSync(d, { withFileTypes: true })) {
+        const ruta = `${d}/${e.name}`;
+        if (e.isDirectory()) recorrer(ruta);
+        else enDisco.push(ruta.replace(/^public/, ''));
+      }
+    };
+    recorrer('public/images');
+
+    const citadas = new Set<string>();
+    for (const r of todasLasRanurasConPublicadas()) citadas.add(r.ruta);
+    for (const p of products) {
+      if (p.image) citadas.add(p.image);
+      for (const g of p.gallery ?? []) citadas.add(g);
+    }
+    for (const m of machinery) for (const v of m.views) { citadas.add(v.webp); citadas.add(v.thumb); }
+    // Rutas escritas directamente en el código: heros, /servicios, /en, /pt.
+    // Se ignoran las que llevan interpolación: ésas ya salen del registro.
+    const recorrerFuentes = (d: string) => {
+      for (const e of readdirSync(d, { withFileTypes: true })) {
+        if (e.name === 'node_modules' || e.name.startsWith('.')) continue;
+        const ruta = `${d}/${e.name}`;
+        if (e.isDirectory()) recorrerFuentes(ruta);
+        else if (/\.(ts|tsx|mjs|json)$/.test(e.name) && statSync(ruta).size < 3_000_000) {
+          for (const m of readFileSync(ruta, 'utf8')
+            .matchAll(/["'`](\/images\/[^"'`${]+\.(?:webp|jpg|jpeg|png|svg|avif))["'`]/g)) {
+            citadas.add(m[1]);
+          }
+        }
+      }
+    };
+    for (const d of ['app', 'components', 'lib', 'data']) recorrerFuentes(d);
+
+    // Tomas alternas: -2, -3, -4 sobre cualquier ruta ya citada.
+    for (const c of [...citadas]) for (const n of [2, 3, 4]) citadas.add(c.replace(/(\.\w+)$/, `-${n}$1`));
+
+    const huerfanas = enDisco.filter((f) => !citadas.has(f)).sort();
+    expect(
+      huerfanas,
+      `archivos que ocupan disco y no se ven en ninguna página. Conéctelos a la ` +
+        `galería o ranura que les corresponda, o retírelos: ${huerfanas.join(', ')}`,
+    ).toEqual([]);
+  });
+});
+
+describe('las tomas rotan y los esquemas no se recortan', () => {
+  /**
+   * Dos reglas distintas para dos clases de imagen.
+   *
+   * El cruce entre tomas aporta en las dos: enseña el mismo asunto desde otro
+   * ángulo sin pedirle nada al lector. El ZOOM, en cambio, sólo aporta cuando
+   * hay aire alrededor. Un diagrama se compone hasta el borde —cada elemento
+   * está donde significa algo— y un 6 % de escala se lleva un 3 % por lado.
+   */
+  it('ImagenContenido no aplica ken-burns a un diagrama', () => {
+    const src = readFileSync(join(process.cwd(), 'components/ImagenContenido.tsx'), 'utf8');
+    expect(src, 'falta la condición que exime del zoom a los esquemas').toContain(
+      "ranura.tipo !== 'diagrama'",
+    );
+    expect(
+      /className=\{`\$\{animar \? 'ken-burns' : ''\}/.test(src),
+      'el zoom volvió a aplicarse incondicionalmente',
+    ).toBe(true);
+  });
+
+  it('toda ranura de proceso publicada tiene su segunda toma, sin huecos', () => {
+    /**
+     * La numeración de tomas no admite huecos: si existe -3 y falta -2, el
+     * sitio se queda en la toma 1 y el cruce no ocurre. Se comprueba aquí
+     * porque un ZIP mal descomprimido es la forma habitual de crear el hueco.
+     */
+    const sinHueco: string[] = [];
+    for (const r of ranurasProceso()) {
+      const base = `public${r.ruta}`;
+      if (!existsSync(base)) continue;
+      const toma = (n: number) => base.replace(/(\.\w+)$/, `-${n}$1`);
+      for (let n = 3; n <= 4; n += 1) {
+        if (existsSync(toma(n)) && !existsSync(toma(n - 1))) {
+          sinHueco.push(`${r.ruta}: existe -${n} pero falta -${n - 1}`);
+        }
+      }
+    }
+    expect(sinHueco, 'una numeración con huecos deja la ranura sin rotar').toEqual([]);
+  });
+
+  it('ninguna toma alterna es un duplicado exacto de su toma 1', () => {
+    /**
+     * El sitio compara byte a byte y descarta las copias exactas, así que un
+     * duplicado no rompe nada visible: simplemente deja la página quieta y
+     * descarga el archivo dos veces. Es peso muerto disfrazado de movimiento.
+     */
+    const duplicadas: string[] = [];
+    for (const r of ranurasProceso()) {
+      const base = `public${r.ruta}`;
+      const segunda = base.replace(/(\.\w+)$/, '-2$1');
+      if (!existsSync(base) || !existsSync(segunda)) continue;
+      if (readFileSync(base).equals(readFileSync(segunda))) duplicadas.push(r.ruta);
+    }
+    expect(duplicadas, 'la toma 2 es idéntica a la 1: cambie el ángulo o retírela').toEqual([]);
   });
 });
