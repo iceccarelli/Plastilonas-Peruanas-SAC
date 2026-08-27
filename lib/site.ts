@@ -33,12 +33,37 @@
  * dominio de marca vivo que reciba esa autoridad no consolidaría nada, borraría
  * el sitio de Google. test/dominio-migracion.test.ts protege ese invariante.
  */
+/**
+ * EL ORIGEN CANÓNICO NO LO DECIDE UNA VARIABLE DE STRIPE.
+ *
+ * Este fallback leía `NEXT_PUBLIC_SITE_URL` en segundo lugar, y esa variable
+ * existe para OTRA cosa: construir las URLs de retorno de Stripe. `.env.example`
+ * la trae puesta a `http://localhost:3000` con ese propósito escrito al lado.
+ *
+ * El día que alguien active pagos siguiendo ese archivo y la copie a Vercel, el
+ * sitio entero pasa a publicar canónicos, sitemap, robots (Host y Sitemap), OG,
+ * llms.txt y los cuatro nodos de JSON-LD apuntando a localhost. Y no lo avisa
+ * nada: `migracionActiva()` sólo mira CANONICAL_ORIGIN, así que el middleware
+ * no se entera, y el daño es el mismo que el del interruptor de dominio pero
+ * sin ninguna de sus protecciones — se pisa haciendo otra cosa.
+ *
+ * Ahora sólo CANONICAL_ORIGIN puede mover el origen, que es la variable que
+ * lib/site.ts y middleware.ts documentan como el interruptor de la mudanza. Y
+ * se rechaza cualquier valor que no sea https, para que un http:// pegado por
+ * error no emita canónicos inseguros.
+ */
+const ORIGEN_POR_DEFECTO = "https://plastilonas-peruanas-sac.vercel.app";
+
 function originFromEnv(): string {
-  const raw =
-    process.env.CANONICAL_ORIGIN ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://plastilonas-peruanas-sac.vercel.app";
-  return raw.replace(/\/$/, "");
+  const raw = (process.env.CANONICAL_ORIGIN || "").trim();
+  if (!raw) return ORIGEN_POR_DEFECTO;
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:") return ORIGEN_POR_DEFECTO;
+    return raw.replace(/\/$/, "");
+  } catch {
+    return ORIGEN_POR_DEFECTO;
+  }
 }
 
 export const SITE = {

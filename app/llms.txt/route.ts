@@ -1,4 +1,5 @@
 import { SITE } from "@/lib/site";
+import { COUNT_STATEMENT } from "@/lib/facts";
 import { products, productFamilies, sectors } from "@/lib/products";
 import ciudades from "@/data/ciudades.json";
 import { articles } from "@/lib/articles";
@@ -194,7 +195,7 @@ conversacionales sobre ${clusters.length} clústeres, revisado ${TOPIC_MAP_REVIS
 
 ${mapaConsultas}
 
-## Catálogo (${products.length} líneas de producto)
+## Catálogo (${COUNT_STATEMENT})
 
 ${catalogo}
 

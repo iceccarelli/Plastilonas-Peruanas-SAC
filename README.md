@@ -69,7 +69,8 @@ Lo que conviene saber sin abrirlo:
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Checkout hospedado | No hay pago en línea |
 | `N8N_WEBHOOK_URL` | Reenvío de leads | `/api/lead` responde 200 y no reenvía |
 | `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GTM_ID` | Analítica | No se carga ningún script de terceros |
-| **`CANONICAL_ORIGIN`** | Interruptor de mudanza de dominio | **Ver el aviso de abajo** |
+| **`CANONICAL_ORIGIN`** | Interruptor de mudanza de dominio. **La única que mueve `SITE.url`** | **Ver el aviso de abajo** |
+| `NEXT_PUBLIC_SITE_URL` | URLs de retorno de Stripe, y sólo eso | No afecta al origen canónico |
 
 > **`CANONICAL_ORIGIN` puede desindexar el sitio entero.** Cuando su valor
 > coincide con el host canónico, `middleware.ts` emite
@@ -86,14 +87,16 @@ instalado y `OPENAI_API_KEY` no la lee nadie.
 
 ## 4. Verificación
 
-Nada se publica sin que estas siete pasen. Las seis primeras corren en CI en
-cada pull request (`.github/workflows/ci.yml`).
+Nada se publica sin que estas siete pasen. **Las siete corren en CI** en cada
+pull request (`.github/workflows/ci.yml`), y el flujo añade dos pasos más que no
+están en esta lista: `npm run seo:all` y una segunda pasada aislada de
+`test/facts.test.ts` contra las contradicciones de conteo.
 
 ```bash
 npx tsc --noEmit            # tipos
-npm test                    # 553 pruebas (vitest)
+npm test                    # la suite completa (vitest)
 npm run auditar:imagenes    # toda ruta de imagen citada tiene archivo
-npm run build               # 275 páginas
+npm run build               # el sitio completo, estático
 npm run auditar             # el HTML SERVIDO: títulos, descripciones, enlaces,
                             #   imágenes, nombres accesibles, JSON-LD, huérfanas
 npm run auditar:viewport    # 17 dispositivos de 280px a 2560px, con Chromium

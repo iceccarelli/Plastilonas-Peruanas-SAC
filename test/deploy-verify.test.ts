@@ -123,17 +123,30 @@ describe('cobertura: nada se publica sin verificarse', () => {
       .join('\n');
     expect(extraccion, 'el script ya no extrae el origen de ningún sitio').not.toBe('');
 
+    /**
+     * SE EJECUTAN LAS LÍNEAS DEL SCRIPT, NO UNA COPIA DE ELLAS.
+     *
+     * Esta prueba llevaba dentro un duplicado literal del grep del script. Un
+     * duplicado no vigila: envejece. Cuando se sacó NEXT_PUBLIC_SITE_URL del
+     * fallback de originFromEnv() —era la variable de Stripe y podía mandar
+     * todos los canónicos a localhost— el script se reancló y esta copia siguió
+     * probando el ancla vieja, que es exactamente el fallo de veintiséis commits
+     * que el comentario de arriba narra.
+     *
+     * Ahora se recorta el bloque real del archivo y se ejecuta. Si alguien
+     * cambia el ancla, esto se entera el mismo día.
+     */
+    const bloque = /SITE_URL="\$\{CANONICAL_ORIGIN[\s\S]*?\nfi\n/.exec(script)?.[0];
+    expect(bloque, 'no se encontró el bloque que resuelve el origen en el script').toBeTruthy();
+
     const resuelto = execFileSync(
       'bash',
-      [
-        '-c',
-        'SITE_URL="${CANONICAL_ORIGIN:-${NEXT_PUBLIC_SITE_URL:-}}"; ' +
-          'if [ -z "$SITE_URL" ]; then ' +
-          'SITE_URL=$(grep -A2 \'process.env.NEXT_PUBLIC_SITE_URL\' lib/site.ts ' +
-          '| grep -oE \'"https://[^"]+"\' | head -1 | tr -d \'"\'); fi; ' +
-          'printf %s "$SITE_URL"',
-      ],
-      { cwd: process.cwd(), encoding: 'utf8', env: { ...process.env, CANONICAL_ORIGIN: '', NEXT_PUBLIC_SITE_URL: '' } },
+      ['-c', `${bloque}\nprintf %s "$SITE_URL"`],
+      {
+        cwd: process.cwd(),
+        encoding: 'utf8',
+        env: { ...process.env, CANONICAL_ORIGIN: '', NEXT_PUBLIC_SITE_URL: '' },
+      },
     );
     expect(resuelto, 'la extracción del origen devolvió vacío: el verificador no puede verificar nada').not.toBe('');
     expect(resuelto).toBe(SITE.url);
