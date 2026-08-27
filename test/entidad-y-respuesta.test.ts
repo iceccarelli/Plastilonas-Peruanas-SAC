@@ -12,9 +12,9 @@ import {
   rfqWhatsAppProducto,
 } from '@/lib/respuesta-directa';
 import ciudades from '@/data/ciudades.json';
-import { todasLasRanurasConPublicadas } from '@/lib/imagenes';
+import { todasLasRanurasConPublicadas, ranurasProceso } from '@/lib/imagenes';
 import { machinery } from '@/lib/machinery';
-import { readdirSync, statSync } from 'node:fs';
+import { readdirSync, statSync, existsSync } from 'node:fs';
 
 /**
  * LA ENTIDAD SE CIERRA, Y LA RESPUESTA DIRECTA NO INVENTA.
@@ -281,5 +281,62 @@ describe('ninguna imagen del repositorio se queda sin mostrar', () => {
       `archivos que ocupan disco y no se ven en ninguna página. Conéctelos a la ` +
         `galería o ranura que les corresponda, o retírelos: ${huerfanas.join(', ')}`,
     ).toEqual([]);
+  });
+});
+
+describe('las tomas rotan y los esquemas no se recortan', () => {
+  /**
+   * Dos reglas distintas para dos clases de imagen.
+   *
+   * El cruce entre tomas aporta en las dos: enseña el mismo asunto desde otro
+   * ángulo sin pedirle nada al lector. El ZOOM, en cambio, sólo aporta cuando
+   * hay aire alrededor. Un diagrama se compone hasta el borde —cada elemento
+   * está donde significa algo— y un 6 % de escala se lleva un 3 % por lado.
+   */
+  it('ImagenContenido no aplica ken-burns a un diagrama', () => {
+    const src = readFileSync(join(process.cwd(), 'components/ImagenContenido.tsx'), 'utf8');
+    expect(src, 'falta la condición que exime del zoom a los esquemas').toContain(
+      "ranura.tipo !== 'diagrama'",
+    );
+    expect(
+      /className=\{`\$\{animar \? 'ken-burns' : ''\}/.test(src),
+      'el zoom volvió a aplicarse incondicionalmente',
+    ).toBe(true);
+  });
+
+  it('toda ranura de proceso publicada tiene su segunda toma, sin huecos', () => {
+    /**
+     * La numeración de tomas no admite huecos: si existe -3 y falta -2, el
+     * sitio se queda en la toma 1 y el cruce no ocurre. Se comprueba aquí
+     * porque un ZIP mal descomprimido es la forma habitual de crear el hueco.
+     */
+    const sinHueco: string[] = [];
+    for (const r of ranurasProceso()) {
+      const base = `public${r.ruta}`;
+      if (!existsSync(base)) continue;
+      const toma = (n: number) => base.replace(/(\.\w+)$/, `-${n}$1`);
+      for (let n = 3; n <= 4; n += 1) {
+        if (existsSync(toma(n)) && !existsSync(toma(n - 1))) {
+          sinHueco.push(`${r.ruta}: existe -${n} pero falta -${n - 1}`);
+        }
+      }
+    }
+    expect(sinHueco, 'una numeración con huecos deja la ranura sin rotar').toEqual([]);
+  });
+
+  it('ninguna toma alterna es un duplicado exacto de su toma 1', () => {
+    /**
+     * El sitio compara byte a byte y descarta las copias exactas, así que un
+     * duplicado no rompe nada visible: simplemente deja la página quieta y
+     * descarga el archivo dos veces. Es peso muerto disfrazado de movimiento.
+     */
+    const duplicadas: string[] = [];
+    for (const r of ranurasProceso()) {
+      const base = `public${r.ruta}`;
+      const segunda = base.replace(/(\.\w+)$/, '-2$1');
+      if (!existsSync(base) || !existsSync(segunda)) continue;
+      if (readFileSync(base).equals(readFileSync(segunda))) duplicadas.push(r.ruta);
+    }
+    expect(duplicadas, 'la toma 2 es idéntica a la 1: cambie el ángulo o retírela').toEqual([]);
   });
 });
