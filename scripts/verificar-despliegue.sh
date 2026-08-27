@@ -36,14 +36,21 @@ set -uo pipefail
 # durante 300 segundos y concluía que el despliegue no había llegado — mientras
 # el sitio servía perfectamente el commit correcto.
 #
-# Ahora se resuelve en el mismo orden que originFromEnv(): las dos variables de
-# entorno primero, y si no hay ninguna, el literal de reserva que ese archivo
-# declara. No se escribe ningún host a mano aquí: test/dominio.test.ts rompe el
-# build si alguien lo intenta, y con razón — un verificador con su propia copia
-# del dominio es el archivo que se queda atrás el día de la migración.
-SITE_URL="${CANONICAL_ORIGIN:-${NEXT_PUBLIC_SITE_URL:-}}"
+# Ahora se resuelve en el mismo orden que originFromEnv(): CANONICAL_ORIGIN
+# primero, y si no está, el literal de reserva que ese archivo declara. No se
+# escribe ningún host a mano aquí: test/dominio.test.ts rompe el build si
+# alguien lo intenta, y con razón — un verificador con su propia copia del
+# dominio es el archivo que se queda atrás el día de la migración.
+#
+# SEGUNDA VEZ. Este grep volvió a quedarse sin ancla cuando se sacó
+# NEXT_PUBLIC_SITE_URL del fallback —era la variable de Stripe y podía mandar
+# todos los canónicos a localhost—. La lección de la primera vez era anclar en
+# algo estable, y `process.env.…` no lo era. Ahora se ancla en la CONSTANTE que
+# originFromEnv() devuelve por defecto, que es un nombre y no un camino de
+# ejecución, y test/deploy-verify.test.ts comprueba que siga casando.
+SITE_URL="${CANONICAL_ORIGIN:-}"
 if [ -z "$SITE_URL" ]; then
-  SITE_URL=$(grep -A2 'process.env.NEXT_PUBLIC_SITE_URL' lib/site.ts \
+  SITE_URL=$(grep -E '^const ORIGEN_POR_DEFECTO' lib/site.ts \
     | grep -oE '"https://[^"]+"' | head -1 | tr -d '"')
 fi
 BASE_URL="${BASE_URL:-$SITE_URL}"

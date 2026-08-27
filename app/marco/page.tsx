@@ -27,7 +27,15 @@ import { ranurasProceso } from '@/lib/imagenes';
  */
 
 const URL = `${SITE.url}/marco`;
-const TITLE = 'Marco de Especificación: 6 pilares y 27 criterios';
+/**
+ * El título se DERIVA. Escrito a mano decía «6 pilares y 27 criterios» mientras
+ * la misma página renderizaba `totalCriteria()` = 26 cuatro veces: la pestaña
+ * del navegador y el primer párrafo se contradecían, y el 27 es el que Google
+ * indexaba. Es la bomba de tiempo que el README describe —«escribir 36
+ * productos a mano crea una cifra que caduca en silencio»— sólo que en la
+ * página cuyo trabajo entero es demostrar rigor ante un ingeniero.
+ */
+const TITLE = `Marco de Especificación: ${pillars.length} pilares y ${totalCriteria()} criterios`;
 const DESCRIPTION = `${totalCriteria()} criterios verificables para definir un proyecto antes de cotizarlo: compatibilidad, cargas, exposición, ejecución, documentación y operación.`;
 
 const FAQS = [

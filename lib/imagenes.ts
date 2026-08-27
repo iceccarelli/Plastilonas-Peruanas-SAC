@@ -6,6 +6,7 @@ import { guides } from './guides';
 import { applications } from './applications';
 import { INDUSTRIAS } from './industrias';
 import { calculadoras } from './calculadoras';
+import { pillars } from './framework';
 
 /**
  * REGISTRO DE IMÁGENES.
@@ -707,7 +708,12 @@ const PROCESOS = [
     ancho: 1600,
     alto: 900,
     alt: 'Los pilares del marco de especificación y qué decide cada uno',
-    tema: 'los pilares del marco de especificación dispuestos como columnas, cada una con el tipo de decisión que resuelve y lo que ocurre en obra si ese dato no existe al cotizar',
+    // El número va DERIVADO del marco. Escrito a mano, el encargo pedía «los
+    // pilares» sin decir cuántos, y el generador entregó cinco columnas para
+    // una página que dice seis. Un esquema que contradice a su propia página
+    // es peor que no tener esquema: el comprador que los cuenta deja de
+    // fiarse del resto.
+    tema: `los ${pillars.length} pilares del marco de especificación dispuestos como columnas —exactamente ${pillars.length}, ni una más ni una menos—, cada una con el tipo de decisión que resuelve y lo que ocurre en obra si ese dato no existe al cotizar`,
   },
   {
     slug: 'informes-metodo',
