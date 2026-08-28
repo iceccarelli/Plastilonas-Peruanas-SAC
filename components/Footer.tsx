@@ -6,9 +6,15 @@ import Image from 'next/image';
 import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
 import SocialIcons from '@/components/SocialIcons';
 import FooterAccordion, { type FSection } from '@/components/FooterAccordion';
+import { products } from '@/lib/products';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  // Cifra honesta, contada del catálogo: la insignia decía «Fabricación 100%
+  // a medida» mientras 16 de las 36 líneas son importación directa y una es
+  // de aliado técnico. La misma mentira ya se retiró de la portada y del
+  // prompt del asistente; el pie era el último lugar donde sobrevivía.
+  const propias = products.filter((p) => p.sourcing === 'fabricacion_propia').length;
 
   const sections: FSection[] = [
     { title: 'PRODUCTOS', links: [
@@ -67,8 +73,24 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-[#0A2540] text-white/90 pt-16 pb-8">
+    <footer className="bg-[#0A2540] text-white/90 pt-12 pb-8 rounded-t-[2.5rem]">
       <div className="max-w-7xl mx-auto px-6">
+        {/* ── Fila de cierre (patrón AWS): el CTA principal y los idiomas
+            reales del sitio. /en y /pt existen: son la puerta de entrada por
+            idioma, no una traducción fingida. ── */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-5 pb-10 mb-10 border-b border-white/10">
+          <Link
+            href="/cotizacion"
+            className="inline-flex items-center justify-center bg-white text-[#0A2540] font-semibold px-7 py-3 rounded-full hover:bg-[#10B981] hover:text-white transition-colors"
+          >
+            Solicitar cotización
+          </Link>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="px-4 py-2 rounded-full border border-white/30 text-white">Español</span>
+            <Link href="/en" className="px-4 py-2 rounded-full border border-white/15 text-white/70 hover:border-white/40 hover:text-white transition-colors">English</Link>
+            <Link href="/pt" className="px-4 py-2 rounded-full border border-white/15 text-white/70 hover:border-white/40 hover:text-white transition-colors">Português</Link>
+          </div>
+        </div>
         {/* ── Mobile: marca compacta + CTA + acordeón (patrón AWS) ── */}
         <div className="md:hidden">
           <div className="flex items-center gap-3 mb-4">
@@ -104,7 +126,7 @@ export default function Footer() {
                 <Award className="w-3.5 h-3.5" /> Desde 2009
               </div>
               <div className="flex items-center gap-2 text-xs bg-white/5 px-3.5 py-1.5 rounded-full">
-                <Users className="w-3.5 h-3.5" /> Fabricación 100% a medida
+                <Users className="w-3.5 h-3.5" /> Confección en planta: {propias} de {products.length} líneas
               </div>
             </div>
             <div className="mt-7">
