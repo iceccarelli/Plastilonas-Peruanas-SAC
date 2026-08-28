@@ -7,12 +7,13 @@ import { X, Send, Bot, User } from 'lucide-react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { whatsappUrl, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
+import { INICIOS, seguimientosPara } from '@/lib/chat/intents';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
 
   const engaged = useRef(false);
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, append, isLoading, error } = useChat({
     api: '/api/chat',
     initialMessages: [
       {
@@ -24,6 +25,41 @@ export default function Chatbot() {
   });
 
   const toggleChat = () => setIsOpen(!isOpen);
+
+  /**
+   * Un botón de intención envía SU texto como turno del usuario: mismo camino
+   * que escribirlo a mano, misma métrica de interés. Patrón «Ask AWS»: el
+   * estado vacío ofrece caminos tocables en lugar de un pozo en blanco.
+   */
+  const enviarIntencion = (mensaje: string) => {
+    if (isLoading) return;
+    if (!engaged.current) {
+      engaged.current = true;
+      trackChatbotEngaged();
+    }
+    void append({ role: 'user', content: mensaje });
+  };
+
+  // El estado "vacío" es solo el saludo: aún no hay ningún turno del usuario.
+  const sinConversacion = messages.length <= 1;
+  // Chips de seguimiento: tras cada respuesta del asistente, los 2–3 pasos
+  // siguientes más probables según el último intercambio.
+  const ultimo = messages[messages.length - 1];
+  const chipsSeguimiento =
+    !sinConversacion && !isLoading && !error && ultimo?.role === 'assistant'
+      ? seguimientosPara(
+          messages
+            .slice(-2)
+            .map((m) => m.content)
+            .join('\n'),
+        ).slice(0, 3)
+      : [];
+  // Semilla del botón de WhatsApp: la última consulta real del usuario, para
+  // que el comercial reciba el contexto y no un «hola» vacío.
+  const ultimaConsulta = [...messages].reverse().find((m) => m.role === 'user')?.content;
+  const semillaWhatsApp = ultimaConsulta
+    ? `Hola, vengo del asistente del sitio. Mi consulta: ${ultimaConsulta}`
+    : 'Hola, quisiera hacer una consulta sobre sus productos.';
 
   return (
     <>
@@ -144,6 +180,43 @@ export default function Chatbot() {
                   </div>
                 ))}
 
+                {/* Estado vacío: caminos tocables, no un pozo en blanco. */}
+                {sinConversacion && !isLoading && (
+                  <div className="pl-10 space-y-3">
+                    <p className="t-micro text-gray-400">¿Qué necesita resolver?</p>
+                    <div className="flex flex-col gap-2">
+                      {INICIOS.map((intento) => (
+                        <button
+                          key={intento.etiqueta}
+                          type="button"
+                          onClick={() => enviarIntencion(intento.mensaje)}
+                          className="text-left text-sm bg-white border border-gray-200 hover:border-[#059669] hover:text-[#047857] px-4 py-2.5 rounded-2xl shadow-sm transition-colors"
+                        >
+                          {intento.etiqueta}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Seguimientos: después de cada respuesta, los 2–3 pasos
+                    siguientes más probables. La conversación nunca queda
+                    en un callejón sin salida. */}
+                {chipsSeguimiento.length > 0 && (
+                  <div className="pl-10 flex flex-wrap gap-2">
+                    {chipsSeguimiento.map((chip) => (
+                      <button
+                        key={chip.etiqueta}
+                        type="button"
+                        onClick={() => enviarIntencion(chip.mensaje)}
+                        className="text-xs bg-white border border-gray-200 hover:border-[#059669] hover:text-[#047857] px-3.5 py-2 rounded-full shadow-sm transition-colors"
+                      >
+                        {chip.etiqueta}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {isLoading && (
                   <div className="flex gap-3">
                     <div className="w-7 h-7 bg-[#0A2540] text-white rounded-2xl flex-shrink-0 flex items-center justify-center">
@@ -174,6 +247,25 @@ export default function Chatbot() {
                 )}
               </div>
 
+              {/* Cierre de conversión: siempre visible. El asistente orienta;
+                  estos dos botones son los que convierten. */}
+              <div className="px-4 pt-3 border-t bg-white flex gap-2">
+                <a
+                  href="/cotizacion?origen=chat"
+                  className="flex-1 text-center text-sm font-semibold bg-[#0A2540] hover:bg-[#047857] text-white px-4 py-2.5 rounded-2xl transition-colors"
+                >
+                  Cotizar
+                </a>
+                <a
+                  href={whatsappUrl(semillaWhatsApp)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 text-center text-sm font-semibold border border-gray-200 hover:border-[#059669] text-[#047857] px-4 py-2.5 rounded-2xl transition-colors"
+                >
+                  WhatsApp
+                </a>
+              </div>
+
               {/* Input */}
               <form
                 onSubmit={(e) => {
@@ -185,7 +277,7 @@ export default function Chatbot() {
                   }
                   handleSubmit(e);
                 }}
-                className="p-4 border-t bg-white flex gap-2"
+                className="p-4 pt-3 bg-white flex gap-2"
               >
                 <input
                   value={input}

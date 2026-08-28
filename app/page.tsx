@@ -22,7 +22,7 @@ const FOTO_SERVICIO: Record<string, string> = {
   ship: '/images/servicio-importacion.webp',
   lightbulb: '/images/servicio-asesoria.webp',
 };
-import HeroCarousel from '@/components/HeroCarousel';
+import HeroImagen from '@/components/HeroImagen';
 import SectionHeading from '@/components/SectionHeading';
 import MachineryGallery from '@/components/MachineryGallery';
 import { Reveal } from '@/components/Reveal';
@@ -127,43 +127,66 @@ export default function Home() {
 
   return (
     <div className="overflow-hidden">
-      {/* ===== 1 · HERO ===== */}
-      <section className="relative min-h-[78vh] md:min-h-[92vh] flex flex-col items-center justify-center bg-[#0A2540] text-white py-16 md:py-0">
-        <HeroCarousel />
-        <div className="relative max-w-5xl mx-auto px-6 text-center z-10 pt-24">
-          <Reveal>
-            <div className="inline-flex items-center gap-2 bg-white/10 text-white/90 text-xs tracking-[2px] font-medium px-5 py-2 rounded-full mb-6 border border-white/20">SOLUCIONES TEXTILES E INDUSTRIALES INTEGRALES EN EL PERÚ</div>
-          </Reveal>
-          <Reveal delay={0.05}>
-            <h1 className="t-display font-semibold mb-6">Fabricación a medida.<br />Instalación propia.<br />Un solo proveedor.</h1>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/80 mb-10">Big Bags, geomembranas, estructuras, mallas, ventilación y geosintéticos: {products.length} soluciones en {productFamilies.length} líneas de producto, fabricadas e instaladas por nuestro propio equipo en el Perú.</p>
-          </Reveal>
-          <Reveal delay={0.15}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/productos" className="group btn btn-lg bg-white text-[#0A2540] hover:bg-[#047857] hover:text-white shadow-lg shadow-black/20">Explorar Catálogo <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></Link>
-              <Link href="/cotizacion" className="btn btn-lg border border-white/40 text-white hover:bg-white/10 hover:border-white/60">Solicitar Cotización</Link>
-            </div>
-          </Reveal>
+      {/* ===== 1 · HERO — panel sólido a la izquierda, UNA foto quieta a la derecha.
+           El texto nunca se superpone a la fotografía: cada plano es legible
+           por sí solo. Sin carrusel, sin Ken Burns, sin cifras sobre la foto. ===== */}
+      <section className="relative bg-[#0A2540] text-white">
+        <div className="mx-auto grid lg:grid-cols-[minmax(0,46rem)_minmax(0,1fr)] min-h-[70vh] md:min-h-[82vh]">
+          {/* Columna de texto: fondo sólido, una idea por línea. */}
+          <div className="flex flex-col justify-center px-6 py-16 md:py-20 lg:pl-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))] lg:pr-14">
+            <Reveal>
+              <div className="text-xs tracking-[2px] text-[#10B981] font-semibold uppercase mb-5">
+                Fabricante e instalador · Chorrillos, Lima — Perú
+              </div>
+            </Reveal>
+            <Reveal delay={0.05}>
+              <h1 className="t-display font-semibold mb-4">Textil técnico a medida, con instalación propia.</h1>
+            </Reveal>
+            <Reveal delay={0.08}>
+              <p className="text-lg md:text-xl text-white/85 mb-3">Un solo proveedor para cubrir, contener y ventilar.</p>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <p className="max-w-xl text-sm md:text-base text-white/60 mb-9">
+                Big bags, lonas, geomembranas, mallas y ventilación minera. Cotización con ficha técnica y despacho a todo el país.
+              </p>
+            </Reveal>
+            <Reveal delay={0.15}>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-10">
+                <Link href="/cotizacion" className="group btn btn-lg bg-white text-[#0A2540] hover:bg-[#047857] hover:text-white shadow-lg shadow-black/20 justify-center">Cotizar proyecto <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></Link>
+                <Link href="/productos" className="btn btn-lg border border-white/40 text-white hover:bg-white/10 hover:border-white/60 justify-center">Ver catálogo</Link>
+              </div>
+            </Reveal>
+            <Reveal delay={0.2}>
+              <div className="flex flex-wrap items-center gap-x-7 gap-y-3 border-t border-white/15 pt-6 text-xs text-white/55">
+                {trust.map((t, i) => (
+                  <div key={i} className="flex items-center gap-2"><t.icon className="w-3.5 h-3.5 text-[#10B981]" /> {t.text}</div>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+          {/* Columna de fotografía: una obra real, quieta, sin texto encima. */}
+          <div className="relative h-64 sm:h-80 lg:h-auto">
+            <HeroImagen />
+          </div>
         </div>
-        <Reveal delay={0.2} className="relative z-10 w-full max-w-6xl mx-auto px-6 mt-10 md:mt-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-3xl overflow-hidden border border-white/10 backdrop-blur-sm">
+      </section>
+
+      {/* ===== 1b · CIFRAS — banda plana bajo el hero, sobre fondo sólido.
+           Las mismas cifras derivadas del catálogo, ahora legibles: nada de
+           vidrio esmerilado sobre fotografía. ===== */}
+      <section className="bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
             {stats.map((stat, i) => (
-              <div key={i} className="bg-white/5 px-3 py-6 md:px-6 md:py-7 text-center">
-                <div className="text-3xl md:text-4xl font-semibold tracking-tighter text-white tabular-nums">
+              <div key={i} className="px-3 py-7 md:px-6 md:py-9 text-center">
+                <div className="text-3xl md:text-4xl font-semibold tracking-tighter text-[#0A2540] tabular-nums">
                   <CountUp to={stat.to} suffix={stat.suffix} display={stat.display} />
                 </div>
-                <div className="text-xs text-white/85 mt-1.5 font-medium tracking-wide">{stat.label}</div>
-                <div className="t-micro text-white/45 mt-1 leading-snug">{stat.sub}</div>
+                <div className="text-xs text-gray-700 mt-1.5 font-medium tracking-wide">{stat.label}</div>
+                <div className="t-micro text-gray-400 mt-1 leading-snug">{stat.sub}</div>
               </div>
             ))}
           </div>
-        </Reveal>
-        <div className="relative z-10 mt-10 mb-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-white/50">
-          {trust.map((t, i) => (
-            <div key={i} className="flex items-center gap-2"><t.icon className="w-3.5 h-3.5 text-[#10B981]" /> {t.text}</div>
-          ))}
         </div>
       </section>
 

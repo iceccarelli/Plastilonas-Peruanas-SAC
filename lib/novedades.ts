@@ -363,6 +363,28 @@ const registro: Novedad[] = [
       { label: 'Términos y condiciones', href: '/terminos' },
     ],
   },
+  {
+    slug: 'asistente-guiado-y-portada-legible',
+    fecha: '2026-08-28',
+    tipo: 'herramienta',
+    titulo: 'El asistente guía la consulta paso a paso',
+    resumen:
+      'El chat abre con seis caminos tocables, sugiere el paso siguiente tras cada respuesta y mantiene a la vista la cotización y el canal de WhatsApp.',
+    queCambia:
+      'Quien llega con una necesidad y sin vocabulario técnico ya no tiene que redactar la primera pregunta: elige el trabajo que trae —cubrir, contener, impermeabilizar, ventilar o proteger cultivo— y el asistente pide justo los datos que faltan para cotizar. Cada recomendación enlaza la ficha real del catálogo y declara el modo de suministro de la línea.',
+    detalle: [
+      'El estado inicial del chat ofrece seis intenciones frecuentes en lugar de un campo vacío; cada botón envía la consulta tal cual, sin texto oculto.',
+      'Tras cada respuesta aparecen dos o tres seguimientos según el tema (big bags, geomembranas, ventilación, mallas, lonas, precios o plazos), de modo que la conversación nunca queda sin paso siguiente.',
+      'La cotización formal y el canal de WhatsApp quedan siempre visibles en el widget; el mensaje de WhatsApp lleva la última consulta como contexto.',
+      'El asistente conoce la ruta y el modo de suministro de cada una de las líneas del catálogo, y tiene prohibido inventar precios, plazos, certificaciones, clientes u obras.',
+      'La portada se reorganizó: el texto vive sobre panel sólido y la fotografía —una obra real por visita, quieta— en su propia columna; las cifras del catálogo pasaron a una banda plana legible.',
+    ],
+    enlaces: [
+      { label: 'Portada', href: '/' },
+      { label: 'Solicitar cotización', href: '/cotizacion' },
+      { label: 'Catálogo de productos', href: '/productos' },
+    ],
+  },
 ];
 
 /** Novedades de la más reciente a la más antigua. */
