@@ -23,6 +23,7 @@ const FOTO_SERVICIO: Record<string, string> = {
   lightbulb: '/images/servicio-asesoria.webp',
 };
 import HeroImagen from '@/components/HeroImagen';
+import HeroMensaje from '@/components/HeroMensaje';
 import { novedades, tipoLabels } from '@/lib/novedades';
 import SectionHeading from '@/components/SectionHeading';
 import MachineryGallery from '@/components/MachineryGallery';
@@ -143,16 +144,11 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-24 md:pt-24 md:pb-36">
           <Reveal>
             <div className="max-w-xl bg-white/95 backdrop-blur rounded-3xl shadow-2xl shadow-black/25 p-7 md:p-10">
-              <div className="text-xs tracking-[2px] text-[#047857] font-semibold uppercase mb-4">
-                Fabricante e instalador · Chorrillos, Lima — Perú
-              </div>
-              <h1 className="text-3xl md:text-[2.75rem] md:leading-[1.08] font-semibold tracking-tight text-[#0A2540] mb-4">
-                Textil técnico a medida, con instalación propia.
-              </h1>
-              <p className="text-base md:text-lg text-[#334155] mb-2">Un solo proveedor para cubrir, contener y ventilar.</p>
-              <p className="text-sm text-[#64748B] mb-7">
-                Big bags, lonas, geomembranas, mallas y ventilación minera. Cotización con ficha técnica y despacho a todo el país.
-              </p>
+              {/* Texto vivo: 15 bloques con los mismos hechos, rotados cada
+                  ~10 s; solo el H1 se teclea. Los botones y los chips de
+                  abajo son el marco constante. SSR sirve el primer bloque
+                  completo — el H1 canónico de los rastreadores. */}
+              <HeroMensaje />
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-7">
                 <Link href="/cotizacion" className="group inline-flex items-center justify-center gap-2 bg-[#0A2540] text-white hover:bg-[#047857] font-semibold px-6 py-3.5 rounded-full transition-colors">Cotizar proyecto <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></Link>
                 <Link href="/productos" className="inline-flex items-center justify-center gap-2 border border-[#0A2540]/25 text-[#0A2540] hover:border-[#047857] hover:text-[#047857] font-semibold px-6 py-3.5 rounded-full transition-colors">Ver catálogo</Link>
