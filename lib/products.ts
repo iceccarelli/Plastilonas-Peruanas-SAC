@@ -221,7 +221,7 @@ export const products: Product[] = [
       'Cualquier solución textil industrial personalizada'
     ],
     benefits: [
-      'Fabricación 100% a medida según sus especificaciones exactas',
+      'Fabricación a medida según sus especificaciones exactas',
       'Alta calidad de confección con garantía de durabilidad',
       'Asesoría técnica especializada para elegir la mejor solución',
       'Entregas rápidas y precios competitivos',
@@ -1621,7 +1621,7 @@ export const products: Product[] = [
 // -----------------------------------------------------------------------------
 export const productFamilies: ProductFamily[] = [
   { name: 'Envases y Embalaje', slug: 'envases-embalaje', tagline: 'Big Bags, sacos, bolsas y films' },
-  { name: 'Lonas y Cobertores', slug: 'lonas-cobertores', tagline: 'Confección textil 100% a medida' },
+  { name: 'Lonas y Cobertores', slug: 'lonas-cobertores', tagline: 'Confección textil a medida en planta' },
   { name: 'Estructuras y Arquitectura Textil', slug: 'estructuras-arquitectura-textil', tagline: 'Carpas, tensadas, módulos e invernaderos' },
   { name: 'Mallas y Coberturas Agrícolas', slug: 'mallas-agricolas', tagline: 'Antiáfidas, Raschel y protección de cultivo' },
   { name: 'Ventilación Industrial', slug: 'ventilacion-industrial', tagline: 'Mangas para minas y túneles' },

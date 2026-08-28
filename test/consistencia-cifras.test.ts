@@ -121,3 +121,32 @@ describe('sólo CANONICAL_ORIGIN mueve el origen canónico', () => {
     expect(culpables, 'localhost escrito en una página servida').toEqual([]);
   });
 });
+
+describe('la insignia «100% a medida» no vuelve', () => {
+  /**
+   * «Fabricación 100% a medida» sobrevivió en el pie del sitio y en el prompt
+   * del asistente mientras el propio catálogo declaraba que 16 de las 36
+   * líneas son importación directa y una es de aliado técnico. La cifra
+   * honesta se cuenta de lib/products (sourcing === 'fabricacion_propia') y
+   * así se muestra en la portada y en el pie. Este test la caza en TODO el
+   * código servido para que no reaparezca en el siguiente rediseño.
+   */
+  it('ningún archivo servido afirma fabricación 100% a medida', () => {
+    const culpables: string[] = [];
+    const recorrer = (dir: string) => {
+      for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
+        if (e.name.startsWith('.') || e.name === 'node_modules') continue;
+        const rel = `${dir}/${e.name}`;
+        if (e.isDirectory()) recorrer(rel);
+        else if (/\.(ts|tsx|json)$/.test(e.name) && statSync(join(raiz, rel)).size < 2_000_000) {
+          const codigo = readFileSync(join(raiz, rel), 'utf8')
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/^\s*\/\/.*$/gm, '');
+          if (/100\s*%\s*a\s*medida/i.test(codigo)) culpables.push(rel);
+        }
+      }
+    };
+    for (const d of ['app', 'components', 'lib', 'data']) recorrer(d);
+    expect(culpables, 'la cifra honesta se deriva del catálogo, no se inventa').toEqual([]);
+  });
+});

@@ -471,6 +471,10 @@ export default function Navbar() {
             dimensionan a 24px de alto como mínimo: WCAG 2.5.8. */}
         <div className="hidden md:block bg-[#0A2540] dark:bg-[#060D18] text-white/80 text-xs border-b border-transparent dark:border-[#24354F]">
           <div className="max-w-7xl mx-auto px-6 h-10 flex items-center justify-end gap-5">
+            {/* Horario y planta: datos de la barra utilitaria, no del hero.
+                El horario real vive aquí, junto al teléfono que lo atiende. */}
+            <span className="hidden xl:inline-flex items-center min-h-[24px] px-1 text-white/55">Chorrillos, Lima</span>
+            <span className="hidden lg:inline-flex items-center min-h-[24px] px-1 text-white/55">L–V 8:00–18:00 · Sáb 8:00–13:00</span>
             <a href="tel:+51998117065" className="inline-flex items-center min-h-[24px] px-1 hover:text-white transition-colors">
               +51 998 117 065
             </a>

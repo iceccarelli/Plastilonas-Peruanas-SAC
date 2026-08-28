@@ -4,6 +4,7 @@ import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import FeedbackBar from '@/components/FeedbackBar';
 import Chatbot from '@/components/Chatbot';
 import CartDrawer from '@/components/CartDrawer';
 import { Toaster } from 'sonner';
@@ -158,7 +159,12 @@ export default function RootLayout({
         <WebPush />
         <AuthProvider>
           <Navbar />
-          <main className="min-h-screen">{children}</main>
+          <main className="min-h-screen">
+            {children}
+            {/* Cierre de página estilo AWS: ¿encontró lo que buscaba? Dentro
+                de <main> para que la capa oscura de globals.css lo cubra. */}
+            <FeedbackBar />
+          </main>
           <Footer />
           <Chatbot />
           <CartDrawer />

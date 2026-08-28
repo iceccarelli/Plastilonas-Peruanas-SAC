@@ -23,6 +23,7 @@ const FOTO_SERVICIO: Record<string, string> = {
   lightbulb: '/images/servicio-asesoria.webp',
 };
 import HeroImagen from '@/components/HeroImagen';
+import { novedades, tipoLabels } from '@/lib/novedades';
 import SectionHeading from '@/components/SectionHeading';
 import MachineryGallery from '@/components/MachineryGallery';
 import { Reveal } from '@/components/Reveal';
@@ -127,56 +128,52 @@ export default function Home() {
 
   return (
     <div className="overflow-hidden">
-      {/* ===== 1 · HERO — panel sólido a la izquierda, UNA foto quieta a la derecha.
-           El texto nunca se superpone a la fotografía: cada plano es legible
-           por sí solo. Sin carrusel, sin Ken Burns, sin cifras sobre la foto. ===== */}
-      <section className="relative bg-[#0A2540] text-white">
-        <div className="mx-auto grid lg:grid-cols-[minmax(0,46rem)_minmax(0,1fr)] min-h-[70vh] md:min-h-[82vh]">
-          {/* Columna de texto: fondo sólido, una idea por línea. */}
-          <div className="flex flex-col justify-center px-6 py-16 md:py-20 lg:pl-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))] lg:pr-14">
-            <Reveal>
-              <div className="text-xs tracking-[2px] text-[#10B981] font-semibold uppercase mb-5">
+      {/* ===== 1 · HERO — patrón AWS: tarjeta clara flotante sobre la
+           fotografía. La tarjeta es opaca (bg-white/95, adrede NO bg-white:
+           la capa de modo oscuro remapea .bg-white y esta tarjeta debe seguir
+           clara en ambos temas, como la de aws.amazon.com), así que el texto
+           nunca compite con la foto. Dentro de la tarjeta los colores van en
+           hexadecimal por la misma razón: la capa oscura remapea las
+           utilidades .text-gray-* y volvería tinta clara un texto que vive
+           sobre superficie clara. Sin carrusel, sin Ken Burns. ===== */}
+      <section className="relative bg-[#0A2540] overflow-hidden">
+        <div className="absolute inset-0">
+          <HeroImagen />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-24 md:pt-24 md:pb-36">
+          <Reveal>
+            <div className="max-w-xl bg-white/95 backdrop-blur rounded-3xl shadow-2xl shadow-black/25 p-7 md:p-10">
+              <div className="text-xs tracking-[2px] text-[#047857] font-semibold uppercase mb-4">
                 Fabricante e instalador · Chorrillos, Lima — Perú
               </div>
-            </Reveal>
-            <Reveal delay={0.05}>
-              <h1 className="t-display font-semibold mb-4">Textil técnico a medida, con instalación propia.</h1>
-            </Reveal>
-            <Reveal delay={0.08}>
-              <p className="text-lg md:text-xl text-white/85 mb-3">Un solo proveedor para cubrir, contener y ventilar.</p>
-            </Reveal>
-            <Reveal delay={0.1}>
-              <p className="max-w-xl text-sm md:text-base text-white/60 mb-9">
+              <h1 className="text-3xl md:text-[2.75rem] md:leading-[1.08] font-semibold tracking-tight text-[#0A2540] mb-4">
+                Textil técnico a medida, con instalación propia.
+              </h1>
+              <p className="text-base md:text-lg text-[#334155] mb-2">Un solo proveedor para cubrir, contener y ventilar.</p>
+              <p className="text-sm text-[#64748B] mb-7">
                 Big bags, lonas, geomembranas, mallas y ventilación minera. Cotización con ficha técnica y despacho a todo el país.
               </p>
-            </Reveal>
-            <Reveal delay={0.15}>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-10">
-                <Link href="/cotizacion" className="group btn btn-lg bg-white text-[#0A2540] hover:bg-[#047857] hover:text-white shadow-lg shadow-black/20 justify-center">Cotizar proyecto <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></Link>
-                <Link href="/productos" className="btn btn-lg border border-white/40 text-white hover:bg-white/10 hover:border-white/60 justify-center">Ver catálogo</Link>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-7">
+                <Link href="/cotizacion" className="group inline-flex items-center justify-center gap-2 bg-[#0A2540] text-white hover:bg-[#047857] font-semibold px-6 py-3.5 rounded-full transition-colors">Cotizar proyecto <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></Link>
+                <Link href="/productos" className="inline-flex items-center justify-center gap-2 border border-[#0A2540]/25 text-[#0A2540] hover:border-[#047857] hover:text-[#047857] font-semibold px-6 py-3.5 rounded-full transition-colors">Ver catálogo</Link>
               </div>
-            </Reveal>
-            <Reveal delay={0.2}>
-              <div className="flex flex-wrap items-center gap-x-7 gap-y-3 border-t border-white/15 pt-6 text-xs text-white/55">
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-[#0A2540]/10 pt-5 text-xs text-[#64748B]">
                 {trust.map((t, i) => (
-                  <div key={i} className="flex items-center gap-2"><t.icon className="w-3.5 h-3.5 text-[#10B981]" /> {t.text}</div>
+                  <div key={i} className="flex items-center gap-1.5"><t.icon className="w-3.5 h-3.5 text-[#059669]" /> {t.text}</div>
                 ))}
               </div>
-            </Reveal>
-          </div>
-          {/* Columna de fotografía: una obra real, quieta, sin texto encima. */}
-          <div className="relative h-64 sm:h-80 lg:h-auto">
-            <HeroImagen />
-          </div>
+            </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* ===== 1b · CIFRAS — banda plana bajo el hero, sobre fondo sólido.
-           Las mismas cifras derivadas del catálogo, ahora legibles: nada de
-           vidrio esmerilado sobre fotografía. ===== */}
-      <section className="bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
+      {/* ===== 1b · LÁMINA BLANCA (patrón AWS): el contenido sube sobre el
+           hero con esquinas redondeadas grandes. Dentro: las cifras derivadas
+           del catálogo en banda plana y las novedades reales del registro
+           fechado — el «What's new» de AWS, con enlaces que existen. ===== */}
+      <section className="relative z-10 -mt-12 rounded-t-[2.5rem] bg-white">
+        <div className="max-w-7xl mx-auto px-6 pt-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100 border-b border-gray-100">
             {stats.map((stat, i) => (
               <div key={i} className="px-3 py-7 md:px-6 md:py-9 text-center">
                 <div className="text-3xl md:text-4xl font-semibold tracking-tighter text-[#0A2540] tabular-nums">
@@ -187,11 +184,31 @@ export default function Home() {
               </div>
             ))}
           </div>
+
+          <div className="py-14 md:py-16">
+            <Reveal>
+              <SectionHeading eyebrow="Registro fechado" title="Novedades" className="mb-8" action={<Link href="/novedades" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el registro <ArrowRight className="w-4 h-4" /></Link>} />
+            </Reveal>
+            <div className="grid md:grid-cols-3 gap-5">
+              {novedades.slice(0, 3).map((n, i) => (
+                <Reveal key={n.slug} delay={0.04 * i}>
+                  <Link href={`/novedades/${n.slug}`} className="group flex flex-col h-full bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-2xl p-6 transition-colors">
+                    <div className="font-mono text-[11px] tracking-wide text-gray-500 mb-3">{tipoLabels[n.tipo]} · {n.fecha}</div>
+                    <div className="font-semibold text-gray-900 leading-snug mb-2">{n.titulo}</div>
+                    <p className="text-sm text-gray-600 leading-relaxed mb-4">{n.resumen}</p>
+                    <ArrowRight className="w-4 h-4 mt-auto text-gray-400 group-hover:text-[#059669] group-hover:translate-x-1 transition-all" />
+                  </Link>
+                </Reveal>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ===== 2 · CATÁLOGO ===== */}
-      <section className="bg-white section-pad section-lift">
+      {/* section-lift ya no hace falta aquí: la lámina 1b es la que sube
+          sobre el hero; este bloque continúa sobre el mismo fondo blanco. */}
+      <section className="bg-white section-pad">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
             <SectionHeading eyebrow="Todo lo que necesita, en un solo lugar" title="Explore el catálogo por familia" className="mb-6" action={<Link href="/productos" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el catálogo <ArrowRight className="w-4 h-4" /></Link>} />
