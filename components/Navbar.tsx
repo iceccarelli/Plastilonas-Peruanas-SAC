@@ -493,7 +493,13 @@ export default function Navbar() {
         </div>
 
         <nav className="bg-white/95 dark:bg-[#1C2C46]/95 backdrop-blur-lg border-b border-gray-200 dark:border-[var(--border)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          {/* `relative` es el ancla del mega-menú. El panel se posiciona
+              contra ESTE contenedor (ancho útil completo de la cabecera) y no
+              contra zonaNav: el ancho de zonaNav es lo que sobra tras logo,
+              buscador y CTA, y atarle el panel hizo que en pantallas ANCHAS
+              —donde el contenedor se detiene en 1280px pero la derecha crece—
+              el catálogo entero se estrujara a ~350px, palabra por palabra. */}
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
             <div className="flex items-center gap-3 xl:gap-6 h-20">
             {/* Logo. `min-w-0` permite que el rótulo ceda antes de empujar
                 al resto fuera de la pantalla. */}
@@ -540,23 +546,11 @@ export default function Navbar() {
                         Productos
                         <ChevronDown className={`w-4 h-4 transition-transform ${abierto === 'Productos' ? 'rotate-180' : ''}`} />
                       </button>
-                      <span
-                        aria-hidden="true"
-                        /* h-5 y no h-3: el hueco mide 12px, pero el panel entra
-                           con una animación de escala que baja su techo hasta
-                           16px durante 200ms. Un puente al ras deja pasar a
-                           quien se mueva deprisa justo al abrir. Solapando 8px
-                           dentro del panel el hueco no existe en ningún
-                           fotograma, y el solape no estorba: el panel se pinta
-                           por encima y se queda con el clic. */
-                        className={`absolute top-full left-0 right-0 h-5 ${abierto === 'Productos' ? 'block' : 'hidden'}`}
-                      />
-                      <MegaProductos
-                        visible={abierto === 'Productos'}
-                        cerrar={cerrarYa}
-                        reafirmar={() => abrir('Productos')}
-                        abrirBuscador={() => { cerrarYa(); setShowCommand(true); }}
-                      />
+                      {/* Ni panel ni puente viven aquí: ambos se renderizan al
+                          final del contenedor `relative` de la cabecera
+                          (MegaProductos trae su propio puente del ancho del
+                          panel), para que su geometría no dependa del hueco
+                          que le dejen el logo y las acciones de la derecha. */}
                     </div>
                   ) : e.tipo === 'grupo' ? (
                     <div
@@ -700,14 +694,18 @@ export default function Navbar() {
                 <Search className="w-5 h-5" />
               </button>
 
+              {/* Buscador: SIEMPRE píldora de icono. El rótulo «Buscar
+                  productos ⌘K» que aparecía en 2xl añadía ~190px a la derecha
+                  de una cabecera cuyo contenedor se detiene en 1280px: en
+                  pantallas ANCHAS le robaba ese ancho a la navegación y al
+                  mega-menú. Crecer el viewport no puede encoger el menú. */}
               <button
                 onClick={() => setShowCommand(true)}
                 aria-label="Buscar productos"
-                className="hidden lg:flex items-center gap-2 px-2.5 xl:px-4 py-2 text-sm text-gray-500 dark:text-[var(--text-muted)] hover:text-[#0A2540] dark:hover:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] hover:border-gray-300 rounded-full transition-all active:scale-[0.985]"
+                title="Buscar productos (⌘K)"
+                className="hidden lg:flex items-center px-2.5 py-2 text-sm text-gray-500 dark:text-[var(--text-muted)] hover:text-[#0A2540] dark:hover:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] hover:border-gray-300 rounded-full transition-all active:scale-[0.985]"
               >
                 <Search className="w-4 h-4 shrink-0" />
-                <span className="hidden 2xl:inline whitespace-nowrap">Buscar productos</span>
-                <kbd className="hidden 2xl:block ml-1 px-1.5 py-0.5 t-micro font-mono bg-gray-100 dark:bg-[var(--surface-muted)] rounded">⌘K</kbd>
               </button>
 
               <ThemeToggle />
@@ -758,6 +756,20 @@ export default function Navbar() {
               </button>
             </div>
           </div>
+
+          {/* Mega-menú del catálogo, anclado al contenedor `relative` de la
+              cabecera: su ancho es min(860px, contenedor) SIEMPRE, sin
+              importar cuánto espacio le sobre a la fila de navegación. Lleva
+              los mismos manejadores de la zona (mover cancela el cierre,
+              salir lo programa): al vivir fuera de zonaNav ya no hereda ese
+              comportamiento por burbujeo y hay que dárselo explícito. */}
+          <MegaProductos
+            visible={abierto === 'Productos'}
+            cerrar={cerrarYa}
+            reafirmar={() => abrir('Productos')}
+            abrirBuscador={() => { cerrarYa(); setShowCommand(true); }}
+            zona={manejadoresZona}
+          />
         </div>
 
         {/* Menú móvil. Altura acotada con dvh —no vh— porque en iOS la barra
@@ -944,19 +956,45 @@ function MegaProductos({
   cerrar,
   reafirmar,
   abrirBuscador,
+  zona,
 }: {
   visible: boolean;
   cerrar: () => void;
   /** Cancela cualquier cierre pendiente cuando el puntero entra al panel. */
   reafirmar: () => void;
   abrirBuscador: () => void;
+  /** Manejadores de la zona de navegación. El panel vive FUERA de zonaNav
+      (para que su ancho no dependa de ella), así que el «mover cancela el
+      cierre / salir lo programa» que los demás paneles heredan por burbujeo
+      aquí se conecta a mano. */
+  zona: {
+    onMouseMove: () => void;
+    onMouseLeave: () => void;
+    onBlur: (ev: React.FocusEvent<HTMLDivElement>) => void;
+  };
 }) {
   return (
-    <div
+    <>
+      {/* El puente del mega, del ANCHO DEL PANEL. h-5 y no h-3: el hueco mide
+          12px, pero el panel entra con una animación de escala que baja su
+          techo hasta 16px durante 200ms; solapando 8px dentro del panel el
+          hueco no existe en ningún fotograma. Es hermano inmediato del panel
+          a propósito: el auditor de navegación lo localiza así. */}
+      <span
+        aria-hidden="true"
+        className={`absolute top-full inset-x-0 mx-auto h-5 w-[min(860px,calc(100%-2rem))] ${
+          visible ? 'hidden lg:block' : 'hidden'
+        }`}
+      />
+      <div
       id="panel-productos"
       onMouseEnter={reafirmar}
-      className={`mega-menu absolute top-full left-0 mt-3 w-full max-w-[860px] max-h-[75dvh] overflow-y-auto overflow-x-visible rounded-2xl border border-gray-100 bg-white p-6 xl:p-8 shadow-xl dark:border-[var(--border)] dark:bg-[var(--surface-raised)] ${
-        visible ? 'block' : 'hidden'
+      {...zona}
+      /* inset-x-0 + mx-auto + ancho explícito centran SIN transform: la
+         animación fadeInScale del panel anima `transform`, y un centrado con
+         translate-x se lo pisaría durante los primeros 200 ms. */
+      className={`mega-menu absolute top-full inset-x-0 mx-auto mt-3 w-[min(860px,calc(100%-2rem))] max-h-[75dvh] overflow-y-auto overflow-x-visible rounded-2xl border border-gray-100 bg-white p-6 xl:p-8 shadow-xl dark:border-[var(--border)] dark:bg-[var(--surface-raised)] ${
+        visible ? 'hidden lg:block' : 'hidden'
       }`}
       aria-label="Catálogo de productos"
     >
@@ -1023,5 +1061,6 @@ function MegaProductos({
         </button>
       </div>
     </div>
+    </>
   );
 }

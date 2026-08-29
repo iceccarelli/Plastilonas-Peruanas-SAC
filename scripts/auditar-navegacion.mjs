@@ -151,7 +151,14 @@ for (const vp of ANCHOS) {
       await pagina.mouse.move(cajaBoton.x + cajaBoton.width / 2, cajaBoton.y + cajaBoton.height / 2);
       await esperar(120);
 
-      const panel = boton.locator('xpath=following-sibling::div[1]');
+      // El panel se resuelve por su `aria-controls`, no por posición en el
+      // DOM. La versión anterior tomaba «el div hermano siguiente», y eso
+      // dejó de ser cierto en cuanto el mega-menú se movió fuera de su
+      // disparador para que su ancho no dependiera de la zona de navegación.
+      // El atributo es el contrato accesible botón→panel: si se rompe, debe
+      // fallar la auditoría, no la localización del panel.
+      const idPanel = await boton.getAttribute('aria-controls');
+      const panel = pagina.locator(`#${idPanel}`);
       let abierto = await panel.isVisible().catch(() => false);
       if (!abierto) {
         await boton.click();
@@ -179,10 +186,14 @@ for (const vp of ANCHOS) {
         ([sel, idx]) => {
           const b = document.querySelectorAll(sel)[idx];
           if (!b) return null;
-          const puente = b.parentElement?.querySelector(':scope > span[aria-hidden="true"]');
-          const panel = b.nextElementSibling?.tagName === 'SPAN'
-            ? b.nextElementSibling.nextElementSibling
-            : b.nextElementSibling;
+          const panel = document.getElementById(b.getAttribute('aria-controls') || '');
+          // El puente vive como hermano inmediato ANTERIOR del panel (así lo
+          // construyen los tres desplegables); si no, se busca junto al botón.
+          const previo = panel?.previousElementSibling;
+          const puente =
+            previo && previo.tagName === 'SPAN' && previo.getAttribute('aria-hidden') === 'true'
+              ? previo
+              : b.parentElement?.querySelector(':scope > span[aria-hidden="true"]');
           const zona = b.closest('nav')?.querySelector('.lg\\:block');
           if (!puente || !panel || !zona) return { falta: !puente ? 'puente' : !panel ? 'panel' : 'zona' };
           const p = puente.getBoundingClientRect();
@@ -209,6 +220,56 @@ for (const vp of ANCHOS) {
         malas++;
       } else if (geo?.fallos?.length) {
         anota('puente-corto', `${vp.w}px ${ruta} · ${etiqueta}`, geo.fallos.join('; '));
+        malas++;
+      }
+
+      // --- LA FORMA DEL PANEL: ancho real y texto sin estrujar.
+      //
+      // Esta comprobación existe porque todo lo anterior estuvo en verde
+      // mientras el mega-menú se servía a ~350px en pantallas de 2560:
+      // el panel abría, se alcanzaba y cada enlace era pulsable… con cada
+      // categoría partida palabra por palabra en columnas de 100px. Abrir
+      // y poder pulsar no es lo mismo que poderse LEER. Dos medidas:
+      //  1. El ancho del panel debe acercarse a su ancho de diseño (el mega
+      //     declara min(860px, contenedor); los demás, ≥280px). Un panel muy
+      //     por debajo delata que hereda el ancho de un contenedor equivocado.
+      //  2. Ningún texto del panel puede ocupar más de ~2 líneas de su propia
+      //     altura de línea: tres o más líneas en un rótulo corto es la firma
+      //     del ajuste palabra-por-palabra.
+      const forma = await pagina.evaluate(
+        ([id, vw]) => {
+          const panel = document.getElementById(id);
+          if (!panel) return null;
+          const q = panel.getBoundingClientRect();
+          const esperado = id === 'panel-productos' ? Math.min(860, vw - 48) : 280;
+          const estrecho =
+            q.width + 8 < esperado
+              ? `mide ${Math.round(q.width)}px; su ancho de diseño es ≥ ${Math.round(esperado)}px`
+              : null;
+          const estrujados = [];
+          for (const el of panel.querySelectorAll('a span, a')) {
+            if (el.tagName === 'A' && el.querySelector('span')) continue; // se miden sus spans
+            const cs = getComputedStyle(el);
+            const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.5;
+            const h = el.getBoundingClientRect().height;
+            if (h > lh * 2.2) {
+              estrujados.push(`«${(el.textContent || '').trim().slice(0, 32)}» ocupa ~${Math.round(h / lh)} líneas`);
+            }
+          }
+          return { estrecho, estrujados: estrujados.slice(0, 4), demas: Math.max(0, estrujados.length - 4) };
+        },
+        [idPanel, vp.w],
+      );
+      if (forma?.estrecho) {
+        anota('panel-estrecho', `${vp.w}px ${ruta} · ${etiqueta}`, forma.estrecho);
+        malas++;
+      }
+      if (forma?.estrujados?.length) {
+        anota(
+          'texto-estrujado',
+          `${vp.w}px ${ruta} · ${etiqueta}`,
+          forma.estrujados.join('; ') + (forma.demas ? ` … y ${forma.demas} más` : ''),
+        );
         malas++;
       }
 
