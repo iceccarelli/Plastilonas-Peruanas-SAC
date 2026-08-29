@@ -192,9 +192,11 @@ export default function Footer() {
               <div className="flex items-start gap-3 pt-1">
                 <MapPin className="w-4 h-4 mt-0.5 text-white/50 flex-shrink-0" />
                 <div className="text-xs leading-snug">
+                  {/* La urbanización ya viene en addressStreet: repetirla aquí
+                      duplicaba «Urb. Los Huertos de Villa» y un agente que ve
+                      una calle doblada inventa una segunda sede. */}
                   {SITE.addressStreet}<br />
-                  Urb. Los Huertos de Villa, Chorrillos<br />
-                  Lima, Perú
+                  {SITE.addressLocality}, {SITE.addressRegion}, Perú
                 </div>
               </div>
             </div>

@@ -123,6 +123,24 @@ export const SITE = {
   ] as string[],
 };
 
+/**
+ * HORARIO COMERCIAL — fuente única.
+ *
+ * Estaba escrito a mano en cuatro sitios (barra superior, /contacto, la
+ * portada y el prompt del chatbot), en cuatro redacciones distintas. Cuatro
+ * copias del mismo dato son cuatro horarios que pueden divergir, y un agente
+ * que lea dos horarios distintos para el mismo RUC inventa una segunda sede.
+ * Header, pie, /contacto, chatbot, /llms.txt y /ai.txt derivan de aquí.
+ */
+export const HORARIO = {
+  /** Para barras y chips: cabe en una línea de utilitario. */
+  corto: "L–V 8:00–18:00 · Sáb 8:00–13:00",
+  /** Para prosa: páginas, prompt del chatbot y superficies para agentes. */
+  completo: "lunes a viernes de 8:00 a 18:00 y sábados de 8:00 a 13:00",
+  /** Para la tarjeta de la portada, que separa «L–V» del detalle. */
+  tarjeta: "8:00–18:00 · sábados 8:00–13:00",
+} as const;
+
 export const BASE_URL: string = SITE.url.replace(/\/$/, "");
 
 export function absoluteUrl(path = "/"): string {
