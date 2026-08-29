@@ -183,7 +183,7 @@ export default function Home() {
 
           <div className="py-14 md:py-16">
             <Reveal>
-              <SectionHeading eyebrow="Registro fechado" title="Novedades" className="mb-8" action={<Link href="/novedades" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el registro <ArrowRight className="w-4 h-4" /></Link>} />
+              <SectionHeading eyebrow="Registro fechado" title="Novedades" className="mb-8" action={<Link href="/novedades" className="hidden md:flex items-center gap-2 py-2 -my-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el registro <ArrowRight className="w-4 h-4" /></Link>} />
             </Reveal>
             <div className="grid md:grid-cols-3 gap-5">
               {novedades.slice(0, 3).map((n, i) => (
