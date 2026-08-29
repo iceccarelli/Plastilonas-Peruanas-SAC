@@ -100,11 +100,17 @@ describe('navegación principal', () => {
      * sobresalga de su caja, incluido algo colocado 12px por encima. Existía
      * en las clases y no en pantalla.
      */
-    const puentes = [...codigo.matchAll(/absolute top-full (left-0 right-0|left-0|right-0) h-5/g)];
+    // Dos formas de puente: el de grupo y el de «Más» abarcan su zona
+    // (left-0/right-0); el del mega abarca EL PANEL (inset-x-0 mx-auto con el
+    // mismo ancho que el panel), porque el panel ya no hereda el ancho de la
+    // zona de navegación.
+    const puentesZona = [...codigo.matchAll(/absolute top-full (left-0 right-0|left-0|right-0) h-5/g)];
+    const puentesPanel = [...codigo.matchAll(/absolute top-full inset-x-0 mx-auto h-5/g)];
     expect(
-      puentes.length,
+      puentesZona.length + puentesPanel.length,
       'cada desplegable necesita su puente: el de grupo, el de «Más» y el mega',
     ).toBeGreaterThanOrEqual(3);
+    expect(puentesPanel.length, 'el mega lleva puente del ancho del panel').toBeGreaterThanOrEqual(1);
     expect(codigo, 'el puente no puede vivir dentro del panel: overflow lo recorta')
       .not.toMatch(/before:-top-3/);
   });
@@ -197,5 +203,44 @@ describe('viewport del documento', () => {
     // ilegible una ficha técnica en un teléfono.
     expect(layout).not.toMatch(/userScalable:\s*false/);
     expect(layout).not.toMatch(/maximumScale:\s*1\b/);
+  });
+});
+
+describe('el mega-menú no hereda el ancho de la zona de navegación', () => {
+  /**
+   * EL FALLO QUE MOTIVA ESTE BLOQUE. El panel del catálogo medía `w-full` de
+   * zonaNav, y zonaNav es lo que SOBRA tras logo, buscador y CTA dentro de un
+   * contenedor que se detiene en 1280px. En pantallas anchas la derecha
+   * revelaba más piezas, zonaNav se encogía a ~350px y el catálogo entero se
+   * servía palabra por palabra en columnas de 100px — con todas las
+   * auditorías en verde, porque ninguna medía la forma. La regla queda
+   * escrita: el ancho del panel se declara contra el contenedor de la
+   * cabecera, nunca contra el hueco sobrante.
+   */
+  const codigo = readFileSync(join(process.cwd(), 'components/Navbar.tsx'), 'utf8');
+
+  it('el panel declara su ancho propio, no w-full de zonaNav', () => {
+    expect(codigo).toContain('w-[min(860px,calc(100%-2rem))]');
+    expect(codigo, 'w-full ataría el panel al ancho sobrante de la zona')
+      .not.toMatch(/mega-menu absolute[^`]*w-full/);
+  });
+
+  it('el contenedor de la cabecera es el ancla posicional del panel', () => {
+    expect(codigo).toMatch(/relative max-w-7xl mx-auto/);
+  });
+
+  it('el buscador no crece con el viewport a costa de la navegación', () => {
+    // El rótulo «Buscar productos ⌘K» en 2xl robaba ~190px a zonaNav dentro
+    // de un contenedor fijo: más pantalla no puede significar menos menú.
+    expect(codigo).not.toMatch(/2xl:inline[^<]*Buscar productos/);
+    expect(codigo).not.toMatch(/hidden 2xl:block[^<]*⌘K/);
+  });
+
+  it('el auditor de navegación mide la forma, no solo la pulsabilidad', () => {
+    const auditor = readFileSync(join(process.cwd(), 'scripts/auditar-navegacion.mjs'), 'utf8');
+    expect(auditor).toContain('panel-estrecho');
+    expect(auditor).toContain('texto-estrujado');
+    expect(auditor, 'el panel se resuelve por aria-controls, no por posición')
+      .toContain("getAttribute('aria-controls')");
   });
 });
