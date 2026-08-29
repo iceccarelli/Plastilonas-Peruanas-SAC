@@ -1,0 +1,356 @@
+From 84b9b2098c423d4afdfc7bef6fe23ae5ca463054 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 29 Aug 2026 19:29:29 +0000
+Subject: [PATCH] fix(navegacion): el mega-menu declara su ancho contra la
+ cabecera y el auditor mide la forma
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+EL FALLO. El panel del catalogo media w-full de zonaNav — lo que SOBRA tras
+logo, buscador y CTA dentro de un contenedor detenido en 1280px. En >=1536px
+la derecha revelaba el rotulo del buscador («Buscar productos ⌘K») e «Iniciar
+sesion»: mas pantalla, menos zona. zonaNav caia a ~350px, el panel heredaba
+ese ancho y su rejilla (breakpoints de viewport, no de contenedor) forzaba 3
+columnas de ~100px: el catalogo entero palabra por palabra. Todas las
+auditorias en verde, porque ninguna media geometria.
+
+EL ARREGLO (3 capas):
+1. El panel y su puente se renderizan contra el contenedor  de la
+   cabecera: w-[min(860px,calc(100%-2rem))], centrado con inset-x-0 mx-auto
+   (sin transform: la animacion fadeInScale anima transform y lo pisaria).
+   Lleva los manejadores de la zona explicitos — al salir de zonaNav ya no
+   los hereda por burbujeo.
+2. El buscador es SIEMPRE pildora de icono: el rotulo de 2xl robaba ~190px a
+   la navegacion. Crecer el viewport no puede encoger el menu.
+3. auditar:navegacion ahora resuelve cada panel por aria-controls (no por
+   posicion en el DOM) y mide la FORMA: ancho real vs ancho de diseno
+   (panel-estrecho) y ningun rotulo a mas de ~2 lineas de su line-height
+   (texto-estrujado). Esta clase de fallo ya no puede pasar en silencio, en
+   ningun desplegable del sitio.
+
+PRUEBAS: 4 nuevas en test/navegacion.test.ts (ancho propio, ancla en la
+cabecera, buscador sin rotulo 2xl, auditor con medidas de forma) y el puente
+del mega contado en su nueva forma. Suite: 695.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Q6iwrdvuqJ1EEhhFUy2ZPk
+---
+ components/Navbar.tsx          | 87 ++++++++++++++++++++++++----------
+ scripts/auditar-navegacion.mjs | 71 +++++++++++++++++++++++++--
+ test/navegacion.test.ts        | 49 ++++++++++++++++++-
+ 3 files changed, 176 insertions(+), 31 deletions(-)
+
+diff --git a/components/Navbar.tsx b/components/Navbar.tsx
+index 72c84a3..527336e 100644
+--- a/components/Navbar.tsx
++++ b/components/Navbar.tsx
+@@ -493,7 +493,13 @@ export default function Navbar() {
+         </div>
+ 
+         <nav className="bg-white/95 dark:bg-[#1C2C46]/95 backdrop-blur-lg border-b border-gray-200 dark:border-[var(--border)]">
+-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
++          {/* `relative` es el ancla del mega-menú. El panel se posiciona
++              contra ESTE contenedor (ancho útil completo de la cabecera) y no
++              contra zonaNav: el ancho de zonaNav es lo que sobra tras logo,
++              buscador y CTA, y atarle el panel hizo que en pantallas ANCHAS
++              —donde el contenedor se detiene en 1280px pero la derecha crece—
++              el catálogo entero se estrujara a ~350px, palabra por palabra. */}
++          <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+             <div className="flex items-center gap-3 xl:gap-6 h-20">
+             {/* Logo. `min-w-0` permite que el rótulo ceda antes de empujar
+                 al resto fuera de la pantalla. */}
+@@ -540,23 +546,11 @@ export default function Navbar() {
+                         Productos
+                         <ChevronDown className={`w-4 h-4 transition-transform ${abierto === 'Productos' ? 'rotate-180' : ''}`} />
+                       </button>
+-                      <span
+-                        aria-hidden="true"
+-                        /* h-5 y no h-3: el hueco mide 12px, pero el panel entra
+-                           con una animación de escala que baja su techo hasta
+-                           16px durante 200ms. Un puente al ras deja pasar a
+-                           quien se mueva deprisa justo al abrir. Solapando 8px
+-                           dentro del panel el hueco no existe en ningún
+-                           fotograma, y el solape no estorba: el panel se pinta
+-                           por encima y se queda con el clic. */
+-                        className={`absolute top-full left-0 right-0 h-5 ${abierto === 'Productos' ? 'block' : 'hidden'}`}
+-                      />
+-                      <MegaProductos
+-                        visible={abierto === 'Productos'}
+-                        cerrar={cerrarYa}
+-                        reafirmar={() => abrir('Productos')}
+-                        abrirBuscador={() => { cerrarYa(); setShowCommand(true); }}
+-                      />
++                      {/* Ni panel ni puente viven aquí: ambos se renderizan al
++                          final del contenedor `relative` de la cabecera
++                          (MegaProductos trae su propio puente del ancho del
++                          panel), para que su geometría no dependa del hueco
++                          que le dejen el logo y las acciones de la derecha. */}
+                     </div>
+                   ) : e.tipo === 'grupo' ? (
+                     <div
+@@ -700,14 +694,18 @@ export default function Navbar() {
+                 <Search className="w-5 h-5" />
+               </button>
+ 
++              {/* Buscador: SIEMPRE píldora de icono. El rótulo «Buscar
++                  productos ⌘K» que aparecía en 2xl añadía ~190px a la derecha
++                  de una cabecera cuyo contenedor se detiene en 1280px: en
++                  pantallas ANCHAS le robaba ese ancho a la navegación y al
++                  mega-menú. Crecer el viewport no puede encoger el menú. */}
+               <button
+                 onClick={() => setShowCommand(true)}
+                 aria-label="Buscar productos"
+-                className="hidden lg:flex items-center gap-2 px-2.5 xl:px-4 py-2 text-sm text-gray-500 dark:text-[var(--text-muted)] hover:text-[#0A2540] dark:hover:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] hover:border-gray-300 rounded-full transition-all active:scale-[0.985]"
++                title="Buscar productos (⌘K)"
++                className="hidden lg:flex items-center px-2.5 py-2 text-sm text-gray-500 dark:text-[var(--text-muted)] hover:text-[#0A2540] dark:hover:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] hover:border-gray-300 rounded-full transition-all active:scale-[0.985]"
+               >
+                 <Search className="w-4 h-4 shrink-0" />
+-                <span className="hidden 2xl:inline whitespace-nowrap">Buscar productos</span>
+-                <kbd className="hidden 2xl:block ml-1 px-1.5 py-0.5 t-micro font-mono bg-gray-100 dark:bg-[var(--surface-muted)] rounded">⌘K</kbd>
+               </button>
+ 
+               <ThemeToggle />
+@@ -758,6 +756,20 @@ export default function Navbar() {
+               </button>
+             </div>
+           </div>
++
++          {/* Mega-menú del catálogo, anclado al contenedor `relative` de la
++              cabecera: su ancho es min(860px, contenedor) SIEMPRE, sin
++              importar cuánto espacio le sobre a la fila de navegación. Lleva
++              los mismos manejadores de la zona (mover cancela el cierre,
++              salir lo programa): al vivir fuera de zonaNav ya no hereda ese
++              comportamiento por burbujeo y hay que dárselo explícito. */}
++          <MegaProductos
++            visible={abierto === 'Productos'}
++            cerrar={cerrarYa}
++            reafirmar={() => abrir('Productos')}
++            abrirBuscador={() => { cerrarYa(); setShowCommand(true); }}
++            zona={manejadoresZona}
++          />
+         </div>
+ 
+         {/* Menú móvil. Altura acotada con dvh —no vh— porque en iOS la barra
+@@ -944,19 +956,45 @@ function MegaProductos({
+   cerrar,
+   reafirmar,
+   abrirBuscador,
++  zona,
+ }: {
+   visible: boolean;
+   cerrar: () => void;
+   /** Cancela cualquier cierre pendiente cuando el puntero entra al panel. */
+   reafirmar: () => void;
+   abrirBuscador: () => void;
++  /** Manejadores de la zona de navegación. El panel vive FUERA de zonaNav
++      (para que su ancho no dependa de ella), así que el «mover cancela el
++      cierre / salir lo programa» que los demás paneles heredan por burbujeo
++      aquí se conecta a mano. */
++  zona: {
++    onMouseMove: () => void;
++    onMouseLeave: () => void;
++    onBlur: (ev: React.FocusEvent<HTMLDivElement>) => void;
++  };
+ }) {
+   return (
+-    <div
++    <>
++      {/* El puente del mega, del ANCHO DEL PANEL. h-5 y no h-3: el hueco mide
++          12px, pero el panel entra con una animación de escala que baja su
++          techo hasta 16px durante 200ms; solapando 8px dentro del panel el
++          hueco no existe en ningún fotograma. Es hermano inmediato del panel
++          a propósito: el auditor de navegación lo localiza así. */}
++      <span
++        aria-hidden="true"
++        className={`absolute top-full inset-x-0 mx-auto h-5 w-[min(860px,calc(100%-2rem))] ${
++          visible ? 'hidden lg:block' : 'hidden'
++        }`}
++      />
++      <div
+       id="panel-productos"
+       onMouseEnter={reafirmar}
+-      className={`mega-menu absolute top-full left-0 mt-3 w-full max-w-[860px] max-h-[75dvh] overflow-y-auto overflow-x-visible rounded-2xl border border-gray-100 bg-white p-6 xl:p-8 shadow-xl dark:border-[var(--border)] dark:bg-[var(--surface-raised)] ${
+-        visible ? 'block' : 'hidden'
++      {...zona}
++      /* inset-x-0 + mx-auto + ancho explícito centran SIN transform: la
++         animación fadeInScale del panel anima `transform`, y un centrado con
++         translate-x se lo pisaría durante los primeros 200 ms. */
++      className={`mega-menu absolute top-full inset-x-0 mx-auto mt-3 w-[min(860px,calc(100%-2rem))] max-h-[75dvh] overflow-y-auto overflow-x-visible rounded-2xl border border-gray-100 bg-white p-6 xl:p-8 shadow-xl dark:border-[var(--border)] dark:bg-[var(--surface-raised)] ${
++        visible ? 'hidden lg:block' : 'hidden'
+       }`}
+       aria-label="Catálogo de productos"
+     >
+@@ -1023,5 +1061,6 @@ function MegaProductos({
+         </button>
+       </div>
+     </div>
++    </>
+   );
+ }
+diff --git a/scripts/auditar-navegacion.mjs b/scripts/auditar-navegacion.mjs
+index 25c42cd..d2fe57f 100644
+--- a/scripts/auditar-navegacion.mjs
++++ b/scripts/auditar-navegacion.mjs
+@@ -151,7 +151,14 @@ for (const vp of ANCHOS) {
+       await pagina.mouse.move(cajaBoton.x + cajaBoton.width / 2, cajaBoton.y + cajaBoton.height / 2);
+       await esperar(120);
+ 
+-      const panel = boton.locator('xpath=following-sibling::div[1]');
++      // El panel se resuelve por su `aria-controls`, no por posición en el
++      // DOM. La versión anterior tomaba «el div hermano siguiente», y eso
++      // dejó de ser cierto en cuanto el mega-menú se movió fuera de su
++      // disparador para que su ancho no dependiera de la zona de navegación.
++      // El atributo es el contrato accesible botón→panel: si se rompe, debe
++      // fallar la auditoría, no la localización del panel.
++      const idPanel = await boton.getAttribute('aria-controls');
++      const panel = pagina.locator(`#${idPanel}`);
+       let abierto = await panel.isVisible().catch(() => false);
+       if (!abierto) {
+         await boton.click();
+@@ -179,10 +186,14 @@ for (const vp of ANCHOS) {
+         ([sel, idx]) => {
+           const b = document.querySelectorAll(sel)[idx];
+           if (!b) return null;
+-          const puente = b.parentElement?.querySelector(':scope > span[aria-hidden="true"]');
+-          const panel = b.nextElementSibling?.tagName === 'SPAN'
+-            ? b.nextElementSibling.nextElementSibling
+-            : b.nextElementSibling;
++          const panel = document.getElementById(b.getAttribute('aria-controls') || '');
++          // El puente vive como hermano inmediato ANTERIOR del panel (así lo
++          // construyen los tres desplegables); si no, se busca junto al botón.
++          const previo = panel?.previousElementSibling;
++          const puente =
++            previo && previo.tagName === 'SPAN' && previo.getAttribute('aria-hidden') === 'true'
++              ? previo
++              : b.parentElement?.querySelector(':scope > span[aria-hidden="true"]');
+           const zona = b.closest('nav')?.querySelector('.lg\\:block');
+           if (!puente || !panel || !zona) return { falta: !puente ? 'puente' : !panel ? 'panel' : 'zona' };
+           const p = puente.getBoundingClientRect();
+@@ -212,6 +223,56 @@ for (const vp of ANCHOS) {
+         malas++;
+       }
+ 
++      // --- LA FORMA DEL PANEL: ancho real y texto sin estrujar.
++      //
++      // Esta comprobación existe porque todo lo anterior estuvo en verde
++      // mientras el mega-menú se servía a ~350px en pantallas de 2560:
++      // el panel abría, se alcanzaba y cada enlace era pulsable… con cada
++      // categoría partida palabra por palabra en columnas de 100px. Abrir
++      // y poder pulsar no es lo mismo que poderse LEER. Dos medidas:
++      //  1. El ancho del panel debe acercarse a su ancho de diseño (el mega
++      //     declara min(860px, contenedor); los demás, ≥280px). Un panel muy
++      //     por debajo delata que hereda el ancho de un contenedor equivocado.
++      //  2. Ningún texto del panel puede ocupar más de ~2 líneas de su propia
++      //     altura de línea: tres o más líneas en un rótulo corto es la firma
++      //     del ajuste palabra-por-palabra.
++      const forma = await pagina.evaluate(
++        ([id, vw]) => {
++          const panel = document.getElementById(id);
++          if (!panel) return null;
++          const q = panel.getBoundingClientRect();
++          const esperado = id === 'panel-productos' ? Math.min(860, vw - 48) : 280;
++          const estrecho =
++            q.width + 8 < esperado
++              ? `mide ${Math.round(q.width)}px; su ancho de diseño es ≥ ${Math.round(esperado)}px`
++              : null;
++          const estrujados = [];
++          for (const el of panel.querySelectorAll('a span, a')) {
++            if (el.tagName === 'A' && el.querySelector('span')) continue; // se miden sus spans
++            const cs = getComputedStyle(el);
++            const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.5;
++            const h = el.getBoundingClientRect().height;
++            if (h > lh * 2.2) {
++              estrujados.push(`«${(el.textContent || '').trim().slice(0, 32)}» ocupa ~${Math.round(h / lh)} líneas`);
++            }
++          }
++          return { estrecho, estrujados: estrujados.slice(0, 4), demas: Math.max(0, estrujados.length - 4) };
++        },
++        [idPanel, vp.w],
++      );
++      if (forma?.estrecho) {
++        anota('panel-estrecho', `${vp.w}px ${ruta} · ${etiqueta}`, forma.estrecho);
++        malas++;
++      }
++      if (forma?.estrujados?.length) {
++        anota(
++          'texto-estrujado',
++          `${vp.w}px ${ruta} · ${etiqueta}`,
++          forma.estrujados.join('; ') + (forma.demas ? ` … y ${forma.demas} más` : ''),
++        );
++        malas++;
++      }
++
+       // --- LA TRAYECTORIA. Del centro del botón al centro de la primera
+       // opción, en pasos, como se mueve una mano. Si el panel se cierra a
+       // mitad de camino, hay una franja muerta entre el botón y el panel.
+diff --git a/test/navegacion.test.ts b/test/navegacion.test.ts
+index a286bd4..45e8b89 100644
+--- a/test/navegacion.test.ts
++++ b/test/navegacion.test.ts
+@@ -100,11 +100,17 @@ describe('navegación principal', () => {
+      * sobresalga de su caja, incluido algo colocado 12px por encima. Existía
+      * en las clases y no en pantalla.
+      */
+-    const puentes = [...codigo.matchAll(/absolute top-full (left-0 right-0|left-0|right-0) h-5/g)];
++    // Dos formas de puente: el de grupo y el de «Más» abarcan su zona
++    // (left-0/right-0); el del mega abarca EL PANEL (inset-x-0 mx-auto con el
++    // mismo ancho que el panel), porque el panel ya no hereda el ancho de la
++    // zona de navegación.
++    const puentesZona = [...codigo.matchAll(/absolute top-full (left-0 right-0|left-0|right-0) h-5/g)];
++    const puentesPanel = [...codigo.matchAll(/absolute top-full inset-x-0 mx-auto h-5/g)];
+     expect(
+-      puentes.length,
++      puentesZona.length + puentesPanel.length,
+       'cada desplegable necesita su puente: el de grupo, el de «Más» y el mega',
+     ).toBeGreaterThanOrEqual(3);
++    expect(puentesPanel.length, 'el mega lleva puente del ancho del panel').toBeGreaterThanOrEqual(1);
+     expect(codigo, 'el puente no puede vivir dentro del panel: overflow lo recorta')
+       .not.toMatch(/before:-top-3/);
+   });
+@@ -199,3 +205,42 @@ describe('viewport del documento', () => {
+     expect(layout).not.toMatch(/maximumScale:\s*1\b/);
+   });
+ });
++
++describe('el mega-menú no hereda el ancho de la zona de navegación', () => {
++  /**
++   * EL FALLO QUE MOTIVA ESTE BLOQUE. El panel del catálogo medía `w-full` de
++   * zonaNav, y zonaNav es lo que SOBRA tras logo, buscador y CTA dentro de un
++   * contenedor que se detiene en 1280px. En pantallas anchas la derecha
++   * revelaba más piezas, zonaNav se encogía a ~350px y el catálogo entero se
++   * servía palabra por palabra en columnas de 100px — con todas las
++   * auditorías en verde, porque ninguna medía la forma. La regla queda
++   * escrita: el ancho del panel se declara contra el contenedor de la
++   * cabecera, nunca contra el hueco sobrante.
++   */
++  const codigo = readFileSync(join(process.cwd(), 'components/Navbar.tsx'), 'utf8');
++
++  it('el panel declara su ancho propio, no w-full de zonaNav', () => {
++    expect(codigo).toContain('w-[min(860px,calc(100%-2rem))]');
++    expect(codigo, 'w-full ataría el panel al ancho sobrante de la zona')
++      .not.toMatch(/mega-menu absolute[^`]*w-full/);
++  });
++
++  it('el contenedor de la cabecera es el ancla posicional del panel', () => {
++    expect(codigo).toMatch(/relative max-w-7xl mx-auto/);
++  });
++
++  it('el buscador no crece con el viewport a costa de la navegación', () => {
++    // El rótulo «Buscar productos ⌘K» en 2xl robaba ~190px a zonaNav dentro
++    // de un contenedor fijo: más pantalla no puede significar menos menú.
++    expect(codigo).not.toMatch(/2xl:inline[^<]*Buscar productos/);
++    expect(codigo).not.toMatch(/hidden 2xl:block[^<]*⌘K/);
++  });
++
++  it('el auditor de navegación mide la forma, no solo la pulsabilidad', () => {
++    const auditor = readFileSync(join(process.cwd(), 'scripts/auditar-navegacion.mjs'), 'utf8');
++    expect(auditor).toContain('panel-estrecho');
++    expect(auditor).toContain('texto-estrujado');
++    expect(auditor, 'el panel se resuelve por aria-controls, no por posición')
++      .toContain("getAttribute('aria-controls')");
++  });
++});
+-- 
+2.43.0
+
