@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/site";
+import { SUPERFICIES_MAQUINA } from "@/lib/superficies-maquina";
 
 /**
  * robots.txt — política de rastreo.
@@ -46,13 +47,24 @@ const ALLOWED_AGENTS = [
   "Meta-ExternalAgent",
 ];
 
+/**
+ * Permisos explícitos, no heredados. Las superficies para máquinas
+ * (/llms.txt, /ai.txt, /entidad.json y los catálogos JSON) hoy solo están
+ * permitidas porque «Allow: /» gana por longitud de coincidencia. Ese es un
+ * permiso por accidente: cualquier Disallow futuro más específico las
+ * apagaría en silencio, y son exactamente las rutas de las que depende la
+ * citabilidad. Se enumeran para que la intención quede escrita en el archivo
+ * que los agentes leen primero.
+ */
+const ALLOW = ["/", ...SUPERFICIES_MAQUINA];
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      { userAgent: "*", allow: "/", disallow: DISALLOW },
+      { userAgent: "*", allow: ALLOW, disallow: DISALLOW },
       ...ALLOWED_AGENTS.map((userAgent) => ({
         userAgent,
-        allow: "/",
+        allow: ALLOW,
         disallow: DISALLOW,
       })),
     ],
