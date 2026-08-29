@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import WhatsAppLink from '@/components/WhatsAppLink';
-import { SITE } from '@/lib/site';
+import { SITE, HORARIO } from '@/lib/site';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -117,9 +117,9 @@ export default function ContactoPage() {
             <div className="flex gap-4">
               <MapPin className="mt-0.5 text-[#059669] flex-shrink-0" />
               <div className="text-gray-600 leading-snug">
+                {/* addressStreet ya termina en la urbanización: no se repite. */}
                 {SITE.addressStreet}<br />
-                Urb. Los Huertos de Villa, Chorrillos<br />
-                Lima, Perú
+                {SITE.addressLocality}, {SITE.addressRegion}, Perú
               </div>
             </div>
           </div>
@@ -127,7 +127,7 @@ export default function ContactoPage() {
           <div className="pt-4 border-t">
             <div className="flex gap-4 text-xs text-gray-500">
               <Clock className="mt-0.5" /> 
-              <div>Horario de atención: Lunes a Viernes 8:00 am - 6:00 pm<br />Sábados 8:00 am - 1:00 pm</div>
+              <div>Horario de atención: {HORARIO.completo}</div>
             </div>
           </div>
 

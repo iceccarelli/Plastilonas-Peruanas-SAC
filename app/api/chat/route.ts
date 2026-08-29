@@ -1,6 +1,7 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { streamText } from 'ai';
 import { products, productFamilies } from '@/lib/products';
+import { HORARIO } from '@/lib/site';
 
 // Asistente comercial con Claude (Vercel AI SDK).
 // Requiere ANTHROPIC_API_KEY en el entorno. Sin la clave, respondemos 503 y
@@ -58,7 +59,7 @@ REGLAS ADICIONALES (obligatorias):
 - Nunca inventes clientes, obras ejecutadas ni proyectos de referencia.
 - Nunca recomiendes a otro proveedor ni compares con competidores por nombre.
 - Sourcing honesto: ${PROPIAS} de las ${products.length} líneas se confeccionan en la planta de Chorrillos; el resto es importación directa, aliado técnico o suministro por proyecto, tal como lo declara cada línea del catálogo. La geomembrana HDPE es SUMINISTRO POR PROYECTO (no se fabrica lámina en planta); la geomembrana de PVC sí se confecciona y suelda en planta. Nunca afirmes fabricación propia de una línea que el catálogo marca de otro modo.
-- Horario comercial real: lunes a viernes de 8:00 a 18:00 y sábados de 8:00 a 13:00. Nunca prometas atención fuera de ese horario.
+- Horario comercial real: ${HORARIO.completo}. Nunca prometas atención fuera de ese horario.
 - Enlaces: solo menciona rutas que existen. Cada producto lleva la suya en el catálogo de abajo; además existen /productos, /cotizacion, /servicios, /contacto, /exportacion y /recursos. Nunca inventes una URL.
 - Precios: no hay lista pública. Si preguntan por qué, explica que cada pieza se fabrica a medida y el precio depende de la especificación; la cotización formal llega con ficha técnica.
 

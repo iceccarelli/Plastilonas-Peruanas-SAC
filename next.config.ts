@@ -92,6 +92,35 @@ const nextConfig: NextConfig = {
       { source: '/industrias/logistica', destination: '/industria/transporte-logistica', permanent: true },
       { source: '/industrias/saneamiento', destination: '/industria/saneamiento-y-agua', permanent: true },
       { source: '/industrias/:path*', destination: '/industria', permanent: true },
+
+      /**
+       * MAPA DEL FOLLETO ANTIGUO DE plastilonas.com → SLUG NUEVO.
+       *
+       * El día que el DNS de plastilonas.com apunte a este proyecto, cada
+       * ruta del sitio 2010s va a llegar aquí con su enlace y su historial de
+       * rastreo. Un 308 transfiere esa señal a la ficha equivalente; un 404
+       * la tira. Se añaden ANTES de la mudanza a propósito: hoy esas rutas no
+       * existen en este host (404 igual), así que el redirect no cambia nada
+       * hasta el día 0 — y ese día ya está resuelto sin tocar código.
+       * Inventario tomado del folleto vivo el 2026-08-29; el runbook completo
+       * está en docs/mudanza-plastilonas-com.md.
+       */
+      { source: '/index.html', destination: '/', permanent: true },
+      { source: '/default/index.html', destination: '/nosotros', permanent: true },
+      { source: '/default/ubicacion.html', destination: '/contacto', permanent: true },
+      { source: '/default/contacto.html', destination: '/contacto', permanent: true },
+      { source: '/default/big-bags-bolsones-sacos-polipropileno.html', destination: '/productos/big-bags-bolsones-polipropileno', permanent: true },
+      { source: '/default/biombos-cortinas-para-soldaduras.html', destination: '/productos/biombos-protectores-soldadura', permanent: true },
+      { source: '/default/carpas-lona-cobertores-tensionadas.html', destination: '/productos/carpas-lona-estructuras-metalicas', permanent: true },
+      { source: '/default/geomembranas-pvc-canales-pozas-agua.html', destination: '/productos/geomembranas-pvc', permanent: true },
+      { source: '/default/mallas-antiafidas-antiafidos.html', destination: '/productos/mallas-antiafidas', permanent: true },
+      { source: '/default/mangas-de-ventilacion-minas-tunel.html', destination: '/productos/mangas-ventilacion-minas-tuneles', permanent: true },
+      { source: '/default/mantas-aislantes-termicas-acusticas-multiterm.html', destination: '/productos/mantas-aislantes-termicas-termoacusticas', permanent: true },
+      { source: '/default/mantas-arpilleras-granjas-pollos-cerdos.html', destination: '/productos/mantas-arpilleras-granjas', permanent: true },
+      { source: '/default/mantas-cobertores-lonas-rafia-polytarp-toldos.html', destination: '/productos/lona-plastificada-rafia-polytarp', permanent: true },
+      { source: '/default/mulch-madera-picada-plantas-parques-jardines.html', destination: '/productos/mulch-madera-picada', permanent: true },
+      // Cualquier otra ruta del folleto que no esté arriba: al catálogo, no a un 404.
+      { source: '/default/:path*', destination: '/productos', permanent: true },
     ];
   },
   async headers() {

@@ -14,6 +14,7 @@ import { calculadoras, CALCULADORAS_ACTUALIZADO } from "@/lib/calculadoras";
 import { INDUSTRIAS } from "@/lib/industrias";
 import { applications } from "@/lib/applications";
 import { guides } from "@/lib/guides";
+import { SUPERFICIES_INDEXABLES } from "@/lib/superficies-maquina";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -167,6 +168,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...industriaRoutes, ...marcoRoutes, ...calculadoraRoutes, ...informeRoutes, ...glosarioRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
+  // Superficies para máquinas indexables (/llms.txt, /ai.txt, /entidad.json y
+  // los catálogos JSON): un agente que solo consume sitemaps también tiene que
+  // encontrarlas. /llms-full.txt NO va aquí: es noindex con canónica en
+  // /llms.txt, y declarar en el sitemap una URL noindex es contradecirse.
+  const machineRoutes: MetadataRoute.Sitemap = SUPERFICIES_INDEXABLES.map((p) => ({
+    url: `${SITE.url}${p}`,
+    lastModified: now, changeFrequency: "weekly" as const, priority: 0.5,
+  }));
+
+  return [...staticRoutes, ...machineRoutes, ...industriaRoutes, ...marcoRoutes, ...calculadoraRoutes, ...informeRoutes, ...glosarioRoutes, ...solucionRoutes, ...novedadRoutes, ...familyRoutes, ...compareRoutes, ...productRoutes,
     ...applicationRoutes, ...guideRoutes, ...localRoutes, ...articleRoutes];
 }

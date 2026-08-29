@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { familyHrefByName } from '@/lib/families';
+import { HORARIO } from '@/lib/site';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -474,7 +475,7 @@ export default function Navbar() {
             {/* Horario y planta: datos de la barra utilitaria, no del hero.
                 El horario real vive aquí, junto al teléfono que lo atiende. */}
             <span className="hidden xl:inline-flex items-center min-h-[24px] px-1 text-white/55">Chorrillos, Lima</span>
-            <span className="hidden lg:inline-flex items-center min-h-[24px] px-1 text-white/55">L–V 8:00–18:00 · Sáb 8:00–13:00</span>
+            <span className="hidden lg:inline-flex items-center min-h-[24px] px-1 text-white/55">{HORARIO.corto}</span>
             <a href="tel:+51998117065" className="inline-flex items-center min-h-[24px] px-1 hover:text-white transition-colors">
               +51 998 117 065
             </a>

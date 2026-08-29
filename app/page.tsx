@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { SITE } from '@/lib/site';
+import { SITE, HORARIO } from '@/lib/site';
 import { YEARS_OPERATING } from '@/lib/facts';
 import Link from 'next/link';
 import { ArrowRight, Phone, ShieldCheck, MapPin, Truck, FileText } from 'lucide-react';
@@ -105,7 +105,7 @@ export default function Home() {
     { to: fabricacionPropia, label: 'Líneas de fabricación propia', sub: `De ${products.length} en catálogo, confeccionadas aquí` },
     { to: products.length, label: 'Soluciones', sub: `En ${productFamilies.length} líneas de producto` },
     { to: anios, label: 'Años fabricando', sub: `En el Perú desde ${SITE.foundingYear}` },
-    { display: 'L–V', label: 'Atención comercial', sub: '8:00–18:00 · sábados 8:00–13:00' },
+    { display: 'L–V', label: 'Atención comercial', sub: HORARIO.tarjeta },
   ];
   // Franja de legitimidad: datos verificables, no repite las cifras de arriba.
   const trust = [
@@ -183,7 +183,7 @@ export default function Home() {
 
           <div className="py-14 md:py-16">
             <Reveal>
-              <SectionHeading eyebrow="Registro fechado" title="Novedades" className="mb-8" action={<Link href="/novedades" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el registro <ArrowRight className="w-4 h-4" /></Link>} />
+              <SectionHeading eyebrow="Registro fechado" title="Novedades" className="mb-8" action={<Link href="/novedades" className="hidden md:flex items-center gap-2 py-2 -my-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el registro <ArrowRight className="w-4 h-4" /></Link>} />
             </Reveal>
             <div className="grid md:grid-cols-3 gap-5">
               {novedades.slice(0, 3).map((n, i) => (

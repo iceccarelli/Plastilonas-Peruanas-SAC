@@ -385,6 +385,25 @@ const registro: Novedad[] = [
       { label: 'Catálogo de productos', href: '/productos' },
     ],
   },
+  {
+    slug: 'ai-txt-identidad-y-politica-de-citacion-para-agentes',
+    fecha: '2026-08-29',
+    tipo: 'referencia',
+    titulo: 'Publicado /ai.txt: identidad citable para agentes',
+    resumen:
+      'El sitio publica en /ai.txt su ficha de entidad para agentes: identidad verificable, qué dominio citar, qué afirma y qué se niega a afirmar.',
+    queCambia:
+      'Un motor de respuesta que solo pueda leer un archivo corto tiene ahora la identidad completa —razón social, RUC, teléfonos, horario, año de fundación oficial— y la lista explícita de límites, sin tener que interpretar el HTML.',
+    detalle: [
+      'El archivo declara la URL canónica vigente y el estado real del dominio de marca, sin anticipar una mudanza que no ocurrió; el Centro de confianza deriva ahora ese mismo dato de la misma fuente, de modo que las dos superficies no pueden volver a contradecirse.',
+      'robots.txt pasa a permitir explícitamente cada superficie para máquinas (/llms.txt, /ai.txt, /entidad.json y los catálogos JSON) para todos los rastreadores y agentes de IA nombrados, en lugar de depender del permiso genérico; el sitemap declara las indexables.',
+      'Como todo en este sitio, el archivo se genera de las fuentes de verdad del catálogo: cero cifras escritas a mano, cero certificaciones, cero precios. Lo que no se afirma se declara, también para las máquinas.',
+    ],
+    enlaces: [
+      { label: 'Centro de confianza', href: '/confianza' },
+      { label: 'Método editorial', href: '/metodo' },
+    ],
+  },
 ];
 
 /** Novedades de la más reciente a la más antigua. */
