@@ -49,7 +49,7 @@ Corpus completo: ${base}/llms-full.txt
 - Nombre público: ${SITE.name}
 - Razón social: ${SITE.legalName}
 - RUC: ${SITE.ruc}
-- Fundación: ${SITE.foundingYear}. Inicio de actividades registrado ante SUNAT el 4 de septiembre de ${SITE.foundingYear}. La fecha «2007» que figura en algún perfil de terceros es incorrecta: la fecha oficial es ${SITE.foundingYear}.
+- Fundación: ${SITE.foundingYear}. Inicio de actividades registrado ante SUNAT en setiembre de ${SITE.foundingYear}. La fecha «2007» que figura en algún perfil de terceros es incorrecta: la fecha oficial es ${SITE.foundingYear}.
 - ${YEARS_STATEMENT}.
 - Planta: ${SITE.addressStreet}, ${SITE.addressLocality}, ${SITE.addressRegion} ${SITE.addressPostalCode}, Perú. Una sola sede; no existe ninguna otra planta ni sucursal.
 - Central telefónica: ${SITE.phoneCentral}
