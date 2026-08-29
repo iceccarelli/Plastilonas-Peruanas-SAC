@@ -1,10 +1,10 @@
 {
   "generadoPor": "scripts/auditar-estado.mjs",
-  "commit": "67693bd",
+  "commit": "9b6e728",
   "resumen": {
-    "plantillasDePagina": 51,
-    "urlsPublicas": 203,
-    "endpointsMaquina": 18,
+    "plantillasDePagina": 52,
+    "urlsPublicas": 218,
+    "endpointsMaquina": 20,
     "endpointsApi": 5,
     "productos": 36,
     "familias": 11,
@@ -13,11 +13,11 @@
     "guias": 5,
     "aplicaciones": 8,
     "soluciones": 6,
-    "ciudades": 12,
+    "ciudades": 17,
     "proyectosRedactados": 5,
     "proyectosPublicados": 0,
-    "clustersDeConsulta": 67,
-    "terminosMapeados": 647,
+    "clustersDeConsulta": 72,
+    "terminosMapeados": 701,
     "paginasSinCanonical": 2,
     "paginasSinEsquema": 10,
     "paginasProfundasSinBreadcrumbSchema": 1,
@@ -56,7 +56,7 @@
         "/cotizacion",
         "/productos/[slug]"
       ],
-      "lineas": 104
+      "lineas": 129
     },
     {
       "ruta": "/aplicaciones",
@@ -304,7 +304,7 @@
         "webPageSchema (vía EsquemaPagina)"
       ],
       "enlacesSalientes": [],
-      "lineas": 52
+      "lineas": 68
     },
     {
       "ruta": "/configurador",
@@ -337,7 +337,7 @@
       "enlacesSalientes": [
         "/cotizacion"
       ],
-      "lineas": 141
+      "lineas": 142
     },
     {
       "ruta": "/cotizacion",
@@ -395,7 +395,7 @@
         "/contacto",
         "/cotizacion"
       ],
-      "lineas": 233
+      "lineas": 242
     },
     {
       "ruta": "/distribuidores",
@@ -443,13 +443,16 @@
       "h1": "Exportación desde el Perú",
       "canonical": "/exportacion",
       "esquemas": [
+        "breadcrumbSchema",
         "breadcrumbSchema (vía EsquemaPagina)",
+        "faqSchema",
+        "webPageSchema",
         "webPageSchema (vía EsquemaPagina)"
       ],
       "enlacesSalientes": [
         "/compradores"
       ],
-      "lineas": 51
+      "lineas": 185
     },
     {
       "ruta": "/glosario/[slug]",
@@ -545,7 +548,7 @@
         "/glosario/terminos.json",
         "/marco"
       ],
-      "lineas": 228
+      "lineas": 237
     },
     {
       "ruta": "/indicadores",
@@ -569,7 +572,7 @@
         "/informes/[slug]",
         "/informes/formacion-de-precio-y-volatilidad-textiles-industriales"
       ],
-      "lineas": 225
+      "lineas": 234
     },
     {
       "ruta": "/industria/[sector]",
@@ -681,7 +684,7 @@
       "ruta": "/local/[ciudad]",
       "archivo": "app/local/[ciudad]/page.tsx",
       "dinamica": true,
-      "instancias": 12,
+      "instancias": 17,
       "slugs": [
         "lima",
         "arequipa",
@@ -694,7 +697,12 @@
         "iquitos",
         "huancayo",
         "tacna",
-        "pucallpa"
+        "pucallpa",
+        "callao",
+        "moquegua",
+        "cajamarca",
+        "pasco",
+        "puno"
       ],
       "title": null,
       "tituloDerivado": true,
@@ -711,7 +719,7 @@
         "/local",
         "/productos/[slug]"
       ],
-      "lineas": 138
+      "lineas": 176
     },
     {
       "ruta": "/local",
@@ -797,7 +805,31 @@
         "/recursos",
         "/recursos/[slug]"
       ],
-      "lineas": 246
+      "lineas": 254
+    },
+    {
+      "ruta": "/metodo",
+      "archivo": "app/metodo/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Cómo se publica este sitio",
+      "tituloDerivado": false,
+      "h1": "Cómo se publica este sitio",
+      "canonical": "/metodo",
+      "esquemas": [
+        "breadcrumbSchema",
+        "faqSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/",
+        "/calidad",
+        "/confianza",
+        "/novedades",
+        "/proyectos"
+      ],
+      "lineas": 265
     },
     {
       "ruta": "/nosotros",
@@ -822,8 +854,10 @@
       "ruta": "/novedades/[slug]",
       "archivo": "app/novedades/[slug]/page.tsx",
       "dinamica": true,
-      "instancias": 11,
+      "instancias": 15,
       "slugs": [
+        "serie-ecosistema-cinco-articulos-del-rubro",
+        "metodo-editorial-como-se-publica-este-sitio",
         "silo-tecnico-recursos-primeras-guias",
         "paginas-de-familia-con-criterios",
         "siete-guias-nuevas-silo-a-diez",
@@ -834,7 +868,9 @@
         "glosario-tecnico-del-rubro",
         "centro-de-documentacion-y-datos-abiertos",
         "informes-del-sector-con-fuente-oficial",
-        "por-que-cambia-el-precio-de-una-plastilona"
+        "por-que-cambia-el-precio-de-una-plastilona",
+        "asistente-guiado-y-portada-legible",
+        "ai-txt-identidad-y-politica-de-citacion-para-agentes"
       ],
       "title": "${n.titulo} | ${SITE.name}",
       "tituloDerivado": true,
@@ -876,7 +912,7 @@
         "/novedades/feed.json",
         "/novedades/rss.xml"
       ],
-      "lineas": 222
+      "lineas": 231
     },
     {
       "ruta": "/",
@@ -886,7 +922,7 @@
       "slugs": null,
       "title": "Fabricante de big bags, lonas, geomembranas y mallas en Perú",
       "tituloDerivado": false,
-      "h1": "Fabricación 100% a medida.<br />Instalación propia.<br />Un solo proveedor.",
+      "h1": null,
       "canonical": "/",
       "esquemas": [
         "organizationSchema (vía StructuredData)"
@@ -894,9 +930,11 @@
       "enlacesSalientes": [
         "/cotizacion",
         "/nosotros",
+        "/novedades",
+        "/novedades/[slug]",
         "/productos"
       ],
-      "lineas": 230
+      "lineas": 286
     },
     {
       "ruta": "/privacidad",
@@ -972,7 +1010,7 @@
         "/productos/[slug]",
         "/soluciones/[slug]"
       ],
-      "lineas": 312
+      "lineas": 340
     },
     {
       "ruta": "/productos/familia/[slug]/comparar",
@@ -1111,7 +1149,7 @@
       "ruta": "/recursos/[slug]",
       "archivo": "app/recursos/[slug]/page.tsx",
       "dinamica": true,
-      "instancias": 10,
+      "instancias": 15,
       "slugs": [
         "big-bags-mineria-peru-normativa-errores-estiba",
         "instalacion-geomembranas-hdpe-pozas-canales",
@@ -1122,7 +1160,12 @@
         "carpas-industriales-carga-viento-norma-e020",
         "cobertores-transporte-concentrado-mineral",
         "tanques-flexibles-almacenamiento-agua-operaciones-remotas",
-        "mulch-madera-espesor-calculo-cobertura-suelo"
+        "mulch-madera-espesor-calculo-cobertura-suelo",
+        "de-la-resina-a-la-rafia-cadena-productiva-textil-industrial",
+        "ecosistema-plastico-industrial-peru-quien-fabrica-quien-compra",
+        "polipropileno-polietileno-pvc-que-material-para-que-trabajo",
+        "vida-util-degradacion-uv-reciclaje-textil-industrial",
+        "comprar-textil-industrial-peru-sudamerica-incoterms-homologacion"
       ],
       "title": null,
       "tituloDerivado": true,
@@ -1289,9 +1332,25 @@
   ],
   "endpointsMaquina": [
     {
+      "ruta": "/ai.txt",
+      "archivo": "app/ai.txt/route.ts",
+      "contentType": "text/plain; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": false,
+      "noindex": false
+    },
+    {
       "ruta": "/calculadoras/formulas.json",
       "archivo": "app/calculadoras/formulas.json/route.ts",
       "contentType": "application/json; charset=utf-8",
+      "estatico": true,
+      "abiertoACors": true,
+      "noindex": false
+    },
+    {
+      "ruta": "/entidad.json",
+      "archivo": "app/entidad.json/route.ts",
+      "contentType": "application/ld+json; charset=utf-8",
       "estatico": true,
       "abiertoACors": true,
       "noindex": false
@@ -1599,9 +1658,16 @@
       "carpas-industriales-carga-viento-norma-e020",
       "cobertores-transporte-concentrado-mineral",
       "tanques-flexibles-almacenamiento-agua-operaciones-remotas",
-      "mulch-madera-espesor-calculo-cobertura-suelo"
+      "mulch-madera-espesor-calculo-cobertura-suelo",
+      "de-la-resina-a-la-rafia-cadena-productiva-textil-industrial",
+      "ecosistema-plastico-industrial-peru-quien-fabrica-quien-compra",
+      "polipropileno-polietileno-pvc-que-material-para-que-trabajo",
+      "vida-util-degradacion-uv-reciclaje-textil-industrial",
+      "comprar-textil-industrial-peru-sudamerica-incoterms-homologacion"
     ],
     "novedades": [
+      "serie-ecosistema-cinco-articulos-del-rubro",
+      "metodo-editorial-como-se-publica-este-sitio",
       "silo-tecnico-recursos-primeras-guias",
       "paginas-de-familia-con-criterios",
       "siete-guias-nuevas-silo-a-diez",
@@ -1612,7 +1678,9 @@
       "glosario-tecnico-del-rubro",
       "centro-de-documentacion-y-datos-abiertos",
       "informes-del-sector-con-fuente-oficial",
-      "por-que-cambia-el-precio-de-una-plastilona"
+      "por-que-cambia-el-precio-de-una-plastilona",
+      "asistente-guiado-y-portada-legible",
+      "ai-txt-identidad-y-politica-de-citacion-para-agentes"
     ],
     "informes": [
       "sectores-compradores-textiles-industriales-peru",
@@ -1644,7 +1712,12 @@
       "iquitos",
       "huancayo",
       "tacna",
-      "pucallpa"
+      "pucallpa",
+      "callao",
+      "moquegua",
+      "cajamarca",
+      "pasco",
+      "puno"
     ]
   },
   "proyectos": {
@@ -1660,7 +1733,7 @@
   "mapaConsultas": {
     "existe": true,
     "version": "1.0.0",
-    "revisado": "2026-08-24",
+    "revisado": "2026-08-27",
     "clusters": [
       {
         "id": "big-bags",
@@ -1668,7 +1741,7 @@
         "intencion": "comercial",
         "termino": "big bags",
         "variantes": 25,
-        "preguntas": 5,
+        "preguntas": 9,
         "apoyos": 11
       },
       {
@@ -1677,7 +1750,7 @@
         "intencion": "comercial",
         "termino": "sacos polytarp",
         "variantes": 6,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 4
       },
       {
@@ -1686,7 +1759,7 @@
         "intencion": "comercial",
         "termino": "bolsas de polietileno industrial",
         "variantes": 8,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 3
       },
       {
@@ -1695,7 +1768,7 @@
         "intencion": "comercial",
         "termino": "film termocontraíble",
         "variantes": 7,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 3
       },
       {
@@ -1704,7 +1777,7 @@
         "intencion": "comercial",
         "termino": "envases y embalaje industrial",
         "variantes": 7,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 5
       },
       {
@@ -1713,7 +1786,7 @@
         "intencion": "comercial",
         "termino": "lona plastificada",
         "variantes": 16,
-        "preguntas": 4,
+        "preguntas": 6,
         "apoyos": 8
       },
       {
@@ -1722,7 +1795,7 @@
         "intencion": "comercial",
         "termino": "toldos para camiones",
         "variantes": 11,
-        "preguntas": 3,
+        "preguntas": 5,
         "apoyos": 6
       },
       {
@@ -1731,7 +1804,7 @@
         "intencion": "comercial",
         "termino": "siders y tolderas",
         "variantes": 7,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 4
       },
       {
@@ -1740,7 +1813,7 @@
         "intencion": "comercial",
         "termino": "cobertores agrícolas",
         "variantes": 6,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 4
       },
       {
@@ -1749,7 +1822,7 @@
         "intencion": "comercial",
         "termino": "arpilleras para granjas",
         "variantes": 6,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 3
       },
       {
@@ -1758,7 +1831,7 @@
         "intencion": "comercial",
         "termino": "mantas aislantes térmicas",
         "variantes": 6,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 3
       },
       {
@@ -1767,7 +1840,7 @@
         "intencion": "comercial",
         "termino": "lonas y cobertores industriales",
         "variantes": 9,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 5
       },
       {
@@ -1776,7 +1849,7 @@
         "intencion": "comercial",
         "termino": "carpas industriales",
         "variantes": 10,
-        "preguntas": 3,
+        "preguntas": 5,
         "apoyos": 6
       },
       {
@@ -1785,7 +1858,7 @@
         "intencion": "comercial",
         "termino": "coberturas tensionadas",
         "variantes": 8,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 5
       },
       {
@@ -1794,7 +1867,7 @@
         "intencion": "comercial",
         "termino": "estructuras inflables",
         "variantes": 5,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 2
       },
       {
@@ -1803,7 +1876,7 @@
         "intencion": "comercial",
         "termino": "módulos para campamentos",
         "variantes": 6,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 4
       },
       {
@@ -1812,7 +1885,7 @@
         "intencion": "comercial",
         "termino": "invernaderos",
         "variantes": 9,
-        "preguntas": 3,
+        "preguntas": 5,
         "apoyos": 4
       },
       {
@@ -1821,7 +1894,7 @@
         "intencion": "comercial",
         "termino": "toldos y cerramientos industriales",
         "variantes": 10,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 4
       },
       {
@@ -1830,7 +1903,7 @@
         "intencion": "comercial",
         "termino": "estructuras textiles",
         "variantes": 6,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 5
       },
       {
@@ -1839,7 +1912,7 @@
         "intencion": "comercial",
         "termino": "malla antiáfida",
         "variantes": 8,
-        "preguntas": 3,
+        "preguntas": 5,
         "apoyos": 7
       },
       {
@@ -1848,7 +1921,7 @@
         "intencion": "comercial",
         "termino": "malla raschel",
         "variantes": 10,
-        "preguntas": 3,
+        "preguntas": 5,
         "apoyos": 6
       },
       {
@@ -1857,7 +1930,7 @@
         "intencion": "comercial",
         "termino": "malla anti pájaro",
         "variantes": 6,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 4
       },
       {
@@ -1866,7 +1939,7 @@
         "intencion": "comercial",
         "termino": "mallas agrícolas",
         "variantes": 7,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 5
       },
       {
@@ -1875,7 +1948,7 @@
         "intencion": "comercial",
         "termino": "mangas de ventilación",
         "variantes": 11,
-        "preguntas": 4,
+        "preguntas": 8,
         "apoyos": 11
       },
       {
@@ -1884,7 +1957,7 @@
         "intencion": "comercial",
         "termino": "ventilación industrial",
         "variantes": 7,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 5
       },
       {
@@ -1893,7 +1966,7 @@
         "intencion": "comercial",
         "termino": "geomembranas",
         "variantes": 11,
-        "preguntas": 4,
+        "preguntas": 6,
         "apoyos": 9
       },
       {
@@ -1902,7 +1975,7 @@
         "intencion": "comercial",
         "termino": "geomembrana de PVC",
         "variantes": 4,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 4
       },
       {
@@ -1911,7 +1984,7 @@
         "intencion": "comercial",
         "termino": "geomembrana HDPE",
         "variantes": 9,
-        "preguntas": 3,
+        "preguntas": 8,
         "apoyos": 9
       },
       {
@@ -1920,7 +1993,7 @@
         "intencion": "comercial",
         "termino": "geomembrana fortificada",
         "variantes": 4,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 3
       },
       {
@@ -1929,7 +2002,7 @@
         "intencion": "comercial",
         "termino": "geomembrana bituminosa",
         "variantes": 3,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 3
       },
       {
@@ -1938,7 +2011,7 @@
         "intencion": "comercial",
         "termino": "geotextiles",
         "variantes": 8,
-        "preguntas": 3,
+        "preguntas": 5,
         "apoyos": 7
       },
       {
@@ -1947,7 +2020,7 @@
         "intencion": "comercial",
         "termino": "geomallas",
         "variantes": 8,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 4
       },
       {
@@ -1956,7 +2029,7 @@
         "intencion": "comercial",
         "termino": "geocompuestos de drenaje",
         "variantes": 5,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 4
       },
       {
@@ -1965,7 +2038,7 @@
         "intencion": "comercial",
         "termino": "tanques flexibles",
         "variantes": 9,
-        "preguntas": 3,
+        "preguntas": 5,
         "apoyos": 5
       },
       {
@@ -1974,7 +2047,7 @@
         "intencion": "comercial",
         "termino": "biodigestores",
         "variantes": 5,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 4
       },
       {
@@ -1983,7 +2056,7 @@
         "intencion": "comercial",
         "termino": "tuberías HDPE",
         "variantes": 6,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 4
       },
       {
@@ -1992,7 +2065,7 @@
         "intencion": "comercial",
         "termino": "soluciones ambientales y de fluidos",
         "variantes": 5,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 5
       },
       {
@@ -2001,7 +2074,7 @@
         "intencion": "comercial",
         "termino": "biombos protectores",
         "variantes": 7,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 2
       },
       {
@@ -2010,7 +2083,7 @@
         "intencion": "comercial",
         "termino": "barreras acústicas",
         "variantes": 6,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 3
       },
       {
@@ -2019,7 +2092,7 @@
         "intencion": "comercial",
         "termino": "protección y seguridad industrial",
         "variantes": 4,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 3
       },
       {
@@ -2028,7 +2101,7 @@
         "intencion": "comercial",
         "termino": "accesorios de instalación",
         "variantes": 8,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 3
       },
       {
@@ -2037,7 +2110,7 @@
         "intencion": "comercial",
         "termino": "accesorios y complementos",
         "variantes": 3,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 2
       },
       {
@@ -2046,7 +2119,7 @@
         "intencion": "comercial",
         "termino": "gigantografías",
         "variantes": 7,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 2
       },
       {
@@ -2055,7 +2128,7 @@
         "intencion": "comercial",
         "termino": "revestimiento vehicular",
         "variantes": 5,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 3
       },
       {
@@ -2064,7 +2137,7 @@
         "intencion": "comercial",
         "termino": "publicidad y comunicación visual",
         "variantes": 3,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 2
       },
       {
@@ -2073,7 +2146,7 @@
         "intencion": "comercial",
         "termino": "mulch",
         "variantes": 6,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 3
       },
       {
@@ -2082,7 +2155,7 @@
         "intencion": "comercial",
         "termino": "líneas especiales",
         "variantes": 3,
-        "preguntas": 2,
+        "preguntas": 4,
         "apoyos": 2
       },
       {
@@ -2253,7 +2326,7 @@
         "intencion": "local",
         "termino": "cobertura nacional de textiles industriales",
         "variantes": 5,
-        "preguntas": 2,
+        "preguntas": 5,
         "apoyos": 4
       },
       {
@@ -2264,9 +2337,54 @@
         "variantes": 8,
         "preguntas": 3,
         "apoyos": 5
+      },
+      {
+        "id": "cadena-productiva-rafia",
+        "canonica": "/recursos/de-la-resina-a-la-rafia-cadena-productiva-textil-industrial",
+        "intencion": "decision",
+        "termino": "cadena productiva del plastico industrial",
+        "variantes": 10,
+        "preguntas": 4,
+        "apoyos": 4
+      },
+      {
+        "id": "ecosistema-plastico-peru",
+        "canonica": "/recursos/ecosistema-plastico-industrial-peru-quien-fabrica-quien-compra",
+        "intencion": "decision",
+        "termino": "industria del plastico industrial en el peru",
+        "variantes": 6,
+        "preguntas": 3,
+        "apoyos": 4
+      },
+      {
+        "id": "pp-pe-pvc-material",
+        "canonica": "/recursos/polipropileno-polietileno-pvc-que-material-para-que-trabajo",
+        "intencion": "decision",
+        "termino": "polipropileno o polietileno",
+        "variantes": 8,
+        "preguntas": 4,
+        "apoyos": 4
+      },
+      {
+        "id": "vida-util-reciclaje",
+        "canonica": "/recursos/vida-util-degradacion-uv-reciclaje-textil-industrial",
+        "intencion": "decision",
+        "termino": "vida util de una lona industrial",
+        "variantes": 8,
+        "preguntas": 4,
+        "apoyos": 4
+      },
+      {
+        "id": "importar-desde-peru",
+        "canonica": "/recursos/comprar-textil-industrial-peru-sudamerica-incoterms-homologacion",
+        "intencion": "decision",
+        "termino": "importar textil industrial desde peru",
+        "variantes": 7,
+        "preguntas": 3,
+        "apoyos": 4
       }
     ],
-    "terminos": 647
+    "terminos": 701
   },
   "afirmaciones": [
     {
@@ -2316,7 +2434,7 @@
     },
     {
       "id": "ciudades",
-      "valor": "12",
+      "valor": "17",
       "fuente": "data/ciudades.json"
     }
   ],
@@ -2355,6 +2473,7 @@
       "/login",
       "/marco/evaluacion",
       "/marco",
+      "/metodo",
       "/nosotros",
       "/novedades/[slug]",
       "/novedades",
@@ -2374,7 +2493,7 @@
       "/soluciones",
       "/terminos"
     ],
-    "aristas": 197,
+    "aristas": 205,
     "enlacesGlobales": [
       "/",
       "/aplicaciones",
@@ -2406,6 +2525,7 @@
       "/local",
       "/login",
       "/marco",
+      "/metodo",
       "/nosotros",
       "/novedades",
       "/privacidad",
@@ -2461,9 +2581,10 @@
       "/marco": 1,
       "/marco/evaluacion": 2,
       "/marco/marco.pdf": 2,
+      "/metodo": 1,
       "/nosotros": 1,
       "/novedades": 1,
-      "/novedades/[slug]": 2,
+      "/novedades/[slug]": 1,
       "/privacidad": 1,
       "/productos": 1,
       "/productos/[slug]": 2,
