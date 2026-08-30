@@ -12,11 +12,22 @@ const securityHeaders = [
     key: 'Strict-Transport-Security',
     value: 'max-age=63072000; includeSubDomains; preload',
   },
+  /**
+   * CSP EN MODO ENFORCE (antes: Report-Only sin report-uri — no aplicaba nada
+   * y no informaba a nadie). Cambios respecto de la lista anterior:
+   *  · sin 'unsafe-eval' — el runtime de producción de Next no lo necesita;
+   *  · sin cdn.onesignal.com — el web push se retiró (components/WebPush);
+   *  · sin grok.com — nunca hubo un script del sitio servido desde ahí;
+   *  · connect.facebook.net entra porque Analytics carga el píxel de Meta.
+   * 'unsafe-inline' se queda: Next incrusta su bootstrap y el script de tema
+   * como inline; retirarlo exige nonces por respuesta (SSR dinámico en todo el
+   * sitio), que costaría el caché estático entero.
+   */
   {
-    key: 'Content-Security-Policy-Report-Only',
+    key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://cdn.onesignal.com https://grok.com",
+      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https://fonts.gstatic.com",

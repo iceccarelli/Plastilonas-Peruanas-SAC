@@ -1,4 +1,3 @@
-import ExitIntentModal from '@/components/ExitIntentModal';
 import type { Metadata, Viewport } from 'next';
 import { fontClasses } from '@/lib/fonts';
 import '../globals.css';
@@ -7,13 +6,14 @@ import Footer from '@/components/Footer';
 import FeedbackBar from '@/components/FeedbackBar';
 import Chatbot from '@/components/Chatbot';
 import CartDrawer from '@/components/CartDrawer';
+import { CART_ENABLED } from '@/lib/flags';
 import { Toaster } from 'sonner';
 import AuthProvider from '@/components/AuthProvider';
 import StructuredData from '@/components/StructuredData';
 import { SITE } from '@/lib/site';
 import Analytics from '@/components/Analytics';
-import WebPush from '@/components/WebPush';
 import ConsentBanner from '@/components/ConsentBanner';
+import BarraMovilContacto from '@/components/BarraMovilContacto';
 
 /**
  * VIEWPORT — `viewportFit: 'cover'` es lo que activa las variables
@@ -127,7 +127,6 @@ export default function RootLayout({
         <span id="top" aria-hidden="true" />
         <StructuredData />
         <Analytics />
-        <WebPush />
         <AuthProvider>
           <Navbar />
           <main className="min-h-screen">
@@ -138,10 +137,10 @@ export default function RootLayout({
           </main>
           <Footer />
           <Chatbot />
-          <CartDrawer />
+          <BarraMovilContacto />
+          {CART_ENABLED && <CartDrawer />}
           <Toaster position="top-center" richColors closeButton />
         </AuthProvider>
-              <ExitIntentModal />
         <ConsentBanner />
       </body>
     </html>

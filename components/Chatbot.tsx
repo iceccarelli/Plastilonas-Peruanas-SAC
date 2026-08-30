@@ -65,7 +65,7 @@ export default function Chatbot() {
   return (
     <>
       {/* Botón flotante con anillos pulsantes (estilo empresarial) */}
-      <div className="fixed bottom-6 right-6 z-[90]">
+      <div className="fixed bottom-20 md:bottom-6 right-6 z-[90]">
         {/* Anillos que irradian: solo cuando el chat está cerrado, para
             atraer la atención sin distraer durante la conversación. */}
         {!isOpen && (
@@ -132,7 +132,7 @@ export default function Chatbot() {
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed bottom-24 right-6 z-[95] w-[380px] max-w-[calc(100vw-3rem)] chatbot-window">
+          <div className="fixed bottom-36 md:bottom-24 right-6 z-[95] w-[380px] max-w-[calc(100vw-3rem)] chatbot-window">
             <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 flex flex-col h-[min(560px,calc(100dvh-8.5rem))] overflow-hidden">
               {/* Header */}
               <div className="bg-[#0A2540] text-white px-6 py-5 flex items-center justify-between">

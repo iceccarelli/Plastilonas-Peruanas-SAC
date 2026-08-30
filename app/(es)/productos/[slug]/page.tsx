@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
 import { products } from '@/lib/products';
-import CotizacionModal from '@/components/CotizacionModal';
 import ProductGallery from '@/components/ProductGallery';
 import { mapaDeTomas } from '@/lib/galeria';
 import ProductBuyBox from '@/components/ProductBuyBox';
@@ -28,6 +27,9 @@ import DatosParaCotizar from '@/components/DatosParaCotizar';
 interface Props {
   params: Promise<{ slug: string }>;
 }
+
+// ISR: las fichas cambian solo con el catálogo; un día de caché.
+export const revalidate = 86400;
 
 export async function generateStaticParams() {
   return products.map((product) => ({

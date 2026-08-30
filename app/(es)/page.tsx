@@ -23,12 +23,10 @@ const FOTO_SERVICIO: Record<string, string> = {
   lightbulb: '/images/servicio-asesoria.webp',
 };
 import HeroImagen from '@/components/HeroImagen';
-import HeroMensaje from '@/components/HeroMensaje';
 import { novedades, tipoLabels } from '@/lib/novedades';
 import SectionHeading from '@/components/SectionHeading';
 import MachineryGallery from '@/components/MachineryGallery';
 import { Reveal } from '@/components/Reveal';
-import CountUp from '@/components/CountUp';
 
 /**
  * Metadata propia de la home. Sin esto heredaba el title/description por
@@ -67,6 +65,13 @@ export const metadata: Metadata = {
     type: 'website',
   },
 };
+
+/**
+ * ISR: la portada se regenera como mucho cada hora. Sus datos (catálogo,
+ * novedades) cambian con los deploys; una hora de caché en CDN elimina el
+ * render por visita sin arriesgar frescura.
+ */
+export const revalidate = 3600;
 
 export default function Home() {
   const featuredProducts = [...products].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
@@ -108,8 +113,10 @@ export default function Home() {
     { display: 'L–V', label: 'Atención comercial', sub: HORARIO.tarjeta },
   ];
   // Franja de legitimidad: datos verificables, no repite las cifras de arriba.
+  // El número de RUC vive en /contacto y /confianza (regla de la Etapa 1):
+  // aquí basta la afirmación verificable, con su página de respaldo a un clic.
   const trust = [
-    { icon: ShieldCheck, text: `RUC ${SITE.ruc}` },
+    { icon: ShieldCheck, text: 'Empresa registrada en SUNAT desde 2009' },
     { icon: MapPin, text: 'Chorrillos, Lima — Perú' },
     { icon: Truck, text: 'Entrega a todo el país' },
     { icon: FileText, text: 'Ficha técnica en cada cotización' },
@@ -144,11 +151,21 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-24 md:pt-24 md:pb-36">
           <Reveal>
             <div className="max-w-xl bg-white/95 backdrop-blur rounded-3xl shadow-2xl shadow-black/25 p-7 md:p-10">
-              {/* Texto vivo: 15 bloques con los mismos hechos, rotados cada
-                  ~10 s; solo el H1 se teclea. Los botones y los chips de
-                  abajo son el marco constante. SSR sirve el primer bloque
-                  completo — el H1 canónico de los rastreadores. */}
-              <HeroMensaje />
+              {/* H1 ÚNICO, ESTÁTICO Y EN FLUJO. El rotor anterior tecleaba la
+                  frase sobre un triple <span> (reserva invisible + sr-only +
+                  copia animada): tres copias del mismo texto y un hero que un
+                  rastreador con presupuesto corto podía capturar a medio
+                  teclear. El primer HTML ahora ES el mensaje. */}
+              <div className="text-xs tracking-[2px] text-[#047857] font-semibold uppercase mb-4">
+                Fabricante peruano de textil industrial
+              </div>
+              <h1 className="text-3xl md:text-[2.75rem] md:leading-[1.08] font-semibold tracking-tight text-[#0A2540] mb-4">
+                Lonas para camión, mangas de ventilación y big bags, a medida
+              </h1>
+              <p className="text-base md:text-lg text-[#334155] mb-7">
+                Fabricamos en Chorrillos desde 2009. Cotización con ficha técnica.
+                Diga producto, medidas y ciudad. Respondemos en horario L–V 8:00–18:00.
+              </p>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-7">
                 <Link href="/cotizacion" className="group inline-flex items-center justify-center gap-2 bg-[#0A2540] text-white hover:bg-[#047857] font-semibold px-6 py-3.5 rounded-full transition-colors">Cotizar proyecto <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></Link>
                 <Link href="/productos" className="inline-flex items-center justify-center gap-2 border border-[#0A2540]/25 text-[#0A2540] hover:border-[#047857] hover:text-[#047857] font-semibold px-6 py-3.5 rounded-full transition-colors">Ver catálogo</Link>
@@ -172,8 +189,10 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100 border-b border-gray-100">
             {stats.map((stat, i) => (
               <div key={i} className="px-3 py-7 md:px-6 md:py-9 text-center">
+                {/* Texto real en el primer HTML: sin contador desde 0. La cifra
+                    que lee un rastreador y la que ve una persona son la misma. */}
                 <div className="text-3xl md:text-4xl font-semibold tracking-tighter text-[#0A2540] tabular-nums">
-                  <CountUp to={stat.to} suffix={stat.suffix} display={stat.display} />
+                  {stat.display ?? `${stat.to}${stat.suffix ?? ''}`}
                 </div>
                 <div className="text-xs text-gray-700 mt-1.5 font-medium tracking-wide">{stat.label}</div>
                 <div className="t-micro text-gray-400 mt-1 leading-snug">{stat.sub}</div>

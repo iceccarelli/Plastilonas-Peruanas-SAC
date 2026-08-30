@@ -44,8 +44,10 @@ describe('navegación principal', () => {
   const primerNivel = entradasDePrimerNivel();
 
   it('declara exactamente las entradas de primer nivel esperadas', () => {
+    // Etapa 2: cuatro entradas + CTA «Cotizar». Soluciones y Nosotros viven
+    // bajo Recursos; el CTA es un enlace fijo a /cotizacion, no una entrada.
     expect(primerNivel.map((e) => e.label)).toEqual([
-      'Productos', 'Industrias', 'Soluciones', 'Servicios', 'Recursos', 'Nosotros',
+      'Productos', 'Industrias', 'Servicios', 'Recursos',
     ]);
   });
 
