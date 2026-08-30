@@ -1,4 +1,5 @@
 import { SITE } from '@/lib/site';
+import { MAPA_URL } from '@/components/NAP';
 import { WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 
 /**
@@ -79,6 +80,11 @@ export default function StructuredData() {
       addressCountry: SITE.addressCountry,
     },
     areaServed: { '@type': 'Country', name: 'Perú' },
+    // Mapa por CONSULTA (razón social + dirección), sin coordenadas
+    // inventadas. Cuando exista el Business Profile verificado, su URL exacta
+    // reemplaza esta búsqueda (components/NAP.tsx es la fuente).
+    hasMap: MAPA_URL,
+    openingHours: ['Mo-Fr 08:00-18:00', 'Sa 08:00-13:00'],
     isicV4: SITE.isicV4,
     naics: SITE.naics,
     currenciesAccepted: 'PEN',
