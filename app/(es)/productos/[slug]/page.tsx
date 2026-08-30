@@ -20,6 +20,10 @@ import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
 import RielComercial from '@/components/RielComercial';
 import { respuestaDirectaProducto, rfqWhatsAppProducto } from '@/lib/respuesta-directa';
+import { familyHrefByName } from '@/lib/families';
+import { INDUSTRIAS } from '@/lib/industrias';
+import { guides } from '@/lib/guides';
+import DatosParaCotizar from '@/components/DatosParaCotizar';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -83,6 +87,13 @@ export default async function ProductDetailPage({ params }: Props) {
   const relatedProducts = products
     .filter(p => p.id !== product.id && (p.category === product.category || p.sector.some(s => product.sector.includes(s))))
     .slice(0, 3);
+  // Enlaces laterales del grafo interno: familia, hub de industria y guía de
+  // la biblioteca que gobiernan esta compra. Derivados del dato, no a mano.
+  const familiaHref = familyHrefByName(product.category);
+  const industriasRel = INDUSTRIAS.filter((i) =>
+    i.etiquetas.some((e) => product.sector.includes(e)),
+  ).slice(0, 3);
+  const guiasRel = guides.filter((g) => g.relatedProductSlugs.includes(product.slug));
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
@@ -107,14 +118,15 @@ export default async function ProductDetailPage({ params }: Props) {
       <JsonLd data={breadcrumbSchema([
         { name: 'Inicio', url: `${SITE.url}/` },
         { name: 'Productos', url: `${SITE.url}/productos` },
-        { name: product.category, url: `${SITE.url}/productos` },
+        { name: product.category, url: `${SITE.url}${familiaHref}` },
         { name: product.name, url: `${SITE.url}${rutaProducto}` },
       ])} />
-      {/* Breadcrumb */}
+      {/* Breadcrumb: la familia enlaza a SU página, no de vuelta al catálogo.
+          Es el mismo dato que declara el BreadcrumbList de arriba. */}
       <div className="flex items-center gap-2 text-sm mb-8 text-gray-500">
         <Link href="/productos" className="hover:text-[#059669]">Productos</Link>
         <span>/</span>
-        <span className="text-[#0A2540]">{product.category}</span>
+        <Link href={familiaHref} className="hover:text-[#059669]">{product.category}</Link>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-x-14 gap-y-10">
@@ -323,6 +335,37 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
         </div>
       )}
+
+      {/* Contexto de compra: familia, hub de sector y guía técnica. Cierra el
+          triángulo ficha → familia → industria → biblioteca del grafo interno. */}
+      {(industriasRel.length > 0 || guiasRel.length > 0) && (
+        <div className="mt-16 pt-10 border-t">
+          <h2 className="font-semibold tracking-tight text-2xl mb-6">Para seguir especificando</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Link href={familiaHref} className="group block rounded-2xl border border-gray-100 p-5 hover:border-[#059669]/40 transition-colors">
+              <span className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Familia</span>
+              <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669]">{product.category}</span>
+            </Link>
+            {industriasRel.map((i) => (
+              <Link key={i.slug} href={`/industria/${i.slug}`} className="group block rounded-2xl border border-gray-100 p-5 hover:border-[#059669]/40 transition-colors">
+                <span className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Industria</span>
+                <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669]">{i.nombre}</span>
+              </Link>
+            ))}
+            {guiasRel.map((g) => (
+              <Link key={g.slug} href={`/biblioteca/${g.slug}`} className="group block rounded-2xl border border-gray-100 p-5 hover:border-[#059669]/40 transition-colors">
+                <span className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Guía técnica</span>
+                <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669]">{g.title}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Checklist transversal: los mismos 4 datos que pide el formulario. */}
+      <div className="mt-10">
+        <DatosParaCotizar />
+      </div>
 
       {/* Enlace lateral entre páginas comerciales: lo que le falta al grafo
           interno cuando todo enlaza hacia arriba y nada hacia el lado. */}

@@ -2251,6 +2251,33 @@
         "/confianza",
         "/cotizacion"
       ]
+    },
+    {
+      "id": "identidad-fiscal",
+      "canonica": "/confianza",
+      "intencion": "entidad",
+      "termino": "ruc plastilonas peruanas",
+      "variantes": [
+        "ruc 20523135385",
+        "planta plastilonas chorrillos",
+        "fábrica de plastilonas en chorrillos",
+        "dónde queda plastilonas peruanas",
+        "plastilonas peruanas sunat"
+      ],
+      "erratas": [
+        "plastilonas peruanas s.a.c ruc",
+        "ruc plastilonas peruana"
+      ],
+      "preguntas": [
+        "¿cuál es el RUC de Plastilonas Peruanas SAC?",
+        "¿dónde está la planta de Plastilonas Peruanas?",
+        "¿Plastilonas Peruanas es una empresa formal registrada en SUNAT?"
+      ],
+      "apoyos": [
+        "/contacto",
+        "/nosotros",
+        "/metodo"
+      ]
     }
   ]
 }
