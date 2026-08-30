@@ -88,17 +88,12 @@ export function respuestaDirectaAplicacion(a: Application): string {
  * cotizar.
  */
 export function rfqWhatsAppProducto(p: Product): string {
-  const campos = p.specifications.slice(0, 4).map((s) => `· ${s.label}: `);
+  // Primera línea: el guion de los «4 datos para cotizar», con los huecos a
+  // la vista. El SKU sigue viajando debajo: identifica la ficha sin
+  // ambigüedad y el comprador no tiene que escribirlo.
   return [
-    `*SOLICITUD DE COTIZACIÓN (RFQ)*`,
-    `Producto: ${p.name}`,
+    `Hola, quiero cotizar ${p.name}. Medidas/cantidad: ___. Ciudad de entrega: ___.`,
     `SKU: ${p.id} — ${p.slug}`,
-    '',
-    'Para cotizar necesito indicar:',
-    ...campos,
-    '· Cantidad: ',
-    '· Ciudad de entrega: ',
-    '· Fecha requerida: ',
   ].join('\n');
 }
 

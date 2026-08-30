@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { familyHrefByName } from '@/lib/families';
-import { HORARIO, TELEFONOS } from '@/lib/site';
+import { TELEFONOS } from '@/lib/site';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -15,10 +15,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { productFamilies, sectors } from '@/lib/products';
 import { INDUSTRIAS } from '@/lib/industrias';
 import CommandPalette from './CommandPalette';
-import CotizacionModal from './CotizacionModal';
 import WhatsAppLink from './WhatsAppLink';
 import CartButton from './CartButton';
 import { ThemeToggle } from './ThemeToggle';
+import { CART_ENABLED } from '@/lib/flags';
+import EstadoHorario from './EstadoHorario';
 
 /**
  * NAVEGACIÓN — agrupada por decisión de compra, no por orden de creación.
@@ -60,6 +61,12 @@ type Entrada =
   | { tipo: 'grupo'; href: string; label: string; hijos: EntradaHija[] }
   | { tipo: 'enlace'; href: string; label: string };
 
+/**
+ * Barra de primer nivel: Productos · Industrias · Servicios · Recursos, y el
+ * CTA «Cotizar» como quinto elemento fijo. Soluciones y Nosotros no
+ * desaparecen: viven bajo Recursos (y en el pie). Cuatro entradas + CTA caben
+ * en todos los anchos sin recortar el botón que convierte.
+ */
 const NAV: Entrada[] = [
   { tipo: 'mega', href: '/productos', label: 'Productos' },
   {
@@ -70,7 +77,6 @@ const NAV: Entrada[] = [
     // en el menú sin tocar este archivo.
     hijos: INDUSTRIAS.map((i) => ({ href: `/industria/${i.slug}`, label: i.nombre })),
   },
-  { tipo: 'enlace', href: '/soluciones', label: 'Soluciones' },
   { tipo: 'enlace', href: '/servicios', label: 'Servicios' },
   {
     tipo: 'grupo',
@@ -78,16 +84,18 @@ const NAV: Entrada[] = [
     label: 'Recursos',
     hijos: [
       { href: '/recursos', label: 'Guías técnicas', nota: 'Cómo se especifica cada familia' },
+      { href: '/soluciones', label: 'Soluciones', nota: 'Arquitecturas de referencia completas' },
       { href: '/calculadoras', label: 'Calculadoras', nota: 'Predimensionado con método publicado' },
       { href: '/informes', label: 'Informes', nota: 'Sector y formación de precio' },
       { href: '/indicadores', label: 'Indicadores', nota: 'Datos con fuente oficial' },
       { href: '/glosario', label: 'Glosario', nota: 'El vocabulario de compra' },
       { href: '/marco', label: 'Marco de evaluación', nota: 'Cómo comparar proveedores' },
+      { href: '/metodo', label: 'Método', nota: 'Cómo se publica este sitio' },
       { href: '/descargas', label: 'Descargas', nota: 'Fichas y catálogos en PDF' },
       { href: '/novedades', label: 'Novedades', nota: 'Qué ha cambiado en el sitio' },
+      { href: '/nosotros', label: 'Nosotros', nota: 'Historia, planta y forma de trabajo' },
     ],
   },
-  { tipo: 'enlace', href: '/nosotros', label: 'Nosotros' },
 ];
 
 /** Todos los enlaces del menú, aplanados. Lo usa el menú móvil y «Más». */
@@ -320,7 +328,6 @@ export default function Navbar() {
   };
 
   const [showCommand, setShowCommand] = useState(false);
-  const [showCotizacion, setShowCotizacion] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const [mobileGrupo, setMobileGrupo] = useState<string | null>(null);
   const pathname = usePathname();
@@ -475,7 +482,7 @@ export default function Navbar() {
             {/* Horario y planta: datos de la barra utilitaria, no del hero.
                 El horario real vive aquí, junto al teléfono que lo atiende. */}
             <span className="hidden xl:inline-flex items-center min-h-[24px] px-1 text-white/55">Chorrillos, Lima</span>
-            <span className="hidden lg:inline-flex items-center min-h-[24px] px-1 text-white/55">{HORARIO.corto}</span>
+            <EstadoHorario className="hidden lg:inline-flex items-center min-h-[24px] px-1 text-white/55" />
             <a href={TELEFONOS.central.tel} className="inline-flex items-center min-h-[24px] px-1 hover:text-white transition-colors">
               {TELEFONOS.central.display}
             </a>
@@ -724,27 +731,26 @@ export default function Navbar() {
                   )}
                   {user.name?.split(' ')[0] ?? 'Mi Cuenta'}
                 </Link>
-              ) : (
-                <Link
-                  href="/login"
-                  className="hidden xl:flex items-center px-3 py-2 text-sm font-medium whitespace-nowrap text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669] transition-colors"
-                >
-                  Iniciar sesión
-                </Link>
-              )}
+              ) : null}
+              {/* «Iniciar sesión» público retirado: en un B2B por RFQ la cuenta
+                  no compra nada y el enlace solo confundía. El dashboard sigue
+                  accesible por URL directa para quien ya tiene sesión. */}
 
-              {/* CTA principal. El texto se acorta antes de recortarse: en
-                  Full HD llegó a terminar en x=2038 sobre 1920 px de viewport. */}
-              <button
-                onClick={() => setShowCotizacion(true)}
+              {/* CTA principal: NAVEGA a /cotizacion, la página completa del
+                  RFQ. El modal era un formulario sin URL: no se puede enlazar,
+                  medir ni volver a él desde el historial. */}
+              <Link
+                href="/cotizacion"
                 className="hidden md:inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-[#0A2540] px-4 xl:px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all active:scale-[0.985] hover:bg-[#059669] dark:bg-[#10B981] dark:text-[#0A2540] dark:hover:bg-[#34D399]"
               >
                 <Award className="w-4 h-4 shrink-0" />
                 <span className="hidden xl:inline">Solicitar Cotización</span>
                 <span className="xl:hidden">Cotizar</span>
-              </button>
+              </Link>
 
-              <CartButton className="p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669]" />
+              {CART_ENABLED && (
+                <CartButton className="p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669]" />
+              )}
 
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -896,26 +902,31 @@ export default function Navbar() {
                 </Link>
 
                 <div className="pt-4 mt-2 border-t dark:border-[var(--border)]">
-                  <button
-                    onClick={() => { setIsOpen(false); setShowCotizacion(true); }}
+                  <Link
+                    href="/cotizacion"
+                    onClick={() => setIsOpen(false)}
                     className="w-full flex items-center justify-center gap-2 bg-[#0A2540] dark:bg-[#10B981] text-white dark:text-[#0A2540] min-h-[48px] py-3.5 rounded-2xl font-semibold"
                   >
                     <Award className="w-4 h-4" />
                     Solicitar Cotización
-                  </button>
+                  </Link>
                 </div>
 
-                <Link href="/carrito" onClick={() => setIsOpen(false)} className="flex items-center gap-2 min-h-[44px]">
-                  <ShoppingCart className="w-4 h-4 shrink-0" /> Mi carrito
-                </Link>
-                <Link
-                  href={user ? '/dashboard' : '/login'}
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 min-h-[44px]"
-                >
-                  <LayoutDashboard className="w-4 h-4 shrink-0" />
-                  {user ? 'Mi Cuenta' : 'Iniciar sesión'}
-                </Link>
+                {CART_ENABLED && (
+                  <Link href="/carrito" onClick={() => setIsOpen(false)} className="flex items-center gap-2 min-h-[44px]">
+                    <ShoppingCart className="w-4 h-4 shrink-0" /> Mi carrito
+                  </Link>
+                )}
+                {user && (
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-2 min-h-[44px]"
+                  >
+                    <LayoutDashboard className="w-4 h-4 shrink-0" />
+                    Mi Cuenta
+                  </Link>
+                )}
                 <WhatsAppLink
                   context="navbar-movil"
                   message="Hola, quisiera información sobre sus productos."
@@ -937,7 +948,6 @@ export default function Navbar() {
       <div className="h-20 md:h-[120px]" aria-hidden="true" />
 
       <CommandPalette open={showCommand} onOpenChange={setShowCommand} />
-      <CotizacionModal open={showCotizacion} onOpenChange={setShowCotizacion} />
     </>
   );
 }

@@ -75,13 +75,15 @@ describe('el catálogo se sirve como HTML, no como promesa', () => {
     expect(src.startsWith("'use client'")).toBe(true);
   });
 
-  it('/cotizacion tiene su encabezado fuera del Suspense', () => {
-    const cuerpo = jsx(leer('app/(es)/cotizacion/page.tsx'));
-    const h1 = cuerpo.indexOf('<h1 className');
-    const suspense = cuerpo.indexOf('<Suspense');
-    expect(h1).toBeGreaterThan(-1);
-    expect(suspense).toBeGreaterThan(-1);
-    expect(h1, 'el <h1> volvió a caer dentro del Suspense').toBeLessThan(suspense);
+  it('/cotizacion sirve encabezado y formulario en el primer HTML', () => {
+    // Etapa 2: la página es un componente de SERVIDOR que lee searchParams
+    // como prop. Ya no hay Suspense que esconda el formulario: el <h1>, la
+    // ciudad de entrega y el SLA viajan en el HTML inicial.
+    const src = leer('app/(es)/cotizacion/page.tsx');
+    expect(src).not.toContain("'use client'");
+    expect(src).not.toContain('<Suspense');
+    expect(src).toContain('<h1 className');
+    expect(src).toContain('CotizacionForm');
   });
 
   it('carrito y checkout emiten encabezado antes de montar', () => {

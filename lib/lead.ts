@@ -26,6 +26,18 @@ export interface LeadPayload {
   deliveryCity?: string;
   whatsapp?: string;
   language?: 'es' | 'en' | 'pt';
+  // ── Atribución (campos ocultos del formulario) ───────────────────────────
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_term?: string;
+  utm_content?: string;
+  /** Ruta (con query) desde la que se envió el RFQ. */
+  path?: string;
+  /** Slug del producto de origen, si el enlace lo trajo. */
+  slug?: string;
+  /** Referencias de adjuntos: ruta en Storage o nombre del archivo. */
+  archivos?: string[];
 }
 
 export async function postLead(lead: LeadPayload): Promise<void> {

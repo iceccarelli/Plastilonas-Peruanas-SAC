@@ -29,6 +29,9 @@ import IndiceCatalogo from '@/components/IndiceCatalogo';
 
 const CATALOGO_URL = `${SITE.url}/productos`;
 
+// ISR: catálogo, 1 hora.
+export const revalidate = 3600;
+
 export default function ProductosPage() {
   return (
     <>

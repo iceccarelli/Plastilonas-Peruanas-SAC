@@ -84,6 +84,12 @@ export default function HeroImagen() {
             'linear-gradient(to right, rgba(10,37,64,0.28) 0%, rgba(10,37,64,0) 22%)',
         }}
       />
+      {/* Honestidad visual: estas fotos ilustran la aplicación, no son obras
+          ejecutadas por la empresa. Decirlo cuesta una línea; callarlo cuesta
+          la credibilidad de las fotos que sí sean propias. */}
+      <div className="absolute bottom-2 right-3 text-[10px] leading-tight text-white/70 bg-[#0A2540]/50 rounded px-2 py-0.5 pointer-events-none">
+        Imagen referencial de la aplicación — no es una obra ejecutada
+      </div>
     </div>
   );
 }

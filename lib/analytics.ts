@@ -43,9 +43,9 @@ export function trackQuoteStarted(context: string, producto?: string): void {
 }
 
 /** Solicitud de cotización enviada — la conversión principal del negocio. */
-export function trackQuoteRequest(producto?: string): void {
+export function trackQuoteRequest(producto?: string, slug?: string): void {
   const content = producto ?? 'general';
-  trackEvent('quote_request', { producto: content });
+  trackEvent('quote_request', { producto: content, ...(slug ? { slug } : {}) });
   if (typeof window !== 'undefined') {
     window.fbq?.('track', 'Lead', { content_name: content });
   }

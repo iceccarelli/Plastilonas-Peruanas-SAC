@@ -78,14 +78,15 @@ describe('deep link de cotización', () => {
 
   it('la página de cotización LEE el parámetro producto', () => {
     // Las 36 fichas enlazan con ?producto=; antes el parámetro se descartaba y
-    // el comprador tenía que volver a escribir lo que acababa de mirar.
-    expect(page).toContain('useSearchParams');
-    expect(page).toContain("searchParams.get('producto')");
+    // el comprador tenía que volver a escribir lo que acababa de mirar. Ahora
+    // la página es un componente de servidor: lee `searchParams` como prop.
+    expect(page).toContain('searchParams');
+    expect(page).toContain('params.producto');
     expect(page).toContain('preselectedProduct');
   });
 
   it('acepta una comparativa por slugs y la traduce a nombres del catálogo', () => {
-    expect(page).toContain("searchParams.get('comparativa')");
+    expect(page).toContain('params.comparativa');
     expect(page).toContain('products.find((p) => p.slug === slug)');
   });
 

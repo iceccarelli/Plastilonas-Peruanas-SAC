@@ -25,6 +25,19 @@ const LeadSchema = z.object({
   fechaNecesaria: z.string().trim().max(40).optional(),
   mensaje: z.string().trim().max(4000).optional(),
   language: z.enum(['es', 'en', 'pt']).optional(),
+  /** RUC ya normalizado (el formulario lo valida con módulo 11). Antes el
+      esquema lo omitía y safeParse lo descartaba en silencio. */
+  ruc: z.string().trim().regex(/^\d{11}$/).optional(),
+  // ── Atribución: campos ocultos del formulario ────────────────────────────
+  utm_source: z.string().trim().max(120).optional(),
+  utm_medium: z.string().trim().max(120).optional(),
+  utm_campaign: z.string().trim().max(120).optional(),
+  utm_term: z.string().trim().max(120).optional(),
+  utm_content: z.string().trim().max(120).optional(),
+  path: z.string().trim().max(400).optional(),
+  slug: z.string().trim().max(120).optional(),
+  /** Referencias de adjuntos (ruta en Storage o nombre del archivo). */
+  archivos: z.array(z.string().trim().max(300)).max(5).optional(),
 });
 
 const buckets = new Map<string, { n: number; t: number }>();
