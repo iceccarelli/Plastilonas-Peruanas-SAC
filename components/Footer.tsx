@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import WhatsAppLink from './WhatsAppLink';
 import { WHATSAPP_DISPLAY } from '@/lib/whatsapp';
-import { SITE } from '@/lib/site';
+import { SITE, TELEFONOS } from '@/lib/site';
+import { FABRICACION_PROPIA_COUNT } from '@/lib/facts';
 import Image from 'next/image';
 import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
 import SocialIcons from '@/components/SocialIcons';
@@ -14,7 +15,7 @@ export default function Footer() {
   // a medida» mientras 16 de las 36 líneas son importación directa y una es
   // de aliado técnico. La misma mentira ya se retiró de la portada y del
   // prompt del asistente; el pie era el último lugar donde sobrevivía.
-  const propias = products.filter((p) => p.sourcing === 'fabricacion_propia').length;
+  const propias = FABRICACION_PROPIA_COUNT;
 
   const sections: FSection[] = [
     { title: 'PRODUCTOS', links: [
@@ -66,7 +67,7 @@ export default function Footer() {
       { label: 'Português', href: '/pt' },
     ]},
     { title: 'CONTACTO', links: [
-      { label: '+51 998 117 065 · Central', href: 'tel:+51998117065', external: true },
+      { label: `${TELEFONOS.central.display} · Central`, href: TELEFONOS.central.tel, external: true },
       { label: SITE.email, href: `mailto:${SITE.email}`, external: true },
       { label: 'Chorrillos, Lima — Perú', href: '/contacto' },
     ]},
@@ -171,17 +172,17 @@ export default function Footer() {
           <div>
             <div className="font-semibold text-white mb-4 tracking-wide text-sm">CONTACTO DIRECTO</div>
             <div className="space-y-4 text-sm">
-              <a href="tel:+51998117065" className="flex items-start gap-3 group">
+              <a href={TELEFONOS.central.tel} className="flex items-start gap-3 group">
                 <Phone className="w-4 h-4 mt-0.5 text-white/50 group-hover:text-[#059669]" />
                 <div>
-                  <div>+51 998 117 065</div>
+                  <div>{TELEFONOS.central.display}</div>
                   <div className="text-xs text-white/50">Central</div>
                 </div>
               </a>
               <WhatsAppLink context="footer-contacto" message="Hola, quisiera información sobre sus productos." className="flex items-start gap-3 group">
                 <Phone className="w-4 h-4 mt-0.5 text-[#25D366] group-hover:text-[#059669]" />
                 <div>
-                  <div className="text-[#25D366]">+51 946 085 270</div>
+                  <div className="text-[#25D366]">{TELEFONOS.whatsapp.display}</div>
                   <div className="text-xs text-white/50">WhatsApp comercial</div>
                 </div>
               </WhatsAppLink>

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, ArrowRight, Phone } from 'lucide-react';
 import { useExitIntent } from '@/lib/useExitIntent';
+import { HORARIO, TELEFONOS } from '@/lib/site';
 
 export default function ExitIntentModal() {
   const { open, close } = useExitIntent();
@@ -83,7 +84,7 @@ export default function ExitIntentModal() {
             </div>
 
             <p className="text-center text-sm text-gray-500 mt-6">
-              O llame al <a href="tel:+51998117065" className="text-[#047857] font-semibold hover:underline">+51 998 117 065</a> · Lun–Sáb, 8 AM – 7 PM
+              O llame al <a href={TELEFONOS.central.tel} className="text-[#047857] font-semibold hover:underline">{TELEFONOS.central.display}</a> · {HORARIO.corto}
             </p>
           </motion.div>
         </motion.div>

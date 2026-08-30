@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { SITE, HORARIO } from '@/lib/site';
-import { YEARS_OPERATING } from '@/lib/facts';
+import { FABRICACION_PROPIA_COUNT, YEARS_OPERATING } from '@/lib/facts';
 import Link from 'next/link';
 import { ArrowRight, Phone, ShieldCheck, MapPin, Truck, FileText } from 'lucide-react';
 import { products, productFamilies, sectors } from '@/lib/products';
@@ -88,7 +88,7 @@ export default function Home() {
    * prompt del chatbot— existe para declararlo. Una cifra falsa sentada junto a
    * dos verdaderas les roba la credibilidad a las dos.
    */
-  const fabricacionPropia = products.filter((p) => p.sourcing === 'fabricacion_propia').length;
+  const fabricacionPropia = FABRICACION_PROPIA_COUNT;
   /**
    * Cifras calculadas del catálogo: nunca quedan desfasadas ni se inventan.
    *

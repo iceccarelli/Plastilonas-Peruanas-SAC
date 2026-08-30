@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import { SITE, TELEFONOS } from '@/lib/site';
 
 /**
  * Imagen Open Graph (1200x630) con el logo REAL de la marca.
@@ -52,8 +53,8 @@ export default function OpengraphImage() {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.55)', fontSize: 24 }}>
-          <div style={{ display: 'flex' }}>RUC 20523135385 · Chorrillos, Lima</div>
-          <div style={{ display: 'flex' }}>WhatsApp +51 946 085 270</div>
+          <div style={{ display: 'flex' }}>RUC {SITE.ruc} · Chorrillos, Lima</div>
+          <div style={{ display: 'flex' }}>WhatsApp {TELEFONOS.whatsapp.display}</div>
         </div>
       </div>
     ),

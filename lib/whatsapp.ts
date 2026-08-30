@@ -7,10 +7,10 @@
  * El lead llega de verdad, con un clic, al canal que la empresa ya atiende.
  */
 
-import { SITE } from './site';
+import { SITE, TELEFONOS } from './site';
 
-export const WHATSAPP_NUMBER = '51946085270';
-export const WHATSAPP_DISPLAY = '+51 946 085 270';
+export const WHATSAPP_NUMBER = TELEFONOS.whatsapp.waNumber;
+export const WHATSAPP_DISPLAY = TELEFONOS.whatsapp.display;
 
 /** Host visible del sitio, derivado de SITE.url (nunca hard-codeado). */
 const SITE_HOST = SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
