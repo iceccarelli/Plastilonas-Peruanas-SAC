@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import robots from '@/app/robots';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 import { SITE } from '@/lib/site';
 import { products } from '@/lib/products';
 import { productFaqs } from '@/lib/product-faq';

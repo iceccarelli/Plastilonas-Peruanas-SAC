@@ -5,12 +5,21 @@ import { SITE } from '@/lib/site';
 const BASE = SITE.url;
 
 /**
- * JSON-LD por producto: Product + BreadcrumbList.
+ * JSON-LD por producto: nodo Product.
  *
  * Regla de honestidad: solo datos REALES del catálogo. NO se declaran precios,
  * reseñas ni calificaciones (el negocio es por cotización) — inventarlos rompería
  * el rich result de Google y sería fabricación. Las especificaciones técnicas sí
  * son reales y se exponen como additionalProperty para enriquecer el entendimiento.
+ *
+ * La Offer se emite SIN precio: dice dónde se cotiza (`url` → /cotizacion) y en
+ * qué moneda se cotizaría, y declara `availability` solo cuando el estado del
+ * catálogo lo respalda (stock). Un precio inventado o un InStock genérico en
+ * líneas a medida sería exactamente la fabricación que este sitio no hace.
+ *
+ * El BreadcrumbList vive en app/(es)/productos/[slug]/page.tsx (4 niveles, con
+ * la familia). Aquí se emitía OTRO de 3 niveles: dos migas de pan distintas en
+ * la misma página compiten y Google descarta ambas.
  */
 export default function ProductStructuredData({ product }: { product: Product }) {
   const url = `${BASE}/productos/${product.slug}`;
@@ -26,6 +35,7 @@ export default function ProductStructuredData({ product }: { product: Product })
   const productLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
+    '@id': `${url}#product`,
     name: product.name,
     description: product.shortDescription,
     image: galleryImages.length ? galleryImages : `${BASE}${product.image}`,
@@ -47,22 +57,22 @@ export default function ProductStructuredData({ product }: { product: Product })
           })),
         }
       : {}),
-  };
-
-  const breadcrumbLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Inicio', item: BASE },
-      { '@type': 'ListItem', position: 2, name: 'Productos', item: `${BASE}/productos` },
-      { '@type': 'ListItem', position: 3, name: product.name, item: url },
-    ],
+    offers: {
+      '@type': 'Offer',
+      url: `${BASE}/cotizacion?producto=${encodeURIComponent(product.slug)}`,
+      priceCurrency: 'PEN',
+      // Sin `price`: negocio B2B por cotización, sin lista pública en líneas
+      // a medida. `availability` solo cuando el catálogo declara stock real.
+      ...(product.availability === 'stock'
+        ? { availability: 'https://schema.org/InStock' }
+        : {}),
+      description:
+        'Sin lista de precios en líneas a medida: se cotiza con producto, medidas o cantidad, ciudad de entrega y plazo.',
+      seller: { '@id': `${BASE}/#business` },
+    },
   };
 
   return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-    </>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }} />
   );
 }

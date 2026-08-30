@@ -7,7 +7,7 @@ import {
 } from '@/lib/solutions';
 import { products } from '@/lib/products';
 import { generateStaticParams } from '@/app/(es)/soluciones/[slug]/page';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 import { SITE } from '@/lib/site';
 
 describe('arquitecturas: referencias reales', () => {

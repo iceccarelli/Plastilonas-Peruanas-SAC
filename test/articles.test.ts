@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { articles, articleBySlug, articleUrl } from '@/lib/articles';
 import { products } from '@/lib/products';
 import ciudades from '@/data/ciudades.json';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 import { SITE } from '@/lib/site';
 import { articleSchema, howToSchema } from '@/lib/schema';
 

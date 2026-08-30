@@ -53,7 +53,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // con el nombre solo. Nunca una frase partida por la mitad.
     title: tituloAjustado(title, 'qué es y cómo se especifica'),
     description: descripcionAjustada([t.definicionCorta]),
-    keywords: formasDe(t),
     alternates: { canonical: `/glosario/${slug}` },
     openGraph: {
       title: `${title} | Glosario técnico de ${SITE.name}`,

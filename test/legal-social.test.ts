@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { SOCIAL_LINKS, readySocialLinks, pendingSocialLinks } from '@/lib/social';
 import { privacidad, terminos, LEGAL_UPDATED } from '@/lib/legal';
 import { SITE } from '@/lib/site';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 
 /**
  * Dos defectos que este archivo impide que vuelvan:

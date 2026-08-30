@@ -9,7 +9,9 @@ import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
 const URL_NOSOTROS = `${SITE.url}/nosotros`;
 
 const TITLE = `Nosotros: fabricantes peruanos desde ${SITE.foundingYear}`;
-const DESCRIPTION = `${SITE.legalName}, RUC ${SITE.ruc}. Fabricamos e instalamos desde nuestra planta en ${SITE.addressLocality}: historia, capacidad propia y forma de trabajo.`;
+// El RUC vive en /contacto y /confianza (y en el JSON-LD): en una descripción
+// de búsqueda no gana el clic y gasta el espacio de lo que sí lo gana.
+const DESCRIPTION = `${SITE.legalName}. Fabricamos e instalamos desde nuestra planta en ${SITE.addressLocality}: historia, capacidad propia y forma de trabajo.`;
 
 export const metadata: Metadata = {
   title: TITLE,

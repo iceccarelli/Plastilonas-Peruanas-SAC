@@ -50,7 +50,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: a.metaTitle,
     description: descripcionBusqueda,
-    keywords: [a.category, ...a.sectors, 'Perú', 'guía técnica'],
     alternates: { canonical: `/recursos/${a.slug}` },
     openGraph: {
       title: a.metaTitle,

@@ -7,7 +7,7 @@ import {
 } from '@/lib/framework';
 import { buildBriefPdf } from '@/lib/framework-brief';
 import { scoreAnswers, type Answers } from '@/lib/framework-score';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 import { SITE } from '@/lib/site';
 
 describe('marco: integridad de los criterios', () => {
