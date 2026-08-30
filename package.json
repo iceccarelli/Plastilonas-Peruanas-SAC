@@ -32,7 +32,8 @@
     "seo:crawl": "bash scripts/verificar-despliegue.sh",
     "seo:all": "npm run seo:consistency && npm run seo:claims && npm run seo:schema && npm run seo:links && npm run seo:prompts",
     "auditar": "node scripts/auditar-html.mjs",
-    "auditar:json": "node scripts/auditar-html.mjs --json"
+    "auditar:json": "node scripts/auditar-html.mjs --json",
+    "typecheck": "rm -rf .next/types && tsc --noEmit"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",
