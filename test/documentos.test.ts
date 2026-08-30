@@ -166,7 +166,7 @@ describe('centro de documentación', () => {
 });
 
 describe('404 útil', () => {
-  const src = readFileSync(join(process.cwd(), 'app/not-found.tsx'), 'utf8');
+  const src = readFileSync(join(process.cwd(), 'app/(es)/not-found.tsx'), 'utf8');
   /**
    * Se asevera sobre el CÓDIGO, no sobre los comentarios: el comentario que
    * documenta el fallo original cita literalmente el texto que el test

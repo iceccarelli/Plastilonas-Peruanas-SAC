@@ -5,6 +5,7 @@ import { useChat } from '@ai-sdk/react';
 import { trackChatbotEngaged } from '@/lib/analytics';
 import { X, Send, Bot, User } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { whatsappUrl, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 import { INICIOS, seguimientosPara } from '@/lib/chat/intents';
@@ -250,12 +251,12 @@ export default function Chatbot() {
               {/* Cierre de conversión: siempre visible. El asistente orienta;
                   estos dos botones son los que convierten. */}
               <div className="px-4 pt-3 border-t bg-white flex gap-2">
-                <a
+                <Link
                   href="/cotizacion?origen=chat"
                   className="flex-1 text-center text-sm font-semibold bg-[#0A2540] hover:bg-[#047857] text-white px-4 py-2.5 rounded-2xl transition-colors"
                 >
                   Cotizar
-                </a>
+                </Link>
                 <a
                   href={whatsappUrl(semillaWhatsApp)}
                   target="_blank"

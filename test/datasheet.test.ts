@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { products } from '@/lib/products';
 import { buildDatasheetPdf } from '@/lib/datasheet';
 import { toWinAnsi } from '@/lib/pdf-text';
-import { generateStaticParams } from '@/app/productos/[slug]/ficha-tecnica.pdf/route';
+import { generateStaticParams } from '@/app/(es)/productos/[slug]/ficha-tecnica.pdf/route';
 
 const FECHA = '2026-08-18';
 
@@ -59,7 +59,7 @@ describe('ficha técnica: generación', () => {
 
 describe('ficha técnica: honestidad del documento', () => {
   const route = readFileSync(
-    join(process.cwd(), 'app/productos/[slug]/ficha-tecnica.pdf/route.ts'),
+    join(process.cwd(), 'app/(es)/productos/[slug]/ficha-tecnica.pdf/route.ts'),
     'utf8',
   );
   const lib = readFileSync(join(process.cwd(), 'lib/datasheet.ts'), 'utf8');

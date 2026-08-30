@@ -20,7 +20,7 @@ import { solutions } from '@/lib/solutions';
 import { familyContent, comparableFamilies } from '@/lib/families';
 import { terminos } from '@/lib/glosario';
 import { informes } from '@/lib/informes';
-import { generateStaticParams } from '@/app/novedades/[slug]/page';
+import { generateStaticParams } from '@/app/(es)/novedades/[slug]/page';
 import sitemap from '@/app/sitemap';
 import { SITE } from '@/lib/site';
 
@@ -48,6 +48,11 @@ function rutasEstaticas(dir = 'app', prefijo = ''): string[] {
   for (const e of readdirSync(join(process.cwd(), dir), { withFileTypes: true })) {
     if (!e.isDirectory() || e.name.startsWith('[') || e.name.startsWith('_') || e.name.includes('.')) continue;
     const rel = `${dir}/${e.name}`;
+    // Los grupos de ruta (es)/(en)/(pt) no aparecen en la URL.
+    if (e.name.startsWith('(')) {
+      salida.push(...rutasEstaticas(rel, prefijo));
+      continue;
+    }
     const ruta = `${prefijo}/${e.name}`;
     if (existsSync(join(process.cwd(), rel, 'page.tsx'))) salida.push(ruta);
     salida.push(...rutasEstaticas(rel, ruta));
@@ -193,7 +198,7 @@ describe('novedades: rutas y descubrimiento', () => {
 });
 
 describe('novedades: descubrimiento del feed en todo el sitio', () => {
-  const layout = readFileSync(join(process.cwd(), 'app/layout.tsx'), 'utf8');
+  const layout = readFileSync(join(process.cwd(), 'app/(es)/layout.tsx'), 'utf8');
 
   it('el <head> raíz declara el feed RSS en JSX, no en metadata.alternates', () => {
     // Cada página define su propio alternates.canonical y Next reemplaza el

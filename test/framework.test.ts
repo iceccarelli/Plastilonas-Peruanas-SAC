@@ -103,7 +103,7 @@ describe('marco: brief en PDF', () => {
   it('pdf-lib NO viaja en la carga inicial de la evaluación', () => {
     // 210 kB de JavaScript por una descarga opcional es un impuesto que paga
     // todo el que solo quería responder las preguntas.
-    const page = readFileSync(join(process.cwd(), 'app/marco/evaluacion/page.tsx'), 'utf8');
+    const page = readFileSync(join(process.cwd(), 'app/(es)/marco/evaluacion/page.tsx'), 'utf8');
     expect(page).toContain("await import('@/lib/framework-brief')");
     expect(page).not.toMatch(/^import .*framework-brief/m);
     const score = readFileSync(join(process.cwd(), 'lib/framework-score.ts'), 'utf8');
@@ -118,7 +118,7 @@ describe('marco: brief en PDF', () => {
   });
 
   it('la evaluación no pide datos personales', () => {
-    const src = readFileSync(join(process.cwd(), 'app/marco/evaluacion/page.tsx'), 'utf8');
+    const src = readFileSync(join(process.cwd(), 'app/(es)/marco/evaluacion/page.tsx'), 'utf8');
     for (const campo of ['email', 'correo', 'telefono', 'teléfono', 'ruc']) {
       expect(src.toLowerCase(), `pide ${campo}`).not.toContain(`"${campo}"`);
     }

@@ -80,7 +80,7 @@ describe('intenciones del asistente: forma y honestidad', () => {
 
 describe('el widget y la portada usan las intenciones de verdad', () => {
   const chatbot = leer('components/Chatbot.tsx');
-  const portada = leer('app/page.tsx');
+  const portada = leer('app/(es)/page.tsx');
   const heroImagen = leer('components/HeroImagen.tsx');
   const rutaApi = leer('app/api/chat/route.ts');
 

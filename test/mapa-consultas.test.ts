@@ -45,20 +45,21 @@ const raiz = process.cwd();
 /** ¿Existe esta ruta en app/, contando plantillas dinámicas? */
 function rutaExiste(ruta: string): boolean {
   const partes = ruta.replace(/^\//, '').split('/').filter(Boolean);
-  if (partes.length === 0) return existsSync(join(raiz, 'app/page.tsx'));
+  if (partes.length === 0) return existsSync(join(raiz, 'app/(es)/page.tsx'));
 
-  // Ruta literal.
+  // Ruta literal (el grupo (es) no aparece en la URL).
   if (existsSync(join(raiz, 'app', ...partes, 'page.tsx'))) return true;
+  if (existsSync(join(raiz, 'app', '(es)', ...partes, 'page.tsx'))) return true;
 
-  // Plantilla dinámica: /productos/foo → app/productos/[slug]/page.tsx, y el
+  // Plantilla dinámica: /productos/foo → app/(es)/productos/[slug]/page.tsx, y el
   // slug tiene que existir además en su fuente de verdad.
   const dinamicas: Record<string, { plantilla: string; slugs: string[] }> = {
     productos: {
-      plantilla: 'app/productos/[slug]/page.tsx',
+      plantilla: 'app/(es)/productos/[slug]/page.tsx',
       slugs: products.map((p) => p.slug),
     },
     industria: {
-      plantilla: 'app/industria/[sector]/page.tsx',
+      plantilla: 'app/(es)/industria/[sector]/page.tsx',
       slugs: INDUSTRIAS.map((i) => i.slug),
     },
   };
@@ -66,7 +67,7 @@ function rutaExiste(ruta: string): boolean {
 
   if (primero === 'productos' && resto[0] === 'familia' && resto.length === 2) {
     return (
-      existsSync(join(raiz, 'app/productos/familia/[slug]/page.tsx')) &&
+      existsSync(join(raiz, 'app/(es)/productos/familia/[slug]/page.tsx')) &&
       productFamilies.some((f) => f.slug === resto[1])
     );
   }
@@ -77,7 +78,10 @@ function rutaExiste(ruta: string): boolean {
   // Colecciones cuyo slug se valida contra su propia plantilla dinámica.
   const conPlantilla = ['biblioteca', 'aplicaciones', 'soluciones', 'calculadoras', 'glosario', 'recursos', 'informes', 'novedades'];
   if (conPlantilla.includes(primero) && resto.length === 1) {
-    return existsSync(join(raiz, 'app', primero, '[slug]/page.tsx'));
+    return (
+      existsSync(join(raiz, 'app', primero, '[slug]/page.tsx')) ||
+      existsSync(join(raiz, 'app', '(es)', primero, '[slug]/page.tsx'))
+    );
   }
   return false;
 }

@@ -237,7 +237,7 @@ describe('galería: integración con la ficha', () => {
   const gal = readFileSync(join(process.cwd(), 'components/ProductGallery.tsx'), 'utf8');
 
   it('la ficha resuelve las tomas en el servidor y las pasa al componente', () => {
-    const page = readFileSync(join(process.cwd(), 'app/productos/[slug]/page.tsx'), 'utf8');
+    const page = readFileSync(join(process.cwd(), 'app/(es)/productos/[slug]/page.tsx'), 'utf8');
     expect(page).toMatch(/mapaDeTomas\(product\.gallery/);
   });
 

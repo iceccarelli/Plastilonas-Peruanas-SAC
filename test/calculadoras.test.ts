@@ -438,7 +438,7 @@ describe('integración con el resto del sitio', () => {
   });
 
   it('la página emite HowTo y SoftwareApplication', () => {
-    const src = readFileSync(join(raiz, 'app/calculadoras/[slug]/page.tsx'), 'utf8');
+    const src = readFileSync(join(raiz, 'app/(es)/calculadoras/[slug]/page.tsx'), 'utf8');
     expect(src).toMatch(/howToSchema\(/);
     expect(src).toMatch(/softwareApplicationSchema\(/);
     // Los límites viajan dentro del nodo, no solo en el HTML.
@@ -447,7 +447,7 @@ describe('integración con el resto del sitio', () => {
 
   it('los límites se muestran DESPUÉS del resultado', () => {
     // Puestos arriba, donde nadie los ha necesitado todavía, no los lee nadie.
-    const src = readFileSync(join(raiz, 'app/calculadoras/[slug]/page.tsx'), 'utf8');
+    const src = readFileSync(join(raiz, 'app/(es)/calculadoras/[slug]/page.tsx'), 'utf8');
     expect(src.indexOf('<CalculadoraForm')).toBeLessThan(src.indexOf('Qué NO cubre'));
   });
 
@@ -471,7 +471,7 @@ describe('integración con el resto del sitio', () => {
   });
 
   it('las guías y arquitecturas enlazan de vuelta a sus calculadoras', () => {
-    for (const ruta of ['app/recursos/[slug]/page.tsx', 'app/soluciones/[slug]/page.tsx']) {
+    for (const ruta of ['app/(es)/recursos/[slug]/page.tsx', 'app/(es)/soluciones/[slug]/page.tsx']) {
       const src = readFileSync(join(raiz, ruta), 'utf8');
       expect(src, ruta).toMatch(/calculadorasQueEnlazan\(/);
     }

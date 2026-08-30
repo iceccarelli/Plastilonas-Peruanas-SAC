@@ -47,12 +47,18 @@ const NO_PUBLICAS: Record<string, string> = {
 };
 
 function seccionesPublicas(): string[] {
-  return readdirSync(join(raiz, 'app'), { withFileTypes: true })
-    .filter((e) => e.isDirectory() && !e.name.startsWith('[') && !e.name.startsWith('_'))
-    .map((e) => e.name)
-    .filter((n) => existsSync(join(raiz, 'app', n, 'page.tsx')))
-    .filter((n) => !(n in NO_PUBLICAS))
-    .sort();
+  // Los grupos de ruta (es)/(en)/(pt) no aparecen en la URL: se desciende en
+  // ellos sin contarlos como sección.
+  const bases = ['app', 'app/(es)', 'app/(en)', 'app/(pt)'];
+  const nombres = new Set<string>();
+  for (const base of bases) {
+    if (!existsSync(join(raiz, base))) continue;
+    for (const e of readdirSync(join(raiz, base), { withFileTypes: true })) {
+      if (!e.isDirectory() || e.name.startsWith('[') || e.name.startsWith('_') || e.name.startsWith('(')) continue;
+      if (existsSync(join(raiz, base, e.name, 'page.tsx'))) nombres.add(e.name);
+    }
+  }
+  return [...nombres].filter((n) => !(n in NO_PUBLICAS)).sort();
 }
 
 async function textoLlms(): Promise<string> {
@@ -149,7 +155,7 @@ describe('el sitemap declara lo mismo que el sitio publica', () => {
 });
 
 describe('hreflang: un clúster recíproco y pequeño', () => {
-  const PAGINAS = ['app/page.tsx', 'app/en/page.tsx', 'app/pt/page.tsx'];
+  const PAGINAS = ['app/(es)/page.tsx', 'app/(en)/en/page.tsx', 'app/(pt)/pt/page.tsx'];
 
   it('las tres páginas de entrada se declaran entre sí', () => {
     for (const p of PAGINAS) {
@@ -183,10 +189,11 @@ describe('hreflang: un clúster recíproco y pequeño', () => {
     expect(culpables).toEqual([]);
   });
 
-  it('las páginas en otro idioma lo declaran en el marcado', () => {
-    // El <html> del sitio dice lang="es". Sin un lang propio, el inglés de
-    // /en se indexa como español y un lector de pantalla lo pronuncia así.
-    expect(readFileSync(join(raiz, 'app/en/page.tsx'), 'utf8')).toContain('lang="en"');
-    expect(readFileSync(join(raiz, 'app/pt/page.tsx'), 'utf8')).toContain('lang="pt-BR"');
+  it('las páginas en otro idioma lo declaran en su layout raíz', () => {
+    // El atributo correcto vive en <html>: cada grupo de ruta tiene su layout
+    // raíz con el lang del idioma que sirve.
+    expect(readFileSync(join(raiz, 'app/(en)/layout.tsx'), 'utf8')).toContain('lang="en"');
+    expect(readFileSync(join(raiz, 'app/(pt)/layout.tsx'), 'utf8')).toContain('lang="pt-BR"');
+    expect(readFileSync(join(raiz, 'app/(es)/layout.tsx'), 'utf8')).toContain('lang="es-PE"');
   });
 });

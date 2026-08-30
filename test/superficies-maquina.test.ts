@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { GET as mapaConsultas } from '@/app/mapa-consultas.json/route';
 import { GET as llmsFull } from '@/app/llms-full.txt/route';
-import { GET as espejoProducto } from '@/app/productos/[slug]/contenido.md/route';
+import { GET as espejoProducto } from '@/app/(es)/productos/[slug]/contenido.md/route';
 import { GET as llms } from '@/app/llms.txt/route';
 import { SITE } from '@/lib/site';
 import { products } from '@/lib/products';

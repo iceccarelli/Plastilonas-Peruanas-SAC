@@ -6,7 +6,7 @@ import {
   informes, informeBySlug, fuenteDe, fuentesUsadas, INFORMES_UPDATED,
 } from '@/lib/informes';
 import { buildInformePdf } from '@/lib/doc-informe';
-import { generateStaticParams } from '@/app/informes/[slug]/page';
+import { generateStaticParams } from '@/app/(es)/informes/[slug]/page';
 import sitemap from '@/app/sitemap';
 import { SITE } from '@/lib/site';
 
@@ -181,7 +181,7 @@ describe('informes: gráficos', () => {
   it('la serie temporal usa el componente de línea, no barras', () => {
     // La forma la decide el trabajo del dato: una trayectoria en barras obliga
     // a comparar alturas contiguas en vez de leer hacia dónde va.
-    const page = readFileSync(join(process.cwd(), 'app/informes/[slug]/page.tsx'), 'utf8');
+    const page = readFileSync(join(process.cwd(), 'app/(es)/informes/[slug]/page.tsx'), 'utf8');
     expect(page).toMatch(/tipo === 'serie-temporal'/);
     expect(page).toMatch(/LineChart/);
   });
