@@ -691,7 +691,7 @@ export default function Navbar() {
 
             {/* Acciones de la derecha. Se reducen antes de que la barra se
                 quede sin sitio: por debajo de xl el buscador pierde el rótulo,
-                «Iniciar sesión» pasa al menú y el CTA acorta su texto. */}
+                el CTA acorta su texto antes de recortarse. */}
             <div className="flex items-center gap-1.5 xl:gap-2 shrink-0 ml-auto lg:ml-0">
               <button
                 onClick={() => setShowCommand(true)}
@@ -732,9 +732,9 @@ export default function Navbar() {
                   {user.name?.split(' ')[0] ?? 'Mi Cuenta'}
                 </Link>
               ) : null}
-              {/* «Iniciar sesión» público retirado: en un B2B por RFQ la cuenta
-                  no compra nada y el enlace solo confundía. El dashboard sigue
-                  accesible por URL directa para quien ya tiene sesión. */}
+              {/* Acceso público a la cuenta retirado: en un B2B por RFQ la
+                  cuenta no compra nada y el enlace solo confundía. El
+                  dashboard sigue accesible por URL directa con sesión. */}
 
               {/* CTA principal: NAVEGA a /cotizacion, la página completa del
                   RFQ. El modal era un formulario sin URL: no se puede enlazar,

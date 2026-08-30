@@ -170,6 +170,7 @@ cuenta() { # <ruta> <patrón> <mínimo> <descripción>
 
 echo "— Rutas —"
 for r in / /productos /servicios /nosotros /contacto /cotizacion /recursos \
+         /big-bags /lonas-camiones /ventilacion-minera \
          /local /marco /marco/evaluacion /soluciones /novedades /glosario \
          /informes /indicadores /descargas /privacidad /terminos \
          /calculadoras /calculadoras/caudal-ventilacion-mina \
@@ -180,6 +181,10 @@ done
 echo "— Archivos para rastreadores —"
 ruta /robots.txt
 ruta /sitemap.xml
+ruta /sitemaps/pages.xml
+ruta /sitemaps/productos.xml
+ruta /sitemaps/industrias.xml
+ruta /sitemaps/recursos.xml
 ruta /llms.txt
 ruta /novedades/rss.xml
 ruta /novedades/feed.json
