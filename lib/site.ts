@@ -54,8 +54,22 @@
  */
 const ORIGEN_POR_DEFECTO = "https://plastilonas-peruanas-sac.vercel.app";
 
+/**
+ * Host canónico objetivo de la mudanza. NO es el host vigente: el vigente lo
+ * decide la variable de entorno. Documentado aquí para que middleware, /confianza
+ * y docs/mudanza hablen del mismo destino.
+ */
+const HOST_OBJETIVO = "https://www.plastilonas.com";
+
 function originFromEnv(): string {
-  const raw = (process.env.CANONICAL_ORIGIN || "").trim();
+  // NEXT_PUBLIC_CANONICAL_HOST es el interruptor documentado de la mudanza
+  // (visible también en el cliente). CANONICAL_ORIGIN se mantiene por
+  // compatibilidad con la configuración anterior de Vercel.
+  const raw = (
+    process.env.NEXT_PUBLIC_CANONICAL_HOST ||
+    process.env.CANONICAL_ORIGIN ||
+    ""
+  ).trim();
   if (!raw) return ORIGEN_POR_DEFECTO;
   try {
     const u = new URL(raw);
@@ -68,7 +82,11 @@ function originFromEnv(): string {
 
 export const SITE = {
   url: originFromEnv(),
+  /** Alias legible: host canónico VIGENTE (el que emite canonicals, OG y JSON-LD). */
+  canonicalHost: originFromEnv(),
   brandHost: "plastilonas.com",
+  /** Destino de la mudanza de dominio. Solo informativo hasta que el env lo active. */
+  targetHost: HOST_OBJETIVO,
 
   name: "Plastilonas Peruanas SAC",
   legalName: "Plastilonas Peruanas SAC",
@@ -139,6 +157,33 @@ export const HORARIO = {
   completo: "lunes a viernes de 8:00 a 18:00 y sábados de 8:00 a 13:00",
   /** Para la tarjeta de la portada, que separa «L–V» del detalle. */
   tarjeta: "8:00–18:00 · sábados 8:00–13:00",
+} as const;
+
+/**
+ * TELÉFONOS — presentación única.
+ *
+ * El E.164 vive en SITE.phoneCentral / SITE.phoneWhatsApp. Todo lo demás
+ * (href `tel:`, texto visible «+51 998 117 065», número del enlace de WhatsApp) se DERIVA
+ * aquí. Ningún componente debe volver a escribir un número a mano: ocho
+ * archivos lo hacían y cualquier corrección dejaba siete copias viejas.
+ */
+function displayPhone(e164: string): string {
+  const m = e164.match(/^\+51(\d{3})(\d{3})(\d{3})$/);
+  return m ? `+51 ${m[1]} ${m[2]} ${m[3]}` : e164;
+}
+
+export const TELEFONOS = {
+  central: {
+    e164: SITE.phoneCentral,
+    tel: `tel:${SITE.phoneCentral}`,
+    display: displayPhone(SITE.phoneCentral),
+  },
+  whatsapp: {
+    e164: SITE.phoneWhatsApp,
+    /** Número para el enlace de WhatsApp: E.164 sin el signo +. */
+    waNumber: SITE.phoneWhatsApp.replace(/^\+/, ""),
+    display: displayPhone(SITE.phoneWhatsApp),
+  },
 } as const;
 
 export const BASE_URL: string = SITE.url.replace(/\/$/, "");

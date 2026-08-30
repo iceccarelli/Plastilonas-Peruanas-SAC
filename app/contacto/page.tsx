@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import WhatsAppLink from '@/components/WhatsAppLink';
-import { SITE, HORARIO } from '@/lib/site';
+import { SITE, HORARIO, TELEFONOS } from '@/lib/site';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -91,17 +91,17 @@ export default function ContactoPage() {
             <div className="font-semibold tracking-tight text-lg mb-4 text-[#0A2540]">Información de contacto</div>
             
             <div className="space-y-5">
-              <a href="tel:+51998117065" className="flex gap-4 group">
-                <Phone className="mt-0.5 text-[#059669]" /> 
+              <a href={TELEFONOS.central.tel} className="flex gap-4 group">
+                <Phone className="mt-0.5 text-[#059669]" />
                 <div>
-                  <div className="font-medium">+51 998 117 065</div>
+                  <div className="font-medium">{TELEFONOS.central.display}</div>
                   <div className="text-xs text-gray-500">Central telefónica</div>
                 </div>
               </a>
               <WhatsAppLink context="contacto" message="Hola, quisiera información sobre sus productos." className="flex gap-4 group">
                 <Phone className="mt-0.5 text-[#047857]" /> 
                 <div>
-                  <div className="font-medium text-[#047857]">+51 946 085 270 (WhatsApp)</div>
+                  <div className="font-medium text-[#047857]">{TELEFONOS.whatsapp.display} (WhatsApp)</div>
                   <div className="text-xs text-gray-500">Respuesta en horario comercial</div>
                 </div>
               </WhatsAppLink>

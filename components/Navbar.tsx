@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { familyHrefByName } from '@/lib/families';
-import { HORARIO } from '@/lib/site';
+import { HORARIO, TELEFONOS } from '@/lib/site';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -476,8 +476,8 @@ export default function Navbar() {
                 El horario real vive aquí, junto al teléfono que lo atiende. */}
             <span className="hidden xl:inline-flex items-center min-h-[24px] px-1 text-white/55">Chorrillos, Lima</span>
             <span className="hidden lg:inline-flex items-center min-h-[24px] px-1 text-white/55">{HORARIO.corto}</span>
-            <a href="tel:+51998117065" className="inline-flex items-center min-h-[24px] px-1 hover:text-white transition-colors">
-              +51 998 117 065
+            <a href={TELEFONOS.central.tel} className="inline-flex items-center min-h-[24px] px-1 hover:text-white transition-colors">
+              {TELEFONOS.central.display}
             </a>
             <WhatsAppLink
               context="navbar-topbar"
@@ -921,7 +921,7 @@ export default function Navbar() {
                   message="Hola, quisiera información sobre sus productos."
                   className="flex items-center gap-2 min-h-[44px] text-[#059669]"
                 >
-                  <Phone className="w-4 h-4 shrink-0" /> WhatsApp: +51 946 085 270
+                  <Phone className="w-4 h-4 shrink-0" /> WhatsApp: {TELEFONOS.whatsapp.display}
                 </WhatsAppLink>
                 <div className="pt-2"><ThemeToggle /></div>
               </div>

@@ -1,7 +1,7 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { streamText } from 'ai';
 import { products, productFamilies } from '@/lib/products';
-import { HORARIO } from '@/lib/site';
+import { HORARIO, TELEFONOS } from '@/lib/site';
 
 // Asistente comercial con Claude (Vercel AI SDK).
 // Requiere ANTHROPIC_API_KEY en el entorno. Sin la clave, respondemos 503 y
@@ -39,8 +39,8 @@ const CATALOG = productFamilies
   .filter(Boolean)
   .join('\n\n');
 
-// Cifra honesta de fabricación en planta, contada del propio catálogo.
-const PROPIAS = products.filter((p) => p.sourcing === 'fabricacion_propia').length;
+// Cifra honesta de fabricación en planta, derivada una sola vez en lib/facts.
+import { FABRICACION_PROPIA_COUNT as PROPIAS } from '@/lib/facts';
 
 const SYSTEM_PROMPT = `Eres un asesor comercial experto y altamente profesional de Plastilonas Peruanas SAC, fabricante peruano de textiles industriales a medida desde 2009 (RUC 20523135385, Chorrillos, Lima).
 
@@ -73,7 +73,7 @@ Directrices de respuesta:
 1. Saluda de forma cálida y presenta brevemente tu rol (solo en el primer turno).
 2. Haz preguntas precisas para entender: producto o aplicación, medidas o metraje, cantidad, sector y ciudad de entrega.
 3. Recomienda 1-2 productos relevantes con su ruta del catálogo (respetando la regla de honestidad y el sourcing declarado).
-4. Invita a la cotización formal en /cotizacion; si hay urgencia o proyecto grande, sugiere WhatsApp (+51 946 085 270).
+4. Invita a la cotización formal en /cotizacion; si hay urgencia o proyecto grande, sugiere WhatsApp (${TELEFONOS.whatsapp.display}).
 5. Mantén las respuestas concisas (máximo 4-5 oraciones por turno).
 6. CIERRE OBLIGATORIO: termina cada respuesta con UN solo paso siguiente — o una pregunta concreta por el dato que falta, o una invitación a cotizar. Nunca ambos, nunca ninguno.
 

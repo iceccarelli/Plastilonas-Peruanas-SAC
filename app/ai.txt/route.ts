@@ -1,5 +1,5 @@
 import { SITE, HORARIO } from "@/lib/site";
-import { COUNT_STATEMENT, PRODUCT_COUNT, YEARS_STATEMENT } from "@/lib/facts";
+import { COUNT_STATEMENT, FABRICACION_PROPIA_COUNT, PRODUCT_COUNT, YEARS_STATEMENT } from "@/lib/facts";
 import { products } from "@/lib/products";
 
 /**
@@ -27,8 +27,8 @@ export async function GET(): Promise<Response> {
   const hostVigente = new URL(base).host;
   const migrado = hostVigente.replace(/^www\./, "") === SITE.brandHost;
 
-  // Derivado del catálogo, nunca tecleado: la cifra cambia sola con lib/products.ts.
-  const propias = products.filter((p) => p.sourcing === "fabricacion_propia").length;
+  // Derivado del catálogo, una sola vez, en lib/facts.ts.
+  const propias = FABRICACION_PROPIA_COUNT;
 
   const bloqueDominio = migrado
     ? `La URL canónica de esta empresa es ${base}. El host de despliegue en Vercel redirige aquí con 308 y no debe citarse.`
