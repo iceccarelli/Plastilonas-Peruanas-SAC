@@ -13,20 +13,24 @@
  * de marca, plastilonas.com, ya es propiedad de la empresa y sirve el correo
  * (ventas@plastilonas.com) pero todavía apunta al sitio antiguo.
  *
- * La mudanza NO se hace editando este archivo. Se hace en dos pasos:
+ * La mudanza NO se hace editando este archivo. Se hace en tres pasos:
  *
- *   1. DNS: apuntar plastilonas.com al proyecto de Vercel y verificar el
- *      dominio en el panel (Settings → Domains).
+ *   1. DNS: apuntar www.plastilonas.com al proyecto de Vercel y verificar el
+ *      dominio en el panel (Settings → Domains). TODO(HUMAN).
  *   2. Variable de entorno, en Vercel → Settings → Environment Variables:
  *
- *          CANONICAL_ORIGIN = https://plastilonas.com
+ *          NEXT_PUBLIC_CANONICAL_HOST = https://www.plastilonas.com
  *
- * Con esa sola variable, en el mismo despliegue y sin tocar código:
- *   · SITE.url pasa a plastilonas.com, y con él sitemap, robots, llms.txt,
- *     metadataBase, todos los canonicals y todos los bloques JSON-LD;
- *   · middleware.ts empieza a redirigir www → apex con 308;
- *   · middleware.ts empieza a emitir noindex + Link rel=canonical en el host
- *     de Vercel, para que deje de competir por las mismas consultas.
+ *      (CANONICAL_ORIGIN se sigue leyendo por compatibilidad; la nueva gana.)
+ *      Con esa sola variable, en el mismo despliegue y sin tocar código:
+ *      · SITE.url pasa a www.plastilonas.com, y con él sitemap, robots,
+ *        llms.txt, metadataBase, canonicals, OG y todos los bloques JSON-LD;
+ *      · middleware.ts emite noindex + Link rel=canonical en el host de
+ *        Vercel, para que deje de competir por las mismas consultas.
+ *   3. ENFORCE_BRAND_DOMAIN=true — SOLO tras confirmar que el DNS y el SSL
+ *      de www sirven este proyecto: activa la redirección 308 dura de
+ *      vercel.app (y del apex) hacia www. Ver middleware.ts y
+ *      docs/HUMAN-GATES.md.
  *
  * MIENTRAS LA VARIABLE ESTÉ VACÍA no ocurre nada de lo anterior, y eso es
  * deliberado: emitir noindex en el host de Vercel antes de que exista un

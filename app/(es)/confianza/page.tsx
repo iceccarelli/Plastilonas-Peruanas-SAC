@@ -52,7 +52,7 @@ export default function ConfianzaPage() {
       <p className="mt-4 text-sm text-gray-600">
         {migrado
           ? `El origen canónico de este sitio es ${hostVigente}; el host de despliegue redirige aquí con 308.`
-          : `La URL vigente de este sitio es ${hostVigente}. El dominio de marca ${SITE.brandHost} pertenece a la empresa y recibe su correo, pero hoy aloja un sitio comercial anterior; la migración está planificada y no se declara como hecha. Hasta entonces, la fuente actualizada es ${hostVigente}.`}
+          : `La URL vigente de este sitio es ${hostVigente}. El dominio de marca ${SITE.brandHost} pertenece a la empresa y recibe su correo, pero hoy aloja un sitio comercial anterior; la migración —con destino ${SITE.targetHost}— está planificada y no se declara como hecha. Cuando ocurra, este párrafo cambiará solo y el host de despliegue redirigirá con 308. Hasta entonces, la fuente actualizada es ${hostVigente}.`}
       </p>
       <h2 className="mt-10 font-semibold text-[#0A2540]">Lo que no publicamos</h2>
       <ul className="mt-3 list-disc pl-5 text-sm text-gray-600 space-y-1">
