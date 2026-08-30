@@ -3,6 +3,7 @@ import WhatsAppLink from './WhatsAppLink';
 import { WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 import { SITE, TELEFONOS } from '@/lib/site';
 import { FABRICACION_PROPIA_COUNT } from '@/lib/facts';
+import { DATOS_PARA_COTIZAR } from '@/components/DatosParaCotizar';
 import Image from 'next/image';
 import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
 import SocialIcons from '@/components/SocialIcons';
@@ -204,12 +205,32 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-white/10 flex justify-center">
+        {/* «4 datos para cotizar»: el mismo checklist que gobierna /cotizacion
+            y el mensaje de WhatsApp, visible en todo el sitio. Fuente única:
+            components/DatosParaCotizar.tsx. */}
+        <div className="mt-16 pt-8 border-t border-white/10">
+          <div className="text-sm font-semibold text-white/90 mb-3">
+            4 datos para cotizar sin idas y vueltas
+          </div>
+          <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 text-sm text-white/60">
+            {DATOS_PARA_COTIZAR.map((d, i) => (
+              <li key={d.dato} className="flex gap-2">
+                <span className="font-mono text-[#34D399]">{i + 1}.</span>
+                <span><span className="text-white/80">{d.dato}</span> — {d.detalle}</span>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-3 text-sm">
+            <Link href="/cotizacion" className="text-[#34D399] hover:underline">Cotizar con estos datos →</Link>
+          </div>
+        </div>
+
+        <div className="mt-10 pt-8 border-t border-white/10 flex justify-center">
           <a href="#top" className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors">Volver arriba <ArrowUp className="w-4 h-4" /></a>
         </div>
 
         <div className="mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-y-4 text-xs text-white/50">
-          <div>© {currentYear} Plastilonas Peruanas SAC. Todos los derechos reservados. RUC: 20523135385</div>
+          <div>© {currentYear} {SITE.legalName}. Todos los derechos reservados. RUC: {SITE.ruc}</div>
           <div className="flex items-center gap-x-6">
             <Link href="/privacidad" className="hover:text-white transition-colors">Política de Privacidad</Link>
             <Link href="/terminos" className="hover:text-white transition-colors">Términos y Condiciones</Link>
