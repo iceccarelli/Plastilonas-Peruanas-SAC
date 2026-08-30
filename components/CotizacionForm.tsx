@@ -154,8 +154,8 @@ export default function CotizacionForm({ preselectedProduct, slugOrigen, presele
     if (preselectedMessage) setValue('mensaje', preselectedMessage);
   }, [preselectedMessage, setValue]);
   React.useEffect(() => {
-    trackQuoteStarted('pagina', preselectedProduct);
-  }, [preselectedProduct]);
+    trackQuoteStarted('pagina', preselectedProduct, slugOrigen);
+  }, [preselectedProduct, slugOrigen]);
 
   // ── Adjuntos ─────────────────────────────────────────────────────────────
   const onArchivos = (e: React.ChangeEvent<HTMLInputElement>) => {

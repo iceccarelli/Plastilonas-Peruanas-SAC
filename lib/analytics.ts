@@ -35,17 +35,22 @@ export function trackEvent(name: string, params: EventParams = {}): void {
 /* ------------------------------------------------------------------ */
 
 /**
- * El formulario de cotización se ABRIÓ. Junto con `quote_request` da la tasa
+ * El formulario de cotización se ABRIÓ. Junto con `rfq_submit` da la tasa
  * de abandono del formulario, que es lo que dice si el formulario pide de más.
+ *
+ * Nombres de evento GA4 (Etapa 5): `rfq_start` / `rfq_submit` /
+ * `whatsapp_click`, siempre con el slug de producto cuando se conoce. Los
+ * nombres anteriores (`quote_started` / `quote_request`) se retiran: dos
+ * nombres para el mismo evento parten el embudo en dos series incomparables.
  */
-export function trackQuoteStarted(context: string, producto?: string): void {
-  trackEvent('quote_started', { context, producto: producto ?? 'general' });
+export function trackQuoteStarted(context: string, producto?: string, slug?: string): void {
+  trackEvent('rfq_start', { context, producto: producto ?? 'general', ...(slug ? { slug } : {}) });
 }
 
 /** Solicitud de cotización enviada — la conversión principal del negocio. */
 export function trackQuoteRequest(producto?: string, slug?: string): void {
   const content = producto ?? 'general';
-  trackEvent('quote_request', { producto: content, ...(slug ? { slug } : {}) });
+  trackEvent('rfq_submit', { producto: content, ...(slug ? { slug } : {}) });
   if (typeof window !== 'undefined') {
     window.fbq?.('track', 'Lead', { content_name: content });
   }

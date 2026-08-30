@@ -122,7 +122,9 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const webhook = process.env.N8N_WEBHOOK_URL;
+  // CRM_WEBHOOK_URL es el nombre estable (Etapa 5); N8N_WEBHOOK_URL se
+  // mantiene por compatibilidad con la configuración existente.
+  const webhook = process.env.CRM_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL;
   let forwarded = false;
   if (webhook) {
     try {
@@ -143,6 +145,52 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Resend (opcional, Etapa 5): copia del RFQ al buzón comercial. Sin las
+  // variables no se intenta nada; un fallo de correo no rompe el lead, que ya
+  // viajó por WhatsApp y quedó en Supabase/webhook si están configurados.
+  let emailed = false;
+  const resendKey = process.env.RESEND_API_KEY;
+  const emailTo = process.env.LEAD_EMAIL_TO || SITE.email;
+  if (resendKey) {
+    try {
+      const cuerpo = [
+        `RFQ ${id}`,
+        `Nombre: ${contact}`,
+        `Empresa: ${lead.empresa || '—'}`,
+        lead.ruc ? `RUC: ${lead.ruc}` : null,
+        `Email: ${lead.email}`,
+        `Teléfono: ${lead.telefono}`,
+        lead.producto ? `Producto: ${lead.producto}` : null,
+        lead.cantidad ? `Medidas/cantidad: ${lead.cantidad}` : null,
+        lead.deliveryCity ? `Ciudad de entrega: ${lead.deliveryCity}` : null,
+        lead.fechaNecesaria ? `Fecha requerida: ${lead.fechaNecesaria}` : null,
+        lead.mensaje ? `Detalle: ${lead.mensaje}` : null,
+        lead.archivos?.length ? `Adjuntos: ${lead.archivos.join(', ')}` : null,
+        lead.path ? `Página de origen: ${lead.path}` : null,
+        lead.slug ? `Slug de producto: ${lead.slug}` : null,
+      ]
+        .filter(Boolean)
+        .join('\n');
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: process.env.LEAD_EMAIL_FROM || `RFQ Web <onboarding@resend.dev>`,
+          to: [emailTo],
+          subject: `${id} — ${lead.producto || 'consulta general'} (${lead.deliveryCity || 'sin ciudad'})`,
+          text: cuerpo,
+        }),
+      });
+      emailed = res.ok;
+      if (!res.ok) console.error('[lead] resend', res.status);
+    } catch (err) {
+      console.error('[lead] resend unavailable', err);
+    }
+  }
+
   // Email / WhatsApp remain the commercial channels. Persistence failure is
   // logged, never thrown: the buyer already has the RFQ id in the response.
   return NextResponse.json({
@@ -150,5 +198,6 @@ export async function POST(req: NextRequest) {
     rfqId: id,
     persisted,
     forwarded,
+    emailed,
   });
 }
