@@ -22,10 +22,22 @@ import WhatsAppLink from './WhatsAppLink';
 export default function FeedbackBar() {
   const ruta = usePathname();
   const [respuesta, setRespuesta] = useState<'si' | 'no' | null>(null);
+  const [falta, setFalta] = useState('');
+  const [faltaEnviada, setFaltaEnviada] = useState(false);
 
   const responder = (valor: 'si' | 'no') => {
     setRespuesta(valor);
     trackEvent('feedback_pagina', { util: valor, ruta: ruta ?? '' });
+  };
+
+  // «¿Qué faltó?» — el dato accionable del «No»: la carencia concreta más la
+  // ruta donde ocurrió. Viaja como evento (recortado: un parámetro GA4 admite
+  // 100 caracteres); el canal humano sigue siendo WhatsApp, al lado.
+  const enviarFalta = () => {
+    const texto = falta.trim();
+    if (!texto) return;
+    trackEvent('feedback_falta', { ruta: ruta ?? '', detalle: texto.slice(0, 100) });
+    setFaltaEnviada(true);
   };
 
   return (
@@ -58,13 +70,38 @@ export default function FeedbackBar() {
               </button>
             </div>
           ) : respuesta === 'no' ? (
-            <WhatsAppLink
-              context="feedback-pagina"
-              message={`Hola, estuve en ${ruta ?? 'su sitio'} y no encontré lo que buscaba. Busco: `}
-              className="inline-flex items-center gap-2 bg-[#0A2540] text-white hover:bg-[#047857] font-semibold px-7 py-3 rounded-full transition-colors"
-            >
-              Escribir por WhatsApp
-            </WhatsAppLink>
+            <div className="flex flex-col gap-3 w-full md:max-w-md">
+              {faltaEnviada ? (
+                <p className="text-sm text-gray-600">Gracias: quedó registrado qué faltó en esta página.</p>
+              ) : (
+                <div className="flex gap-2">
+                  <label htmlFor="feedback-falta" className="sr-only">¿Qué faltó en esta página?</label>
+                  <input
+                    id="feedback-falta"
+                    value={falta}
+                    onChange={(e) => setFalta(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && enviarFalta()}
+                    placeholder="¿Qué faltó? (una frase)"
+                    maxLength={140}
+                    className="flex-1 rounded-full border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-[#059669]"
+                  />
+                  <button
+                    type="button"
+                    onClick={enviarFalta}
+                    className="rounded-full bg-[#0A2540] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#047857] transition-colors"
+                  >
+                    Enviar
+                  </button>
+                </div>
+              )}
+              <WhatsAppLink
+                context="feedback-pagina"
+                message={`Hola, estuve en ${ruta ?? 'su sitio'} y no encontré lo que buscaba. Busco: ${falta.trim()}`}
+                className="inline-flex items-center justify-center gap-2 border border-gray-200 text-[#047857] hover:border-[#059669] font-semibold px-7 py-2.5 rounded-full transition-colors text-sm"
+              >
+                O cuéntenoslo por WhatsApp
+              </WhatsAppLink>
+            </div>
           ) : null}
         </div>
       </div>
