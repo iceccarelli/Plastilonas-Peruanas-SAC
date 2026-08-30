@@ -47,7 +47,7 @@ const jsx = (src: string) => src.slice(src.lastIndexOf('export default function'
 
 describe('el catálogo se sirve como HTML, no como promesa', () => {
   it('/productos es un componente de SERVIDOR', () => {
-    const src = leer('app/productos/page.tsx');
+    const src = leer('app/(es)/productos/page.tsx');
     expect(src.startsWith("'use client'"), '/productos volvió a ser cliente entero').toBe(false);
     expect(src).toMatch(/import IndiceCatalogo/);
     expect(src).toMatch(/<IndiceCatalogo \/>/);
@@ -55,7 +55,7 @@ describe('el catálogo se sirve como HTML, no como promesa', () => {
 
   it('el <h1> y la entrada están fuera del Suspense', () => {
     // Dentro del Suspense, lo único que se prerenderiza es el fallback.
-    const cuerpo = jsx(leer('app/productos/page.tsx'));
+    const cuerpo = jsx(leer('app/(es)/productos/page.tsx'));
     expect(cuerpo.indexOf('<h1 className')).toBeGreaterThan(-1);
     expect(cuerpo.indexOf('<h1 className')).toBeLessThan(cuerpo.indexOf('<Suspense'));
   });
@@ -76,7 +76,7 @@ describe('el catálogo se sirve como HTML, no como promesa', () => {
   });
 
   it('/cotizacion tiene su encabezado fuera del Suspense', () => {
-    const cuerpo = jsx(leer('app/cotizacion/page.tsx'));
+    const cuerpo = jsx(leer('app/(es)/cotizacion/page.tsx'));
     const h1 = cuerpo.indexOf('<h1 className');
     const suspense = cuerpo.indexOf('<Suspense');
     expect(h1).toBeGreaterThan(-1);
@@ -86,7 +86,7 @@ describe('el catálogo se sirve como HTML, no como promesa', () => {
 
   it('carrito y checkout emiten encabezado antes de montar', () => {
     // Devolvían un div vacío: la página se servía literalmente sin contenido.
-    for (const r of ['app/carrito/page.tsx', 'app/checkout/page.tsx']) {
+    for (const r of ['app/(es)/carrito/page.tsx', 'app/(es)/checkout/page.tsx']) {
       const src = leer(r);
       const guarda = src.indexOf('if (!mounted)');
       expect(guarda, r).toBeGreaterThan(-1);
@@ -99,7 +99,7 @@ describe('el catálogo se sirve como HTML, no como promesa', () => {
     // Tres URLs distintas compartían el MISMO <title> por defecto del sitio,
     // que es exactamente la señal de duplicado que se quiere evitar.
     const titulos = new Set<string>();
-    for (const r of ['app/carrito/layout.tsx', 'app/checkout/layout.tsx', 'app/checkout/exito/layout.tsx']) {
+    for (const r of ['app/(es)/carrito/layout.tsx', 'app/(es)/checkout/layout.tsx', 'app/(es)/checkout/exito/layout.tsx']) {
       const src = leer(r);
       const t = src.match(/title:\s*'([^']+)'/)?.[1];
       expect(t, `${r} sin título propio`).toBeTruthy();
@@ -144,14 +144,14 @@ describe('el auditor del HTML es un mecanismo, no un script suelto', () => {
     // El sufijo de 27 caracteres causaba por sí solo 67 de los 100 títulos
     // recortados. La razón social exacta sigue en el JSON-LD y en llms.txt,
     // que es donde de verdad desambigua la entidad.
-    const src = leer('app/layout.tsx');
+    const src = leer('app/(es)/layout.tsx');
     const plantilla = src.match(/template:\s*'([^']+)'/)?.[1] ?? '';
     expect(plantilla).toBeTruthy();
     expect(plantilla.replace('%s', '').length, `sufijo demasiado largo: «${plantilla}»`).toBeLessThanOrEqual(16);
   });
 
   it('ninguna calculadora usa su pregunta como <title>', () => {
-    const src = leer('app/calculadoras/[slug]/page.tsx');
+    const src = leer('app/(es)/calculadoras/[slug]/page.tsx');
     expect(src).toMatch(/title: calc\.tituloSeo/);
     expect(src).not.toMatch(/title: calc\.pregunta/);
   });
@@ -194,7 +194,7 @@ describe('el ajuste de metadatos: el complemento entra solo si cabe', () => {
 
   it('ninguna ciudad vuelve a meter la marca en su propio título', () => {
     // La plantilla ya la añade: ponerla aquí producía la marca dos veces.
-    const src = readFileSync(join(raiz, 'app/local/[ciudad]/page.tsx'), 'utf8');
+    const src = readFileSync(join(raiz, 'app/(es)/local/[ciudad]/page.tsx'), 'utf8');
     const meta = src.slice(src.indexOf('export async function generateMetadata'));
     const cuerpo = meta.slice(0, meta.indexOf('\n}'));
     expect(cuerpo.replace(/\/\/.*$/gm, '')).not.toMatch(/title = `[^`]*\$\{SITE\.name\}/);

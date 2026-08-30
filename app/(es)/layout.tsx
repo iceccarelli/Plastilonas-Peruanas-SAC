@@ -1,7 +1,7 @@
 import ExitIntentModal from '@/components/ExitIntentModal';
 import type { Metadata, Viewport } from 'next';
-import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google';
-import './globals.css';
+import { fontClasses } from '@/lib/fonts';
+import '../globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import FeedbackBar from '@/components/FeedbackBar';
@@ -14,26 +14,6 @@ import { SITE } from '@/lib/site';
 import Analytics from '@/components/Analytics';
 import WebPush from '@/components/WebPush';
 import ConsentBanner from '@/components/ConsentBanner';
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  weight: ['400', '500', '600', '700'],
-});
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
-  weight: ['700'],
-});
-
-// Mono para metadatos técnicos (specs, estados, conteos).
-// Patrón AWS: la monoespaciada señala "dato de ingeniería", no marketing.
-const mono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  display: 'swap',
-});
 
 /**
  * VIEWPORT — `viewportFit: 'cover'` es lo que activa las variables
@@ -72,18 +52,9 @@ export const metadata: Metadata = {
     template: '%s | Plastilonas',
   },
   description: SITE.description,
-  keywords: [
-    'plastilonas peruanas',
-    'big bags lima',
-    'geomembranas perú',
-    'carpas industriales',
-    'mantas para camiones',
-    'lona plastificada',
-    'soluciones textiles industriales',
-    'fabricación a medida perú',
-    'big bags minería',
-    'geomembrana pvc',
-  ],
+  // Sin `keywords`: Google la ignora desde 2009 y Bing la trata como señal de
+  // spam cuando no coincide con el contenido. Las palabras clave reales viven
+  // en títulos, H1 y /mapa-consultas.json.
   authors: [{ name: 'Plastilonas Peruanas SAC' }],
   creator: 'Plastilonas Peruanas SAC',
   publisher: 'Plastilonas Peruanas SAC',
@@ -124,8 +95,8 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="es"
-      className={`${inter.variable} ${playfair.variable} ${mono.variable}`}
+      lang="es-PE"
+      className={fontClasses}
       suppressHydrationWarning
     >
       <head>

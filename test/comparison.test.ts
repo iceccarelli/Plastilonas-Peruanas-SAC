@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { products, productFamilies } from '@/lib/products';
 import { comparableFamilies } from '@/lib/families';
-import { generateStaticParams } from '@/app/productos/familia/[slug]/comparar/page';
+import { generateStaticParams } from '@/app/(es)/productos/familia/[slug]/comparar/page';
 import sitemap from '@/app/sitemap';
 import { SITE } from '@/lib/site';
 
@@ -41,7 +41,7 @@ describe('comparativas: qué familias las tienen', () => {
 
 describe('comparativas: honestidad de la matriz', () => {
   const page = readFileSync(
-    join(ROOT, 'app/productos/familia/[slug]/comparar/page.tsx'),
+    join(ROOT, 'app/(es)/productos/familia/[slug]/comparar/page.tsx'),
     'utf8',
   );
 
@@ -73,7 +73,7 @@ describe('comparativas: honestidad de la matriz', () => {
 });
 
 describe('deep link de cotización', () => {
-  const page = readFileSync(join(ROOT, 'app/cotizacion/page.tsx'), 'utf8');
+  const page = readFileSync(join(ROOT, 'app/(es)/cotizacion/page.tsx'), 'utf8');
   const modal = readFileSync(join(ROOT, 'components/CotizacionModal.tsx'), 'utf8');
 
   it('la página de cotización LEE el parámetro producto', () => {
@@ -100,7 +100,7 @@ describe('deep link de cotización', () => {
   });
 
   it('cada ficha de producto enlaza a la cotización con su propio nombre', () => {
-    const productPage = readFileSync(join(ROOT, 'app/productos/[slug]/page.tsx'), 'utf8');
+    const productPage = readFileSync(join(ROOT, 'app/(es)/productos/[slug]/page.tsx'), 'utf8');
     expect(productPage).toContain('/cotizacion?producto=${encodeURIComponent(product.name)}');
   });
 });

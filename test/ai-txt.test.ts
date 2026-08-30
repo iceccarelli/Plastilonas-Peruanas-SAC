@@ -122,7 +122,9 @@ describe('/ai.txt responde y dice la verdad', () => {
 describe('las superficies para máquinas cumplen sus tres condiciones', () => {
   it('cada superficie declarada tiene su route handler: anunciar un 404 es peor que callar', () => {
     const sinRuta = SUPERFICIES_MAQUINA.filter(
-      (p) => !existsSync(join(process.cwd(), 'app', p.replace(/^\//, ''), 'route.ts')),
+      (p) =>
+        !existsSync(join(process.cwd(), 'app', p.replace(/^\//, ''), 'route.ts')) &&
+        !existsSync(join(process.cwd(), 'app', '(es)', p.replace(/^\//, ''), 'route.ts')),
     );
     expect(sinRuta).toEqual([]);
   });

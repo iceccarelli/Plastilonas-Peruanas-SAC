@@ -94,7 +94,7 @@ describe('frontera servidor/cliente: ninguna función cruza como prop', () => {
     // La forma concreta del fallo que ya ocurrió.
     const src = readFileSync(join(raiz, 'components/CalculadoraForm.tsx'), 'utf8');
     expect(src).toMatch(/CalculadoraForm\(\{\s*slug\s*\}: \{\s*slug: string\s*\}\)/);
-    const page = readFileSync(join(raiz, 'app/calculadoras/[slug]/page.tsx'), 'utf8');
+    const page = readFileSync(join(raiz, 'app/(es)/calculadoras/[slug]/page.tsx'), 'utf8');
     expect(page).toMatch(/<CalculadoraForm slug=\{calc\.slug\}/);
     expect(page).not.toMatch(/<CalculadoraForm calc=/);
   });

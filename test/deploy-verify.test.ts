@@ -176,7 +176,7 @@ describe('cobertura: nada se publica sin verificarse', () => {
     const recorrer = (dir: string) => {
       for (const e of readdirSync(join(process.cwd(), dir), { withFileTypes: true })) {
         if (e.isDirectory()) recorrer(`${dir}/${e.name}`);
-        else if (e.name === 'route.ts' && dir.endsWith('.json')) rutas.push(dir.replace(/^app/, ''));
+        else if (e.name === 'route.ts' && dir.endsWith('.json')) rutas.push(dir.replace(/^app/, '').replace(/\/\([^)]+\)/g, ''));
       }
     };
     recorrer('app');

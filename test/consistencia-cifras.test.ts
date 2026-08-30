@@ -31,7 +31,7 @@ const raiz = process.cwd();
 
 describe('las cifras derivan del dato, no del teclado', () => {
   it('/marco titula con los pilares y criterios que el marco tiene', () => {
-    const src = readFileSync(join(raiz, 'app/marco/page.tsx'), 'utf8');
+    const src = readFileSync(join(raiz, 'app/(es)/marco/page.tsx'), 'utf8');
     const literal = /const TITLE = '[^']*\d+[^']*'/.exec(src);
     expect(
       literal?.[0] ?? null,

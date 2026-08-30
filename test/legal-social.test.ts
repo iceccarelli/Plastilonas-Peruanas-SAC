@@ -75,7 +75,7 @@ describe('avisos legales: existen y describen el sitio real', () => {
 
   it('el ancla "Volver arriba" tiene destino real', () => {
     const footer = readFileSync(join(process.cwd(), 'components/Footer.tsx'), 'utf8');
-    const layout = readFileSync(join(process.cwd(), 'app/layout.tsx'), 'utf8');
+    const layout = readFileSync(join(process.cwd(), 'app/(es)/layout.tsx'), 'utf8');
     if (footer.includes('href="#top"')) expect(layout).toMatch(/id="top"/);
   });
 

@@ -58,7 +58,7 @@ describe('los 15 mensajes del hero: forma y honestidad', () => {
 
 describe('el rotor del hero: accesibilidad y contención', () => {
   const rotor = leer('components/HeroMensaje.tsx');
-  const portada = leer('app/page.tsx');
+  const portada = leer('app/(es)/page.tsx');
   const css = leer('app/globals.css');
 
   it('la portada monta el rotor dentro de la tarjeta del hero', () => {

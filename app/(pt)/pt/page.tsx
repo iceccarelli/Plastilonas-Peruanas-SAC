@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { SITE } from '@/lib/site';
-import { COUNT_STATEMENT } from '@/lib/facts';
+import { PRODUCT_COUNT, FAMILY_COUNT } from '@/lib/facts';
 
 /**
  * hreflang — se declara SOLO entre estas tres páginas.
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 
 export default function PortuguesePage() {
   return (
-    <div lang="pt-BR" className="max-w-3xl mx-auto px-6 py-14">
+    <div className="max-w-3xl mx-auto px-6 py-14">
       {/* Mismo motivo que en /en: el <html> dice "es" y esta página no lo es. */}
       <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">PORTUGUÊS · COMPRADOR BRASILEIRO</div>
       <h1 className="t-display font-semibold text-[#0A2540]">Fabricante peruano de têxteis industriais sob medida</h1>
@@ -53,7 +53,7 @@ export default function PortuguesePage() {
         <figcaption className="mt-2 text-xs text-gray-500">Planta de Chorrillos, Lima — Peru.</figcaption>
       </figure>
       <p className="mt-4 text-gray-600 leading-relaxed">
-        Fábrica em Chorrillos, Lima. Desde {SITE.foundingYear}. RUC {SITE.ruc}. {COUNT_STATEMENT}.
+        Fábrica em Chorrillos, Lima. Desde {SITE.foundingYear}. RUC {SITE.ruc}. {PRODUCT_COUNT} soluções em {FAMILY_COUNT} famílias de produto.
         O sítio é em espanhol; esta página confirma identidade e abre o RFQ. Não há tabela de preços em BRL.
       </p>
       <p className="mt-6 text-sm">Vendas: {SITE.email} · WhatsApp {SITE.phoneWhatsApp}</p>

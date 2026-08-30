@@ -91,10 +91,10 @@ describe('cobertura de eventos de conversión', () => {
 
   it('las páginas que generan demanda emiten su evento de vista', () => {
     const pages: [string, string][] = [
-      ['app/productos/[slug]/page.tsx', 'kind="product"'],
-      ['app/productos/familia/[slug]/page.tsx', 'kind="family"'],
-      ['app/local/[ciudad]/page.tsx', 'kind="city"'],
-      ['app/recursos/[slug]/page.tsx', 'kind="article"'],
+      ['app/(es)/productos/[slug]/page.tsx', 'kind="product"'],
+      ['app/(es)/productos/familia/[slug]/page.tsx', 'kind="family"'],
+      ['app/(es)/local/[ciudad]/page.tsx', 'kind="city"'],
+      ['app/(es)/recursos/[slug]/page.tsx', 'kind="article"'],
     ];
     for (const [file, marker] of pages) {
       const src = readFileSync(join(ROOT, file), 'utf8');

@@ -14,7 +14,7 @@ import { buildGlosarioJson, GLOSARIO_VERSION } from '@/lib/glosario-feed';
 import { products } from '@/lib/products';
 import { articles } from '@/lib/articles';
 import { pillars } from '@/lib/framework';
-import { generateStaticParams } from '@/app/glosario/[slug]/page';
+import { generateStaticParams } from '@/app/(es)/glosario/[slug]/page';
 import sitemap from '@/app/sitemap';
 import { SITE } from '@/lib/site';
 

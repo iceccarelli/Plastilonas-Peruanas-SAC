@@ -138,7 +138,7 @@ describe('la respuesta directa se compone, no se escribe', () => {
   });
 
   it('la ficha y el hub de aplicación marcan el párrafo como speakable', () => {
-    for (const ruta of ['app/productos/[slug]/page.tsx', 'app/aplicaciones/[slug]/page.tsx']) {
+    for (const ruta of ['app/(es)/productos/[slug]/page.tsx', 'app/(es)/aplicaciones/[slug]/page.tsx']) {
       const src = readFileSync(join(process.cwd(), ruta), 'utf8');
       expect(src, `${ruta} no declara speakable`).toContain("speakable: ['.respuesta-directa']");
       expect(src, `${ruta} no pinta el párrafo citable`).toContain('respuesta-directa');
@@ -194,12 +194,12 @@ describe('la cobertura geográfica describe sitios reales, no páginas de rellen
      * «costa y sierra» y Puno como «altiplano»: dos huérfanas que sólo cazó
      * `npm run auditar` sobre el HTML servido. Aquí se caza antes.
      */
-    const src = readFileSync(join(process.cwd(), 'app/local/page.tsx'), 'utf8');
+    const src = readFileSync(join(process.cwd(), 'app/(es)/local/page.tsx'), 'utf8');
     const declaradas = /const REGION_ORDER = \[([^\]]+)\]/.exec(src)?.[1] ?? '';
     const validas = new Set(
       declaradas.split(',').map((r) => r.trim().replace(/^["']|["']$/g, '')).filter(Boolean),
     );
-    expect(validas.size, 'no se pudo leer REGION_ORDER de app/local/page.tsx').toBeGreaterThan(0);
+    expect(validas.size, 'no se pudo leer REGION_ORDER de app/(es)/local/page.tsx').toBeGreaterThan(0);
     const fuera = CIUDADES.filter((c) => !validas.has(c.region)).map((c) => `${c.slug} (${c.region})`);
     expect(
       fuera,

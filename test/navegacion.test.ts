@@ -34,8 +34,10 @@ function entradasDePrimerNivel(): { label: string; href: string }[] {
 function rutaExiste(href: string): boolean {
   const limpio = href.split('?')[0].replace(/^\//, '');
   if (limpio === '') return true;
-  const directo = join(raiz, 'app', limpio, 'page.tsx');
-  return existsSync(directo);
+  return (
+    existsSync(join(raiz, 'app', limpio, 'page.tsx')) ||
+    existsSync(join(raiz, 'app', '(es)', limpio, 'page.tsx'))
+  );
 }
 
 describe('navegación principal', () => {
@@ -192,7 +194,7 @@ describe('navegación principal', () => {
 });
 
 describe('viewport del documento', () => {
-  const layout = readFileSync(join(raiz, 'app/layout.tsx'), 'utf8');
+  const layout = readFileSync(join(raiz, 'app/(es)/layout.tsx'), 'utf8');
 
   it('declara viewportFit cover para habilitar env(safe-area-inset-*)', () => {
     expect(layout).toMatch(/viewportFit:\s*'cover'/);

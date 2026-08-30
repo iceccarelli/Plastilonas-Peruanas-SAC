@@ -105,7 +105,7 @@ describe('fotos de servicio de la portada', () => {
   });
 
   it('la portada resuelve las tomas en el servidor', () => {
-    const src = readFileSyncSafe('app/page.tsx');
+    const src = readFileSyncSafe('app/(es)/page.tsx');
     expect(src).toMatch(/tomasDe\(/);
     expect(src).toMatch(/FOTO_SERVICIO/);
   });

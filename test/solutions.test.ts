@@ -6,7 +6,7 @@ import {
   productExists, guideExists, pillarExists,
 } from '@/lib/solutions';
 import { products } from '@/lib/products';
-import { generateStaticParams } from '@/app/soluciones/[slug]/page';
+import { generateStaticParams } from '@/app/(es)/soluciones/[slug]/page';
 import sitemap from '@/app/sitemap';
 import { SITE } from '@/lib/site';
 
@@ -85,7 +85,7 @@ describe('arquitecturas: honestidad', () => {
   });
 
   it('el índice declara explícitamente que no son casos de estudio', () => {
-    const page = readFileSync(join(process.cwd(), 'app/soluciones/page.tsx'), 'utf8');
+    const page = readFileSync(join(process.cwd(), 'app/(es)/soluciones/page.tsx'), 'utf8');
     expect(page).toContain('no casos de estudio');
   });
 });
@@ -111,7 +111,7 @@ describe('arquitecturas: integración', () => {
   });
 
   it('la ficha de producto muestra dónde encaja', () => {
-    const page = readFileSync(join(process.cwd(), 'app/productos/[slug]/page.tsx'), 'utf8');
+    const page = readFileSync(join(process.cwd(), 'app/(es)/productos/[slug]/page.tsx'), 'utf8');
     expect(page).toContain('solutionsForProduct');
     expect(page).toContain('Dónde encaja este producto');
   });

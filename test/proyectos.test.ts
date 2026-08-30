@@ -16,7 +16,7 @@ describe('evidencia de proyecto', () => {
   });
 
   it('la página lee projectsPublicados, nunca el array crudo', () => {
-    const src = readFileSync(join(raiz, 'app/proyectos/page.tsx'), 'utf8');
+    const src = readFileSync(join(raiz, 'app/(es)/proyectos/page.tsx'), 'utf8');
     expect(src).toContain('projectsPublicados');
     expect(src).not.toMatch(/import\s*\{[^}]*\bprojects\b[^}]*\}\s*from\s*'@\/lib\/projects'/);
   });
