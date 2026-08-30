@@ -55,12 +55,43 @@ const explicitUrls = args.filter((a) => a.startsWith('http'));
 /** La especificación admite 8–128 caracteres hexadecimales, letras y guiones. */
 const KEY_PATTERN = /^[a-zA-Z0-9-]{8,128}$/;
 
+const locsDe = (xml) => [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].trim());
+
+/**
+ * URLs del sitemap, SIGUIENDO EL ÍNDICE.
+ *
+ * /sitemap.xml dejó de ser un XML plano: ahora es un <sitemapindex> que apunta
+ * a /sitemaps/{pages,productos,industrias,recursos}.xml. Si esta función se
+ * quedara leyendo solo el primer nivel, enviaría a los buscadores CUATRO URLs
+ * —las de los propios sitemaps— en lugar de las ~280 páginas del sitio, y lo
+ * haría en silencio, con salida 200 y un «4 URLs enviadas» que nadie leería
+ * como avería. Es exactamente la clase de fallo que este archivo documenta en
+ * su cabecera: el canal de distribución apagado mientras todo «funciona».
+ *
+ * Se detecta el índice por su elemento raíz y se descienden sus hijos. Un
+ * sitemap plano sigue funcionando igual, así que la función es correcta con
+ * las dos formas.
+ */
 async function urlsFromSitemap() {
   const res = await fetch(`${SITE_URL}/sitemap.xml`);
   if (!res.ok) throw new Error(`sitemap.xml respondió ${res.status}`);
   const xml = await res.text();
-  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].trim());
-  return [...new Set(locs)];
+
+  if (!/<sitemapindex/i.test(xml)) return [...new Set(locsDe(xml))];
+
+  const hijos = locsDe(xml);
+  if (!hijos.length) throw new Error('El índice de sitemaps no declara ningún sitemap hijo.');
+
+  const todas = [];
+  for (const hijo of hijos) {
+    const r = await fetch(hijo);
+    if (!r.ok) throw new Error(`${hijo} respondió ${r.status}`);
+    const urls = locsDe(await r.text());
+    if (!urls.length) throw new Error(`${hijo} no declara ninguna URL.`);
+    console.log(`  · ${hijo.replace(SITE_URL, '')}: ${urls.length} URLs`);
+    todas.push(...urls);
+  }
+  return [...new Set(todas)];
 }
 
 async function main() {

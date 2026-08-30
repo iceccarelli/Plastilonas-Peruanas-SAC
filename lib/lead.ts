@@ -40,15 +40,34 @@ export interface LeadPayload {
   archivos?: string[];
 }
 
-export async function postLead(lead: LeadPayload): Promise<void> {
+export interface LeadResultado {
+  ok: boolean;
+  /** Código RFQ-AAAAMMDD-XXXX que emite /api/lead. */
+  rfqId?: string;
+}
+
+/**
+ * Devuelve el resultado en vez de tragárselo.
+ *
+ * Antes era `Promise<void>`: el código RFQ que /api/lead genera para cada
+ * solicitud existía, viajaba en la respuesta y se descartaba en el cliente.
+ * El comprador se quedaba sin acuse de recibo y, si el navegador bloqueaba la
+ * ventana de WhatsApp, sin ninguna prueba de que su solicitud había entrado.
+ * Sigue siendo best-effort: un fallo de red devuelve `ok: false` y no lanza,
+ * porque el lead ya viajó por el otro canal.
+ */
+export async function postLead(lead: LeadPayload): Promise<LeadResultado> {
   try {
-    await fetch('/api/lead', {
+    const res = await fetch('/api/lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(lead),
       keepalive: true,
     });
+    if (!res.ok) return { ok: false };
+    const data = (await res.json()) as { ok?: boolean; rfqId?: string };
+    return { ok: Boolean(data.ok), rfqId: data.rfqId };
   } catch {
-    /* best-effort: el lead ya fue a WhatsApp */
+    return { ok: false };
   }
 }

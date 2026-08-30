@@ -106,6 +106,51 @@ describe('etapa 2 — alcanzabilidad', () => {
   });
 });
 
+describe('etapa 8 — aceleración', () => {
+  it('el hero es next/image con prioridad y una sola descarga', () => {
+    const hero = leer('components/HeroImagen.tsx');
+    expect(hero).toContain("from 'next/image'");
+    expect(hero).toContain('priority');
+    // El sorteo de foto al montar descargaba una SEGUNDA imagen de ~150 KB
+    // por visita y movía el elemento LCP después de la hidratación.
+    expect(hero).not.toContain('Math.random');
+  });
+
+  it('el formulario de RFQ no arrastra el catálogo al navegador', () => {
+    const form = leer('components/CotizacionForm.tsx');
+    // 92 KB de fuente —descripciones, specs, galerías— para llenar un <select>
+    // que solo necesita slug y nombre.
+    expect(form).not.toContain("from '@/lib/products'");
+    expect(form).toContain('opciones');
+  });
+
+  it('el RFQ entrega acuse de recibo y sobrevive a un bloqueador de ventanas', () => {
+    const form = leer('components/CotizacionForm.tsx');
+    expect(form).toContain('rfqId');
+    expect(form).toContain('acuse');
+    expect(leer('lib/whatsapp.ts')).toContain('export function openWhatsApp(message: string): boolean');
+    expect(leer('lib/lead.ts')).toContain('LeadResultado');
+  });
+
+  it('no queda un segundo formulario de cotización divergente', () => {
+    // El modal no tenía ciudad de entrega, ni SLA, ni adjuntos, y llevaba el
+    // teléfono de la empresa como placeholder. Dos formularios son dos verdades.
+    expect(() => leer('components/CotizacionModal.tsx')).toThrow();
+  });
+
+  it('las tres cuñas reciben enlaces internos desde el pie y las fichas', () => {
+    expect(leer('components/Footer.tsx')).toContain('ENLACES_CUNAS');
+    expect(leer('app/(es)/productos/[slug]/page.tsx')).toContain('cunaDeProducto');
+    expect(leer('app/(es)/local/[ciudad]/page.tsx')).toContain('ENLACES_CUNAS');
+  });
+
+  it('cada cuña declara un Service de alcance nacional, no de una ciudad', () => {
+    const hub = leer('components/CunaHub.tsx');
+    expect(hub).toContain("'@type': 'Service'");
+    expect(hub).toContain("areaServed: { '@type': 'Country', name: 'Perú' }");
+  });
+});
+
 describe('etapa 3 — las tres cuñas', () => {
   it('cada cuña tiene página, entra al sitemap y aparece en llms.txt', () => {
     const urls = new Set(sitemap().map((e) => e.url));

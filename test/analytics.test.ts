@@ -104,9 +104,9 @@ describe('cobertura de eventos de conversión', () => {
   });
 
   it('el formulario mide apertura y envío por separado', () => {
-    const modal = readFileSync(join(ROOT, 'components/CotizacionModal.tsx'), 'utf8');
-    expect(modal).toContain('trackQuoteStarted');
-    expect(modal).toContain('trackQuoteRequest');
+    const form = readFileSync(join(ROOT, 'components/CotizacionForm.tsx'), 'utf8');
+    expect(form).toContain('trackQuoteStarted');
+    expect(form).toContain('trackQuoteRequest');
   });
 
   it('el chatbot mide el primer mensaje, no la apertura del widget', () => {

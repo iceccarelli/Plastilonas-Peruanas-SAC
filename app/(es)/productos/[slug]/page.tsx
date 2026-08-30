@@ -22,6 +22,7 @@ import { respuestaDirectaProducto, rfqWhatsAppProducto } from '@/lib/respuesta-d
 import { familyHrefByName } from '@/lib/families';
 import { INDUSTRIAS } from '@/lib/industrias';
 import { guides } from '@/lib/guides';
+import { cunaDeProducto } from '@/lib/cunas';
 import DatosParaCotizar from '@/components/DatosParaCotizar';
 
 interface Props {
@@ -96,6 +97,10 @@ export default async function ProductDetailPage({ params }: Props) {
     i.etiquetas.some((e) => product.sector.includes(e)),
   ).slice(0, 3);
   const guiasRel = guides.filter((g) => g.relatedProductSlugs.includes(product.slug));
+  // La cuña comercial que agrupa esta ficha, si alguna la agrupa: es la página
+  // que debe concentrar la señal de «lona camión», «manga ventilación» o
+  // «big bags», y sus propias fichas hijas son quienes mejor se la pasan.
+  const cuna = cunaDeProducto(product.slug);
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
@@ -340,10 +345,16 @@ export default async function ProductDetailPage({ params }: Props) {
 
       {/* Contexto de compra: familia, hub de sector y guía técnica. Cierra el
           triángulo ficha → familia → industria → biblioteca del grafo interno. */}
-      {(industriasRel.length > 0 || guiasRel.length > 0) && (
+      {(cuna || industriasRel.length > 0 || guiasRel.length > 0) && (
         <div className="mt-16 pt-10 border-t">
           <h2 className="font-semibold tracking-tight text-2xl mb-6">Para seguir especificando</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {cuna && (
+              <Link href={`/${cuna.slug}`} className="group block rounded-2xl border border-[#059669]/30 bg-emerald-50/40 p-5 hover:border-[#059669] transition-colors">
+                <span className="block text-xs uppercase tracking-wide text-[#047857] mb-1">Frente comercial</span>
+                <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669]">{cuna.titulo}</span>
+              </Link>
+            )}
             <Link href={familiaHref} className="group block rounded-2xl border border-gray-100 p-5 hover:border-[#059669]/40 transition-colors">
               <span className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Familia</span>
               <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669]">{product.category}</span>

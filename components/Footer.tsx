@@ -4,6 +4,7 @@ import { WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 import { SITE, TELEFONOS } from '@/lib/site';
 import { FABRICACION_PROPIA_COUNT } from '@/lib/facts';
 import { DATOS_PARA_COTIZAR } from '@/components/DatosParaCotizar';
+import { ENLACES_CUNAS } from '@/lib/cunas';
 import Image from 'next/image';
 import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
 import SocialIcons from '@/components/SocialIcons';
@@ -19,6 +20,14 @@ export default function Footer() {
   const propias = FABRICACION_PROPIA_COUNT;
 
   const sections: FSection[] = [
+    // Las tres cuñas comerciales encabezan el pie: son las páginas que este
+    // sitio quiere que contesten «lona camión», «manga ventilación» y «big
+    // bags», y el pie es el único bloque que las enlaza desde las ~280
+    // páginas del sitio. Sin esto vivían colgando solo de la portada.
+    { title: 'LO QUE MÁS COTIZAMOS', links: [
+      ...ENLACES_CUNAS,
+      { label: 'Solicitar cotización →', href: '/cotizacion' },
+    ]},
     { title: 'PRODUCTOS', links: [
       { label: 'Envases y Embalaje', href: '/productos/familia/envases-embalaje' },
       { label: 'Lonas y Cobertores', href: '/productos/familia/lonas-cobertores' },

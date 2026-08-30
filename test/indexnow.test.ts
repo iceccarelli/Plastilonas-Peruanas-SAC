@@ -18,6 +18,38 @@ const ROOT = process.cwd();
 const sinComentarios = (src: string) =>
   src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
+describe('IndexNow: el envío sigue el índice de sitemaps', () => {
+  const script = readFileSync(join(ROOT, 'scripts/submit-indexnow.mjs'), 'utf8');
+
+  /**
+   * REGRESIÓN REAL, ATRAPADA AQUÍ.
+   *
+   * Al partir /sitemap.xml en un <sitemapindex> con cuatro hijos, este script
+   * —que leía <loc> del primer nivel— pasó a enviar CUATRO URLs (las de los
+   * propios sitemaps) en lugar de las ~280 páginas. Y lo hacía con salida 200
+   * y un «4 URLs enviadas» que nadie iba a leer como avería: el canal de
+   * distribución apagado mientras todo parecía correcto, que es exactamente
+   * el incidente que la cabecera de este script documenta.
+   */
+  it('detecta el índice y desciende a los sitemaps hijos', () => {
+    expect(script).toMatch(/sitemapindex/);
+    expect(sinComentarios(script)).toMatch(/for \(const hijo of hijos\)/);
+  });
+
+  it('falla ruidosamente si un sitemap hijo viene vacío', () => {
+    const codigo = sinComentarios(script);
+    expect(codigo).toMatch(/no declara ninguna URL/);
+    expect(codigo).toMatch(/no declara ningún sitemap hijo/);
+  });
+
+  it('la verificación de despliegue cuenta URLs en los hijos, no en el índice', () => {
+    const verificacion = readFileSync(join(ROOT, 'scripts/verificar-despliegue.sh'), 'utf8');
+    // Contar <loc> en el índice da 4 y daría por bueno cualquier hijo vacío.
+    expect(verificacion).toMatch(/sitemaps\/productos\.xml"\s+'<loc>'/);
+    expect(verificacion).toMatch(/sitemaps\/pages\.xml"\s+'<loc>'/);
+  });
+});
+
 describe('IndexNow: prueba de propiedad', () => {
   it('acepta claves dentro del rango de la especificación (8–128)', () => {
     expect(isValidIndexNowKey('a'.repeat(8))).toBe(true);

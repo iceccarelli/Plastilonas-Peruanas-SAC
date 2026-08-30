@@ -18,6 +18,7 @@ import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import WhatsAppLink from '@/components/WhatsAppLink';
 import ImagenContenido from '@/components/ImagenContenido';
+import FotoReferencial from '@/components/FotoReferencial';
 import RielComercial from '@/components/RielComercial';
 import { ranurasErrorCompra } from '@/lib/imagenes';
 import {
@@ -167,9 +168,11 @@ export default async function IndustriaPage({ params }: Props) {
       <h1 className="mb-6 text-3xl font-semibold tracking-tight text-[#0A2540] sm:text-4xl">
         {ind.nombre}: {ind.complementoTitulo}
       </h1>
-      <p className="speakable-intro mb-12 text-lg leading-relaxed text-gray-700">
+      <p className="speakable-intro mb-8 text-lg leading-relaxed text-gray-700">
         {ind.intro}
       </p>
+
+      <FotoReferencial src={ind.foto.src} alt={ind.foto.alt} className="mb-12" />
 
       <section className="mb-14">
         <h2 className="mb-6 text-2xl font-semibold tracking-tight text-[#0A2540]">

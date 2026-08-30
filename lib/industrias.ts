@@ -74,6 +74,8 @@ export interface Industria {
   /** Nota logística real: se despacha desde Chorrillos. */
   logistica: string;
   faqs: { q: string; a: string }[];
+  /** Fotografía ilustrativa del sector. Referencial: la etiqueta lo declara. */
+  foto: { src: string; alt: string };
 }
 
 export const INDUSTRIAS: Industria[] = [
@@ -133,6 +135,10 @@ export const INDUSTRIAS: Industria[] = [
         a: 'Fabricamos en Chorrillos y despachamos a todo el país. La instalación de geomembranas y estructuras se coordina contra el cronograma de la obra, no contra el nuestro.',
       },
     ],
+    foto: {
+      src: '/images/hero/hero-12.webp',
+      alt: 'Acopio minero cubierto con lona en altura.',
+    },
   },
   {
     slug: 'agroexportacion',
@@ -181,6 +187,10 @@ export const INDUSTRIAS: Industria[] = [
         a: 'Sí. Es el caso habitual: se programa el volumen contra la fecha de instalación y se despacha desde Lima. Cuanto antes se cierre el ancho útil, menos merma queda en campo.',
       },
     ],
+    foto: {
+      src: '/images/hero/hero-06.webp',
+      alt: 'Malla de sombra y anti-granizo sobre un cultivo.',
+    },
   },
   {
     slug: 'transporte-logistica',
@@ -230,6 +240,10 @@ export const INDUSTRIAS: Industria[] = [
         a: 'Sí, y es lo que recomendamos. Trabajamos con medida tomada sobre la unidad o con plano de caja, incluyendo refuerzos en las zonas de amarre según el sistema de fijación que ya tiene el camión.',
       },
     ],
+    foto: {
+      src: '/images/hero/hero-16.webp',
+      alt: 'Patio logístico con cargas paletizadas y embaladas.',
+    },
   },
   {
     slug: 'construccion',
@@ -278,6 +292,10 @@ export const INDUSTRIAS: Industria[] = [
         a: 'La función y, por lo tanto, la propiedad que gobierna. En separación importa la retención de finos y la permeabilidad; en refuerzo importa la resistencia a la tracción y la deformación a la que se alcanza. Especificar solo el gramaje deja fuera lo que decide el desempeño en ambos casos.',
       },
     ],
+    foto: {
+      src: '/images/hero/hero-04.webp',
+      alt: 'Geotextil y geomalla en una obra de movimiento de tierras.',
+    },
   },
   {
     slug: 'saneamiento-y-agua',
@@ -326,6 +344,10 @@ export const INDUSTRIAS: Industria[] = [
         a: 'Primero el contenido y la subrasante, que son los que mandan. De ahí sale qué polímero resiste el líquido y qué protección necesita la lámina contra el punzonamiento. Elegir la lámina primero y buscarle protección después es hacerlo al revés.',
       },
     ],
+    foto: {
+      src: '/images/hero/hero-07.webp',
+      alt: 'Tanque flexible para almacenamiento de agua en operación remota.',
+    },
   },
 ];
 

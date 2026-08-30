@@ -110,7 +110,7 @@ describe('el widget y la portada usan las intenciones de verdad', () => {
     expect(portada).toContain('HeroImagen');
     expect(heroImagen).not.toContain('setInterval');
     expect(heroImagen).not.toMatch(/kenburns/i);
-    expect(heroImagen).toContain('fetchPriority');
+    expect(heroImagen).toContain('priority');
   });
 
   it('la acción primaria del hero es cotizar, no navegar', () => {

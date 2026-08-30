@@ -67,9 +67,19 @@ export function whatsappUrl(message: string): string {
 
 import { trackWhatsAppClick } from './analytics';
 
-export function openWhatsApp(message: string): void {
+/**
+ * Abre WhatsApp y DICE si lo consiguió.
+ *
+ * `window.open` devuelve null cuando el navegador bloquea la ventana —cosa
+ * habitual en escritorio corporativo y en iOS con bloqueo de ventanas—. Antes
+ * esta función devolvía void, así que el formulario anunciaba «se abrió
+ * WhatsApp» delante de un usuario que no veía nada abrirse y creía que su
+ * solicitud se había perdido. Ahora quien llama puede ofrecer el enlace a mano.
+ */
+export function openWhatsApp(message: string): boolean {
   trackWhatsAppClick();
-  window.open(whatsappUrl(message), '_blank', 'noopener,noreferrer');
+  const win = window.open(whatsappUrl(message), '_blank', 'noopener,noreferrer');
+  return Boolean(win);
 }
 
 /* ------------------------------------------------------------------ */

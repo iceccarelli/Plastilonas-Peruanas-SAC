@@ -10,6 +10,7 @@ import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
 import WhatsAppLink from '@/components/WhatsAppLink';
 import DatosParaCotizar from '@/components/DatosParaCotizar';
+import FotoReferencial from '@/components/FotoReferencial';
 
 /**
  * Página de cuña comercial (ver lib/cunas.ts). Server component compartido
@@ -42,6 +43,29 @@ export default function CunaHub({ cuna }: { cuna: Cuna }) {
             `${url}#breadcrumb`,
           ),
           faqSchema(cuna.faqs, url),
+          /**
+           * Service de alcance NACIONAL. No se usa `serviceSchema` de
+           * lib/schema.ts porque ese ancla `areaServed` a una City —correcto
+           * para /local/[ciudad], falso aquí: estas tres páginas se despachan
+           * a todo el país desde una sola planta. El canal declarado es el
+           * que existe de verdad: cotización, no compra en línea.
+           */
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Service',
+            '@id': `${url}#service`,
+            name: cuna.titulo,
+            description: cuna.descripcion,
+            url,
+            provider: { '@id': `${SITE.url}/#business` },
+            areaServed: { '@type': 'Country', name: 'Perú' },
+            serviceType: hijos.map((p) => p.name),
+            availableChannel: {
+              '@type': 'ServiceChannel',
+              serviceUrl: `${SITE.url}/cotizacion`,
+              availableLanguage: ['es-PE'],
+            },
+          },
         ]}
       />
 
@@ -73,6 +97,8 @@ export default function CunaHub({ cuna }: { cuna: Cuna }) {
           </WhatsAppLink>
         </div>
       </div>
+
+      <FotoReferencial src={cuna.foto.src} alt={cuna.foto.alt} className="mt-10 max-w-4xl" />
 
       {/* Checklist de especificación */}
       <section className="mt-14">

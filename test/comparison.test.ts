@@ -74,7 +74,7 @@ describe('comparativas: honestidad de la matriz', () => {
 
 describe('deep link de cotización', () => {
   const page = readFileSync(join(ROOT, 'app/(es)/cotizacion/page.tsx'), 'utf8');
-  const modal = readFileSync(join(ROOT, 'components/CotizacionModal.tsx'), 'utf8');
+  const form = readFileSync(join(ROOT, 'components/CotizacionForm.tsx'), 'utf8');
 
   it('la página de cotización LEE el parámetro producto', () => {
     // Las 36 fichas enlazan con ?producto=; antes el parámetro se descartaba y
@@ -90,14 +90,14 @@ describe('deep link de cotización', () => {
     expect(page).toContain('products.find((p) => p.slug === slug)');
   });
 
-  it('el modal aplica producto y mensaje preseleccionados', () => {
-    expect(modal).toContain('preselectedProduct');
-    expect(modal).toContain('preselectedMessage');
-    expect(modal).toContain("setValue('mensaje', preselectedMessage)");
+  it('el formulario aplica producto y mensaje preseleccionados', () => {
+    expect(form).toContain('preselectedProduct');
+    expect(form).toContain('preselectedMessage');
+    expect(form).toContain("setValue('mensaje', preselectedMessage)");
   });
 
   it('el valor del <select> es el nombre del producto, que es lo que llega por la URL', () => {
-    expect(modal).toContain('value={p.name}');
+    expect(form).toContain('value={p.name}');
   });
 
   it('cada ficha de producto enlaza a la cotización con su propio nombre', () => {

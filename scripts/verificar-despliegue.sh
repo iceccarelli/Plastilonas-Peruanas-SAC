@@ -233,9 +233,13 @@ echo "— Contenido esperado —"
 # Los mínimos son cotas inferiores medidas, no cifras exactas: el sitemap
 # crece con el catálogo y una igualdad estricta obligaría a editar este script
 # en cada patch, que es justo como una verificación deja de correrse.
-cuenta "/sitemap.xml" '<loc>'       100 "URLs en el sitemap"
-cuenta "/sitemap.xml" 'soluciones'    7 "arquitecturas en el sitemap"
-cuenta "/sitemap.xml" 'novedades'     8 "novedades en el sitemap"
+# /sitemap.xml es un ÍNDICE: las URLs viven en sus cuatro hijos. Contar <loc>
+# en el índice daría 4 y pasaría por bueno cualquier sitemap hijo vacío.
+cuenta "/sitemap.xml" '<sitemap>'      4 "sitemaps declarados en el índice"
+cuenta "/sitemaps/productos.xml"  '<loc>'      40 "URLs de catálogo"
+cuenta "/sitemaps/pages.xml"      '<loc>'      20 "URLs de páginas"
+cuenta "/sitemaps/industrias.xml" 'soluciones'  7 "arquitecturas en el sitemap"
+cuenta "/sitemaps/recursos.xml"   'novedades'   8 "novedades en el sitemap"
 cuenta "/novedades/rss.xml" '<item>'  7 "entradas en el feed RSS"
 contiene "/llms.txt" 'Arquitecturas de referencia' "llms.txt declara arquitecturas"
 contiene "/llms.txt" 'Novedades (registro fechado)' "llms.txt declara el registro"

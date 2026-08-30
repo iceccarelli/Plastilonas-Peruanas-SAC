@@ -36,6 +36,8 @@ export interface Cuna {
   calculadoraSlug?: string;
   /** Mensaje de WhatsApp prellenado (guion de los 4 datos). */
   whatsapp: string;
+  /** Fotografía ilustrativa del frente. Referencial: la etiqueta lo declara. */
+  foto: { src: string; alt: string };
 }
 
 export const cunas: Cuna[] = [
@@ -95,6 +97,10 @@ export const cunas: Cuna[] = [
     industriaSlug: 'transporte-logistica',
     whatsapp:
       'Hola, quiero cotizar lonas/toldos/siders para camión. Medidas de carrocería: ___. Cantidad de unidades: ___. Ciudad de entrega: ___.',
+    foto: {
+      src: '/images/hero/hero-08.webp',
+      alt: 'Camión con siders y tolderas de lona en una carretera peruana.',
+    },
   },
   {
     slug: 'ventilacion-minera',
@@ -148,6 +154,10 @@ export const cunas: Cuna[] = [
     calculadoraSlug: 'caudal-ventilacion-mina',
     whatsapp:
       'Hola, quiero cotizar mangas de ventilación. Diámetro y largo de tramo: ___. Metraje total: ___. Ciudad de entrega: ___.',
+    foto: {
+      src: '/images/hero/hero-09.webp',
+      alt: 'Mangas de ventilación industrial dispuestas en planta.',
+    },
   },
   {
     slug: 'big-bags',
@@ -204,9 +214,27 @@ export const cunas: Cuna[] = [
     calculadoraSlug: 'big-bags-por-viaje',
     whatsapp:
       'Hola, quiero cotizar big bags / FIBC. Capacidad y medidas: ___. Cantidad: ___. Ciudad de entrega: ___.',
+    foto: {
+      src: '/images/hero/hero-02.webp',
+      alt: 'Carga de big bags (FIBC) en una planta industrial.',
+    },
   },
 ];
 
 export function cunaPorSlug(slug: string): Cuna | undefined {
   return cunas.find((c) => c.slug === slug);
 }
+
+/** La cuña a la que pertenece una ficha de producto, si alguna la agrupa. */
+export function cunaDeProducto(productSlug: string): Cuna | undefined {
+  return cunas.find((c) => c.productSlugs.includes(productSlug));
+}
+
+/**
+ * Enlaces de las tres cuñas, listos para pintar en pie, hubs de ciudad y
+ * cualquier sitio que deba empujar peso interno hacia ellas.
+ */
+export const ENLACES_CUNAS = cunas.map((c) => ({
+  href: `/${c.slug}`,
+  label: c.titulo,
+}));

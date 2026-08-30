@@ -8,6 +8,7 @@ import { products } from "@/lib/products";
 import Image from "next/image";
 import { breadcrumbSchema, faqSchema, serviceSchema, webPageSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
+import { ENLACES_CUNAS } from "@/lib/cunas";
 import WhatsAppLink from "@/components/WhatsAppLink";
 import TrackView from "@/components/TrackView";
 
@@ -160,6 +161,29 @@ export default async function CiudadPage({ params }: { params: Promise<{ ciudad:
           </ul>
         </section>
       )}
+      {/* Las tres cuñas, enlazadas desde cada ciudad. No se afirma demanda
+          local que no esté medida: se declara lo único cierto —que se fabrica
+          en Chorrillos y se despacha a esta ciudad— y se deja que el comprador
+          entre por el frente que le corresponde. */}
+      <section className="mb-10">
+        <h2 className="mb-3 text-2xl font-semibold">Lo que más se despacha a {c.ciudad}</h2>
+        <p className="mb-4 text-neutral-700">
+          Se fabrica en la planta de Chorrillos y se despacha a {c.ciudad}. Estas tres páginas
+          traen el checklist de especificación de cada frente:
+        </p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {ENLACES_CUNAS.map((e) => (
+            <Link
+              key={e.href}
+              href={e.href}
+              className="group block rounded-2xl border border-gray-100 p-4 transition-colors hover:border-[#059669]/40"
+            >
+              <span className="block text-sm font-semibold text-[#0A2540] group-hover:text-[#059669]">{e.label}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <div className="flex flex-wrap gap-3">
         <WhatsAppLink context={`ciudad:${c.slug}`}
           message={`Hola, necesito una cotización de plastilonas en ${c.ciudad}.`}

@@ -80,6 +80,7 @@ export default async function CotizacionPage({
       )}
 
       <CotizacionForm
+        opciones={products.map((p) => ({ slug: p.slug, name: p.name }))}
         preselectedProduct={preselectedProduct}
         slugOrigen={slugOrigen}
         preselectedMessage={preselectedMessage}

@@ -20,6 +20,11 @@
  *    lead y el archivo se pide por correo. Ver docs/HUMAN-GATES.md.
  *  · UTM + ruta + slug viajan ocultos: el comercial sabe QUÉ página produjo
  *    el lead sin preguntárselo al visitante.
+ *  · NO IMPORTA `lib/products`: el catálogo son 92 KB de fuente —descripciones,
+ *    especificaciones, galerías— y este es un componente de cliente, así que
+ *    importarlo entero enviaba TODO ese JSON al navegador para llenar un
+ *    <select> que solo necesita slug y nombre. La página (servidor) pasa la
+ *    lista mínima por props.
  */
 
 import React from 'react';
@@ -27,9 +32,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Send, CheckCircle, Paperclip, X } from 'lucide-react';
-import { products } from '@/lib/products';
 import { toast } from 'sonner';
-import { buildQuoteMessage, openWhatsApp, saveQuoteLocally } from '@/lib/whatsapp';
+import { buildQuoteMessage, openWhatsApp, saveQuoteLocally, whatsappUrl } from '@/lib/whatsapp';
 import { trackQuoteRequest, trackQuoteStarted } from '@/lib/analytics';
 import { postLead } from '@/lib/lead';
 import { errorRuc, normalizarRuc } from '@/lib/ruc';
@@ -74,7 +78,15 @@ function esquema(productoObligatorio: boolean) {
 
 type FormData = z.infer<ReturnType<typeof esquema>>;
 
+/** Lo mínimo que el <select> necesita: nada de especificaciones ni galerías. */
+export interface OpcionProducto {
+  slug: string;
+  name: string;
+}
+
 interface Props {
+  /** Catálogo reducido, resuelto en el servidor. */
+  opciones: OpcionProducto[];
   /** Nombre de producto preseleccionado (de ?producto= o comparativa). */
   preselectedProduct?: string;
   /** Slug del producto de origen, si el enlace lo trajo. */
@@ -94,11 +106,13 @@ function leerUtm(): Record<string, string> {
   return out;
 }
 
-export default function CotizacionForm({ preselectedProduct, slugOrigen, preselectedMessage }: Props) {
+export default function CotizacionForm({ opciones, preselectedProduct, slugOrigen, preselectedMessage }: Props) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
   const [archivos, setArchivos] = React.useState<File[]>([]);
   const [errorArchivos, setErrorArchivos] = React.useState<string | null>(null);
+  /** Acuse de recibo: código RFQ, si la ventana de WhatsApp abrió, y el enlace. */
+  const [acuse, setAcuse] = React.useState<{ rfqId?: string; abrio: boolean; href: string } | null>(null);
   const productoObligatorio = Boolean(preselectedProduct);
 
   const {
@@ -244,7 +258,7 @@ export default function CotizacionForm({ preselectedProduct, slugOrigen, presele
       mensaje: detalle,
     });
 
-    await postLead({
+    const resultado = await postLead({
       nombre: data.nombre,
       empresa: data.empresa,
       ruc,
@@ -261,8 +275,9 @@ export default function CotizacionForm({ preselectedProduct, slugOrigen, presele
       archivos: refsArchivos,
     });
 
-    openWhatsApp(message);
+    const abrio = openWhatsApp(message);
     trackQuoteRequest(data.producto, slugOrigen);
+    setAcuse({ rfqId: resultado.rfqId, abrio, href: whatsappUrl(message) });
 
     try {
       window.localStorage.removeItem(BORRADOR_KEY);
@@ -272,11 +287,15 @@ export default function CotizacionForm({ preselectedProduct, slugOrigen, presele
 
     setIsSubmitting(false);
     setIsSuccess(true);
-    toast.success('Su solicitud está lista en WhatsApp', {
-      description:
-        'Pulse enviar en la ventana de WhatsApp para que nuestro equipo comercial la reciba de inmediato.',
-      duration: 7000,
-    });
+    toast.success(
+      abrio ? 'Su solicitud está lista en WhatsApp' : 'Su solicitud quedó registrada',
+      {
+        description: abrio
+          ? 'Pulse enviar en la ventana de WhatsApp para que nuestro equipo comercial la reciba de inmediato.'
+          : 'El navegador bloqueó la ventana de WhatsApp. Su solicitud ya entró en nuestro registro; abajo tiene el enlace para enviarla también por WhatsApp.',
+        duration: 9000,
+      },
+    );
   };
 
   const campo =
@@ -288,11 +307,36 @@ export default function CotizacionForm({ preselectedProduct, slugOrigen, presele
     return (
       <div className="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-10 text-center">
         <CheckCircle className="mx-auto mb-4 h-10 w-10 text-[#059669]" />
-        <div className="text-xl font-semibold text-[#0A2540]">Solicitud lista</div>
-        <p className="mx-auto mt-2 max-w-md text-sm text-gray-600">
-          Se abrió WhatsApp con su solicitud estructurada: pulse enviar ahí y quedará en manos del
-          equipo comercial. {SLA_COTIZACION}
+        <div className="text-xl font-semibold text-[#0A2540]">Solicitud registrada</div>
+
+        {/* ACUSE DE RECIBO. El código RFQ lo emite /api/lead y hasta ahora se
+            descartaba en el cliente: el comprador se iba sin nada que citar si
+            quería preguntar por su solicitud. */}
+        {acuse?.rfqId && (
+          <p className="mt-3 font-mono text-sm text-[#0A2540]">
+            Código de su solicitud: <strong>{acuse.rfqId}</strong>
+          </p>
+        )}
+
+        <p className="mx-auto mt-3 max-w-md text-sm text-gray-600">
+          {acuse?.abrio
+            ? 'Se abrió WhatsApp con su solicitud estructurada: pulse enviar ahí y quedará en manos del equipo comercial.'
+            : 'Su navegador bloqueó la ventana de WhatsApp, pero la solicitud ya entró en nuestro registro comercial.'}{' '}
+          {SLA_COTIZACION}
         </p>
+
+        {/* Salida manual: un window.open bloqueado dejaba al comprador mirando
+            un mensaje que hablaba de una ventana que nunca se abrió. */}
+        {acuse && !acuse.abrio && (
+          <a
+            href={acuse.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 inline-flex items-center justify-center rounded-2xl bg-[#0A2540] px-8 py-3 font-semibold text-white hover:bg-[#059669]"
+          >
+            Abrir WhatsApp con mi solicitud
+          </a>
+        )}
       </div>
     );
   }
@@ -332,7 +376,7 @@ export default function CotizacionForm({ preselectedProduct, slugOrigen, presele
           </label>
           <select id="rfq-producto" {...register('producto')} className={campo}>
             <option value="">Seleccione un producto…</option>
-            {products.map((p) => (
+            {opciones.map((p) => (
               <option key={p.slug} value={p.name}>{p.name}</option>
             ))}
           </select>
