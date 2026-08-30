@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { products, productFamilies } from '@/lib/products';
 import { comparableFamilies } from '@/lib/families';
 import { generateStaticParams } from '@/app/(es)/productos/familia/[slug]/comparar/page';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 import { SITE } from '@/lib/site';
 
 const ROOT = process.cwd();

@@ -7,7 +7,7 @@ import { applications } from '@/lib/applications';
 import { INDUSTRIAS } from '@/lib/industrias';
 import { projects, projectsPublicados } from '@/lib/projects';
 import { GET as llms } from '@/app/llms.txt/route';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 
 /**
  * SI NO ESTÁ DECLARADO, NO EXISTE.

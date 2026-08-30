@@ -17,6 +17,14 @@ import { Product, ProductFamily } from './types';
 //  3. No se reutilizan proyectos, logos ni certificados de la competencia.
 // -----------------------------------------------------------------------------
 
+/**
+ * Fecha del último cambio REAL del catálogo (alta, baja o edición de un
+ * producto o familia). Alimenta el lastmod del sitemap de productos: súbala
+ * cuando edite este archivo. Un lastmod «hoy» en cada deploy enseña a los
+ * rastreadores a ignorar el campo en todo el sitio.
+ */
+export const CATALOGO_ACTUALIZADO = "2026-08-24";
+
 export const products: Product[] = [
   // ===========================================================================
   // 1) ENVASES Y EMBALAJE INDUSTRIAL

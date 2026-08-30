@@ -7,7 +7,7 @@ import {
 } from '@/lib/informes';
 import { buildInformePdf } from '@/lib/doc-informe';
 import { generateStaticParams } from '@/app/(es)/informes/[slug]/page';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 import { SITE } from '@/lib/site';
 
 /**

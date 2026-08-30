@@ -21,7 +21,7 @@ import { familyContent, comparableFamilies } from '@/lib/families';
 import { terminos } from '@/lib/glosario';
 import { informes } from '@/lib/informes';
 import { generateStaticParams } from '@/app/(es)/novedades/[slug]/page';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 import { SITE } from '@/lib/site';
 
 /**

@@ -9,6 +9,7 @@ import ProductBuyBox from '@/components/ProductBuyBox';
 import ProductAvailability from '@/components/ProductAvailability';
 import ProductStructuredData from '@/components/ProductStructuredData';
 import { SITE } from '@/lib/site';
+import { descripcionDeTexto } from '@/lib/meta';
 import WhatsAppLink from '@/components/WhatsAppLink';
 import TrackView from '@/components/TrackView';
 import DatasheetButton from '@/components/DatasheetButton';
@@ -43,9 +44,11 @@ export async function generateMetadata({ params }: Props) {
   const ogTitle = `${product.name} — Plastilonas Peruanas SAC`;
   const ogImage = product.image ? `${SITE.url}${product.image}` : undefined;
   return {
-    title: product.name,
-    description: product.shortDescription,
-    keywords: [product.name, product.category, ...product.sector, 'Perú', 'proveedor', 'fabricante'],
+    // Plantilla de ficha de producto: «{Producto} a medida en Perú | Plastilonas
+    // Peruanas SAC». Va como `absolute` para no heredar además el sufijo del
+    // layout y terminar con la marca dos veces.
+    title: { absolute: `${product.name} a medida en Perú | Plastilonas Peruanas SAC` },
+    description: descripcionDeTexto(product.shortDescription),
     alternates: { canonical },
     openGraph: {
       title: ogTitle,

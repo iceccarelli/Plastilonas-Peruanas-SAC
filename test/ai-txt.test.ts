@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { GET as aiTxt } from '@/app/ai.txt/route';
 import { GET as llms } from '@/app/llms.txt/route';
 import robots from '@/app/robots';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 import { SITE, HORARIO } from '@/lib/site';
 import { products } from '@/lib/products';
 import { guides } from '@/lib/guides';

@@ -421,13 +421,12 @@ describe('integración con el resto del sitio', () => {
   const raiz = process.cwd();
 
   it('todas las calculadoras están en el sitemap', () => {
-    const src = readFileSync(join(raiz, 'app/sitemap.ts'), 'utf8');
-    expect(src).toMatch(/calculadoraRoutes/);
-    expect(src).toMatch(/\.\.\.calculadoraRoutes/);
+    const src = readFileSync(join(raiz, 'lib/sitemaps.ts'), 'utf8');
+    expect(src).toMatch(/calculadoras\.map/);
     // La fecha es la de revisión del método, no "hoy": declarar cambios
     // diarios en una fórmula que no cambia enseña al rastreador a desconfiar.
-    expect(src).toMatch(/new Date\(CALCULADORAS_ACTUALIZADO\)/);
-    expect(src).not.toMatch(/calculadoras\.map[\s\S]{0,200}lastModified: now/);
+    expect(src).toMatch(/d\(CALCULADORAS_ACTUALIZADO\)/);
+    expect(src).not.toMatch(/calculadoras\.map[\s\S]{0,200}lastModified: new Date\(\)/);
   });
 
   it('llms.txt declara la sección, el volcado y la regla de cita', () => {

@@ -13,7 +13,7 @@ import { solutions } from '@/lib/solutions';
 import { products } from '@/lib/products';
 import { terminos } from '@/lib/glosario';
 import { SITE } from '@/lib/site';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 
 /**
  * Un documento que no abre, o que promete algo que la fuente no dice, es peor

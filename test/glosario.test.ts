@@ -15,7 +15,7 @@ import { products } from '@/lib/products';
 import { articles } from '@/lib/articles';
 import { pillars } from '@/lib/framework';
 import { generateStaticParams } from '@/app/(es)/glosario/[slug]/page';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 import { SITE } from '@/lib/site';
 
 /**

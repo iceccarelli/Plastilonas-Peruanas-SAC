@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { products, productFamilies } from '@/lib/products';
 import { familyContent, resolveFamily, familyHrefByName } from '@/lib/families';
 import { articles } from '@/lib/articles';
-import sitemap from '@/app/sitemap';
+import sitemap from '@/lib/sitemaps';
 import { SITE } from '@/lib/site';
 
 describe('páginas de familia: cobertura y consistencia', () => {
