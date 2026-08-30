@@ -848,17 +848,13 @@
       "intencion": "comercial",
       "termino": "ventilación industrial",
       "variantes": [
-        "ventilación minera",
         "ductos de ventilación",
         "ducto de ventilación",
-        "ventilación de túneles",
-        "ventilación subterránea",
         "sistemas de ventilación industrial",
         "accesorios de ventilación"
       ],
       "erratas": [
         "ventilacion industrial peru",
-        "ventilacion minera peru",
         "ductos ventilacion minera"
       ],
       "preguntas": [
@@ -872,7 +868,8 @@
         "/calculadoras/caudal-ventilacion-mina",
         "/industria/mineria",
         "/aplicaciones/ventilacion-subterranea",
-        "/glosario/perdida-de-carga"
+        "/glosario/perdida-de-carga",
+        "/ventilacion-minera"
       ]
     },
     {
@@ -2277,6 +2274,86 @@
         "/contacto",
         "/nosotros",
         "/metodo"
+      ]
+    },
+    {
+      "id": "hub-ventilacion-minera",
+      "canonica": "/ventilacion-minera",
+      "intencion": "comercial",
+      "termino": "ventilación minera",
+      "variantes": [
+        "ventilación de minas",
+        "ventilación de túneles",
+        "ventilación subterránea",
+        "proveedores de ventilación minera",
+        "fabricante de mangas de ventilación en perú"
+      ],
+      "erratas": [
+        "ventilacion minera peru"
+      ],
+      "preguntas": [
+        "¿quién fabrica mangas de ventilación minera en el Perú?",
+        "¿qué datos necesito para cotizar ventilación de un túnel?"
+      ],
+      "apoyos": [
+        "/productos/mangas-ventilacion-minas-tuneles",
+        "/biblioteca/seleccion-mangas-ventilacion",
+        "/industria/mineria",
+        "/calculadoras/caudal-ventilacion-mina"
+      ]
+    },
+    {
+      "id": "hub-lonas-camiones",
+      "canonica": "/lonas-camiones",
+      "intencion": "comercial",
+      "termino": "lonas para camiones",
+      "variantes": [
+        "lonas y toldos para camión con instalación",
+        "fabricante de toldos para camiones",
+        "confección de lonas para camiones",
+        "lonas para flota de camiones",
+        "instalación de toldos para camión",
+        "siders y cobertores a medida"
+      ],
+      "erratas": [
+        "lonas para camiones peru",
+        "lonas camion"
+      ],
+      "preguntas": [
+        "¿quién fabrica e instala toldos para camiones en Lima?",
+        "¿qué medidas necesito para cotizar la lona de un camión?"
+      ],
+      "apoyos": [
+        "/productos/mantas-cobertores-toldos-camiones",
+        "/productos/siders-tolderas-camiones",
+        "/biblioteca/gramaje-lona-industrial",
+        "/industria/transporte-logistica"
+      ]
+    },
+    {
+      "id": "hub-big-bags",
+      "canonica": "/big-bags",
+      "intencion": "comercial",
+      "termino": "fábrica de big bags",
+      "variantes": [
+        "big bags a medida",
+        "confección de big bags en lima",
+        "big bags de 1 y 2 toneladas",
+        "big bags cortados y cosidos en lima",
+        "big bags factor de seguridad 5:1",
+        "big bags factor de seguridad 6:1"
+      ],
+      "erratas": [
+        "big bags a medida peru"
+      ],
+      "preguntas": [
+        "¿quién confecciona big bags en Lima?",
+        "¿qué necesito indicar para cotizar un lote de big bags?"
+      ],
+      "apoyos": [
+        "/productos/big-bags-bolsones-polipropileno",
+        "/biblioteca/especificacion-fibc",
+        "/calculadoras/big-bags-por-viaje"
       ]
     }
   ]

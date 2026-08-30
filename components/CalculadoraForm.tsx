@@ -227,16 +227,18 @@ function Formulario({ calc }: { calc: NonNullable<ReturnType<typeof calculadoraP
           >
             Revisar este resultado con un especialista
           </WhatsAppLink>
+          {/* El predimensionado viaja al formulario como nota: el comprador no
+              vuelve a teclear lo que la calculadora ya escribió. */}
           <Link
-            href="/cotizacion"
+            href={`/cotizacion?nota=${encodeURIComponent(resumenParaCotizar)}`}
             className="inline-flex items-center gap-2 rounded-full border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-800 hover:border-gray-400"
           >
-            Pedir cotización
+            Enviar este predimensionado a cotización
           </Link>
         </div>
         <p className="text-xs text-gray-500">
-          Nada de lo que escriba aquí sale de su navegador. El resumen solo viaja si usted pulsa el
-          botón de WhatsApp.
+          Nada de lo que escriba aquí sale de su navegador. El resumen solo viaja si usted pulsa
+          uno de los dos botones de arriba.
         </p>
       </div>
     </div>

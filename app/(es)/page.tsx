@@ -24,6 +24,7 @@ const FOTO_SERVICIO: Record<string, string> = {
 };
 import HeroImagen from '@/components/HeroImagen';
 import { novedades, tipoLabels } from '@/lib/novedades';
+import { cunas } from '@/lib/cunas';
 import SectionHeading from '@/components/SectionHeading';
 import MachineryGallery from '@/components/MachineryGallery';
 import { Reveal } from '@/components/Reveal';
@@ -74,6 +75,9 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 export default function Home() {
+  // Novedades de portada: SOLO briefs de comprador. El changelog de las
+  // superficies para agentes (/ai.txt, método editorial) vive en /novedades.
+  const novedadesComprador = novedades.filter((n) => n.audiencia !== 'operacion');
   const featuredProducts = [...products].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
   // Conteo REAL de soluciones por sector (se recalcula solo al editar el catálogo).
   const sectorStats = sectors
@@ -200,22 +204,27 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="py-14 md:py-16">
-            <Reveal>
-              <SectionHeading eyebrow="Registro fechado" title="Novedades" className="mb-8" action={<Link href="/novedades" className="hidden md:flex items-center gap-2 py-2 -my-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el registro <ArrowRight className="w-4 h-4" /></Link>} />
-            </Reveal>
-            <div className="grid md:grid-cols-3 gap-5">
-              {novedades.slice(0, 3).map((n, i) => (
-                <Reveal key={n.slug} delay={0.04 * i}>
-                  <Link href={`/novedades/${n.slug}`} className="group flex flex-col h-full bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-2xl p-6 transition-colors">
-                    <div className="font-mono text-[11px] tracking-wide text-gray-500 mb-3">{tipoLabels[n.tipo]} · {n.fecha}</div>
-                    <div className="font-semibold text-gray-900 leading-snug mb-2">{n.titulo}</div>
-                    <p className="text-sm text-gray-600 leading-relaxed mb-4">{n.resumen}</p>
-                    <ArrowRight className="w-4 h-4 mt-auto text-gray-400 group-hover:text-[#059669] group-hover:translate-x-1 transition-all" />
-                  </Link>
-                </Reveal>
-              ))}
-            </div>
+        </div>
+      </section>
+
+      {/* ===== 1c · LOS TRES FRENTES — la historia de la portada. El catálogo
+           completo sigue abajo; estas tres cuñas son la oferta con la que la
+           empresa quiere ser la respuesta por defecto. ===== */}
+      <section className="bg-white section-pad">
+        <div className="max-w-7xl mx-auto px-6">
+          <Reveal>
+            <SectionHeading eyebrow="Tres frentes, un fabricante" title="Lo que más nos piden, con página propia" className="mb-8" />
+          </Reveal>
+          <div className="grid md:grid-cols-3 gap-5">
+            {cunas.map((c, i) => (
+              <Reveal key={c.slug} delay={0.04 * i}>
+                <Link href={`/${c.slug}`} className="group flex flex-col h-full bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-2xl p-7 transition-colors">
+                  <div className="font-semibold text-lg text-[#0A2540] leading-snug mb-2 group-hover:text-[#059669]">{c.titulo}</div>
+                  <p className="text-sm text-gray-600 leading-relaxed mb-5">{c.descripcion}</p>
+                  <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-medium text-[#059669]">Ver especificación y cotizar <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></span>
+                </Link>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
@@ -241,6 +250,31 @@ export default function Home() {
           </Reveal>
           <Reveal delay={0.05}>
             <FeaturedDeck products={featuredProducts} />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ===== 2b · PROCESO — cómo se fabrica y qué servicios lo rodean ===== */}
+      <MachineryGallery />
+
+      {/* ===== 4 · SERVICIOS — explorador por pestañas (patrón AWS) ===== */}
+      <section className="bg-white section-pad">
+        <div className="max-w-7xl mx-auto px-6">
+          <Reveal>
+            <SectionHeading eyebrow="Más que fabricación" title="Servicios integrales, de principio a fin" className="mb-10" />
+          </Reveal>
+          <Reveal delay={0.05}>
+            <ServiceTabs
+              services={services.map((sv, i) => {
+                const icon = ['ruler', 'hardhat', 'ship', 'lightbulb'][i];
+                // Las tomas se resuelven AQUÍ, en el servidor, porque es el
+                // único sitio con acceso al disco. `tomasDe` devuelve la
+                // primera foto más las secundarias que existan de verdad, ya
+                // sin duplicados byte a byte.
+                const base = FOTO_SERVICIO[icon];
+                return { ...sv, icon, tomas: tomasDe(base) };
+              })}
+            />
           </Reveal>
         </div>
       </section>
@@ -273,28 +307,43 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CÓMO SE FABRICA — galería ilustrativa del proceso */}
-      <MachineryGallery />
-
-      {/* ===== 4 · SERVICIOS — explorador por pestañas (patrón AWS) ===== */}
+      {/* ===== 4 · NOVEDADES — solo briefs de comprador (el changelog de
+           /ai.txt y del método editorial vive en /novedades). ===== */}
       <section className="bg-white section-pad">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
-            <SectionHeading eyebrow="Más que fabricación" title="Servicios integrales, de principio a fin" className="mb-10" />
+            <SectionHeading eyebrow="Registro fechado" title="Novedades" className="mb-8" action={<Link href="/novedades" className="hidden md:flex items-center gap-2 py-2 -my-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el registro <ArrowRight className="w-4 h-4" /></Link>} />
           </Reveal>
-          <Reveal delay={0.05}>
-            <ServiceTabs
-              services={services.map((sv, i) => {
-                const icon = ['ruler', 'hardhat', 'ship', 'lightbulb'][i];
-                // Las tomas se resuelven AQUÍ, en el servidor, porque es el
-                // único sitio con acceso al disco. `tomasDe` devuelve la
-                // primera foto más las secundarias que existan de verdad, ya
-                // sin duplicados byte a byte.
-                const base = FOTO_SERVICIO[icon];
-                return { ...sv, icon, tomas: tomasDe(base) };
-              })}
-            />
-          </Reveal>
+          <div className="grid md:grid-cols-3 gap-5">
+            {novedadesComprador.slice(0, 3).map((n, i) => (
+              <Reveal key={n.slug} delay={0.04 * i}>
+                <Link href={`/novedades/${n.slug}`} className="group flex flex-col h-full bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-2xl p-6 transition-colors">
+                  <div className="font-mono text-[11px] tracking-wide text-gray-500 mb-3">{tipoLabels[n.tipo]} · {n.fecha}</div>
+                  <div className="font-semibold text-gray-900 leading-snug mb-2">{n.titulo}</div>
+                  <p className="text-sm text-gray-600 leading-relaxed mb-4">{n.resumen}</p>
+                  <ArrowRight className="w-4 h-4 mt-auto text-gray-400 group-hover:text-[#059669] group-hover:translate-x-1 transition-all" />
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 5 · FRANJA DE CONFIANZA — el cierre: identidad verificable ===== */}
+      <section className="bg-gray-50 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="max-w-2xl">
+            <div className="font-semibold text-[#0A2540] mb-1">Lo que este sitio afirma se puede verificar</div>
+            <p className="text-sm text-gray-600">
+              Empresa registrada en SUNAT, planta en Chorrillos y una regla editorial: ninguna
+              cifra sin fuente, ningún proyecto sin autorización. El RUC y el método completo
+              están publicados.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3 shrink-0">
+            <Link href="/confianza" className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-[#0A2540] hover:border-[#059669] transition-colors">Centro de confianza</Link>
+            <Link href="/metodo" className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-[#0A2540] hover:border-[#059669] transition-colors">Cómo se publica este sitio</Link>
+          </div>
         </div>
       </section>
 

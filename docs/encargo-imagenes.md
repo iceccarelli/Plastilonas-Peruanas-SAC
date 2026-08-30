@@ -75,113 +75,69 @@ como `public/images/familias/geosinteticos.jpg`.
 
 ## Encabezados de guía
 
-5 pendientes de 15.
+3 pendientes de 18.
 
-### 1. `/images/recursos/de-la-resina-a-la-rafia-cadena-productiva-textil-industrial.webp`
+### 1. `/images/recursos/rfq-manga-ventilacion-minera-datos-completos.webp`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/recursos/de-la-resina-a-la-rafia-cadena-productiva-textil-industrial.webp` |
+| **Archivo** | `public/images/recursos/rfq-manga-ventilacion-minera-datos-completos.webp` |
 | **Tamaño** | 1920 × 1080 px |
 | **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/de-la-resina-a-la-rafia-cadena-productiva-textil-industrial |
-| **Texto alternativo** | Apertura de la guía: De la resina a la rafia: la cadena productiva del textil industrial, etapa por etapa |
+| **Dónde se usa** | Encabezado de /recursos/rfq-manga-ventilacion-minera-datos-completos |
+| **Texto alternativo** | Apertura de la guía: RFQ de mangas de ventilación minera: los datos que convierten una consulta en una cotización |
 
 **Prompt:**
 
 ```
 Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
 
-TEMA: De la resina a la rafia: la cadena productiva del textil industrial, etapa por etapa
-DE QUÉ TRATA: El recorrido completo: gránulo de polipropileno, extrusión de cinta, estiraje, telar circular, laminado y confección. Qué gobierna la calidad en cada etapa.
+TEMA: RFQ de mangas de ventilación minera: los datos que convierten una consulta en una cotización
+DE QUÉ TRATA: Qué debe traer un pedido de cotización de mangas de ventilación para mina o túnel: diámetro, tramos, régimen, ambiente y accesorios.
 ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
 ```
 
 ---
 
-### 2. `/images/recursos/ecosistema-plastico-industrial-peru-quien-fabrica-quien-compra.webp`
+### 2. `/images/recursos/fibc-factor-seguridad-5-1-vs-6-1.webp`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/recursos/ecosistema-plastico-industrial-peru-quien-fabrica-quien-compra.webp` |
+| **Archivo** | `public/images/recursos/fibc-factor-seguridad-5-1-vs-6-1.webp` |
 | **Tamaño** | 1920 × 1080 px |
 | **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/ecosistema-plastico-industrial-peru-quien-fabrica-quien-compra |
-| **Texto alternativo** | Apertura de la guía: El ecosistema del plástico industrial en el Perú: quién fabrica, quién importa y quién compra |
+| **Dónde se usa** | Encabezado de /recursos/fibc-factor-seguridad-5-1-vs-6-1 |
+| **Texto alternativo** | Apertura de la guía: Factor de seguridad 5:1 vs 6:1 en big bags: qué significa y cuál pedir |
 
 **Prompt:**
 
 ```
 Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
 
-TEMA: El ecosistema del plástico industrial en el Perú: quién fabrica, quién importa y quién compra
-DE QUÉ TRATA: Cómo se estructura el rubro: resina importada, transformación local, importación directa de líneas terminadas, y los sectores que demandan cada cosa.
+TEMA: Factor de seguridad 5:1 vs 6:1 en big bags: qué significa y cuál pedir
+DE QUÉ TRATA: El factor de seguridad de un FIBC no es un número de catálogo: 5:1 corresponde a uso único y 6:1 a bolsón multiuso. Cómo decidirlo en el RFQ.
 ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
 ```
 
 ---
 
-### 3. `/images/recursos/polipropileno-polietileno-pvc-que-material-para-que-trabajo.webp`
+### 3. `/images/recursos/medidas-lona-toldo-sider-camion-rfq.webp`
 
 | | |
 |---|---|
-| **Archivo** | `public/images/recursos/polipropileno-polietileno-pvc-que-material-para-que-trabajo.webp` |
+| **Archivo** | `public/images/recursos/medidas-lona-toldo-sider-camion-rfq.webp` |
 | **Tamaño** | 1920 × 1080 px |
 | **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/polipropileno-polietileno-pvc-que-material-para-que-trabajo |
-| **Texto alternativo** | Apertura de la guía: Polipropileno, polietileno o PVC: qué material para qué trabajo |
+| **Dónde se usa** | Encabezado de /recursos/medidas-lona-toldo-sider-camion-rfq |
+| **Texto alternativo** | Apertura de la guía: Cómo tomar las medidas de una lona, toldo o sider de camión para cotizar sin errores |
 
 **Prompt:**
 
 ```
 Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
 
-TEMA: Polipropileno, polietileno o PVC: qué material para qué trabajo
-DE QUÉ TRATA: Los tres polímeros del textil industrial comparados por lo que decide una compra: comportamiento mecánico, química, soldadura, sol de altura y fin de vida.
-ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
-```
-
----
-
-### 4. `/images/recursos/vida-util-degradacion-uv-reciclaje-textil-industrial.webp`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/recursos/vida-util-degradacion-uv-reciclaje-textil-industrial.webp` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/vida-util-degradacion-uv-reciclaje-textil-industrial |
-| **Texto alternativo** | Apertura de la guía: Vida útil, sol de altura y fin de vida: lo que le pasa al textil industrial con los años |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
-
-TEMA: Vida útil, sol de altura y fin de vida: lo que le pasa al textil industrial con los años
-DE QUÉ TRATA: Cómo degrada el sol a los plásticos industriales, qué señales anuncian el fin de la vida útil, qué se recicla de verdad y qué no — sin promesas verdes.
-ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
-```
-
----
-
-### 5. `/images/recursos/comprar-textil-industrial-peru-sudamerica-incoterms-homologacion.webp`
-
-| | |
-|---|---|
-| **Archivo** | `public/images/recursos/comprar-textil-industrial-peru-sudamerica-incoterms-homologacion.webp` |
-| **Tamaño** | 1920 × 1080 px |
-| **Tipo** | ilustracion |
-| **Dónde se usa** | Encabezado de /recursos/comprar-textil-industrial-peru-sudamerica-incoterms-homologacion |
-| **Texto alternativo** | Apertura de la guía: Comprar textil industrial desde Sudamérica: homologación, Incoterms y el pedido que sí llega |
-
-**Prompt:**
-
-```
-Fotografía industrial documental, realista. Luz natural de día, sin flash ni destellos. Encuadre limpio y ordenado, profundidad de campo moderada. Gradación de color neutra y sobria: sin saturación exagerada, sin HDR, sin brillos de catálogo publicitario. Contexto peruano creíble. Sin personas identificables ni rostros. Sin logotipos, marcas ni texto legible de ningún tipo. Sin marcas de agua. Proporción 16:9 horizontal.
-
-TEMA: Comprar textil industrial desde Sudamérica: homologación, Incoterms y el pedido que sí llega
-DE QUÉ TRATA: La ruta completa para un comprador de la región andina: verificar al proveedor peruano, especificar sin ambigüedad, elegir el Incoterm y documentar el lote.
+TEMA: Cómo tomar las medidas de una lona, toldo o sider de camión para cotizar sin errores
+DE QUÉ TRATA: Largo, ancho, alto útil y sistema de tensado: las medidas que un RFQ de lona o sider de camión debe traer, y los errores de medición que cuestan.
 ENCUADRE: la situación de obra concreta que la guía enseña a resolver, en el momento en que la decisión técnica se toma. Nada de gente posando ni de oficinas.
 ```
 

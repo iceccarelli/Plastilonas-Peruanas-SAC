@@ -12,6 +12,7 @@ import ImagenContenido from '@/components/ImagenContenido';
 import { calculadorasQueEnlazan } from '@/lib/calculadoras';
 import { ranurasGuia } from '@/lib/imagenes';
 import TrackView from '@/components/TrackView';
+import Byline from '@/components/Byline';
 import {
   articleSchema,
   breadcrumbSchema,
@@ -166,9 +167,12 @@ export default async function ArticlePage({ params }: Props) {
         <time dateTime={a.dateModified}>Actualizado {a.dateModified}</time>
       </div>
 
-      <h1 className="mb-6 text-4xl font-semibold leading-tight tracking-tight text-[#0A2540]">
+      <h1 className="mb-3 text-4xl font-semibold leading-tight tracking-tight text-[#0A2540]">
         {a.title}
       </h1>
+
+      {/* Firma editorial: del área, nunca de una persona inventada. */}
+      <div className="mb-6"><Byline autor={a.byline} /></div>
 
       {imagen && <ImagenContenido ranura={imagen} prioridad className="mb-10" />}
 

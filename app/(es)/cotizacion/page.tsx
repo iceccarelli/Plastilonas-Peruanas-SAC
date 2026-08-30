@@ -24,7 +24,7 @@ import DatosParaCotizar from '@/components/DatosParaCotizar';
 export default async function CotizacionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ producto?: string; comparativa?: string }>;
+  searchParams: Promise<{ producto?: string; comparativa?: string; nota?: string }>;
 }) {
   const params = await searchParams;
   const productoParam = params.producto || undefined;
@@ -42,11 +42,20 @@ export default async function CotizacionPage({
     porSlug?.slug ??
     products.find((p) => p.name === productoParam)?.slug ??
     comparativa[0]?.slug;
-  const preselectedMessage = comparativa.length
-    ? `Estoy comparando estas alternativas y necesito una cotización: ${comparativa
-        .map((p) => p.name)
-        .join('; ')}. `
-    : undefined;
+  // `nota` llega de las calculadoras («Enviar este predimensionado a
+  // cotización»): el resumen del cálculo prellenado en la descripción.
+  const nota = (params.nota ?? '').slice(0, 1500) || undefined;
+  const preselectedMessage =
+    [
+      comparativa.length
+        ? `Estoy comparando estas alternativas y necesito una cotización: ${comparativa
+            .map((p) => p.name)
+            .join('; ')}. `
+        : '',
+      nota ?? '',
+    ]
+      .filter(Boolean)
+      .join('\n') || undefined;
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-16">

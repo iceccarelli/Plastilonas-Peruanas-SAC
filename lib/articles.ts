@@ -78,6 +78,12 @@ export interface Article {
   /** Slugs de data/ciudades.json. */
   relatedCities?: string[];
   sources: ArticleSource[];
+  /**
+   * Firma editorial visible. Sin nombres inventados: la autoría es del área,
+   * no de una persona ficticia. Si se omite, components/Byline.tsx usa la
+   * firma por defecto «Área técnica · Plastilonas Peruanas SAC».
+   */
+  byline?: string;
 }
 
 export const articles: Article[] = [
@@ -1985,6 +1991,320 @@ export const articles: Article[] = [
         label: 'APM Terminals Callao — requisitos documentales para bolsones',
         url: 'https://www.apmterminals.com/es/callao/customer-zone/news-and-alerts/2022/28112022-recordatorio-estandarizacion-de-bolsones',
         supports: 'Un ejemplo real de exigencia normativa del punto de tránsito que debe verificarse antes de producir.',
+      },
+    ],
+  },
+
+  // ===========================================================================
+  // Serie «guía RFQ» (Etapa 3): un artículo por cuña comercial. Cada uno
+  // enseña a armar el pedido de cotización completo — el contenido que un
+  // comprador guarda y reenvía, que es la forma honesta de ser recomendable.
+  // ===========================================================================
+  {
+    slug: 'rfq-manga-ventilacion-minera-datos-completos',
+    title: 'RFQ de mangas de ventilación minera: los datos que convierten una consulta en una cotización',
+    metaTitle: 'RFQ de mangas de ventilación: qué datos enviar',
+    description:
+      'Qué debe traer un pedido de cotización de mangas de ventilación para mina o túnel: diámetro, tramos, régimen, ambiente y accesorios.',
+    datePublished: '2026-08-30',
+    dateModified: '2026-08-30',
+    readingMinutes: 8,
+    category: 'Ventilación Industrial',
+    sectors: ['Minería', 'Construcción'],
+    byline: 'Área técnica · Plastilonas Peruanas SAC',
+    keyTakeaways: [
+      'Un RFQ de ventilación con diámetro, largo de tramo, régimen y ambiente se responde con cotización; uno con solo el diámetro se responde con preguntas.',
+      'El régimen —impulsión o extracción— cambia la construcción de la manga: una manga aspirante necesita refuerzo espiral para no colapsar.',
+      'Los accesorios de unión y suspensión pertenecen al mismo RFQ: un tramo sin uniones es un tramo incompleto en el frente.',
+      'La memoria de ventilación de la operación, si existe, viaja adjunta: el proveedor cotiza contra ella, no la reemplaza.',
+    ],
+    intro: [
+      'La consulta más frecuente de ventilación llega con un solo dato: «necesito manga de 800». Con eso no se puede cotizar: falta saber cuánto tramo, en qué régimen trabajará y en qué ambiente. Cada dato que falta es una ida y vuelta con el área comercial, y cada ida y vuelta es un día menos de ventilación en el frente.',
+      'Este artículo es la lista completa: qué datos lleva un RFQ de mangas de ventilación, por qué cada uno cambia la especificación, y qué puede dejar fuera sin perder precisión. Sirve igual si termina comprando a otro proveedor.',
+    ],
+    sections: [
+      {
+        heading: 'Los cuatro datos sin los cuales no hay cotización',
+        body: [
+          'El diámetro interior define el área de paso y, con el caudal, la velocidad del aire. El largo de cada tramo define la confección y el manejo en interior mina. El régimen —impelente o aspirante— define la construcción: la impulsión infla la manga y la mantiene abierta; la extracción la colapsa, así que exige refuerzo espiral. El ambiente —humedad, abrasión de la roca, requisito antiestático de la operación— define el material y el acabado.',
+        ],
+        list: [
+          'Diámetro interior, en milímetros, por tramo si varía a lo largo de la labor.',
+          'Largo de cada tramo y metraje total, con el sobrante de empalme que use la operación.',
+          'Régimen: impulsión (impelente) o extracción (aspirante, con refuerzo espiral).',
+          'Ambiente: humedad, abrasión, exigencia antiestática del reglamento interno.',
+        ],
+      },
+      {
+        heading: 'Los datos que afinan el precio y el plazo',
+        body: [
+          'Con los cuatro datos anteriores la cotización existe. Los siguientes la vuelven exacta: el caudal de diseño si hay memoria de ventilación; el tipo de unión que ya usa la mina, para que el tramo nuevo empalme con el existente; los accesorios de suspensión —sogas, ganchos, abrazaderas—; y la altitud y vía de acceso del sitio, que definen el flete y el embalaje.',
+        ],
+      },
+      {
+        heading: 'Qué NO pedirle al proveedor de la manga',
+        body: [
+          'La memoria de cálculo de ventilación pertenece al área de ventilación de la operación y a su consultor: el fabricante de la manga cotiza contra ella, no la sustituye. Lo mismo con la certificación de cumplimiento del reglamento de seguridad minera: el reglamento obliga a la operación, y el proveedor responde con la ficha técnica y la documentación del material, que es lo que el expediente puede citar.',
+        ],
+        callout:
+          'Desconfíe del proveedor que «certifica» el cumplimiento normativo de su mina sin haber visto la memoria de ventilación: está firmando algo que no puede saber.',
+      },
+      {
+        heading: 'El RFQ completo, listo para copiar',
+        steps: [
+          'Indique diámetro interior y largo de cada tramo, con el metraje total.',
+          'Declare el régimen: impulsión o extracción (y si necesita refuerzo espiral).',
+          'Describa el ambiente: humedad, abrasión, requisito antiestático si aplica.',
+          'Adjunte la memoria de ventilación o el caudal de diseño, si existen.',
+          'Liste accesorios: uniones, abrazaderas, sogas de suspensión.',
+          'Cierre con cantidad, sitio de entrega y fecha en que lo necesita.',
+        ],
+      },
+    ],
+    howTo: {
+      name: 'Cómo armar el RFQ de una manga de ventilación',
+      steps: [
+        { name: 'Mida la labor', text: 'Anote el diámetro interior requerido y el largo de cada tramo, con el metraje total de la labor.' },
+        { name: 'Defina el régimen', text: 'Indique si la manga trabajará en impulsión o extracción; la extracción exige refuerzo espiral.' },
+        { name: 'Describa el ambiente', text: 'Humedad, abrasión y requisito antiestático del reglamento interno de la operación.' },
+        { name: 'Adjunte la evidencia', text: 'Memoria de ventilación o caudal de diseño si existen; el proveedor cotiza contra ese expediente.' },
+        { name: 'Complete la logística', text: 'Cantidad, accesorios de unión y suspensión, sitio de entrega y fecha requerida.' },
+      ],
+    },
+    faqs: [
+      {
+        q: '¿Qué pasa si solo tengo el diámetro?',
+        a: 'Se puede abrir la conversación, pero no cerrar un precio: el largo de tramo, el régimen y el ambiente cambian el material y la confección. Espere preguntas antes que números.',
+      },
+      {
+        q: '¿La manga impelente y la aspirante son la misma?',
+        a: 'No. La impulsión mantiene la manga inflada; la extracción la colapsa, por lo que la manga aspirante lleva refuerzo espiral. Especificar el régimen equivocado compra el producto equivocado.',
+      },
+      {
+        q: '¿Debo pedir los accesorios en el mismo RFQ?',
+        a: 'Sí. Uniones, abrazaderas y sogas de suspensión completan el tramo; pedirlos aparte arriesga llegar al frente con la manga y sin cómo colgarla.',
+      },
+      {
+        q: '¿El proveedor certifica que cumplo el reglamento de seguridad minera?',
+        a: 'No puede: el reglamento obliga a la operación. El proveedor entrega ficha técnica y documentación del material para su expediente.',
+      },
+    ],
+    relatedProducts: ['mangas-ventilacion-minas-tuneles', 'accesorios-instalacion'],
+    sources: [
+      {
+        label: 'OSINERGMIN — D.S. 024-2016-EM, Reglamento de Seguridad y Salud Ocupacional en Minería',
+        url: 'https://www.gob.pe/institucion/osinergmin/normas-legales/741887-024-2016-em',
+        supports: 'La obligación normativa de ventilación recae en el titular de la operación minera, no en el proveedor del ducto.',
+      },
+      {
+        label: 'Revista Seguridad Minera — ventilación minera: recomendaciones y reglamento',
+        url: 'https://revistaseguridadminera.com/operaciones-mineras/ventilacion-minera-7-recomendaciones-y-reglamento-de-seguridad/',
+        supports: 'El papel del caudal de diseño y del estado de las mangas en el desempeño real del circuito de ventilación.',
+      },
+    ],
+  },
+  {
+    slug: 'fibc-factor-seguridad-5-1-vs-6-1',
+    title: 'Factor de seguridad 5:1 vs 6:1 en big bags: qué significa y cuál pedir',
+    metaTitle: 'Big bags: factor de seguridad 5:1 vs 6:1',
+    description:
+      'El factor de seguridad de un FIBC no es un número de catálogo: 5:1 corresponde a uso único y 6:1 a bolsón multiuso. Cómo decidirlo en el RFQ.',
+    datePublished: '2026-08-30',
+    dateModified: '2026-08-30',
+    readingMinutes: 8,
+    category: 'Envases y Embalaje',
+    sectors: ['Minería', 'Agroindustria', 'Construcción'],
+    byline: 'Área técnica · Plastilonas Peruanas SAC',
+    keyTakeaways: [
+      'El factor de seguridad (SF) es la relación entre la carga de rotura del bolsón y su carga de trabajo: un FIBC 5:1 de 1 000 kg debe resistir 5 000 kg en ensayo.',
+      'La práctica normativa asocia 5:1 al bolsón de un solo uso y 6:1 al bolsón reutilizable; reutilizar un 5:1 traslada el riesgo al izaje.',
+      'El SF no sustituye al protocolo de izaje: un 6:1 izado de una sola asa o con carga descentrada falla igual.',
+      'En el RFQ, el SF se decide junto con la capacidad, el tipo de boca y descarga y si la carga exige liner interior.',
+    ],
+    intro: [
+      'En las fichas de big bags conviven dos cifras que parecen intercambiables: 5:1 y 6:1. No lo son. El factor de seguridad dice cuántas veces la carga de trabajo debe resistir el tejido en ensayo de rotura, y la diferencia entre ambos números es la diferencia entre un envase de un solo viaje y uno diseñado para reutilizarse.',
+      'Elegir mal en cualquiera de las dos direcciones cuesta: pedir 6:1 para un despacho de un solo viaje encarece el lote sin ganar seguridad; reutilizar bolsones 5:1 porque «se ven bien» traslada el riesgo a la maniobra de izaje, que es donde un FIBC falla con consecuencias.',
+    ],
+    sections: [
+      {
+        heading: 'Qué mide exactamente el factor de seguridad',
+        body: [
+          'El SF relaciona la carga de rotura con la carga de trabajo segura (SWL). Un bolsón de SWL 1 000 kg con SF 5:1 debe soportar 5 000 kg en el ensayo cíclico y de rotura; con SF 6:1, 6 000 kg. El margen no existe para cargar de más: existe para absorber el desgaste del tejido, las asimetrías del izaje real y la degradación UV entre llenado y vaciado.',
+        ],
+      },
+      {
+        heading: '5:1 o 6:1: la decisión en una tabla',
+        table: {
+          headers: ['Criterio', 'FIBC 5:1', 'FIBC 6:1'],
+          rows: [
+            ['Uso previsto', 'Un solo viaje (single trip)', 'Multiuso, con inspección entre ciclos'],
+            ['Costo relativo del lote', 'Menor', 'Mayor (más tejido y confección)'],
+            ['Reutilización', 'No prevista por diseño', 'Prevista, con protocolo de inspección'],
+            ['Caso típico', 'Despacho de concentrado o exportación', 'Circuito interno que llena y vacía el mismo envase'],
+          ],
+        },
+        body: [
+          'La regla corta: si el bolsón hace un viaje y se retira, 5:1; si vuelve a llenarse, 6:1 con inspección documentada entre ciclos. La decisión pertenece al protocolo de la operación, no al catálogo del proveedor.',
+        ],
+      },
+      {
+        heading: 'Lo que el factor de seguridad no arregla',
+        body: [
+          'El SF supone un izaje correcto: las asas verticales, la carga centrada, el equipo con los puntos de toma que el bolsón trae. Izar un 6:1 de una sola asa, arrastrarlo cargado o exponerlo meses al sol de altura antes del izaje anula el margen que se pagó. El factor de seguridad es una propiedad del envase; la seguridad del izaje es una propiedad de la maniobra.',
+        ],
+        callout:
+          'Error frecuente: comprar 6:1 «por seguridad» para uso único, y reutilizarlo después precisamente porque era 6:1 — sin protocolo de inspección. El número correcto sin el protocolo no protege nada.',
+      },
+      {
+        heading: 'Cómo pedirlo en el RFQ',
+        steps: [
+          'Declare la capacidad (1 t o 2 t) y la densidad del material si la conoce.',
+          'Diga si el bolsón hace un viaje o se reutiliza: eso decide 5:1 o 6:1.',
+          'Especifique boca y descarga: faldón, boca abierta, válvula, liner interior.',
+          'Indique las medidas o el estándar que su operación ya usa (p. ej. 90×90×90 cm).',
+          'Cierre con cantidad del lote, ciudad de entrega y fecha requerida.',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: '¿Puedo reutilizar un big bag 5:1 si se ve en buen estado?',
+        a: 'El diseño de un 5:1 no prevé la reutilización: el margen se calculó para un ciclo. Si su circuito reutiliza envases, la especificación correcta es 6:1 con inspección documentada entre usos.',
+      },
+      {
+        q: '¿El 6:1 aguanta más carga que el 5:1?',
+        a: 'No es su propósito. Ambos se especifican para la misma carga de trabajo; el 6:1 reserva más margen de rotura para sobrevivir varios ciclos. La carga de trabajo no debe superarse en ningún caso.',
+      },
+      {
+        q: '¿Quién decide el factor de seguridad: el proveedor o el comprador?',
+        a: 'El comprador, porque depende de cómo usa el envase su operación. El proveedor confecciona contra esa decisión y entrega la documentación del tejido y del lote.',
+      },
+      {
+        q: '¿El factor de seguridad viene certificado?',
+        a: 'La trazabilidad honesta es la del ensayo del tejido y la documentación del lote, que se entregan en la cotización. Un número impreso sin documentación detrás no es una certificación.',
+      },
+    ],
+    relatedProducts: ['big-bags-bolsones-polipropileno', 'sacos-polytarp-embarque-granel'],
+    sources: [
+      {
+        label: 'ISO 21898 — Packaging: Flexible intermediate bulk containers (FIBCs) for non-dangerous goods',
+        url: 'https://www.iso.org/standard/35750.html',
+        supports: 'La definición del ensayo del FIBC y la asociación entre factor de seguridad y uso único o multiuso.',
+      },
+      {
+        label: 'APM Terminals Callao — estandarización de bolsones para embarque',
+        url: 'https://www.apmterminals.com/es/callao/customer-zone/news-and-alerts/2022/28112022-recordatorio-estandarizacion-de-bolsones',
+        supports: 'Un punto de tránsito real que exige especificación estandarizada del bolsón antes del embarque.',
+      },
+    ],
+  },
+  {
+    slug: 'medidas-lona-toldo-sider-camion-rfq',
+    title: 'Cómo tomar las medidas de una lona, toldo o sider de camión para cotizar sin errores',
+    metaTitle: 'Medidas de lona y sider de camión para cotizar',
+    description:
+      'Largo, ancho, alto útil y sistema de tensado: las medidas que un RFQ de lona o sider de camión debe traer, y los errores de medición que cuestan.',
+    datePublished: '2026-08-30',
+    dateModified: '2026-08-30',
+    readingMinutes: 9,
+    category: 'Lonas y Cobertores',
+    sectors: ['Transporte y Logística', 'Minería', 'Agroindustria'],
+    byline: 'Área técnica · Plastilonas Peruanas SAC',
+    keyTakeaways: [
+      'La lona se cotiza contra la carrocería real, no contra el modelo del camión: dos unidades del mismo modelo pueden medir distinto tras años de trabajo.',
+      'Las tres medidas base son largo, ancho y alto útil de la carrocería; el sistema (cobertor simple, toldo con arcos, sider) decide qué medidas adicionales hacen falta.',
+      'El traslape y el faldón no los estima el comprador: salen del sistema de sujeción, y por eso el RFQ debe decir cómo se amarra hoy la carga.',
+      'Para flotas conviene medir una unidad de referencia y declarar cuántas repiten el plano.',
+    ],
+    intro: [
+      'El error más caro en lonas de camión no es el gramaje: es la medida. Una lona corta no cubre; una excesiva embolsa aire en ruta, golpea y se rasga por donde flamea. Y la medida correcta no está en el catálogo del fabricante del camión, sino en la carrocería concreta, con sus barandas, arcos y ganchos reales.',
+      'Esta guía explica qué medir para cada sistema —cobertor simple, toldo con arcos, sider— y cómo declarar el resultado en el RFQ para que la primera respuesta sea una cotización con ficha técnica.',
+    ],
+    sections: [
+      {
+        heading: 'Las tres medidas que todo RFQ lleva',
+        list: [
+          'Largo útil de la carrocería, de cara interna a cara interna.',
+          'Ancho útil, medido en la parte superior de las barandas.',
+          'Alto: de la base de la baranda al punto más alto que la carga o los arcos alcanzan.',
+        ],
+        body: [
+          'Con esas tres medidas y el tipo de carga, el confeccionista calcula el desarrollo de la pieza: cuánto material cae por los costados, cuánto traslapa en la trasera y dónde se refuerza. Declarar también cómo se amarra hoy la carga —ganchos, sogas, ratchets, riel— evita que la lona llegue con los ojalillos donde el camión no tiene puntos de anclaje.',
+        ],
+      },
+      {
+        heading: 'Cobertor simple, toldo con arcos o sider: qué cambia en la medición',
+        table: {
+          headers: ['Sistema', 'Medidas adicionales', 'Dato crítico'],
+          rows: [
+            ['Cobertor simple (manta)', 'Caída lateral deseada y traslape trasero', 'Puntos de anclaje existentes'],
+            ['Toldo con arcos', 'Cantidad, separación y flecha (altura) de los arcos', 'Perfil del arco: la lona copia esa curva'],
+            ['Sider (cortina lateral)', 'Altura de baranda a riel y largo por paño', 'Sistema de riel y tensores del semirremolque'],
+          ],
+        },
+      },
+      {
+        heading: 'Los cuatro errores de medición que más lonas arruinan',
+        list: [
+          'Medir sobre la lona vieja: la pieza gastada está estirada o encogida; se mide la carrocería.',
+          'Ignorar la flecha del arco: un toldo medido «plano» queda corto en cuanto sube la curva.',
+          'Olvidar el traslape trasero: la compuerta queda descubierta y la carga expuesta.',
+          'Confundir alto de baranda con alto de carga: la lona debe cubrir lo que viaja, no solo la carrocería vacía.',
+        ],
+        callout:
+          'Si existe el plano de la carrocería o del carrocero, adjúntelo al RFQ: reemplaza media docena de medidas y elimina la ambigüedad de dónde se midió.',
+      },
+      {
+        heading: 'El RFQ completo para una unidad o una flota',
+        steps: [
+          'Mida largo, ancho y alto útil de la carrocería de referencia.',
+          'Declare el sistema: cobertor simple, toldo con arcos (con su separación y flecha) o sider.',
+          'Describa el tipo de carga y cómo se amarra hoy (ganchos, riel, ratchets).',
+          'Adjunte plano o fotos de la carrocería si existen.',
+          'Indique cuántas unidades repiten el plano, la ciudad de entrega o instalación y la fecha.',
+        ],
+      },
+    ],
+    howTo: {
+      name: 'Cómo medir una carrocería para cotizar su lona o sider',
+      steps: [
+        { name: 'Mida la carrocería, no la lona vieja', text: 'Tome largo y ancho útiles de cara interna a cara interna, sobre la baranda.' },
+        { name: 'Capture el alto real', text: 'De la base de la baranda al punto más alto de la carga o del arco, incluida la flecha de la curva.' },
+        { name: 'Registre el sistema de sujeción', text: 'Ganchos, sogas, ratchets o riel: define ojalillos, faldón y refuerzos de la pieza.' },
+        { name: 'Documente con fotos o plano', text: 'Una foto por costado y la trasera, o el plano del carrocero si existe.' },
+        { name: 'Declare la flota', text: 'Cuántas unidades repiten el plano de la unidad medida, con ciudad y fecha de entrega.' },
+      ],
+    },
+    faqs: [
+      {
+        q: '¿Puedo mandar las medidas de la lona que ya tengo?',
+        a: 'Como referencia sirve, pero la pieza gastada está deformada. La medida que gobierna es la de la carrocería; la lona vieja se usa para confirmar el sistema de sujeción.',
+      },
+      {
+        q: '¿Cuánto traslape debo pedir?',
+        a: 'No lo estime: el traslape y la caída salen del sistema de sujeción y del uso. Declare cómo amarra la carga y el desarrollo lo calcula la confección.',
+      },
+      {
+        q: '¿Sirve el mismo plano para toda mi flota?',
+        a: 'Si las carrocerías son del mismo carrocero y no han sido modificadas, sí: se mide una unidad de referencia y se declara cuántas repiten. Ante duda, se verifican las unidades más antiguas.',
+      },
+      {
+        q: '¿Qué pasa con el transporte de materiales peligrosos?',
+        a: 'El reglamento de transporte de materiales y residuos peligrosos impone condiciones a la unidad y su cobertura; su área de operaciones debe declararlo en el RFQ para que la especificación lo considere.',
+      },
+    ],
+    relatedProducts: ['mantas-cobertores-toldos-camiones', 'siders-tolderas-camiones', 'lona-plastificada-rafia-polytarp'],
+    relatedCities: ['lima', 'arequipa', 'trujillo'],
+    sources: [
+      {
+        label: 'MTC — D.S. 021-2008-MTC, Reglamento Nacional de Transporte Terrestre de Materiales y Residuos Peligrosos',
+        url: 'https://gestop.pe/ds-021-2008-mtc-aprueban-el-reglamento-nacional-de-transporte-terrestre-de-materiales-y-residuos-peligrosos/',
+        supports: 'La existencia de condiciones normativas sobre la unidad y su cobertura cuando la carga es material peligroso.',
+      },
+      {
+        label: 'RNE E.020 — cargas (referencia de criterio estructural)',
+        url: 'https://cdn-web.construccion.org/normas/rne2012/rne2006/files/titulo3/02_E/RNE2006_E_020.pdf',
+        supports: 'El criterio general de que la succión y la presión del viento sobre superficies flexibles dependen de la geometría expuesta.',
       },
     ],
   },
