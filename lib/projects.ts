@@ -34,6 +34,15 @@ export interface Project {
   verificado: boolean;
 }
 
+/**
+ * Nombre del encargo (Etapa 6): el modelo de ficha de proyecto. Es el mismo
+ * `Project` — el alias existe para que el vocabulario del código coincida con
+ * el del plan («ProjectFicha sobre []») sin duplicar el tipo. De 1 a 8 fichas
+ * autorizadas se publican poniendo `verificado: true`; /proyectos ya las
+ * renderiza y, sin ninguna, mantiene su estado vacío honesto.
+ */
+export type ProjectFicha = Project;
+
 export const projects: Project[] = [
   {
     slug: "ventilacion-contratista-minero-peru",

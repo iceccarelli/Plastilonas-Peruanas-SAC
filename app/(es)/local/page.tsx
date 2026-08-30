@@ -12,6 +12,7 @@ import {
 } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
 import ImagenContenido from '@/components/ImagenContenido';
+import NAP from '@/components/NAP';
 import { ranurasProceso } from '@/lib/imagenes';
 
 /**
@@ -144,6 +145,14 @@ export default function LocalIndexPage() {
         que la especificación (gramaje, tratamiento UV, tipo de unión) se decida antes de
         cotizar, no después de instalar.
       </p>
+
+      {/* NAP único del sitio: la sede real, con mapa por consulta. Ninguna
+          ciudad de abajo declara oficina ni almacén; esta tarjeta deja claro
+          desde dónde se despacha. */}
+      <section className="mb-12 rounded-3xl border border-gray-100 bg-gray-50/60 p-7 max-w-xl">
+        <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">Sede y planta única</div>
+        <NAP />
+      </section>
 
       {porRegion.map((grupo) => (
         <section key={grupo.region} className="mb-12">

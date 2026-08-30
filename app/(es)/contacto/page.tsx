@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import WhatsAppLink from '@/components/WhatsAppLink';
 import { SITE, HORARIO, TELEFONOS } from '@/lib/site';
+import { MAPA_URL } from '@/components/NAP';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -120,6 +121,10 @@ export default function ContactoPage() {
                 {/* addressStreet ya termina en la urbanización: no se repite. */}
                 {SITE.addressStreet}<br />
                 {SITE.addressLocality}, {SITE.addressRegion}, Perú
+                <div className="mt-2">
+                  {/* Mapa por consulta: sin coordenadas inventadas (ver NAP.tsx). */}
+                  <a href={MAPA_URL} target="_blank" rel="noopener noreferrer" className="text-[#047857] hover:underline">Ver en el mapa →</a>
+                </div>
               </div>
             </div>
           </div>
