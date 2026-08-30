@@ -70,6 +70,14 @@ export interface Novedad {
   queCambia: string;
   detalle: string[];
   enlaces: NovedadEnlace[];
+  /**
+   * A quién le sirve la entrada. 'comprador' (por defecto): briefs de compra
+   * —líneas nuevas, guías, herramientas—. 'operacion': cambios de la
+   * infraestructura del sitio (superficies para agentes, método editorial),
+   * que viven en /novedades pero NO en la portada: la portada cuenta la
+   * historia del comprador, no el changelog de /ai.txt.
+   */
+  audiencia?: 'comprador' | 'operacion';
 }
 
 /**
@@ -100,6 +108,7 @@ const registro: Novedad[] = [
   },
   {
     slug: 'metodo-editorial-como-se-publica-este-sitio',
+    audiencia: 'operacion',
     fecha: '2026-08-27',
     tipo: 'referencia',
     titulo: 'Publicamos el método editorial de este sitio',
@@ -387,6 +396,7 @@ const registro: Novedad[] = [
   },
   {
     slug: 'ai-txt-identidad-y-politica-de-citacion-para-agentes',
+    audiencia: 'operacion',
     fecha: '2026-08-29',
     tipo: 'referencia',
     titulo: 'Publicado /ai.txt: identidad citable para agentes',

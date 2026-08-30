@@ -14,6 +14,7 @@ import { INDUSTRIAS } from "@/lib/industrias";
 import { applications } from "@/lib/applications";
 import { guides } from "@/lib/guides";
 import { SUPERFICIES_INDEXABLES } from "@/lib/superficies-maquina";
+import { cunas } from "@/lib/cunas";
 
 /**
  * SITEMAPS — índice + cuatro secciones, con lastmod REAL.
@@ -69,6 +70,14 @@ export function seccionPaginas(): EntradaSitemap[] {
   const paginas = d(ACTUALIZADO.paginas);
   const estaticas: EntradaSitemap[] = [
     { url: `${SITE.url}/`, lastModified: paginas, changeFrequency: "weekly", priority: 1 },
+    // Las tres cuñas comerciales (lib/cunas.ts): las páginas que el sitio
+    // quiere que contesten «lona camión», «manga ventilación» y «big bags».
+    ...cunas.map((c): EntradaSitemap => ({
+      url: `${SITE.url}/${c.slug}`,
+      lastModified: paginas,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    })),
     { url: `${SITE.url}/servicios`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE.url}/nosotros`, lastModified: paginas, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE.url}/contacto`, lastModified: paginas, changeFrequency: "yearly", priority: 0.6 },
