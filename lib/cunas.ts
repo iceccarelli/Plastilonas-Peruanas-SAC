@@ -38,6 +38,13 @@ export interface Cuna {
   whatsapp: string;
   /** Fotografía ilustrativa del frente. Referencial: la etiqueta lo declara. */
   foto: { src: string; alt: string };
+  /**
+   * Códigos de serie del BCRP que mueven el costo o la demanda de ESTE frente.
+   * El crudo y el tipo de cambio entran en los tres (resina y facturación);
+   * el metal cambia porque cambia el comprador: zinc es labor subterránea
+   * —ventilación—, cobre es tajo y concentrado —big bags—.
+   */
+  indicadores: string[];
 }
 
 export const cunas: Cuna[] = [
@@ -101,6 +108,7 @@ export const cunas: Cuna[] = [
       src: '/images/hero/hero-08.webp',
       alt: 'Camión con siders y tolderas de lona en una carretera peruana.',
     },
+    indicadores: ['PN01660XM', 'PD04640PD'],
   },
   {
     slug: 'ventilacion-minera',
@@ -158,6 +166,7 @@ export const cunas: Cuna[] = [
       src: '/images/hero/hero-09.webp',
       alt: 'Mangas de ventilación industrial dispuestas en planta.',
     },
+    indicadores: ['PN01660XM', 'PD04640PD', 'PN01657XM'],
   },
   {
     slug: 'big-bags',
@@ -218,6 +227,7 @@ export const cunas: Cuna[] = [
       src: '/images/hero/hero-02.webp',
       alt: 'Carga de big bags (FIBC) en una planta industrial.',
     },
+    indicadores: ['PN01660XM', 'PD04640PD', 'PN01652XM'],
   },
 ];
 

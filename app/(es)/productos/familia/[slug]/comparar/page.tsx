@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import { products, sourcingLabels, availabilityLabels } from '@/lib/products';
+import { construirComparativa } from '@/lib/comparativa';
 import { resolveFamily, comparableFamilies } from '@/lib/families';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
@@ -72,35 +73,9 @@ export default async function CompararPage({ params }: Props) {
 
   const url = `${SITE.url}/productos/familia/${slug}/comparar`;
 
-  // Unión de etiquetas, en el orden en que aparecen en el catálogo.
-  const labels: string[] = [];
-  for (const p of items) {
-    for (const spec of p.specifications) {
-      if (!labels.includes(spec.label)) labels.push(spec.label);
-    }
-  }
-
-  // Una fila solo compara si al menos DOS productos declaran esa
-  // especificación. Con la unión completa, una familia de siete productos
-  // producía una tabla de mayoría "No declarado": técnicamente honesta pero
-  // inservible para decidir, y que además hace parecer pobre al catálogo.
-  const cuenta = (label: string) =>
-    items.filter((p) => p.specifications.some((s) => s.label === label)).length;
-  const sharedLabels = labels.filter((l) => cuenta(l) >= 2);
-
-  // Lo exclusivo de cada producto no se descarta: se muestra debajo, donde
-  // aporta como diferenciador en vez de como hueco en la matriz.
-  const exclusivas = items
-    .map((p) => ({
-      producto: p,
-      specs: p.specifications.filter((s) => cuenta(s.label) < 2),
-    }))
-    .filter((x) => x.specs.length > 0);
-
-  const valueFor = (slugProducto: string, label: string): string => {
-    const p = items.find((x) => x.slug === slugProducto);
-    return p?.specifications.find((s) => s.label === label)?.value ?? 'No declarado';
-  };
+  // La matriz se construye en lib/comparativa.ts: la misma tabla, con las
+  // mismas dos reglas de honestidad, la usan también las cuñas comerciales.
+  const { filas: sharedLabels, exclusivas, valor: valueFor } = construirComparativa(items);
 
   const cotizarTodos = `/cotizacion?comparativa=${items.map((p) => p.slug).join(',')}`;
 

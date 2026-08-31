@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { products, productFamilies } from '@/lib/products';
 import { comparableFamilies } from '@/lib/families';
+import { construirComparativa, NO_DECLARADO } from '@/lib/comparativa';
+import type { Product } from '@/lib/types';
 import { generateStaticParams } from '@/app/(es)/productos/familia/[slug]/comparar/page';
 import sitemap from '@/lib/sitemaps';
 import { SITE } from '@/lib/site';
@@ -45,25 +47,74 @@ describe('comparativas: honestidad de la matriz', () => {
     'utf8',
   );
 
+  /**
+   * Estas pruebas afirmaban sobre el TEXTO de la página. Al extraer la matriz
+   * a lib/comparativa.ts —para que la usen también las cuñas— se rompieron
+   * las cuatro sin que nada estuviera mal: vigilaban una implementación, no
+   * una garantía. Ahora ejercitan la función pura, así que sobreviven al
+   * próximo refactor y siguen protegiendo lo que de verdad importa.
+   */
+  const ficha = (
+    slug: string,
+    specs: { label: string; value: string }[],
+  ): Product => ({
+    id: slug.toUpperCase(),
+    slug,
+    name: slug,
+    category: 'Prueba',
+    sector: ['Minería'],
+    shortDescription: 'x',
+    description: 'x',
+    specifications: specs,
+    applications: [],
+    benefits: [],
+    image: '/images/x.webp',
+    gallery: [],
+    featured: false,
+    popular: false,
+  });
+
+  const muestra = [
+    ficha('a', [{ label: 'Material', value: 'PVC' }, { label: 'Solo A', value: '1' }]),
+    ficha('b', [{ label: 'Material', value: 'PE' }]),
+    ficha('c', [{ label: 'Ancho', value: '2 m' }]),
+  ];
+
   it('las celdas sin dato dicen "No declarado" y no se rellenan', () => {
-    expect(page).toContain("'No declarado'");
+    const m = construirComparativa(muestra);
+    expect(m.valor('c', 'Material')).toBe(NO_DECLARADO);
     // La celda vacía nunca hereda el valor de otro producto.
-    expect(page).toContain('specifications.find((s) => s.label === label)?.value ??');
+    expect(m.valor('c', 'Material')).not.toBe('PVC');
+    expect(m.valor('a', 'Material')).toBe('PVC');
   });
 
   it('la matriz usa la unión de etiquetas declaradas, no una lista fija', () => {
-    expect(page).toContain('if (!labels.includes(spec.label)) labels.push(spec.label);');
+    // 'Material' lo declaran dos: entra. Nada se inventa fuera del catálogo.
+    expect(construirComparativa(muestra).filas).toEqual(['Material']);
   });
 
   it('solo compara filas que al menos dos productos declaran', () => {
     // Con la unión completa, una familia de siete productos daba una tabla de
     // mayoría "No declarado": honesta pero inservible para decidir.
-    expect(page).toContain('const sharedLabels = labels.filter((l) => cuenta(l) >= 2);');
+    const filas = construirComparativa(muestra).filas;
+    expect(filas).not.toContain('Solo A');
+    expect(filas).not.toContain('Ancho');
   });
 
   it('lo exclusivo de cada producto se muestra, no se descarta', () => {
-    expect(page).toContain('const exclusivas = items');
+    const exclusivas = construirComparativa(muestra).exclusivas;
+    expect(exclusivas.map((e) => e.producto.slug).sort()).toEqual(['a', 'c']);
+    expect(exclusivas.find((e) => e.producto.slug === 'a')?.specs[0].label).toBe('Solo A');
     expect(page).toContain('Especificaciones exclusivas de cada alternativa');
+  });
+
+  it('con el catálogo real, cada familia comparable produce filas', () => {
+    for (const familia of comparableFamilies()) {
+      const items = products.filter((p) => p.category === familia.name);
+      const m = construirComparativa(items);
+      expect(m.filas.length, `${familia.slug} no produce ninguna fila comparable`)
+        .toBeGreaterThan(0);
+    }
   });
 
   it('no publica precios: el negocio sigue siendo por cotización', () => {

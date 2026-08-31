@@ -41,7 +41,7 @@ import { cunas } from "@/lib/cunas";
 /** Fechas de última revisión editorial por bloque estático (YYYY-MM-DD). */
 export const ACTUALIZADO = {
   /** Portada y páginas institucionales (hero, orden de secciones, copy). */
-  paginas: "2026-08-30",
+  paginas: "2026-08-31",
   /** Hubs de sector (/industria/*) y cobertura local (/local/*). */
   industrias: "2026-08-30",
   /** Glosario: fecha de la última revisión del conjunto de términos. */

@@ -19,6 +19,10 @@ export const metadata: Metadata = {
   },
 };
 
+// ISR: la franja de costo lee el BCRP en vivo; una hora de caché en CDN
+// evita consultar la API en cada visita sin servir un dato rancio.
+export const revalidate = 3600;
+
 export default function Page() {
   return <CunaHub cuna={cuna} />;
 }

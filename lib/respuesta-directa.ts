@@ -1,6 +1,6 @@
 import type { Product } from './types';
 import type { Application } from './applications';
-import { SITE } from './site';
+import { SITE, HORARIO } from './site';
 
 /**
  * RESPUESTA DIRECTA — el párrafo que un motor de respuestas puede citar entero.
@@ -107,4 +107,44 @@ export function rfqWhatsAppAplicacion(a: Application): string {
     ...a.questions.map((q) => `· ${q}: `),
     '· Ciudad de entrega: ',
   ].join('\n');
+}
+
+
+/**
+ * RESPUESTA DIRECTA DE UNA CUÑA COMERCIAL.
+ *
+ * Va ARRIBA del hub, antes de la prosa, y no por estética: los datos de 2026
+ * sobre qué citan los motores de respuesta muestran que el 44 % de las citas
+ * sale del primer 30 % del contenido, y que lo que se recupera son bloques
+ * autocontenidos, densos en entidades y en lenguaje definido. Este párrafo es
+ * ese bloque.
+ *
+ * Se COMPONE de campos reales —cuántas líneas agrupa el frente, cuántas se
+ * confeccionan en planta, la razón social, el RUC, el año, el checklist del
+ * RFQ y el horario—, nunca de texto libre. Así no hay dónde escribir una cifra
+ * inventada, y cuando el catálogo cambie, el párrafo cambia solo.
+ */
+export function respuestaDirectaCuna(
+  cuna: { titulo: string; checklist: { dato: string }[] },
+  hijos: Product[],
+): string {
+  const propias = hijos.filter((p) => p.sourcing === 'fabricacion_propia');
+  const suministro = hijos.length - propias.length;
+
+  const origen =
+    suministro === 0
+      ? `las ${hijos.length} se confeccionan en la planta de Chorrillos (Lima, Perú)`
+      : `${propias.length} de ${hijos.length} se confeccionan en la planta de Chorrillos ` +
+        `(Lima, Perú) y ${suministro === 1 ? 'la restante es' : 'las restantes son'} ` +
+        `suministro declarado en su ficha`;
+
+  const datos = cuna.checklist.map((c) => c.dato.toLowerCase()).join(', ');
+
+  return (
+    `${cuna.titulo}: ${origen}. ` +
+    `${SITE.legalName}, RUC ${SITE.ruc}, fabrica textil industrial en el Perú desde ` +
+    `${SITE.foundingYear}. Se cotiza contra especificación —${datos}— y no hay lista de ` +
+    `precios en líneas a medida. La respuesta llega con ficha técnica dentro del horario ` +
+    `comercial (${HORARIO.corto}, hora de Lima).`
+  );
 }

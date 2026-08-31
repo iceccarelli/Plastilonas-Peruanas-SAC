@@ -1,4 +1,5 @@
 import { productFamilies, products } from './products';
+import { construirComparativa } from './comparativa';
 
 /**
  * CONTENIDO EDITORIAL POR FAMILIA (/productos/familia/[slug]).
@@ -561,12 +562,25 @@ export function familyHrefByName(name: string): string {
 }
 
 /**
- * Familias con dos o más productos: las únicas donde una comparativa tiene
- * sentido. Una tabla de un solo elemento es una página vacía que no debe
- * generarse ni indexarse.
+ * Familias donde una comparativa tiene sentido DE VERDAD.
+ *
+ * La condición era «dos o más productos», y no bastaba. `seguridad-industrial`
+ * la cumplía y aun así publicaba una tabla VACÍA: sus fichas no comparten ni
+ * una sola etiqueta de especificación, así que la matriz —que solo admite
+ * filas declaradas por dos o más productos— salía sin ninguna fila. El
+ * resultado era una página que promete «especificación lado a lado», entrega
+ * cero comparaciones y entra al sitemap: exactamente el contenido delgado que
+ * este sitio evita en todas partes menos, hasta ahora, aquí.
+ *
+ * La condición correcta es la que el lector experimenta: que la matriz
+ * produzca al menos una fila. test/comparison.test.ts lo verifica contra el
+ * catálogo real, de modo que el día que alguien homologue las etiquetas de esa
+ * familia, su comparativa vuelve sola.
  */
 export function comparableFamilies() {
-  return productFamilies.filter(
-    (f) => products.filter((p) => p.category === f.name).length >= 2,
-  );
+  return productFamilies.filter((f) => {
+    const items = products.filter((p) => p.category === f.name);
+    if (items.length < 2) return false;
+    return construirComparativa(items).filas.length > 0;
+  });
 }

@@ -151,6 +151,61 @@ describe('etapa 8 — aceleración', () => {
   });
 });
 
+describe('etapa 9 — citabilidad y señal de costo', () => {
+  /**
+   * Los datos de 2026 sobre citación por motores de respuesta mandan aquí:
+   * el 44 % de las citas sale del primer 30 % del contenido, y lo que se
+   * recupera son bloques autocontenidos, tablas y fechas de revisión.
+   */
+  it('cada cuña abre con un bloque citable, antes de la prosa', () => {
+    const hub = leer('components/CunaHub.tsx');
+    expect(hub).toContain('respuestaDirectaCuna');
+    expect(hub).toContain("speakable: ['.respuesta-directa']");
+    // La rampa va ANTES de la prosa de introducción, no después.
+    expect(hub.indexOf('respuesta-directa text-')).toBeLessThan(hub.indexOf('cuna.intro.map'));
+  });
+
+  it('la respuesta directa se compone de campos reales, sin texto libre', () => {
+    const src = leer('lib/respuesta-directa.ts');
+    expect(src).toContain('export function respuestaDirectaCuna');
+    // Se arma con razón social, RUC, año y checklist: nada tecleado a mano.
+    for (const campo of ['SITE.legalName', 'SITE.ruc', 'SITE.foundingYear', 'cuna.checklist']) {
+      expect(src, `la respuesta directa no deriva de ${campo}`).toContain(campo);
+    }
+  });
+
+  it('la matriz de comparación tiene UNA implementación', () => {
+    const lib = leer('lib/comparativa.ts');
+    expect(lib).toContain('export function construirComparativa');
+    expect(lib).toContain('No declarado');
+    // Ni la página de comparar ni las cuñas la reimplementan.
+    for (const f of [
+      'app/(es)/productos/familia/[slug]/comparar/page.tsx',
+      'components/CunaHub.tsx',
+    ]) {
+      expect(leer(f), `${f} no usa la matriz común`).toContain('construirComparativa');
+    }
+  });
+
+  it('la señal de costo declara fecha, respaldo y que no es un pronóstico', () => {
+    const src = leer('components/CostoEnVivo.tsx');
+    expect(src).toContain('leerIndicadores');
+    expect(src).toContain('No es un pronóstico de precio');
+    expect(src).toContain('sinConexion');
+    // Cada serie explica qué significa para una cotización.
+    expect(leer('lib/indicadores.ts')).toContain('export const SIGNIFICADO');
+  });
+
+  it('cada cuña declara qué indicadores mueven SU costo', () => {
+    for (const c of cunas) {
+      expect(c.indicadores.length, c.slug).toBeGreaterThanOrEqual(2);
+      // Crudo y tipo de cambio entran en los tres: resina y facturación.
+      expect(c.indicadores, c.slug).toContain('PN01660XM');
+      expect(c.indicadores, c.slug).toContain('PD04640PD');
+    }
+  });
+});
+
 describe('etapa 3 — las tres cuñas', () => {
   it('cada cuña tiene página, entra al sitemap y aparece en llms.txt', () => {
     const urls = new Set(sitemap().map((e) => e.url));

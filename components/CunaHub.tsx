@@ -11,6 +11,10 @@ import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
 import WhatsAppLink from '@/components/WhatsAppLink';
 import DatosParaCotizar from '@/components/DatosParaCotizar';
 import FotoReferencial from '@/components/FotoReferencial';
+import CostoEnVivo from '@/components/CostoEnVivo';
+import { construirComparativa } from '@/lib/comparativa';
+import { respuestaDirectaCuna } from '@/lib/respuesta-directa';
+import { ACTUALIZADO } from '@/lib/sitemaps';
 
 /**
  * Página de cuña comercial (ver lib/cunas.ts). Server component compartido
@@ -19,7 +23,7 @@ import FotoReferencial from '@/components/FotoReferencial';
  * embudo completo — checklist, fichas hijas, honestidad hacemos/no afirmamos,
  * FAQ (visible + FAQPage), guía de biblioteca y CTA doble.
  */
-export default function CunaHub({ cuna }: { cuna: Cuna }) {
+export default async function CunaHub({ cuna }: { cuna: Cuna }) {
   const url = `${SITE.url}/${cuna.slug}`;
   const hijos = cuna.productSlugs
     .map((s) => products.find((p) => p.slug === s))
@@ -29,12 +33,21 @@ export default function CunaHub({ cuna }: { cuna: Cuna }) {
   const calculadora = cuna.calculadoraSlug
     ? calculadoras.find((c) => c.slug === cuna.calculadoraSlug)
     : undefined;
+  const respuestaDirecta = respuestaDirectaCuna(cuna, hijos);
+  // Matriz honesta: una fila solo si dos o más líneas declaran esa
+  // especificación; los huecos dicen «No declarado» (lib/comparativa.ts).
+  const comparativa = hijos.length >= 2 ? construirComparativa(hijos) : null;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
       <JsonLd
         data={[
-          webPageSchema({ url, name: cuna.titulo, description: cuna.descripcion }),
+          webPageSchema({
+            url,
+            name: cuna.titulo,
+            description: respuestaDirecta,
+            speakable: ['.respuesta-directa'],
+          }),
           breadcrumbSchema(
             [
               { name: 'Inicio', url: `${SITE.url}/` },
@@ -76,6 +89,14 @@ export default function CunaHub({ cuna }: { cuna: Cuna }) {
         <h1 className="text-3xl md:text-5xl tracking-tighter font-semibold text-[#0A2540] leading-tight mb-6">
           {cuna.h1}
         </h1>
+        {/* RAMPA. El 44 % de las citas de los motores de respuesta sale del
+            primer 30 % del contenido, y lo que se recupera son bloques
+            autocontenidos y densos en entidades. Este es ese bloque, y está
+            compuesto de campos reales (lib/respuesta-directa.ts). */}
+        <p className="respuesta-directa text-[15px] leading-relaxed text-[#0A2540] bg-emerald-50/60 border border-emerald-100 rounded-2xl p-5 mb-6">
+          {respuestaDirecta}
+        </p>
+
         {cuna.intro.map((p) => (
           <p key={p.slice(0, 24)} className="text-lg text-gray-600 leading-relaxed mb-4">
             {p}
@@ -146,6 +167,59 @@ export default function CunaHub({ cuna }: { cuna: Cuna }) {
         </div>
       </section>
 
+      {/* TABLA COMPARATIVA. Las tablas son de lo que más se recupera y se cita,
+          y aquí además es la pregunta real del comprador: en qué se diferencian
+          estas líneas. Se construye con la misma matriz que /comparar. */}
+      {comparativa && comparativa.filas.length > 0 && (
+        <section className="mt-14">
+          <h2 className="font-semibold tracking-tight text-2xl mb-2">
+            ¿En qué se diferencian estas líneas?
+          </h2>
+          <p className="text-gray-600 mb-6 max-w-2xl">
+            Especificación declarada por cada ficha. Donde una línea no la declara dice «No
+            declarado»: no se rellena ni se infiere del vecino.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <caption className="sr-only">
+                Comparación de especificaciones de {hijos.length} líneas de {cuna.titulo}
+              </caption>
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th scope="col" className="py-3 pr-6 text-left font-medium text-gray-500">
+                    Especificación
+                  </th>
+                  {hijos.map((p) => (
+                    <th key={p.slug} scope="col" className="py-3 pr-6 text-left font-semibold text-[#0A2540]">
+                      <Link href={`/productos/${p.slug}`} className="hover:text-[#059669]">
+                        {p.name}
+                      </Link>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {comparativa.filas.map((label) => (
+                  <tr key={label} className="border-b border-gray-100 last:border-none align-top">
+                    <th scope="row" className="py-3 pr-6 text-left font-medium text-gray-600">
+                      {label}
+                    </th>
+                    {hijos.map((p) => (
+                      <td key={p.slug} className="py-3 pr-6 text-[#0A2540]">
+                        {comparativa.valor(p.slug, label)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* Señal de costo en vivo, donde se decide la compra. */}
+      <CostoEnVivo codigos={cuna.indicadores} />
+
       {/* Honestidad: hacemos / no afirmamos */}
       <section className="mt-14 grid gap-6 md:grid-cols-2">
         <div className="rounded-3xl border border-emerald-100 bg-emerald-50/50 p-7">
@@ -212,7 +286,14 @@ export default function CunaHub({ cuna }: { cuna: Cuna }) {
         </dl>
       </section>
 
-      <div className="mt-12">
+      <p className="mt-12 text-sm text-gray-500">
+        Página revisada el{' '}
+        <time dateTime={ACTUALIZADO.paginas}>{ACTUALIZADO.paginas}</time>. Las especificaciones
+        provienen del catálogo publicado; los indicadores de costo, del BCRP, con la fecha de cada
+        lectura a la vista.
+      </p>
+
+      <div className="mt-8">
         <DatosParaCotizar />
       </div>
 

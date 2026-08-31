@@ -113,6 +113,27 @@ export const RESPALDO: { lecturas: Lectura[]; verificado: string } = {
   ],
 };
 
+/**
+ * QUÉ SIGNIFICA CADA SERIE PARA UNA COTIZACIÓN.
+ *
+ * Un número sin lectura es decoración. Estas frases son el puente entre el
+ * dato oficial y la decisión de compra, y son deliberadamente prudentes: se
+ * declara la DIRECCIÓN del efecto y su desfase, nunca una fórmula de traspaso
+ * a precio que este repositorio no puede sostener con evidencia.
+ */
+export const SIGNIFICADO: Record<string, string> = {
+  PN01660XM:
+    'Cabeza de la cadena de la resina: el crudo mueve la nafta, la nafta el polipropileno y el polipropileno la lona. El traspaso llega con semanas de desfase por inventario.',
+  PD04640PD:
+    'La resina se compra en dólares y la cotización se factura en soles: el tipo de cambio entra directo en el precio final.',
+  PN01652XM:
+    'Cobre: actividad de tajo abierto e hidrometalurgia, que es la demanda de impermeabilización y cobertura.',
+  PN01657XM:
+    'Zinc: actividad subterránea, que es la demanda de ventilación de labores.',
+  PN01656XM:
+    'Plomo: acompaña al zinc en la misma operación subterránea.',
+};
+
 export interface IndicadorVivo {
   serie: SerieBCRP;
   valor: number | null;
