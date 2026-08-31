@@ -15,6 +15,7 @@ import CostoEnVivo from '@/components/CostoEnVivo';
 import { construirComparativa } from '@/lib/comparativa';
 import { respuestaDirectaCuna } from '@/lib/respuesta-directa';
 import { ACTUALIZADO } from '@/lib/sitemaps';
+import { RUTA_ES } from '@/lib/fabricar-o-importar';
 
 /**
  * Página de cuña comercial (ver lib/cunas.ts). Server component compartido
@@ -270,6 +271,15 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
               <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669]">{calculadora.titulo}</span>
             </Link>
           )}
+          {/* La decisión que se toma ANTES de esta página. Va aquí porque el
+              lector que llegó a especificar todavía puede estar comparando
+              contra un contenedor importado, y esa tabla la publicamos entera. */}
+          <Link href={RUTA_ES} className="group block rounded-2xl border border-gray-100 p-5 hover:border-[#059669]/40 transition-colors">
+            <span className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Decisión de abastecimiento</span>
+            <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669]">
+              ¿Fabricar en Lima o importar?
+            </span>
+          </Link>
         </div>
       </section>
 

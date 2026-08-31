@@ -185,7 +185,21 @@ describe('hreflang: clústeres recíprocos y declarados', () => {
     c.slug,
   ]);
 
-  const CON_HREFLANG = [...TRIO, ...PARES.flatMap(([es, en]) => [es, en])];
+  /**
+   * El par de decisión de abastecimiento (etapa 13). Mismo criterio que las
+   * cuñas: es la MISMA comparación en dos idiomas, escrita desde la misma
+   * matriz, así que el clúster es legítimo.
+   */
+  const PAR_DECISION: [string, string, string, string] = [
+    'app/(es)/fabricar-o-importar/page.tsx',
+    'app/(en)/en/manufacture-in-peru-or-import/page.tsx',
+    'fabricar-o-importar',
+    'manufacture-in-peru-or-import',
+  ];
+
+  const TODOS_LOS_PARES = [...PARES, PAR_DECISION];
+
+  const CON_HREFLANG = [...TRIO, ...TODOS_LOS_PARES.flatMap(([es, en]) => [es, en])];
 
   it('las tres páginas de entrada se declaran entre sí', () => {
     for (const p of TRIO) {
@@ -197,10 +211,10 @@ describe('hreflang: clústeres recíprocos y declarados', () => {
     }
   });
 
-  it('cada par de cuña se declara en LOS DOS sentidos', () => {
+  it('cada par bilingüe se declara en LOS DOS sentidos', () => {
     // Un hreflang que sólo va de ida no es un clúster: es una afirmación sin
     // confirmar, y Google la ignora. Se comprueba lado a lado.
-    for (const [rutaEs, rutaEn, slugEs, slugEn] of PARES) {
+    for (const [rutaEs, rutaEn, slugEs, slugEn] of TODOS_LOS_PARES) {
       for (const ruta of [rutaEs, rutaEn]) {
         const src = readFileSync(join(raiz, ruta), 'utf8');
         expect(src, `${ruta} no declara alternates.languages`).toContain('languages: ALTERNOS');

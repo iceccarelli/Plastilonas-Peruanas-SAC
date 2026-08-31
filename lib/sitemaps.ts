@@ -16,6 +16,7 @@ import { guides } from "@/lib/guides";
 import { SUPERFICIES_INDEXABLES } from "@/lib/superficies-maquina";
 import { cunas } from "@/lib/cunas";
 import { CUNAS_EN } from "@/lib/cunas-en";
+import { RUTA_ES, RUTA_EN, FABRICAR_ACTUALIZADO } from "@/lib/fabricar-o-importar";
 
 /**
  * SITEMAPS — índice + cuatro secciones, con lastmod REAL.
@@ -79,6 +80,9 @@ export function seccionPaginas(): EntradaSitemap[] {
       changeFrequency: "monthly",
       priority: 0.9,
     })),
+    // La página de decisión de abastecimiento: se lee ANTES de elegir
+    // proveedor, así que pesa como una cuña. Su gemela inglesa va abajo.
+    { url: `${SITE.url}${RUTA_ES}`, lastModified: d(FABRICAR_ACTUALIZADO), changeFrequency: "monthly", priority: 0.9 },
     { url: `${SITE.url}/servicios`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE.url}/nosotros`, lastModified: paginas, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE.url}/contacto`, lastModified: paginas, changeFrequency: "yearly", priority: 0.6 },
@@ -99,6 +103,7 @@ export function seccionPaginas(): EntradaSitemap[] {
     // el clúster recíproco de tres sigue intacto.
     { url: `${SITE.url}/en/sourcing-from-peru`, lastModified: paginas, changeFrequency: "monthly", priority: 0.75 },
     { url: `${SITE.url}/en/rfq`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE.url}${RUTA_EN}`, lastModified: d(FABRICAR_ACTUALIZADO), changeFrequency: "monthly", priority: 0.9 },
     // Las tres cuñas en inglés (lib/cunas-en.ts). Prioridad igual a la de sus
     // gemelas españolas: son la misma oferta y compiten por consultas que en
     // español no existen —«mine ventilation ducting Peru» no tiene traducción

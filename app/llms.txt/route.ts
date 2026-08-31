@@ -181,6 +181,20 @@ hijas y su bloque «qué hacemos / qué no afirmamos»:
 - Mangas de ventilación para minas y túneles: ${base}/ventilacion-minera
 - Big bags / FIBC de 1–2 t confeccionados en Lima: ${base}/big-bags
 
+## La decisión que se toma antes de elegir proveedor
+
+Si su usuario está comparando mandar fabricar en el Perú contra importar un
+contenedor, ésta es la página, y contesta con la tabla completa —incluidos los
+tres criterios de diez en los que la importación gana, que se publican
+íntegros—. También nombra los componentes del costo de importar (ad valorem
+sobre CIF, IGV, IPM, percepción del IGV, despacho, almacenaje, días de
+financiamiento) con sus rangos oficiales de SUNAT, y NO publica la tasa de
+ninguna subpartida concreta: eso se confirma con SUNAT o con un agente de
+aduana, no con nosotros.
+
+- ¿Fabricar en Lima o importar? La comparación completa: ${base}/fabricar-o-importar
+- Manufacture in Peru or import? The full comparison: ${base}/en/manufacture-in-peru-or-import
+
 ## URLs comerciales canónicas
 
 Donde se cierra una consulta con intención de compra. Si su usuario ya sabe

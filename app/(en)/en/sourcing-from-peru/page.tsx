@@ -4,6 +4,7 @@ import { SITE, HORARIO } from '@/lib/site';
 import { PRODUCT_COUNT, FAMILY_COUNT, FABRICACION_PROPIA_COUNT, YEARS_OPERATING } from '@/lib/facts';
 import { INCOTERMS_SALIDA, MERCADOS, NO_AFIRMAMOS_EN } from '@/lib/exportacion';
 import { CUNAS_EN } from '@/lib/cunas-en';
+import { RUTA_EN } from '@/lib/fabricar-o-importar';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
 import WhatsAppLink from '@/components/WhatsAppLink';
@@ -160,6 +161,22 @@ export default function SourcingFromPeruPage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="mb-12 rounded-3xl border border-emerald-100 bg-emerald-50/50 p-7">
+        <h2 className="mb-2 text-xl font-semibold tracking-tight text-[#0A2540]">
+          Before you compare suppliers, compare the two options
+        </h2>
+        <p className="text-sm leading-relaxed text-gray-700">
+          Importing a container and having it made in Lima are not the same purchase, and the
+          honest comparison is landed cost, not FOB against ex-works. We publish the whole table —
+          including the three criteria out of ten where importing is the better choice.
+        </p>
+        <p className="mt-4 text-sm">
+          <Link href={RUTA_EN} className="font-medium text-[#047857] hover:underline">
+            Manufacture in Peru or import? The full comparison →
+          </Link>
+        </p>
       </section>
 
       <section className="mb-12">

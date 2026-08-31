@@ -3,6 +3,16 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { cunas } from '@/lib/cunas';
 import { CUNAS_EN, cunaEsDeEn } from '@/lib/cunas-en';
+import {
+  MATRIZ,
+  COSTO_IMPORTACION,
+  NO_NOS_COMPRE,
+  NO_NOS_COMPRE_EN,
+  FAQS_FABRICAR,
+  FAQS_FABRICAR_EN,
+  RUTA_ES,
+  RUTA_EN,
+} from '@/lib/fabricar-o-importar';
 import { products } from '@/lib/products';
 import { STATS, FABRICACION_PROPIA_COUNT } from '@/lib/facts';
 import sitemap from '@/lib/sitemaps';
@@ -460,5 +470,115 @@ describe('etapa 12 — las tres cuñas hablan inglés', () => {
       expect(texto, c.slug).not.toMatch(/ISO\s?9001/);
       expect(texto, c.slug).not.toMatch(/998\s?117\s?065|946\s?085\s?270/);
     }
+  });
+});
+
+describe('etapa 13 — fabricar en Lima o importar', () => {
+  it('la matriz reconoce que la importación gana algunas filas', () => {
+    /**
+     * EL CRITERIO DE SALIDA MÁS IMPORTANTE DE ESTA ETAPA. Si ninguna fila la
+     * gana la importación, la tabla no es una comparación: es publicidad con
+     * forma de tabla, nadie la cita y el comprador la descarta en diez
+     * segundos. Se exige al menos dos, y que la fila del precio unitario a
+     * volumen —la que el comprador ya sabe— sea una de ellas.
+     */
+    const importar = MATRIZ.filter((f) => f.gana === 'importar');
+    expect(importar.length, 'una comparación sin derrotas no es una comparación').toBeGreaterThanOrEqual(2);
+    expect(MATRIZ.length).toBeGreaterThanOrEqual(8);
+    const precio = MATRIZ.find((f) => /precio unitario/i.test(f.criterio));
+    expect(precio?.gana, 'la fila del precio a volumen no puede darse por ganada').toBe('importar');
+    /**
+     * Y la concesión no puede ser sólo la obvia. Conceder el precio y nada más
+     * es la concesión que hace todo el mundo; lo que hace citable a esta tabla
+     * es admitir también disponibilidad, variedad de configuraciones y
+     * certificación propia de producto —que es justo lo que /confianza declara
+     * que esta empresa NO emite—.
+     */
+    expect(
+      importar.filter((f) => !/precio unitario/i.test(f.criterio)).length,
+      'conceder sólo el precio es la concesión de todos: no distingue',
+    ).toBeGreaterThanOrEqual(2);
+    expect(importar.some((f) => /certificaci/i.test(f.criterio))).toBe(true);
+  });
+
+  it('el recuento de la tabla se deriva de la tabla, no se escribe a mano', () => {
+    // La primera versión afirmaba «tres de las diez» con una sola fila
+    // concedida. Lo detectó una prueba, no una lectura. Ahora el número sale
+    // del dato y no puede volver a mentir.
+    const tpl = leer('components/FabricarOImportar.tsx');
+    expect(tpl).toContain('t.pmatriz(MATRIZ.length, ganaImportar)');
+    expect(tpl).not.toMatch(/tres de las diez|three of the ten/i);
+  });
+
+  it('cada fila está escrita en los dos idiomas', () => {
+    // Una fila a medio traducir en la tabla que más se cita es peor que
+    // ninguna tabla.
+    for (const f of MATRIZ) {
+      for (const campo of ['criterio', 'importar', 'fabricar'] as const) {
+        expect(f[campo].length, `${f.criterio}.${campo}`).toBeGreaterThan(10);
+        expect(f[`${campo}En` as const].length, `${f.criterio}.${campo}En`).toBeGreaterThan(10);
+      }
+    }
+  });
+
+  it('no se inventa la tasa de ninguna subpartida', () => {
+    /**
+     * Los rangos oficiales de SUNAT (0/6/11 ad valorem, IGV 16, IPM 2,
+     * percepción 3,5/5/10) SÍ se publican, con su fuente. Lo prohibido es
+     * atribuirle una tasa a una partida concreta —«los big bags pagan 6 %»—,
+     * que es el dato que este repositorio no puede verificar y que quedaría
+     * obsoleto sin que nadie se entere.
+     */
+    const texto = [
+      ...COSTO_IMPORTACION.flatMap((c) => [c.detalle, c.detalleEn]),
+      ...FAQS_FABRICAR.map((f) => f.a),
+      ...FAQS_FABRICAR_EN.map((f) => f.a),
+    ].join(' ');
+    expect(texto).not.toMatch(/\b6305[.\d]*\s*(paga|pays|es del|is)\b/i);
+    expect(texto).not.toMatch(/(big bags?|bulk bags?)[^.]{0,40}\b(pagan?|pays?)\b[^.]{0,20}%/i);
+    // Y se dice de quién es la última palabra.
+    expect(texto).toMatch(/SUNAT/);
+    expect(texto.toLowerCase()).toMatch(/agente de aduana|customs broker/);
+  });
+
+  it('el bloque «cuándo NO nos compre» existe en los dos idiomas y no se suaviza', () => {
+    expect(NO_NOS_COMPRE.length).toBeGreaterThanOrEqual(3);
+    expect(NO_NOS_COMPRE_EN.length).toBe(NO_NOS_COMPRE.length);
+    // La concesión concreta —a volumen, importar gana en precio unitario—
+    // tiene que estar escrita, no insinuada.
+    expect(NO_NOS_COMPRE.join(' ')).toMatch(/precio unitario/i);
+    expect(NO_NOS_COMPRE_EN.join(' ')).toMatch(/unit price/i);
+  });
+
+  it('el par se publica, entra al sitemap y se anuncia a las máquinas', () => {
+    const urls = new Set(sitemap().map((e) => e.url));
+    for (const [ruta, archivo] of [
+      [RUTA_ES, 'app/(es)/fabricar-o-importar/page.tsx'],
+      [RUTA_EN, 'app/(en)/en/manufacture-in-peru-or-import/page.tsx'],
+    ] as const) {
+      expect(() => leer(archivo), archivo).not.toThrow();
+      expect(urls.has(`${SITE.url}${ruta}`), `${ruta} falta en el sitemap`).toBe(true);
+      expect(leer('app/llms.txt/route.ts'), `${ruta} falta en llms.txt`).toContain(ruta);
+    }
+  });
+
+  it('una sola plantilla sirve los dos idiomas', () => {
+    // Dos plantillas serían dos verdades, y esta página afirma cosas que nos
+    // perjudican: el día que una de las dos las suavizara, el argumento entero
+    // se cae. La lección la pagó CotizacionModal.
+    const tpl = leer('components/FabricarOImportar.tsx');
+    expect(tpl).toContain("idioma }: { idioma: 'es' | 'en' }");
+    expect(leer('app/(es)/fabricar-o-importar/page.tsx')).toContain('idioma="es"');
+    expect(leer('app/(en)/en/manufacture-in-peru-or-import/page.tsx')).toContain('idioma="en"');
+    // El RFQ de cada idioma va al formulario de ese idioma (etapa 11).
+    expect(tpl).toContain("rfq: '/cotizacion'");
+    expect(tpl).toContain("rfq: '/en/rfq'");
+  });
+
+  it('la página se enlaza donde se decide, no sólo desde el sitemap', () => {
+    for (const f of ['components/CunaHub.tsx', 'app/(en)/en/sourcing-from-peru/page.tsx']) {
+      expect(leer(f), `${f} no enlaza la decisión de abastecimiento`).toContain('fabricar-o-importar');
+    }
+    expect(leer('components/CunaHubEn.tsx')).toContain('RUTA_EN');
   });
 });

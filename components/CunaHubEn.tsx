@@ -11,6 +11,7 @@ import WhatsAppLink from '@/components/WhatsAppLink';
 import FotoReferencial from '@/components/FotoReferencial';
 import CostoEnVivo from '@/components/CostoEnVivo';
 import { ACTUALIZADO } from '@/lib/sitemaps';
+import { RUTA_EN } from '@/lib/fabricar-o-importar';
 
 /**
  * PÁGINA DE CUÑA EN INGLÉS (ver lib/cunas-en.ts).
@@ -271,7 +272,19 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
       {/* Rutas hacia el resto del inglés que sí existe */}
       <section className="mt-14">
         <h2 className="mb-6 text-2xl font-semibold tracking-tight">Before you send the RFQ</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Link
+            href={RUTA_EN}
+            className="group block rounded-2xl border border-gray-100 p-5 transition-colors hover:border-[#059669]/40 dark:border-[var(--border)]"
+          >
+            <span className="mb-1 block text-xs uppercase tracking-wide text-gray-500">Sourcing decision</span>
+            <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669] dark:text-inherit">
+              Manufacture in Peru, or import?
+            </span>
+            <span className="mt-1 block text-sm text-gray-600 dark:text-gray-400">
+              Ten criteria including the three importing wins, and what an import really costs.
+            </span>
+          </Link>
           <Link
             href="/en/sourcing-from-peru"
             className="group block rounded-2xl border border-gray-100 p-5 transition-colors hover:border-[#059669]/40 dark:border-[var(--border)]"
