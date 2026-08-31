@@ -93,6 +93,10 @@ export function seccionPaginas(): EntradaSitemap[] {
     { url: `${SITE.url}/confianza`, lastModified: paginas, changeFrequency: "yearly", priority: 0.7 },
     { url: `${SITE.url}/metodo`, lastModified: paginas, changeFrequency: "yearly", priority: 0.7 },
     { url: `${SITE.url}/en`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },
+    // Hub de compra en inglés: la puerta del comprador extranjero. No lleva
+    // hreflang (no es traducción de ninguna página, es una síntesis), así que
+    // el clúster recíproco de tres sigue intacto.
+    { url: `${SITE.url}/en/sourcing-from-peru`, lastModified: paginas, changeFrequency: "monthly", priority: 0.75 },
     { url: `${SITE.url}/pt`, lastModified: paginas, changeFrequency: "monthly", priority: 0.6 },
     // Indicadores: la única página que cambia sola; su lastmod diario es cierto.
     { url: `${SITE.url}/indicadores`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },

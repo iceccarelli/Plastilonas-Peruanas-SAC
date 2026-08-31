@@ -206,6 +206,61 @@ describe('etapa 9 — citabilidad y señal de costo', () => {
   });
 });
 
+describe('etapa 10 — el comprador extranjero', () => {
+  it('el hub en inglés existe, entra al sitemap y lo enlaza /en', () => {
+    expect(() => leer('app/(en)/en/sourcing-from-peru/page.tsx')).not.toThrow();
+    const urls = new Set(sitemap().map((e) => e.url));
+    expect(urls.has(`${SITE.url}/en/sourcing-from-peru`)).toBe(true);
+    expect(leer('app/(en)/en/page.tsx')).toContain('/en/sourcing-from-peru');
+  });
+
+  it('NO emite hreflang: no es traducción de ninguna página', () => {
+    // El clúster recíproco son tres páginas (/, /en, /pt). Declarar hreflang
+    // hacia un destino que no corresponde hace que Google descarte el clúster
+    // entero, incluido el caso en que sí corresponde.
+    expect(leer('app/(en)/en/sourcing-from-peru/page.tsx')).not.toContain('languages:');
+  });
+
+  it('los mercados se declaran UNA vez, en los dos idiomas', () => {
+    // Que la página en español y la inglesa afirmen coberturas distintas es el
+    // peor defecto posible en una empresa exportadora.
+    const lib = leer('lib/exportacion.ts');
+    expect(lib).toContain('export const MERCADOS');
+    expect(leer('app/(es)/exportacion/page.tsx')).toContain('MERCADOS');
+    expect(leer('app/(en)/en/sourcing-from-peru/page.tsx')).toContain('MERCADOS');
+    // Y ninguna reimplementa la tabla a mano.
+    expect(leer('app/(es)/exportacion/page.tsx')).not.toContain('const MARKETS');
+  });
+
+  it('el hub en inglés publica los mismos límites que /confianza', () => {
+    const en = leer('app/(en)/en/sourcing-from-peru/page.tsx');
+    expect(en).toContain('NO_AFIRMAMOS_EN');
+    expect(en).toContain('What we do not claim');
+    const lib = leer('lib/exportacion.ts');
+    // Los dos límites que un comprador extranjero verifica primero.
+    expect(lib).toContain('Worldwide shipping');
+    expect(lib).toContain('List prices on made-to-measure lines');
+  });
+
+  it('el hub en inglés no promete envío mundial ni publica precios', () => {
+    const en = leer('app/(en)/en/sourcing-from-peru/page.tsx');
+    // Las dos negaciones explícitas, en las palabras del comprador.
+    expect(en).toContain('no automatic worldwide shipping');
+    expect(en).toContain('no price list in any currency');
+    // Y ninguna cifra monetaria en la página: ni dólares ni soles.
+    expect(en).not.toMatch(/US\$\s?\d/);
+    expect(en).not.toMatch(/S\/\s?\d/);
+  });
+
+  it('el guion de entrega existe y no usa el glob del shell', () => {
+    const sh = leer('scripts/aplicar-entrega.sh');
+    expect(sh).toContain('git ls-files -z');
+    // El glob del shell incluye parches SIN versionar y hace abortar git rm.
+    expect(sh).not.toContain('git rm -q -- *.patch');
+    expect(sh).toContain('set -euo pipefail');
+  });
+});
+
 describe('etapa 3 — las tres cuñas', () => {
   it('cada cuña tiene página, entra al sitemap y aparece en llms.txt', () => {
     const urls = new Set(sitemap().map((e) => e.url));

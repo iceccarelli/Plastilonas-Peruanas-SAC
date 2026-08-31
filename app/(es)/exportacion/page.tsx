@@ -6,6 +6,7 @@ import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import { webPageSchema, breadcrumbSchema, faqSchema, businessRef } from '@/lib/schema';
 import { INCOTERMS_SALIDA } from '@/lib/entidad-feed';
+import { MERCADOS } from '@/lib/exportacion';
 import WhatsAppLink from '@/components/WhatsAppLink';
 
 export const metadata: Metadata = {
@@ -15,15 +16,6 @@ export const metadata: Metadata = {
   alternates: { canonical: '/exportacion' },
 };
 
-const MARKETS = [
-  ['Perú', 'PEN', 'Despacho nacional. Fabricación e instalación propias.'],
-  ['Chile', 'CLP', 'Callao o terrestre. Ventilación, lonas, FIBC por RFQ.'],
-  ['Colombia', 'COP', 'Señal pública de comercio exterior. Cada operación se evalúa.'],
-  ['Ecuador', 'USD', 'Marítimo o terrestre según volumen.'],
-  ['Bolivia', 'BOB', 'Terrestre. Coberturas y geosintéticos por proyecto.'],
-  ['Brasil', 'BRL', 'Marítimo. Sin lista de precios en BRL.'],
-  ['México', 'MXN', 'Solo pedidos calificados por volumen.'],
-];
 
 /**
  * ALCANCE INTERNACIONAL, DECLARADO SIN INVENTAR COBERTURA.
@@ -140,11 +132,11 @@ export default function ExportacionPage() {
 
       <table className="mt-8 w-full text-sm">
         <tbody>
-          {MARKETS.map(([n, c, note]) => (
-            <tr key={n} className="border-t border-gray-100">
-              <td className="py-3 font-medium">{n}</td>
-              <td className="py-3 text-gray-500">{c}</td>
-              <td className="py-3 text-gray-600">{note}</td>
+          {MERCADOS.map((m) => (
+            <tr key={m.pais} className="border-t border-gray-100">
+              <td className="py-3 font-medium">{m.pais}</td>
+              <td className="py-3 text-gray-500">{m.moneda}</td>
+              <td className="py-3 text-gray-600">{m.nota}</td>
             </tr>
           ))}
         </tbody>

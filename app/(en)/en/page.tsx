@@ -63,7 +63,14 @@ export default function EnglishPage() {
         We manufacture in Peru. International supply is evaluated per order. We do not offer automatic worldwide shipping.
       </p>
       <p className="mt-6 text-sm">Sales: {SITE.email} · WhatsApp {SITE.phoneWhatsApp}</p>
-      <Link href="/cotizacion" className="btn mt-8 inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">File an RFQ</Link>
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <Link href="/en/sourcing-from-peru" className="inline-flex items-center justify-center rounded-2xl bg-[#0A2540] px-5 py-3 font-semibold text-white hover:bg-[#059669]">
+          How to source from Peru →
+        </Link>
+        <Link href="/cotizacion" className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-5 py-3 font-medium text-gray-700 hover:border-[#059669]/40 hover:text-[#059669]">
+          File an RFQ
+        </Link>
+      </div>
     </div>
   );
 }

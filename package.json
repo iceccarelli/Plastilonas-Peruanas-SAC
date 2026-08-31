@@ -33,7 +33,8 @@
     "seo:all": "npm run seo:consistency && npm run seo:claims && npm run seo:schema && npm run seo:links && npm run seo:prompts",
     "auditar": "node scripts/auditar-html.mjs",
     "auditar:json": "node scripts/auditar-html.mjs --json",
-    "typecheck": "rm -rf .next/types && tsc --noEmit"
+    "typecheck": "rm -rf .next/types && tsc --noEmit",
+    "entrega": "bash scripts/aplicar-entrega.sh"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",
