@@ -261,6 +261,65 @@ describe('etapa 10 — el comprador extranjero', () => {
   });
 });
 
+describe('etapa 11 — el camino en inglés se cierra', () => {
+  it('el grupo (en) usa su propia cabecera y pie, no los españoles', () => {
+    const layout = leer('app/(en)/layout.tsx');
+    expect(layout).toContain('HeaderEn');
+    expect(layout).toContain('FooterEn');
+    expect(layout).not.toContain("from '@/components/Navbar'");
+    expect(layout).not.toContain("from '@/components/Footer'");
+  });
+
+  it('el pie en inglés repite el NAP EXACTO del sitio en español', () => {
+    // Un NAP que cambia entre idiomas rompe el SEO local y la verificación.
+    const chrome = leer('components/ChromeEn.tsx');
+    expect(chrome).toContain('DIRECCION_COMPLETA');
+    expect(chrome).toContain('TELEFONOS');
+    expect(chrome).toContain('SITE.ruc');
+    // Y no reescribe la dirección a mano.
+    expect(chrome).not.toMatch(/Alameda del Remero/);
+  });
+
+  it('el marco en inglés avisa de que el catálogo está en español', () => {
+    // Decirlo ANTES del clic, no después.
+    expect(leer('components/ChromeEn.tsx')).toContain('published in');
+  });
+
+  it('el RFQ en inglés reutiliza el MISMO formulario, no uno paralelo', () => {
+    const rfq = leer('app/(en)/en/rfq/page.tsx');
+    expect(rfq).toContain("from '@/components/CotizacionForm'");
+    expect(rfq).toContain('idioma="en"');
+    // La lección de CotizacionModal: dos formularios son dos verdades.
+    expect(rfq).not.toContain('useForm');
+  });
+
+  it('el formulario traduce sin tocar una coma del camino en español', () => {
+    const form = leer('components/CotizacionForm.tsx');
+    expect(form).toContain("idioma = 'es'");
+    // El SLA en español sigue literal, y el inglés dice lo mismo.
+    expect(form).toContain(
+      'Respondemos en horario comercial en ≤2 horas hábiles con ficha técnica o con las preguntas que falten.',
+    );
+    expect(form).toContain('≤2 working hours');
+    // El placeholder inglés tampoco es un número de la empresa.
+    expect(form).not.toContain('946 085 270');
+  });
+
+  it('el lead declara su idioma, campo que /api/lead aceptaba y nunca recibía', () => {
+    expect(leer('components/CotizacionForm.tsx')).toContain('language: idioma');
+    expect(leer('app/api/lead/route.ts')).toContain("language: z.enum(['es', 'en', 'pt'])");
+  });
+
+  it('las páginas en inglés están en el sitemap y enlazadas entre sí', () => {
+    const urls = new Set(sitemap().map((e) => e.url));
+    for (const p of ['/en', '/en/sourcing-from-peru', '/en/rfq']) {
+      expect(urls.has(`${SITE.url}${p}`), `${p} falta en el sitemap`).toBe(true);
+    }
+    expect(leer('app/(en)/en/page.tsx')).toContain('/en/rfq');
+    expect(leer('app/(en)/en/sourcing-from-peru/page.tsx')).toContain('/en/rfq');
+  });
+});
+
 describe('etapa 3 — las tres cuñas', () => {
   it('cada cuña tiene página, entra al sitemap y aparece en llms.txt', () => {
     const urls = new Set(sitemap().map((e) => e.url));

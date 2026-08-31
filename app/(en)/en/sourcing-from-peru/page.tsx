@@ -248,10 +248,10 @@ export default function SourcingFromPeruPage() {
         </p>
         <div className="flex flex-col justify-center gap-3 sm:flex-row">
           <Link
-            href="/cotizacion"
+            href="/en/rfq"
             className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
           >
-            RFQ form
+            RFQ form (in English)
           </Link>
           <WhatsAppLink
             context="en-sourcing"

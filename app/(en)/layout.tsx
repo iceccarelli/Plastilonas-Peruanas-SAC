@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { fontClasses } from '@/lib/fonts';
 import '../globals.css';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { HeaderEn, FooterEn } from '@/components/ChromeEn';
 import StructuredData from '@/components/StructuredData';
 import Analytics from '@/components/Analytics';
 import ConsentBanner from '@/components/ConsentBanner';
@@ -49,9 +48,9 @@ export default function EnglishLayout({ children }: { children: React.ReactNode 
         <StructuredData />
         <Analytics />
         <AuthProvider>
-          <Navbar />
+          <HeaderEn />
           <main className="min-h-screen">{children}</main>
-          <Footer />
+          <FooterEn />
         </AuthProvider>
         <ConsentBanner />
       </body>

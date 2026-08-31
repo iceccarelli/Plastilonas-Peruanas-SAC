@@ -39,14 +39,101 @@ import { postLead } from '@/lib/lead';
 import { errorRuc, normalizarRuc } from '@/lib/ruc';
 import { supabaseBrowser } from '@/lib/supabase';
 
-/** Copia del SLA — verbatim, no editar sin decisión comercial. */
-export const SLA_COTIZACION =
-  'Respondemos en horario comercial en ≤2 horas hábiles con ficha técnica o con las preguntas que falten.';
-
 const EXTENSIONES = ['pdf', 'jpg', 'jpeg', 'png', 'dwg', 'dxf'];
 const MAX_ARCHIVOS = 5;
 const MAX_BYTES = 20 * 1024 * 1024; // 20 MB
 const BORRADOR_KEY = 'pp_rfq_borrador';
+
+/** Copia del SLA — verbatim, no editar sin decisión comercial. */
+export const SLA_COTIZACION =
+  'Respondemos en horario comercial en ≤2 horas hábiles con ficha técnica o con las preguntas que falten.';
+
+/** Su equivalente en inglés. Dice lo MISMO: mismo plazo, misma condición. */
+export const SLA_QUOTE_EN =
+  'We reply within business hours in ≤2 working hours with a technical datasheet, or with the questions still missing.';
+
+export type Idioma = 'es' | 'en';
+
+/**
+ * CADENAS DEL FORMULARIO, EN DOS IDIOMAS.
+ *
+ * Viven en ESTE archivo a propósito, no en un lib de traducciones. Dos
+ * motivos, y el segundo importa más:
+ *
+ *  1. Son las cadenas de un solo componente; sacarlas obligaría a saltar
+ *     entre dos archivos para leer un formulario.
+ *  2. Varias pruebas afirman la copia en español LITERALMENTE —el SLA, el
+ *     placeholder del teléfono que no puede ser el de la empresa, los
+ *     formatos de adjunto—. Manteniéndolas aquí, esas pruebas siguen
+ *     protegiendo el camino en español, que es el que produce el negocio.
+ *
+ * El español es byte a byte el que ya estaba: esta traducción no toca una
+ * sola coma del formulario que ya funciona.
+ */
+const T = {
+  es: {
+    nombre: 'Nombre y apellido *', nombrePh: 'Juan Pérez García',
+    empresa: 'Empresa *', empresaPh: 'Minera XYZ S.A.C.',
+    ruc: 'RUC (opcional)', rucPh: '20123456789',
+    email: 'Correo *', emailPh: 'compras@suempresa.com',
+    telefono: 'Teléfono *', telefonoPh: '+51 9XX XXX XXX',
+    producto: 'Producto', productoOpc: '(opcional)', productoPh: 'Seleccione un producto…',
+    cantidad: 'Medidas / cantidad', cantidadPh: 'Ej: 2 500 m² · 40 mangas Ø600 · 12 toldos',
+    ciudad: 'Ciudad de entrega *', ciudadPh: 'Arequipa',
+    fecha: 'Fecha en que lo necesita',
+    mensaje: 'Descripción del requerimiento *',
+    mensajePh: 'Ej: Necesitamos 40 big bags de 1 tonelada con faldón y descarga, para concentrado. Entrega en Arequipa la primera semana del mes.',
+    adjuntos: 'Planos o fotos (opcional)',
+    adjuntosNota: `PDF, JPG, PNG, DWG o DXF · hasta ${MAX_ARCHIVOS} archivos · máx. 20 MB c/u`,
+    quitar: (n: string) => `Quitar ${n}`,
+    enviar: 'Enviar solicitud de cotización', enviando: 'Preparando su solicitud…',
+    sla: SLA_COTIZACION,
+    nota: 'Su solicitud se abre en WhatsApp lista para enviar y llega también a nuestro registro comercial. Sin listas de precios en líneas a medida: cada RFQ se responde con especificación.',
+    okTitulo: 'Solicitud registrada',
+    okCodigo: 'Código de su solicitud:',
+    okAbrio: 'Se abrió WhatsApp con su solicitud estructurada: pulse enviar ahí y quedará en manos del equipo comercial.',
+    okBloqueado: 'Su navegador bloqueó la ventana de WhatsApp, pero la solicitud ya entró en nuestro registro comercial.',
+    okEnlace: 'Abrir WhatsApp con mi solicitud',
+    errMax: `Máximo ${MAX_ARCHIVOS} archivos.`,
+    errTipo: (n: string) => `Formato no admitido: ${n}. Use PDF, JPG, PNG, DWG o DXF.`,
+    errPeso: (n: string) => `${n} supera los 20 MB.`,
+    toastOk: 'Su solicitud está lista en WhatsApp',
+    toastOkDesc: 'Pulse enviar en la ventana de WhatsApp para que nuestro equipo comercial la reciba de inmediato.',
+    toastBloq: 'Su solicitud quedó registrada',
+    toastBloqDesc: 'El navegador bloqueó la ventana de WhatsApp. Su solicitud ya entró en nuestro registro; abajo tiene el enlace para enviarla también por WhatsApp.',
+  },
+  en: {
+    nombre: 'Full name *', nombrePh: 'Jane Doe',
+    empresa: 'Company *', empresaPh: 'Acme Mining Ltd.',
+    ruc: 'Tax ID (optional)', rucPh: '20123456789',
+    email: 'Email *', emailPh: 'procurement@yourcompany.com',
+    telefono: 'Phone *', telefonoPh: '+1 555 000 0000',
+    producto: 'Product', productoOpc: '(optional)', productoPh: 'Select a product…',
+    cantidad: 'Dimensions / quantity', cantidadPh: 'e.g. 2,500 m² · 40 ducts Ø600 · 12 tarpaulins',
+    ciudad: 'Delivery city or port *', ciudadPh: 'Callao · Valparaíso · Houston',
+    fecha: 'Date you need it',
+    mensaje: 'Describe your requirement *',
+    mensajePh: 'e.g. We need 40 one-tonne big bags with skirt and discharge spout, for concentrate. Delivery FOB Callao in the first week of the month.',
+    adjuntos: 'Drawings or photos (optional)',
+    adjuntosNota: `PDF, JPG, PNG, DWG or DXF · up to ${MAX_ARCHIVOS} files · max. 20 MB each`,
+    quitar: (n: string) => `Remove ${n}`,
+    enviar: 'Send request for quotation', enviando: 'Preparing your request…',
+    sla: SLA_QUOTE_EN,
+    nota: 'Your request opens in WhatsApp ready to send and also reaches our commercial record. No price lists on made-to-measure lines: every RFQ is answered with a specification.',
+    okTitulo: 'Request registered',
+    okCodigo: 'Your request reference:',
+    okAbrio: 'WhatsApp opened with your structured request: press send there and it reaches the sales team.',
+    okBloqueado: 'Your browser blocked the WhatsApp window, but the request already reached our commercial record.',
+    okEnlace: 'Open WhatsApp with my request',
+    errMax: `Maximum ${MAX_ARCHIVOS} files.`,
+    errTipo: (n: string) => `Unsupported format: ${n}. Use PDF, JPG, PNG, DWG or DXF.`,
+    errPeso: (n: string) => `${n} exceeds 20 MB.`,
+    toastOk: 'Your request is ready in WhatsApp',
+    toastOkDesc: 'Press send in the WhatsApp window so our sales team receives it right away.',
+    toastBloq: 'Your request was registered',
+    toastBloqDesc: 'The browser blocked the WhatsApp window. Your request already reached our record; the link below sends it via WhatsApp too.',
+  },
+} as const;
 
 function esquema(productoObligatorio: boolean) {
   return z.object({
@@ -87,6 +174,8 @@ export interface OpcionProducto {
 interface Props {
   /** Catálogo reducido, resuelto en el servidor. */
   opciones: OpcionProducto[];
+  /** Idioma de la interfaz. 'es' por defecto: el camino que produce el negocio. */
+  idioma?: Idioma;
   /** Nombre de producto preseleccionado (de ?producto= o comparativa). */
   preselectedProduct?: string;
   /** Slug del producto de origen, si el enlace lo trajo. */
@@ -106,7 +195,8 @@ function leerUtm(): Record<string, string> {
   return out;
 }
 
-export default function CotizacionForm({ opciones, preselectedProduct, slugOrigen, preselectedMessage }: Props) {
+export default function CotizacionForm({ opciones, idioma = 'es', preselectedProduct, slugOrigen, preselectedMessage }: Props) {
+  const t = T[idioma];
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
   const [archivos, setArchivos] = React.useState<File[]>([]);
@@ -177,17 +267,17 @@ export default function CotizacionForm({ opciones, preselectedProduct, slugOrige
     setErrorArchivos(null);
     const todos = [...archivos, ...nuevos];
     if (todos.length > MAX_ARCHIVOS) {
-      setErrorArchivos(`Máximo ${MAX_ARCHIVOS} archivos.`);
+      setErrorArchivos(t.errMax);
       return;
     }
     for (const f of nuevos) {
       const ext = f.name.split('.').pop()?.toLowerCase() ?? '';
       if (!EXTENSIONES.includes(ext)) {
-        setErrorArchivos(`Formato no admitido: ${f.name}. Use PDF, JPG, PNG, DWG o DXF.`);
+        setErrorArchivos(t.errTipo(f.name));
         return;
       }
       if (f.size > MAX_BYTES) {
-        setErrorArchivos(`${f.name} supera los 20 MB.`);
+        setErrorArchivos(t.errPeso(f.name));
         return;
       }
     }
@@ -273,6 +363,7 @@ export default function CotizacionForm({ opciones, preselectedProduct, slugOrige
       path: typeof window !== 'undefined' ? window.location.pathname + window.location.search : undefined,
       slug: slugOrigen,
       archivos: refsArchivos,
+      language: idioma,
     });
 
     const abrio = openWhatsApp(message);
@@ -287,15 +378,10 @@ export default function CotizacionForm({ opciones, preselectedProduct, slugOrige
 
     setIsSubmitting(false);
     setIsSuccess(true);
-    toast.success(
-      abrio ? 'Su solicitud está lista en WhatsApp' : 'Su solicitud quedó registrada',
-      {
-        description: abrio
-          ? 'Pulse enviar en la ventana de WhatsApp para que nuestro equipo comercial la reciba de inmediato.'
-          : 'El navegador bloqueó la ventana de WhatsApp. Su solicitud ya entró en nuestro registro; abajo tiene el enlace para enviarla también por WhatsApp.',
-        duration: 9000,
-      },
-    );
+    toast.success(abrio ? t.toastOk : t.toastBloq, {
+      description: abrio ? t.toastOkDesc : t.toastBloqDesc,
+      duration: 9000,
+    });
   };
 
   const campo =
@@ -307,22 +393,20 @@ export default function CotizacionForm({ opciones, preselectedProduct, slugOrige
     return (
       <div className="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-10 text-center">
         <CheckCircle className="mx-auto mb-4 h-10 w-10 text-[#059669]" />
-        <div className="text-xl font-semibold text-[#0A2540]">Solicitud registrada</div>
+        <div className="text-xl font-semibold text-[#0A2540]">{t.okTitulo}</div>
 
         {/* ACUSE DE RECIBO. El código RFQ lo emite /api/lead y hasta ahora se
             descartaba en el cliente: el comprador se iba sin nada que citar si
             quería preguntar por su solicitud. */}
         {acuse?.rfqId && (
           <p className="mt-3 font-mono text-sm text-[#0A2540]">
-            Código de su solicitud: <strong>{acuse.rfqId}</strong>
+            {t.okCodigo} <strong>{acuse.rfqId}</strong>
           </p>
         )}
 
         <p className="mx-auto mt-3 max-w-md text-sm text-gray-600">
-          {acuse?.abrio
-            ? 'Se abrió WhatsApp con su solicitud estructurada: pulse enviar ahí y quedará en manos del equipo comercial.'
-            : 'Su navegador bloqueó la ventana de WhatsApp, pero la solicitud ya entró en nuestro registro comercial.'}{' '}
-          {SLA_COTIZACION}
+          {acuse?.abrio ? t.okAbrio : t.okBloqueado}{' '}
+          {t.sla}
         </p>
 
         {/* Salida manual: un window.open bloqueado dejaba al comprador mirando
@@ -334,7 +418,7 @@ export default function CotizacionForm({ opciones, preselectedProduct, slugOrige
             rel="noopener noreferrer"
             className="mt-5 inline-flex items-center justify-center rounded-2xl bg-[#0A2540] px-8 py-3 font-semibold text-white hover:bg-[#059669]"
           >
-            Abrir WhatsApp con mi solicitud
+            {t.okEnlace}
           </a>
         )}
       </div>
@@ -345,37 +429,37 @@ export default function CotizacionForm({ opciones, preselectedProduct, slugOrige
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="text-left">
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="rfq-nombre" className={etiqueta}>Nombre y apellido *</label>
-          <input id="rfq-nombre" {...register('nombre')} placeholder="Juan Pérez García" className={campo} autoComplete="name" />
+          <label htmlFor="rfq-nombre" className={etiqueta}>{t.nombre}</label>
+          <input id="rfq-nombre" {...register('nombre')} placeholder={t.nombrePh} className={campo} autoComplete="name" />
           {errors.nombre && <p className={error}>{errors.nombre.message}</p>}
         </div>
         <div>
-          <label htmlFor="rfq-empresa" className={etiqueta}>Empresa *</label>
-          <input id="rfq-empresa" {...register('empresa')} placeholder="Minera XYZ S.A.C." className={campo} autoComplete="organization" />
+          <label htmlFor="rfq-empresa" className={etiqueta}>{t.empresa}</label>
+          <input id="rfq-empresa" {...register('empresa')} placeholder={t.empresaPh} className={campo} autoComplete="organization" />
           {errors.empresa && <p className={error}>{errors.empresa.message}</p>}
         </div>
         <div>
-          <label htmlFor="rfq-ruc" className={etiqueta}>RUC (opcional)</label>
-          <input id="rfq-ruc" {...register('ruc')} placeholder="20123456789" inputMode="numeric" className={campo} />
+          <label htmlFor="rfq-ruc" className={etiqueta}>{t.ruc}</label>
+          <input id="rfq-ruc" {...register('ruc')} placeholder={t.rucPh} inputMode="numeric" className={campo} />
           {errors.ruc && <p className={error}>{errors.ruc.message}</p>}
         </div>
         <div>
-          <label htmlFor="rfq-email" className={etiqueta}>Correo *</label>
-          <input id="rfq-email" type="email" {...register('email')} placeholder="compras@suempresa.com" className={campo} autoComplete="email" />
+          <label htmlFor="rfq-email" className={etiqueta}>{t.email}</label>
+          <input id="rfq-email" type="email" {...register('email')} placeholder={t.emailPh} className={campo} autoComplete="email" />
           {errors.email && <p className={error}>{errors.email.message}</p>}
         </div>
         <div>
-          <label htmlFor="rfq-telefono" className={etiqueta}>Teléfono *</label>
+          <label htmlFor="rfq-telefono" className={etiqueta}>{t.telefono}</label>
           {/* Placeholder genérico a propósito: NUNCA el número de la empresa. */}
-          <input id="rfq-telefono" type="tel" {...register('telefono')} placeholder="+51 9XX XXX XXX" className={campo} autoComplete="tel" />
+          <input id="rfq-telefono" type="tel" {...register('telefono')} placeholder={t.telefonoPh} className={campo} autoComplete="tel" />
           {errors.telefono && <p className={error}>{errors.telefono.message}</p>}
         </div>
         <div>
           <label htmlFor="rfq-producto" className={etiqueta}>
-            Producto {productoObligatorio ? '*' : '(opcional)'}
+            {t.producto} {productoObligatorio ? '*' : t.productoOpc}
           </label>
           <select id="rfq-producto" {...register('producto')} className={campo}>
-            <option value="">Seleccione un producto…</option>
+            <option value="">{t.productoPh}</option>
             {opciones.map((p) => (
               <option key={p.slug} value={p.name}>{p.name}</option>
             ))}
@@ -383,36 +467,36 @@ export default function CotizacionForm({ opciones, preselectedProduct, slugOrige
           {errors.producto && <p className={error}>{errors.producto.message}</p>}
         </div>
         <div>
-          <label htmlFor="rfq-cantidad" className={etiqueta}>Medidas / cantidad</label>
-          <input id="rfq-cantidad" {...register('cantidad')} placeholder="Ej: 2 500 m² · 40 mangas Ø600 · 12 toldos" className={campo} />
+          <label htmlFor="rfq-cantidad" className={etiqueta}>{t.cantidad}</label>
+          <input id="rfq-cantidad" {...register('cantidad')} placeholder={t.cantidadPh} className={campo} />
         </div>
         <div>
-          <label htmlFor="rfq-ciudad" className={etiqueta}>Ciudad de entrega *</label>
-          <input id="rfq-ciudad" {...register('ciudadEntrega')} placeholder="Arequipa" className={campo} autoComplete="address-level2" />
+          <label htmlFor="rfq-ciudad" className={etiqueta}>{t.ciudad}</label>
+          <input id="rfq-ciudad" {...register('ciudadEntrega')} placeholder={t.ciudadPh} className={campo} autoComplete="address-level2" />
           {errors.ciudadEntrega && <p className={error}>{errors.ciudadEntrega.message}</p>}
         </div>
         <div>
-          <label htmlFor="rfq-fecha" className={etiqueta}>Fecha en que lo necesita</label>
+          <label htmlFor="rfq-fecha" className={etiqueta}>{t.fecha}</label>
           {/* type="date": el navegador lo presenta dd/mm/aaaa en es-PE. */}
           <input id="rfq-fecha" type="date" lang="es-PE" {...register('fechaNecesaria')} className={campo} />
         </div>
         <div className="sm:col-span-2">
-          <label htmlFor="rfq-mensaje" className={etiqueta}>Descripción del requerimiento *</label>
+          <label htmlFor="rfq-mensaje" className={etiqueta}>{t.mensaje}</label>
           <textarea
             id="rfq-mensaje"
             rows={4}
             {...register('mensaje')}
-            placeholder="Ej: Necesitamos 40 big bags de 1 tonelada con faldón y descarga, para concentrado. Entrega en Arequipa la primera semana del mes."
+            placeholder={t.mensajePh}
             className={campo}
           />
           {errors.mensaje && <p className={error}>{errors.mensaje.message}</p>}
         </div>
 
         <div className="sm:col-span-2">
-          <span className={etiqueta}>Planos o fotos (opcional)</span>
+          <span className={etiqueta}>{t.adjuntos}</span>
           <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-gray-300 dark:border-[var(--border)] px-4 py-3 text-sm text-gray-600 hover:border-[#059669]">
             <Paperclip className="h-4 w-4" />
-            PDF, JPG, PNG, DWG o DXF · hasta {MAX_ARCHIVOS} archivos · máx. 20 MB c/u
+            {t.adjuntosNota}
             <input
               type="file"
               multiple
@@ -430,7 +514,7 @@ export default function CotizacionForm({ opciones, preselectedProduct, slugOrige
                   <span className="text-gray-400">{Math.round(f.size / 1024)} KB</span>
                   <button
                     type="button"
-                    aria-label={`Quitar ${f.name}`}
+                    aria-label={t.quitar(f.name)}
                     onClick={() => setArchivos(archivos.filter((_, j) => j !== i))}
                     className="text-gray-400 hover:text-red-600"
                   >
@@ -449,15 +533,12 @@ export default function CotizacionForm({ opciones, preselectedProduct, slugOrige
         className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0A2540] px-8 py-4 font-semibold text-white transition-all hover:bg-[#059669] active:scale-[0.985] disabled:opacity-60"
       >
         <Send className="h-4 w-4" />
-        {isSubmitting ? 'Preparando su solicitud…' : 'Enviar solicitud de cotización'}
+        {isSubmitting ? t.enviando : t.enviar}
       </button>
 
       {/* SLA — verbatim. */}
-      <p className="mt-4 text-center text-sm text-gray-600">{SLA_COTIZACION}</p>
-      <p className="mt-2 text-center text-xs text-gray-400">
-        Su solicitud se abre en WhatsApp lista para enviar y llega también a nuestro registro
-        comercial. Sin listas de precios en líneas a medida: cada RFQ se responde con especificación.
-      </p>
+      <p className="mt-4 text-center text-sm text-gray-600">{t.sla}</p>
+      <p className="mt-2 text-center text-xs text-gray-400">{t.nota}</p>
     </form>
   );
 }
