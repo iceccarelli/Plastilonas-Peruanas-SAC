@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { SITE, HORARIO, TELEFONOS } from '@/lib/site';
 import { MAPA_URL, DIRECCION_COMPLETA } from '@/components/NAP';
 import WhatsAppLink from '@/components/WhatsAppLink';
+import { ENLACES_CUNAS_EN } from '@/lib/cunas-en';
 
 /**
  * CABECERA Y PIE DEL GRUPO (en).
@@ -29,6 +30,14 @@ const ENLACES_EN = [
   { href: '/en/sourcing-from-peru', label: 'Sourcing from Peru' },
   { href: '/en/rfq', label: 'Request a quote' },
 ];
+
+/**
+ * Las tres cuñas en inglés van en el PIE y no en la barra: la barra tiene tres
+ * decisiones y seis son ninguna. En el pie, en cambio, son el enlace interno
+ * que da peso a las tres páginas por las que este sitio quiere ser la
+ * respuesta en inglés, desde todas las demás.
+ */
+const PRODUCTOS_EN = ENLACES_CUNAS_EN;
 
 export function HeaderEn() {
   return (
@@ -120,6 +129,15 @@ export function FooterEn() {
                 </li>
               ))}
             </ul>
+            <div className="mt-6 font-semibold text-[#0A2540] dark:text-inherit mb-2">What we make</div>
+            <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+              {PRODUCTOS_EN.map((e) => (
+                <li key={e.href}>
+                  <Link href={e.href} className="hover:text-[#047857]">{e.label}</Link>
+                </li>
+              ))}
+            </ul>
+
             {/* Decirlo antes del clic, no después. */}
             <p className="mt-5 text-gray-500">
               The product catalogue, technical library and specification guides are published in

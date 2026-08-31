@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { cunas } from '@/lib/cunas';
+import { CUNAS_EN, cunaEsDeEn } from '@/lib/cunas-en';
+import { products } from '@/lib/products';
 import { STATS, FABRICACION_PROPIA_COUNT } from '@/lib/facts';
 import sitemap from '@/lib/sitemaps';
 import { SITE } from '@/lib/site';
@@ -345,5 +347,118 @@ describe('etapa 3 — las tres cuñas', () => {
     expect(nf).toContain('role="search"');
     expect(nf).toContain('WhatsAppLink');
     expect(nf).toContain('cunas');
+  });
+});
+
+describe('etapa 12 — las tres cuñas hablan inglés', () => {
+  it('cada cuña española tiene exactamente una gemela inglesa, y al revés', () => {
+    // Biyección. Sin esto, la cuarta cuña nacería coja: española y muda para
+    // el comprador extranjero, que es justo a quien esta etapa vino a servir.
+    expect(CUNAS_EN).toHaveLength(cunas.length);
+    expect(CUNAS_EN.map((c) => c.slugEs).sort()).toEqual(cunas.map((c) => c.slug).sort());
+    expect(new Set(CUNAS_EN.map((c) => c.slug)).size).toBe(CUNAS_EN.length);
+    // La gemela resuelve a su original sin lanzar.
+    for (const c of CUNAS_EN) expect(() => cunaEsDeEn(c), c.slug).not.toThrow();
+  });
+
+  it('la gemela inglesa no contradice a su original en ningún dato duro', () => {
+    // El contenido se escribe dos veces; los HECHOS se leen una sola. Los
+    // productos, la foto y los indicadores del BCRP salen de la cuña
+    // española, así que no pueden divergir aunque alguien lo intente.
+    for (const c of CUNAS_EN) {
+      const es = cunaEsDeEn(c);
+      expect(es.productSlugs.length, c.slug).toBeGreaterThan(0);
+      // El checklist inglés cubre lo mismo que el español: mismo número de
+      // datos exigidos. Un RFQ inglés más corto sería un RFQ peor atendido.
+      expect(c.checklist.length, c.slug).toBe(es.checklist.length);
+    }
+  });
+
+  it('el bloque de honestidad no se suaviza al traducir', () => {
+    for (const c of CUNAS_EN) {
+      const es = cunaEsDeEn(c);
+      expect(c.queHacemos.length, c.slug).toBeGreaterThanOrEqual(2);
+      // Lo que NO se afirma nunca puede encoger en el idioma en que el
+      // comprador tiene menos forma de verificarlo por su cuenta.
+      expect(c.queNoAfirmamos.length, c.slug).toBeGreaterThanOrEqual(es.queNoAfirmamos.length);
+      expect(c.faqs.length, c.slug).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('cada gemela tiene ruta, entra al sitemap y se anuncia en llms.txt', () => {
+    const urls = new Set(sitemap().map((e) => e.url));
+    const llms = leer('app/llms.txt/route.ts');
+    for (const c of CUNAS_EN) {
+      expect(() => leer(`app/(en)/en/${c.slug}/page.tsx`), c.slug).not.toThrow();
+      expect(urls.has(`${SITE.url}/en/${c.slug}`), `${c.slug} falta en el sitemap`).toBe(true);
+      expect(llms, `${c.slug} falta en llms.txt`).toContain(`/en/${c.slug}`);
+    }
+  });
+
+  it('el hub de compra ya no suelta al comprador en una página que no lee', () => {
+    // El defecto que esta etapa vino a cerrar: /en/sourcing-from-peru
+    // enlazaba las tres cuñas con la coletilla «(page in Spanish)».
+    const hub = leer('app/(en)/en/sourcing-from-peru/page.tsx');
+    expect(hub).not.toContain('(page in Spanish)');
+    // Las tres salen de la fuente y el enlace se compone: si mañana cambia un
+    // slug, cambia solo. Por eso se comprueba el patrón, no tres literales.
+    expect(hub).toContain("from '@/lib/cunas-en'");
+    expect(hub).toContain('CUNAS_EN.map');
+    expect(hub).toContain('href={`/en/${c.slug}`}');
+    // Y la portada inglesa también las enlaza.
+    const portada = leer('app/(en)/en/page.tsx');
+    expect(portada).toContain('CUNAS_EN.map');
+    expect(portada).toContain('href={`/en/${c.slug}`}');
+    // El pie inglés les da peso interno desde todas las páginas del grupo.
+    expect(leer('components/ChromeEn.tsx')).toContain('ENLACES_CUNAS_EN');
+  });
+
+  it('la plantilla inglesa reusa el catálogo, no lo reescribe', () => {
+    const tpl = leer('components/CunaHubEn.tsx');
+    expect(tpl).toContain('cunaEsDeEn');
+    expect(tpl).toContain("from '@/lib/products'");
+    expect(tpl).toContain('sourcingLabelsEn');
+    // Canal declarado: el formulario que contesta en inglés (etapa 11).
+    expect(tpl).toContain("serviceUrl: `${SITE.url}/en/rfq`");
+    expect(tpl).toContain("availableLanguage: ['en', 'es-PE']");
+    // Y avisa del idioma de la ficha ANTES del clic, no después.
+    expect(tpl).toContain('Open datasheet (in Spanish)');
+  });
+
+  it('el aviso de foto referencial sobrevive a la traducción', () => {
+    // /confianza promete no publicar obra ejecutada. Una etiqueta que sólo
+    // existe en español convierte la misma foto en un caso de éxito implícito
+    // para el lector inglés.
+    const foto = leer('components/FotoReferencial.tsx');
+    expect(foto).toContain('does not document a project delivered');
+    expect(leer('components/CunaHubEn.tsx')).toContain('idioma="en"');
+  });
+
+  it('la franja de costo se traduce con su separador decimal', () => {
+    // «79,99» leído por un comprador anglosajón es 7 999. El formato numérico
+    // no es cosmética en una página donde se decide una compra.
+    const costo = leer('components/CostoEnVivo.tsx');
+    expect(costo).toContain('numeroEN');
+    expect(costo).toContain('SIGNIFICADO_EN');
+    expect(costo).toContain('SERIE_EN');
+    expect(leer('lib/format.ts')).toContain('export function numeroEN');
+  });
+
+  it('las etiquetas de origen inglesas cubren todos los modos del catálogo', () => {
+    const modos = new Set(products.map((p) => p.sourcing).filter(Boolean) as string[]);
+    const src = leer('lib/products.ts');
+    const bloque = src.slice(src.indexOf('sourcingLabelsEn'));
+    for (const m of modos) {
+      expect(bloque.slice(0, 400), `sourcingLabelsEn no traduce «${m}»`).toContain(m);
+    }
+  });
+
+  it('ninguna página inglesa inventa un teléfono ni una cobertura mundial', () => {
+    for (const c of CUNAS_EN) {
+      const texto = [...c.intro, ...c.queHacemos, ...c.queNoAfirmamos, ...c.faqs.map((f) => f.a)].join(' ');
+      expect(texto.toLowerCase(), c.slug).not.toContain('worldwide shipping to');
+      expect(texto, c.slug).not.toMatch(/ISO\s?9001/);
+      expect(texto, c.slug).not.toMatch(/998\s?117\s?065|946\s?085\s?270/);
+    }
   });
 });

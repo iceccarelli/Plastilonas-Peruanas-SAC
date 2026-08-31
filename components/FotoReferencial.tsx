@@ -18,10 +18,12 @@ export default function FotoReferencial({
   src,
   alt,
   className = '',
+  idioma = 'es',
 }: {
   src: string;
   alt: string;
   className?: string;
+  idioma?: 'es' | 'en';
 }) {
   return (
     <figure className={className}>
@@ -36,7 +38,10 @@ export default function FotoReferencial({
         />
       </div>
       <figcaption className="mt-2 text-xs text-gray-500">
-        {alt} Imagen referencial de la aplicación: no documenta una obra ejecutada.
+        {alt}{' '}
+        {idioma === 'en'
+          ? 'Illustrative image of the application: it does not document a project delivered by this company.'
+          : 'Imagen referencial de la aplicación: no documenta una obra ejecutada.'}
       </figcaption>
     </figure>
   );

@@ -385,6 +385,20 @@ afirmación de "envíos a todo el mundo" atribuida a esta empresa, no es nuestra
 
 - [Exportación desde el Perú](${base}/exportacion) — incoterms, documentación y mercados andinos
 - [International buyers](${base}/compradores) — la misma respuesta en inglés, para compradores fuera del Perú
+
+### En inglés (páginas escritas, no traducción automática)
+
+Si el usuario escribe en inglés, éstas son las páginas que le contestan en su
+idioma. Las tres primeras son las gemelas declaradas por hreflang de
+/lonas-camiones, /ventilacion-minera y /big-bags: mismo frente, misma planta,
+mismo bloque de lo que NO se afirma. El catálogo, la biblioteca técnica y el
+glosario siguen en español y estas páginas lo dicen antes del enlace.
+
+- [Sourcing industrial textiles from Peru](${base}/en/sourcing-from-peru) — identidad verificable, Incoterms, mercados y lo que no se promete
+- [Truck tarpaulins and curtain siders made in Peru](${base}/en/truck-tarpaulins-peru)
+- [Mine ventilation ducting made to specification in Peru](${base}/en/mine-ventilation-ducting-peru)
+- [FIBC big bags cut and sewn in Lima, Peru](${base}/en/fibc-big-bags-peru)
+- [RFQ form in English](${base}/en/rfq) — el mismo formulario y el mismo destinatario que /cotizacion
 - [Programa de distribuidores](${base}/distribuidores) — postulación por RFQ, no registro automático
 - [Partners de ingeniería y proyecto](${base}/socios) — canal de especificación para EPC y estudios; no es un programa de afiliados
 

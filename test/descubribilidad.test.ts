@@ -8,6 +8,7 @@ import { INDUSTRIAS } from '@/lib/industrias';
 import { projects, projectsPublicados } from '@/lib/projects';
 import { GET as llms } from '@/app/llms.txt/route';
 import sitemap from '@/lib/sitemaps';
+import { CUNAS_EN } from '@/lib/cunas-en';
 
 /**
  * SI NO ESTÁ DECLARADO, NO EXISTE.
@@ -154,11 +155,40 @@ describe('el sitemap declara lo mismo que el sitio publica', () => {
   });
 });
 
-describe('hreflang: un clúster recíproco y pequeño', () => {
-  const PAGINAS = ['app/(es)/page.tsx', 'app/(en)/en/page.tsx', 'app/(pt)/pt/page.tsx'];
+describe('hreflang: clústeres recíprocos y declarados', () => {
+  /**
+   * LA REGLA. hreflang significa «esta página es la MISMA cosa en otro
+   * idioma». No significa «este sitio también existe en inglés». Declararlo
+   * hacia un destino que no traduce el origen hace que Google descarte el
+   * clúster entero, y con él el caso en que sí correspondía.
+   *
+   * Por eso el sitio tiene clústeres PEQUEÑOS y EXACTOS, no una declaración
+   * global:
+   *
+   *  · el trío de portadas —/, /en, /pt—: tres puertas de entrada al mismo
+   *    proveedor, una por idioma;
+   *  · los tres pares de cuña —/lonas-camiones ↔ /en/truck-tarpaulins-peru y
+   *    sus hermanas—: misma oferta comercial, mismas líneas, misma planta,
+   *    escritas en dos idiomas (etapa 12).
+   *
+   * Y por eso las 275 fichas del catálogo siguen SIN hreflang: no tienen
+   * gemela. Esta prueba existe para que añadir una página en inglés no tiente
+   * a nadie a apuntarle media web.
+   */
+  const TRIO = ['app/(es)/page.tsx', 'app/(en)/en/page.tsx', 'app/(pt)/pt/page.tsx'];
+
+  /** Pares cuña ES ↔ EN: [ruta española, ruta inglesa, slug es, slug en]. */
+  const PARES: [string, string, string, string][] = CUNAS_EN.map((c) => [
+    `app/(es)/${c.slugEs}/page.tsx`,
+    `app/(en)/en/${c.slug}/page.tsx`,
+    c.slugEs,
+    c.slug,
+  ]);
+
+  const CON_HREFLANG = [...TRIO, ...PARES.flatMap(([es, en]) => [es, en])];
 
   it('las tres páginas de entrada se declaran entre sí', () => {
-    for (const p of PAGINAS) {
+    for (const p of TRIO) {
       const src = readFileSync(join(raiz, p), 'utf8');
       expect(src, `${p} no declara alternates.languages`).toContain('languages: ALTERNOS');
       for (const clave of ["'es-PE': '/'", "en: '/en'", "'pt-BR': '/pt'", "'x-default': '/'"]) {
@@ -167,20 +197,28 @@ describe('hreflang: un clúster recíproco y pequeño', () => {
     }
   });
 
+  it('cada par de cuña se declara en LOS DOS sentidos', () => {
+    // Un hreflang que sólo va de ida no es un clúster: es una afirmación sin
+    // confirmar, y Google la ignora. Se comprueba lado a lado.
+    for (const [rutaEs, rutaEn, slugEs, slugEn] of PARES) {
+      for (const ruta of [rutaEs, rutaEn]) {
+        const src = readFileSync(join(raiz, ruta), 'utf8');
+        expect(src, `${ruta} no declara alternates.languages`).toContain('languages: ALTERNOS');
+        expect(src, `${ruta} no apunta al español`).toContain(`'es-PE': '/${slugEs}'`);
+        expect(src, `${ruta} no apunta al inglés`).toContain(`en: '/en/${slugEn}'`);
+        // x-default al español: es el idioma del catálogo que hay detrás.
+        expect(src, `${ruta} no fija x-default`).toContain(`'x-default': '/${slugEs}'`);
+      }
+    }
+  });
+
   it('ninguna otra página emite hreflang', () => {
-    /**
-     * /en y /pt son una página de identidad y RFQ por idioma, no una
-     * traducción del catálogo. Declarar hreflang en una ficha de producto
-     * apuntaría a una portada en inglés que no la traduce, y Google descarta
-     * el clúster entero cuando el destino no corresponde: se perdería también
-     * el caso en que sí corresponde.
-     */
     const culpables: string[] = [];
     const recorrer = (dir: string) => {
       for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
         const rel = `${dir}/${e.name}`;
         if (e.isDirectory()) recorrer(rel);
-        else if (e.name === 'page.tsx' && !PAGINAS.includes(rel)) {
+        else if (e.name === 'page.tsx' && !CON_HREFLANG.includes(rel)) {
           if (/languages\s*:/.test(readFileSync(join(raiz, rel), 'utf8'))) culpables.push(rel);
         }
       }

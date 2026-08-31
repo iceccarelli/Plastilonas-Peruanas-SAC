@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { SITE, HORARIO } from '@/lib/site';
 import { PRODUCT_COUNT, FAMILY_COUNT, FABRICACION_PROPIA_COUNT, YEARS_OPERATING } from '@/lib/facts';
 import { INCOTERMS_SALIDA, MERCADOS, NO_AFIRMAMOS_EN } from '@/lib/exportacion';
-import { cunas } from '@/lib/cunas';
+import { CUNAS_EN } from '@/lib/cunas-en';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
 import WhatsAppLink from '@/components/WhatsAppLink';
@@ -18,16 +18,18 @@ import WhatsAppLink from '@/components/WhatsAppLink';
  * /exportacion y /confianza. Un comprador en Santiago, Bogotá o Houston no lo
  * lee. Esta página libera esa sustancia; no inventa ninguna.
  *
- * SIN hreflang, y es deliberado. El clúster recíproco del sitio son tres
+ * SIN hreflang, y es deliberado —a diferencia de las tres cuñas inglesas que
+ * esta página enlaza, que desde la etapa 12 SÍ lo declaran porque sí tienen
+ * gemela española exacta—. El clúster recíproco del sitio son tres
  * páginas —/, /en, /pt— y esta no es la traducción de ninguna: es una síntesis
  * en inglés de /exportacion más las tres cuñas. Declarar hreflang hacia un
  * destino que no corresponde hace que Google descarte el clúster entero,
  * incluido el caso en que sí corresponde. La regla y su prueba viven en
  * test/descubribilidad.test.ts.
  *
- * TODO(HUMAN): la cabecera y el pie siguen en español, como ya ocurría en /en.
- * Una navegación bilingüe es un cambio de otro tamaño; esta página es
- * autocontenida a propósito, con sus propios enlaces internos.
+ * (La cabecera y el pie ingleses llegaron en la etapa 11: components/ChromeEn.tsx.
+ * Las tres cuñas en inglés, en la etapa 12: lib/cunas-en.ts. Esta página dejó de
+ * ser el final del camino y pasó a ser su vestíbulo.)
  */
 
 const URL_PAGINA = `${SITE.url}/en/sourcing-from-peru`;
@@ -142,17 +144,17 @@ export default function SourcingFromPeruPage() {
           export enquiries:
         </p>
         <ul className="space-y-3">
-          {cunas.map((c) => (
+          {CUNAS_EN.map((c) => (
             <li key={c.slug}>
               <Link
-                href={`/${c.slug}`}
+                href={`/en/${c.slug}`}
                 className="group block rounded-2xl border border-gray-100 p-5 transition-colors hover:border-[#059669]/40"
               >
                 <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669]">
                   {c.titulo}
                 </span>
                 <span className="mt-1 block text-sm text-gray-600">
-                  Specification checklist, child products and what we do not claim (page in Spanish).
+                  {c.descripcion}
                 </span>
               </Link>
             </li>

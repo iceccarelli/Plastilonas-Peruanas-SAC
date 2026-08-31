@@ -226,3 +226,36 @@ export async function leerIndicadores(ahora: Date): Promise<EstadoIndicadores> {
     ],
   };
 }
+
+/**
+ * LOS MISMOS INDICADORES, EN INGLÉS.
+ *
+ * No es una traducción decorativa. La franja de costo es la única cosa que
+ * este sitio publica y la competencia del rubro no: un jefe de compras en
+ * Santiago o Houston que ve el WTI y el tipo de cambio con SU fecha entiende
+ * por qué una cotización de hace tres meses ya no vale, y entiende que quien
+ * se lo enseña no le está escondiendo la formación del precio.
+ *
+ * Se mantiene la misma prudencia que en español: dirección del efecto y
+ * desfase, nunca una fórmula de traspaso a precio.
+ */
+export const SERIE_EN: Record<string, { etiqueta: string; unidad: string }> = {
+  PN01660XM: { etiqueta: 'WTI crude oil', unidad: 'US$ per barrel' },
+  PN01652XM: { etiqueta: 'LME copper', unidad: 'US¢ per pound' },
+  PN01657XM: { etiqueta: 'LME zinc', unidad: 'US¢ per pound' },
+  PN01656XM: { etiqueta: 'LME lead', unidad: 'US¢ per pound' },
+  PD04640PD: { etiqueta: 'Exchange rate (ask)', unidad: 'soles per US dollar' },
+};
+
+export const SIGNIFICADO_EN: Record<string, string> = {
+  PN01660XM:
+    'Head of the resin chain: crude moves naphtha, naphtha moves polypropylene and polypropylene moves the fabric. The pass-through arrives weeks later, delayed by inventory.',
+  PD04640PD:
+    'Resin is bought in dollars and Peruvian invoices are issued in soles: the exchange rate enters the final price directly.',
+  PN01652XM:
+    'Copper: open-pit and hydrometallurgical activity, which is the demand for lining and covering.',
+  PN01657XM:
+    'Zinc: underground activity, which is the demand for ventilation ducting.',
+  PN01656XM:
+    'Lead: travels with zinc in the same underground operation.',
+};

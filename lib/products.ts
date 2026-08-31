@@ -1672,6 +1672,19 @@ export const sourcingLabels: Record<string, string> = {
   partner: 'Aliado técnico'
 };
 
+/**
+ * Las mismas etiquetas en inglés. La distinción fabricación / importación /
+ * suministro es lo primero que audita un comprador extranjero, y traducirla
+ * a ojo en cada página inglesa era la forma segura de que un día dijeran
+ * cosas distintas. Vive junto a su original.
+ */
+export const sourcingLabelsEn: Record<string, string> = {
+  fabricacion_propia: 'Own manufacturing',
+  importacion_directa: 'Direct import',
+  bajo_pedido: 'Specialist supply',
+  partner: 'Technical partner'
+};
+
 export const availabilityLabels: Record<string, string> = {
   stock: 'Stock disponible',
   a_medida: 'Fabricación a medida',

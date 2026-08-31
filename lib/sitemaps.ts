@@ -15,6 +15,7 @@ import { applications } from "@/lib/applications";
 import { guides } from "@/lib/guides";
 import { SUPERFICIES_INDEXABLES } from "@/lib/superficies-maquina";
 import { cunas } from "@/lib/cunas";
+import { CUNAS_EN } from "@/lib/cunas-en";
 
 /**
  * SITEMAPS — índice + cuatro secciones, con lastmod REAL.
@@ -98,6 +99,17 @@ export function seccionPaginas(): EntradaSitemap[] {
     // el clúster recíproco de tres sigue intacto.
     { url: `${SITE.url}/en/sourcing-from-peru`, lastModified: paginas, changeFrequency: "monthly", priority: 0.75 },
     { url: `${SITE.url}/en/rfq`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },
+    // Las tres cuñas en inglés (lib/cunas-en.ts). Prioridad igual a la de sus
+    // gemelas españolas: son la misma oferta y compiten por consultas que en
+    // español no existen —«mine ventilation ducting Peru» no tiene traducción
+    // que un comprador de Houston vaya a escribir—. Éstas SÍ llevan hreflang,
+    // porque a diferencia de las fichas del catálogo tienen gemela real.
+    ...CUNAS_EN.map((c): EntradaSitemap => ({
+      url: `${SITE.url}/en/${c.slug}`,
+      lastModified: paginas,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    })),
     { url: `${SITE.url}/pt`, lastModified: paginas, changeFrequency: "monthly", priority: 0.6 },
     // Indicadores: la única página que cambia sola; su lastmod diario es cierto.
     { url: `${SITE.url}/indicadores`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },

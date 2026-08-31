@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { SITE } from '@/lib/site';
 import { PRODUCT_COUNT, FAMILY_COUNT } from '@/lib/facts';
+import { CUNAS_EN } from '@/lib/cunas-en';
 
 /**
  * hreflang — se declara SOLO entre estas tres páginas.
@@ -71,6 +72,32 @@ export default function EnglishPage() {
           File an RFQ
         </Link>
       </div>
+
+      {/* Las tres consultas por las que un fabricante limeño puede ser la
+          respuesta en inglés. Van aquí, bajo los dos botones, y no antes: esta
+          página sigue siendo identidad y RFQ, no un catálogo traducido. */}
+      <section className="mt-12 border-t pt-10">
+        <h2 className="text-xl font-semibold tracking-tight text-[#0A2540]">What we make</h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Three lines, written in English: specification checklist, sourcing table, Incoterms and
+          what we do not claim.
+        </p>
+        <ul className="mt-5 space-y-3">
+          {CUNAS_EN.map((c) => (
+            <li key={c.slug}>
+              <Link
+                href={`/en/${c.slug}`}
+                className="group block rounded-2xl border border-gray-100 p-5 transition-colors hover:border-[#059669]/40"
+              >
+                <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669]">
+                  {c.titulo}
+                </span>
+                <span className="mt-1 block text-sm text-gray-600">{c.descripcion}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

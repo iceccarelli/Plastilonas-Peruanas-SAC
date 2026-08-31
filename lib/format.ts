@@ -71,3 +71,22 @@ export function numeroConSigno(valor: number, decimales?: number): string {
   const base = numeroPE(valor, decimales);
   return valor > 0 ? `+${base}` : base;
 }
+
+/**
+ * Formato numérico ANGLOSAJÓN, sin Intl, por la misma razón que `numeroPE`.
+ *
+ * Existe porque la franja de costo del BCRP ahora también se publica en
+ * inglés, y ahí «79,99» no es 79 con 99 céntimos: un comprador en Houston lo
+ * lee como setenta y nueve mil noventa y nueve. La coma y el punto significan
+ * cosas opuestas a cada lado del idioma, y el número que se muestra en una
+ * página de compra no puede depender de en qué idioma cayó el lector.
+ */
+export function numeroEN(valor: number, decimales?: number): string {
+  const negativo = valor < 0;
+  const abs = Math.abs(valor);
+  const dec = decimales ?? (Number.isInteger(abs) ? 0 : 1);
+  const [entero, fraccion] = abs.toFixed(dec).split('.');
+  const conMillares = entero.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const cuerpo = fraccion ? `${conMillares}.${fraccion}` : conMillares;
+  return negativo ? `−${cuerpo}` : cuerpo;
+}
