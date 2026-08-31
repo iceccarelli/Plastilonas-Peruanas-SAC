@@ -1,0 +1,799 @@
+From 2880e0cce4e5c1684b06773fa360f1f06573af31 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 31 Aug 2026 05:11:31 +0000
+Subject: [PATCH] =?UTF-8?q?Etapa=209:=20citabilidad=20medida=20y=20se?=
+ =?UTF-8?q?=C3=B1al=20de=20costo=20donde=20se=20decide?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Decidido con datos de 2026 sobre qué citan los motores de respuesta, no por
+intuición: el 44% de las citas sale del primer 30% del contenido, los modelos
+avanzados mandan el 51% de sus citas a páginas comerciales (antes iban al
+blog), y lo que se recupera son bloques autocontenidos, tablas y fechas de
+revisión. Los crawlers de IA casi no piden /llms.txt y Google declaró que no
+lo usará: se mantiene como cobertura barata y la inversión va al HTML.
+
+- RAMPA: cada cuña abre con una respuesta directa citable, ANTES de la prosa,
+  compuesta de campos reales (razón social, RUC, año, cuántas líneas se
+  confeccionan en planta, checklist del RFQ, horario). Marcada speakable.
+- TABLA COMPARATIVA en las cuñas, con la misma matriz honesta de /comparar,
+  ahora extraída a lib/comparativa.ts: una fila solo si dos o más fichas
+  declaran esa especificación, y «No declarado» donde no la hay. Se oculta
+  sola cuando no hay nada que comparar (ventilación: manga y accesorios no
+  son alternativas entre sí).
+- DEFECTO ENCONTRADO por la prueba nueva:  publicaba
+  una comparativa VACÍA —sus fichas no comparten ninguna etiqueta— y entraba
+  al sitemap. comparableFamilies() ahora exige que la matriz produzca al
+  menos una fila; la página vuelve sola si se homologan las etiquetas.
+- COSTO EN VIVO por frente: WTI y tipo de cambio en los tres, más el metal
+  que mueve SU demanda (zinc en ventilación, cobre en big bags). Series
+  oficiales del BCRP con fecha, respaldo en frío declarado y una frase de
+  qué significa para una cotización. Dice explícitamente que no es un
+  pronóstico. El dato de costo vivía en /indicadores y no llegaba a la
+  página donde se compra.
+- Fecha de revisión visible en las cuñas (señal de frescura) e ISR 1 h.
+- Las pruebas de la matriz pasan de afirmar sobre el texto del componente a
+  ejercitar la función pura: sobreviven al próximo refactor.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Qwwa5dum4UXSRjpnGYQYFh
+---
+ app/(es)/big-bags/page.tsx                    |  4 +
+ app/(es)/lonas-camiones/page.tsx              |  4 +
+ .../familia/[slug]/comparar/page.tsx          | 33 +------
+ app/(es)/ventilacion-minera/page.tsx          |  4 +
+ components/CostoEnVivo.tsx                    | 85 ++++++++++++++++++
+ components/CunaHub.tsx                        | 87 ++++++++++++++++++-
+ lib/comparativa.ts                            | 60 +++++++++++++
+ lib/cunas.ts                                  | 10 +++
+ lib/families.ts                               | 26 ++++--
+ lib/indicadores.ts                            | 21 +++++
+ lib/respuesta-directa.ts                      | 42 ++++++++-
+ lib/sitemaps.ts                               |  2 +-
+ test/comparison.test.ts                       | 61 +++++++++++--
+ test/etapas.test.ts                           | 55 ++++++++++++
+ 14 files changed, 449 insertions(+), 45 deletions(-)
+ create mode 100644 components/CostoEnVivo.tsx
+ create mode 100644 lib/comparativa.ts
+
+diff --git a/app/(es)/big-bags/page.tsx b/app/(es)/big-bags/page.tsx
+index e331d1a..cbc8d51 100644
+--- a/app/(es)/big-bags/page.tsx
++++ b/app/(es)/big-bags/page.tsx
+@@ -19,6 +19,10 @@ export const metadata: Metadata = {
+   },
+ };
+ 
++// ISR: la franja de costo lee el BCRP en vivo; una hora de caché en CDN
++// evita consultar la API en cada visita sin servir un dato rancio.
++export const revalidate = 3600;
++
+ export default function Page() {
+   return <CunaHub cuna={cuna} />;
+ }
+diff --git a/app/(es)/lonas-camiones/page.tsx b/app/(es)/lonas-camiones/page.tsx
+index 9dd21c2..63e86ab 100644
+--- a/app/(es)/lonas-camiones/page.tsx
++++ b/app/(es)/lonas-camiones/page.tsx
+@@ -19,6 +19,10 @@ export const metadata: Metadata = {
+   },
+ };
+ 
++// ISR: la franja de costo lee el BCRP en vivo; una hora de caché en CDN
++// evita consultar la API en cada visita sin servir un dato rancio.
++export const revalidate = 3600;
++
+ export default function Page() {
+   return <CunaHub cuna={cuna} />;
+ }
+diff --git a/app/(es)/productos/familia/[slug]/comparar/page.tsx b/app/(es)/productos/familia/[slug]/comparar/page.tsx
+index c700f9e..e00c177 100644
+--- a/app/(es)/productos/familia/[slug]/comparar/page.tsx
++++ b/app/(es)/productos/familia/[slug]/comparar/page.tsx
+@@ -4,6 +4,7 @@ import Link from 'next/link';
+ import Image from 'next/image';
+ import { ArrowRight } from 'lucide-react';
+ import { products, sourcingLabels, availabilityLabels } from '@/lib/products';
++import { construirComparativa } from '@/lib/comparativa';
+ import { resolveFamily, comparableFamilies } from '@/lib/families';
+ import { SITE } from '@/lib/site';
+ import { JsonLd } from '@/components/JsonLd';
+@@ -72,35 +73,9 @@ export default async function CompararPage({ params }: Props) {
+ 
+   const url = `${SITE.url}/productos/familia/${slug}/comparar`;
+ 
+-  // Unión de etiquetas, en el orden en que aparecen en el catálogo.
+-  const labels: string[] = [];
+-  for (const p of items) {
+-    for (const spec of p.specifications) {
+-      if (!labels.includes(spec.label)) labels.push(spec.label);
+-    }
+-  }
+-
+-  // Una fila solo compara si al menos DOS productos declaran esa
+-  // especificación. Con la unión completa, una familia de siete productos
+-  // producía una tabla de mayoría "No declarado": técnicamente honesta pero
+-  // inservible para decidir, y que además hace parecer pobre al catálogo.
+-  const cuenta = (label: string) =>
+-    items.filter((p) => p.specifications.some((s) => s.label === label)).length;
+-  const sharedLabels = labels.filter((l) => cuenta(l) >= 2);
+-
+-  // Lo exclusivo de cada producto no se descarta: se muestra debajo, donde
+-  // aporta como diferenciador en vez de como hueco en la matriz.
+-  const exclusivas = items
+-    .map((p) => ({
+-      producto: p,
+-      specs: p.specifications.filter((s) => cuenta(s.label) < 2),
+-    }))
+-    .filter((x) => x.specs.length > 0);
+-
+-  const valueFor = (slugProducto: string, label: string): string => {
+-    const p = items.find((x) => x.slug === slugProducto);
+-    return p?.specifications.find((s) => s.label === label)?.value ?? 'No declarado';
+-  };
++  // La matriz se construye en lib/comparativa.ts: la misma tabla, con las
++  // mismas dos reglas de honestidad, la usan también las cuñas comerciales.
++  const { filas: sharedLabels, exclusivas, valor: valueFor } = construirComparativa(items);
+ 
+   const cotizarTodos = `/cotizacion?comparativa=${items.map((p) => p.slug).join(',')}`;
+ 
+diff --git a/app/(es)/ventilacion-minera/page.tsx b/app/(es)/ventilacion-minera/page.tsx
+index 1e1d660..fa61a14 100644
+--- a/app/(es)/ventilacion-minera/page.tsx
++++ b/app/(es)/ventilacion-minera/page.tsx
+@@ -19,6 +19,10 @@ export const metadata: Metadata = {
+   },
+ };
+ 
++// ISR: la franja de costo lee el BCRP en vivo; una hora de caché en CDN
++// evita consultar la API en cada visita sin servir un dato rancio.
++export const revalidate = 3600;
++
+ export default function Page() {
+   return <CunaHub cuna={cuna} />;
+ }
+diff --git a/components/CostoEnVivo.tsx b/components/CostoEnVivo.tsx
+new file mode 100644
+index 0000000..3c464eb
+--- /dev/null
++++ b/components/CostoEnVivo.tsx
+@@ -0,0 +1,85 @@
++import Link from 'next/link';
++import { leerIndicadores, SIGNIFICADO } from '@/lib/indicadores';
++import { numeroPE } from '@/lib/format';
++
++/**
++ * QUÉ MUEVE EL PRECIO DE ESTE FRENTE, HOY.
++ *
++ * Por qué existe. La página /indicadores ya leía el BCRP en vivo, pero vivía
++ * al final del menú: el dato de costo estaba en el sitio y no llegaba a la
++ * página donde alguien decide comprar. Esta franja lo pone donde se decide.
++ *
++ * Las tres reglas que la hacen publicable —las mismas de /indicadores, aquí
++ * heredadas de lib/bcrp.ts y no reimplementadas—:
++ *  · cada número lleva SU periodo, siempre: un dato sin fecha invita a cotizar
++ *    contra él;
++ *  · si el BCRP no responde se sirve el respaldo en frío DICIÉNDOLO, nunca un
++ *    hueco ni un número viejo disfrazado de actual;
++ *  · se declara la dirección del efecto y su desfase, jamás una fórmula de
++ *    traspaso a precio que no podríamos sostener.
++ *
++ * NO es un pronóstico y el bloque lo dice en su propio texto. Es el contexto
++ * verificable que un jefe de compras usaría para decidir si adelanta su
++ * pedido, y ningún competidor del rubro lo publica.
++ */
++export default async function CostoEnVivo({
++  codigos,
++  titulo = 'Qué mueve el precio de este frente, hoy',
++}: {
++  codigos: string[];
++  titulo?: string;
++}) {
++  const estado = await leerIndicadores(new Date());
++  const vistos = estado.indicadores.filter((i) => codigos.includes(i.serie.codigo));
++  if (vistos.length === 0) return null;
++
++  return (
++    <section
++      aria-label={titulo}
++      className="mt-14 rounded-3xl border border-gray-200 dark:border-[var(--border)] p-7"
++    >
++      <div className="flex flex-wrap items-baseline justify-between gap-3 mb-1">
++        <h2 className="font-semibold tracking-tight text-2xl text-[#0A2540] dark:text-inherit">
++          {titulo}
++        </h2>
++        <Link href="/indicadores" className="text-sm font-medium text-[#047857] hover:underline">
++          Ver los cinco indicadores y su método →
++        </Link>
++      </div>
++      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
++        Series oficiales del Banco Central de Reserva del Perú. No es un pronóstico de precio:
++        es el contexto de costo con el que se arma una cotización.
++      </p>
++
++      <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
++        {vistos.map((i) => (
++          <div key={i.serie.codigo} className="rounded-2xl bg-gray-50 dark:bg-white/5 p-5">
++            <dt className="text-xs uppercase tracking-wide text-gray-500">{i.serie.etiqueta}</dt>
++            <dd className="mt-1 font-mono text-2xl font-semibold tabular-nums text-[#0A2540] dark:text-inherit">
++              {i.valor === null
++                ? 'sin dato'
++                : numeroPE(i.valor, i.serie.decimales)}
++            </dd>
++            <dd className="text-xs text-gray-500">
++              {i.serie.unidad}
++              {i.periodo && ` · ${i.periodo}`}
++              {i.deRespaldo && ' · última lectura conocida'}
++            </dd>
++            {SIGNIFICADO[i.serie.codigo] && (
++              <dd className="mt-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
++                {SIGNIFICADO[i.serie.codigo]}
++              </dd>
++            )}
++          </div>
++        ))}
++      </dl>
++
++      {estado.sinConexion && (
++        <p className="mt-5 text-xs text-gray-500">
++          El BCRP no respondió en la última consulta ({estado.consultadoEl}): arriba se muestran las
++          últimas lecturas conocidas, con su fecha.
++        </p>
++      )}
++    </section>
++  );
++}
+diff --git a/components/CunaHub.tsx b/components/CunaHub.tsx
+index 01edd68..009f6a4 100644
+--- a/components/CunaHub.tsx
++++ b/components/CunaHub.tsx
+@@ -11,6 +11,10 @@ import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
+ import WhatsAppLink from '@/components/WhatsAppLink';
+ import DatosParaCotizar from '@/components/DatosParaCotizar';
+ import FotoReferencial from '@/components/FotoReferencial';
++import CostoEnVivo from '@/components/CostoEnVivo';
++import { construirComparativa } from '@/lib/comparativa';
++import { respuestaDirectaCuna } from '@/lib/respuesta-directa';
++import { ACTUALIZADO } from '@/lib/sitemaps';
+ 
+ /**
+  * Página de cuña comercial (ver lib/cunas.ts). Server component compartido
+@@ -19,7 +23,7 @@ import FotoReferencial from '@/components/FotoReferencial';
+  * embudo completo — checklist, fichas hijas, honestidad hacemos/no afirmamos,
+  * FAQ (visible + FAQPage), guía de biblioteca y CTA doble.
+  */
+-export default function CunaHub({ cuna }: { cuna: Cuna }) {
++export default async function CunaHub({ cuna }: { cuna: Cuna }) {
+   const url = `${SITE.url}/${cuna.slug}`;
+   const hijos = cuna.productSlugs
+     .map((s) => products.find((p) => p.slug === s))
+@@ -29,12 +33,21 @@ export default function CunaHub({ cuna }: { cuna: Cuna }) {
+   const calculadora = cuna.calculadoraSlug
+     ? calculadoras.find((c) => c.slug === cuna.calculadoraSlug)
+     : undefined;
++  const respuestaDirecta = respuestaDirectaCuna(cuna, hijos);
++  // Matriz honesta: una fila solo si dos o más líneas declaran esa
++  // especificación; los huecos dicen «No declarado» (lib/comparativa.ts).
++  const comparativa = hijos.length >= 2 ? construirComparativa(hijos) : null;
+ 
+   return (
+     <div className="max-w-6xl mx-auto px-6 py-12">
+       <JsonLd
+         data={[
+-          webPageSchema({ url, name: cuna.titulo, description: cuna.descripcion }),
++          webPageSchema({
++            url,
++            name: cuna.titulo,
++            description: respuestaDirecta,
++            speakable: ['.respuesta-directa'],
++          }),
+           breadcrumbSchema(
+             [
+               { name: 'Inicio', url: `${SITE.url}/` },
+@@ -76,6 +89,14 @@ export default function CunaHub({ cuna }: { cuna: Cuna }) {
+         <h1 className="text-3xl md:text-5xl tracking-tighter font-semibold text-[#0A2540] leading-tight mb-6">
+           {cuna.h1}
+         </h1>
++        {/* RAMPA. El 44 % de las citas de los motores de respuesta sale del
++            primer 30 % del contenido, y lo que se recupera son bloques
++            autocontenidos y densos en entidades. Este es ese bloque, y está
++            compuesto de campos reales (lib/respuesta-directa.ts). */}
++        <p className="respuesta-directa text-[15px] leading-relaxed text-[#0A2540] bg-emerald-50/60 border border-emerald-100 rounded-2xl p-5 mb-6">
++          {respuestaDirecta}
++        </p>
++
+         {cuna.intro.map((p) => (
+           <p key={p.slice(0, 24)} className="text-lg text-gray-600 leading-relaxed mb-4">
+             {p}
+@@ -146,6 +167,59 @@ export default function CunaHub({ cuna }: { cuna: Cuna }) {
+         </div>
+       </section>
+ 
++      {/* TABLA COMPARATIVA. Las tablas son de lo que más se recupera y se cita,
++          y aquí además es la pregunta real del comprador: en qué se diferencian
++          estas líneas. Se construye con la misma matriz que /comparar. */}
++      {comparativa && comparativa.filas.length > 0 && (
++        <section className="mt-14">
++          <h2 className="font-semibold tracking-tight text-2xl mb-2">
++            ¿En qué se diferencian estas líneas?
++          </h2>
++          <p className="text-gray-600 mb-6 max-w-2xl">
++            Especificación declarada por cada ficha. Donde una línea no la declara dice «No
++            declarado»: no se rellena ni se infiere del vecino.
++          </p>
++          <div className="overflow-x-auto">
++            <table className="w-full border-collapse text-sm">
++              <caption className="sr-only">
++                Comparación de especificaciones de {hijos.length} líneas de {cuna.titulo}
++              </caption>
++              <thead>
++                <tr className="border-b border-gray-200">
++                  <th scope="col" className="py-3 pr-6 text-left font-medium text-gray-500">
++                    Especificación
++                  </th>
++                  {hijos.map((p) => (
++                    <th key={p.slug} scope="col" className="py-3 pr-6 text-left font-semibold text-[#0A2540]">
++                      <Link href={`/productos/${p.slug}`} className="hover:text-[#059669]">
++                        {p.name}
++                      </Link>
++                    </th>
++                  ))}
++                </tr>
++              </thead>
++              <tbody>
++                {comparativa.filas.map((label) => (
++                  <tr key={label} className="border-b border-gray-100 last:border-none align-top">
++                    <th scope="row" className="py-3 pr-6 text-left font-medium text-gray-600">
++                      {label}
++                    </th>
++                    {hijos.map((p) => (
++                      <td key={p.slug} className="py-3 pr-6 text-[#0A2540]">
++                        {comparativa.valor(p.slug, label)}
++                      </td>
++                    ))}
++                  </tr>
++                ))}
++              </tbody>
++            </table>
++          </div>
++        </section>
++      )}
++
++      {/* Señal de costo en vivo, donde se decide la compra. */}
++      <CostoEnVivo codigos={cuna.indicadores} />
++
+       {/* Honestidad: hacemos / no afirmamos */}
+       <section className="mt-14 grid gap-6 md:grid-cols-2">
+         <div className="rounded-3xl border border-emerald-100 bg-emerald-50/50 p-7">
+@@ -212,7 +286,14 @@ export default function CunaHub({ cuna }: { cuna: Cuna }) {
+         </dl>
+       </section>
+ 
+-      <div className="mt-12">
++      <p className="mt-12 text-sm text-gray-500">
++        Página revisada el{' '}
++        <time dateTime={ACTUALIZADO.paginas}>{ACTUALIZADO.paginas}</time>. Las especificaciones
++        provienen del catálogo publicado; los indicadores de costo, del BCRP, con la fecha de cada
++        lectura a la vista.
++      </p>
++
++      <div className="mt-8">
+         <DatosParaCotizar />
+       </div>
+ 
+diff --git a/lib/comparativa.ts b/lib/comparativa.ts
+new file mode 100644
+index 0000000..67fd012
+--- /dev/null
++++ b/lib/comparativa.ts
+@@ -0,0 +1,60 @@
++import type { Product } from './types';
++
++/**
++ * MATRIZ DE COMPARACIÓN — una sola implementación.
++ *
++ * Vivía dentro de app/(es)/productos/familia/[slug]/comparar/page.tsx. Al
++ * necesitarla también en las cuñas comerciales, copiarla habría creado dos
++ * tablas con reglas de honestidad que pueden divergir: el día que alguien
++ * ajuste el umbral en una, la otra empieza a publicar una matriz con otro
++ * criterio bajo la misma marca.
++ *
++ * LAS DOS REGLAS QUE LA GOBIERNAN, y que se mantienen intactas:
++ *
++ *  1. Una fila entra solo si AL MENOS DOS productos declaran esa
++ *     especificación. Con la unión completa de etiquetas, una familia de
++ *     siete líneas producía una tabla de mayoría «No declarado»: técnicamente
++ *     honesta e inservible para decidir.
++ *  2. Donde un producto no declara la especificación se escribe «No
++ *     declarado». Nunca se rellena, nunca se infiere, nunca se copia del
++ *     vecino.
++ */
++
++export const NO_DECLARADO = 'No declarado';
++
++export interface Comparativa {
++  /** Etiquetas que al menos dos productos declaran, en orden de catálogo. */
++  filas: string[];
++  /** Especificación exclusiva de un producto: diferencia, no hueco. */
++  exclusivas: { producto: Product; specs: { label: string; value: string }[] }[];
++  /** Valor de una celda, o «No declarado». */
++  valor: (slugProducto: string, label: string) => string;
++}
++
++export function construirComparativa(items: Product[]): Comparativa {
++  const labels: string[] = [];
++  for (const p of items) {
++    for (const spec of p.specifications) {
++      if (!labels.includes(spec.label)) labels.push(spec.label);
++    }
++  }
++
++  const cuenta = (label: string) =>
++    items.filter((p) => p.specifications.some((s) => s.label === label)).length;
++
++  const filas = labels.filter((l) => cuenta(l) >= 2);
++
++  const exclusivas = items
++    .map((producto) => ({
++      producto,
++      specs: producto.specifications.filter((s) => cuenta(s.label) < 2),
++    }))
++    .filter((x) => x.specs.length > 0);
++
++  const valor = (slugProducto: string, label: string): string => {
++    const p = items.find((x) => x.slug === slugProducto);
++    return p?.specifications.find((s) => s.label === label)?.value ?? NO_DECLARADO;
++  };
++
++  return { filas, exclusivas, valor };
++}
+diff --git a/lib/cunas.ts b/lib/cunas.ts
+index f8bb3da..1312f40 100644
+--- a/lib/cunas.ts
++++ b/lib/cunas.ts
+@@ -38,6 +38,13 @@ export interface Cuna {
+   whatsapp: string;
+   /** Fotografía ilustrativa del frente. Referencial: la etiqueta lo declara. */
+   foto: { src: string; alt: string };
++  /**
++   * Códigos de serie del BCRP que mueven el costo o la demanda de ESTE frente.
++   * El crudo y el tipo de cambio entran en los tres (resina y facturación);
++   * el metal cambia porque cambia el comprador: zinc es labor subterránea
++   * —ventilación—, cobre es tajo y concentrado —big bags—.
++   */
++  indicadores: string[];
+ }
+ 
+ export const cunas: Cuna[] = [
+@@ -101,6 +108,7 @@ export const cunas: Cuna[] = [
+       src: '/images/hero/hero-08.webp',
+       alt: 'Camión con siders y tolderas de lona en una carretera peruana.',
+     },
++    indicadores: ['PN01660XM', 'PD04640PD'],
+   },
+   {
+     slug: 'ventilacion-minera',
+@@ -158,6 +166,7 @@ export const cunas: Cuna[] = [
+       src: '/images/hero/hero-09.webp',
+       alt: 'Mangas de ventilación industrial dispuestas en planta.',
+     },
++    indicadores: ['PN01660XM', 'PD04640PD', 'PN01657XM'],
+   },
+   {
+     slug: 'big-bags',
+@@ -218,6 +227,7 @@ export const cunas: Cuna[] = [
+       src: '/images/hero/hero-02.webp',
+       alt: 'Carga de big bags (FIBC) en una planta industrial.',
+     },
++    indicadores: ['PN01660XM', 'PD04640PD', 'PN01652XM'],
+   },
+ ];
+ 
+diff --git a/lib/families.ts b/lib/families.ts
+index 3f6f0e1..f70f8cf 100644
+--- a/lib/families.ts
++++ b/lib/families.ts
+@@ -1,4 +1,5 @@
+ import { productFamilies, products } from './products';
++import { construirComparativa } from './comparativa';
+ 
+ /**
+  * CONTENIDO EDITORIAL POR FAMILIA (/productos/familia/[slug]).
+@@ -561,12 +562,25 @@ export function familyHrefByName(name: string): string {
+ }
+ 
+ /**
+- * Familias con dos o más productos: las únicas donde una comparativa tiene
+- * sentido. Una tabla de un solo elemento es una página vacía que no debe
+- * generarse ni indexarse.
++ * Familias donde una comparativa tiene sentido DE VERDAD.
++ *
++ * La condición era «dos o más productos», y no bastaba. `seguridad-industrial`
++ * la cumplía y aun así publicaba una tabla VACÍA: sus fichas no comparten ni
++ * una sola etiqueta de especificación, así que la matriz —que solo admite
++ * filas declaradas por dos o más productos— salía sin ninguna fila. El
++ * resultado era una página que promete «especificación lado a lado», entrega
++ * cero comparaciones y entra al sitemap: exactamente el contenido delgado que
++ * este sitio evita en todas partes menos, hasta ahora, aquí.
++ *
++ * La condición correcta es la que el lector experimenta: que la matriz
++ * produzca al menos una fila. test/comparison.test.ts lo verifica contra el
++ * catálogo real, de modo que el día que alguien homologue las etiquetas de esa
++ * familia, su comparativa vuelve sola.
+  */
+ export function comparableFamilies() {
+-  return productFamilies.filter(
+-    (f) => products.filter((p) => p.category === f.name).length >= 2,
+-  );
++  return productFamilies.filter((f) => {
++    const items = products.filter((p) => p.category === f.name);
++    if (items.length < 2) return false;
++    return construirComparativa(items).filas.length > 0;
++  });
+ }
+diff --git a/lib/indicadores.ts b/lib/indicadores.ts
+index 4216d24..2b4fbc8 100644
+--- a/lib/indicadores.ts
++++ b/lib/indicadores.ts
+@@ -113,6 +113,27 @@ export const RESPALDO: { lecturas: Lectura[]; verificado: string } = {
+   ],
+ };
+ 
++/**
++ * QUÉ SIGNIFICA CADA SERIE PARA UNA COTIZACIÓN.
++ *
++ * Un número sin lectura es decoración. Estas frases son el puente entre el
++ * dato oficial y la decisión de compra, y son deliberadamente prudentes: se
++ * declara la DIRECCIÓN del efecto y su desfase, nunca una fórmula de traspaso
++ * a precio que este repositorio no puede sostener con evidencia.
++ */
++export const SIGNIFICADO: Record<string, string> = {
++  PN01660XM:
++    'Cabeza de la cadena de la resina: el crudo mueve la nafta, la nafta el polipropileno y el polipropileno la lona. El traspaso llega con semanas de desfase por inventario.',
++  PD04640PD:
++    'La resina se compra en dólares y la cotización se factura en soles: el tipo de cambio entra directo en el precio final.',
++  PN01652XM:
++    'Cobre: actividad de tajo abierto e hidrometalurgia, que es la demanda de impermeabilización y cobertura.',
++  PN01657XM:
++    'Zinc: actividad subterránea, que es la demanda de ventilación de labores.',
++  PN01656XM:
++    'Plomo: acompaña al zinc en la misma operación subterránea.',
++};
++
+ export interface IndicadorVivo {
+   serie: SerieBCRP;
+   valor: number | null;
+diff --git a/lib/respuesta-directa.ts b/lib/respuesta-directa.ts
+index 91df9a3..c1b570b 100644
+--- a/lib/respuesta-directa.ts
++++ b/lib/respuesta-directa.ts
+@@ -1,6 +1,6 @@
+ import type { Product } from './types';
+ import type { Application } from './applications';
+-import { SITE } from './site';
++import { SITE, HORARIO } from './site';
+ 
+ /**
+  * RESPUESTA DIRECTA — el párrafo que un motor de respuestas puede citar entero.
+@@ -108,3 +108,43 @@ export function rfqWhatsAppAplicacion(a: Application): string {
+     '· Ciudad de entrega: ',
+   ].join('\n');
+ }
++
++
++/**
++ * RESPUESTA DIRECTA DE UNA CUÑA COMERCIAL.
++ *
++ * Va ARRIBA del hub, antes de la prosa, y no por estética: los datos de 2026
++ * sobre qué citan los motores de respuesta muestran que el 44 % de las citas
++ * sale del primer 30 % del contenido, y que lo que se recupera son bloques
++ * autocontenidos, densos en entidades y en lenguaje definido. Este párrafo es
++ * ese bloque.
++ *
++ * Se COMPONE de campos reales —cuántas líneas agrupa el frente, cuántas se
++ * confeccionan en planta, la razón social, el RUC, el año, el checklist del
++ * RFQ y el horario—, nunca de texto libre. Así no hay dónde escribir una cifra
++ * inventada, y cuando el catálogo cambie, el párrafo cambia solo.
++ */
++export function respuestaDirectaCuna(
++  cuna: { titulo: string; checklist: { dato: string }[] },
++  hijos: Product[],
++): string {
++  const propias = hijos.filter((p) => p.sourcing === 'fabricacion_propia');
++  const suministro = hijos.length - propias.length;
++
++  const origen =
++    suministro === 0
++      ? `las ${hijos.length} se confeccionan en la planta de Chorrillos (Lima, Perú)`
++      : `${propias.length} de ${hijos.length} se confeccionan en la planta de Chorrillos ` +
++        `(Lima, Perú) y ${suministro === 1 ? 'la restante es' : 'las restantes son'} ` +
++        `suministro declarado en su ficha`;
++
++  const datos = cuna.checklist.map((c) => c.dato.toLowerCase()).join(', ');
++
++  return (
++    `${cuna.titulo}: ${origen}. ` +
++    `${SITE.legalName}, RUC ${SITE.ruc}, fabrica textil industrial en el Perú desde ` +
++    `${SITE.foundingYear}. Se cotiza contra especificación —${datos}— y no hay lista de ` +
++    `precios en líneas a medida. La respuesta llega con ficha técnica dentro del horario ` +
++    `comercial (${HORARIO.corto}, hora de Lima).`
++  );
++}
+diff --git a/lib/sitemaps.ts b/lib/sitemaps.ts
+index 023ff4c..59fc231 100644
+--- a/lib/sitemaps.ts
++++ b/lib/sitemaps.ts
+@@ -41,7 +41,7 @@ import { cunas } from "@/lib/cunas";
+ /** Fechas de última revisión editorial por bloque estático (YYYY-MM-DD). */
+ export const ACTUALIZADO = {
+   /** Portada y páginas institucionales (hero, orden de secciones, copy). */
+-  paginas: "2026-08-30",
++  paginas: "2026-08-31",
+   /** Hubs de sector (/industria/*) y cobertura local (/local/*). */
+   industrias: "2026-08-30",
+   /** Glosario: fecha de la última revisión del conjunto de términos. */
+diff --git a/test/comparison.test.ts b/test/comparison.test.ts
+index 83e1ab2..c8cc212 100644
+--- a/test/comparison.test.ts
++++ b/test/comparison.test.ts
+@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
+ import { join } from 'node:path';
+ import { products, productFamilies } from '@/lib/products';
+ import { comparableFamilies } from '@/lib/families';
++import { construirComparativa, NO_DECLARADO } from '@/lib/comparativa';
++import type { Product } from '@/lib/types';
+ import { generateStaticParams } from '@/app/(es)/productos/familia/[slug]/comparar/page';
+ import sitemap from '@/lib/sitemaps';
+ import { SITE } from '@/lib/site';
+@@ -45,27 +47,76 @@ describe('comparativas: honestidad de la matriz', () => {
+     'utf8',
+   );
+ 
++  /**
++   * Estas pruebas afirmaban sobre el TEXTO de la página. Al extraer la matriz
++   * a lib/comparativa.ts —para que la usen también las cuñas— se rompieron
++   * las cuatro sin que nada estuviera mal: vigilaban una implementación, no
++   * una garantía. Ahora ejercitan la función pura, así que sobreviven al
++   * próximo refactor y siguen protegiendo lo que de verdad importa.
++   */
++  const ficha = (
++    slug: string,
++    specs: { label: string; value: string }[],
++  ): Product => ({
++    id: slug.toUpperCase(),
++    slug,
++    name: slug,
++    category: 'Prueba',
++    sector: ['Minería'],
++    shortDescription: 'x',
++    description: 'x',
++    specifications: specs,
++    applications: [],
++    benefits: [],
++    image: '/images/x.webp',
++    gallery: [],
++    featured: false,
++    popular: false,
++  });
++
++  const muestra = [
++    ficha('a', [{ label: 'Material', value: 'PVC' }, { label: 'Solo A', value: '1' }]),
++    ficha('b', [{ label: 'Material', value: 'PE' }]),
++    ficha('c', [{ label: 'Ancho', value: '2 m' }]),
++  ];
++
+   it('las celdas sin dato dicen "No declarado" y no se rellenan', () => {
+-    expect(page).toContain("'No declarado'");
++    const m = construirComparativa(muestra);
++    expect(m.valor('c', 'Material')).toBe(NO_DECLARADO);
+     // La celda vacía nunca hereda el valor de otro producto.
+-    expect(page).toContain('specifications.find((s) => s.label === label)?.value ??');
++    expect(m.valor('c', 'Material')).not.toBe('PVC');
++    expect(m.valor('a', 'Material')).toBe('PVC');
+   });
+ 
+   it('la matriz usa la unión de etiquetas declaradas, no una lista fija', () => {
+-    expect(page).toContain('if (!labels.includes(spec.label)) labels.push(spec.label);');
++    // 'Material' lo declaran dos: entra. Nada se inventa fuera del catálogo.
++    expect(construirComparativa(muestra).filas).toEqual(['Material']);
+   });
+ 
+   it('solo compara filas que al menos dos productos declaran', () => {
+     // Con la unión completa, una familia de siete productos daba una tabla de
+     // mayoría "No declarado": honesta pero inservible para decidir.
+-    expect(page).toContain('const sharedLabels = labels.filter((l) => cuenta(l) >= 2);');
++    const filas = construirComparativa(muestra).filas;
++    expect(filas).not.toContain('Solo A');
++    expect(filas).not.toContain('Ancho');
+   });
+ 
+   it('lo exclusivo de cada producto se muestra, no se descarta', () => {
+-    expect(page).toContain('const exclusivas = items');
++    const exclusivas = construirComparativa(muestra).exclusivas;
++    expect(exclusivas.map((e) => e.producto.slug).sort()).toEqual(['a', 'c']);
++    expect(exclusivas.find((e) => e.producto.slug === 'a')?.specs[0].label).toBe('Solo A');
+     expect(page).toContain('Especificaciones exclusivas de cada alternativa');
+   });
+ 
++  it('con el catálogo real, cada familia comparable produce filas', () => {
++    for (const familia of comparableFamilies()) {
++      const items = products.filter((p) => p.category === familia.name);
++      const m = construirComparativa(items);
++      expect(m.filas.length, `${familia.slug} no produce ninguna fila comparable`)
++        .toBeGreaterThan(0);
++    }
++  });
++
+   it('no publica precios: el negocio sigue siendo por cotización', () => {
+     expect(page).not.toMatch(/S\/\s?\d/);
+     expect(page).not.toContain('price');
+diff --git a/test/etapas.test.ts b/test/etapas.test.ts
+index fec461c..3e6be9c 100644
+--- a/test/etapas.test.ts
++++ b/test/etapas.test.ts
+@@ -151,6 +151,61 @@ describe('etapa 8 — aceleración', () => {
+   });
+ });
+ 
++describe('etapa 9 — citabilidad y señal de costo', () => {
++  /**
++   * Los datos de 2026 sobre citación por motores de respuesta mandan aquí:
++   * el 44 % de las citas sale del primer 30 % del contenido, y lo que se
++   * recupera son bloques autocontenidos, tablas y fechas de revisión.
++   */
++  it('cada cuña abre con un bloque citable, antes de la prosa', () => {
++    const hub = leer('components/CunaHub.tsx');
++    expect(hub).toContain('respuestaDirectaCuna');
++    expect(hub).toContain("speakable: ['.respuesta-directa']");
++    // La rampa va ANTES de la prosa de introducción, no después.
++    expect(hub.indexOf('respuesta-directa text-')).toBeLessThan(hub.indexOf('cuna.intro.map'));
++  });
++
++  it('la respuesta directa se compone de campos reales, sin texto libre', () => {
++    const src = leer('lib/respuesta-directa.ts');
++    expect(src).toContain('export function respuestaDirectaCuna');
++    // Se arma con razón social, RUC, año y checklist: nada tecleado a mano.
++    for (const campo of ['SITE.legalName', 'SITE.ruc', 'SITE.foundingYear', 'cuna.checklist']) {
++      expect(src, `la respuesta directa no deriva de ${campo}`).toContain(campo);
++    }
++  });
++
++  it('la matriz de comparación tiene UNA implementación', () => {
++    const lib = leer('lib/comparativa.ts');
++    expect(lib).toContain('export function construirComparativa');
++    expect(lib).toContain('No declarado');
++    // Ni la página de comparar ni las cuñas la reimplementan.
++    for (const f of [
++      'app/(es)/productos/familia/[slug]/comparar/page.tsx',
++      'components/CunaHub.tsx',
++    ]) {
++      expect(leer(f), `${f} no usa la matriz común`).toContain('construirComparativa');
++    }
++  });
++
++  it('la señal de costo declara fecha, respaldo y que no es un pronóstico', () => {
++    const src = leer('components/CostoEnVivo.tsx');
++    expect(src).toContain('leerIndicadores');
++    expect(src).toContain('No es un pronóstico de precio');
++    expect(src).toContain('sinConexion');
++    // Cada serie explica qué significa para una cotización.
++    expect(leer('lib/indicadores.ts')).toContain('export const SIGNIFICADO');
++  });
++
++  it('cada cuña declara qué indicadores mueven SU costo', () => {
++    for (const c of cunas) {
++      expect(c.indicadores.length, c.slug).toBeGreaterThanOrEqual(2);
++      // Crudo y tipo de cambio entran en los tres: resina y facturación.
++      expect(c.indicadores, c.slug).toContain('PN01660XM');
++      expect(c.indicadores, c.slug).toContain('PD04640PD');
++    }
++  });
++});
++
+ describe('etapa 3 — las tres cuñas', () => {
+   it('cada cuña tiene página, entra al sitemap y aparece en llms.txt', () => {
+     const urls = new Set(sitemap().map((e) => e.url));
+-- 
+2.43.0
+
