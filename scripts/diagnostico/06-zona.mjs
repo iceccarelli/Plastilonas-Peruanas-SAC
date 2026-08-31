@@ -1,0 +1,13 @@
+import { chromium } from 'playwright';
+import { BASE, LANZAR } from './rutas.mjs';
+const [ruta, sel, nombre, oscuro] = process.argv.slice(2);
+const nav = await chromium.launch(LANZAR);
+const ctx = await nav.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, colorScheme: oscuro==='1'?'dark':'light' });
+await ctx.addInitScript(`try{localStorage.setItem('theme','${oscuro==='1'?'dark':'light'}')}catch(e){}`);
+const p = await ctx.newPage();
+await p.goto(BASE + ruta, { waitUntil: 'domcontentloaded' });
+await p.waitForTimeout(1500);
+const el = p.locator(sel).first();
+await el.scrollIntoViewIfNeeded(); await p.waitForTimeout(500);
+await el.screenshot({ path: `.diagnostico/${nombre}.png` });
+await nav.close(); console.error('ok');

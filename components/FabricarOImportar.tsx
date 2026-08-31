@@ -185,7 +185,7 @@ export default async function FabricarOImportar({ idioma }: { idioma: 'es' | 'en
         <p className="mb-6 max-w-3xl text-gray-600 dark:text-gray-400">
           {t.pmatriz(MATRIZ.length, ganaImportar)}
         </p>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={t.h2matriz}>
           <table className="w-full border-collapse text-sm">
             <caption className="sr-only">{t.h2matriz}</caption>
             <thead>

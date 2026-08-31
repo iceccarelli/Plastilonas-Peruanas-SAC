@@ -31,7 +31,7 @@ export function ThemeToggle() {
   }, [theme, mounted]);
 
   // Render a fixed-size placeholder pre-hydration to avoid layout shift.
-  if (!mounted) return <div className="h-9 w-9" aria-hidden />;
+  if (!mounted) return <div className="h-11 w-11" aria-hidden />;
 
   const next: Theme = theme === 'dark' ? 'light' : 'dark';
 
@@ -41,7 +41,7 @@ export function ThemeToggle() {
       onClick={() => setTheme(next)}
       aria-label={next === 'dark' ? 'Activar modo oscuro' : 'Activar modo claro'}
       title={next === 'dark' ? 'Modo oscuro' : 'Modo claro'}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--brand)] hover:border-[var(--brand)]"
+      className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--brand)] hover:border-[var(--brand)]"
     >
       {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </button>

@@ -27,21 +27,44 @@ const ICONS: Record<string, LucideIcon> = { ruler: Ruler, hardhat: HardHat, ship
  */
 type Svc = { title: string; desc: string; icon: string; tomas: string[] };
 
+/**
+ * ACCESIBILIDAD DE ESTE COMPONENTE — dos defectos encontrados en la auditoría
+ * de agosto de 2026, y por qué importaban:
+ *
+ * 1. NO ERA UN GRUPO DE PESTAÑAS PARA QUIEN NO VE. Se declaraba con
+ *    `aria-pressed`, que un lector de pantalla anuncia como interruptor
+ *    («pulsado / no pulsado»), no como «pestaña 2 de 4, seleccionada». Y el
+ *    panel no estaba asociado a su pestaña, así que activarla no llevaba el
+ *    foco ni el contexto a ninguna parte. En el MISMO repositorio,
+ *    MachineryGallery ya lo hacía bien: dos widgets de pestañas, dos verdades.
+ *    Ahora los dos hablan el mismo idioma —tablist/tab/tabpanel, aria-selected,
+ *    aria-controls— y además se navega con flechas, que es lo que espera
+ *    cualquiera que use el teclado.
+ *
+ * 2. EL AVANCE AUTOMÁTICO NO SE PODÍA PARAR CON EL DEDO. Rotaba cada 5 s y la
+ *    única pausa era `hover`, que en un teléfono NO EXISTE: el contenido
+ *    cambiaba solo mientras alguien lo leía. WCAG 2.2.2 exige poder pausarlo.
+ *    Ahora se pausa al tocar/enfocar cualquier pestaña, hay un botón explícito
+ *    de pausa, y tocar una pestaña detiene la rotación para siempre: si el
+ *    usuario eligió, el componente deja de decidir por él.
+ */
 export default function ServiceTabs({ services }: { services: Svc[] }) {
   const [active, setActive] = useState(0);
   const [phase, setPhase] = useState(0);      // 0 = foto A, 1 = foto B (crossfade Ken Burns)
   const [hover, setHover] = useState(false);
+  // Pausa deliberada: el usuario tocó una pestaña o el botón de pausa.
+  const [pausado, setPausado] = useState(false);
   const svc = services[active];
   const Icon = ICONS[svc.icon] ?? Ruler;
   const tomas = svc.tomas?.length ? svc.tomas : [];
 
   // Auto-avance de pestañas cada 5s (pausa al pasar el cursor / prefiere menos movimiento).
   useEffect(() => {
-    if (hover) return;
+    if (hover || pausado) return;
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const id = setInterval(() => setActive((a) => (a + 1) % services.length), 5000);
     return () => clearInterval(id);
-  }, [hover, services.length]);
+  }, [hover, pausado, services.length]);
 
   // Cruce entre las tomas del servicio activo cada 3.5s.
   useEffect(() => {
@@ -60,30 +83,71 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
       onMouseLeave={() => setHover(false)}
     >
       {/* Pestañas */}
-      <div className="no-scrollbar flex lg:flex-col gap-2 overflow-x-auto -mx-6 px-6 lg:mx-0 lg:px-0">
-        {services.map((s, i) => {
-          const I = ICONS[s.icon] ?? Ruler;
-          const on = i === active;
-          return (
-            <button
-              key={s.title}
-              onClick={() => setActive(i)}
-              aria-pressed={on}
-              className={`shrink-0 lg:shrink text-left flex items-center gap-3 px-5 py-4 rounded-2xl border transition-all duration-300 ${
-                on ? 'bg-[#0A2540] border-[#0A2540] text-white shadow-lg shadow-[#0A2540]/15'
-                   : 'bg-white border-gray-200 text-[#0A2540] hover:border-[#047857]'
-              }`}
-            >
-              <I className={`w-5 h-5 shrink-0 ${on ? 'text-[#10B981]' : 'text-gray-400'}`} />
-              <span className="font-medium text-sm whitespace-nowrap lg:whitespace-normal">{s.title}</span>
-              {on && <span className="ml-auto hidden lg:block w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />}
-            </button>
-          );
-        })}
+      <div className="flex lg:flex-col gap-2">
+        <div
+          role="tablist"
+          aria-label="Servicios"
+          aria-orientation="horizontal"
+          className="no-scrollbar flex lg:flex-col gap-2 overflow-x-auto -mx-6 px-6 lg:mx-0 lg:px-0"
+          onKeyDown={(e) => {
+            const d = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1
+                    : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+            if (!d) return;
+            e.preventDefault();
+            setPausado(true);
+            const sig = (active + d + services.length) % services.length;
+            setActive(sig);
+            document.getElementById(`pestana-servicio-${sig}`)?.focus();
+          }}
+        >
+          {services.map((s, i) => {
+            const I = ICONS[s.icon] ?? Ruler;
+            const on = i === active;
+            return (
+              <button
+                key={s.title}
+                id={`pestana-servicio-${i}`}
+                type="button"
+                role="tab"
+                aria-selected={on}
+                aria-controls="panel-servicio"
+                // El estándar: sólo la pestaña activa está en el orden de
+                // tabulación; dentro del grupo se navega con flechas.
+                tabIndex={on ? 0 : -1}
+                onClick={() => { setActive(i); setPausado(true); }}
+                onFocus={() => setPausado(true)}
+                className={`shrink-0 lg:shrink text-left flex items-center gap-3 px-5 py-4 rounded-2xl border transition-all duration-300 ${
+                  on ? 'bg-[#0A2540] border-[#0A2540] text-white shadow-lg shadow-[#0A2540]/15'
+                     : 'bg-white border-gray-200 text-[#0A2540] hover:border-[#047857]'
+                }`}
+              >
+                <I className={`w-5 h-5 shrink-0 ${on ? 'text-[#10B981]' : 'text-gray-400'}`} aria-hidden="true" />
+                <span className="font-medium text-sm whitespace-nowrap lg:whitespace-normal">{s.title}</span>
+                {on && <span className="ml-auto hidden lg:block w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" aria-hidden="true" />}
+              </button>
+            );
+          })}
+        </div>
+        {/* WCAG 2.2.2: un control explícito para detener el avance. En un
+            teléfono es el único que existe — `hover` no ocurre nunca. */}
+        <button
+          type="button"
+          onClick={() => setPausado((p) => !p)}
+          aria-pressed={pausado}
+          className="shrink-0 self-center lg:self-start min-h-[44px] px-4 rounded-2xl border border-gray-200 text-xs font-medium text-gray-600 hover:border-[#047857] hover:text-[#047857] transition-colors"
+        >
+          {pausado ? 'Reanudar el avance automático' : 'Pausar el avance automático'}
+        </button>
       </div>
 
       {/* Panel con fotos de fondo (Ken Burns + crossfade) y texto sobre velo */}
-      <div className="relative rounded-3xl overflow-hidden min-h-[22rem] flex border border-gray-100 bg-[#0A2540]">
+      <div
+        id="panel-servicio"
+        role="tabpanel"
+        aria-labelledby={`pestana-servicio-${active}`}
+        aria-live="polite"
+        className="relative rounded-3xl overflow-hidden min-h-[22rem] flex border border-gray-100 bg-[#0A2540]"
+      >
         {/* Capa de fotos */}
         <div className="absolute inset-0">
           <AnimatePresence>

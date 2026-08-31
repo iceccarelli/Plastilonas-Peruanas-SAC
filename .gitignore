@@ -53,3 +53,8 @@ public/images/_pruebas-tomas/
 # Diagnóstico del verificador de dominio: depende de la red y del DNS del día.
 # Se regenera con `npm run seo:dominio`; versionarlo guardaría un estado falso.
 audit/domain-redirect.json
+
+# Salida de la auditoría de navegador (scripts/diagnostico/): JSON de
+# mediciones y capturas. Se regenera con `npm run diagnostico`; versionarla
+# metería megas de PNG en la historia por cada pasada.
+/.diagnostico/

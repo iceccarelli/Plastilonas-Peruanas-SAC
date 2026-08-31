@@ -272,6 +272,10 @@ export default function MachineryGallery() {
           <span className="text-xs font-medium text-gray-500 tabular-nums">
             {String(item.orden).padStart(2, '0')} / {total}
           </span>
+          {/* Los puntos medían 24×4 px de zona tocable: por debajo del mínimo
+              de 24×24 de WCAG 2.5.8. La MARCA sigue siendo una línea fina —no
+              cambia el diseño— pero el botón que la contiene ya tiene altura
+              suficiente para acertarle. */}
           <div className="hidden sm:flex gap-1">
             {machinery.map((m, i) => (
               <button
@@ -279,8 +283,13 @@ export default function MachineryGallery() {
                 type="button"
                 aria-label={`Ir a ${m.titulo}`}
                 onClick={() => goTo(i)}
-                className={`h-1 rounded-full transition-all ${i === index ? 'w-6 bg-[#059669]' : 'w-2 bg-gray-300 hover:bg-gray-400'}`}
-              />
+                className="grid h-6 w-6 place-items-center"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`block h-1 rounded-full transition-all ${i === index ? 'w-6 bg-[#059669]' : 'w-2 bg-gray-300 group-hover:bg-gray-400'}`}
+                />
+              </button>
             ))}
           </div>
         </div>

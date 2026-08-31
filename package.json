@@ -34,7 +34,12 @@
     "auditar": "node scripts/auditar-html.mjs",
     "auditar:json": "node scripts/auditar-html.mjs --json",
     "typecheck": "rm -rf .next/types && tsc --noEmit",
-    "entrega": "bash scripts/aplicar-entrega.sh"
+    "entrega": "bash scripts/aplicar-entrega.sh",
+    "diagnostico": "node scripts/diagnostico/01-maquetacion.mjs && node scripts/diagnostico/02-interaccion.mjs && node scripts/diagnostico/03-arquitectura.mjs && node scripts/diagnostico/04-accesibilidad.mjs && node scripts/diagnostico/07-solapamiento.mjs",
+    "diagnostico:a11y": "node scripts/diagnostico/04-accesibilidad.mjs",
+    "diagnostico:maqueta": "node scripts/diagnostico/01-maquetacion.mjs",
+    "diagnostico:enlaces": "node scripts/diagnostico/03-arquitectura.mjs",
+    "diagnostico:capturas": "node scripts/diagnostico/05-capturas.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",
@@ -66,6 +71,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.20",
+    "axe-core": "^4.13.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "jsdom": "^25.0.1",

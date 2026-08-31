@@ -78,7 +78,7 @@ export default async function CostoEnVivo({
         <h2 className="font-semibold tracking-tight text-2xl text-[#0A2540] dark:text-inherit">
           {encabezado}
         </h2>
-        <Link href="/indicadores" className="text-sm font-medium text-[#047857] hover:underline">
+        <Link href="/indicadores" className="inline-flex min-h-[44px] items-center text-sm font-medium text-[#047857] hover:underline">
           {t.verMetodo}
         </Link>
       </div>

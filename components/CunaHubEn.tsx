@@ -180,7 +180,7 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
           Line by line, from the same catalogue field the Spanish product pages use. A supplier that
           blurs manufacturing and supply is a supplier you cannot audit.
         </p>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Sourcing mode per line (scrolls horizontally)">
           <table className="w-full border-collapse text-sm">
             <caption className="sr-only">
               Sourcing mode declared for each line of {cuna.titulo}
@@ -264,7 +264,7 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
           </ul>
           <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
             The same limits are published in Spanish at{' '}
-            <Link href="/confianza" className="text-[#047857] hover:underline">/confianza</Link>.
+            <Link href="/confianza" className="text-[#047857] underline underline-offset-2">/confianza</Link>.
           </p>
         </div>
       </section>

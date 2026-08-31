@@ -29,7 +29,7 @@ export default function SocialIcons({ variant = "dark", className = "" }: Props)
           rel="noopener noreferrer"
           data-social={name.toLowerCase()}
           onClick={() => trackSocialClick(name)}
-          className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all ${base}`}
+          className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all ${base}`}
           title={name}
           aria-label={name}
         >

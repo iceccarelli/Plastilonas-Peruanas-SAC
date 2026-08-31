@@ -451,7 +451,11 @@ export default function Navbar() {
           Usa transform, no cambia el flujo: la página nunca "salta".
           El padding lateral respeta el recorte de pantalla en horizontal
           (iPhone con muesca girado), donde el área segura no es cero. */}
-      <div
+      {/* Landmark `banner`. Era un <div>: la barra utilitaria superior —horario,
+          teléfono, WhatsApp, Contáctenos— quedaba FUERA de cualquier región,
+          y un lector de pantalla no podía saltar a la cabecera con el atajo de
+          landmarks. Un elemento, trece rutas arregladas. */}
+      <header
         /**
          * `abierto !== null` es lo que faltaba, y es un fallo real, no una
          * sutileza. La cabecera se esconde al bajar la página trasladándose
@@ -499,7 +503,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        <nav className="bg-white/95 dark:bg-[#1C2C46]/95 backdrop-blur-lg border-b border-gray-200 dark:border-[var(--border)]">
+        <nav aria-label="Navegación principal" className="bg-white/95 dark:bg-[#1C2C46]/95 backdrop-blur-lg border-b border-gray-200 dark:border-[var(--border)]">
           {/* `relative` es el ancla del mega-menú. El panel se posiciona
               contra ESTE contenedor (ancho útil completo de la cabecera) y no
               contra zonaNav: el ancho de zonaNav es lo que sobra tras logo,
@@ -510,7 +514,7 @@ export default function Navbar() {
             <div className="flex items-center gap-3 xl:gap-6 h-20">
             {/* Logo. `min-w-0` permite que el rótulo ceda antes de empujar
                 al resto fuera de la pantalla. */}
-            <Link href="/" className="flex items-center gap-3 group shrink-0 min-w-0">
+            <Link href="/" className="flex min-h-[44px] items-center gap-3 group shrink-0 min-w-0">
               <div className="w-9 h-9 shrink-0 rounded-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/10 transition-transform group-hover:scale-[1.04]">
                 <Image src="/logo.png" alt="Plastilonas Peruanas SAC" width={36} height={36} priority className="w-full h-full object-cover" />
               </div>
@@ -696,7 +700,7 @@ export default function Navbar() {
               <button
                 onClick={() => setShowCommand(true)}
                 aria-label="Buscar productos"
-                className="lg:hidden p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#047857] transition-colors"
+                className="lg:hidden inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#047857] transition-colors"
               >
                 <Search className="w-5 h-5" />
               </button>
@@ -749,12 +753,12 @@ export default function Navbar() {
               </Link>
 
               {CART_ENABLED && (
-                <CartButton className="p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669]" />
+                <CartButton className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669]" />
               )}
 
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="lg:hidden p-2.5 text-[#0A2540] dark:text-[var(--text)]"
+                className="lg:hidden inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2.5 text-[#0A2540] dark:text-[var(--text)]"
                 aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
                 aria-expanded={isOpen}
               >
@@ -940,7 +944,7 @@ export default function Navbar() {
           )}
         </AnimatePresence>
         </nav>
-      </div>
+      </header>
 
       {/* Espaciador: reserva la altura del encabezado fijo para que el
           contenido no quede oculto debajo. md: incluye la barra utilitaria,

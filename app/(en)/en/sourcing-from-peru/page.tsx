@@ -203,7 +203,7 @@ export default function SourcingFromPeruPage() {
           We do not publish a map of flags. Below is what is true per destination; anything not
           listed is assessed shipment by shipment.
         </p>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Export markets (scrolls horizontally)">
           <table className="w-full text-sm border-collapse">
             <caption className="sr-only">Export markets, currency and stated scope</caption>
             <thead>
@@ -239,7 +239,7 @@ export default function SourcingFromPeruPage() {
         </ul>
         <p className="mt-4 text-sm text-gray-600">
           This list is published in Spanish too, at{' '}
-          <Link href="/confianza" className="text-[#047857] hover:underline">/confianza</Link>. Both
+          <Link href="/confianza" className="text-[#047857] underline underline-offset-2">/confianza</Link>. Both
           languages state the same limits.
         </p>
       </section>

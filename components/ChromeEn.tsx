@@ -43,10 +43,12 @@ export function HeaderEn() {
   return (
     <header className="border-b border-gray-200 dark:border-[var(--border)] bg-white/95 dark:bg-[#1C2C46]/95 backdrop-blur">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-3 px-6 py-4">
-        <Link href="/en" className="flex items-center gap-3">
+        <Link href="/en" className="flex min-h-[44px] items-center gap-3">
           <Image
             src="/logo.png"
-            alt={SITE.legalName}
+            /* El nombre ya está escrito al lado, en texto. Repetirlo en el alt
+               hace que un lector de pantalla lo anuncie dos veces seguidas. */
+            alt=""
             width={32}
             height={32}
             className="rounded-xl ring-1 ring-black/5"
@@ -61,7 +63,7 @@ export function HeaderEn() {
             <Link
               key={e.href}
               href={e.href}
-              className="text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669] transition-colors"
+              className="inline-flex min-h-[44px] items-center text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669] transition-colors"
             >
               {e.label}
             </Link>
@@ -70,7 +72,7 @@ export function HeaderEn() {
 
         <Link
           href="/"
-          className="ml-auto rounded-full border border-gray-200 dark:border-[var(--border)] px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:border-[#059669] hover:text-[#047857] transition-colors"
+          className="ml-auto inline-flex min-h-[44px] items-center rounded-full border border-gray-200 dark:border-[var(--border)] px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:border-[#059669] hover:text-[#047857] transition-colors"
         >
           Sitio en español →
         </Link>
@@ -93,7 +95,7 @@ export function FooterEn() {
               <div>
                 {DIRECCION_COMPLETA}
                 {' · '}
-                <a href={MAPA_URL} target="_blank" rel="noopener noreferrer" className="text-[#047857] hover:underline">
+                <a href={MAPA_URL} target="_blank" rel="noopener noreferrer" className="text-[#047857] underline underline-offset-2">
                   Map
                 </a>
               </div>
@@ -108,7 +110,7 @@ export function FooterEn() {
                 <WhatsAppLink
                   context="footer-en"
                   message="Hello, I am an international buyer and would like to request a quotation."
-                  className="text-[#047857] hover:underline"
+                  className="text-[#047857] underline underline-offset-2"
                 >
                   {TELEFONOS.whatsapp.display} (WhatsApp)
                 </WhatsAppLink>
@@ -139,19 +141,19 @@ export function FooterEn() {
             </ul>
 
             {/* Decirlo antes del clic, no después. */}
-            <p className="mt-5 text-gray-500">
+            <p className="mt-5 text-gray-500 dark:text-[var(--text-muted)]">
               The product catalogue, technical library and specification guides are published in
               Spanish. These English pages cover identity, export terms and the RFQ path.
             </p>
             <p className="mt-3">
-              <Link href="/" className="text-[#047857] hover:underline">Ir al sitio en español</Link>
+              <Link href="/" className="text-[#047857] underline underline-offset-2">Ir al sitio en español</Link>
               {' · '}
-              <Link href="/pt" className="text-[#047857] hover:underline">Português</Link>
+              <Link href="/pt" className="text-[#047857] underline underline-offset-2">Português</Link>
             </p>
           </div>
         </div>
 
-        <div className="mt-10 border-t border-gray-200 dark:border-[var(--border)] pt-6 text-xs text-gray-500">
+        <div className="mt-10 border-t border-gray-200 dark:border-[var(--border)] pt-6 text-xs text-gray-500 dark:text-[var(--text-muted)]">
           © {new Date().getFullYear()} {SITE.legalName}. Manufactured in Chorrillos, Lima, Peru
           since {SITE.foundingYear}. B2B by quotation — no price list.
         </div>

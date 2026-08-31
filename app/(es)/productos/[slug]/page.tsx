@@ -216,7 +216,7 @@ export default async function ProductDetailPage({ params }: Props) {
             pares clave/valor legibles para un lector de pantalla y para
             cualquier extractor de tablas. El mismo par viaja además como
             additionalProperty en el JSON-LD de ProductStructuredData. */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Especificaciones técnicas (se desplaza en horizontal)">
           <table className="specs-table w-full border-collapse">
             <caption className="sr-only">
               Especificaciones técnicas de {product.name} (SKU {product.id})

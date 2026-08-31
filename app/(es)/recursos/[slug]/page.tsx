@@ -255,7 +255,7 @@ export default async function ArticlePage({ params }: Props) {
           )}
 
           {s.table && (
-            <div className="mb-4 overflow-x-auto">
+            <div className="mb-4 overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla del artículo (se desplaza en horizontal)">
               <table className="w-full border-collapse text-sm">
                 {s.table.caption && (
                   <caption className="mb-2 text-left text-xs text-gray-500">

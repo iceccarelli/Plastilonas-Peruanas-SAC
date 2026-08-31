@@ -389,6 +389,28 @@ export default function CotizacionForm({ opciones, idioma = 'es', preselectedPro
   const etiqueta = 'block text-sm font-medium text-[#0A2540] dark:text-[var(--text)] mb-1.5';
   const error = 'mt-1 text-xs text-red-600';
 
+  /**
+   * ARIA DE VALIDACIÓN — el hueco más caro que encontró la auditoría.
+   *
+   * El formulario lleva `noValidate` y valida con react-hook-form, que es lo
+   * correcto para poder escribir los mensajes en español y en inglés. Pero el
+   * resultado sólo existía como PÍXELES: un `<p>` rojo debajo del campo. Sin
+   * `aria-invalid`, sin `aria-describedby` y sin `role="alert"`, alguien que
+   * usa lector de pantalla pulsaba «Enviar», no oía absolutamente nada y no
+   * tenía forma de saber qué campo estaba mal. En la única página por la que
+   * entra el dinero.
+   *
+   * Tres atributos y el error pasa a anunciarse solo, asociado a SU campo.
+   * `aria-required` además dice cuáles son obligatorios ANTES de intentarlo,
+   * que es cuando sirve.
+   */
+  const campoErr = errors as Record<string, { message?: string } | undefined>;
+  const aria = (nombre: string, obligatorio = false) => ({
+    'aria-invalid': campoErr[nombre] ? ('true' as const) : undefined,
+    'aria-describedby': campoErr[nombre] ? `${nombre}-error` : undefined,
+    'aria-required': obligatorio ? ('true' as const) : undefined,
+  });
+
   if (isSuccess) {
     return (
       <div className="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-10 text-center">
@@ -430,55 +452,55 @@ export default function CotizacionForm({ opciones, idioma = 'es', preselectedPro
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="rfq-nombre" className={etiqueta}>{t.nombre}</label>
-          <input id="rfq-nombre" {...register('nombre')} placeholder={t.nombrePh} className={campo} autoComplete="name" />
-          {errors.nombre && <p className={error}>{errors.nombre.message}</p>}
+          <input id="rfq-nombre" {...register('nombre')} placeholder={t.nombrePh} {...aria('nombre', true)} className={campo} autoComplete="name" />
+          {errors.nombre && <p id="nombre-error" role="alert" className={error}>{errors.nombre.message}</p>}
         </div>
         <div>
           <label htmlFor="rfq-empresa" className={etiqueta}>{t.empresa}</label>
-          <input id="rfq-empresa" {...register('empresa')} placeholder={t.empresaPh} className={campo} autoComplete="organization" />
-          {errors.empresa && <p className={error}>{errors.empresa.message}</p>}
+          <input id="rfq-empresa" {...register('empresa')} placeholder={t.empresaPh} {...aria('empresa', true)} className={campo} autoComplete="organization" />
+          {errors.empresa && <p id="empresa-error" role="alert" className={error}>{errors.empresa.message}</p>}
         </div>
         <div>
           <label htmlFor="rfq-ruc" className={etiqueta}>{t.ruc}</label>
-          <input id="rfq-ruc" {...register('ruc')} placeholder={t.rucPh} inputMode="numeric" className={campo} />
-          {errors.ruc && <p className={error}>{errors.ruc.message}</p>}
+          <input id="rfq-ruc" {...register('ruc')} placeholder={t.rucPh} inputMode="numeric" {...aria('ruc', false)} className={campo} />
+          {errors.ruc && <p id="ruc-error" role="alert" className={error}>{errors.ruc.message}</p>}
         </div>
         <div>
           <label htmlFor="rfq-email" className={etiqueta}>{t.email}</label>
-          <input id="rfq-email" type="email" {...register('email')} placeholder={t.emailPh} className={campo} autoComplete="email" />
-          {errors.email && <p className={error}>{errors.email.message}</p>}
+          <input id="rfq-email" type="email" {...register('email')} placeholder={t.emailPh} {...aria('email', true)} className={campo} autoComplete="email" />
+          {errors.email && <p id="email-error" role="alert" className={error}>{errors.email.message}</p>}
         </div>
         <div>
           <label htmlFor="rfq-telefono" className={etiqueta}>{t.telefono}</label>
           {/* Placeholder genérico a propósito: NUNCA el número de la empresa. */}
-          <input id="rfq-telefono" type="tel" {...register('telefono')} placeholder={t.telefonoPh} className={campo} autoComplete="tel" />
-          {errors.telefono && <p className={error}>{errors.telefono.message}</p>}
+          <input id="rfq-telefono" type="tel" {...register('telefono')} placeholder={t.telefonoPh} {...aria('telefono', true)} className={campo} autoComplete="tel" />
+          {errors.telefono && <p id="telefono-error" role="alert" className={error}>{errors.telefono.message}</p>}
         </div>
         <div>
           <label htmlFor="rfq-producto" className={etiqueta}>
             {t.producto} {productoObligatorio ? '*' : t.productoOpc}
           </label>
-          <select id="rfq-producto" {...register('producto')} className={campo}>
+          <select id="rfq-producto" {...register('producto')} {...aria('producto', false)} className={campo}>
             <option value="">{t.productoPh}</option>
             {opciones.map((p) => (
               <option key={p.slug} value={p.name}>{p.name}</option>
             ))}
           </select>
-          {errors.producto && <p className={error}>{errors.producto.message}</p>}
+          {errors.producto && <p id="producto-error" role="alert" className={error}>{errors.producto.message}</p>}
         </div>
         <div>
           <label htmlFor="rfq-cantidad" className={etiqueta}>{t.cantidad}</label>
-          <input id="rfq-cantidad" {...register('cantidad')} placeholder={t.cantidadPh} className={campo} />
+          <input id="rfq-cantidad" {...register('cantidad')} placeholder={t.cantidadPh} {...aria('cantidad', false)} className={campo} />
         </div>
         <div>
           <label htmlFor="rfq-ciudad" className={etiqueta}>{t.ciudad}</label>
-          <input id="rfq-ciudad" {...register('ciudadEntrega')} placeholder={t.ciudadPh} className={campo} autoComplete="address-level2" />
-          {errors.ciudadEntrega && <p className={error}>{errors.ciudadEntrega.message}</p>}
+          <input id="rfq-ciudad" {...register('ciudadEntrega')} placeholder={t.ciudadPh} {...aria('ciudadEntrega', true)} className={campo} autoComplete="address-level2" />
+          {errors.ciudadEntrega && <p id="ciudadEntrega-error" role="alert" className={error}>{errors.ciudadEntrega.message}</p>}
         </div>
         <div>
           <label htmlFor="rfq-fecha" className={etiqueta}>{t.fecha}</label>
           {/* type="date": el navegador lo presenta dd/mm/aaaa en es-PE. */}
-          <input id="rfq-fecha" type="date" lang="es-PE" {...register('fechaNecesaria')} className={campo} />
+          <input id="rfq-fecha" type="date" lang="es-PE" {...register('fechaNecesaria')} {...aria('fechaNecesaria', false)} className={campo} />
         </div>
         <div className="sm:col-span-2">
           <label htmlFor="rfq-mensaje" className={etiqueta}>{t.mensaje}</label>
@@ -487,9 +509,10 @@ export default function CotizacionForm({ opciones, idioma = 'es', preselectedPro
             rows={4}
             {...register('mensaje')}
             placeholder={t.mensajePh}
+            {...aria('mensaje', true)}
             className={campo}
           />
-          {errors.mensaje && <p className={error}>{errors.mensaje.message}</p>}
+          {errors.mensaje && <p id="mensaje-error" role="alert" className={error}>{errors.mensaje.message}</p>}
         </div>
 
         <div className="sm:col-span-2">

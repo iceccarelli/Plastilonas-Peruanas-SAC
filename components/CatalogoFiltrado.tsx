@@ -172,8 +172,17 @@ export default function CatalogoFiltrado() {
             <Filter className="w-4 h-4" /> Filtros
           </button>
 
-          <select 
-            value={sortBy} 
+          {/* El <select> no tenia etiqueta de ningun tipo: ni <label>, ni
+              aria-label, ni name. Un lector de pantalla lo anunciaba como
+              «cuadro combinado» a secas, sin decir que ordenaba el catalogo.
+              La etiqueta va oculta a la vista, no ausente. */}
+          <label htmlFor="orden-catalogo" className="sr-only">
+            Ordenar el catálogo
+          </label>
+          <select
+            id="orden-catalogo"
+            name="orden"
+            value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'name' | 'popular')}
             className="px-5 py-3.5 border border-gray-200 rounded-2xl text-sm bg-white focus:border-[#059669]"
           >
@@ -181,9 +190,33 @@ export default function CatalogoFiltrado() {
             <option value="name">Orden alfabético</option>
           </select>
 
-          <div className="flex border border-gray-200 rounded-2xl overflow-hidden">
-            <button onClick={() => setViewMode('grid')} className={`p-3.5 ${viewMode === 'grid' ? 'bg-[#0A2540] text-white' : 'hover:bg-gray-50'}`}><Grid className="w-4 h-4" /></button>
-            <button onClick={() => setViewMode('list')} className={`p-3.5 ${viewMode === 'list' ? 'bg-[#0A2540] text-white' : 'hover:bg-gray-50'}`}><List className="w-4 h-4" /></button>
+          {/* Los dos botones de vista eran iconos sin texto ni aria-label: para
+              un lector de pantalla, dos botones anonimos uno al lado del otro.
+              Son un grupo de dos estados excluyentes, asi que se declaran como
+              tales con aria-pressed y con nombre. */}
+          <div
+            role="group"
+            aria-label="Forma de ver el catálogo"
+            className="flex border border-gray-200 rounded-2xl overflow-hidden"
+          >
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              aria-label="Ver en cuadrícula"
+              aria-pressed={viewMode === 'grid'}
+              className={`p-3.5 ${viewMode === 'grid' ? 'bg-[#0A2540] text-white' : 'hover:bg-gray-50'}`}
+            >
+              <Grid className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              aria-label="Ver en lista"
+              aria-pressed={viewMode === 'list'}
+              className={`p-3.5 ${viewMode === 'list' ? 'bg-[#0A2540] text-white' : 'hover:bg-gray-50'}`}
+            >
+              <List className="w-4 h-4" aria-hidden="true" />
+            </button>
           </div>
         </div>
       </div>
@@ -210,6 +243,10 @@ export default function CatalogoFiltrado() {
         </div>
 
         {/* Products Grid/List */}
+        {/* Las fichas titulan con h3 (ProductCard) y encima sólo había un h1:
+            salto de nivel. El h2 de la región de resultados existía en el
+            diseño —es «el catálogo»— pero no en el marcado. */}
+        <h2 className="sr-only">Resultados del catálogo</h2>
         <div className="flex-1 min-w-0">
           <AnimatePresence mode="wait">
             {filteredProducts.length > 0 ? (

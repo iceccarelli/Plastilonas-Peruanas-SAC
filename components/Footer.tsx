@@ -97,9 +97,9 @@ export default function Footer() {
             Solicitar cotización
           </Link>
           <div className="flex items-center gap-2 text-sm">
-            <span className="px-4 py-2 rounded-full border border-white/30 text-white">Español</span>
-            <Link href="/en" className="px-4 py-2 rounded-full border border-white/15 text-white/70 hover:border-white/40 hover:text-white transition-colors">English</Link>
-            <Link href="/pt" className="px-4 py-2 rounded-full border border-white/15 text-white/70 hover:border-white/40 hover:text-white transition-colors">Português</Link>
+            <span className="inline-flex min-h-[44px] items-center px-4 py-2 rounded-full border border-white/30 text-white">Español</span>
+            <Link href="/en" className="inline-flex min-h-[44px] items-center px-4 py-2 rounded-full border border-white/15 text-white/70 hover:border-white/40 hover:text-white transition-colors">English</Link>
+            <Link href="/pt" className="inline-flex min-h-[44px] items-center px-4 py-2 rounded-full border border-white/15 text-white/70 hover:border-white/40 hover:text-white transition-colors">Português</Link>
           </div>
         </div>
         {/* ── Mobile: marca compacta + CTA + acordeón (patrón AWS) ── */}
@@ -116,7 +116,7 @@ export default function Footer() {
           </WhatsAppLink>
           <FooterAccordion sections={sections} />
           <div className="py-6">
-            <div className="text-xs text-white/40 mb-3 tracking-wide">SÍGANOS</div>
+            <div className="text-xs text-white/70 mb-3 tracking-wide">SÍGANOS</div>
             <SocialIcons variant="dark" />
           </div>
         </div>
@@ -235,14 +235,19 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 pt-8 border-t border-white/10 flex justify-center">
-          <a href="#top" className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors">Volver arriba <ArrowUp className="w-4 h-4" /></a>
+          <a href="#top" className="inline-flex min-h-[44px] items-center gap-2 px-3 text-sm text-white/70 hover:text-white transition-colors">Volver arriba <ArrowUp className="w-4 h-4" /></a>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-y-4 text-xs text-white/50">
+        {/* items-start en móvil, no items-center: centrados, «Términos y
+            Condiciones» caía justo debajo del botón flotante del asistente
+            (fixed bottom-20 right-6, 64×64) y era intocable con el dedo.
+            Alineados a la izquierda quedan fuera de esa esquina, sin añadir
+            hueco muerto al final de la página. */}
+        <div className="mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-y-4 text-xs text-white/50">
           <div>© {currentYear} {SITE.legalName}. Todos los derechos reservados. RUC: {SITE.ruc}</div>
           <div className="flex items-center gap-x-6">
-            <Link href="/privacidad" className="hover:text-white transition-colors">Política de Privacidad</Link>
-            <Link href="/terminos" className="hover:text-white transition-colors">Términos y Condiciones</Link>
+            <Link href="/privacidad" className="inline-flex min-h-[44px] items-center hover:text-white transition-colors">Política de Privacidad</Link>
+            <Link href="/terminos" className="inline-flex min-h-[44px] items-center hover:text-white transition-colors">Términos y Condiciones</Link>
             <span className="hidden md:inline">Hecho en Perú</span>
           </div>
         </div>

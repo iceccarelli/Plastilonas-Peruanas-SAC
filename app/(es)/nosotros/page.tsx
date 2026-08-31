@@ -90,7 +90,7 @@ export default function NosotrosPage() {
 
       <div className="mt-16 bg-[#0A2540] text-white rounded-3xl p-12 text-center">
         <div className="max-w-md mx-auto">
-          <h3 className="t-h2 font-semibold mb-4">¿Listo para trabajar con nosotros?</h3>
+          <h2 className="t-h2 font-semibold mb-4">¿Listo para trabajar con nosotros?</h2>
                     {/* Aquí decía «Únase a más de 500 empresas que ya confían en
               Plastilonas Peruanas». Esa cifra no sale de ningún sistema de
               esta empresa: no hay recuento de clientes publicable ni

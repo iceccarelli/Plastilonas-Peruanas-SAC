@@ -180,7 +180,8 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
             Especificación declarada por cada ficha. Donde una línea no la declara dice «No
             declarado»: no se rellena ni se infiere del vecino.
           </p>
-          <div className="overflow-x-auto">
+          {/* WCAG 2.1.1: caja con scroll = recorrible con teclado. */}
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Comparación de especificaciones (se desplaza en horizontal)">
             <table className="w-full border-collapse text-sm">
               <caption className="sr-only">
                 Comparación de especificaciones de {hijos.length} líneas de {cuna.titulo}

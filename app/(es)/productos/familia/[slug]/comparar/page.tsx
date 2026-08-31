@@ -129,7 +129,7 @@ export default async function CompararPage({ params }: Props) {
         que después no podamos sostener en la cotización.
       </p>
 
-      <div className="mb-10 overflow-x-auto rounded-3xl border border-gray-100">
+      <div className="mb-10 overflow-x-auto rounded-3xl border border-gray-100" tabIndex={0} role="region" aria-label="Tabla comparativa (se desplaza en horizontal)">
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50">

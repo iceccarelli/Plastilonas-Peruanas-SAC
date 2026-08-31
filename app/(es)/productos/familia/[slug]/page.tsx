@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { products, productFamilies, sourcingLabels, availabilityLabels } from '@/lib/products';
-import { familyContent, resolveFamily } from '@/lib/families';
+import { familyContent, resolveFamily, comparableFamilies } from '@/lib/families';
 import { articles } from '@/lib/articles';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
@@ -65,6 +65,8 @@ export default async function FamilyPage({ params }: Props) {
   const url = `${SITE.url}/productos/familia/${slug}`;
   const imagen = ranurasFamilia().find((r) => r.id === `familia:${slug}`);
   const items = products.filter((p) => p.category === family.name);
+  // ¿Existe /comparar para esta familia? La misma función que genera la ruta.
+  const comparable = comparableFamilies().some((f) => f.slug === slug);
   const sectores = Array.from(new Set(items.flatMap((p) => p.sector)));
   const sourcings = Array.from(new Set(items.map((p) => p.sourcing).filter(Boolean))) as string[];
   const disponibilidades = Array.from(
@@ -185,7 +187,13 @@ export default async function FamilyPage({ params }: Props) {
         </div>
       </section>
 
-      {items.length >= 2 && (
+      {/* El enlace se pinta con EL MISMO predicado que genera la ruta.
+          Antes bastaba con `items.length >= 2`, pero /comparar sólo existe
+          para las familias que además producen al menos una fila comparable
+          (lib/families.ts). `seguridad-industrial` tiene cuatro fichas y
+          ninguna especificación compartida: el botón se pintaba y llevaba a
+          un 404. Lo encontró el rastreo de enlaces, no una prueba. */}
+      {comparable && (
         <div className="mb-14 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-[#059669]/20 bg-[#059669]/5 p-6">
           <p className="text-gray-800">
             ¿Está eligiendo entre varias de estas {items.length} alternativas? Véalas con

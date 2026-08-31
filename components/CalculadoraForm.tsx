@@ -157,7 +157,12 @@ function Formulario({ calc }: { calc: NonNullable<ReturnType<typeof calculadoraP
       </form>
 
       {/* ---------------- Resultado ---------------- */}
+      {/* El bloque «Cómo sale ese número» era un h3 colgando directamente del
+          h1 de la página: un salto de nivel que deja a un lector de pantalla
+          sin la sección intermedia. El encabezado de la región existe, sólo
+          que no hacía falta verlo. */}
       <div className="space-y-6">
+        <h2 className="sr-only">Resultado del cálculo</h2>
         <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-gray-100" aria-live="polite">
           {salida.invalido ? (
             <div className="flex gap-3">
