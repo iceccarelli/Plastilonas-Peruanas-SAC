@@ -7,6 +7,7 @@ import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, itemListSchema, webPageSchema, faqSchema } from '@/lib/schema';
 import MiniaturaRanura from '@/components/MiniaturaRanura';
 import { ranurasCalculadora } from '@/lib/imagenes';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Índice de calculadoras.
@@ -27,6 +28,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/calculadoras' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: DESCRIPTION,
     url: URL,

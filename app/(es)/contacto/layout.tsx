@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * /contacto es client component (formulario) y no puede exportar `metadata`.
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/contacto' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: DESCRIPTION,
     url: URL,

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { tituloAjustado, descripcionAjustada } from '@/lib/meta';
+import { tituloAjustado, descripcionAjustada, OG_IMAGEN } from '@/lib/meta';
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ciudades from "@/data/ciudades.json";
@@ -48,7 +48,8 @@ export async function generateMetadata({ params }: { params: Promise<{ ciudad: s
   ]);
   const url = `${SITE.url}/local/${c.slug}`;
   return { title, description, alternates: { canonical: url },
-    openGraph: { title, description, url, locale: "es_PE", type: "website" } };
+    openGraph: {
+    images: OG_IMAGEN, title, description, url, locale: "es_PE", type: "website" } };
 }
 
 function faqsFor(c: Ciudad) {

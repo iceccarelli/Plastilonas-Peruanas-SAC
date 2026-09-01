@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import FabricarOImportar from '@/components/FabricarOImportar';
 import { SITE } from '@/lib/site';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * hreflang RECÍPROCO: esta página y /en/manufacture-in-peru-or-import son la
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/fabricar-o-importar', languages: ALTERNOS },
   openGraph: {
+    images: OG_IMAGEN,
     title: TITLE,
     description: DESCRIPTION,
     url: `${SITE.url}/fabricar-o-importar`,

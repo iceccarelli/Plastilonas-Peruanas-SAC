@@ -14,6 +14,7 @@ import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, faqSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasProceso } from '@/lib/imagenes';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Marco de Especificación Plastilonas — el documento público.
@@ -62,6 +63,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/marco' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: DESCRIPTION,
     url: URL,

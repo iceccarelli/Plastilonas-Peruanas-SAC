@@ -21,6 +21,7 @@ import ImagenContenido from '@/components/ImagenContenido';
 import FotoReferencial from '@/components/FotoReferencial';
 import RielComercial from '@/components/RielComercial';
 import { ranurasErrorCompra } from '@/lib/imagenes';
+import { OG_IMAGEN } from '@/lib/meta';
 import {
   breadcrumbSchema,
   faqSchema,
@@ -59,6 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     alternates: { canonical: `/industria/${ind.slug}` },
     openGraph: {
+    images: OG_IMAGEN,
       title: `${title} | ${SITE.name}`,
       description,
       url,

@@ -5,6 +5,7 @@ import { ArrowRight, Check } from 'lucide-react';
 import Image from 'next/image';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, itemListSchema, serviceSchema, webPageSchema } from '@/lib/schema';
+import { OG_IMAGEN } from '@/lib/meta';
 
 const URL_SERVICIOS = `${SITE.url}/servicios`;
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/servicios' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: DESCRIPTION,
     url: `${SITE.url}/servicios`,

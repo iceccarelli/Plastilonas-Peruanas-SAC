@@ -6,6 +6,7 @@ import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
 import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasProceso } from '@/lib/imagenes';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * La evaluación es un client component (estado del formulario) y no puede
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/marco/evaluacion' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: DESCRIPTION,
     url: URL,

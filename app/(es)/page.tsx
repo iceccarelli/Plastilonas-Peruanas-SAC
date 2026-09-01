@@ -28,6 +28,7 @@ import { cunas } from '@/lib/cunas';
 import SectionHeading from '@/components/SectionHeading';
 import MachineryGallery from '@/components/MachineryGallery';
 import { Reveal } from '@/components/Reveal';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Metadata propia de la home. Sin esto heredaba el title/description por
@@ -59,6 +60,7 @@ export const metadata: Metadata = {
     `Fabricamos e instalamos a medida desde ${SITE.foundingYear}: big bags FIBC, lonas, geomembranas, carpas, ventilación minera y mallas. Un solo proveedor, despacho nacional.`,
   alternates: { canonical: '/', languages: ALTERNOS },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${SITE.name} | Fabricante de soluciones textiles industriales en el Perú`,
     description: SITE.description,
     url: SITE.url,

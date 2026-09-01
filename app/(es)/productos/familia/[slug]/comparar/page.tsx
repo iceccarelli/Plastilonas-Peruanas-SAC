@@ -10,7 +10,7 @@ import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
-import { descripcionDeTexto } from '@/lib/meta';
+import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Tabla comparativa por familia (/productos/familia/[slug]/comparar).
@@ -53,6 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     alternates: { canonical: `/productos/familia/${slug}/comparar` },
     openGraph: {
+    images: OG_IMAGEN,
       title: `${title} | ${SITE.name}`,
       description,
       url: `${SITE.url}/productos/familia/${slug}/comparar`,

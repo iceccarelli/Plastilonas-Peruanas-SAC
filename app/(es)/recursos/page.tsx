@@ -8,6 +8,7 @@ import { ranurasGuia } from '@/lib/imagenes';
 import { familyHrefByName } from '@/lib/families';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Índice del silo técnico (/recursos).
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/recursos' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: DESCRIPTION,
     url: URL,

@@ -7,6 +7,7 @@ import { ranurasSolucion } from '@/lib/imagenes';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Índice de arquitecturas de referencia.
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/soluciones' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: DESCRIPTION,
     url: URL,

@@ -141,3 +141,36 @@ export function descripcionDeTexto(texto: string, max = MAX_DESCRIPCION): string
 
 /** ¿Esta descripción cabe entera en el resultado de búsqueda? */
 export const descripcionCabe = (d: string): boolean => d.trim().length <= MAX_DESCRIPCION;
+
+/**
+ * IMAGEN DE VISTA PREVIA — una, compartida, y declarada explícitamente.
+ *
+ * EL DEFECTO QUE CIERRA. `app/opengraph-image.tsx` genera la tarjeta de 1200×630
+ * con el logo real, y un comentario en el layout daba por hecho que con eso
+ * bastaba. No bastaba: en Next, cuando una página declara su propio objeto
+ * `openGraph`, ese objeto REEMPLAZA al del padre —imágenes incluidas—, y las
+ * 43 páginas del sitio declaran el suyo para poner título, descripción y URL.
+ * Resultado medido sobre el HTML servido: `/`, `/big-bags`, `/cotizacion` y
+ * las 214 páginas en español salían SIN `og:image`. Sólo `/en` y `/pt`, que no
+ * declaran `openGraph`, la conservaban.
+ *
+ * POR QUÉ IMPORTA MÁS DE LO QUE PARECE. El canal comercial de esta empresa es
+ * WhatsApp. Un enlace pegado en WhatsApp, LinkedIn o Slack sin imagen es una
+ * línea de texto azul; con imagen es una tarjeta con el logo, el título y la
+ * descripción. Es la diferencia entre que un jefe de compras abra el enlace
+ * que le reenviaron o lo ignore, y no cuesta nada: la imagen ya existía.
+ *
+ * La ruta se declara relativa a propósito: `metadataBase` (los tres layouts
+ * raíz) la resuelve al host canónico del momento, así que el día del corte a
+ * www.plastilonas.com no hay que tocar 43 archivos.
+ */
+export const OG_IMAGEN = [
+  {
+    url: '/opengraph-image',
+    width: 1200,
+    height: 630,
+    // El alt viaja con la imagen: es lo que lee quien recibe la tarjeta con un
+    // lector de pantalla, y lo que se muestra si la imagen no carga.
+    alt: 'Plastilonas Peruanas SAC — Soluciones textiles industriales a medida',
+  },
+];

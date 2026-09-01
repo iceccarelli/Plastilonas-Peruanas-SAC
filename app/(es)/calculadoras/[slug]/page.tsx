@@ -21,7 +21,7 @@ import {
 import CalculadoraForm from '@/components/CalculadoraForm';
 import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasCalculadora } from '@/lib/imagenes';
-import { descripcionDeTexto } from '@/lib/meta';
+import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Página de una calculadora.
@@ -68,6 +68,7 @@ export async function generateMetadata({
     description: descripcionDeTexto(`${calc.pregunta} Método abierto de predimensionamiento, con la fórmula a la vista y sus límites declarados.`),
     alternates: { canonical: `/calculadoras/${calc.slug}` },
     openGraph: {
+    images: OG_IMAGEN,
       title: `${calc.titulo} | ${SITE.name}`,
       description: descripcionDeTexto(calc.resumen),
       url,

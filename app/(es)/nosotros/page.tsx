@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
+import { OG_IMAGEN } from '@/lib/meta';
 
 const URL_NOSOTROS = `${SITE.url}/nosotros`;
 
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/nosotros' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: DESCRIPTION,
     url: `${SITE.url}/nosotros`,

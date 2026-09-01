@@ -6,6 +6,7 @@ import { SITE, HORARIO } from '@/lib/site';
 import { INCOTERMS_SALIDA } from '@/lib/exportacion';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * RFQ EN INGLÉS.
@@ -34,7 +35,8 @@ export const metadata: Metadata = {
   title: { absolute: `${TITLE} | ${SITE.legalName}` },
   description: DESCRIPTION,
   alternates: { canonical: '/en/rfq' },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: URL_PAGINA, locale: 'en', type: 'website' },
+  openGraph: {
+    images: OG_IMAGEN, title: TITLE, description: DESCRIPTION, url: URL_PAGINA, locale: 'en', type: 'website' },
 };
 
 export default async function RfqEnPage({

@@ -8,6 +8,7 @@ import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasProceso } from '@/lib/imagenes';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Índice de informes del sector.
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/informes' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: DESCRIPTION,
     url: URL,

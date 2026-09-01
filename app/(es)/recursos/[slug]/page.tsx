@@ -20,7 +20,7 @@ import {
   howToSchema,
   webPageSchema,
 } from '@/lib/schema';
-import { descripcionDeTexto } from '@/lib/meta';
+import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Plantilla de artículo técnico.
@@ -53,6 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: descripcionBusqueda,
     alternates: { canonical: `/recursos/${a.slug}` },
     openGraph: {
+    images: OG_IMAGEN,
       title: a.metaTitle,
       description: descripcionBusqueda,
       url,

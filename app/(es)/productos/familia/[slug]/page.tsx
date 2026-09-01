@@ -11,7 +11,7 @@ import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasFamilia } from '@/lib/imagenes';
 import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, faqSchema, itemListSchema, webPageSchema, imageObjectSchema } from '@/lib/schema';
-import { descripcionDeTexto } from '@/lib/meta';
+import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
 import RielComercial from '@/components/RielComercial';
 
 /**
@@ -47,6 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: descripcionBusqueda,
     alternates: { canonical: `/productos/familia/${slug}` },
     openGraph: {
+    images: OG_IMAGEN,
       title: content.metaTitle,
       description: descripcionBusqueda,
       url,

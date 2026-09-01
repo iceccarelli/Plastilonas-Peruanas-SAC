@@ -8,7 +8,7 @@ import {
   tituloIndustria,
   descripcionIndustria,
 } from '@/lib/industrias';
-import { descripcionAjustada } from '@/lib/meta';
+import { descripcionAjustada, OG_IMAGEN } from '@/lib/meta';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 import MiniaturaRanura from '@/components/MiniaturaRanura';
@@ -34,6 +34,7 @@ export const metadata: Metadata = {
   ]),
   alternates: { canonical: '/industria' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `Soluciones por industria | ${SITE.name}`,
     description:
       'Qué fabricamos para minería, agroexportación, transporte, construcción y saneamiento en el Perú.',

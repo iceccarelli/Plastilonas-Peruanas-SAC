@@ -13,6 +13,7 @@ import { calculadoras } from '@/lib/calculadoras';
 import { pillars, totalCriteria } from '@/lib/framework';
 import { projects, projectsPublicados } from '@/lib/projects';
 import { todasLasRanurasConPublicadas } from '@/lib/imagenes';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * MÉTODO EDITORIAL — cómo se decide lo que se publica aquí.
@@ -66,6 +67,7 @@ export const metadata: Metadata = {
     'El método editorial: de dónde sale cada cifra, qué se comprueba antes de publicar, qué no se afirma y cómo verificarlo por su cuenta.',
   alternates: { canonical: '/metodo' },
   openGraph: {
+    images: OG_IMAGEN,
     title: 'Cómo se publica este sitio — método editorial',
     description:
       'De dónde sale cada cifra, qué se comprueba antes de publicar y cómo verificarlo sin pedirnos permiso.',

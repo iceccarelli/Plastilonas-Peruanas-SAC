@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import CunaHubEn from '@/components/CunaHubEn';
 import { cunaEnPorSlug } from '@/lib/cunas-en';
 import { SITE } from '@/lib/site';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Cuña comercial en inglés (ver lib/cunas-en.ts).
@@ -27,6 +28,7 @@ export const metadata: Metadata = {
   description: cuna.descripcion,
   alternates: { canonical: '/en/fibc-big-bags-peru', languages: ALTERNOS },
   openGraph: {
+    images: OG_IMAGEN,
     title: cuna.titulo,
     description: cuna.descripcion,
     url: `${SITE.url}/en/fibc-big-bags-peru`,

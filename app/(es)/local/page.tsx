@@ -14,6 +14,7 @@ import { JsonLd } from "@/components/JsonLd";
 import ImagenContenido from '@/components/ImagenContenido';
 import NAP from '@/components/NAP';
 import { ranurasProceso } from '@/lib/imagenes';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Índice de cobertura local (/local).
@@ -75,6 +76,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: "/local" },
   openGraph: {
+    images: OG_IMAGEN,
     title: TITLE,
     description: DESCRIPTION,
     url: URL,

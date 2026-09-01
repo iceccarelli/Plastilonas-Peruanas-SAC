@@ -12,7 +12,7 @@ import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import { articleSchema, breadcrumbSchema, webPageSchema } from '@/lib/schema';
-import { descripcionDeTexto } from '@/lib/meta';
+import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Entrada del registro fechado.
@@ -45,6 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: descripcionBusqueda,
     alternates: { canonical: `/novedades/${slug}` },
     openGraph: {
+    images: OG_IMAGEN,
       title: `${n.titulo} | ${SITE.name}`,
       description: descripcionBusqueda,
       url,

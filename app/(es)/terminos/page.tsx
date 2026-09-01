@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { terminos } from '@/lib/legal';
 import { LegalPage } from '@/lib/legal-page';
 import { SITE } from '@/lib/site';
+import { OG_IMAGEN } from '@/lib/meta';
 
 const TITLE = 'Términos y condiciones';
 const INTRO = `Cómo funciona la relación comercial: venta por cotización, alcance de las especificaciones publicadas, compra en línea y uso del contenido técnico del sitio.`;
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   description: `Venta B2B por cotización, sin precios de lista. Alcance de las fichas y guías técnicas, compra en línea y ley aplicable.`,
   alternates: { canonical: '/terminos' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: INTRO,
     url: `${SITE.url}/terminos`,

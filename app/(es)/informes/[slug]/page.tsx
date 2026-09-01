@@ -10,7 +10,7 @@ import BarChart from '@/components/BarChart';
 import LineChart from '@/components/LineChart';
 import { numeroConSigno } from '@/lib/format';
 import { articleSchema, breadcrumbSchema, datasetSchema, webPageSchema } from '@/lib/schema';
-import { descripcionDeTexto } from '@/lib/meta';
+import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Página de informe.
@@ -48,6 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: descripcionBusqueda,
     alternates: { canonical: `/informes/${slug}` },
     openGraph: {
+    images: OG_IMAGEN,
       title: `${i.titulo} | ${SITE.name}`,
       description: descripcionBusqueda,
       url,

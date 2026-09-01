@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
@@ -202,5 +202,86 @@ describe('el arné de diagnóstico sigue en su sitio', () => {
     expect(pkg.scripts.diagnostico).toContain('scripts/diagnostico/');
     expect(pkg.devDependencies['axe-core'], 'axe-core es la fuente del veredicto').toBeTruthy();
     expect(leer('.gitignore')).toContain('/.diagnostico/');
+  });
+});
+
+describe('las fuentes son nuestras', () => {
+  it('no se descargan de un tercero en tiempo de compilación', () => {
+    // DEFECTO: `next build` salía a fonts.googleapis.com. En Codespaces
+    // imprimía diecisiete «Retrying 1/3…»; en un contenedor sin salida a ese
+    // dominio la compilación fallaba y hubo que inventar un mock para poder
+    // verificar. Una compilación que depende de un servicio ajeno no es
+    // reproducible.
+    const src = leer('lib/fonts.ts');
+    expect(src).toContain("from 'next/font/local'");
+    expect(src, 'volvió la descarga desde Google').not.toContain('next/font/google');
+  });
+
+  it('los seis subconjuntos latinos viven en el repositorio', () => {
+    for (const f of [
+      'public/fonts/inter-latin-400-normal.woff2',
+      'public/fonts/inter-latin-500-normal.woff2',
+      'public/fonts/inter-latin-600-normal.woff2',
+      'public/fonts/inter-latin-700-normal.woff2',
+      'public/fonts/playfair-display-latin-700-normal.woff2',
+      'public/fonts/jetbrains-mono-latin-400-normal.woff2',
+    ]) {
+      expect(() => readFileSync(join(raiz, f)), f).not.toThrow();
+    }
+  });
+
+  it('la CSP ya no necesita abrir el dominio de fuentes de Google', () => {
+    const cfg = leer('next.config.ts');
+    expect(cfg).toContain("font-src 'self' data:");
+    expect(cfg, 'la CSP volvió a abrirse a un tercero').not.toContain('fonts.gstatic.com');
+  });
+
+  it('se conserva el ajuste métrico de la fuente de respaldo', () => {
+    // Sin `adjustFontFallback`, self-hostear reintroduce el salto de texto
+    // (CLS) que next/font/google evitaba por su cuenta.
+    const src = leer('lib/fonts.ts');
+    expect(src).toContain('adjustFontFallback');
+    expect(src).toContain("display: 'swap'");
+  });
+});
+
+describe('cada enlace compartido lleva su tarjeta', () => {
+  it('la imagen de vista previa se declara una vez, con medidas y alt', () => {
+    // DEFECTO: app/opengraph-image.tsx generaba la tarjeta y un comentario daba
+    // por hecho que con eso bastaba. No bastaba: en Next, una página que
+    // declara su propio objeto `openGraph` REEMPLAZA el del padre, imágenes
+    // incluidas. Medido sobre el HTML servido: 0 de las 214 páginas en español
+    // emitían og:image. El canal comercial de esta empresa es WhatsApp.
+    const src = leer('lib/meta.ts');
+    expect(src).toContain('export const OG_IMAGEN');
+    expect(src).toContain("url: '/opengraph-image'");
+    expect(src).toContain('width: 1200');
+    expect(src).toContain('height: 630');
+    expect(src).toContain('alt:');
+  });
+
+  it('NINGÚN openGraph del sitio se queda sin imagen', () => {
+    /**
+     * El invariante que impide que vuelva: cualquier archivo que declare un
+     * objeto `openGraph` tiene que declarar también sus imágenes —heredarlas
+     * no funciona—. Se recorre app/ entero, no una lista escrita a mano.
+     */
+    const culpables: string[] = [];
+    const recorrer = (dir: string) => {
+      for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
+        const rel = `${dir}/${e.name}`;
+        if (e.isDirectory()) recorrer(rel);
+        else if (e.name.endsWith('.tsx')) {
+          const src = readFileSync(join(raiz, rel), 'utf8');
+          const i = src.indexOf('openGraph: {');
+          if (i === -1) continue;
+          // El bloque llega hasta su llave de cierre al mismo nivel; basta con
+          // mirar los 900 caracteres siguientes, que lo cubren de sobra.
+          if (!/images/.test(src.slice(i, i + 900))) culpables.push(rel);
+        }
+      }
+    };
+    recorrer('app');
+    expect(culpables, 'estos openGraph saldrían sin tarjeta al compartirse').toEqual([]);
   });
 });

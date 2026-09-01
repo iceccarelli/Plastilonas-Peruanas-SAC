@@ -14,6 +14,7 @@ import { SITE } from '@/lib/site';
 import Analytics from '@/components/Analytics';
 import ConsentBanner from '@/components/ConsentBanner';
 import BarraMovilContacto from '@/components/BarraMovilContacto';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * VIEWPORT — `viewportFit: 'cover'` es lo que activa las variables
@@ -77,6 +78,10 @@ export const metadata: Metadata = {
       : {}),
   },
   openGraph: {
+    // Declarada explícitamente: cuando una página define su propio objeto
+    // `openGraph`, reemplaza al del padre —imágenes incluidas—, así que la
+    // imagen de fichero por sí sola no llegaba a ninguna página en español.
+    images: OG_IMAGEN,
     title: 'Plastilonas Peruanas SAC | Soluciones Textiles Industriales — Fabricación e Importación Directa',
     description: 'Portafolio integral de soluciones textiles industriales en el Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
     // og:image lo genera app/opengraph-image.tsx (antes apuntaba a un archivo

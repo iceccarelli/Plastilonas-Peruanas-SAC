@@ -14,6 +14,7 @@ import TrackView from '@/components/TrackView';
 import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasProceso } from '@/lib/imagenes';
 import { breadcrumbSchema, definedTermSetSchema, webPageSchema } from '@/lib/schema';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Índice del glosario.
@@ -33,6 +34,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/glosario' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: DESCRIPTION,
     url: URL,

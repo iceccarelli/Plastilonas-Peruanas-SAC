@@ -9,6 +9,7 @@ import TrackView from '@/components/TrackView';
 import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasProceso } from '@/lib/imagenes';
 import { breadcrumbSchema, datasetSchema, webPageSchema } from '@/lib/schema';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Indicadores en vivo.
@@ -39,6 +40,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/indicadores' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: DESCRIPTION,
     url: URL,

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { tituloAjustado, descripcionAjustada } from '@/lib/meta';
+import { tituloAjustado, descripcionAjustada, OG_IMAGEN } from '@/lib/meta';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, AlertTriangle, Ruler } from 'lucide-react';
@@ -55,6 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: descripcionAjustada([t.definicionCorta]),
     alternates: { canonical: `/glosario/${slug}` },
     openGraph: {
+    images: OG_IMAGEN,
       title: `${title} | Glosario técnico de ${SITE.name}`,
       description: t.definicionCorta,
       url,

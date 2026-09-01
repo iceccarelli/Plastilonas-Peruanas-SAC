@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import CunaHub from '@/components/CunaHub';
 import { cunaPorSlug } from '@/lib/cunas';
 import { SITE } from '@/lib/site';
+import { OG_IMAGEN } from '@/lib/meta';
 
 // Cuña comercial (ver lib/cunas.ts). Contenido estático: se prerenderiza.
 const cuna = cunaPorSlug('big-bags')!;
@@ -24,6 +25,7 @@ export const metadata: Metadata = {
   description: cuna.descripcion,
   alternates: { canonical: '/big-bags', languages: ALTERNOS },
   openGraph: {
+    images: OG_IMAGEN,
     title: cuna.titulo,
     description: cuna.descripcion,
     url: `${SITE.url}/big-bags`,

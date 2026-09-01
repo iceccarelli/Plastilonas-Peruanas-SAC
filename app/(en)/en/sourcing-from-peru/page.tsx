@@ -8,6 +8,7 @@ import { RUTA_EN } from '@/lib/fabricar-o-importar';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
 import WhatsAppLink from '@/components/WhatsAppLink';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * SOURCING HUB EN INGLÉS — la puerta del comprador extranjero.
@@ -43,6 +44,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/en/sourcing-from-peru' },
   openGraph: {
+    images: OG_IMAGEN,
     title: TITLE,
     description: DESCRIPTION,
     url: URL_PAGINA,

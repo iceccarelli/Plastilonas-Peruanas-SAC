@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { SITE } from '@/lib/site';
 import { products, productFamilies } from '@/lib/products';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * El catálogo (app/productos/page.tsx) es un client component y por eso no
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/productos' },
   openGraph: {
+    images: OG_IMAGEN,
     title: `${TITLE} | ${SITE.name}`,
     description: DESCRIPTION,
     url: `${SITE.url}/productos`,

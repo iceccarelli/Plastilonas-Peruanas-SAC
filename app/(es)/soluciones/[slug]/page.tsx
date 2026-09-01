@@ -20,7 +20,7 @@ import {
   webPageSchema,
   imageObjectSchema,
 } from '@/lib/schema';
-import { descripcionDeTexto } from '@/lib/meta';
+import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Arquitectura de referencia (/soluciones/[slug]).
@@ -53,6 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: descripcionBusqueda,
     alternates: { canonical: `/soluciones/${slug}` },
     openGraph: {
+    images: OG_IMAGEN,
       title: s.metaTitle,
       description: descripcionBusqueda,
       url,
