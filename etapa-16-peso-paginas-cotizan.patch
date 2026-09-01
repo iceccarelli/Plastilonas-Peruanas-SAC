@@ -1,0 +1,347 @@
+From cdcb25b731e4422a75904498a35f9d69ccfb736d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 1 Sep 2026 15:44:29 +0000
+Subject: [PATCH] Etapa 16: las dos paginas que cotizan pesaban el doble por
+ una libreria que casi nadie usa
+
+/cotizacion y /en/rfq salian a 208 kB de First Load JS frente a los 102 kB de
+base del sitio, siendo un formulario. Medido chunk a chunk: 53 kB comprimidos
+de @supabase/supabase-js viajaban en el paquete INICIAL porque
+CotizacionForm.tsx lo importaba de forma estatica.
+
+Ese cliente se usa en un solo sitio: dentro de subirArchivos(), despues de
+'if (archivos.length === 0) return []'. Solo hace falta si alguien adjunta un
+plano, y la mayoria de los RFQ son medidas, cantidad y ciudad. Se estaban
+descargando 53 kB en la ruta critica, en la pagina donde se decide una
+cotizacion, sobre una conexion movil peruana, para una funcion que la mayoria
+no llega a usar.
+
+Arreglo: await import('@/lib/supabase') despues de la salida temprana.
+208 kB -> 147 kB en ambas paginas (-29%). Verificado en el navegador: al abrir
+/cotizacion se descargan 26 chunks y ninguno contiene Supabase; los dos que lo
+contienen quedan asincronos y la capacidad de adjuntar sigue intacta.
+
+Se midio el resto antes de seguir: el suelo de 102 kB es React mas el enrutador
+de Next (comprobado buscando marcas en los chunks compartidos), y
+framer-motion, cmdk y el SDK del asistente YA estan divididos. Sacar
+framer-motion de la cabecera habria costado rehacer el mega-menu y arriesgar la
+interfaz que la etapa 14 certifico, para mover bytes que ya no bloquean. Se
+para ahi y se deja escrito por que.
+
+Guardas nuevas: npm run diagnostico:peso lee el manifiesto real del build y
+falla si una ruta excede su presupuesto declarado, y una prueba prohibe que un
+componente de cliente importe Supabase de forma estatica.
+
+772/772 pruebas, tsc limpio, lint limpio, build 354 paginas, axe-core 0
+violaciones, 0 enlaces rotos, 0 desbordes en 234 mediciones.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ components/CotizacionForm.tsx                 | 14 ++-
+ ...6-09-01-peso-de-las-paginas-que-cotizan.md | 95 +++++++++++++++++++
+ package.json                                  |  5 +-
+ scripts/diagnostico/08-presupuesto.mjs        | 81 ++++++++++++++++
+ test/regresiones-ui.test.ts                   | 46 +++++++++
+ 5 files changed, 238 insertions(+), 3 deletions(-)
+ create mode 100644 docs/entregas/2026-09-01-peso-de-las-paginas-que-cotizan.md
+ create mode 100644 scripts/diagnostico/08-presupuesto.mjs
+
+diff --git a/components/CotizacionForm.tsx b/components/CotizacionForm.tsx
+index b7482ad..5b1e0ba 100644
+--- a/components/CotizacionForm.tsx
++++ b/components/CotizacionForm.tsx
+@@ -37,7 +37,6 @@ import { buildQuoteMessage, openWhatsApp, saveQuoteLocally, whatsappUrl } from '
+ import { trackQuoteRequest, trackQuoteStarted } from '@/lib/analytics';
+ import { postLead } from '@/lib/lead';
+ import { errorRuc, normalizarRuc } from '@/lib/ruc';
+-import { supabaseBrowser } from '@/lib/supabase';
+ 
+ const EXTENSIONES = ['pdf', 'jpg', 'jpeg', 'png', 'dwg', 'dxf'];
+ const MAX_ARCHIVOS = 5;
+@@ -291,9 +290,22 @@ export default function CotizacionForm({ opciones, idioma = 'es', preselectedPro
+    * (ruta subida o solo el nombre si no hay almacenamiento).
+    * TODO(HUMAN): crear el bucket `rfq-adjuntos` (privado, escritura anónima
+    * vía política RLS de INSERT) en Supabase — ver docs/HUMAN-GATES.md.
++   *
++   * EL CLIENTE DE SUPABASE SE CARGA AQUÍ, NO ARRIBA. Importado de forma
++   * estática, `@supabase/supabase-js` pesaba 53 kB comprimidos en el paquete
++   * INICIAL de /cotizacion y /en/rfq: las dos páginas por las que entra el
++   * dinero eran las más pesadas del sitio (208 kB frente a los 102 kB de
++   * base) por una biblioteca que la mayoría de los RFQ nunca llega a usar —
++   * sólo se necesita si alguien adjunta un plano.
++   *
++   * Con `await import()` después de la salida temprana, el navegador descarga
++   * esos 53 kB únicamente cuando hay archivos y se pulsa enviar; es decir,
++   * cuando la persona ya decidió cotizar y una espera de red se justifica.
++   * Nunca antes, y nunca para quien sólo escribe medidas y ciudad.
+    */
+   async function subirArchivos(rfqRef: string): Promise<string[]> {
+     if (archivos.length === 0) return [];
++    const { supabaseBrowser } = await import('@/lib/supabase');
+     const sb = supabaseBrowser();
+     if (!sb) return archivos.map((f) => `${f.name} (${Math.round(f.size / 1024)} KB — adjuntar por correo)`);
+     const refs: string[] = [];
+diff --git a/docs/entregas/2026-09-01-peso-de-las-paginas-que-cotizan.md b/docs/entregas/2026-09-01-peso-de-las-paginas-que-cotizan.md
+new file mode 100644
+index 0000000..f97a376
+--- /dev/null
++++ b/docs/entregas/2026-09-01-peso-de-las-paginas-que-cotizan.md
+@@ -0,0 +1,95 @@
++# Etapa 16 — las dos páginas por las que entra el dinero pesaban el doble
++
++**Fecha:** 2026-09-01 · **Pruebas:** 772 (3 nuevas)
++
++## 1. El defecto, con su número
++
++En la salida de `next build`, dos rutas destacaban sobre las otras 352:
++
++```
++├ ƒ /cotizacion      199 B    208 kB   ← First Load JS
++├ ƒ /en/rfq          198 B    208 kB
++├ ○ /big-bags        472 B    114 kB
+++ First Load JS shared by all          102 kB
++```
++
++**208 kB frente a los 102 kB de base.** Y no eran páginas ricas: son un
++formulario. Medido chunk a chunk sobre el paquete compilado, la causa era una
++sola:
++
++| chunk | contenido | tamaño |
++|---|---|---|
++| `1321-…` | `@supabase/supabase-js` | 39.9 kB gz |
++| `44530001-…` | `@supabase/supabase-js` | 13.1 kB gz |
++| | **total** | **53 kB gz** |
++
++`components/CotizacionForm.tsx` importaba `@/lib/supabase` de forma estática.
++Ese cliente se usa **en un solo sitio**: dentro de `subirArchivos()`, después de
++`if (archivos.length === 0) return []`. Es decir, sólo hace falta si alguien
++adjunta un plano — y la mayoría de los RFQ son medidas, cantidad y ciudad.
++
++Se estaban descargando 53 kB comprimidos, en la ruta crítica, en la página
++donde se decide una cotización, sobre una conexión móvil peruana, para una
++función que la mayoría no llega a usar.
++
++## 2. El arreglo
++
++Una línea, en el sitio correcto: `await import('@/lib/supabase')` **después** de
++la salida temprana. Webpack lo saca a un chunk asíncrono; el navegador lo pide
++sólo cuando hay archivos y se pulsa enviar, que es cuando la persona ya decidió
++cotizar y una espera de red se justifica.
++
++| | Antes | Después |
++|---|---|---|
++| `/cotizacion` First Load JS | 208 kB | **147 kB** |
++| `/en/rfq` First Load JS | 208 kB | **147 kB** |
++| Reducción | | **−61 kB (−29 %)** |
++
++**Verificado en el navegador, no en la teoría:** al abrir `/cotizacion` se
++descargan 26 chunks y **ninguno contiene Supabase**; los dos chunks que sí lo
++contienen quedan como asíncronos (`7817.…js`, `44530001.…js`) y la lógica de
++subida sigue en el paquete de la página. La capacidad de adjuntar planos está
++intacta.
++
++## 3. Lo que se midió y se decidió NO tocar
++
++Antes de seguir optimizando conviene saber dónde está el resto del peso. Se
++midió chunk a chunk:
++
++- El suelo de 102 kB es **React más el enrutador de Next**. Se comprobó
++  buscando marcas dentro de los dos chunks compartidos: no hay ninguna
++  biblioteca nuestra ahí. Es irreducible sin cambiar de framework.
++- `framer-motion` (36.7 kB gz), `cmdk` (18.5 kB) y el SDK del asistente
++  (13.5 kB) **ya están divididos**: aparecen en el grafo del layout pero no en
++  el First Load de las páginas de contenido, que se quedan en 111–114 kB.
++- Las páginas más pesadas que quedan —portada 180 kB, catálogo 174 kB— lo son
++  por carruseles, filtros y tarjetas que sí se ven en pantalla.
++
++Sacar `framer-motion` de la cabecera habría costado rehacer el mega-menú y
++arriesgar la interfaz que la etapa 14 acaba de certificar, para mover bytes que
++ya no bloquean. Se para aquí, y se deja escrito por qué.
++
++## 4. Para que no vuelva a pasar
++
++Un paquete inicial crece un import a la vez, cada uno razonable por separado.
++Dos guardas nuevas:
++
++- **`npm run diagnostico:peso`** — lee el manifiesto real de `next build` y
++  falla si alguna ruta excede su presupuesto declarado (contenido 135 kB,
++  formularios 165 kB, portada y catálogo 195 kB). Los presupuestos llevan su
++  motivo escrito al lado, no son cifras redondas.
++- **Una prueba de vitest** que prohíbe que cualquier componente de cliente
++  importe el cliente de Supabase de forma estática, y que comprueba que el
++  `await import()` va después de la salida temprana.
++
++*(La primera ejecución del propio script encontró un error mío: las reglas de
++presupuesto se evaluaban de la más general a la más específica y `/en/rfq`
++caía en la categoría equivocada. Ahora van de específica a general, con el
++motivo escrito.)*
++
++## 5. Verificación
++
++`tsc --noEmit` limpio · **772/772 pruebas** · `next lint` sin avisos · build 354
++páginas · axe-core **0 violaciones** (16 rutas × 4 modos) · **0** enlaces rotos ·
++**0** desbordes en 234 mediciones · **0** solapamientos en 13 rutas · el RFQ
++sigue declarando sus 6 campos obligatorios y reteniendo el envío vacío.
+diff --git a/package.json b/package.json
+index f0c6587..0ca1eee 100644
+--- a/package.json
++++ b/package.json
+@@ -35,11 +35,12 @@
+     "auditar:json": "node scripts/auditar-html.mjs --json",
+     "typecheck": "rm -rf .next/types && tsc --noEmit",
+     "entrega": "bash scripts/aplicar-entrega.sh",
+-    "diagnostico": "node scripts/diagnostico/01-maquetacion.mjs && node scripts/diagnostico/02-interaccion.mjs && node scripts/diagnostico/03-arquitectura.mjs && node scripts/diagnostico/04-accesibilidad.mjs && node scripts/diagnostico/07-solapamiento.mjs",
++    "diagnostico": "node scripts/diagnostico/01-maquetacion.mjs && node scripts/diagnostico/02-interaccion.mjs && node scripts/diagnostico/03-arquitectura.mjs && node scripts/diagnostico/04-accesibilidad.mjs && node scripts/diagnostico/07-solapamiento.mjs && node scripts/diagnostico/08-presupuesto.mjs",
+     "diagnostico:a11y": "node scripts/diagnostico/04-accesibilidad.mjs",
+     "diagnostico:maqueta": "node scripts/diagnostico/01-maquetacion.mjs",
+     "diagnostico:enlaces": "node scripts/diagnostico/03-arquitectura.mjs",
+-    "diagnostico:capturas": "node scripts/diagnostico/05-capturas.mjs"
++    "diagnostico:capturas": "node scripts/diagnostico/05-capturas.mjs",
++    "diagnostico:peso": "node scripts/diagnostico/08-presupuesto.mjs"
+   },
+   "dependencies": {
+     "@ai-sdk/anthropic": "^1.2.12",
+diff --git a/scripts/diagnostico/08-presupuesto.mjs b/scripts/diagnostico/08-presupuesto.mjs
+new file mode 100644
+index 0000000..a727185
+--- /dev/null
++++ b/scripts/diagnostico/08-presupuesto.mjs
+@@ -0,0 +1,81 @@
++/**
++ * DIAGNÓSTICO 8 — PRESUPUESTO DE JAVASCRIPT POR RUTA.
++ *
++ * Por qué existe. El paquete inicial de una página no aparece en ninguna
++ * prueba: crece un import a la vez, cada uno razonable por separado, y un día
++ * la página por la que entra el dinero pesa el doble que el resto del sitio.
++ * Eso ya pasó aquí: /cotizacion y /en/rfq llegaron a 208 kB frente a los
++ * 102 kB de base porque `@supabase/supabase-js` viajaba en el import estático
++ * del formulario para una función —adjuntar planos— que la mayoría de los RFQ
++ * nunca usa.
++ *
++ * Qué mide. El "First Load JS" real de cada ruta: la suma comprimida de los
++ * chunks que el navegador necesita ANTES de poder interactuar. Se lee del
++ * manifiesto que genera `next build`, así que no estima nada.
++ *
++ * Uso:  npm run build && node scripts/diagnostico/08-presupuesto.mjs
++ */
++import { readFileSync, existsSync } from 'node:fs';
++import { gzipSync } from 'node:zlib';
++
++const MANIFIESTO = '.next/app-build-manifest.json';
++if (!existsSync(MANIFIESTO)) {
++  console.error('Falta .next/app-build-manifest.json — ejecute `npm run build` primero.');
++  process.exit(2);
++}
++
++/**
++ * PRESUPUESTOS, con su motivo. No son cifras redondas puestas a ojo: son el
++ * valor medido hoy más un margen para que un cambio honesto no rompa el build,
++ * pero no tanto como para que quepa una biblioteca entera sin enterarse.
++ */
++// El ORDEN importa: gana la primera regla que casa, así que van de la más
++// específica a la más general. La primera versión ponía «contenido» arriba y
++// /en/rfq —que es un formulario— caía en el presupuesto equivocado y rompía
++// el build. Lo detectó la primera ejecución del propio script.
++const PRESUPUESTO = [
++  // Portada, catálogo y el cuestionario del marco: llevan carruseles, filtros
++  // y tarjetas, y son las páginas más ricas del sitio.
++  { patron: /^\/\(es\)\/(page|productos\/page|marco\/evaluacion\/page)$/, kb: 195, nombre: 'portada y catálogo' },
++  // Formularios: react-hook-form + zod + resolvers son un coste real y
++  // justificado. Supabase NO: se carga sólo si alguien adjunta un plano.
++  { patron: /\/(cotizacion|en\/rfq|contacto)\/page$/, kb: 165, nombre: 'formularios' },
++  // Todo lo demás: la inmensa mayoría del sitio. El suelo lo pone el framework
++  // (React más el enrutador de Next), no nosotros.
++  { patron: /page$/, kb: 135, nombre: 'contenido' },
++];
++
++const m = JSON.parse(readFileSync(MANIFIESTO, 'utf8'));
++const tam = new Map();
++const gz = (f) => {
++  if (!tam.has(f)) tam.set(f, gzipSync(readFileSync('.next/' + f)).length / 1024);
++  return tam.get(f);
++};
++
++const filas = [];
++for (const [ruta, archivos] of Object.entries(m.pages)) {
++  if (!ruta.endsWith('/page')) continue;
++  const js = archivos.filter((f) => f.endsWith('.js'));
++  const total = js.reduce((a, f) => a + gz(f), 0);
++  const regla = PRESUPUESTO.find((p) => p.patron.test(ruta));
++  filas.push({ ruta, kb: total, regla });
++}
++filas.sort((a, b) => b.kb - a.kb);
++
++const excesos = filas.filter((f) => f.regla && f.kb > f.regla.kb);
++const sinRegla = filas.filter((f) => !f.regla);
++
++console.log('Las 12 rutas más pesadas (kB comprimidos, paquete inicial):');
++for (const f of filas.slice(0, 12)) {
++  const marca = f.regla ? (f.kb > f.regla.kb ? '  ✗ EXCEDE' : '  ✓') : '  · sin presupuesto';
++  console.log(`  ${f.kb.toFixed(1).padStart(7)} kB  ${f.ruta.padEnd(46)}${marca}${f.regla ? ` (${f.regla.nombre}: ${f.regla.kb} kB)` : ''}`);
++}
++if (sinRegla.length) {
++  console.log(`\n${sinRegla.length} rutas sin presupuesto declarado (la más pesada: ${sinRegla[0].kb.toFixed(1)} kB).`);
++}
++if (excesos.length) {
++  console.error('\n✗ PRESUPUESTO EXCEDIDO:');
++  for (const f of excesos) console.error(`  ${f.ruta}: ${f.kb.toFixed(1)} kB > ${f.regla.kb} kB (${f.regla.nombre})`);
++  process.exit(1);
++}
++console.log('\n✓ Ninguna ruta excede su presupuesto.');
+diff --git a/test/regresiones-ui.test.ts b/test/regresiones-ui.test.ts
+index 6416425..20706bf 100644
+--- a/test/regresiones-ui.test.ts
++++ b/test/regresiones-ui.test.ts
+@@ -285,3 +285,49 @@ describe('cada enlace compartido lleva su tarjeta', () => {
+     expect(culpables, 'estos openGraph saldrían sin tarjeta al compartirse').toEqual([]);
+   });
+ });
++
++describe('el peso de las páginas donde entra el dinero', () => {
++  it('ningún componente de cliente arrastra el cliente de Supabase al paquete inicial', () => {
++    /**
++     * DEFECTO: `CotizacionForm` importaba `@/lib/supabase` de forma estática y
++     * eso metía `@supabase/supabase-js` —53 kB comprimidos— en el paquete
++     * INICIAL de /cotizacion y /en/rfq. Las dos páginas por las que entra el
++     * dinero eran las más pesadas del sitio (208 kB frente a 102 kB de base)
++     * por una función, adjuntar planos, que la mayoría de los RFQ no usa.
++     * Medido después del arreglo: 147 kB.
++     *
++     * La regla es de bulto porque el defecto lo fue: en un componente de
++     * cliente, ese cliente se pide con `await import()` donde se necesita.
++     */
++    const culpables: string[] = [];
++    const recorrer = (dir: string) => {
++      for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
++        const rel = `${dir}/${e.name}`;
++        if (e.isDirectory()) { recorrer(rel); continue; }
++        if (!e.name.endsWith('.tsx')) continue;
++        const src = readFileSync(join(raiz, rel), 'utf8');
++        if (!/^['"]use client['"]/m.test(src)) continue;
++        if (/^import .*(@\/lib\/supabase|@supabase\/supabase-js)/m.test(src)) culpables.push(rel);
++      }
++    };
++    for (const d of ['components', 'app']) recorrer(d);
++    expect(culpables, 'importe el cliente de Supabase con await import() donde se use').toEqual([]);
++  });
++
++  it('el formulario carga Supabase sólo cuando hay algo que subir', () => {
++    const src = leer('components/CotizacionForm.tsx');
++    expect(src).toContain("await import('@/lib/supabase')");
++    // Y después de la salida temprana: sin adjuntos no se descarga nada.
++    const i = src.indexOf('async function subirArchivos');
++    const bloque = src.slice(i, i + 400);
++    expect(bloque.indexOf('if (archivos.length === 0) return [];'))
++      .toBeLessThan(bloque.indexOf("await import('@/lib/supabase')"));
++  });
++
++  it('el presupuesto de JavaScript por ruta se puede comprobar con un comando', () => {
++    expect(() => leer('scripts/diagnostico/08-presupuesto.mjs')).not.toThrow();
++    const pkg = JSON.parse(leer('package.json'));
++    expect(pkg.scripts['diagnostico:peso']).toContain('08-presupuesto.mjs');
++    expect(pkg.scripts.diagnostico).toContain('08-presupuesto.mjs');
++  });
++});
+-- 
+2.43.0
+
