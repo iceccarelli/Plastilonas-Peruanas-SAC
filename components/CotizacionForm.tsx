@@ -37,7 +37,6 @@ import { buildQuoteMessage, openWhatsApp, saveQuoteLocally, whatsappUrl } from '
 import { trackQuoteRequest, trackQuoteStarted } from '@/lib/analytics';
 import { postLead } from '@/lib/lead';
 import { errorRuc, normalizarRuc } from '@/lib/ruc';
-import { supabaseBrowser } from '@/lib/supabase';
 
 const EXTENSIONES = ['pdf', 'jpg', 'jpeg', 'png', 'dwg', 'dxf'];
 const MAX_ARCHIVOS = 5;
@@ -291,9 +290,22 @@ export default function CotizacionForm({ opciones, idioma = 'es', preselectedPro
    * (ruta subida o solo el nombre si no hay almacenamiento).
    * TODO(HUMAN): crear el bucket `rfq-adjuntos` (privado, escritura anónima
    * vía política RLS de INSERT) en Supabase — ver docs/HUMAN-GATES.md.
+   *
+   * EL CLIENTE DE SUPABASE SE CARGA AQUÍ, NO ARRIBA. Importado de forma
+   * estática, `@supabase/supabase-js` pesaba 53 kB comprimidos en el paquete
+   * INICIAL de /cotizacion y /en/rfq: las dos páginas por las que entra el
+   * dinero eran las más pesadas del sitio (208 kB frente a los 102 kB de
+   * base) por una biblioteca que la mayoría de los RFQ nunca llega a usar —
+   * sólo se necesita si alguien adjunta un plano.
+   *
+   * Con `await import()` después de la salida temprana, el navegador descarga
+   * esos 53 kB únicamente cuando hay archivos y se pulsa enviar; es decir,
+   * cuando la persona ya decidió cotizar y una espera de red se justifica.
+   * Nunca antes, y nunca para quien sólo escribe medidas y ciudad.
    */
   async function subirArchivos(rfqRef: string): Promise<string[]> {
     if (archivos.length === 0) return [];
+    const { supabaseBrowser } = await import('@/lib/supabase');
     const sb = supabaseBrowser();
     if (!sb) return archivos.map((f) => `${f.name} (${Math.round(f.size / 1024)} KB — adjuntar por correo)`);
     const refs: string[] = [];

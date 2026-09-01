@@ -285,3 +285,49 @@ describe('cada enlace compartido lleva su tarjeta', () => {
     expect(culpables, 'estos openGraph saldrían sin tarjeta al compartirse').toEqual([]);
   });
 });
+
+describe('el peso de las páginas donde entra el dinero', () => {
+  it('ningún componente de cliente arrastra el cliente de Supabase al paquete inicial', () => {
+    /**
+     * DEFECTO: `CotizacionForm` importaba `@/lib/supabase` de forma estática y
+     * eso metía `@supabase/supabase-js` —53 kB comprimidos— en el paquete
+     * INICIAL de /cotizacion y /en/rfq. Las dos páginas por las que entra el
+     * dinero eran las más pesadas del sitio (208 kB frente a 102 kB de base)
+     * por una función, adjuntar planos, que la mayoría de los RFQ no usa.
+     * Medido después del arreglo: 147 kB.
+     *
+     * La regla es de bulto porque el defecto lo fue: en un componente de
+     * cliente, ese cliente se pide con `await import()` donde se necesita.
+     */
+    const culpables: string[] = [];
+    const recorrer = (dir: string) => {
+      for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
+        const rel = `${dir}/${e.name}`;
+        if (e.isDirectory()) { recorrer(rel); continue; }
+        if (!e.name.endsWith('.tsx')) continue;
+        const src = readFileSync(join(raiz, rel), 'utf8');
+        if (!/^['"]use client['"]/m.test(src)) continue;
+        if (/^import .*(@\/lib\/supabase|@supabase\/supabase-js)/m.test(src)) culpables.push(rel);
+      }
+    };
+    for (const d of ['components', 'app']) recorrer(d);
+    expect(culpables, 'importe el cliente de Supabase con await import() donde se use').toEqual([]);
+  });
+
+  it('el formulario carga Supabase sólo cuando hay algo que subir', () => {
+    const src = leer('components/CotizacionForm.tsx');
+    expect(src).toContain("await import('@/lib/supabase')");
+    // Y después de la salida temprana: sin adjuntos no se descarga nada.
+    const i = src.indexOf('async function subirArchivos');
+    const bloque = src.slice(i, i + 400);
+    expect(bloque.indexOf('if (archivos.length === 0) return [];'))
+      .toBeLessThan(bloque.indexOf("await import('@/lib/supabase')"));
+  });
+
+  it('el presupuesto de JavaScript por ruta se puede comprobar con un comando', () => {
+    expect(() => leer('scripts/diagnostico/08-presupuesto.mjs')).not.toThrow();
+    const pkg = JSON.parse(leer('package.json'));
+    expect(pkg.scripts['diagnostico:peso']).toContain('08-presupuesto.mjs');
+    expect(pkg.scripts.diagnostico).toContain('08-presupuesto.mjs');
+  });
+});
