@@ -1,0 +1,2390 @@
+From cb72f20d77e85cd40801b6831706ad96ae01e541 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 31 Aug 2026 12:10:47 +0000
+Subject: [PATCH] Auditoria de navegador: 127 violaciones a 0, un 404 del
+ catalogo y la barra que tapaba los avisos legales
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+El repositorio tenia 747 pruebas en verde y ninguna abre un navegador: leen
+archivos y llaman funciones. Por eso convivieron trece etapas con defectos que
+solo existen en la pagina renderizada.
+
+Lo encontrado y corregido:
+
+- 404 REAL. /productos/familia/seguridad-industrial pintaba "Comparar las 4"
+  y esa ruta no existe: el enlace usaba items.length>=2 y la ruta se genera con
+  comparableFamilies(), que ademas exige una fila comparable. Ahora comparten
+  predicado.
+- La barra movil fija se comia "Politica de Privacidad" y "Terminos y
+  Condiciones" al final de 11 de 13 rutas medidas. Reserva su alto. El boton
+  flotante del asistente cubria el segundo enlace: la fila legal se alinea a la
+  izquierda.
+- Modo oscuro rompia las cinco calculadoras y el ordenador del catalogo: la capa
+  oscura remapeaba la tinta de .text-gray-900 pero no el fondo de
+  input.bg-white. Fondo blanco con tinta clara, 1.16:1.
+- Los errores del RFQ no existian para un lector de pantalla: sin aria-invalid,
+  aria-describedby, role=alert ni aria-required. En la unica pagina por la que
+  entra el dinero.
+- Las pestanas de la portada no eran pestanas (aria-pressed en vez de
+  tablist/tab/tabpanel) y rotaban cada 5 s con pausa solo por hover, que en un
+  telefono no existe. MachineryGallery ya lo hacia bien: dos widgets, dos
+  verdades.
+- Bloque de respuesta directa ilegible en oscuro (2.33:1): las utilidades con
+  modificador de opacidad no las alcanzaba la capa oscura. Igual los bloques
+  "Que no afirmamos".
+- Verde de accion a 2.56:1 fuera de main, incluido el WhatsApp de la barra.
+- Areas tactiles, tablas sin acceso por teclado, saltos de encabezado, y la
+  cabecera que no era un landmark porque su raiz era un div.
+
+Un error propio atrapado por la propia auditoria: la regla de tintes cubria
+tambien el blanco, y un selector de atributo no distingue hover:bg-white/90, asi
+que pinto de oscuro el boton blanco del CTA final (1.09:1). Acotada y con prueba.
+
+Resultado: axe-core 127 -> 0 violaciones (16 rutas x 4 modos), 1 -> 0 enlaces
+rotos, 11 -> 0 rutas con contenido tapado, interaccion 16/18 -> 23/23.
+Desborde horizontal 0 antes y despues, en 234 mediciones de 360 a 1440 px.
+
+Añade el arne (scripts/diagnostico/, npm run diagnostico) y 16 pruebas de
+regresion. 763 pruebas, tsc limpio, lint limpio, build 354 paginas.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ .gitignore                                    |   5 +
+ app/(en)/en/sourcing-from-peru/page.tsx       |   4 +-
+ app/(es)/nosotros/page.tsx                    |   2 +-
+ app/(es)/productos/[slug]/page.tsx            |   2 +-
+ .../familia/[slug]/comparar/page.tsx          |   2 +-
+ app/(es)/productos/familia/[slug]/page.tsx    |  12 +-
+ app/(es)/recursos/[slug]/page.tsx             |   2 +-
+ app/globals.css                               | 122 +++++++++
+ components/BarraMovilContacto.tsx             |  19 ++
+ components/CalculadoraForm.tsx                |   5 +
+ components/CatalogoFiltrado.tsx               |  47 +++-
+ components/ChromeEn.tsx                       |  22 +-
+ components/CostoEnVivo.tsx                    |   2 +-
+ components/CotizacionForm.tsx                 |  57 ++--
+ components/CunaHub.tsx                        |   3 +-
+ components/CunaHubEn.tsx                      |   4 +-
+ components/FabricarOImportar.tsx              |   2 +-
+ components/Footer.tsx                         |  21 +-
+ components/MachineryGallery.tsx               |  13 +-
+ components/Navbar.tsx                         |  18 +-
+ components/ServiceTabs.tsx                    | 110 ++++++--
+ components/SocialIcons.tsx                    |   2 +-
+ components/ThemeToggle.tsx                    |   4 +-
+ .../2026-08-31-auditoria-navegador.md         | 133 ++++++++++
+ package-lock.json                             |  14 +-
+ package.json                                  |   8 +-
+ scripts/diagnostico/01-maquetacion.mjs        | 176 +++++++++++++
+ scripts/diagnostico/02-interaccion.mjs        | 244 ++++++++++++++++++
+ scripts/diagnostico/03-arquitectura.mjs       | 131 ++++++++++
+ scripts/diagnostico/04-accesibilidad.mjs      |  82 ++++++
+ scripts/diagnostico/05-capturas.mjs           |  35 +++
+ scripts/diagnostico/06-zona.mjs               |  13 +
+ scripts/diagnostico/07-solapamiento.mjs       |  65 +++++
+ scripts/diagnostico/rutas.mjs                 |  91 +++++++
+ test/regresiones-ui.test.ts                   | 206 +++++++++++++++
+ 35 files changed, 1583 insertions(+), 95 deletions(-)
+ create mode 100644 docs/entregas/2026-08-31-auditoria-navegador.md
+ create mode 100644 scripts/diagnostico/01-maquetacion.mjs
+ create mode 100644 scripts/diagnostico/02-interaccion.mjs
+ create mode 100644 scripts/diagnostico/03-arquitectura.mjs
+ create mode 100644 scripts/diagnostico/04-accesibilidad.mjs
+ create mode 100644 scripts/diagnostico/05-capturas.mjs
+ create mode 100644 scripts/diagnostico/06-zona.mjs
+ create mode 100644 scripts/diagnostico/07-solapamiento.mjs
+ create mode 100644 scripts/diagnostico/rutas.mjs
+ create mode 100644 test/regresiones-ui.test.ts
+
+diff --git a/.gitignore b/.gitignore
+index 20faedf..0ac94c1 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -53,3 +53,8 @@ public/images/_pruebas-tomas/
+ # Diagnóstico del verificador de dominio: depende de la red y del DNS del día.
+ # Se regenera con `npm run seo:dominio`; versionarlo guardaría un estado falso.
+ audit/domain-redirect.json
++
++# Salida de la auditoría de navegador (scripts/diagnostico/): JSON de
++# mediciones y capturas. Se regenera con `npm run diagnostico`; versionarla
++# metería megas de PNG en la historia por cada pasada.
++/.diagnostico/
+diff --git a/app/(en)/en/sourcing-from-peru/page.tsx b/app/(en)/en/sourcing-from-peru/page.tsx
+index 0fe75c0..641ea88 100644
+--- a/app/(en)/en/sourcing-from-peru/page.tsx
++++ b/app/(en)/en/sourcing-from-peru/page.tsx
+@@ -203,7 +203,7 @@ export default function SourcingFromPeruPage() {
+           We do not publish a map of flags. Below is what is true per destination; anything not
+           listed is assessed shipment by shipment.
+         </p>
+-        <div className="overflow-x-auto">
++        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Export markets (scrolls horizontally)">
+           <table className="w-full text-sm border-collapse">
+             <caption className="sr-only">Export markets, currency and stated scope</caption>
+             <thead>
+@@ -239,7 +239,7 @@ export default function SourcingFromPeruPage() {
+         </ul>
+         <p className="mt-4 text-sm text-gray-600">
+           This list is published in Spanish too, at{' '}
+-          <Link href="/confianza" className="text-[#047857] hover:underline">/confianza</Link>. Both
++          <Link href="/confianza" className="text-[#047857] underline underline-offset-2">/confianza</Link>. Both
+           languages state the same limits.
+         </p>
+       </section>
+diff --git a/app/(es)/nosotros/page.tsx b/app/(es)/nosotros/page.tsx
+index 5ae33bc..04c8a73 100644
+--- a/app/(es)/nosotros/page.tsx
++++ b/app/(es)/nosotros/page.tsx
+@@ -90,7 +90,7 @@ export default function NosotrosPage() {
+ 
+       <div className="mt-16 bg-[#0A2540] text-white rounded-3xl p-12 text-center">
+         <div className="max-w-md mx-auto">
+-          <h3 className="t-h2 font-semibold mb-4">¿Listo para trabajar con nosotros?</h3>
++          <h2 className="t-h2 font-semibold mb-4">¿Listo para trabajar con nosotros?</h2>
+                     {/* Aquí decía «Únase a más de 500 empresas que ya confían en
+               Plastilonas Peruanas». Esa cifra no sale de ningún sistema de
+               esta empresa: no hay recuento de clientes publicable ni
+diff --git a/app/(es)/productos/[slug]/page.tsx b/app/(es)/productos/[slug]/page.tsx
+index 27d4b53..9f89550 100644
+--- a/app/(es)/productos/[slug]/page.tsx
++++ b/app/(es)/productos/[slug]/page.tsx
+@@ -216,7 +216,7 @@ export default async function ProductDetailPage({ params }: Props) {
+             pares clave/valor legibles para un lector de pantalla y para
+             cualquier extractor de tablas. El mismo par viaja además como
+             additionalProperty en el JSON-LD de ProductStructuredData. */}
+-        <div className="overflow-x-auto">
++        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Especificaciones técnicas (se desplaza en horizontal)">
+           <table className="specs-table w-full border-collapse">
+             <caption className="sr-only">
+               Especificaciones técnicas de {product.name} (SKU {product.id})
+diff --git a/app/(es)/productos/familia/[slug]/comparar/page.tsx b/app/(es)/productos/familia/[slug]/comparar/page.tsx
+index e00c177..dbef6e6 100644
+--- a/app/(es)/productos/familia/[slug]/comparar/page.tsx
++++ b/app/(es)/productos/familia/[slug]/comparar/page.tsx
+@@ -129,7 +129,7 @@ export default async function CompararPage({ params }: Props) {
+         que después no podamos sostener en la cotización.
+       </p>
+ 
+-      <div className="mb-10 overflow-x-auto rounded-3xl border border-gray-100">
++      <div className="mb-10 overflow-x-auto rounded-3xl border border-gray-100" tabIndex={0} role="region" aria-label="Tabla comparativa (se desplaza en horizontal)">
+         <table className="w-full border-collapse text-sm">
+           <thead>
+             <tr className="border-b border-gray-200 bg-gray-50">
+diff --git a/app/(es)/productos/familia/[slug]/page.tsx b/app/(es)/productos/familia/[slug]/page.tsx
+index 7deb077..dfa8f8d 100644
+--- a/app/(es)/productos/familia/[slug]/page.tsx
++++ b/app/(es)/productos/familia/[slug]/page.tsx
+@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
+ import Link from 'next/link';
+ import { ArrowRight } from 'lucide-react';
+ import { products, productFamilies, sourcingLabels, availabilityLabels } from '@/lib/products';
+-import { familyContent, resolveFamily } from '@/lib/families';
++import { familyContent, resolveFamily, comparableFamilies } from '@/lib/families';
+ import { articles } from '@/lib/articles';
+ import { SITE } from '@/lib/site';
+ import { JsonLd } from '@/components/JsonLd';
+@@ -65,6 +65,8 @@ export default async function FamilyPage({ params }: Props) {
+   const url = `${SITE.url}/productos/familia/${slug}`;
+   const imagen = ranurasFamilia().find((r) => r.id === `familia:${slug}`);
+   const items = products.filter((p) => p.category === family.name);
++  // ¿Existe /comparar para esta familia? La misma función que genera la ruta.
++  const comparable = comparableFamilies().some((f) => f.slug === slug);
+   const sectores = Array.from(new Set(items.flatMap((p) => p.sector)));
+   const sourcings = Array.from(new Set(items.map((p) => p.sourcing).filter(Boolean))) as string[];
+   const disponibilidades = Array.from(
+@@ -185,7 +187,13 @@ export default async function FamilyPage({ params }: Props) {
+         </div>
+       </section>
+ 
+-      {items.length >= 2 && (
++      {/* El enlace se pinta con EL MISMO predicado que genera la ruta.
++          Antes bastaba con `items.length >= 2`, pero /comparar sólo existe
++          para las familias que además producen al menos una fila comparable
++          (lib/families.ts). `seguridad-industrial` tiene cuatro fichas y
++          ninguna especificación compartida: el botón se pintaba y llevaba a
++          un 404. Lo encontró el rastreo de enlaces, no una prueba. */}
++      {comparable && (
+         <div className="mb-14 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-[#059669]/20 bg-[#059669]/5 p-6">
+           <p className="text-gray-800">
+             ¿Está eligiendo entre varias de estas {items.length} alternativas? Véalas con
+diff --git a/app/(es)/recursos/[slug]/page.tsx b/app/(es)/recursos/[slug]/page.tsx
+index 3217b0b..8f3664f 100644
+--- a/app/(es)/recursos/[slug]/page.tsx
++++ b/app/(es)/recursos/[slug]/page.tsx
+@@ -255,7 +255,7 @@ export default async function ArticlePage({ params }: Props) {
+           )}
+ 
+           {s.table && (
+-            <div className="mb-4 overflow-x-auto">
++            <div className="mb-4 overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla del artículo (se desplaza en horizontal)">
+               <table className="w-full border-collapse text-sm">
+                 {s.table.caption && (
+                   <caption className="mb-2 text-left text-xs text-gray-500">
+diff --git a/app/globals.css b/app/globals.css
+index 299fc27..a6f75e4 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -254,6 +254,28 @@ a:hover, button:hover {
+ .dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label, a, button).bg-white {
+   background-color: var(--surface-raised);
+ }
++
++/* CONTROLES DE FORMULARIO. Faltaban en la lista de arriba, y la capa de tinta
++   (mas abajo) SI los alcanzaba: un <input class="bg-white text-gray-900"> en
++   modo oscuro quedaba con fondo BLANCO y tinta CLARA -> 1.16:1, es decir texto
++   invisible. Pasaba en las cinco calculadoras y en el ordenador de /productos,
++   que son paginas donde alguien decide una compra.
++
++   Lo encontro una auditoria con axe-core sobre el DOM hidratado, no una
++   revision a ojo: en claro se ve perfecto y el defecto solo existe en oscuro.
++   Se arregla en la capa y no en cada componente para que tambien cubra el
++   formulario que alguien escriba manana. */
++.dark main :is(input, select, textarea).bg-white,
++.dark main :is(input, select, textarea):not([class*="bg-"]) {
++  background-color: var(--surface-raised);
++  color: var(--text);
++}
++.dark main :is(input, select, textarea):is(.border-gray-200, .border-gray-300) {
++  border-color: var(--border);
++}
++.dark main :is(input, textarea)::placeholder {
++  color: var(--text-muted);
++}
+ .dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label).bg-gray-50,
+ .dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label).bg-gray-100 {
+   background-color: var(--surface-muted);
+@@ -267,6 +289,12 @@ a:hover, button:hover {
+ 
+ /* Tinta */
+ .dark main .text-\[\#0A2540\] { color: var(--text) !important; }
++/* Los otros literales de tinta oscura que se colaron en el codigo. #334155 y
++   #64748B son slate-700/500 escritos a mano: sobre --surface-muted dan 1.64:1,
++   es decir texto casi invisible. Se remapean igual que #0A2540. #B45309 es el
++   ambar de aviso, que tambien nace pensado para fondo claro. */
++.dark main :is(.text-\[\#334155\], .text-\[\#64748B\]) { color: var(--text-muted) !important; }
++.dark main .text-\[\#B45309\] { color: #FCD34D !important; }
+ /* gray-800 es tinta principal, no secundaria: mapearla a --text-muted dejaba
+    el bloque "En resumen" de cada guia casi ilegible sobre fondo oscuro. */
+ .dark main :is(.text-gray-800, .text-gray-900) { color: var(--text) !important; }
+@@ -783,3 +811,97 @@ main h1, main h2, main h3 { letter-spacing: -0.02em; }
+     outline: none;
+   }
+ }
++
++
++/* ── BLOQUE DE RESPUESTA DIRECTA ────────────────────────────────────────
++   Es el parrafo mas importante del sitio: el que los motores de respuesta
++   citan y el primero que lee una persona en las cunas, en /fabricar-o-importar
++   y en el hub de compra en ingles.
++
++   En oscuro era ILEGIBLE (2.33:1). El motivo es sutil y vale escribirlo: la
++   utilidad lleva modificador de opacidad —bg-emerald-50/60— y la capa de
++   arriba selecciona `.bg-emerald-50`, que es OTRA clase. El verde translucido
++   se mezclaba con la superficie oscura hasta dar un gris sucio, y encima
++   quedaba la tinta clara del tema.
++
++   Se corrige por nombre semantico, que ademas es a prueba de futuro: cualquier
++   pagina que use .respuesta-directa hereda el tratamiento correcto. */
++.dark .respuesta-directa {
++  background-color: color-mix(in srgb, var(--brand) 12%, var(--surface-raised));
++  border-color: color-mix(in srgb, var(--brand) 35%, var(--surface-raised));
++  color: var(--text) !important;
++}
++
++/* ── ENLACES Y ROTULOS VERDES EN OSCURO ─────────────────────────────────
++   #047857 (emerald-700) sobre las superficies oscuras da 2.59:1 - 3.04:1. Es
++   el color de casi todos los enlaces de accion del sitio. En oscuro se sube a
++   --brand-hover (#34D399), que sobre --surface-raised pasa de 7:1.
++   La regla de linea 296 ya lo hacia para .text-emerald-700; faltaba el literal
++   hexadecimal, que es como esta escrito en el 90% de los componentes. */
++.dark main .text-\[\#047857\],
++.dark main .text-\[\#059669\] {
++  color: var(--brand-hover) !important;
++}
++
++/* Y FUERA de <main>: la cabecera, el pie y la barra movil de contacto viven
++   sobre --surface-nav (#1C2C46), donde #047857 da 2.56:1. Son los enlaces de
++   accion que aparecen en las 230 paginas, incluido «WhatsApp» de la barra
++   inferior, que es el boton mas pulsado del sitio en un telefono.
++   En modo oscuro NINGUNA superficie es clara, asi que subir este verde no
++   puede romper ningun contraste al reves. */
++.dark :is(header, footer, nav) :is(.text-\[\#047857\], .text-\[\#059669\]) {
++  color: var(--brand-hover) !important;
++}
++
++
++/* ── TINTES TRANSLUCIDOS EN MODO OSCURO ────────────────────────────────
++   LA MISMA TRAMPA, TRES VECES. La capa de arriba remapea `.bg-emerald-50`,
++   pero Tailwind genera OTRA clase cuando se le pone modificador de opacidad:
++   `bg-emerald-50/60`. El selector no la alcanza, el verde palido translucido
++   se mezcla con la superficie oscura hasta dar un gris sucio (#7c888b) y
++   encima queda la tinta clara del tema: 3.1:1.
++
++   Afectaba a los bloques «Que hacemos / Que no afirmamos» de las tres cunas y
++   sus gemelas inglesas, al «Cuando NO nos compre» de /fabricar-o-importar y a
++   los avisos ambar de los hubs de industria. Es decir, precisamente los
++   bloques de honestidad, que son los que mas se leen y se citan.
++
++   Se usa selector de atributo porque es lo unico que ve el modificador, y se
++   cubren de una vez todas las opacidades presentes y futuras. */
++.dark main [class*="bg-emerald-50/"],
++.dark main [class*="bg-emerald-100/"],
++.dark main [class*="bg-green-50/"] {
++  background-color: color-mix(in srgb, var(--brand) 10%, var(--surface-raised)) !important;
++}
++.dark main [class*="bg-amber-50/"],
++.dark main [class*="bg-yellow-50/"] {
++  background-color: color-mix(in srgb, #f59e0b 12%, var(--surface-raised)) !important;
++}
++.dark main [class*="bg-red-50/"] {
++  background-color: color-mix(in srgb, #ef4444 12%, var(--surface-raised)) !important;
++}
++.dark main [class*="bg-blue-50/"],
++.dark main [class*="bg-sky-50/"] {
++  background-color: color-mix(in srgb, #3b82f6 12%, var(--surface-raised)) !important;
++}
++.dark main [class*="bg-gray-50/"],
++.dark main [class*="bg-gray-100/"],
++.dark main [class*="bg-slate-50/"] {
++  background-color: var(--surface-muted) !important;
++}
++
++/* OJO CON LOS VARIANTES. La primera version de esta regla cubria tambien el
++   blanco translucido, y un selector de atributo no distingue la utilidad de su
++   variante: casaba igual con la version `hover:`. El resultado fue que el boton
++   blanco del CTA final —el mas pulsado del sitio— se pintaba oscuro con tinta
++   #0A2540 encima: 1.09:1. Lo detecto la propia auditoria en la pasada
++   siguiente, no una lectura. El blanco se quedo fuera de la regla en lugar de
++   afinarse: menos superficie, menos sorpresas. La prueba de
++   test/regresiones-ui.test.ts impide que vuelva. */
++.dark main [class*="border-emerald-100/"],
++.dark main [class*="border-emerald-200/"] {
++  border-color: color-mix(in srgb, var(--brand) 30%, var(--surface-raised)) !important;
++}
++.dark main [class*="border-amber-200/"] {
++  border-color: color-mix(in srgb, #f59e0b 30%, var(--surface-raised)) !important;
++}
+diff --git a/components/BarraMovilContacto.tsx b/components/BarraMovilContacto.tsx
+index e6f8499..16b7cef 100644
+--- a/components/BarraMovilContacto.tsx
++++ b/components/BarraMovilContacto.tsx
+@@ -14,12 +14,30 @@ import { TELEFONOS } from '@/lib/site';
+  * arriba para actuar. Tres acciones, altura táctil de 48px, respeta el área
+  * segura del iPhone. Se oculta en /cotizacion: ahí el CTA es el formulario
+  * mismo y la barra taparía su botón de envío.
++ *
++ * EL ESPACIADOR NO ES DECORACIÓN. La barra está en `position: fixed`, así que
++ * no ocupa sitio en el flujo: al final del documento se comía los últimos
++ * 48 px del pie. Lo que quedaba debajo, en TODAS las páginas menos /cotizacion,
++ * eran «Política de Privacidad» y «Términos y Condiciones» — dos enlaces que
++ * un teléfono no podía tocar. No es un detalle estético: son los avisos
++ * legales, y tienen que ser alcanzables. Lo encontró una comprobación de
++ * solapamiento con elementFromPoint, no una revisión a ojo.
++ *
++ * El espaciador se renderiza junto a la barra y con la misma condición, así
++ * que aparece y desaparece con ella: no hay forma de que uno exista sin el
++ * otro.
+  */
+ export default function BarraMovilContacto() {
+   const pathname = usePathname();
+   if (pathname?.startsWith('/cotizacion')) return null;
+ 
+   return (
++    <>
++    <div
++      aria-hidden="true"
++      className="md:hidden"
++      style={{ height: 'calc(48px + env(safe-area-inset-bottom))' }}
++    />
+     <nav
+       aria-label="Contacto rápido"
+       className="fixed inset-x-0 bottom-0 z-[80] grid grid-cols-3 md:hidden bg-white/95 dark:bg-[#1C2C46]/95 backdrop-blur border-t border-gray-200 dark:border-[var(--border)]"
+@@ -45,5 +63,6 @@ export default function BarraMovilContacto() {
+         <FileText className="w-4 h-4" /> Cotizar
+       </Link>
+     </nav>
++    </>
+   );
+ }
+diff --git a/components/CalculadoraForm.tsx b/components/CalculadoraForm.tsx
+index 6cb6457..3a4f78c 100644
+--- a/components/CalculadoraForm.tsx
++++ b/components/CalculadoraForm.tsx
+@@ -157,7 +157,12 @@ function Formulario({ calc }: { calc: NonNullable<ReturnType<typeof calculadoraP
+       </form>
+ 
+       {/* ---------------- Resultado ---------------- */}
++      {/* El bloque «Cómo sale ese número» era un h3 colgando directamente del
++          h1 de la página: un salto de nivel que deja a un lector de pantalla
++          sin la sección intermedia. El encabezado de la región existe, sólo
++          que no hacía falta verlo. */}
+       <div className="space-y-6">
++        <h2 className="sr-only">Resultado del cálculo</h2>
+         <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-gray-100" aria-live="polite">
+           {salida.invalido ? (
+             <div className="flex gap-3">
+diff --git a/components/CatalogoFiltrado.tsx b/components/CatalogoFiltrado.tsx
+index 2f50d0d..ec6a6a8 100644
+--- a/components/CatalogoFiltrado.tsx
++++ b/components/CatalogoFiltrado.tsx
+@@ -172,8 +172,17 @@ export default function CatalogoFiltrado() {
+             <Filter className="w-4 h-4" /> Filtros
+           </button>
+ 
+-          <select 
+-            value={sortBy} 
++          {/* El <select> no tenia etiqueta de ningun tipo: ni <label>, ni
++              aria-label, ni name. Un lector de pantalla lo anunciaba como
++              «cuadro combinado» a secas, sin decir que ordenaba el catalogo.
++              La etiqueta va oculta a la vista, no ausente. */}
++          <label htmlFor="orden-catalogo" className="sr-only">
++            Ordenar el catálogo
++          </label>
++          <select
++            id="orden-catalogo"
++            name="orden"
++            value={sortBy}
+             onChange={(e) => setSortBy(e.target.value as 'name' | 'popular')}
+             className="px-5 py-3.5 border border-gray-200 rounded-2xl text-sm bg-white focus:border-[#059669]"
+           >
+@@ -181,9 +190,33 @@ export default function CatalogoFiltrado() {
+             <option value="name">Orden alfabético</option>
+           </select>
+ 
+-          <div className="flex border border-gray-200 rounded-2xl overflow-hidden">
+-            <button onClick={() => setViewMode('grid')} className={`p-3.5 ${viewMode === 'grid' ? 'bg-[#0A2540] text-white' : 'hover:bg-gray-50'}`}><Grid className="w-4 h-4" /></button>
+-            <button onClick={() => setViewMode('list')} className={`p-3.5 ${viewMode === 'list' ? 'bg-[#0A2540] text-white' : 'hover:bg-gray-50'}`}><List className="w-4 h-4" /></button>
++          {/* Los dos botones de vista eran iconos sin texto ni aria-label: para
++              un lector de pantalla, dos botones anonimos uno al lado del otro.
++              Son un grupo de dos estados excluyentes, asi que se declaran como
++              tales con aria-pressed y con nombre. */}
++          <div
++            role="group"
++            aria-label="Forma de ver el catálogo"
++            className="flex border border-gray-200 rounded-2xl overflow-hidden"
++          >
++            <button
++              type="button"
++              onClick={() => setViewMode('grid')}
++              aria-label="Ver en cuadrícula"
++              aria-pressed={viewMode === 'grid'}
++              className={`p-3.5 ${viewMode === 'grid' ? 'bg-[#0A2540] text-white' : 'hover:bg-gray-50'}`}
++            >
++              <Grid className="w-4 h-4" aria-hidden="true" />
++            </button>
++            <button
++              type="button"
++              onClick={() => setViewMode('list')}
++              aria-label="Ver en lista"
++              aria-pressed={viewMode === 'list'}
++              className={`p-3.5 ${viewMode === 'list' ? 'bg-[#0A2540] text-white' : 'hover:bg-gray-50'}`}
++            >
++              <List className="w-4 h-4" aria-hidden="true" />
++            </button>
+           </div>
+         </div>
+       </div>
+@@ -210,6 +243,10 @@ export default function CatalogoFiltrado() {
+         </div>
+ 
+         {/* Products Grid/List */}
++        {/* Las fichas titulan con h3 (ProductCard) y encima sólo había un h1:
++            salto de nivel. El h2 de la región de resultados existía en el
++            diseño —es «el catálogo»— pero no en el marcado. */}
++        <h2 className="sr-only">Resultados del catálogo</h2>
+         <div className="flex-1 min-w-0">
+           <AnimatePresence mode="wait">
+             {filteredProducts.length > 0 ? (
+diff --git a/components/ChromeEn.tsx b/components/ChromeEn.tsx
+index cbee957..9799dcf 100644
+--- a/components/ChromeEn.tsx
++++ b/components/ChromeEn.tsx
+@@ -43,10 +43,12 @@ export function HeaderEn() {
+   return (
+     <header className="border-b border-gray-200 dark:border-[var(--border)] bg-white/95 dark:bg-[#1C2C46]/95 backdrop-blur">
+       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-3 px-6 py-4">
+-        <Link href="/en" className="flex items-center gap-3">
++        <Link href="/en" className="flex min-h-[44px] items-center gap-3">
+           <Image
+             src="/logo.png"
+-            alt={SITE.legalName}
++            /* El nombre ya está escrito al lado, en texto. Repetirlo en el alt
++               hace que un lector de pantalla lo anuncie dos veces seguidas. */
++            alt=""
+             width={32}
+             height={32}
+             className="rounded-xl ring-1 ring-black/5"
+@@ -61,7 +63,7 @@ export function HeaderEn() {
+             <Link
+               key={e.href}
+               href={e.href}
+-              className="text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669] transition-colors"
++              className="inline-flex min-h-[44px] items-center text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669] transition-colors"
+             >
+               {e.label}
+             </Link>
+@@ -70,7 +72,7 @@ export function HeaderEn() {
+ 
+         <Link
+           href="/"
+-          className="ml-auto rounded-full border border-gray-200 dark:border-[var(--border)] px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:border-[#059669] hover:text-[#047857] transition-colors"
++          className="ml-auto inline-flex min-h-[44px] items-center rounded-full border border-gray-200 dark:border-[var(--border)] px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:border-[#059669] hover:text-[#047857] transition-colors"
+         >
+           Sitio en español →
+         </Link>
+@@ -93,7 +95,7 @@ export function FooterEn() {
+               <div>
+                 {DIRECCION_COMPLETA}
+                 {' · '}
+-                <a href={MAPA_URL} target="_blank" rel="noopener noreferrer" className="text-[#047857] hover:underline">
++                <a href={MAPA_URL} target="_blank" rel="noopener noreferrer" className="text-[#047857] underline underline-offset-2">
+                   Map
+                 </a>
+               </div>
+@@ -108,7 +110,7 @@ export function FooterEn() {
+                 <WhatsAppLink
+                   context="footer-en"
+                   message="Hello, I am an international buyer and would like to request a quotation."
+-                  className="text-[#047857] hover:underline"
++                  className="text-[#047857] underline underline-offset-2"
+                 >
+                   {TELEFONOS.whatsapp.display} (WhatsApp)
+                 </WhatsAppLink>
+@@ -139,19 +141,19 @@ export function FooterEn() {
+             </ul>
+ 
+             {/* Decirlo antes del clic, no después. */}
+-            <p className="mt-5 text-gray-500">
++            <p className="mt-5 text-gray-500 dark:text-[var(--text-muted)]">
+               The product catalogue, technical library and specification guides are published in
+               Spanish. These English pages cover identity, export terms and the RFQ path.
+             </p>
+             <p className="mt-3">
+-              <Link href="/" className="text-[#047857] hover:underline">Ir al sitio en español</Link>
++              <Link href="/" className="text-[#047857] underline underline-offset-2">Ir al sitio en español</Link>
+               {' · '}
+-              <Link href="/pt" className="text-[#047857] hover:underline">Português</Link>
++              <Link href="/pt" className="text-[#047857] underline underline-offset-2">Português</Link>
+             </p>
+           </div>
+         </div>
+ 
+-        <div className="mt-10 border-t border-gray-200 dark:border-[var(--border)] pt-6 text-xs text-gray-500">
++        <div className="mt-10 border-t border-gray-200 dark:border-[var(--border)] pt-6 text-xs text-gray-500 dark:text-[var(--text-muted)]">
+           © {new Date().getFullYear()} {SITE.legalName}. Manufactured in Chorrillos, Lima, Peru
+           since {SITE.foundingYear}. B2B by quotation — no price list.
+         </div>
+diff --git a/components/CostoEnVivo.tsx b/components/CostoEnVivo.tsx
+index bb3617e..e95e397 100644
+--- a/components/CostoEnVivo.tsx
++++ b/components/CostoEnVivo.tsx
+@@ -78,7 +78,7 @@ export default async function CostoEnVivo({
+         <h2 className="font-semibold tracking-tight text-2xl text-[#0A2540] dark:text-inherit">
+           {encabezado}
+         </h2>
+-        <Link href="/indicadores" className="text-sm font-medium text-[#047857] hover:underline">
++        <Link href="/indicadores" className="inline-flex min-h-[44px] items-center text-sm font-medium text-[#047857] hover:underline">
+           {t.verMetodo}
+         </Link>
+       </div>
+diff --git a/components/CotizacionForm.tsx b/components/CotizacionForm.tsx
+index fbae4a8..b7482ad 100644
+--- a/components/CotizacionForm.tsx
++++ b/components/CotizacionForm.tsx
+@@ -389,6 +389,28 @@ export default function CotizacionForm({ opciones, idioma = 'es', preselectedPro
+   const etiqueta = 'block text-sm font-medium text-[#0A2540] dark:text-[var(--text)] mb-1.5';
+   const error = 'mt-1 text-xs text-red-600';
+ 
++  /**
++   * ARIA DE VALIDACIÓN — el hueco más caro que encontró la auditoría.
++   *
++   * El formulario lleva `noValidate` y valida con react-hook-form, que es lo
++   * correcto para poder escribir los mensajes en español y en inglés. Pero el
++   * resultado sólo existía como PÍXELES: un `<p>` rojo debajo del campo. Sin
++   * `aria-invalid`, sin `aria-describedby` y sin `role="alert"`, alguien que
++   * usa lector de pantalla pulsaba «Enviar», no oía absolutamente nada y no
++   * tenía forma de saber qué campo estaba mal. En la única página por la que
++   * entra el dinero.
++   *
++   * Tres atributos y el error pasa a anunciarse solo, asociado a SU campo.
++   * `aria-required` además dice cuáles son obligatorios ANTES de intentarlo,
++   * que es cuando sirve.
++   */
++  const campoErr = errors as Record<string, { message?: string } | undefined>;
++  const aria = (nombre: string, obligatorio = false) => ({
++    'aria-invalid': campoErr[nombre] ? ('true' as const) : undefined,
++    'aria-describedby': campoErr[nombre] ? `${nombre}-error` : undefined,
++    'aria-required': obligatorio ? ('true' as const) : undefined,
++  });
++
+   if (isSuccess) {
+     return (
+       <div className="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-10 text-center">
+@@ -430,55 +452,55 @@ export default function CotizacionForm({ opciones, idioma = 'es', preselectedPro
+       <div className="grid gap-5 sm:grid-cols-2">
+         <div>
+           <label htmlFor="rfq-nombre" className={etiqueta}>{t.nombre}</label>
+-          <input id="rfq-nombre" {...register('nombre')} placeholder={t.nombrePh} className={campo} autoComplete="name" />
+-          {errors.nombre && <p className={error}>{errors.nombre.message}</p>}
++          <input id="rfq-nombre" {...register('nombre')} placeholder={t.nombrePh} {...aria('nombre', true)} className={campo} autoComplete="name" />
++          {errors.nombre && <p id="nombre-error" role="alert" className={error}>{errors.nombre.message}</p>}
+         </div>
+         <div>
+           <label htmlFor="rfq-empresa" className={etiqueta}>{t.empresa}</label>
+-          <input id="rfq-empresa" {...register('empresa')} placeholder={t.empresaPh} className={campo} autoComplete="organization" />
+-          {errors.empresa && <p className={error}>{errors.empresa.message}</p>}
++          <input id="rfq-empresa" {...register('empresa')} placeholder={t.empresaPh} {...aria('empresa', true)} className={campo} autoComplete="organization" />
++          {errors.empresa && <p id="empresa-error" role="alert" className={error}>{errors.empresa.message}</p>}
+         </div>
+         <div>
+           <label htmlFor="rfq-ruc" className={etiqueta}>{t.ruc}</label>
+-          <input id="rfq-ruc" {...register('ruc')} placeholder={t.rucPh} inputMode="numeric" className={campo} />
+-          {errors.ruc && <p className={error}>{errors.ruc.message}</p>}
++          <input id="rfq-ruc" {...register('ruc')} placeholder={t.rucPh} inputMode="numeric" {...aria('ruc', false)} className={campo} />
++          {errors.ruc && <p id="ruc-error" role="alert" className={error}>{errors.ruc.message}</p>}
+         </div>
+         <div>
+           <label htmlFor="rfq-email" className={etiqueta}>{t.email}</label>
+-          <input id="rfq-email" type="email" {...register('email')} placeholder={t.emailPh} className={campo} autoComplete="email" />
+-          {errors.email && <p className={error}>{errors.email.message}</p>}
++          <input id="rfq-email" type="email" {...register('email')} placeholder={t.emailPh} {...aria('email', true)} className={campo} autoComplete="email" />
++          {errors.email && <p id="email-error" role="alert" className={error}>{errors.email.message}</p>}
+         </div>
+         <div>
+           <label htmlFor="rfq-telefono" className={etiqueta}>{t.telefono}</label>
+           {/* Placeholder genérico a propósito: NUNCA el número de la empresa. */}
+-          <input id="rfq-telefono" type="tel" {...register('telefono')} placeholder={t.telefonoPh} className={campo} autoComplete="tel" />
+-          {errors.telefono && <p className={error}>{errors.telefono.message}</p>}
++          <input id="rfq-telefono" type="tel" {...register('telefono')} placeholder={t.telefonoPh} {...aria('telefono', true)} className={campo} autoComplete="tel" />
++          {errors.telefono && <p id="telefono-error" role="alert" className={error}>{errors.telefono.message}</p>}
+         </div>
+         <div>
+           <label htmlFor="rfq-producto" className={etiqueta}>
+             {t.producto} {productoObligatorio ? '*' : t.productoOpc}
+           </label>
+-          <select id="rfq-producto" {...register('producto')} className={campo}>
++          <select id="rfq-producto" {...register('producto')} {...aria('producto', false)} className={campo}>
+             <option value="">{t.productoPh}</option>
+             {opciones.map((p) => (
+               <option key={p.slug} value={p.name}>{p.name}</option>
+             ))}
+           </select>
+-          {errors.producto && <p className={error}>{errors.producto.message}</p>}
++          {errors.producto && <p id="producto-error" role="alert" className={error}>{errors.producto.message}</p>}
+         </div>
+         <div>
+           <label htmlFor="rfq-cantidad" className={etiqueta}>{t.cantidad}</label>
+-          <input id="rfq-cantidad" {...register('cantidad')} placeholder={t.cantidadPh} className={campo} />
++          <input id="rfq-cantidad" {...register('cantidad')} placeholder={t.cantidadPh} {...aria('cantidad', false)} className={campo} />
+         </div>
+         <div>
+           <label htmlFor="rfq-ciudad" className={etiqueta}>{t.ciudad}</label>
+-          <input id="rfq-ciudad" {...register('ciudadEntrega')} placeholder={t.ciudadPh} className={campo} autoComplete="address-level2" />
+-          {errors.ciudadEntrega && <p className={error}>{errors.ciudadEntrega.message}</p>}
++          <input id="rfq-ciudad" {...register('ciudadEntrega')} placeholder={t.ciudadPh} {...aria('ciudadEntrega', true)} className={campo} autoComplete="address-level2" />
++          {errors.ciudadEntrega && <p id="ciudadEntrega-error" role="alert" className={error}>{errors.ciudadEntrega.message}</p>}
+         </div>
+         <div>
+           <label htmlFor="rfq-fecha" className={etiqueta}>{t.fecha}</label>
+           {/* type="date": el navegador lo presenta dd/mm/aaaa en es-PE. */}
+-          <input id="rfq-fecha" type="date" lang="es-PE" {...register('fechaNecesaria')} className={campo} />
++          <input id="rfq-fecha" type="date" lang="es-PE" {...register('fechaNecesaria')} {...aria('fechaNecesaria', false)} className={campo} />
+         </div>
+         <div className="sm:col-span-2">
+           <label htmlFor="rfq-mensaje" className={etiqueta}>{t.mensaje}</label>
+@@ -487,9 +509,10 @@ export default function CotizacionForm({ opciones, idioma = 'es', preselectedPro
+             rows={4}
+             {...register('mensaje')}
+             placeholder={t.mensajePh}
++            {...aria('mensaje', true)}
+             className={campo}
+           />
+-          {errors.mensaje && <p className={error}>{errors.mensaje.message}</p>}
++          {errors.mensaje && <p id="mensaje-error" role="alert" className={error}>{errors.mensaje.message}</p>}
+         </div>
+ 
+         <div className="sm:col-span-2">
+diff --git a/components/CunaHub.tsx b/components/CunaHub.tsx
+index a85bb58..6d637ac 100644
+--- a/components/CunaHub.tsx
++++ b/components/CunaHub.tsx
+@@ -180,7 +180,8 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
+             Especificación declarada por cada ficha. Donde una línea no la declara dice «No
+             declarado»: no se rellena ni se infiere del vecino.
+           </p>
+-          <div className="overflow-x-auto">
++          {/* WCAG 2.1.1: caja con scroll = recorrible con teclado. */}
++          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Comparación de especificaciones (se desplaza en horizontal)">
+             <table className="w-full border-collapse text-sm">
+               <caption className="sr-only">
+                 Comparación de especificaciones de {hijos.length} líneas de {cuna.titulo}
+diff --git a/components/CunaHubEn.tsx b/components/CunaHubEn.tsx
+index ba0d64e..92fea00 100644
+--- a/components/CunaHubEn.tsx
++++ b/components/CunaHubEn.tsx
+@@ -180,7 +180,7 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
+           Line by line, from the same catalogue field the Spanish product pages use. A supplier that
+           blurs manufacturing and supply is a supplier you cannot audit.
+         </p>
+-        <div className="overflow-x-auto">
++        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Sourcing mode per line (scrolls horizontally)">
+           <table className="w-full border-collapse text-sm">
+             <caption className="sr-only">
+               Sourcing mode declared for each line of {cuna.titulo}
+@@ -264,7 +264,7 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
+           </ul>
+           <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+             The same limits are published in Spanish at{' '}
+-            <Link href="/confianza" className="text-[#047857] hover:underline">/confianza</Link>.
++            <Link href="/confianza" className="text-[#047857] underline underline-offset-2">/confianza</Link>.
+           </p>
+         </div>
+       </section>
+diff --git a/components/FabricarOImportar.tsx b/components/FabricarOImportar.tsx
+index 713d054..1a65559 100644
+--- a/components/FabricarOImportar.tsx
++++ b/components/FabricarOImportar.tsx
+@@ -185,7 +185,7 @@ export default async function FabricarOImportar({ idioma }: { idioma: 'es' | 'en
+         <p className="mb-6 max-w-3xl text-gray-600 dark:text-gray-400">
+           {t.pmatriz(MATRIZ.length, ganaImportar)}
+         </p>
+-        <div className="overflow-x-auto">
++        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={t.h2matriz}>
+           <table className="w-full border-collapse text-sm">
+             <caption className="sr-only">{t.h2matriz}</caption>
+             <thead>
+diff --git a/components/Footer.tsx b/components/Footer.tsx
+index 4015d93..a2aee79 100644
+--- a/components/Footer.tsx
++++ b/components/Footer.tsx
+@@ -97,9 +97,9 @@ export default function Footer() {
+             Solicitar cotización
+           </Link>
+           <div className="flex items-center gap-2 text-sm">
+-            <span className="px-4 py-2 rounded-full border border-white/30 text-white">Español</span>
+-            <Link href="/en" className="px-4 py-2 rounded-full border border-white/15 text-white/70 hover:border-white/40 hover:text-white transition-colors">English</Link>
+-            <Link href="/pt" className="px-4 py-2 rounded-full border border-white/15 text-white/70 hover:border-white/40 hover:text-white transition-colors">Português</Link>
++            <span className="inline-flex min-h-[44px] items-center px-4 py-2 rounded-full border border-white/30 text-white">Español</span>
++            <Link href="/en" className="inline-flex min-h-[44px] items-center px-4 py-2 rounded-full border border-white/15 text-white/70 hover:border-white/40 hover:text-white transition-colors">English</Link>
++            <Link href="/pt" className="inline-flex min-h-[44px] items-center px-4 py-2 rounded-full border border-white/15 text-white/70 hover:border-white/40 hover:text-white transition-colors">Português</Link>
+           </div>
+         </div>
+         {/* ── Mobile: marca compacta + CTA + acordeón (patrón AWS) ── */}
+@@ -116,7 +116,7 @@ export default function Footer() {
+           </WhatsAppLink>
+           <FooterAccordion sections={sections} />
+           <div className="py-6">
+-            <div className="text-xs text-white/40 mb-3 tracking-wide">SÍGANOS</div>
++            <div className="text-xs text-white/70 mb-3 tracking-wide">SÍGANOS</div>
+             <SocialIcons variant="dark" />
+           </div>
+         </div>
+@@ -235,14 +235,19 @@ export default function Footer() {
+         </div>
+ 
+         <div className="mt-10 pt-8 border-t border-white/10 flex justify-center">
+-          <a href="#top" className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors">Volver arriba <ArrowUp className="w-4 h-4" /></a>
++          <a href="#top" className="inline-flex min-h-[44px] items-center gap-2 px-3 text-sm text-white/70 hover:text-white transition-colors">Volver arriba <ArrowUp className="w-4 h-4" /></a>
+         </div>
+ 
+-        <div className="mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-y-4 text-xs text-white/50">
++        {/* items-start en móvil, no items-center: centrados, «Términos y
++            Condiciones» caía justo debajo del botón flotante del asistente
++            (fixed bottom-20 right-6, 64×64) y era intocable con el dedo.
++            Alineados a la izquierda quedan fuera de esa esquina, sin añadir
++            hueco muerto al final de la página. */}
++        <div className="mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-y-4 text-xs text-white/50">
+           <div>© {currentYear} {SITE.legalName}. Todos los derechos reservados. RUC: {SITE.ruc}</div>
+           <div className="flex items-center gap-x-6">
+-            <Link href="/privacidad" className="hover:text-white transition-colors">Política de Privacidad</Link>
+-            <Link href="/terminos" className="hover:text-white transition-colors">Términos y Condiciones</Link>
++            <Link href="/privacidad" className="inline-flex min-h-[44px] items-center hover:text-white transition-colors">Política de Privacidad</Link>
++            <Link href="/terminos" className="inline-flex min-h-[44px] items-center hover:text-white transition-colors">Términos y Condiciones</Link>
+             <span className="hidden md:inline">Hecho en Perú</span>
+           </div>
+         </div>
+diff --git a/components/MachineryGallery.tsx b/components/MachineryGallery.tsx
+index 1702e05..0d3efb9 100644
+--- a/components/MachineryGallery.tsx
++++ b/components/MachineryGallery.tsx
+@@ -272,6 +272,10 @@ export default function MachineryGallery() {
+           <span className="text-xs font-medium text-gray-500 tabular-nums">
+             {String(item.orden).padStart(2, '0')} / {total}
+           </span>
++          {/* Los puntos medían 24×4 px de zona tocable: por debajo del mínimo
++              de 24×24 de WCAG 2.5.8. La MARCA sigue siendo una línea fina —no
++              cambia el diseño— pero el botón que la contiene ya tiene altura
++              suficiente para acertarle. */}
+           <div className="hidden sm:flex gap-1">
+             {machinery.map((m, i) => (
+               <button
+@@ -279,8 +283,13 @@ export default function MachineryGallery() {
+                 type="button"
+                 aria-label={`Ir a ${m.titulo}`}
+                 onClick={() => goTo(i)}
+-                className={`h-1 rounded-full transition-all ${i === index ? 'w-6 bg-[#059669]' : 'w-2 bg-gray-300 hover:bg-gray-400'}`}
+-              />
++                className="grid h-6 w-6 place-items-center"
++              >
++                <span
++                  aria-hidden="true"
++                  className={`block h-1 rounded-full transition-all ${i === index ? 'w-6 bg-[#059669]' : 'w-2 bg-gray-300 group-hover:bg-gray-400'}`}
++                />
++              </button>
+             ))}
+           </div>
+         </div>
+diff --git a/components/Navbar.tsx b/components/Navbar.tsx
+index a2bc716..ad21dbe 100644
+--- a/components/Navbar.tsx
++++ b/components/Navbar.tsx
+@@ -451,7 +451,11 @@ export default function Navbar() {
+           Usa transform, no cambia el flujo: la página nunca "salta".
+           El padding lateral respeta el recorte de pantalla en horizontal
+           (iPhone con muesca girado), donde el área segura no es cero. */}
+-      <div
++      {/* Landmark `banner`. Era un <div>: la barra utilitaria superior —horario,
++          teléfono, WhatsApp, Contáctenos— quedaba FUERA de cualquier región,
++          y un lector de pantalla no podía saltar a la cabecera con el atajo de
++          landmarks. Un elemento, trece rutas arregladas. */}
++      <header
+         /**
+          * `abierto !== null` es lo que faltaba, y es un fallo real, no una
+          * sutileza. La cabecera se esconde al bajar la página trasladándose
+@@ -499,7 +503,7 @@ export default function Navbar() {
+           </div>
+         </div>
+ 
+-        <nav className="bg-white/95 dark:bg-[#1C2C46]/95 backdrop-blur-lg border-b border-gray-200 dark:border-[var(--border)]">
++        <nav aria-label="Navegación principal" className="bg-white/95 dark:bg-[#1C2C46]/95 backdrop-blur-lg border-b border-gray-200 dark:border-[var(--border)]">
+           {/* `relative` es el ancla del mega-menú. El panel se posiciona
+               contra ESTE contenedor (ancho útil completo de la cabecera) y no
+               contra zonaNav: el ancho de zonaNav es lo que sobra tras logo,
+@@ -510,7 +514,7 @@ export default function Navbar() {
+             <div className="flex items-center gap-3 xl:gap-6 h-20">
+             {/* Logo. `min-w-0` permite que el rótulo ceda antes de empujar
+                 al resto fuera de la pantalla. */}
+-            <Link href="/" className="flex items-center gap-3 group shrink-0 min-w-0">
++            <Link href="/" className="flex min-h-[44px] items-center gap-3 group shrink-0 min-w-0">
+               <div className="w-9 h-9 shrink-0 rounded-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/10 transition-transform group-hover:scale-[1.04]">
+                 <Image src="/logo.png" alt="Plastilonas Peruanas SAC" width={36} height={36} priority className="w-full h-full object-cover" />
+               </div>
+@@ -696,7 +700,7 @@ export default function Navbar() {
+               <button
+                 onClick={() => setShowCommand(true)}
+                 aria-label="Buscar productos"
+-                className="lg:hidden p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#047857] transition-colors"
++                className="lg:hidden inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#047857] transition-colors"
+               >
+                 <Search className="w-5 h-5" />
+               </button>
+@@ -749,12 +753,12 @@ export default function Navbar() {
+               </Link>
+ 
+               {CART_ENABLED && (
+-                <CartButton className="p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669]" />
++                <CartButton className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2.5 text-[#0A2540] dark:text-[var(--text)] hover:text-[#059669]" />
+               )}
+ 
+               <button
+                 onClick={() => setIsOpen(!isOpen)}
+-                className="lg:hidden p-2.5 text-[#0A2540] dark:text-[var(--text)]"
++                className="lg:hidden inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2.5 text-[#0A2540] dark:text-[var(--text)]"
+                 aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+                 aria-expanded={isOpen}
+               >
+@@ -940,7 +944,7 @@ export default function Navbar() {
+           )}
+         </AnimatePresence>
+         </nav>
+-      </div>
++      </header>
+ 
+       {/* Espaciador: reserva la altura del encabezado fijo para que el
+           contenido no quede oculto debajo. md: incluye la barra utilitaria,
+diff --git a/components/ServiceTabs.tsx b/components/ServiceTabs.tsx
+index 63feb9e..84351f5 100644
+--- a/components/ServiceTabs.tsx
++++ b/components/ServiceTabs.tsx
+@@ -27,21 +27,44 @@ const ICONS: Record<string, LucideIcon> = { ruler: Ruler, hardhat: HardHat, ship
+  */
+ type Svc = { title: string; desc: string; icon: string; tomas: string[] };
+ 
++/**
++ * ACCESIBILIDAD DE ESTE COMPONENTE — dos defectos encontrados en la auditoría
++ * de agosto de 2026, y por qué importaban:
++ *
++ * 1. NO ERA UN GRUPO DE PESTAÑAS PARA QUIEN NO VE. Se declaraba con
++ *    `aria-pressed`, que un lector de pantalla anuncia como interruptor
++ *    («pulsado / no pulsado»), no como «pestaña 2 de 4, seleccionada». Y el
++ *    panel no estaba asociado a su pestaña, así que activarla no llevaba el
++ *    foco ni el contexto a ninguna parte. En el MISMO repositorio,
++ *    MachineryGallery ya lo hacía bien: dos widgets de pestañas, dos verdades.
++ *    Ahora los dos hablan el mismo idioma —tablist/tab/tabpanel, aria-selected,
++ *    aria-controls— y además se navega con flechas, que es lo que espera
++ *    cualquiera que use el teclado.
++ *
++ * 2. EL AVANCE AUTOMÁTICO NO SE PODÍA PARAR CON EL DEDO. Rotaba cada 5 s y la
++ *    única pausa era `hover`, que en un teléfono NO EXISTE: el contenido
++ *    cambiaba solo mientras alguien lo leía. WCAG 2.2.2 exige poder pausarlo.
++ *    Ahora se pausa al tocar/enfocar cualquier pestaña, hay un botón explícito
++ *    de pausa, y tocar una pestaña detiene la rotación para siempre: si el
++ *    usuario eligió, el componente deja de decidir por él.
++ */
+ export default function ServiceTabs({ services }: { services: Svc[] }) {
+   const [active, setActive] = useState(0);
+   const [phase, setPhase] = useState(0);      // 0 = foto A, 1 = foto B (crossfade Ken Burns)
+   const [hover, setHover] = useState(false);
++  // Pausa deliberada: el usuario tocó una pestaña o el botón de pausa.
++  const [pausado, setPausado] = useState(false);
+   const svc = services[active];
+   const Icon = ICONS[svc.icon] ?? Ruler;
+   const tomas = svc.tomas?.length ? svc.tomas : [];
+ 
+   // Auto-avance de pestañas cada 5s (pausa al pasar el cursor / prefiere menos movimiento).
+   useEffect(() => {
+-    if (hover) return;
++    if (hover || pausado) return;
+     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+     const id = setInterval(() => setActive((a) => (a + 1) % services.length), 5000);
+     return () => clearInterval(id);
+-  }, [hover, services.length]);
++  }, [hover, pausado, services.length]);
+ 
+   // Cruce entre las tomas del servicio activo cada 3.5s.
+   useEffect(() => {
+@@ -60,30 +83,71 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
+       onMouseLeave={() => setHover(false)}
+     >
+       {/* Pestañas */}
+-      <div className="no-scrollbar flex lg:flex-col gap-2 overflow-x-auto -mx-6 px-6 lg:mx-0 lg:px-0">
+-        {services.map((s, i) => {
+-          const I = ICONS[s.icon] ?? Ruler;
+-          const on = i === active;
+-          return (
+-            <button
+-              key={s.title}
+-              onClick={() => setActive(i)}
+-              aria-pressed={on}
+-              className={`shrink-0 lg:shrink text-left flex items-center gap-3 px-5 py-4 rounded-2xl border transition-all duration-300 ${
+-                on ? 'bg-[#0A2540] border-[#0A2540] text-white shadow-lg shadow-[#0A2540]/15'
+-                   : 'bg-white border-gray-200 text-[#0A2540] hover:border-[#047857]'
+-              }`}
+-            >
+-              <I className={`w-5 h-5 shrink-0 ${on ? 'text-[#10B981]' : 'text-gray-400'}`} />
+-              <span className="font-medium text-sm whitespace-nowrap lg:whitespace-normal">{s.title}</span>
+-              {on && <span className="ml-auto hidden lg:block w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />}
+-            </button>
+-          );
+-        })}
++      <div className="flex lg:flex-col gap-2">
++        <div
++          role="tablist"
++          aria-label="Servicios"
++          aria-orientation="horizontal"
++          className="no-scrollbar flex lg:flex-col gap-2 overflow-x-auto -mx-6 px-6 lg:mx-0 lg:px-0"
++          onKeyDown={(e) => {
++            const d = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1
++                    : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
++            if (!d) return;
++            e.preventDefault();
++            setPausado(true);
++            const sig = (active + d + services.length) % services.length;
++            setActive(sig);
++            document.getElementById(`pestana-servicio-${sig}`)?.focus();
++          }}
++        >
++          {services.map((s, i) => {
++            const I = ICONS[s.icon] ?? Ruler;
++            const on = i === active;
++            return (
++              <button
++                key={s.title}
++                id={`pestana-servicio-${i}`}
++                type="button"
++                role="tab"
++                aria-selected={on}
++                aria-controls="panel-servicio"
++                // El estándar: sólo la pestaña activa está en el orden de
++                // tabulación; dentro del grupo se navega con flechas.
++                tabIndex={on ? 0 : -1}
++                onClick={() => { setActive(i); setPausado(true); }}
++                onFocus={() => setPausado(true)}
++                className={`shrink-0 lg:shrink text-left flex items-center gap-3 px-5 py-4 rounded-2xl border transition-all duration-300 ${
++                  on ? 'bg-[#0A2540] border-[#0A2540] text-white shadow-lg shadow-[#0A2540]/15'
++                     : 'bg-white border-gray-200 text-[#0A2540] hover:border-[#047857]'
++                }`}
++              >
++                <I className={`w-5 h-5 shrink-0 ${on ? 'text-[#10B981]' : 'text-gray-400'}`} aria-hidden="true" />
++                <span className="font-medium text-sm whitespace-nowrap lg:whitespace-normal">{s.title}</span>
++                {on && <span className="ml-auto hidden lg:block w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" aria-hidden="true" />}
++              </button>
++            );
++          })}
++        </div>
++        {/* WCAG 2.2.2: un control explícito para detener el avance. En un
++            teléfono es el único que existe — `hover` no ocurre nunca. */}
++        <button
++          type="button"
++          onClick={() => setPausado((p) => !p)}
++          aria-pressed={pausado}
++          className="shrink-0 self-center lg:self-start min-h-[44px] px-4 rounded-2xl border border-gray-200 text-xs font-medium text-gray-600 hover:border-[#047857] hover:text-[#047857] transition-colors"
++        >
++          {pausado ? 'Reanudar el avance automático' : 'Pausar el avance automático'}
++        </button>
+       </div>
+ 
+       {/* Panel con fotos de fondo (Ken Burns + crossfade) y texto sobre velo */}
+-      <div className="relative rounded-3xl overflow-hidden min-h-[22rem] flex border border-gray-100 bg-[#0A2540]">
++      <div
++        id="panel-servicio"
++        role="tabpanel"
++        aria-labelledby={`pestana-servicio-${active}`}
++        aria-live="polite"
++        className="relative rounded-3xl overflow-hidden min-h-[22rem] flex border border-gray-100 bg-[#0A2540]"
++      >
+         {/* Capa de fotos */}
+         <div className="absolute inset-0">
+           <AnimatePresence>
+diff --git a/components/SocialIcons.tsx b/components/SocialIcons.tsx
+index 62020c6..bd1af84 100644
+--- a/components/SocialIcons.tsx
++++ b/components/SocialIcons.tsx
+@@ -29,7 +29,7 @@ export default function SocialIcons({ variant = "dark", className = "" }: Props)
+           rel="noopener noreferrer"
+           data-social={name.toLowerCase()}
+           onClick={() => trackSocialClick(name)}
+-          className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all ${base}`}
++          className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all ${base}`}
+           title={name}
+           aria-label={name}
+         >
+diff --git a/components/ThemeToggle.tsx b/components/ThemeToggle.tsx
+index 22006e0..f5de4a9 100644
+--- a/components/ThemeToggle.tsx
++++ b/components/ThemeToggle.tsx
+@@ -31,7 +31,7 @@ export function ThemeToggle() {
+   }, [theme, mounted]);
+ 
+   // Render a fixed-size placeholder pre-hydration to avoid layout shift.
+-  if (!mounted) return <div className="h-9 w-9" aria-hidden />;
++  if (!mounted) return <div className="h-11 w-11" aria-hidden />;
+ 
+   const next: Theme = theme === 'dark' ? 'light' : 'dark';
+ 
+@@ -41,7 +41,7 @@ export function ThemeToggle() {
+       onClick={() => setTheme(next)}
+       aria-label={next === 'dark' ? 'Activar modo oscuro' : 'Activar modo claro'}
+       title={next === 'dark' ? 'Modo oscuro' : 'Modo claro'}
+-      className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--brand)] hover:border-[var(--brand)]"
++      className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--brand)] hover:border-[var(--brand)]"
+     >
+       {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+     </button>
+diff --git a/docs/entregas/2026-08-31-auditoria-navegador.md b/docs/entregas/2026-08-31-auditoria-navegador.md
+new file mode 100644
+index 0000000..20446e2
+--- /dev/null
++++ b/docs/entregas/2026-08-31-auditoria-navegador.md
+@@ -0,0 +1,133 @@
++# Auditoría de navegador y corrección — 2026-08-31
++
++**Alcance:** clon limpio de `main` (`d364f7b`), compilado y servido, medido con
++Chromium real sobre **6 viewports × 39 plantillas = 234 mediciones**, **230 URLs
++rastreadas**, **16 rutas × 4 modos** (móvil/escritorio × claro/oscuro) con
++axe-core, y **23 comprobaciones de interacción** ejecutadas tocando los
++controles.
++
++## 0. Por qué hacía falta
++
++El repositorio tenía 747 pruebas en verde. Ninguna abre un navegador: leen
++archivos y llaman funciones. Por eso convivieron trece etapas de trabajo con un
++enlace del catálogo que llevaba a un 404, un formulario cuyos errores no
++existían para un lector de pantalla, una calculadora ilegible en modo oscuro y
++una barra flotante que tapaba los avisos legales en once páginas. **Nada de eso
++rompía una prueba.** Ahora rompe: el arné vive en `scripts/diagnostico/` y los
++invariantes de cada arreglo, en `test/regresiones-ui.test.ts`.
++
++## 1. Lo que ya estaba bien (y conviene no romper)
++
++| Medición | Resultado |
++|---|---|
++| Desborde horizontal (234 mediciones, 360–1440 px) | **0** |
++| Imágenes rotas / peticiones fallidas | **0** |
++| Errores de consola | **0** |
++| `<h1>` por página (230 rutas) | **exactamente 1 en todas** |
++| Títulos y descripciones duplicados | **0 y 0** |
++| Tablas anchas sin contenedor con scroll | **0** |
++| Menú móvil, buscador (48 resultados), filtros (99→67), calculadora, tema, carrito, chat | **funcionan** |
++| Peso interno | concentrado en las tres cuñas, `/confianza` e `/indicadores` |
++
++## 2. Defectos encontrados y corregidos
++
++### P0 — funcionales
++
++1. **404 en el catálogo.** `/productos/familia/seguridad-industrial` pintaba
++   «Comparar las 4» y esa ruta no existe: `comparableFamilies()` exige además
++   una fila comparable, y esa familia no comparte ninguna especificación. El
++   botón se pintaba con `items.length >= 2`. Ahora usa **el mismo predicado que
++   genera la ruta**.
++2. **La barra móvil tapaba los avisos legales.** `position: fixed` no ocupa
++   sitio: al final del documento se comía «Política de Privacidad» y «Términos
++   y Condiciones» en **11 de 13 rutas medidas**. La barra ahora reserva su
++   propio alto. Y el botón flotante del asistente cubría el segundo enlace: la
++   fila legal pasó a alinearse a la izquierda para salir de esa esquina.
++3. **Modo oscuro rompía las cinco calculadoras.** La capa oscura de
++   `globals.css` remapeaba la TINTA de `.text-gray-900` pero no el FONDO de
++   `input.bg-white` (los controles de formulario no estaban en la lista de
++   elementos). Resultado: **fondo blanco con tinta clara, 1.16:1** — texto
++   invisible en la herramienta de una página donde se decide una compra.
++   El mismo defecto afectaba al ordenador de `/productos`.
++
++### P1 — accesibilidad e integración
++
++4. **Tres controles sin nombre en `/productos`**: el `<select>` de orden (sin
++   `label`, sin `aria-label`, sin `name`) y los dos botones de vista
++   cuadrícula/lista (iconos sin texto).
++5. **Las pestañas de la portada no eran pestañas.** `ServiceTabs` se declaraba
++   con `aria-pressed` —que se anuncia como interruptor, no como «pestaña 2 de
++   4»— y el panel no estaba asociado a ninguna. En el mismo repositorio,
++   `MachineryGallery` ya lo hacía bien: **dos widgets, dos verdades.** Además
++   **rotaba cada 5 s con pausa sólo por `hover`, que en un teléfono no existe**
++   (WCAG 2.2.2). Ahora: `tablist/tab/tabpanel`, `aria-selected`,
++   `aria-controls`, navegación con flechas, y un botón explícito de pausa.
++6. **Los errores del RFQ no existían para quien no ve.** `noValidate` +
++   react-hook-form pintaba un `<p>` rojo y nada más: sin `aria-invalid`, sin
++   `aria-describedby`, sin `role="alert"`, sin `aria-required`. En la única
++   página por la que entra el dinero. Verificado tras el arreglo: **7 alertas,
++   6 campos marcados y asociados a su mensaje, 6 declarados obligatorios.**
++7. **El bloque de respuesta directa era ilegible en oscuro (2.33:1)** — el
++   párrafo que citan los motores de respuesta, en las tres cuñas, sus gemelas
++   inglesas y `/fabricar-o-importar`. Causa: la utilidad lleva modificador de
++   opacidad (`bg-emerald-50/60`) y la capa oscura selecciona `.bg-emerald-50`,
++   que es otra clase. El mismo fallo afectaba a los bloques «Qué no afirmamos».
++8. **El verde de acción fallaba en oscuro fuera de `<main>`** (2.56:1):
++   cabecera, pie y el botón «WhatsApp» de la barra inferior — el más pulsado
++   del sitio en un teléfono.
++9. **Áreas táctiles**: logo, tema, buscar, menú, iconos sociales y avisos
++   legales por debajo del mínimo; puntos de la galería de 24×4 px.
++10. **Tablas con scroll no recorribles con teclado** (WCAG 2.1.1) en siete
++    plantillas.
++11. **Saltos de nivel de encabezado** en `/productos`, las calculadoras y
++    `/nosotros`.
++12. **La cabecera no era un landmark**: la raíz de `Navbar` era un `<div>`, así
++    que la barra utilitaria superior quedaba fuera de toda región y no había
++    atajo a la cabecera. Un elemento, trece rutas.
++
++## 3. Un error mío, atrapado por la propia auditoría
++
++La primera versión de la regla de tintes translúcidos cubría también el blanco.
++Un selector de atributo no distingue la utilidad de su variante `hover:`, así
++que **pintó de oscuro el botón blanco del CTA final —el más pulsado del sitio—
++dejando tinta `#0A2540` encima: 1.09:1.** Lo detectó la pasada siguiente de
++axe-core, no una lectura. La regla se acotó y hay una prueba que impide que
++vuelva.
++
++## 4. Resultado
++
++| Medición | Antes | Después |
++|---|---|---|
++| Violaciones axe-core (16 rutas × 4 modos) | **127** | **0** |
++| — de gravedad crítica | 12 | 0 |
++| Enlaces internos rotos | 1 | **0** |
++| Rutas con contenido tapado por elementos flotantes | 11 de 13 | **0** |
++| Saltos de nivel de encabezado | 3 rutas | **0** |
++| Desborde horizontal (234 mediciones) | 0 | **0** |
++| Comprobaciones de interacción | 16/18 | **23/23** |
++| Pruebas de vitest | 747 | **763** (16 nuevas de regresión) |
++
++`tsc --noEmit` limpio · `next lint` sin avisos · build 354 páginas.
++
++## 5. Cómo repetirlo
++
++```bash
++npm run build
++npx next start -p 4000 &
++npm run diagnostico          # los cinco diagnósticos
++npm run diagnostico:a11y     # sólo axe-core
++npm run diagnostico:capturas # capturas móvil/escritorio, claro/oscuro
++```
++
++La salida (JSON y PNG) va a `.diagnostico/`, ignorada por git.
++
++## 6. Lo que se decidió NO tocar
++
++- **`/ai.txt` y `/mapa-consultas.json` sin enlace entrante.** Es correcto: son
++  superficies para agentes, declaradas en `robots.txt` y `llms.txt`, no
++  secciones de navegación.
++- **`/productos` pesa 1,9 MB** (201 imágenes, 200 con carga diferida). Está
++  dentro de lo razonable y bajarlo exige recortar el catálogo visible: es una
++  decisión de producto, no un defecto.
++- **Enlaces de texto en prosa por debajo de 44 px.** WCAG 2.5.8 los exime
++  explícitamente, y axe-core no los reporta.
+diff --git a/package-lock.json b/package-lock.json
+index cc98333..6100c07 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -37,6 +37,7 @@
+         "@types/react": "^19",
+         "@types/react-dom": "^19",
+         "autoprefixer": "^10.4.20",
++        "axe-core": "^4.13.0",
+         "eslint": "^9",
+         "eslint-config-next": "15.3.3",
+         "jsdom": "^25.0.1",
+@@ -3601,10 +3602,11 @@
+       }
+     },
+     "node_modules/axe-core": {
+-      "version": "4.12.1",
+-      "resolved": "https://registry.npmjs.org/axe-core/-/axe-core-4.12.1.tgz",
+-      "integrity": "sha512-s7iGf5GaVMxEG0ENN9x+xTr7GFZCb1ZP/1uATUpCEK2X78nDB3RwbtFCo9pGAf9ru+VwoQ464DkaLEeRM08wJA==",
++      "version": "4.13.0",
++      "resolved": "https://registry.npmjs.org/axe-core/-/axe-core-4.13.0.tgz",
++      "integrity": "sha512-UzGt8zg7Ny8djbYMhxl2zuEevVa7r2gJjYY5Lwr1xM7+XU2nd6CkIWFTVcCIbAP63vSz71NaVyyuSk9lHKcy0A==",
+       "dev": true,
++      "license": "MPL-2.0",
+       "engines": {
+         "node": ">=4"
+       }
+@@ -11473,9 +11475,9 @@
+       }
+     },
+     "axe-core": {
+-      "version": "4.12.1",
+-      "resolved": "https://registry.npmjs.org/axe-core/-/axe-core-4.12.1.tgz",
+-      "integrity": "sha512-s7iGf5GaVMxEG0ENN9x+xTr7GFZCb1ZP/1uATUpCEK2X78nDB3RwbtFCo9pGAf9ru+VwoQ464DkaLEeRM08wJA==",
++      "version": "4.13.0",
++      "resolved": "https://registry.npmjs.org/axe-core/-/axe-core-4.13.0.tgz",
++      "integrity": "sha512-UzGt8zg7Ny8djbYMhxl2zuEevVa7r2gJjYY5Lwr1xM7+XU2nd6CkIWFTVcCIbAP63vSz71NaVyyuSk9lHKcy0A==",
+       "dev": true
+     },
+     "axobject-query": {
+diff --git a/package.json b/package.json
+index 3c3396d..f0c6587 100644
+--- a/package.json
++++ b/package.json
+@@ -34,7 +34,12 @@
+     "auditar": "node scripts/auditar-html.mjs",
+     "auditar:json": "node scripts/auditar-html.mjs --json",
+     "typecheck": "rm -rf .next/types && tsc --noEmit",
+-    "entrega": "bash scripts/aplicar-entrega.sh"
++    "entrega": "bash scripts/aplicar-entrega.sh",
++    "diagnostico": "node scripts/diagnostico/01-maquetacion.mjs && node scripts/diagnostico/02-interaccion.mjs && node scripts/diagnostico/03-arquitectura.mjs && node scripts/diagnostico/04-accesibilidad.mjs && node scripts/diagnostico/07-solapamiento.mjs",
++    "diagnostico:a11y": "node scripts/diagnostico/04-accesibilidad.mjs",
++    "diagnostico:maqueta": "node scripts/diagnostico/01-maquetacion.mjs",
++    "diagnostico:enlaces": "node scripts/diagnostico/03-arquitectura.mjs",
++    "diagnostico:capturas": "node scripts/diagnostico/05-capturas.mjs"
+   },
+   "dependencies": {
+     "@ai-sdk/anthropic": "^1.2.12",
+@@ -66,6 +71,7 @@
+     "@types/react": "^19",
+     "@types/react-dom": "^19",
+     "autoprefixer": "^10.4.20",
++    "axe-core": "^4.13.0",
+     "eslint": "^9",
+     "eslint-config-next": "15.3.3",
+     "jsdom": "^25.0.1",
+diff --git a/scripts/diagnostico/01-maquetacion.mjs b/scripts/diagnostico/01-maquetacion.mjs
+new file mode 100644
+index 0000000..a52687c
+--- /dev/null
++++ b/scripts/diagnostico/01-maquetacion.mjs
+@@ -0,0 +1,176 @@
++/**
++ * DIAGNÓSTICO 1 — MAQUETACIÓN REAL EN NAVEGADOR.
++ *
++ * Lo que busca, en orden de gravedad para un comprador con el teléfono:
++ *  1. DESBORDE HORIZONTAL: la página se mueve de lado. Es el defecto móvil
++ *     que más daña la conversión y el que ninguna prueba de unidad detecta.
++ *  2. ELEMENTOS QUE SE SALEN del viewport, con el selector culpable.
++ *  3. ÁREAS TÁCTILES por debajo de 44×44 px (guía de Apple/WCAG 2.5.8).
++ *  4. ERRORES DE CONSOLA y peticiones fallidas (imágenes rotas incluidas).
++ *  5. JERARQUÍA DE ENCABEZADOS: un solo H1, sin saltos de nivel.
++ *  6. TABLAS ANCHAS que no viven dentro de un contenedor con scroll propio.
++ */
++import { chromium } from 'playwright';
++import { writeFileSync } from 'node:fs';
++import { BASE, REPRESENTATIVAS, VIEWPORTS, LANZAR } from './rutas.mjs';
++
++const HALLAZGOS = [];
++const push = (o) => HALLAZGOS.push(o);
++
++const AUDITORIA = () => {
++  const docEl = document.documentElement;
++  const vw = docEl.clientWidth;
++
++  const visible = (el) => {
++    const r = el.getBoundingClientRect();
++    if (r.width === 0 || r.height === 0) return false;
++    const cs = getComputedStyle(el);
++    return cs.visibility !== 'hidden' && cs.display !== 'none' && cs.opacity !== '0';
++  };
++  const sel = (el) => {
++    const id = el.id ? `#${el.id}` : '';
++    const cls = (el.className && typeof el.className === 'string')
++      ? '.' + el.className.trim().split(/\s+/).slice(0, 3).join('.')
++      : '';
++    return `${el.tagName.toLowerCase()}${id}${cls}`.slice(0, 120);
++  };
++
++  // 1 + 2. Desborde
++  const desbordeDoc = docEl.scrollWidth - vw;
++  const culpables = [];
++  if (desbordeDoc > 1) {
++    for (const el of document.querySelectorAll('body *')) {
++      if (!visible(el)) continue;
++      const r = el.getBoundingClientRect();
++      // Sólo el elemento MÁS EXTERNO que se sale: si el padre ya se sale, el
++      // hijo es consecuencia y no causa.
++      if (r.right > vw + 1 || r.left < -1) {
++        const p = el.parentElement;
++        if (p && p !== document.body) {
++          const pr = p.getBoundingClientRect();
++          if (pr.right > vw + 1 || pr.left < -1) continue;
++        }
++        culpables.push({
++          sel: sel(el),
++          right: Math.round(r.right),
++          left: Math.round(r.left),
++          width: Math.round(r.width),
++          texto: (el.textContent || '').trim().slice(0, 60),
++        });
++      }
++      if (culpables.length >= 8) break;
++    }
++  }
++
++  // 3. Áreas táctiles
++  const chicos = [];
++  const interactivos = document.querySelectorAll('a[href], button, [role="button"], input, select, summary, [role="tab"]');
++  for (const el of interactivos) {
++    if (!visible(el)) continue;
++    const r = el.getBoundingClientRect();
++    if (r.height < 44 || r.width < 24) {
++      // Un enlace dentro de un párrafo no es un botón: se excluye el texto en
++      // línea, que WCAG 2.5.8 exempta explícitamente.
++      const enLinea = el.tagName === 'A' && getComputedStyle(el).display === 'inline';
++      if (enLinea) continue;
++      chicos.push({
++        sel: sel(el),
++        w: Math.round(r.width),
++        h: Math.round(r.height),
++        texto: (el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 40),
++      });
++    }
++    if (chicos.length >= 25) break;
++  }
++
++  // 5. Encabezados
++  const hs = [...document.querySelectorAll('h1,h2,h3,h4,h5,h6')]
++    .filter(visible)
++    .map((h) => ({ n: Number(h.tagName[1]), t: (h.textContent || '').trim().slice(0, 60) }));
++  const saltos = [];
++  for (let i = 1; i < hs.length; i++) {
++    if (hs[i].n - hs[i - 1].n > 1) saltos.push(`h${hs[i - 1].n} → h${hs[i].n} («${hs[i].t}»)`);
++  }
++
++  // 6. Tablas sin contenedor con scroll
++  const tablasAtrapadas = [];
++  for (const t of document.querySelectorAll('table')) {
++    if (!visible(t)) continue;
++    let p = t.parentElement, conScroll = false;
++    for (let i = 0; i < 4 && p; i++, p = p.parentElement) {
++      const ox = getComputedStyle(p).overflowX;
++      if (ox === 'auto' || ox === 'scroll') { conScroll = true; break; }
++    }
++    if (!conScroll && t.getBoundingClientRect().width > vw) {
++      tablasAtrapadas.push(sel(t));
++    }
++  }
++
++  // Barras fijas que tapan el final del contenido
++  const fijos = [...document.querySelectorAll('body *')].filter((el) => {
++    const cs = getComputedStyle(el);
++    return (cs.position === 'fixed' || cs.position === 'sticky') && visible(el);
++  }).map((el) => ({ sel: sel(el), pos: getComputedStyle(el).position, z: getComputedStyle(el).zIndex, h: Math.round(el.getBoundingClientRect().height) }));
++
++  return {
++    vw,
++    scrollWidth: docEl.scrollWidth,
++    desbordeDoc,
++    culpables,
++    chicos,
++    h1: hs.filter((h) => h.n === 1).length,
++    saltos,
++    tablasAtrapadas,
++    fijos: fijos.slice(0, 10),
++    imgsSinAlt: [...document.querySelectorAll('img:not([alt])')].length,
++  };
++};
++
++const navegador = await chromium.launch(LANZAR);
++
++for (const vp of VIEWPORTS) {
++  const ctx = await navegador.newContext({
++    viewport: { width: vp.width, height: vp.height },
++    deviceScaleFactor: vp.dpr,
++    isMobile: vp.movil,
++    hasTouch: vp.movil,
++    userAgent: vp.movil
++      ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
++      : undefined,
++  });
++
++  for (const ruta of REPRESENTATIVAS) {
++    const page = await ctx.newPage();
++    // Nada de red externa: el contenedor no sale a internet y cada intento
++    // (autocompletado de Chrome, GA) cuesta segundos de espera. Se corta.
++    // OJO: abortar peticiones deja el evento `load` pendiente en Chromium, así
++    // que abajo se espera `domcontentloaded` + una pausa, NO `load`. Con
++    // `load` esta misma página tardaba 439 ms sin bloqueo y agotaba 25 s con
++    // él: un falso positivo del arné, no un defecto del sitio.
++    await page.route('**/*', (r) =>
++      r.request().url().startsWith(BASE) ? r.continue() : r.abort());
++    const consola = [];
++    const fallidas = [];
++    page.on('console', (m) => { if (m.type() === 'error') consola.push(m.text().slice(0, 200)); });
++    page.on('pageerror', (e) => consola.push('PAGEERROR: ' + String(e).slice(0, 200)));
++    page.on('response', (r) => { if (r.status() >= 400) fallidas.push(`${r.status()} ${r.url().replace(BASE, '')}`); });
++
++    let estado = 0;
++    try {
++      const resp = await page.goto(BASE + ruta, { waitUntil: 'domcontentloaded', timeout: 25000 });
++      estado = resp ? resp.status() : 0;
++      await page.waitForTimeout(1200);
++      const r = await page.evaluate(AUDITORIA);
++      push({ ruta, vp: vp.nombre, estado, ...r, consola, fallidas: [...new Set(fallidas)] });
++    } catch (e) {
++      push({ ruta, vp: vp.nombre, estado, error: String(e).slice(0, 200) });
++    }
++    await page.close();
++  }
++  await ctx.close();
++  console.error(`  ✓ ${vp.nombre} (${vp.width}px)`);
++}
++
++await navegador.close();
++writeFileSync('.diagnostico/01-maquetacion.json', JSON.stringify(HALLAZGOS, null, 1));
++console.error('escrito .diagnostico/01-maquetacion.json — ' + HALLAZGOS.length + ' mediciones');
+diff --git a/scripts/diagnostico/02-interaccion.mjs b/scripts/diagnostico/02-interaccion.mjs
+new file mode 100644
+index 0000000..f61f582
+--- /dev/null
++++ b/scripts/diagnostico/02-interaccion.mjs
+@@ -0,0 +1,244 @@
++/**
++ * DIAGNÓSTICO 2 — ¿FUNCIONA LO QUE SE TOCA?
++ *
++ * No mira el HTML: abre el navegador, toca el control y comprueba que el
++ * estado del DOM cambió. Un botón que renderiza y no hace nada pasa todas las
++ * pruebas de este repositorio menos ésta.
++ */
++import { chromium } from 'playwright';
++import { writeFileSync } from 'node:fs';
++import { BASE, LANZAR } from './rutas.mjs';
++
++const R = [];
++const ok = (nombre, pasa, detalle = '') => {
++  R.push({ nombre, pasa, detalle });
++  console.error(`  ${pasa ? '✓' : '✗'} ${nombre}${detalle ? ' — ' + detalle : ''}`);
++};
++
++const nav = await chromium.launch(LANZAR);
++
++/* ─────────────── MÓVIL 390×844 ─────────────── */
++const movil = await nav.newContext({
++  viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 3,
++  userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
++});
++let p = await movil.newPage();
++await p.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
++await p.waitForTimeout(600);
++
++// 1. Menú móvil
++try {
++  const antes = await p.locator('nav a:visible, [role="dialog"] a:visible').count();
++  await p.getByRole('button', { name: /abrir menú/i }).click();
++  await p.waitForTimeout(450);
++  const despues = await p.locator('a:visible').count();
++  const cierra = await p.getByRole('button', { name: /cerrar menú|abrir menú/i }).count();
++  ok('menú móvil abre y muestra enlaces', despues > antes, `${antes} → ${despues} enlaces visibles`);
++  ok('menú móvil ofrece cierre', cierra > 0);
++  await p.keyboard.press('Escape');
++  await p.waitForTimeout(350);
++} catch (e) { ok('menú móvil abre y muestra enlaces', false, String(e).slice(0, 120)); }
++
++// 2. Buscador / paleta de comandos
++try {
++  await p.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
++  await p.waitForTimeout(500);
++  await p.getByRole('button', { name: /buscar productos/i }).click();
++  await p.waitForTimeout(500);
++  const campo = p.locator('input[type="text"]:visible, input[type="search"]:visible, [role="combobox"]:visible').first();
++  const abrio = await campo.count() > 0;
++  ok('buscador abre un campo enfocable', abrio);
++  if (abrio) {
++    await campo.fill('big bag');
++    await p.waitForTimeout(700);
++    const res = await p.locator('[role="option"]:visible, [role="listbox"] a:visible, li a:visible').count();
++    ok('buscador devuelve resultados para «big bag»', res > 0, `${res} resultados`);
++  }
++  await p.keyboard.press('Escape');
++} catch (e) { ok('buscador abre un campo enfocable', false, String(e).slice(0, 120)); }
++
++// 3. Barra móvil de contacto: existe y NO tapa el CTA final
++try {
++  await p.goto(BASE + '/big-bags', { waitUntil: 'domcontentloaded' });
++  await p.waitForTimeout(600);
++  await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
++  await p.waitForTimeout(700);
++  const r = await p.evaluate(() => {
++    const fijos = [...document.querySelectorAll('body *')].filter((el) => {
++      const cs = getComputedStyle(el);
++      const rect = el.getBoundingClientRect();
++      return cs.position === 'fixed' && rect.height > 30 && rect.width > 200 &&
++             rect.bottom > innerHeight - 5 && cs.visibility !== 'hidden' && cs.display !== 'none';
++    });
++    if (!fijos.length) return { barra: false };
++    const barra = fijos[0].getBoundingClientRect();
++    // ¿Qué hay justo debajo de la barra? Si es un enlace/botón, está tapado.
++    const bajo = document.elementFromPoint(innerWidth / 2, barra.top + barra.height / 2);
++    const cta = [...document.querySelectorAll('a,button')].filter((el) => {
++      const q = el.getBoundingClientRect();
++      return q.height > 20 && q.top < barra.bottom && q.bottom > barra.top;
++    }).filter((el) => !fijos[0].contains(el));
++    const padBody = getComputedStyle(document.body).paddingBottom;
++    return {
++      barra: true, alto: Math.round(barra.height), padBody,
++      tapa: cta.map((e) => (e.textContent || '').trim().slice(0, 40)).slice(0, 4),
++      debajo: bajo ? bajo.tagName : null,
++    };
++  });
++  ok('barra móvil de contacto presente', r.barra === true, r.barra ? `alto ${r.alto}px, padding-bottom del body: ${r.padBody}` : '');
++  ok('la barra fija no tapa ningún CTA al final de la página', !r.tapa || r.tapa.length === 0,
++     r.tapa && r.tapa.length ? 'tapa: ' + r.tapa.join(' | ') : '');
++} catch (e) { ok('barra móvil de contacto presente', false, String(e).slice(0, 120)); }
++
++// 4. Tema oscuro
++try {
++  await p.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
++  await p.waitForTimeout(500);
++  const antes = await p.evaluate(() => document.documentElement.classList.contains('dark'));
++  await p.getByRole('button', { name: /modo oscuro|modo claro/i }).first().click();
++  await p.waitForTimeout(400);
++  const despues = await p.evaluate(() => document.documentElement.classList.contains('dark'));
++  ok('el conmutador de tema cambia el modo', antes !== despues, `${antes} → ${despues}`);
++  const persiste = await p.evaluate(() => { try { return localStorage.getItem('theme'); } catch { return null; } });
++  ok('el tema queda guardado', persiste !== null, `localStorage.theme = ${persiste}`);
++  if (despues) { await p.getByRole('button', { name: /modo claro|modo oscuro/i }).first().click(); }
++} catch (e) { ok('el conmutador de tema cambia el modo', false, String(e).slice(0, 120)); }
++
++await p.close();
++
++/* ─────────────── ESCRITORIO 1280×800 ─────────────── */
++const esc = await nav.newContext({ viewport: { width: 1280, height: 800 } });
++p = await esc.newPage();
++
++// 5. Filtros del catálogo
++try {
++  await p.goto(BASE + '/productos', { waitUntil: 'domcontentloaded' });
++  await p.waitForTimeout(1200);
++  const antes = await p.locator('a[href^="/productos/"]:visible').count();
++  const botones = p.locator('button:visible, [role="button"]:visible');
++  const n = await botones.count();
++  let clicado = '';
++  for (let i = 0; i < n; i++) {
++    const t = ((await botones.nth(i).textContent()) || '').trim();
++    if (/^(Envases|Lonas|Geosint|Mallas|Ventilaci|Estructuras)/i.test(t)) { await botones.nth(i).click(); clicado = t; break; }
++  }
++  await p.waitForTimeout(800);
++  const despues = await p.locator('a[href^="/productos/"]:visible').count();
++  ok('los filtros del catálogo filtran de verdad', clicado !== '' && despues !== antes,
++     clicado ? `filtro «${clicado}»: ${antes} → ${despues} fichas` : 'no se encontró un botón de familia');
++} catch (e) { ok('los filtros del catálogo filtran de verdad', false, String(e).slice(0, 140)); }
++
++// 6. Pestañas de servicios
++try {
++  await p.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
++  await p.waitForTimeout(800);
++  // La portada tiene DOS grupos de pestañas independientes (servicios y
++  // galería de maquinaria). Se comprueba el de servicios por su tablist.
++  const lista = p.locator('[role="tablist"][aria-label="Servicios"]');
++  const tabs = lista.locator('[role="tab"]');
++  const n = await tabs.count();
++  if (n === 0) { ok('las pestañas de servicios (portada) cambian de panel', false, 'no hay tablist «Servicios»'); }
++  else {
++    const panel = p.locator('#panel-servicio');
++    const t0 = (await panel.textContent() || '').slice(0, 160);
++    await tabs.nth(Math.min(1, n - 1)).click();
++    await p.waitForTimeout(700);
++    const t1 = (await panel.textContent() || '').slice(0, 160);
++    ok('las pestañas de servicios (portada) cambian de panel', t0 !== t1, `${n} pestañas`);
++    const sel = await lista.locator('[role="tab"][aria-selected="true"]').count();
++    ok('exactamente una pestaña de servicios se declara seleccionada', sel === 1, `${sel} con aria-selected=true`);
++    // WCAG 2.2.2: el avance automático tiene que poder detenerse con el dedo.
++    // (Tocar una pestaña ya pausa el avance, así que el botón puede estar en
++    // cualquiera de sus dos estados: se busca por los dos rótulos.)
++    const pausa = p.getByRole('button', { name: /(pausar|reanudar) el avance automático/i });
++    ok('existe un control para pausar el avance automático', await pausa.count() > 0,
++       (await pausa.first().textContent() || '').trim());
++    // Navegación por teclado dentro del grupo: relativa, no absoluta.
++    const idAntes = await lista.locator('[role="tab"][aria-selected="true"]').first().getAttribute('id');
++    await lista.locator(`#${idAntes}`).focus();
++    await p.keyboard.press('ArrowRight');
++    await p.waitForTimeout(400);
++    const idDespues = await lista.locator('[role="tab"][aria-selected="true"]').first().getAttribute('id');
++    const esperado = `pestana-servicio-${(Number(idAntes.split('-').pop()) + 1) % n}`;
++    ok('las flechas mueven la pestaña activa', idDespues === esperado, `${idAntes} → ${idDespues}`);
++  }
++} catch (e) { ok('las pestañas de servicios (portada) cambian de panel', false, String(e).slice(0, 140)); }
++
++// 7. Calculadora
++try {
++  await p.goto(BASE + '/calculadoras/big-bags-por-viaje', { waitUntil: 'domcontentloaded' });
++  await p.waitForTimeout(800);
++  const nums = p.locator('input[type="number"]:visible');
++  const n = await nums.count();
++  const antes = await p.evaluate(() => document.body.innerText);
++  for (let i = 0; i < Math.min(n, 3); i++) await nums.nth(i).fill(String(7 + i * 3));
++  await p.waitForTimeout(800);
++  const despues = await p.evaluate(() => document.body.innerText);
++  ok('la calculadora recalcula al cambiar una entrada', n > 0 && antes !== despues, `${n} campos numéricos`);
++} catch (e) { ok('la calculadora recalcula al cambiar una entrada', false, String(e).slice(0, 140)); }
++
++// 8. Formulario RFQ: validación del navegador y campos obligatorios
++try {
++  await p.goto(BASE + '/cotizacion', { waitUntil: 'domcontentloaded' });
++  await p.waitForTimeout(900);
++  // El formulario lleva `noValidate` a propósito —los mensajes están en dos
++  // idiomas y los escribe react-hook-form—, así que lo obligatorio se declara
++  // con aria-required, que es lo que anuncia un lector de pantalla.
++  const req = await p.locator('[aria-required="true"]:visible').count();
++  const submit = p.locator('button[type="submit"]:visible, form button:visible').first();
++  const haySubmit = await submit.count() > 0;
++  ok('el RFQ declara sus campos obligatorios a la tecnología asistiva', req >= 5, `${req} con aria-required`);
++  ok('el RFQ tiene botón de envío visible', haySubmit);
++  if (haySubmit) {
++    await submit.click();
++    await p.waitForTimeout(900);
++    const enviado = p.url().includes('gracias') || p.url().includes('exito');
++    ok('el RFQ NO se envía vacío', !enviado, 'la validación retiene el envío');
++    // Y el error tiene que EXISTIR para quien no lo ve.
++    const alertas = await p.locator('[role="alert"]:visible').count();
++    const invalidos = await p.locator('[aria-invalid="true"]').count();
++    const descritos = await p.locator('[aria-describedby$="-error"]').count();
++    ok('los errores se anuncian (role=alert)', alertas > 0, `${alertas} alertas`);
++    ok('cada campo inválido se marca y se asocia a su mensaje', invalidos > 0 && descritos > 0,
++       `${invalidos} aria-invalid · ${descritos} aria-describedby`);
++  }
++  const labels = await p.evaluate(() => {
++    const campos = [...document.querySelectorAll('input:not([type=hidden]), select, textarea')];
++    const sin = campos.filter((c) => {
++      if (c.getAttribute('aria-label') || c.getAttribute('aria-labelledby')) return false;
++      if (c.id && document.querySelector(`label[for="${CSS.escape(c.id)}"]`)) return false;
++      return !c.closest('label');
++    });
++    return { total: campos.length, sin: sin.map((c) => c.name || c.type).slice(0, 6) };
++  });
++  ok('todos los campos del RFQ tienen etiqueta', labels.sin.length === 0, `${labels.total} campos, sin etiqueta: ${labels.sin.join(', ') || 'ninguno'}`);
++} catch (e) { ok('el RFQ declara campos obligatorios', false, String(e).slice(0, 140)); }
++
++// 9. Contenedores con scroll horizontal que de verdad hacen scroll
++try {
++  await p.goto(BASE + '/fabricar-o-importar', { waitUntil: 'domcontentloaded' });
++  await p.setViewportSize({ width: 390, height: 844 });
++  await p.waitForTimeout(700);
++  const r = await p.evaluate(() => {
++    const cajas = [...document.querySelectorAll('.overflow-x-auto')];
++    return cajas.map((c) => ({ sw: c.scrollWidth, cw: c.clientWidth, desplazable: c.scrollWidth > c.clientWidth + 2 }));
++  });
++  ok('la tabla ancha vive en un contenedor desplazable', r.length > 0 && r.every((x) => x.desplazable),
++     r.map((x) => `${x.sw}/${x.cw}px`).join(', '));
++} catch (e) { ok('la tabla ancha vive en un contenedor desplazable', false, String(e).slice(0, 140)); }
++
++// 10. Carrito y chatbot
++try {
++  await p.setViewportSize({ width: 1280, height: 800 });
++  await p.goto(BASE + '/productos/big-bags-bolsones-polipropileno', { waitUntil: 'domcontentloaded' });
++  await p.waitForTimeout(900);
++  const chat = p.locator('button[aria-label*="chat" i], button[aria-label*="asistente" i], button[aria-label*="Abrir" i]');
++  ok('la ficha ofrece una ruta a cotización', await p.locator('a[href*="cotizacion"]:visible').count() > 0);
++  ok('hay un lanzador de asistente/chat', await chat.count() > 0, `${await chat.count()} botones`);
++} catch (e) { ok('la ficha ofrece una ruta a cotización', false, String(e).slice(0, 140)); }
++
++await p.close();
++await nav.close();
++writeFileSync('.diagnostico/02-interaccion.json', JSON.stringify(R, null, 1));
++const fallos = R.filter((x) => !x.pasa).length;
++console.error(`\n${R.length - fallos}/${R.length} comprobaciones de interacción pasan`);
+diff --git a/scripts/diagnostico/03-arquitectura.mjs b/scripts/diagnostico/03-arquitectura.mjs
+new file mode 100644
+index 0000000..114563e
+--- /dev/null
++++ b/scripts/diagnostico/03-arquitectura.mjs
+@@ -0,0 +1,131 @@
++/**
++ * DIAGNÓSTICO 3 — ARQUITECTURA DE LA INFORMACIÓN.
++ *
++ * Contesta la pregunta del encargo: ¿está cada cosa donde debe, o hay
++ * ensalada? Rastrea las 230 URLs del sitemap y mide:
++ *  · enlaces internos rotos (404) y enlaces a rutas fuera del sitemap
++ *  · HUÉRFANAS: publicadas en el sitemap y sin un solo enlace entrante
++ *  · profundidad de clic desde la portada (nada comercial debería estar a >3)
++ *  · títulos y descripciones duplicados entre páginas
++ *  · consistencia de marco: ¿cada grupo de idioma sirve SU cabecera y pie?
++ */
++import { writeFileSync } from 'node:fs';
++import { BASE, todasLasRutas } from './rutas.mjs';
++
++const rutas = await todasLasRutas();
++const enSitemap = new Set(rutas);
++
++const salientes = new Map();   // ruta → Set(rutas destino)
++const entrantes = new Map();   // ruta → Set(rutas origen)
++const meta = new Map();        // ruta → {title, desc, h1, estado, header, footer}
++const rotos = [];
++const fuera = new Map();       // destino no publicado → Set(orígenes)
++
++const norm = (href) => {
++  if (!href) return null;
++  if (/^(mailto:|tel:|https?:\/\/(?!localhost:4000)|#|javascript:)/i.test(href)) return null;
++  try {
++    const u = new URL(href, BASE);
++    if (u.origin !== BASE) return null;
++    let p = u.pathname;
++    if (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1);
++    return p;
++  } catch { return null; }
++};
++
++const estados = new Map();
++async function estado(p) {
++  if (estados.has(p)) return estados.get(p);
++  const r = await fetch(BASE + p, { method: 'GET', redirect: 'manual' });
++  estados.set(p, r.status);
++  return r.status;
++}
++
++let i = 0;
++for (const ruta of rutas) {
++  i++;
++  if (i % 40 === 0) console.error(`  ${i}/${rutas.length}`);
++  const res = await fetch(BASE + ruta);
++  const html = await res.text();
++  const esHtml = (res.headers.get('content-type') || '').includes('text/html');
++
++  const title = (html.match(/<title>([^<]*)<\/title>/) || [, ''])[1].trim();
++  const desc = (html.match(/<meta name="description" content="([^"]*)"/) || [, ''])[1].trim();
++  const h1 = (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/) || [, ''])[1].replace(/<[^>]+>/g, '').trim().slice(0, 90);
++  meta.set(ruta, {
++    estado: res.status, esHtml, title, desc, h1,
++    lang: (html.match(/<html lang="([^"]+)"/) || [, ''])[1],
++    marcoEs: html.includes('Solicitar cotización') || html.includes('Productos</'),
++    marcoEn: html.includes('Sitio en español'),
++  });
++  if (!esHtml) { salientes.set(ruta, new Set()); continue; }
++
++  const dest = new Set();
++  for (const m of html.matchAll(/<a\s[^>]*href="([^"]+)"/g)) {
++    const p = norm(m[1]);
++    if (!p || p === ruta) continue;
++    dest.add(p);
++  }
++  salientes.set(ruta, dest);
++  for (const d of dest) {
++    if (!entrantes.has(d)) entrantes.set(d, new Set());
++    entrantes.get(d).add(ruta);
++    if (!enSitemap.has(d)) {
++      if (!fuera.has(d)) fuera.set(d, new Set());
++      fuera.get(d).add(ruta);
++    }
++  }
++}
++
++// Verificar los destinos que no están en el sitemap: ¿existen?
++for (const [d, origenes] of fuera) {
++  const st = await estado(d);
++  if (st >= 400) rotos.push({ destino: d, estado: st, desde: [...origenes].slice(0, 5) });
++}
++
++// Profundidad de clic desde la portada
++const prof = new Map([['/', 0]]);
++let frontera = ['/'];
++while (frontera.length) {
++  const sig = [];
++  for (const n of frontera) {
++    for (const d of salientes.get(n) || []) {
++      if (!prof.has(d)) { prof.set(d, prof.get(n) + 1); sig.push(d); }
++    }
++  }
++  frontera = sig;
++}
++
++const huerfanas = rutas.filter((r) => r !== '/' && !(entrantes.get(r) || new Set()).size);
++const profundas = rutas.filter((r) => (prof.get(r) ?? 99) > 3).map((r) => ({ r, d: prof.get(r) ?? null }));
++
++const porTitulo = new Map(), porDesc = new Map();
++for (const [r, m] of meta) {
++  if (!m.esHtml) continue;
++  if (m.title) { if (!porTitulo.has(m.title)) porTitulo.set(m.title, []); porTitulo.get(m.title).push(r); }
++  if (m.desc) { if (!porDesc.has(m.desc)) porDesc.set(m.desc, []); porDesc.get(m.desc).push(r); }
++}
++const titDup = [...porTitulo.entries()].filter(([, v]) => v.length > 1);
++const descDup = [...porDesc.entries()].filter(([, v]) => v.length > 1);
++
++const salida = {
++  rutas: rutas.length,
++  enlacesRotos: rotos,
++  destinosFueraDelSitemap: [...fuera.entries()].map(([d, o]) => ({ destino: d, estado: estados.get(d), desde: o.size })).sort((a, b) => b.desde - a.desde),
++  huerfanas,
++  profundas,
++  titulosDuplicados: titDup.map(([t, v]) => ({ titulo: t.slice(0, 80), rutas: v })),
++  descripcionesDuplicadas: descDup.map(([d, v]) => ({ desc: d.slice(0, 80), rutas: v })),
++  idiomas: [...meta.entries()].filter(([, m]) => m.esHtml).reduce((a, [r, m]) => { (a[m.lang] = a[m.lang] || []).push(r); return a; }, {}),
++  masEnlazadas: [...entrantes.entries()].map(([r, s]) => [r, s.size]).sort((a, b) => b[1] - a[1]).slice(0, 15),
++};
++writeFileSync('.diagnostico/03-arquitectura.json', JSON.stringify(salida, null, 1));
++
++console.error('\n== RESUMEN ==');
++console.error('rutas rastreadas:', rutas.length);
++console.error('enlaces internos ROTOS:', rotos.length);
++console.error('huérfanas (sin enlace entrante):', huerfanas.length, huerfanas.slice(0, 12).join(', '));
++console.error('a más de 3 clics de la portada:', profundas.length);
++console.error('títulos duplicados:', titDup.length);
++console.error('descripciones duplicadas:', descDup.length);
++console.error('idiomas servidos:', Object.entries(salida.idiomas).map(([k, v]) => `${k}: ${v.length}`).join(' · '));
+diff --git a/scripts/diagnostico/04-accesibilidad.mjs b/scripts/diagnostico/04-accesibilidad.mjs
+new file mode 100644
+index 0000000..a03b8a7
+--- /dev/null
++++ b/scripts/diagnostico/04-accesibilidad.mjs
+@@ -0,0 +1,82 @@
++/**
++ * DIAGNÓSTICO 4 — ACCESIBILIDAD REAL (axe-core), móvil y escritorio, claro y
++ * oscuro. Se ejecuta en el navegador contra el DOM ya hidratado: detecta lo
++ * que ninguna prueba de este repositorio puede ver — contraste insuficiente,
++ * roles mal puestos, orden de foco, nombres accesibles ausentes.
++ */
++import { chromium } from 'playwright';
++import { readFileSync, writeFileSync } from 'node:fs';
++import { BASE, LANZAR } from './rutas.mjs';
++
++const axe = readFileSync('node_modules/axe-core/axe.min.js', 'utf8');
++
++const RUTAS = [
++  '/', '/productos', '/productos/big-bags-bolsones-polipropileno', '/big-bags',
++  '/fabricar-o-importar', '/cotizacion', '/contacto', '/indicadores',
++  '/industria/mineria', '/calculadoras/big-bags-por-viaje', '/confianza',
++  '/en', '/en/fibc-big-bags-peru', '/en/rfq', '/glosario', '/servicios',
++];
++const MODOS = [
++  { nombre: 'movil-claro', w: 390, h: 844, movil: true, oscuro: false },
++  { nombre: 'movil-oscuro', w: 390, h: 844, movil: true, oscuro: true },
++  { nombre: 'escritorio-claro', w: 1440, h: 900, movil: false, oscuro: false },
++  { nombre: 'escritorio-oscuro', w: 1440, h: 900, movil: false, oscuro: true },
++];
++
++const nav = await chromium.launch(LANZAR);
++const todo = [];
++
++for (const m of MODOS) {
++  const ctx = await nav.newContext({
++    viewport: { width: m.w, height: m.h }, isMobile: m.movil, hasTouch: m.movil,
++    colorScheme: m.oscuro ? 'dark' : 'light',
++  });
++  await ctx.addInitScript(`try{localStorage.setItem('theme','${m.oscuro ? 'dark' : 'light'}')}catch(e){}`);
++  for (const ruta of RUTAS) {
++    const p = await ctx.newPage();
++    try {
++      await p.goto(BASE + ruta, { waitUntil: 'domcontentloaded', timeout: 30000 });
++      await p.waitForTimeout(900);
++      await p.addScriptTag({ content: axe });
++      const r = await p.evaluate(async () =>
++        await window.axe.run(document, {
++          resultTypes: ['violations'],
++          runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] },
++        }),
++      );
++      for (const v of r.violations) {
++        todo.push({
++          modo: m.nombre, ruta, id: v.id, impacto: v.impact, ayuda: v.help,
++          n: v.nodes.length,
++          ejemplo: (v.nodes[0]?.target || []).join(' '),
++          resumen: (v.nodes[0]?.failureSummary || '').replace(/\s+/g, ' ').slice(0, 200),
++        });
++      }
++    } catch (e) {
++      todo.push({ modo: m.nombre, ruta, id: 'ERROR', resumen: String(e).slice(0, 160) });
++    }
++    await p.close();
++  }
++  await ctx.close();
++  console.error(`  ✓ ${m.nombre}`);
++}
++await nav.close();
++writeFileSync('.diagnostico/04-accesibilidad.json', JSON.stringify(todo, null, 1));
++
++const porRegla = {};
++for (const v of todo) {
++  const k = `${v.id}|${v.impacto}|${v.ayuda}`;
++  porRegla[k] = porRegla[k] || { rutas: new Set(), modos: new Set(), n: 0, ej: v.ejemplo, res: v.resumen };
++  porRegla[k].rutas.add(v.ruta); porRegla[k].modos.add(v.modo); porRegla[k].n += v.n || 1;
++}
++const orden = { critical: 0, serious: 1, moderate: 2, minor: 3, undefined: 4 };
++console.error('\n== VIOLACIONES agrupadas por regla ==');
++for (const [k, v] of Object.entries(porRegla).sort((a, b) => (orden[a[0].split('|')[1]] ?? 9) - (orden[b[0].split('|')[1]] ?? 9))) {
++  const [id, imp, ayuda] = k.split('|');
++  console.error(`\n[${(imp || '?').toUpperCase()}] ${id} — ${ayuda}`);
++  console.error(`   nodos: ${v.n} · rutas: ${v.rutas.size} (${[...v.rutas].slice(0, 5).join(', ')})`);
++  console.error(`   modos: ${[...v.modos].join(', ')}`);
++  console.error(`   ej: ${v.ej}`);
++  if (v.res) console.error(`   ${v.res.slice(0, 160)}`);
++}
++console.error(`\ntotal de hallazgos: ${todo.length}`);
+diff --git a/scripts/diagnostico/05-capturas.mjs b/scripts/diagnostico/05-capturas.mjs
+new file mode 100644
+index 0000000..5b66c5a
+--- /dev/null
++++ b/scripts/diagnostico/05-capturas.mjs
+@@ -0,0 +1,35 @@
++/** Capturas para MIRAR la maqueta, no sólo medirla. Móvil y escritorio, claro y oscuro. */
++import { chromium } from 'playwright';
++import { mkdirSync } from 'node:fs';
++import { BASE, LANZAR } from './rutas.mjs';
++mkdirSync('.diagnostico/capturas', { recursive: true });
++
++const RUTAS = process.argv[2] ? [process.argv[2]] : [
++  '/', '/productos', '/big-bags', '/fabricar-o-importar',
++  '/calculadoras/big-bags-por-viaje', '/cotizacion', '/en/fibc-big-bags-peru', '/indicadores',
++];
++const MODOS = [
++  { n: 'movil-claro', w: 390, h: 900, m: true, osc: false },
++  { n: 'movil-oscuro', w: 390, h: 900, m: true, osc: true },
++  { n: 'escritorio-claro', w: 1440, h: 950, m: false, osc: false },
++  { n: 'escritorio-oscuro', w: 1440, h: 950, m: false, osc: true },
++];
++const nav = await chromium.launch(LANZAR);
++for (const mo of MODOS) {
++  const ctx = await nav.newContext({
++    viewport: { width: mo.w, height: mo.h }, isMobile: mo.m, hasTouch: mo.m,
++    deviceScaleFactor: 1, colorScheme: mo.osc ? 'dark' : 'light',
++  });
++  await ctx.addInitScript(`try{localStorage.setItem('theme','${mo.osc ? 'dark' : 'light'}')}catch(e){}`);
++  for (const r of RUTAS) {
++    const p = await ctx.newPage();
++    await p.goto(BASE + r, { waitUntil: 'domcontentloaded' });
++    await p.waitForTimeout(1400);
++    const nombre = (r === '/' ? 'home' : r.replace(/\//g, '_').replace(/^_/, ''));
++    await p.screenshot({ path: `.diagnostico/capturas/${nombre}__${mo.n}.png`, fullPage: false });
++    await p.close();
++  }
++  await ctx.close();
++  console.error('  ✓ ' + mo.n);
++}
++await nav.close();
+diff --git a/scripts/diagnostico/06-zona.mjs b/scripts/diagnostico/06-zona.mjs
+new file mode 100644
+index 0000000..34d77d9
+--- /dev/null
++++ b/scripts/diagnostico/06-zona.mjs
+@@ -0,0 +1,13 @@
++import { chromium } from 'playwright';
++import { BASE, LANZAR } from './rutas.mjs';
++const [ruta, sel, nombre, oscuro] = process.argv.slice(2);
++const nav = await chromium.launch(LANZAR);
++const ctx = await nav.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, colorScheme: oscuro==='1'?'dark':'light' });
++await ctx.addInitScript(`try{localStorage.setItem('theme','${oscuro==='1'?'dark':'light'}')}catch(e){}`);
++const p = await ctx.newPage();
++await p.goto(BASE + ruta, { waitUntil: 'domcontentloaded' });
++await p.waitForTimeout(1500);
++const el = p.locator(sel).first();
++await el.scrollIntoViewIfNeeded(); await p.waitForTimeout(500);
++await el.screenshot({ path: `.diagnostico/${nombre}.png` });
++await nav.close(); console.error('ok');
+diff --git a/scripts/diagnostico/07-solapamiento.mjs b/scripts/diagnostico/07-solapamiento.mjs
+new file mode 100644
+index 0000000..9570990
+--- /dev/null
++++ b/scripts/diagnostico/07-solapamiento.mjs
+@@ -0,0 +1,65 @@
++/**
++ * DIAGNÓSTICO 7 — ¿QUÉ TAPAN LOS ELEMENTOS FLOTANTES EN EL TELÉFONO?
++ * La barra inferior de contacto y el lanzador del asistente viven encima del
++ * contenido. Se comprueba, al pie de cada página, qué control queda debajo.
++ */
++import { chromium } from 'playwright';
++import { writeFileSync } from 'node:fs';
++import { BASE, LANZAR } from './rutas.mjs';
++
++const RUTAS = ['/', '/productos', '/productos/big-bags-bolsones-polipropileno', '/big-bags',
++  '/fabricar-o-importar', '/cotizacion', '/calculadoras/big-bags-por-viaje', '/contacto',
++  '/indicadores', '/marco/evaluacion', '/configurador', '/carrito', '/en/rfq'];
++
++const nav = await chromium.launch(LANZAR);
++const ctx = await nav.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
++  userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' });
++const out = [];
++for (const ruta of RUTAS) {
++  const p = await ctx.newPage();
++  await p.goto(BASE + ruta, { waitUntil: 'domcontentloaded' });
++  await p.waitForTimeout(1200);
++  // Al fondo del documento: es donde la barra fija muerde el contenido.
++  await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
++  await p.waitForTimeout(900);
++  const r = await p.evaluate(() => {
++    const vis = (el) => { const c = getComputedStyle(el), q = el.getBoundingClientRect();
++      return c.visibility !== 'hidden' && c.display !== 'none' && q.width > 0 && q.height > 0; };
++    const flotantes = [...document.querySelectorAll('body *')].filter((el) =>
++      getComputedStyle(el).position === 'fixed' && vis(el) && el.getBoundingClientRect().height > 24);
++    const interactivos = [...document.querySelectorAll('a[href], button, input, select, textarea')].filter(vis);
++    const tapados = [];
++    for (const f of flotantes) {
++      const fr = f.getBoundingClientRect();
++      if (fr.top > innerHeight || fr.bottom < 0) continue;
++      for (const el of interactivos) {
++        if (f.contains(el) || el.contains(f)) continue;
++        const r2 = el.getBoundingClientRect();
++        if (r2.bottom < 0 || r2.top > innerHeight) continue;
++        const solape = Math.max(0, Math.min(fr.bottom, r2.bottom) - Math.max(fr.top, r2.top)) *
++                       Math.max(0, Math.min(fr.right, r2.right) - Math.max(fr.left, r2.left));
++        if (solape > r2.width * r2.height * 0.25) {
++          // ¿Está el elemento realmente por debajo? elementFromPoint decide.
++          const cx = r2.left + r2.width / 2, cy = r2.top + r2.height / 2;
++          const arriba = document.elementFromPoint(cx, cy);
++          if (arriba && !el.contains(arriba) && arriba !== el && (f.contains(arriba) || arriba === f)) {
++            tapados.push({
++              flotante: (f.className || '').toString().slice(0, 50),
++              tapado: (el.textContent || el.getAttribute('aria-label') || el.tagName).trim().slice(0, 50),
++              tag: el.tagName.toLowerCase(),
++            });
++          }
++        }
++      }
++    }
++    const padBody = getComputedStyle(document.body).paddingBottom;
++    return { tapados: tapados.slice(0, 6), padBody, nFlotantes: flotantes.length };
++  });
++  out.push({ ruta, ...r });
++  if (r.tapados.length) console.error(`  ✗ ${ruta} — ${r.tapados.map((t) => `«${t.tapado}» (${t.tag}) bajo .${t.flotante.split(' ')[0]}`).join(' | ')}`);
++  else console.error(`  ✓ ${ruta}`);
++  await p.close();
++}
++await nav.close();
++writeFileSync('.diagnostico/07-solapamiento.json', JSON.stringify(out, null, 1));
++console.error('padding-bottom del body: ' + [...new Set(out.map((o) => o.padBody))].join(', '));
+diff --git a/scripts/diagnostico/rutas.mjs b/scripts/diagnostico/rutas.mjs
+new file mode 100644
+index 0000000..c5c23f3
+--- /dev/null
++++ b/scripts/diagnostico/rutas.mjs
+@@ -0,0 +1,91 @@
++/**
++ * ARNÉS DE DIAGNÓSTICO DE NAVEGADOR.
++ *
++ * Por qué existe, además de las 747 pruebas de vitest: esas pruebas leen
++ * archivos y llaman funciones. NO abren un navegador, así que no pueden ver
++ * un desborde horizontal en un teléfono, un botón sin nombre accesible, un
++ * contraste de 1.16:1 en modo oscuro, un enlace interno roto ni una barra
++ * flotante tapando los avisos legales. Todo eso existía y ninguna prueba
++ * fallaba. Este arné mide la página RENDERIZADA, que es la que ve el
++ * comprador.
++ *
++ * Uso: levantar el sitio compilado en el puerto 4000 y `npm run diagnostico`.
++ *   npm run build && npx next start -p 4000 &
++ *   npm run diagnostico
++ *
++ * La salida (JSON y capturas) va a .diagnostico/, que está ignorado.
++ */
++const BASE = process.env.DIAG_BASE || 'http://localhost:4000';
++
++export async function todasLasRutas() {
++  const indice = await (await fetch(`${BASE}/sitemap.xml`)).text();
++  const hijos = [...indice.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
++  const rutas = new Set();
++  for (const h of hijos) {
++    const path = new URL(h).pathname;
++    const xml = await (await fetch(`${BASE}${path}`)).text();
++    for (const m of xml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
++      rutas.add(new URL(m[1]).pathname);
++    }
++  }
++  return [...rutas].sort();
++}
++
++/** Una ruta por PLANTILLA: el conjunto que recibe la auditoría completa. */
++export const REPRESENTATIVAS = [
++  '/',                                        // portada
++  '/productos',                               // catálogo con filtros
++  '/productos/big-bags-bolsones-polipropileno', // ficha
++  '/productos/familia/envases-embalaje',      // familia
++  '/productos/familia/envases-embalaje/comparar', // tabla ancha
++  '/big-bags',                                // cuña ES
++  '/lonas-camiones',
++  '/ventilacion-minera',
++  '/fabricar-o-importar',                     // tabla de 13 filas × 4 col
++  '/cotizacion',                              // formulario RFQ
++  '/contacto',
++  '/industria/mineria',
++  '/local/lima',
++  '/biblioteca/especificacion-fibc',
++  '/calculadoras/big-bags-por-viaje',         // interactiva
++  '/indicadores',                             // datos en vivo
++  '/glosario',
++  '/glosario/big-bag-fibc',
++  '/informes/formacion-de-precio-y-volatilidad-textiles-industriales',
++  '/novedades',
++  '/recursos/instalacion-geomembranas-hdpe-pozas-canales',
++  '/aplicaciones/toldos-camion',
++  '/soluciones/frente-avance-ventilado',
++  '/confianza',
++  '/compras',
++  '/exportacion',
++  '/marco/evaluacion',                        // formulario largo
++  '/configurador',                            // interactivo
++  '/descargas',
++  '/carrito',
++  '/servicios',
++  '/nosotros',
++  '/en',                                      // grupo inglés
++  '/en/sourcing-from-peru',
++  '/en/fibc-big-bags-peru',
++  '/en/manufacture-in-peru-or-import',
++  '/en/rfq',
++  '/pt',
++  '/no-existe-esta-pagina-404',               // 404
++];
++
++export const VIEWPORTS = [
++  { nombre: 'iphone-se',   width: 375, height: 667, movil: true,  dpr: 2 },
++  { nombre: 'iphone-14',   width: 390, height: 844, movil: true,  dpr: 3 },
++  { nombre: 'android',     width: 360, height: 800, movil: true,  dpr: 3 },
++  { nombre: 'tablet',      width: 768, height: 1024, movil: true, dpr: 2 },
++  { nombre: 'laptop',      width: 1280, height: 800, movil: false, dpr: 1 },
++  { nombre: 'desktop',     width: 1440, height: 900, movil: false, dpr: 1 },
++];
++
++export { BASE };
++
++/** El Chromium preinstalado del contenedor; la versión fijada de playwright
++ *  espera otra revisión y descargarla no es posible aquí. */
++export const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
++export const LANZAR = { executablePath: CHROME, args: ['--no-sandbox', '--disable-dev-shm-usage'] };
+diff --git a/test/regresiones-ui.test.ts b/test/regresiones-ui.test.ts
+new file mode 100644
+index 0000000..379f2d8
+--- /dev/null
++++ b/test/regresiones-ui.test.ts
+@@ -0,0 +1,206 @@
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++/**
++ * REGRESIONES DE INTERFAZ — lo que encontró la auditoría de navegador y no
++ * puede volver a colarse.
++ *
++ * POR QUÉ ESTE ARCHIVO EXISTE. Las otras 747 pruebas leen archivos y llaman
++ * funciones: ninguna abre un navegador. Por eso convivieron durante trece
++ * etapas, con el repositorio en verde, un enlace del catálogo que llevaba a un
++ * 404, un formulario cuyos errores no existían para un lector de pantalla, una
++ * calculadora ilegible en modo oscuro y una barra flotante que tapaba los
++ * avisos legales en once páginas.
++ *
++ * El arné que los encontró vive en scripts/diagnostico/ y necesita el sitio
++ * levantado, así que no puede correr en `npm test`. Lo que SÍ puede correr
++ * aquí es el invariante de código que cada arreglo dejó. Eso es lo que hay
++ * debajo: una aserción por defecto real, con el defecto escrito al lado para
++ * que quien la rompa sepa qué está deshaciendo.
++ */
++
++const raiz = process.cwd();
++const leer = (p: string) => readFileSync(join(raiz, p), 'utf8');
++
++describe('enlaces que existen', () => {
++  it('el botón «Comparar» de una familia usa el mismo predicado que genera la ruta', () => {
++    // DEFECTO: /productos/familia/seguridad-industrial pintaba «Comparar las 4»
++    // y esa ruta no existe — `comparableFamilies()` exige además al menos una
++    // fila comparable. Cuatro fichas, ninguna especificación compartida, 404.
++    const src = leer('app/(es)/productos/familia/[slug]/page.tsx');
++    expect(src).toContain('comparableFamilies');
++    expect(src).toContain('const comparable = comparableFamilies()');
++    expect(src).toContain('{comparable && (');
++    expect(src, 'volvió el predicado suelto').not.toContain('{items.length >= 2 && (');
++  });
++});
++
++describe('lo que flota no tapa lo que se toca', () => {
++  it('la barra móvil de contacto reserva su propio alto al final del documento', () => {
++    // DEFECTO: `position: fixed` no ocupa sitio. Al fondo de la página la barra
++    // se comía «Política de Privacidad» y «Términos y Condiciones» en 11 de 13
++    // rutas medidas. Son avisos legales: tienen que ser alcanzables.
++    const src = leer('components/BarraMovilContacto.tsx');
++    expect(src).toContain('aria-hidden="true"');
++    expect(src).toContain('env(safe-area-inset-bottom)');
++    expect(src, 'el espaciador desapareció').toMatch(/height: 'calc\(48px \+ env\(safe-area-inset-bottom\)\)'/);
++  });
++
++  it('los avisos legales no se alinean bajo el botón flotante del asistente', () => {
++    // El lanzador del chat vive en `fixed bottom-20 right-6` (64×64). Con la
++    // fila legal centrada, «Términos y Condiciones» caía justo debajo.
++    expect(leer('components/Footer.tsx')).toContain('items-start md:items-center');
++  });
++});
++
++describe('los controles tienen nombre', () => {
++  it('el catálogo etiqueta su ordenador y sus dos vistas', () => {
++    // DEFECTO: un <select> sin label/aria-label/name y dos botones de icono sin
++    // texto. Para un lector de pantalla, tres controles anónimos en la página
++    // de catálogo.
++    const src = leer('components/CatalogoFiltrado.tsx');
++    expect(src).toContain('htmlFor="orden-catalogo"');
++    expect(src).toContain('id="orden-catalogo"');
++    expect(src).toContain('aria-label="Ver en cuadrícula"');
++    expect(src).toContain('aria-label="Ver en lista"');
++    expect(src).toContain('aria-label="Forma de ver el catálogo"');
++  });
++
++  it('la cabecera es un landmark de banner con nombre', () => {
++    // DEFECTO: la raíz de Navbar era un <div>, así que la barra utilitaria
++    // superior quedaba fuera de toda región y no había atajo a la cabecera.
++    const src = leer('components/Navbar.tsx');
++    expect(src).toContain('<header');
++    expect(src).toContain('aria-label="Navegación principal"');
++  });
++});
++
++describe('las pestañas de la portada son pestañas', () => {
++  it('declaran tablist/tab/tabpanel y no un interruptor', () => {
++    // DEFECTO: se declaraban con `aria-pressed`, que se anuncia como
++    // «pulsado / no pulsado», no como «pestaña 2 de 4». En el MISMO
++    // repositorio, MachineryGallery ya lo hacía bien.
++    const src = leer('components/ServiceTabs.tsx');
++    expect(src).toContain('role="tablist"');
++    expect(src).toContain('role="tab"');
++    expect(src).toContain('role="tabpanel"');
++    expect(src).toContain('aria-selected={on}');
++    expect(src).toContain('aria-controls="panel-servicio"');
++    expect(src).toContain('tabIndex={on ? 0 : -1}');
++  });
++
++  it('el avance automático se puede detener con el dedo (WCAG 2.2.2)', () => {
++    // DEFECTO: rotaba cada 5 s y la única pausa era `hover`, que en un
++    // teléfono no existe: el contenido cambiaba mientras alguien lo leía.
++    const src = leer('components/ServiceTabs.tsx');
++    expect(src).toContain('const [pausado, setPausado] = useState(false)');
++    expect(src).toContain('if (hover || pausado) return;');
++    expect(src).toContain('Pausar el avance automático');
++  });
++});
++
++describe('el formulario que trae el dinero se puede usar sin ver', () => {
++  it('cada campo declara si es obligatorio y si está inválido', () => {
++    // DEFECTO: `noValidate` + react-hook-form pintaba el error como un <p>
++    // rojo y nada más. Sin aria-invalid, sin aria-describedby y sin
++    // role="alert": quien usa lector de pantalla pulsaba «Enviar» y no oía
++    // absolutamente nada.
++    const src = leer('components/CotizacionForm.tsx');
++    expect(src).toContain("const aria = (nombre: string, obligatorio = false)");
++    expect(src).toContain("'aria-invalid'");
++    expect(src).toContain("'aria-describedby'");
++    expect(src).toContain("'aria-required'");
++    expect(src).toContain('role="alert"');
++    // Los seis obligatorios reales del RFQ.
++    for (const c of ['nombre', 'empresa', 'email', 'telefono', 'ciudadEntrega', 'mensaje']) {
++      expect(src, `${c} dejó de declararse obligatorio`).toContain(`aria('${c}', true)`);
++    }
++  });
++
++  it('cada mensaje de error tiene el id al que apunta su campo', () => {
++    const src = leer('components/CotizacionForm.tsx');
++    for (const c of ['nombre', 'empresa', 'email', 'telefono', 'ciudadEntrega', 'mensaje']) {
++      expect(src, `falta el id del error de ${c}`).toContain(`id="${c}-error"`);
++    }
++  });
++});
++
++describe('modo oscuro: lo que se lee, se lee', () => {
++  const css = leer('app/globals.css');
++
++  it('los controles de formulario siguen al tema', () => {
++    // DEFECTO: la capa oscura remapeaba la TINTA de `.text-gray-900` pero no
++    // el FONDO de `input.bg-white` (los inputs no estaban en la lista de
++    // elementos). Resultado: fondo blanco + tinta clara = 1.16:1, texto
++    // invisible, en las cinco calculadoras y en el ordenador del catálogo.
++    expect(css).toContain('.dark main :is(input, select, textarea).bg-white');
++    expect(css).toContain('.dark main :is(input, textarea)::placeholder');
++  });
++
++  it('los tintes con modificador de opacidad también se remapean', () => {
++    // DEFECTO: la capa selecciona `.bg-emerald-50`; Tailwind genera OTRA clase
++    // cuando se le pone opacidad —`bg-emerald-50/60`— y el verde translúcido
++    // se mezclaba con la superficie oscura hasta dar un gris sucio con tinta
++    // clara encima (3.1:1). Afectaba a los bloques «Qué no afirmamos», que son
++    // los que más se leen.
++    expect(css).toContain('[class*="bg-emerald-50/"]');
++    expect(css).toContain('[class*="bg-amber-50/"]');
++    expect(css).toContain('[class*="bg-gray-50/"]');
++    // Y NO al botón blanco del CTA: `hover:bg-white/90` casaba con
++    // [class*="bg-white/"] y lo pintaba oscuro con tinta #0A2540 → 1.09:1.
++    expect(css, 'volvió la regla que rompía el CTA blanco').not.toContain('[class*="bg-white/"]');
++  });
++
++  it('el bloque de respuesta directa tiene tratamiento propio', () => {
++    expect(css).toContain('.dark .respuesta-directa');
++  });
++
++  it('el verde de acción se aclara también fuera de <main>', () => {
++    // La cabecera, el pie y la barra móvil viven sobre --surface-nav, donde
++    // #047857 da 2.56:1. Incluye el botón «WhatsApp» de la barra inferior.
++    expect(css).toContain('.dark :is(header, footer, nav) :is(.text-\\[\\#047857\\], .text-\\[\\#059669\\])');
++  });
++});
++
++describe('las tablas anchas se recorren con el teclado', () => {
++  it('cada contenedor con scroll horizontal es enfocable y tiene nombre', () => {
++    // WCAG 2.1.1: sin tabIndex, quien no usa ratón ni dedo no llega a las
++    // columnas de la derecha.
++    for (const f of [
++      'components/CunaHub.tsx',
++      'components/CunaHubEn.tsx',
++      'components/FabricarOImportar.tsx',
++      'app/(es)/productos/[slug]/page.tsx',
++      'app/(es)/productos/familia/[slug]/comparar/page.tsx',
++      'app/(en)/en/sourcing-from-peru/page.tsx',
++    ]) {
++      const src = leer(f);
++      expect(src, `${f}: contenedor con scroll sin tabIndex`).toMatch(
++        /overflow-x-auto[^"]*"\s+tabIndex=\{0\}\s+role="region"/,
++      );
++    }
++  });
++});
++
++describe('el arné de diagnóstico sigue en su sitio', () => {
++  it('los cinco diagnósticos y su índice de rutas existen', () => {
++    for (const f of [
++      'scripts/diagnostico/rutas.mjs',
++      'scripts/diagnostico/01-maquetacion.mjs',
++      'scripts/diagnostico/02-interaccion.mjs',
++      'scripts/diagnostico/03-arquitectura.mjs',
++      'scripts/diagnostico/04-accesibilidad.mjs',
++      'scripts/diagnostico/07-solapamiento.mjs',
++    ]) {
++      expect(() => leer(f), f).not.toThrow();
++    }
++  });
++
++  it('se puede lanzar con un comando y su salida está ignorada', () => {
++    const pkg = JSON.parse(leer('package.json'));
++    expect(pkg.scripts.diagnostico).toContain('scripts/diagnostico/');
++    expect(pkg.devDependencies['axe-core'], 'axe-core es la fuente del veredicto').toBeTruthy();
++    expect(leer('.gitignore')).toContain('/.diagnostico/');
++  });
++});
+-- 
+2.43.0
+
