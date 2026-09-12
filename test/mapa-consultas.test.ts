@@ -51,6 +51,20 @@ function rutaExiste(ruta: string): boolean {
   if (existsSync(join(raiz, 'app', ...partes, 'page.tsx'))) return true;
   if (existsSync(join(raiz, 'app', '(es)', ...partes, 'page.tsx'))) return true;
 
+  /**
+   * GRUPOS DE IDIOMA. `/en/fibc-big-bags-peru` vive en
+   * app/(en)/en/fibc-big-bags-peru/page.tsx y `/pt` en app/(pt)/pt/page.tsx:
+   * el grupo entre paréntesis no aparece en la URL, igual que (es).
+   *
+   * Hasta la etapa B2 el mapa era sólo español, así que esta rama no existía y
+   * un clúster con canónica en inglés se habría leído como «ruta inventada».
+   * Las cuñas en inglés (etapas 11–13) y la puerta en portugués existen desde
+   * antes; lo que faltaba era que el mapa de consultas pudiera apuntarlas.
+   */
+  for (const grupo of ['(en)', '(pt)']) {
+    if (existsSync(join(raiz, 'app', grupo, ...partes, 'page.tsx'))) return true;
+  }
+
   // Plantilla dinámica: /productos/foo → app/(es)/productos/[slug]/page.tsx, y el
   // slug tiene que existir además en su fuente de verdad.
   const dinamicas: Record<string, { plantilla: string; slugs: string[] }> = {

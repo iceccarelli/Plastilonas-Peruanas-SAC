@@ -3,11 +3,13 @@ import {
   clusters,
   terminosDe,
   intenciones,
+  idiomaDe,
   TOPIC_MAP_VERSION,
   TOPIC_MAP_REVISADO,
   TOTAL_TERMINOS,
   TOTAL_PREGUNTAS,
 } from '@/lib/search/topic-map';
+import { CONSULTAS_DINERO, consultasDeCluster } from '@/lib/consultas-dinero';
 
 /**
  * /mapa-consultas.json — la tabla de decisión del sitio, legible por máquina.
@@ -47,6 +49,7 @@ export async function GET(): Promise<Response> {
       clusters: clusters.length,
       terminos: TOTAL_TERMINOS,
       preguntas: TOTAL_PREGUNTAS,
+      consultasConRespuesta: CONSULTAS_DINERO.length,
     },
     intenciones,
     nota:
@@ -54,15 +57,34 @@ export async function GET(): Promise<Response> {
       'las páginas de apoyo la refuerzan y enlazan hacia ella, nunca compiten con ella. ' +
       'Ningún término de este archivo autoriza a esperar una página propia: todos apuntan ' +
       'a páginas que ya existen y que ya tienen contenido verificado.',
-    clusters: clusters.map((c) => ({
-      id: c.id,
-      intencion: c.intencion,
-      termino: c.termino,
-      terminos: terminosDe(c),
-      canonica: `${base}${c.canonica}`,
-      preguntas: c.preguntas,
-      apoyos: c.apoyos.map((a) => `${base}${a}`),
-    })),
+    clusters: clusters.map((c) => {
+      /**
+       * `consultas` sólo aparece donde hay una respuesta escrita. No se
+       * rellena con una plantilla para que ningún clúster quede «vacío»: un
+       * párrafo generado para cubrir el hueco es exactamente la ficción que
+       * este archivo existe para evitar. Cada respuesta trae su límite pegado,
+       * porque un motor que cite la una sin el otro convierte una oferta en una
+       * promesa que esta empresa no hizo.
+       */
+      const consultas = consultasDeCluster(c.id).map((q) => ({
+        consulta: q.consulta,
+        idioma: q.idioma,
+        respuesta: q.respuesta,
+        limite: q.limite,
+        siguiente: `${base}${q.siguiente}`,
+      }));
+      return {
+        id: c.id,
+        intencion: c.intencion,
+        idioma: idiomaDe(c),
+        termino: c.termino,
+        terminos: terminosDe(c),
+        canonica: `${base}${c.canonica}`,
+        preguntas: c.preguntas,
+        apoyos: c.apoyos.map((a) => `${base}${a}`),
+        ...(consultas.length ? { consultas } : {}),
+      };
+    }),
   };
 
   return new Response(`${JSON.stringify(cuerpo, null, 2)}\n`, {

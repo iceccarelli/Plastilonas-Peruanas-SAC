@@ -184,11 +184,45 @@ describe('/llms.txt anuncia el mapa de consultas antes que el catálogo', () => 
   it('el bloque del mapa no se come el archivo', async () => {
     const cuerpo = await texto(await llms());
     const i = cuerpo.indexOf('## Mapa de consultas comerciales');
-    const j = cuerpo.indexOf('## Catálogo (');
+    const j = cuerpo.indexOf('## Consultas de dinero');
+    const k = cuerpo.indexOf('## Catálogo (');
     const kbMapa = Buffer.byteLength(cuerpo.slice(i, j), 'utf8') / 1024;
+    const kbDinero = Buffer.byteLength(cuerpo.slice(j, k), 'utf8') / 1024;
     const kbTotal = Buffer.byteLength(cuerpo, 'utf8') / 1024;
     expect(kbMapa, `el bloque del mapa pesa ${kbMapa.toFixed(0)} KB: mueva el detalle a /mapa-consultas.json`).toBeLessThan(20);
-    expect(kbTotal, `llms.txt pesa ${kbTotal.toFixed(0)} KB y varios agentes lo truncarían`).toBeLessThan(90);
+    expect(
+      kbDinero,
+      `las respuestas citables pesan ${kbDinero.toFixed(0)} KB: son 22 párrafos de 40–80 palabras con su límite, y ése es su techo`,
+    ).toBeLessThan(20);
+    expect(kbTotal, `llms.txt pesa ${kbTotal.toFixed(0)} KB y varios agentes lo truncarían`).toBeLessThan(100);
+  });
+
+  /**
+   * EL TECHO PASÓ DE 90 A 100 KB, Y ÉSTA ES LA RAZÓN ESCRITA.
+   *
+   * El presupuesto no existe para que el archivo sea pequeño: existe para que
+   * lo PRIMERO que lea un agente que trunca sea lo que decide una compra. La
+   * etapa B2 añadió 14 KB de respuestas citables —las 22 consultas que
+   * preceden a una orden, cada una con su límite—, que es exactamente el
+   * contenido que el presupuesto quería proteger, no el que quería excluir.
+   *
+   * Así que el techo sube y en su lugar se fija lo que de verdad importaba:
+   * que el mapa y las respuestas estén DENTRO de los primeros 40 KB, antes del
+   * catálogo. Si mañana alguien añade 20 KB de prosa por delante, esta prueba
+   * falla aunque el total siga bajo el techo — que es el fallo que el número
+   * redondo nunca habría cazado.
+   */
+  it('el mapa y las respuestas caben en los primeros 40 KB', async () => {
+    const cuerpo = await texto(await llms());
+    const hasta = (marca: string) =>
+      Buffer.byteLength(cuerpo.slice(0, cuerpo.indexOf(marca)), 'utf8') / 1024;
+    for (const marca of ['## Mapa de consultas comerciales', '## Consultas de dinero']) {
+      expect(cuerpo.indexOf(marca), `llms.txt dejó de publicar «${marca}»`).toBeGreaterThan(-1);
+      expect(
+        hasta(marca),
+        `«${marca}» empieza en el KB ${hasta(marca).toFixed(0)}: un cliente que trunque no lo verá`,
+      ).toBeLessThan(40);
+    }
   });
 
   it('anuncia las dos superficies nuevas para máquinas', async () => {

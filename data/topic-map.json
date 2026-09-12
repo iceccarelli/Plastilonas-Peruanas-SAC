@@ -1,7 +1,7 @@
 {
   "$schema": "./topic-map.schema.md",
   "version": "1.0.0",
-  "revisado": "2026-08-27",
+  "revisado": "2026-09-12",
   "nota": "MAPA DE CONSULTAS → PÁGINA CANÓNICA. Una consulta comercial tiene UNA página que la contesta; el resto la refuerza y enlaza hacia ella. Este archivo existe para impedir la canibalización: si dos páginas compiten por el mismo término, el buscador elige por su cuenta y suele elegir mal. Ningún término de aquí autoriza a crear una página nueva: todos apuntan a páginas que YA existen y que ya tienen contenido propio. test/mapa-consultas.test.ts hace fallar el build si un término se repite en dos clústeres, si una canónica se repite, o si una ruta no existe.",
   "intenciones": {
     "comercial": "compra directa de un producto o familia",
@@ -10,7 +10,8 @@
     "calculo": "necesita un número antes de cotizar",
     "transaccional": "quiere cotizar ahora",
     "entidad": "busca a la empresa por su nombre",
-    "local": "pregunta por cobertura geográfica"
+    "local": "pregunta por cobertura geográfica",
+    "corredor": "comprador fuera del Perú que evalúa un embarque"
   },
   "clusters": [
     {
@@ -777,14 +778,16 @@
         "malla agrícola",
         "coberturas agrícolas",
         "mallas para agricultura",
-        "protección de cultivos"
+        "protección de cultivos",
+        "malla raschel antiáfida anti-granizo"
       ],
       "erratas": [],
       "preguntas": [
         "¿qué mallas existen para proteger cultivos en el Perú?",
         "¿qué malla elijo: raschel, antiáfida o anti-granizo?",
         "¿Quién fabrica mallas agrícolas en el Perú?",
-        "¿Cómo cotizo mallas agrícolas para un proyecto industrial?"
+        "¿Cómo cotizo mallas agrícolas para un proyecto industrial?",
+        "¿Necesita sombra, exclusión de insectos o protección contra granizo?"
       ],
       "apoyos": [
         "/productos/malla-raschel-sombra",
@@ -924,7 +927,8 @@
         "geomembrana pvc",
         "membrana de pvc",
         "revestimiento pvc para poza",
-        "lámina pvc impermeable"
+        "lámina pvc impermeable",
+        "geomembrana PVC para poza o canal"
       ],
       "erratas": [
         "geomembrana pvc peru",
@@ -934,7 +938,8 @@
         "¿cuándo se usa geomembrana de PVC en vez de HDPE?",
         "¿qué espesor de geomembrana de PVC se especifica?",
         "¿Quién fabrica geomembrana de PVC en el Perú?",
-        "¿Cómo cotizo geomembrana de PVC para un proyecto industrial?"
+        "¿Cómo cotizo geomembrana de PVC para un proyecto industrial?",
+        "¿Su expediente pide PVC o HDPE, y por qué?"
       ],
       "apoyos": [
         "/biblioteca/seleccion-geomembrana",
@@ -957,7 +962,8 @@
         "geomembrana 1.0 mm",
         "geomembrana 2.0 mm",
         "soldadura de geomembrana",
-        "cuña caliente"
+        "cuña caliente",
+        "expediente que pide geomembrana HDPE"
       ],
       "erratas": [
         "geomembrana hdpe peru",
@@ -972,7 +978,8 @@
         "¿Qué espesor de geomembrana HDPE necesito para una poza de relaves?",
         "¿Quién instala geomembrana en obra en el Perú?",
         "¿Quién fabrica geomembrana HDPE en el Perú?",
-        "¿Cómo cotizo geomembrana HDPE para un proyecto industrial?"
+        "¿Cómo cotizo geomembrana HDPE para un proyecto industrial?",
+        "¿Qué hace esta empresa cuando el expediente pide HDPE?"
       ],
       "apoyos": [
         "/glosario/hdpe",
@@ -1747,14 +1754,18 @@
         "elegir big bag",
         "datos para cotizar big bags",
         "ficha técnica de big bag",
-        "cómo pedir bolsones"
+        "cómo pedir bolsones",
+        "big bags para el Callao ISO 21898",
+        "ISO 21898 como exigencia del comprador"
       ],
       "erratas": [
-        "especificacion fibc"
+        "especificacion fibc",
+        "iso 21898 big bags"
       ],
       "preguntas": [
         "¿qué datos necesito para pedir una cotización de big bags?",
-        "¿cómo se define la carga de trabajo segura de un bolsón?"
+        "¿cómo se define la carga de trabajo segura de un bolsón?",
+        "¿Su comprador o el terminal del Callao exige ISO 21898 para el bolsón?"
       ],
       "apoyos": [
         "/productos/big-bags-bolsones-polipropileno",
@@ -1952,7 +1963,8 @@
         "fábrica de lonas en lima",
         "empresa de textiles industriales perú",
         "fabricante peruano de geosintéticos",
-        "planta en chorrillos"
+        "planta en chorrillos",
+        "fabricante de geomembranas y textil industrial en Chorrillos"
       ],
       "erratas": [
         "plastilonas peru sac",
@@ -1961,7 +1973,8 @@
       "preguntas": [
         "¿quién es Plastilonas Peruanas SAC?",
         "¿desde cuándo fabrica Plastilonas en el Perú?",
-        "¿dónde queda la planta de Plastilonas?"
+        "¿dónde queda la planta de Plastilonas?",
+        "¿Qué líneas se confeccionan en la planta y cuáles se importan?"
       ],
       "apoyos": [
         "/servicios",
@@ -2231,7 +2244,8 @@
         "homologar proveedor peruano",
         "exw fca fob peru",
         "comprar textil industrial sudamerica",
-        "como importar desde peru"
+        "como importar desde peru",
+        "lonas para camión Ecuador"
       ],
       "erratas": [
         "incoterm peru",
@@ -2240,7 +2254,8 @@
       "preguntas": [
         "¿cómo verifico a un proveedor peruano sin viajar al Perú?",
         "¿qué Incoterm conviene para importar textil industrial desde el Perú?",
-        "¿qué documento es imprescindible pedir antes del embarque?"
+        "¿qué documento es imprescindible pedir antes del embarque?",
+        "¿Entregan en Ecuador, y por vía marítima o terrestre?"
       ],
       "apoyos": [
         "/exportacion",
@@ -2286,14 +2301,16 @@
         "ventilación de túneles",
         "ventilación subterránea",
         "proveedores de ventilación minera",
-        "fabricante de mangas de ventilación en perú"
+        "fabricante de mangas de ventilación en perú",
+        "mangas de ventilación minera Perú"
       ],
       "erratas": [
         "ventilacion minera peru"
       ],
       "preguntas": [
         "¿quién fabrica mangas de ventilación minera en el Perú?",
-        "¿qué datos necesito para cotizar ventilación de un túnel?"
+        "¿qué datos necesito para cotizar ventilación de un túnel?",
+        "¿Qué diámetro, tramos y presión de ventilador hay que indicar para cotizar?"
       ],
       "apoyos": [
         "/productos/mangas-ventilacion-minas-tuneles",
@@ -2313,7 +2330,8 @@
         "confección de lonas para camiones",
         "lonas para flota de camiones",
         "instalación de toldos para camión",
-        "siders y cobertores a medida"
+        "siders y cobertores a medida",
+        "lonas y toldos para camión Perú"
       ],
       "erratas": [
         "lonas para camiones peru",
@@ -2321,7 +2339,8 @@
       ],
       "preguntas": [
         "¿quién fabrica e instala toldos para camiones en Lima?",
-        "¿qué medidas necesito para cotizar la lona de un camión?"
+        "¿qué medidas necesito para cotizar la lona de un camión?",
+        "¿Instalan el toldo en Lima o solo entregan la lona confeccionada?"
       ],
       "apoyos": [
         "/productos/mantas-cobertores-toldos-camiones",
@@ -2341,19 +2360,279 @@
         "big bags de 1 y 2 toneladas",
         "big bags cortados y cosidos en lima",
         "big bags factor de seguridad 5:1",
-        "big bags factor de seguridad 6:1"
+        "big bags factor de seguridad 6:1",
+        "big bags FIBC a medida Perú",
+        "big bags para embarque por el Callao"
       ],
       "erratas": [
         "big bags a medida peru"
       ],
       "preguntas": [
         "¿quién confecciona big bags en Lima?",
-        "¿qué necesito indicar para cotizar un lote de big bags?"
+        "¿qué necesito indicar para cotizar un lote de big bags?",
+        "¿Qué factor de seguridad pide su expediente, 5:1 o 6:1?"
       ],
       "apoyos": [
         "/productos/big-bags-bolsones-polipropileno",
         "/biblioteca/especificacion-fibc",
         "/calculadoras/big-bags-por-viaje"
+      ]
+    },
+    {
+      "id": "corredor-exportacion",
+      "canonica": "/exportacion",
+      "intencion": "corredor",
+      "idioma": "es",
+      "termino": "exportación de textil industrial desde el Perú",
+      "variantes": [
+        "EXW Lima",
+        "FCA Lima",
+        "FOB Callao",
+        "EXW Lima FOB Callao textil industrial",
+        "lonas para camión Chile",
+        "big bags para Bolivia",
+        "embarque de textil industrial desde el Callao",
+        "comprar a un fabricante peruano"
+      ],
+      "erratas": [
+        "exportacion textil industrial peru",
+        "fob callao textil",
+        "exw lima textil"
+      ],
+      "preguntas": [
+        "¿Bajo qué Incoterm sale la carga desde Lima o el Callao?",
+        "¿Qué documentos debe enviar mi empresa para que coticen un embarque?",
+        "¿Entregan en Chile, Ecuador o Bolivia?"
+      ],
+      "apoyos": [
+        "/recursos/comprar-textil-industrial-peru-sudamerica-incoterms-homologacion",
+        "/compradores",
+        "/confianza",
+        "/fabricar-o-importar"
+      ]
+    },
+    {
+      "id": "decision-fabricar-importar",
+      "canonica": "/fabricar-o-importar",
+      "intencion": "decision",
+      "idioma": "es",
+      "termino": "fabricar en Perú o importar",
+      "variantes": [
+        "conviene importar o fabricar en Lima",
+        "costo total de importar textil industrial",
+        "plazo de importación frente a fabricación local",
+        "riesgo de importar una medida equivocada"
+      ],
+      "erratas": [
+        "fabricar o importar peru",
+        "importar o fabricar lonas"
+      ],
+      "preguntas": [
+        "¿Me conviene fabricar en Lima o importar?",
+        "¿Qué costos aparecen al importar que no están en el precio de origen?"
+      ],
+      "apoyos": [
+        "/exportacion",
+        "/compras",
+        "/recursos/ecosistema-plastico-industrial-peru-quien-fabrica-quien-compra",
+        "/marco"
+      ]
+    },
+    {
+      "id": "en-puerta",
+      "canonica": "/en",
+      "intencion": "entidad",
+      "idioma": "en",
+      "termino": "Peruvian manufacturer of industrial textiles",
+      "variantes": [
+        "industrial textile manufacturer Peru",
+        "Peru industrial fabric supplier",
+        "Lima textile fabrication plant"
+      ],
+      "erratas": [
+        "peruvian industrial textiles manufacturer"
+      ],
+      "preguntas": [
+        "Who manufactures industrial textiles in Peru?",
+        "Where is the plant and what is the tax ID?"
+      ],
+      "apoyos": [
+        "/en/sourcing-from-peru",
+        "/en/rfq",
+        "/confianza"
+      ]
+    },
+    {
+      "id": "en-fibc",
+      "canonica": "/en/fibc-big-bags-peru",
+      "intencion": "corredor",
+      "idioma": "en",
+      "termino": "FIBC big bags manufactured in Peru",
+      "variantes": [
+        "buy FIBC from Peru",
+        "Peruvian big bag manufacturer",
+        "bulk bags made in Peru",
+        "one tonne FIBC supplier Peru"
+      ],
+      "erratas": [
+        "fibc peru manufacturer",
+        "big bags peru supplier"
+      ],
+      "preguntas": [
+        "Who manufactures FIBC big bags in Peru?",
+        "Can you ship FIBCs FOB Callao?"
+      ],
+      "apoyos": [
+        "/en/rfq",
+        "/en/sourcing-from-peru",
+        "/productos/big-bags-bolsones-polipropileno"
+      ]
+    },
+    {
+      "id": "en-tarps",
+      "canonica": "/en/truck-tarpaulins-peru",
+      "intencion": "corredor",
+      "idioma": "en",
+      "termino": "truck tarpaulins from Peru",
+      "variantes": [
+        "truck tarpaulin manufacturer Peru",
+        "made to measure truck covers Peru",
+        "sider curtains Peru"
+      ],
+      "erratas": [
+        "truck tarpaulins peru"
+      ],
+      "preguntas": [
+        "Who makes made-to-measure truck tarpaulins in Peru?",
+        "What measurements do you need to quote a tarpaulin?"
+      ],
+      "apoyos": [
+        "/en/rfq",
+        "/en/sourcing-from-peru",
+        "/productos/mantas-cobertores-toldos-camiones"
+      ]
+    },
+    {
+      "id": "en-ducting",
+      "canonica": "/en/mine-ventilation-ducting-peru",
+      "intencion": "corredor",
+      "idioma": "en",
+      "termino": "mine ventilation ducting Peru",
+      "variantes": [
+        "ventilation duct manufacturer Peru",
+        "flexible mine ducting supplier",
+        "tunnel ventilation ducting Peru"
+      ],
+      "erratas": [
+        "mine ventilation duct peru"
+      ],
+      "preguntas": [
+        "Who manufactures mine ventilation ducting in Peru?",
+        "What diameter and airflow do you need to quote ducting?"
+      ],
+      "apoyos": [
+        "/en/rfq",
+        "/en/sourcing-from-peru",
+        "/productos/mangas-ventilacion-minas-tuneles"
+      ]
+    },
+    {
+      "id": "en-sourcing",
+      "canonica": "/en/sourcing-from-peru",
+      "intencion": "corredor",
+      "idioma": "en",
+      "termino": "sourcing industrial textiles from Peru",
+      "variantes": [
+        "industrial textile sourcing Peru",
+        "vetting a Peruvian supplier",
+        "homologate a Peruvian manufacturer"
+      ],
+      "erratas": [
+        "sourcing from peru textiles"
+      ],
+      "preguntas": [
+        "How do I vet a Peruvian supplier without travelling?",
+        "Which documents should I require before shipment?"
+      ],
+      "apoyos": [
+        "/en/rfq",
+        "/confianza",
+        "/exportacion"
+      ]
+    },
+    {
+      "id": "en-rfq",
+      "canonica": "/en/rfq",
+      "intencion": "transaccional",
+      "idioma": "en",
+      "termino": "RFQ from an overseas buyer",
+      "variantes": [
+        "request a quote from Peru",
+        "send an RFQ to a Peruvian manufacturer",
+        "quotation request industrial textiles Peru"
+      ],
+      "erratas": [
+        "rfq peru textiles"
+      ],
+      "preguntas": [
+        "How do I send an RFQ from abroad?",
+        "What information makes a quotation possible on the first reply?"
+      ],
+      "apoyos": [
+        "/en/sourcing-from-peru",
+        "/compradores",
+        "/marco"
+      ]
+    },
+    {
+      "id": "en-fabricar-importar",
+      "canonica": "/en/manufacture-in-peru-or-import",
+      "intencion": "decision",
+      "idioma": "en",
+      "termino": "manufacture in Peru or import",
+      "variantes": [
+        "buy local or import industrial textiles",
+        "total landed cost of imported fabric",
+        "lead time local fabrication versus import"
+      ],
+      "erratas": [
+        "manufacture in peru or import textiles"
+      ],
+      "preguntas": [
+        "Should I manufacture in Peru or import?",
+        "Which costs appear beyond the price at origin?"
+      ],
+      "apoyos": [
+        "/en/sourcing-from-peru",
+        "/fabricar-o-importar",
+        "/compras"
+      ]
+    },
+    {
+      "id": "pt-porta",
+      "canonica": "/pt",
+      "intencion": "corredor",
+      "idioma": "pt",
+      "termino": "fabricante peruano de têxteis industriais",
+      "variantes": [
+        "big bags sob medida no Peru",
+        "lona para caminhão",
+        "dutos de ventilação para mineração",
+        "exportação EXW Lima FOB Callao para o Brasil",
+        "fornecedor peruano de geomembranas"
+      ],
+      "erratas": [
+        "fabricante peruano texteis industriais",
+        "big bags sob medida peru"
+      ],
+      "preguntas": [
+        "Quem fabrica têxteis industriais no Peru?",
+        "Vocês exportam para o Brasil e sob qual Incoterm?"
+      ],
+      "apoyos": [
+        "/exportacion",
+        "/confianza",
+        "/compradores"
       ]
     }
   ]

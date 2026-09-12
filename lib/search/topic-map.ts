@@ -39,7 +39,16 @@ export type Intencion =
   | 'calculo'
   | 'transaccional'
   | 'entidad'
-  | 'local';
+  | 'local'
+  /**
+   * CORREDOR — el comprador está fuera del Perú y lo que evalúa es un
+   * embarque, no una compra en plaza. Se separó de 'comercial' porque la
+   * pregunta no es «qué producto» sino «bajo qué Incoterm sale, qué documentos
+   * pide su empresa y qué NO va a afirmar este proveedor sobre su mercado».
+   * Las páginas que lo contestan son /exportacion y las cuñas en inglés y
+   * portugués, que existen desde las etapas 11 a 13.
+   */
+  | 'corredor';
 
 export interface Cluster {
   /** Identificador estable. No aparece en ninguna URL. */
@@ -47,6 +56,15 @@ export interface Cluster {
   /** La única página que contesta este clúster. */
   canonica: string;
   intencion: Intencion;
+  /**
+   * Idioma de la consulta, no del sitio. El catálogo está en español y no se
+   * traduce; las cuñas en inglés y la puerta en portugués contestan consultas
+   * escritas en esos idiomas. Sin este campo, un agente que lee el mapa no
+   * puede saber que «truck tarpaulins from Peru» y «lonas para camión» son dos
+   * consultas distintas con dos páginas distintas, y no una traducción.
+   * Ausente equivale a 'es'.
+   */
+  idioma?: 'es' | 'en' | 'pt';
   /** El término tal y como se escribiría en una búsqueda. */
   termino: string;
   /** Variantes reales: plural, orden invertido, sinónimo del rubro, forma local. */
@@ -225,6 +243,10 @@ export function rielPara(ruta: string, limite = 6): Cluster[] {
 
   const orden: Record<Intencion, number> = {
     comercial: 0, sector: 1, decision: 2, calculo: 3, transaccional: 4, local: 5, entidad: 6,
+    // Un corredor de exportación va al final del riel de una página en
+    // español: es la salida menos frecuente desde una ficha local, y la más
+    // valiosa cuando corresponde.
+    corredor: 7,
   };
 
   const ordenados = [...puntuados.values()]
@@ -275,4 +297,14 @@ export const TOTAL_PREGUNTAS = clusters.reduce((n, c) => n + c.preguntas.length,
 /** Clústeres por intención, en el orden en que se anuncian a un agente. */
 export function clustersPorIntencion(intencion: Intencion): Cluster[] {
   return clusters.filter((c) => c.intencion === intencion);
+}
+
+/** Idioma de la consulta que contesta un clúster. Ausente equivale a español. */
+export function idiomaDe(c: Cluster): 'es' | 'en' | 'pt' {
+  return c.idioma ?? 'es';
+}
+
+/** Clústeres cuya consulta está escrita en un idioma dado. */
+export function clustersPorIdioma(idioma: 'es' | 'en' | 'pt'): Cluster[] {
+  return clusters.filter((c) => idiomaDe(c) === idioma);
 }
