@@ -235,7 +235,7 @@ function Formulario({ calc }: { calc: NonNullable<ReturnType<typeof calculadoraP
           {/* El predimensionado viaja al formulario como nota: el comprador no
               vuelve a teclear lo que la calculadora ya escribió. */}
           <Link
-            href={`/cotizacion?nota=${encodeURIComponent(resumenParaCotizar)}`}
+            href={`/cotizacion?origen=calculadora&nota=${encodeURIComponent(resumenParaCotizar)}`}
             className="inline-flex items-center gap-2 rounded-full border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-800 hover:border-gray-400"
           >
             Enviar este predimensionado a cotización

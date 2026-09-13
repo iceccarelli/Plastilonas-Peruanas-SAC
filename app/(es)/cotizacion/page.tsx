@@ -24,7 +24,13 @@ import DatosParaCotizar from '@/components/DatosParaCotizar';
 export default async function CotizacionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ producto?: string; comparativa?: string; nota?: string }>;
+  searchParams: Promise<{
+    producto?: string;
+    comparativa?: string;
+    nota?: string;
+    notas?: string;
+    origen?: string;
+  }>;
 }) {
   const params = await searchParams;
   const productoParam = params.producto || undefined;
@@ -42,9 +48,28 @@ export default async function CotizacionPage({
     porSlug?.slug ??
     products.find((p) => p.name === productoParam)?.slug ??
     comparativa[0]?.slug;
-  // `nota` llega de las calculadoras («Enviar este predimensionado a
-  // cotización»): el resumen del cálculo prellenado en la descripción.
-  const nota = (params.nota ?? '').slice(0, 1500) || undefined;
+  /**
+   * EL DATO QUE EL COMPRADOR YA ESCRIBIÓ NO SE PIERDE EN EL ÚLTIMO PASO.
+   *
+   * `nota` llega de las calculadoras («Enviar este predimensionado a
+   * cotización»). `notas` llega del configurador de big bags, que lleva
+   * escribiéndolo así desde que existe — y esta página sólo leía `nota`, de
+   * modo que la configuración completa del FIBC (capacidad, tapa, fondo,
+   * asas, factor de seguridad) se descartaba en silencio al llegar aquí. El
+   * comprador veía un formulario vacío y tenía que repetirla, o no la repetía.
+   *
+   * Se leen las dos. Cuál de los dos nombres es el canónico importa menos que
+   * no tirar lo que alguien ya se tomó el trabajo de definir.
+   */
+  const nota = ((params.nota ?? params.notas) ?? '').slice(0, 1500) || undefined;
+
+  /**
+   * De dónde viene el visitante: 'chat', 'configurador', 'calculadora'. El
+   * asistente enlaza ?origen=chat desde hace etapas y nadie lo leía, así que
+   * no había forma de saber cuántos RFQ produce el chat. Viaja al lead y al
+   * evento de analítica, no a la pantalla.
+   */
+  const origen = (params.origen ?? '').slice(0, 40).replace(/[^a-z0-9:_-]/gi, '') || undefined;
   const preselectedMessage =
     [
       comparativa.length
@@ -84,6 +109,7 @@ export default async function CotizacionPage({
         preselectedProduct={preselectedProduct}
         slugOrigen={slugOrigen}
         preselectedMessage={preselectedMessage}
+        origen={origen}
       />
     </div>
   );

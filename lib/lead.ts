@@ -36,6 +36,12 @@ export interface LeadPayload {
   path?: string;
   /** Slug del producto de origen, si el enlace lo trajo. */
   slug?: string;
+  /**
+   * Superficie que originó la solicitud: 'chat', 'configurador',
+   * 'calculadora'. Llega por ?origen= y permite responder una pregunta que
+   * hasta ahora no tenía datos: qué parte del sitio produce RFQ.
+   */
+  origen?: string;
   /** Referencias de adjuntos: ruta en Storage o nombre del archivo. */
   archivos?: string[];
 }

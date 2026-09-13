@@ -26,7 +26,11 @@ export default function ConfiguradorPage() {
 
   function submit(e: FormEvent) {
     e.preventDefault();
-    router.push(`/cotizacion?producto=big-bags-bolsones-polipropileno&notas=${encodeURIComponent(fibcSummary(spec))}`);
+    // `origen` etiqueta el lead: hasta ahora no había forma de saber cuántas
+    // solicitudes salían del configurador.
+    router.push(
+      `/cotizacion?producto=big-bags-bolsones-polipropileno&origen=configurador&notas=${encodeURIComponent(fibcSummary(spec))}`,
+    );
   }
 
   const selectCls = 'w-full border border-gray-200 rounded-xl px-3 h-11 text-sm';

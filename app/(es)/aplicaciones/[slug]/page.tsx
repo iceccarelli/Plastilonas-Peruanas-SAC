@@ -96,7 +96,7 @@ export default async function AplicacionPage({ params }: Props) {
           imagen que mide el LCP de esta página. */}
       {foto && <ImagenContenido ranura={foto} prioridad className="mt-8" sizes="(min-width: 1024px) 900px, 100vw" />}
       <div className="mt-8 flex flex-wrap gap-3">
-        <Link href={`/cotizacion?notas=${encodeURIComponent('Aplicación: ' + app.name)}`} className="btn inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">RFQ de esta aplicación</Link>
+        <Link href={`/cotizacion?origen=aplicacion&notas=${encodeURIComponent('Aplicación: ' + app.name)}`} className="btn inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">RFQ de esta aplicación</Link>
         {/* El RFQ llega con las preguntas de alcance ya listadas: el comprador
             las completa antes de enviar y el primer mensaje ya sirve. */}
         <WhatsAppLink

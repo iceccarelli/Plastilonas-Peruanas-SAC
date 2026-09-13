@@ -181,6 +181,13 @@ interface Props {
   slugOrigen?: string;
   /** Texto inicial del mensaje (p. ej. comparativa). */
   preselectedMessage?: string;
+  /**
+   * Superficie de la que salió el visitante: 'chat', 'configurador',
+   * 'calculadora'. Se declara en el enlace (?origen=) y viaja al lead y al
+   * evento, nunca a la pantalla: sirve para saber qué parte del sitio produce
+   * solicitudes, que hasta ahora no se podía medir.
+   */
+  origen?: string;
 }
 
 function leerUtm(): Record<string, string> {
@@ -194,7 +201,14 @@ function leerUtm(): Record<string, string> {
   return out;
 }
 
-export default function CotizacionForm({ opciones, idioma = 'es', preselectedProduct, slugOrigen, preselectedMessage }: Props) {
+export default function CotizacionForm({
+  opciones,
+  idioma = 'es',
+  preselectedProduct,
+  slugOrigen,
+  preselectedMessage,
+  origen,
+}: Props) {
   const t = T[idioma];
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
@@ -257,7 +271,7 @@ export default function CotizacionForm({ opciones, idioma = 'es', preselectedPro
     if (preselectedMessage) setValue('mensaje', preselectedMessage);
   }, [preselectedMessage, setValue]);
   React.useEffect(() => {
-    trackQuoteStarted('pagina', preselectedProduct, slugOrigen);
+    trackQuoteStarted(origen ?? 'pagina', preselectedProduct, slugOrigen);
   }, [preselectedProduct, slugOrigen]);
 
   // ── Adjuntos ─────────────────────────────────────────────────────────────
@@ -374,6 +388,7 @@ export default function CotizacionForm({ opciones, idioma = 'es', preselectedPro
       ...leerUtm(),
       path: typeof window !== 'undefined' ? window.location.pathname + window.location.search : undefined,
       slug: slugOrigen,
+      origen,
       archivos: refsArchivos,
       language: idioma,
     });

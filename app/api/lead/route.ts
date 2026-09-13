@@ -36,6 +36,8 @@ const LeadSchema = z.object({
   utm_content: z.string().trim().max(120).optional(),
   path: z.string().trim().max(400).optional(),
   slug: z.string().trim().max(120).optional(),
+  /** Superficie de origen: 'chat', 'configurador', 'calculadora'. */
+  origen: z.string().trim().max(40).optional(),
   /** Referencias de adjuntos (ruta en Storage o nombre del archivo). */
   archivos: z.array(z.string().trim().max(300)).max(5).optional(),
 });
@@ -51,6 +53,12 @@ function limited(ip: string): boolean {
   }
   hit.n += 1;
   return hit.n > 12;
+}
+
+/** URL de origen del lead: la ruta que envió el formulario, no una fija. */
+function fuenteDe(lead: { path?: string; origen?: string }): string {
+  const ruta = (lead.path ?? '/cotizacion').split('?')[0];
+  return `${SITE_HOST}${ruta}${lead.origen ? ` (${lead.origen})` : ''}`;
 }
 
 function rfqId(): string {
@@ -101,7 +109,12 @@ export async function POST(req: NextRequest) {
         country: lead.deliveryCountry || lead.country || null,
         industry: lead.industry ?? null,
         status: 'NEW',
-        source: `${SITE_HOST}/cotizacion`,
+        /**
+         * La ruta REAL de la que salió el lead. Estaba fija en /cotizacion, de
+         * modo que una solicitud enviada desde /en/rfq llegaba al CRM
+         * etiquetada como si viniera del formulario en español.
+         */
+        source: fuenteDe(lead),
         payload: lead,
         message: [
           lead.application,
@@ -135,7 +148,7 @@ export async function POST(req: NextRequest) {
           ...lead,
           rfqId: id,
           persisted,
-          source: `${SITE_HOST}/cotizacion`,
+          source: fuenteDe(lead),
           receivedAt: new Date().toISOString(),
         }),
       });
