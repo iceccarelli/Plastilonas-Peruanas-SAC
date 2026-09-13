@@ -25,17 +25,20 @@ const raiz = process.cwd();
 const TARJETA = 'rounded-3xl bg-[#0A2540] p-10 text-center text-white';
 
 /**
- * Quién puede seguir pintando la tarjeta a mano, y por qué. Las tres son
- * componentes de CLIENTE: no pueden renderizar un componente de servidor, y
- * convertir CierreComercial en cliente enviaría JavaScript a las quince
- * páginas estáticas que hoy no lo necesitan. Se migran el día que su bloque
- * deje de depender de estado del navegador.
+ * Quién puede seguir pintando la tarjeta a mano, y por qué.
+ *
+ * LA LISTA ERA MÁS LARGA Y EL MOTIVO ERA FALSO. La entrega 0007 declaró aquí
+ * CunaHubEn y FabricarOImportar como «componentes de cliente» que no podían
+ * renderizar uno de servidor. No lo son: ninguno declara 'use client'. La
+ * excepción se escribió sin comprobarla, y una excepción sin comprobar es una
+ * regla que se afloja sola. Los dos están migrados.
+ *
+ * Queda una, y ésta sí lo es: /marco/evaluacion corre en el navegador porque
+ * la autoevaluación calcula y descarga el brief sin enviar nada al servidor.
  */
 const PINTAN_TARJETA: Record<string, string> = {
   'components/CierreComercial.tsx': 'es el componente',
   'app/(es)/marco/evaluacion/page.tsx': "página de cliente ('use client'): la evaluación vive en el navegador",
-  'components/CunaHubEn.tsx': 'componente de cliente',
-  'components/FabricarOImportar.tsx': 'componente de cliente',
 };
 
 /** El título de /cotizacion no es un botón: es el nombre de la página. */
@@ -152,7 +155,10 @@ describe('la tarjeta que cierra una página vive en un solo archivo', () => {
     for (const f of archivos) {
       const src = readFileSync(join(raiz, f), 'utf8');
       for (const m of src.matchAll(/<CierreComercial\b([\s\S]*?)>/g)) {
-        if (!/\bcontexto="/.test(m[1])) sinContexto.push(f);
+        // Vale el literal —contexto="recursos"— y vale la expresión
+        // —contexto={`cuna-en-final:${cuna.slug}`}—, que es como lo declaran
+        // los bloques que sirven varias páginas con la misma plantilla.
+        if (!/\bcontexto=("|\{)/.test(m[1])) sinContexto.push(f);
       }
     }
     expect(sinContexto, 'sin contexto, el clic de WhatsApp no dice de qué página salió').toEqual([]);

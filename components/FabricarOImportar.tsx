@@ -19,9 +19,9 @@ import { cunas } from '@/lib/cunas';
 import { CUNAS_EN } from '@/lib/cunas-en';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
-import WhatsAppLink from '@/components/WhatsAppLink';
+import CierreComercial from '@/components/CierreComercial';
 import CostoEnVivo from '@/components/CostoEnVivo';
-import { ACCIONES, WHATSAPP_LABEL } from '@/lib/acciones';
+import { ACCIONES } from '@/lib/acciones';
 import { faqsDeRuta } from '@/lib/consultas-dinero';
 
 /**
@@ -69,7 +69,6 @@ const T = {
     ctaH: 'Haga la comparación con números suyos',
     ctaP: `Envíe producto, medidas o cantidad, ciudad de entrega y fecha. Respondemos en horario comercial (${HORARIO.corto}) con ficha técnica, y si su caso es de los que gana la importación, se lo decimos.`,
     ctaBoton: ACCIONES.cotizar.label,
-    ctaWa: 'WhatsApp comercial',
     waMsg:
       'Hola, estoy comparando fabricar en Lima contra importar. Producto: ___. Cantidad y medidas: ___. Ciudad de entrega: ___.',
     rfq: '/cotizacion',
@@ -108,7 +107,6 @@ const T = {
     ctaH: 'Run the comparison with your own numbers',
     ctaP: `Send product, dimensions or quantity, delivery city or port, and the date you need it. We reply within business hours (${HORARIO.corto}, Lima time) with a datasheet — and if yours is one of the cases importing wins, we will say so.`,
     ctaBoton: 'Request a quotation',
-    ctaWa: WHATSAPP_LABEL.en,
     waMsg:
       'Hello, I am comparing manufacturing in Lima against importing. Product: ___. Quantity and dimensions: ___. Destination city or port: ___.',
     rfq: '/en/rfq',
@@ -309,25 +307,16 @@ export default async function FabricarOImportar({ idioma }: { idioma: 'es' | 'en
 
       <p className="mt-12 text-sm text-gray-500">{t.revisada(FABRICAR_ACTUALIZADO)}</p>
 
-      <div className="mt-14 rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">{t.ctaH}</h2>
-        <p className="mx-auto mb-7 max-w-xl text-white/80">{t.ctaP}</p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href={t.rfq}
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            {t.ctaBoton}
-          </Link>
-          <WhatsAppLink
-            context={`fabricar-o-importar:${idioma}`}
-            message={t.waMsg}
-            className="inline-flex items-center justify-center rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            {t.ctaWa}
-          </WhatsAppLink>
-        </div>
-      </div>
+      <CierreComercial
+        contexto={`fabricar-o-importar:${idioma}`}
+        idioma={en ? 'en' : 'es'}
+        titulo={t.ctaH}
+        principal={{ href: t.rfq, label: t.ctaBoton }}
+        whatsappMensaje={t.waMsg}
+        className="mt-14"
+      >
+        {t.ctaP}
+      </CierreComercial>
     </div>
   );
 }

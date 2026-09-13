@@ -43,6 +43,13 @@ interface Props {
   secundaria?: AccionCierre;
   /** Añade el botón de WhatsApp al grupo. Por defecto, sí en español. */
   whatsapp?: boolean;
+  /**
+   * Mensaje con el que abre WhatsApp, cuando la página tiene uno mejor que el
+   * genérico: las cuñas comerciales llevan el suyo, con el producto y los
+   * datos que esa línea necesita. Sin esto, migrarlas al bloque común habría
+   * cambiado un mensaje específico por uno de plantilla, que es peor.
+   */
+  whatsappMensaje?: string;
   /** Punto de salida para atribución: 'recursos', 'producto:big-bags', 'en-sourcing'. */
   contexto: string;
   idioma?: IdiomaAccion;
@@ -62,6 +69,7 @@ export default function CierreComercial({
   principal,
   secundaria,
   whatsapp = true,
+  whatsappMensaje,
   contexto,
   idioma = 'es',
   nota,
@@ -91,7 +99,7 @@ export default function CierreComercial({
         {whatsapp ? (
           <WhatsAppLink
             context={contexto}
-            message={mensajeWhatsApp(contexto, idioma)}
+            message={whatsappMensaje ?? mensajeWhatsApp(contexto, idioma)}
             className={SECUNDARIO}
           >
             {WHATSAPP_LABEL[idioma]}

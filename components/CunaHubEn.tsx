@@ -14,6 +14,7 @@ import { ACTUALIZADO } from '@/lib/sitemaps';
 import { RUTA_EN } from '@/lib/fabricar-o-importar';
 import { ACCIONES_EN, WHATSAPP_LABEL } from '@/lib/acciones';
 import { faqsDeRuta } from '@/lib/consultas-dinero';
+import CierreComercial from '@/components/CierreComercial';
 
 /**
  * PÁGINA DE CUÑA EN INGLÉS (ver lib/cunas-en.ts).
@@ -342,33 +343,24 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
       </p>
 
       {/* CTA final */}
-      <div className="mt-14 rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">Send the four data points</h2>
-        <p className="mx-auto mb-7 max-w-lg text-white/80">
-          Product, dimensions or quantity, destination city or port, and the date you need it. We
-          reply within business hours ({HORARIO.corto}, Lima time) with a datasheet, or with the
-          questions still missing.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href={rfq}
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            {ACCIONES_EN.rfq.label}
-          </Link>
-          <WhatsAppLink
-            context={`cuna-en-final:${cuna.slug}`}
-            message={cuna.whatsapp}
-            className="inline-flex items-center justify-center rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            {WHATSAPP_LABEL.en}
-          </WhatsAppLink>
-        </div>
-        <p className="mt-5 text-sm text-white/60">
-          {SITE.email} · {TELEFONOS.central.display} · {SITE.legalName} · RUC {SITE.ruc} ·
-          Chorrillos, Lima, Peru
-        </p>
-      </div>
+      <CierreComercial
+        contexto={`cuna-en-final:${cuna.slug}`}
+        idioma="en"
+        titulo="Send the four data points"
+        principal={{ href: rfq, label: ACCIONES_EN.rfq.label }}
+        whatsappMensaje={cuna.whatsapp}
+        className="mt-14"
+        nota={
+          <>
+            {SITE.email} · {TELEFONOS.central.display} · {SITE.legalName} · RUC {SITE.ruc} ·
+            Chorrillos, Lima, Peru
+          </>
+        }
+      >
+        Product, dimensions or quantity, destination city or port, and the date you need it. We
+        reply within business hours ({HORARIO.corto}, Lima time) with a datasheet, or with the
+        questions still missing.
+      </CierreComercial>
     </div>
   );
 }

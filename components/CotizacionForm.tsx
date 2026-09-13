@@ -270,9 +270,17 @@ export default function CotizacionForm({
   React.useEffect(() => {
     if (preselectedMessage) setValue('mensaje', preselectedMessage);
   }, [preselectedMessage, setValue]);
+  /**
+   * `rfq_start` se dispara una vez por combinación de producto, slug y origen.
+   * `origen` entró en el arreglo de dependencias porque el evento lo usa: sin
+   * él, un cambio de superficie —del configurador al chat dentro de la misma
+   * navegación— seguiría reportando el origen anterior. Es además la
+   * advertencia de `react-hooks/exhaustive-deps` que introdujo la entrega
+   * 0009, y el lint de este repositorio estaba en cero.
+   */
   React.useEffect(() => {
     trackQuoteStarted(origen ?? 'pagina', preselectedProduct, slugOrigen);
-  }, [preselectedProduct, slugOrigen]);
+  }, [origen, preselectedProduct, slugOrigen]);
 
   // ── Adjuntos ─────────────────────────────────────────────────────────────
   const onArchivos = (e: React.ChangeEvent<HTMLInputElement>) => {
