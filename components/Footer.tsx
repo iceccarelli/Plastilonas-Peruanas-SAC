@@ -10,6 +10,7 @@ import { Phone, Mail, MapPin, Award, Users, ArrowUp } from 'lucide-react';
 import SocialIcons from '@/components/SocialIcons';
 import FooterAccordion, { type FSection } from '@/components/FooterAccordion';
 import { products } from '@/lib/products';
+import { ACCIONES } from '@/lib/acciones';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -26,7 +27,7 @@ export default function Footer() {
     // páginas del sitio. Sin esto vivían colgando solo de la portada.
     { title: 'LO QUE MÁS COTIZAMOS', links: [
       ...ENLACES_CUNAS,
-      { label: 'Solicitar cotización →', href: '/cotizacion' },
+      { label: `${ACCIONES.cotizar.label} →`, href: ACCIONES.cotizar.href },
     ]},
     { title: 'PRODUCTOS', links: [
       { label: 'Envases y Embalaje', href: '/productos/familia/envases-embalaje' },
@@ -57,7 +58,6 @@ export default function Footer() {
       { label: 'Sobre Nosotros', href: '/nosotros' },
       { label: 'Nuestros Servicios', href: '/servicios' },
       { label: 'Contacto', href: '/contacto' },
-      { label: 'Solicitar Cotización', href: '/cotizacion' },
     ]},
     { title: 'INDUSTRIA E INTERNACIONAL', links: [
       { label: 'Hubs de industria', href: '/industria' },
@@ -98,7 +98,7 @@ export default function Footer() {
             href="/cotizacion"
             className="inline-flex items-center justify-center bg-white text-[#0A2540] font-semibold px-7 py-3 rounded-full hover:bg-[#10B981] hover:text-white transition-colors"
           >
-            Solicitar cotización
+            {ACCIONES.cotizar.label}
           </Link>
           <div className="flex items-center gap-2 text-sm">
             <span className="inline-flex min-h-[44px] items-center px-4 py-2 rounded-full border border-white/30 text-white">Español</span>
@@ -179,7 +179,7 @@ export default function Footer() {
               <li><Link href="/contacto" className="hover:text-white transition-colors">Contacto</Link></li>
               <li><Link href="/local" className="hover:text-white transition-colors">Cobertura local</Link></li>
               <li><WhatsAppLink context="footer-enlaces" message="Hola, quisiera información sobre sus productos." className="hover:text-white transition-colors">WhatsApp Directo</WhatsAppLink></li>
-              <li><Link href="/cotizacion" className="hover:text-white transition-colors">Solicitar Cotización</Link></li>
+              <li><Link href={ACCIONES.cotizar.href} className="hover:text-white transition-colors">{ACCIONES.cotizar.label}</Link></li>
             </ul>
           </div>
 

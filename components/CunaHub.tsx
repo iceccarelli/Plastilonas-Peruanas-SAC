@@ -16,6 +16,7 @@ import { construirComparativa } from '@/lib/comparativa';
 import { respuestaDirectaCuna } from '@/lib/respuesta-directa';
 import { ACTUALIZADO } from '@/lib/sitemaps';
 import { RUTA_ES } from '@/lib/fabricar-o-importar';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Página de cuña comercial (ver lib/cunas.ts). Server component compartido
@@ -108,7 +109,7 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
             href={`/cotizacion?producto=${encodeURIComponent(hijos[0]?.slug ?? '')}`}
             className="inline-flex items-center justify-center gap-2 bg-[#0A2540] hover:bg-[#059669] text-white px-8 py-3.5 rounded-2xl font-semibold transition-colors"
           >
-            Cotizar ahora <ArrowRight className="w-4 h-4" />
+            {ACCIONES.cotizar.label} <ArrowRight className="w-4 h-4" />
           </Link>
           <WhatsAppLink
             context={`cuna:${cuna.slug}`}
@@ -320,7 +321,7 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
             href={`/cotizacion?producto=${encodeURIComponent(hijos[0]?.slug ?? '')}`}
             className="inline-flex items-center justify-center bg-white text-[#0A2540] hover:bg-white/90 px-10 py-3.5 rounded-2xl font-semibold"
           >
-            Solicitar cotización
+            {ACCIONES.cotizar.label}
           </Link>
           <WhatsAppLink
             context={`cuna-final:${cuna.slug}`}

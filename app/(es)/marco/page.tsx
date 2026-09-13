@@ -15,6 +15,8 @@ import { breadcrumbSchema, faqSchema, itemListSchema, webPageSchema } from '@/li
 import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasProceso } from '@/lib/imagenes';
 import { OG_IMAGEN } from '@/lib/meta';
+import CierreComercial from '@/components/CierreComercial';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Marco de Especificación Plastilonas — el documento público.
@@ -235,21 +237,14 @@ export default function MarcoPage() {
         </dl>
       </section>
 
-      <div className="rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">
-          Evalúe su proyecto contra los {totalCriteria()} criterios
-        </h2>
-        <p className="mx-auto mb-7 max-w-lg text-white/80">
-          Toma unos minutos, no pide datos personales y genera un brief técnico
-          descargable con los criterios que le faltan por cerrar.
-        </p>
-        <Link
-          href="/marco/evaluacion"
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-        >
-          Comenzar la evaluación <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
+      <CierreComercial
+        contexto="marco"
+        titulo={<>Evalúe su proyecto contra los {totalCriteria()} criterios</>}
+        principal={{ href: "/marco/evaluacion", label: ACCIONES.evaluar.label, flecha: true }}
+      >
+        Toma unos minutos, no pide datos personales y genera un brief técnico
+        descargable con los criterios que le faltan por cerrar.
+      </CierreComercial>
     </div>
   );
 }

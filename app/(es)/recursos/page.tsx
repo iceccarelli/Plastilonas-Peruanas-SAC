@@ -9,6 +9,8 @@ import { familyHrefByName } from '@/lib/families';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 import { OG_IMAGEN } from '@/lib/meta';
+import CierreComercial from '@/components/CierreComercial';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Índice del silo técnico (/recursos).
@@ -157,29 +159,16 @@ export default function RecursosIndexPage() {
         ))}
       </div>
 
-      <div className="mt-14 rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">
-          ¿Necesita aplicar esto a un proyecto concreto?
-        </h2>
-        <p className="mx-auto mb-7 max-w-md text-white/80">
-          Envíenos las condiciones reales —altitud, geometría, material, ciudad— y le
-          devolvemos la especificación y la cotización.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href="/cotizacion"
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            Solicitar cotización
-          </Link>
-          <Link
-            href="/productos"
-            className="inline-flex items-center justify-center gap-1 rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            Ver catálogo <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+      <CierreComercial
+        contexto="recursos"
+        titulo="¿Necesita aplicar esto a un proyecto concreto?"
+        principal={{ href: "/cotizacion", label: ACCIONES.cotizar.label }}
+        secundaria={{ href: "/productos", label: ACCIONES.catalogo.label, flecha: true }}
+        className="mt-14"
+      >
+        Envíenos las condiciones reales —altitud, geometría, material, ciudad— y le
+        devolvemos la especificación y la cotización.
+      </CierreComercial>
     </div>
   );
 }

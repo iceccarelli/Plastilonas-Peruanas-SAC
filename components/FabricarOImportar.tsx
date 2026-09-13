@@ -21,6 +21,7 @@ import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
 import WhatsAppLink from '@/components/WhatsAppLink';
 import CostoEnVivo from '@/components/CostoEnVivo';
+import { ACCIONES, WHATSAPP_LABEL } from '@/lib/acciones';
 
 /**
  * LA PÁGINA QUE DECIDE LA COMPRA, en los dos idiomas del par.
@@ -66,7 +67,7 @@ const T = {
     revisada: (f: string) => `Página revisada el ${f}. Los nombres y rangos de los tributos de importación provienen de SUNAT y de ADEX; la tasa aplicable a una subpartida concreta se confirma con SUNAT o con un agente de aduana.`,
     ctaH: 'Haga la comparación con números suyos',
     ctaP: `Envíe producto, medidas o cantidad, ciudad de entrega y fecha. Respondemos en horario comercial (${HORARIO.corto}) con ficha técnica, y si su caso es de los que gana la importación, se lo decimos.`,
-    ctaBoton: 'Solicitar cotización',
+    ctaBoton: ACCIONES.cotizar.label,
     ctaWa: 'WhatsApp comercial',
     waMsg:
       'Hola, estoy comparando fabricar en Lima contra importar. Producto: ___. Cantidad y medidas: ___. Ciudad de entrega: ___.',
@@ -106,7 +107,7 @@ const T = {
     ctaH: 'Run the comparison with your own numbers',
     ctaP: `Send product, dimensions or quantity, delivery city or port, and the date you need it. We reply within business hours (${HORARIO.corto}, Lima time) with a datasheet — and if yours is one of the cases importing wins, we will say so.`,
     ctaBoton: 'Request a quotation',
-    ctaWa: 'WhatsApp sales',
+    ctaWa: WHATSAPP_LABEL.en,
     waMsg:
       'Hello, I am comparing manufacturing in Lima against importing. Product: ___. Quantity and dimensions: ___. Destination city or port: ___.',
     rfq: '/en/rfq',

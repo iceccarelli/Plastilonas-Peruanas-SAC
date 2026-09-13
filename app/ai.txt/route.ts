@@ -1,6 +1,7 @@
 import { SITE, HORARIO } from "@/lib/site";
 import { COUNT_STATEMENT, FABRICACION_PROPIA_COUNT, PRODUCT_COUNT, YEARS_STATEMENT } from "@/lib/facts";
 import { products } from "@/lib/products";
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * /ai.txt — identidad y política de citación para agentes de IA.
@@ -81,7 +82,7 @@ ${bloqueDominio}
 - Mangas de ventilación para minas y túneles: ${base}/productos/mangas-ventilacion-minas-tuneles
 - Carpas de lona con estructura metálica: ${base}/productos/carpas-lona-estructuras-metalicas
 - Servicios (fabricación, instalación, importación, soluciones): ${base}/servicios
-- Solicitar cotización: ${base}/cotizacion
+- ${ACCIONES.cotizar.label}: ${base}${ACCIONES.cotizar.href}
 
 Catálogo completo y familias: ${base}/productos · Mapa consulta→URL única: ${base}/mapa-consultas.json
 

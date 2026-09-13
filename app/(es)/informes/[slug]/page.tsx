@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { informes, informeBySlug, fuenteDe } from '@/lib/informes';
 import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
@@ -11,6 +11,8 @@ import LineChart from '@/components/LineChart';
 import { numeroConSigno } from '@/lib/format';
 import { articleSchema, breadcrumbSchema, datasetSchema, webPageSchema } from '@/lib/schema';
 import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
+import CierreComercial from '@/components/CierreComercial';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Página de informe.
@@ -269,29 +271,15 @@ export default async function InformePage({ params }: Props) {
         </ol>
       </section>
 
-      <div className="rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">
-          ¿Aplicamos esto a su operación?
-        </h2>
-        <p className="mx-auto mb-7 max-w-lg text-white/80">
-          Envíenos el emplazamiento, la aplicación y el plazo, y le devolvemos la
-          especificación técnica junto con la cotización.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href="/cotizacion"
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            Solicitar cotización
-          </Link>
-          <Link
-            href="/marco"
-            className="inline-flex items-center justify-center gap-1 rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            Marco de Especificación <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+      <CierreComercial
+        contexto="informes:ficha"
+        titulo="¿Aplicamos esto a su operación?"
+        principal={{ href: "/cotizacion", label: ACCIONES.cotizar.label }}
+        secundaria={{ href: "/marco", label: 'Marco de Especificación', flecha: true }}
+      >
+        Envíenos el emplazamiento, la aplicación y el plazo, y le devolvemos la
+        especificación técnica junto con la cotización.
+      </CierreComercial>
     </article>
   );
 }

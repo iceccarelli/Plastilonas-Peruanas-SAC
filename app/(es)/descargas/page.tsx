@@ -12,6 +12,8 @@ import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasProceso } from '@/lib/imagenes';
 import { breadcrumbSchema, dataCatalogSchema, webPageSchema } from '@/lib/schema';
 import { OG_IMAGEN } from '@/lib/meta';
+import CierreComercial from '@/components/CierreComercial';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Centro de documentación.
@@ -215,29 +217,15 @@ export default function DescargasPage() {
         </dl>
       </section>
 
-      <div className="rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">
-          ¿Necesita un documento que no está acá?
-        </h2>
-        <p className="mx-auto mb-7 max-w-lg text-white/80">
-          Si su expediente exige un formato o un dato concreto, dígalo y se lo preparamos
-          junto con la cotización.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href="/cotizacion"
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            Solicitar cotización
-          </Link>
-          <Link
-            href="/contacto"
-            className="inline-flex items-center justify-center gap-1 rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            Contacto <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+      <CierreComercial
+        contexto="descargas"
+        titulo="¿Necesita un documento que no está acá?"
+        principal={{ href: "/cotizacion", label: ACCIONES.cotizar.label }}
+        secundaria={{ href: "/contacto", label: 'Contacto', flecha: true }}
+      >
+        Si su expediente exige un formato o un dato concreto, dígalo y se lo preparamos
+        junto con la cotización.
+      </CierreComercial>
     </div>
   );
 }

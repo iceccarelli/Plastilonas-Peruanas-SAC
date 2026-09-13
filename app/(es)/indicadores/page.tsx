@@ -10,6 +10,8 @@ import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasProceso } from '@/lib/imagenes';
 import { breadcrumbSchema, datasetSchema, webPageSchema } from '@/lib/schema';
 import { OG_IMAGEN } from '@/lib/meta';
+import CierreComercial from '@/components/CierreComercial';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Indicadores en vivo.
@@ -206,30 +208,16 @@ export default async function IndicadoresPage() {
         </p>
       </section>
 
-      <div className="rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">
-          ¿Cómo se traduce esto en su proyecto?
-        </h2>
-        <p className="mx-auto mb-7 max-w-lg text-white/80">
-          Envíenos emplazamiento, aplicación, dimensiones y plazo, y le devolvemos la
-          especificación técnica junto con la cotización, con su plazo de validez y la
-          moneda declarados.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href="/cotizacion"
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            Solicitar cotización
-          </Link>
-          <Link
-            href="/informes/formacion-de-precio-y-volatilidad-textiles-industriales"
-            className="inline-flex items-center justify-center gap-1 rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            Por qué cambia el precio <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+      <CierreComercial
+        contexto="indicadores"
+        titulo="¿Cómo se traduce esto en su proyecto?"
+        principal={{ href: "/cotizacion", label: ACCIONES.cotizar.label }}
+        secundaria={{ href: "/informes/formacion-de-precio-y-volatilidad-textiles-industriales", label: 'Por qué cambia el precio', flecha: true }}
+      >
+        Envíenos emplazamiento, aplicación, dimensiones y plazo, y le devolvemos la
+        especificación técnica junto con la cotización, con su plazo de validez y la
+        moneda declarados.
+      </CierreComercial>
     </div>
   );
 }

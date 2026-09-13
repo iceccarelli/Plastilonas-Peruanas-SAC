@@ -7,8 +7,9 @@ import { CUNAS_EN } from '@/lib/cunas-en';
 import { RUTA_EN } from '@/lib/fabricar-o-importar';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
-import WhatsAppLink from '@/components/WhatsAppLink';
 import { OG_IMAGEN } from '@/lib/meta';
+import CierreComercial from '@/components/CierreComercial';
+import { ACCIONES_EN } from '@/lib/acciones';
 
 /**
  * SOURCING HUB EN INGLÉS — la puerta del comprador extranjero.
@@ -260,32 +261,17 @@ export default function SourcingFromPeruPage() {
         </dl>
       </section>
 
-      <div className="rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">File an RFQ</h2>
-        <p className="mx-auto mb-7 max-w-lg text-white/80">
-          Send product, dimensions or quantity, destination and required date. We reply within
-          business hours ({HORARIO.corto}, Lima time) with a datasheet or with the questions still
-          missing.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href="/en/rfq"
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            RFQ form (in English)
-          </Link>
-          <WhatsAppLink
-            context="en-sourcing"
-            message="Hello, I am an international buyer. Product: ___. Quantity/dimensions: ___. Destination port or city: ___."
-            className="inline-flex items-center justify-center rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            WhatsApp sales
-          </WhatsAppLink>
-        </div>
-        <p className="mt-5 text-sm text-white/60">
-          {SITE.email} · {SITE.legalName} · RUC {SITE.ruc} · Chorrillos, Lima, Peru
-        </p>
-      </div>
+      <CierreComercial
+        contexto="en-sourcing"
+        idioma="en"
+        titulo="File an RFQ"
+        principal={{ href: "/en/rfq", label: ACCIONES_EN.rfq.label }}
+        nota={<>{SITE.email} · {SITE.legalName} · RUC {SITE.ruc} · Chorrillos, Lima, Peru</>}
+      >
+        Send product, dimensions or quantity, destination and required date. We reply within
+        business hours ({HORARIO.corto}, Lima time) with a datasheet or with the questions still
+        missing.
+      </CierreComercial>
     </div>
   );
 }

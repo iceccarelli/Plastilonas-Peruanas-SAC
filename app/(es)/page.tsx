@@ -29,6 +29,7 @@ import SectionHeading from '@/components/SectionHeading';
 import MachineryGallery from '@/components/MachineryGallery';
 import { Reveal } from '@/components/Reveal';
 import { OG_IMAGEN } from '@/lib/meta';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Metadata propia de la home. Sin esto heredaba el title/description por
@@ -171,7 +172,7 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-7">
                 <Link href="/cotizacion" className="group inline-flex items-center justify-center gap-2 bg-[#0A2540] text-white hover:bg-[#047857] font-semibold px-6 py-3.5 rounded-full transition-colors">Cotizar proyecto <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></Link>
-                <Link href="/productos" className="inline-flex items-center justify-center gap-2 border border-[#0A2540]/25 text-[#0A2540] hover:border-[#047857] hover:text-[#047857] font-semibold px-6 py-3.5 rounded-full transition-colors">Ver catálogo</Link>
+                <Link href="/productos" className="inline-flex items-center justify-center gap-2 border border-[#0A2540]/25 text-[#0A2540] hover:border-[#047857] hover:text-[#047857] font-semibold px-6 py-3.5 rounded-full transition-colors">{ACCIONES.catalogo.label}</Link>
               </div>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-[#0A2540]/10 pt-5 text-xs text-[#64748B]">
                 {trust.map((t, i) => (

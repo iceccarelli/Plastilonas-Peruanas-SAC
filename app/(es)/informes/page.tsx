@@ -9,6 +9,8 @@ import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasProceso } from '@/lib/imagenes';
 import { OG_IMAGEN } from '@/lib/meta';
+import CierreComercial from '@/components/CierreComercial';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Índice de informes del sector.
@@ -139,30 +141,16 @@ export default function InformesPage() {
         ))}
       </ul>
 
-      <div className="rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">
-          ¿Qué indicador le falta para decidir?
-        </h2>
-        <p className="mx-auto mb-7 max-w-lg text-white/80">
-          Estos informes crecen con las preguntas que llegan de operación. Si necesita
-          un dato del sector que no está acá y es verificable, dígalo y lo buscamos con
-          su fuente.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href="/contacto"
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            Escribirnos
-          </Link>
-          <Link
-            href="/marco"
-            className="inline-flex items-center justify-center gap-1 rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            Marco de Especificación <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+      <CierreComercial
+        contexto="informes"
+        titulo="¿Qué indicador le falta para decidir?"
+        principal={{ href: "/contacto", label: ACCIONES.escribir.label }}
+        secundaria={{ href: "/marco", label: 'Marco de Especificación', flecha: true }}
+      >
+        Estos informes crecen con las preguntas que llegan de operación. Si necesita
+        un dato del sector que no está acá y es verificable, dígalo y lo buscamos con
+        su fuente.
+      </CierreComercial>
     </div>
   );
 }

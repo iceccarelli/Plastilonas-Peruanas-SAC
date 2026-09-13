@@ -13,6 +13,8 @@ import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, faqSchema, itemListSchema, webPageSchema, imageObjectSchema } from '@/lib/schema';
 import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
 import RielComercial from '@/components/RielComercial';
+import CierreComercial from '@/components/CierreComercial';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Página de familia (/productos/familia/[slug]).
@@ -295,29 +297,15 @@ export default async function FamilyPage({ params }: Props) {
 
       <RielComercial ruta={`/productos/familia/${slug}`} className="mb-12" />
 
-      <div className="rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">
-          ¿Especificamos su caso?
-        </h2>
-        <p className="mx-auto mb-7 max-w-md text-white/80">
-          Envíenos medidas, cantidad, aplicación y ciudad de entrega y le devolvemos la
-          especificación técnica junto con la cotización.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href="/cotizacion"
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            Solicitar cotización
-          </Link>
-          <Link
-            href="/productos"
-            className="inline-flex items-center justify-center gap-1 rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            Ver catálogo completo <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+      <CierreComercial
+        contexto="familia"
+        titulo="¿Especificamos su caso?"
+        principal={{ href: "/cotizacion", label: ACCIONES.cotizar.label }}
+        secundaria={{ href: "/productos", label: ACCIONES.catalogo.label, flecha: true }}
+      >
+        Envíenos medidas, cantidad, aplicación y ciudad de entrega y le devolvemos la
+        especificación técnica junto con la cotización.
+      </CierreComercial>
     </div>
   );
 }

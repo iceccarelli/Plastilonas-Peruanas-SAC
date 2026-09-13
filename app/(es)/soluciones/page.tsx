@@ -8,6 +8,8 @@ import { SITE } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 import { OG_IMAGEN } from '@/lib/meta';
+import CierreComercial from '@/components/CierreComercial';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Índice de arquitecturas de referencia.
@@ -135,29 +137,16 @@ export default function SolucionesPage() {
         ))}
       </div>
 
-      <div className="mt-14 rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">
-          ¿Su proyecto se parece a alguno de estos?
-        </h2>
-        <p className="mx-auto mb-7 max-w-lg text-white/80">
-          Evalúelo primero contra los criterios del marco: llegará a la cotización
-          sabiendo qué le falta definir y recibirá propuestas comparables entre sí.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href="/marco/evaluacion"
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            Evaluar mi proyecto <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
-            href="/cotizacion"
-            className="inline-flex items-center justify-center rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            Solicitar cotización
-          </Link>
-        </div>
-      </div>
+      <CierreComercial
+        contexto="soluciones"
+        titulo="¿Su proyecto se parece a alguno de estos?"
+        principal={{ href: "/marco/evaluacion", label: 'Evaluar mi proyecto', flecha: true }}
+        secundaria={{ href: "/cotizacion", label: ACCIONES.cotizar.label }}
+        className="mt-14"
+      >
+        Evalúelo primero contra los criterios del marco: llegará a la cotización
+        sabiendo qué le falta definir y recibirá propuestas comparables entre sí.
+      </CierreComercial>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { ArrowLeft, Loader2, ShieldCheck } from 'lucide-react';
 import { useCart, cartSubtotal } from '@/lib/cart-store';
 import { formatPEN, IGV_RATE } from '@/lib/format';
 import { PERU_DEPARTMENTS, type ShippingDetails } from '@/lib/peru';
+import { ACCIONES } from '@/lib/acciones';
 
 const EMPTY: ShippingDetails = {
   name: '', email: '', phone: '', ruc: '',
@@ -74,7 +75,7 @@ export default function CheckoutPage() {
       <div className="max-w-3xl mx-auto px-6 py-24 text-center">
         <h1 className="text-2xl font-semibold text-[#0A2540] mb-4">Tu carrito está vacío</h1>
         <Link href="/productos" className="inline-block bg-[#0A2540] hover:bg-[#059669] text-white font-semibold px-8 py-3 rounded-2xl transition-colors">
-          Ver catálogo
+          {ACCIONES.catalogo.label}
         </Link>
       </div>
     );

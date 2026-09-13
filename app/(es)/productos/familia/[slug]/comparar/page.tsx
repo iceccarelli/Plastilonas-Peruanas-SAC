@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight } from 'lucide-react';
 import { products, sourcingLabels, availabilityLabels } from '@/lib/products';
 import { construirComparativa } from '@/lib/comparativa';
 import { resolveFamily, comparableFamilies } from '@/lib/families';
@@ -11,6 +10,7 @@ import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, itemListSchema, webPageSchema } from '@/lib/schema';
 import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
+import CierreComercial from '@/components/CierreComercial';
 
 /**
  * Tabla comparativa por familia (/productos/familia/[slug]/comparar).
@@ -273,29 +273,15 @@ export default async function CompararPage({ params }: Props) {
         </section>
       )}
 
-      <div className="rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">
-          ¿Cotizamos las alternativas que está evaluando?
-        </h2>
-        <p className="mx-auto mb-7 max-w-lg text-white/80">
-          Le enviamos precio y plazo de las {items.length} opciones para que compare con
-          números reales. Indíquenos medidas, cantidad y ciudad de entrega.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href={cotizarTodos}
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            Cotizar las {items.length} alternativas
-          </Link>
-          <Link
-            href={`/productos/familia/${slug}`}
-            className="inline-flex items-center justify-center gap-1 rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            Volver a {family.name} <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+      <CierreComercial
+        contexto="familia:comparar"
+        titulo="¿Cotizamos las alternativas que está evaluando?"
+        principal={{ href: cotizarTodos, label: `Cotizar las ${items.length} alternativas` }}
+        secundaria={{ href: `/productos/familia/${slug}`, label: `Volver a ${family.name}`, flecha: true }}
+      >
+        Le enviamos precio y plazo de las {items.length} opciones para que compare con
+        números reales. Indíquenos medidas, cantidad y ciudad de entrega.
+      </CierreComercial>
     </div>
   );
 }

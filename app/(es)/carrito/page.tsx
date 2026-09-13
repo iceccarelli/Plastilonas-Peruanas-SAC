@@ -5,6 +5,7 @@ import { ArrowLeft, Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useCart, cartSubtotal } from '@/lib/cart-store';
 import { formatPEN, IGV_RATE } from '@/lib/format';
+import { ACCIONES } from '@/lib/acciones';
 
 export default function CarritoPage() {
   const { items, setQuantity, remove } = useCart();
@@ -48,7 +49,7 @@ export default function CarritoPage() {
             href="/productos"
             className="inline-block bg-[#0A2540] hover:bg-[#059669] text-white font-semibold px-8 py-3 rounded-2xl transition-colors"
           >
-            Ver catálogo
+            {ACCIONES.catalogo.label}
           </Link>
         </div>
       ) : (

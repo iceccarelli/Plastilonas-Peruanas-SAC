@@ -20,6 +20,7 @@ import CartButton from './CartButton';
 import { ThemeToggle } from './ThemeToggle';
 import { CART_ENABLED } from '@/lib/flags';
 import EstadoHorario from './EstadoHorario';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * NAVEGACIÓN — agrupada por decisión de compra, no por orden de creación.
@@ -748,7 +749,7 @@ export default function Navbar() {
                 className="hidden md:inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-[#0A2540] px-4 xl:px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all active:scale-[0.985] hover:bg-[#059669] dark:bg-[#10B981] dark:text-[#0A2540] dark:hover:bg-[#34D399]"
               >
                 <Award className="w-4 h-4 shrink-0" />
-                <span className="hidden xl:inline">Solicitar Cotización</span>
+                <span className="hidden xl:inline">{ACCIONES.cotizar.label}</span>
                 <span className="xl:hidden">Cotizar</span>
               </Link>
 
@@ -912,7 +913,7 @@ export default function Navbar() {
                     className="w-full flex items-center justify-center gap-2 bg-[#0A2540] dark:bg-[#10B981] text-white dark:text-[#0A2540] min-h-[48px] py-3.5 rounded-2xl font-semibold"
                   >
                     <Award className="w-4 h-4" />
-                    Solicitar Cotización
+                    {ACCIONES.cotizar.label}
                   </Link>
                 </div>
 

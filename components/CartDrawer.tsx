@@ -6,6 +6,7 @@ import { X, Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useCart, cartSubtotal } from '@/lib/cart-store';
 import { formatPEN } from '@/lib/format';
+import { ACCIONES } from '@/lib/acciones';
 
 export default function CartDrawer() {
   const { items, isOpen, close, setQuantity, remove } = useCart();
@@ -46,7 +47,7 @@ export default function CartDrawer() {
                 <ShoppingCart className="w-10 h-10 mb-4 opacity-40" />
                 <p>Tu carrito está vacío.</p>
                 <Link href="/productos" onClick={close} className="mt-6 text-sm font-medium text-[#059669] hover:underline">
-                  Ver catálogo
+                  {ACCIONES.catalogo.label}
                 </Link>
               </div>
             ) : (

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, BookOpen } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import {
   terminos,
   terminosPorLetra,
@@ -15,6 +15,8 @@ import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasProceso } from '@/lib/imagenes';
 import { breadcrumbSchema, definedTermSetSchema, webPageSchema } from '@/lib/schema';
 import { OG_IMAGEN } from '@/lib/meta';
+import CierreComercial from '@/components/CierreComercial';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Índice del glosario.
@@ -209,30 +211,16 @@ export default function GlosarioPage() {
         ))}
       </section>
 
-      <div className="rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">
-          ¿Falta un término que usted sí usa?
-        </h2>
-        <p className="mx-auto mb-7 max-w-lg text-white/80">
-          Este glosario crece con las preguntas que llegan de obra. Si en su operación
-          hay un término que acá no está definido, escríbanos y entra con su desarrollo
-          y sus guías.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href="/contacto"
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            Escribirnos
-          </Link>
-          <Link
-            href="/marco"
-            className="inline-flex items-center justify-center gap-1 rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            Ver el Marco de Especificación <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+      <CierreComercial
+        contexto="glosario"
+        titulo="¿Falta un término que usted sí usa?"
+        principal={{ href: "/contacto", label: ACCIONES.escribir.label }}
+        secundaria={{ href: "/marco", label: 'Ver el Marco de Especificación', flecha: true }}
+      >
+        Este glosario crece con las preguntas que llegan de obra. Si en su operación
+        hay un término que acá no está definido, escríbanos y entra con su desarrollo
+        y sus guías.
+      </CierreComercial>
     </div>
   );
 }

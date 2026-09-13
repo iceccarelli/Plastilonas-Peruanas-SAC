@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { solutions, solutionBySlug } from '@/lib/solutions';
 import { products } from '@/lib/products';
 import { articleBySlug } from '@/lib/articles';
@@ -21,6 +21,8 @@ import {
   imageObjectSchema,
 } from '@/lib/schema';
 import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
+import CierreComercial from '@/components/CierreComercial';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Arquitectura de referencia (/soluciones/[slug]).
@@ -318,29 +320,15 @@ export default async function SolucionPage({ params }: Props) {
         </dl>
       </section>
 
-      <div className="rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">
-          Cotizar el conjunto, no las piezas
-        </h2>
-        <p className="mx-auto mb-7 max-w-lg text-white/80">
-          Indíquenos las condiciones reales de su proyecto y le devolvemos la
-          especificación de cada componente junto con la propuesta.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href={`/cotizacion?comparativa=${componentes.filter((c) => !c.opcional).map((c) => c.producto!.slug).join(',')}`}
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            Cotizar esta configuración
-          </Link>
-          <Link
-            href="/marco/evaluacion"
-            className="inline-flex items-center justify-center gap-1 rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            Evaluar mi proyecto primero <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+      <CierreComercial
+        contexto="soluciones:ficha"
+        titulo="Cotizar el conjunto, no las piezas"
+        principal={{ href: `/cotizacion?comparativa=${componentes.filter((c) => !c.opcional).map((c) => c.producto!.slug).join(',')}`, label: ACCIONES.cotizarConjunto.label }}
+        secundaria={{ href: "/marco/evaluacion", label: 'Evaluar mi proyecto primero', flecha: true }}
+      >
+        Indíquenos las condiciones reales de su proyecto y le devolvemos la
+        especificación de cada componente junto con la propuesta.
+      </CierreComercial>
     </div>
   );
 }

@@ -24,6 +24,7 @@ import { INDUSTRIAS } from '@/lib/industrias';
 import { guides } from '@/lib/guides';
 import { cunaDeProducto } from '@/lib/cunas';
 import DatosParaCotizar from '@/components/DatosParaCotizar';
+import { ACCIONES } from '@/lib/acciones';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -170,7 +171,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
           <div className="flex flex-wrap gap-3 mb-9">
             <Link href={`/cotizacion?producto=${encodeURIComponent(product.name)}`} className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 bg-[#0A2540] hover:bg-[#059669] text-white px-9 py-4 rounded-2xl font-semibold text-sm transition-all active:scale-[0.985]">
-              Solicitar Cotización para este producto <ArrowRight className="w-4 h-4" />
+              {ACCIONES.cotizarProducto.label} <ArrowRight className="w-4 h-4" />
             </Link>
             {/* El mensaje llega con el SKU y con los campos que la cotización
                 necesita, sacados de las etiquetas de especificación reales.
@@ -389,7 +390,7 @@ export default async function ProductDetailPage({ params }: Props) {
         <h3 className="text-3xl tracking-tight font-semibold mb-3">¿Este producto se adapta a su proyecto?</h3>
         <p className="text-white/80 mb-7 max-w-md mx-auto">Nuestro equipo técnico está listo para asesorarlo y entregarle una cotización personalizada para su proyecto.</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href={`/cotizacion?producto=${encodeURIComponent(product.name)}`} className="inline-flex items-center justify-center bg-white text-[#0A2540] hover:bg-white/90 px-10 py-3.5 rounded-2xl font-semibold">Solicitar Cotización Personalizada</Link>
+          <Link href={`/cotizacion?producto=${encodeURIComponent(product.name)}`} className="inline-flex items-center justify-center bg-white text-[#0A2540] hover:bg-white/90 px-10 py-3.5 rounded-2xl font-semibold">{ACCIONES.cotizarProducto.label}</Link>
           <WhatsAppLink context={`producto-cta:${product.slug}`} message={`Hola, quisiera asesoría técnica sobre ${product.name}.`} className="inline-flex items-center justify-center border border-white/30 hover:bg-white/10 px-8 py-3.5 rounded-2xl font-medium">Hablar con un especialista</WhatsAppLink>
         </div>
       </div>

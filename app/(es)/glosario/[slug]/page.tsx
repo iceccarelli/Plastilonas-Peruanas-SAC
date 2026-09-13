@@ -19,6 +19,7 @@ import ImagenContenido from '@/components/ImagenContenido';
 import { ranurasGlosario } from '@/lib/imagenes';
 import TrackView from '@/components/TrackView';
 import { breadcrumbSchema, definedTermSchema, webPageSchema, imageObjectSchema } from '@/lib/schema';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Página de un término.
@@ -303,7 +304,7 @@ export default async function TerminoPage({ params }: Props) {
             href="/cotizacion"
             className="inline-flex items-center justify-center rounded-2xl bg-[#0A2540] px-8 py-3 font-semibold text-white hover:bg-[#059669]"
           >
-            Solicitar cotización
+            {ACCIONES.cotizar.label}
           </Link>
           <Link
             href="/glosario"

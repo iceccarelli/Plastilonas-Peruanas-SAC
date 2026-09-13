@@ -15,6 +15,8 @@ import ImagenContenido from '@/components/ImagenContenido';
 import NAP from '@/components/NAP';
 import { ranurasProceso } from '@/lib/imagenes';
 import { OG_IMAGEN } from '@/lib/meta';
+import CierreComercial from '@/components/CierreComercial';
+import { ACCIONES } from '@/lib/acciones';
 
 /**
  * Índice de cobertura local (/local).
@@ -221,29 +223,15 @@ export default function LocalIndexPage() {
         </dl>
       </section>
 
-      <div className="rounded-3xl bg-[#0A2540] p-10 text-center text-white">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">
-          ¿Necesita entrega en su ciudad?
-        </h2>
-        <p className="mx-auto mb-7 max-w-md text-white/80">
-          Indíquenos producto, medidas, cantidad y ciudad de entrega, y le enviamos la
-          cotización con el despacho ya considerado.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href="/cotizacion"
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
-          >
-            Solicitar cotización
-          </Link>
-          <Link
-            href="/productos"
-            className="inline-flex items-center justify-center gap-1 rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
-          >
-            Ver catálogo <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+      <CierreComercial
+        contexto="local"
+        titulo="¿Necesita entrega en su ciudad?"
+        principal={{ href: "/cotizacion", label: ACCIONES.cotizar.label }}
+        secundaria={{ href: "/productos", label: ACCIONES.catalogo.label, flecha: true }}
+      >
+        Indíquenos producto, medidas, cantidad y ciudad de entrega, y le enviamos la
+        cotización con el despacho ya considerado.
+      </CierreComercial>
     </div>
   );
 }

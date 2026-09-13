@@ -23,6 +23,7 @@ import {
   TOPIC_MAP_REVISADO,
 } from "@/lib/search/topic-map";
 import { CONSULTAS_DINERO, consultasPorIdioma } from "@/lib/consultas-dinero";
+import { ACCIONES } from "@/lib/acciones";
 
 /**
  * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
@@ -252,7 +253,7 @@ devuelve aquí:
 - Mangas de ventilación para minas y túneles: ${base}/productos/mangas-ventilacion-minas-tuneles
 - Carpas de lona con estructura metálica: ${base}/productos/carpas-lona-estructuras-metalicas
 - Servicios (fabricación, instalación, importación): ${base}/servicios
-- Solicitar cotización: ${base}/cotizacion
+- ${ACCIONES.cotizar.label}: ${base}${ACCIONES.cotizar.href}
 
 ## Tres preguntas que este sitio responde mejor que un directorio
 

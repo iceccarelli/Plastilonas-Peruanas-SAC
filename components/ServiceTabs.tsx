@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ruler, HardHat, Ship, Lightbulb, ArrowRight, Check, type LucideIcon } from 'lucide-react';
+import { ACCIONES } from '@/lib/acciones';
 
 const ICONS: Record<string, LucideIcon> = { ruler: Ruler, hardhat: HardHat, ship: Ship, lightbulb: Lightbulb };
 
@@ -197,7 +198,7 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
               </div>
               <div className="mt-auto flex flex-wrap gap-3">
                 <Link href="/cotizacion" className="inline-flex items-center gap-2 bg-white text-[#0A2540] hover:bg-[#10B981] hover:text-white px-6 py-3 rounded-2xl text-sm font-semibold transition-colors">
-                  Solicitar cotización <ArrowRight className="w-4 h-4" />
+                  {ACCIONES.cotizar.label} <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link href="/servicios" className="inline-flex items-center gap-2 border border-white/30 hover:bg-white/10 text-white px-6 py-3 rounded-2xl text-sm font-medium transition-colors">
                   Ver todos los servicios

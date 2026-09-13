@@ -12,6 +12,7 @@ import FotoReferencial from '@/components/FotoReferencial';
 import CostoEnVivo from '@/components/CostoEnVivo';
 import { ACTUALIZADO } from '@/lib/sitemaps';
 import { RUTA_EN } from '@/lib/fabricar-o-importar';
+import { ACCIONES_EN, WHATSAPP_LABEL } from '@/lib/acciones';
 
 /**
  * PÁGINA DE CUÑA EN INGLÉS (ver lib/cunas-en.ts).
@@ -142,7 +143,7 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
             message={cuna.whatsapp}
             className="inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 px-8 py-3.5 font-medium text-[#047857] transition-colors hover:border-[#059669]"
           >
-            WhatsApp sales
+            {WHATSAPP_LABEL.en}
           </WhatsAppLink>
         </div>
       </div>
@@ -344,14 +345,14 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
             href={rfq}
             className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
           >
-            RFQ form (in English)
+            {ACCIONES_EN.rfq.label}
           </Link>
           <WhatsAppLink
             context={`cuna-en-final:${cuna.slug}`}
             message={cuna.whatsapp}
             className="inline-flex items-center justify-center rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
           >
-            WhatsApp sales
+            {WHATSAPP_LABEL.en}
           </WhatsAppLink>
         </div>
         <p className="mt-5 text-sm text-white/60">
