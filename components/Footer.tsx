@@ -69,6 +69,10 @@ export default function Footer() {
       { label: 'Configurador FIBC', href: '/configurador' },
       { label: 'Compradores internacionales', href: '/compradores' },
       { label: 'Exportación', href: '/exportacion' },
+      // La comparación de abastecimiento colgaba SÓLO de las tres cuñas: quien
+      // entraba por el catálogo o por un hub sectorial no la encontraba nunca,
+      // y es la página que decide si el comprador fabrica aquí o importa.
+      { label: '¿Fabricar en Perú o importar?', href: '/fabricar-o-importar' },
       { label: 'Distribuidores', href: '/distribuidores' },
       { label: 'Partners de ingeniería', href: '/socios' },
       { label: 'Centro de confianza', href: '/confianza' },

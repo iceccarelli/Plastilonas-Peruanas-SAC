@@ -98,6 +98,10 @@ const FUENTES = {
   calculadoras: slugsDe('lib/calculadoras.ts'),
   proyectos: slugsDe('lib/projects.ts'),
   ciudades: slugsDeJson('data/ciudades.json'),
+  // Las cuñas comerciales: sus slugs son rutas de primer nivel (/big-bags,
+  // /lonas-camiones, /ventilacion-minera) y las inglesas cuelgan de /en.
+  cunas: slugsDe('lib/cunas.ts'),
+  cunasEn: slugsDe('lib/cunas-en.ts'),
 };
 
 // `lib/products.ts` declara productos Y familias en el mismo archivo: los
@@ -142,7 +146,17 @@ function rutaDe(archivoPage) {
   return archivoPage
     .replace(/^app\//, '')
     .replace(/\/?page\.tsx$/, '')
-    .replace(/\/?\(\w[^/]*\)/g, ''); // grupos de ruta (auth) no aparecen en la URL
+    .replace(/\/?\(\w[^/]*\)/g, '') // grupos de ruta (es)/(en)/(pt) no aparecen en la URL
+    /**
+     * Y la barra que dejan cuando van DELANTE. `app/(es)/productos/page.tsx`
+     * daba `/productos` tras quitar el grupo, y el consumidor lo volvía a
+     * prefijar: `//productos`. Con ese doble slash, la ruta de cada página del
+     * sitio dejaba de coincidir con el destino de los enlaces que apuntan a
+     * ella, y el auditor declaraba huérfanas las 43 páginas agrupadas —entre
+     * ellas /productos, /contacto y /cotizacion, que el menú enlaza desde
+     * todas partes—. Un informe con 43 falsos positivos no se lee.
+     */
+    .replace(/^\/+/, '');
 }
 
 /** Título declarado en `metadata` o en `generateMetadata`. */
@@ -205,6 +219,33 @@ function esquemasDe(src) {
  * un enlace: lo que no se sabe es a qué slug concreto apunta, y para medir el
  * grafo eso da igual — se le asigna su plantilla.
  */
+/**
+ * ENLACES QUE EL SITIO CONSTRUYE Y UN REGEX NO VE.
+ *
+ * Media navegación de este sitio no está escrita como `href="/algo"`: se deriva
+ * de lib/. El pie enlaza las tres cuñas comerciales con `ENLACES_CUNAS`, la
+ * cabecera en inglés usa `ENLACES_CUNAS_EN`, el menú expande `INDUSTRIAS`, y la
+ * comparación de abastecimiento se enlaza con `RUTA_ES` / `RUTA_EN`. Mirando
+ * sólo los literales, el auditor daba por huérfanas páginas que están a un clic
+ * desde cualquier punto del sitio — y, peor, habría dado por buena la solución
+ * equivocada: añadir enlaces duplicados a mano.
+ *
+ * Cada marca se resuelve contra su fuente de verdad, así que añadir una cuña a
+ * lib/cunas.ts la hace visible aquí sin tocar este archivo.
+ */
+const RUTAS_FABRICAR = sinComentarios(leer('lib/fabricar-o-importar.ts'));
+const rutaConstante = (nombre) =>
+  RUTAS_FABRICAR.match(new RegExp(`${nombre}\\s*=\\s*['"]([^'"]+)['"]`))?.[1] ?? null;
+
+const ENLACES_DERIVADOS = {
+  ENLACES_CUNAS: FUENTES.cunas.map((s) => `/${s}`),
+  ENLACES_CUNAS_EN: FUENTES.cunasEn.map((s) => `/en/${s}`),
+  CUNAS_EN: FUENTES.cunasEn.map((s) => `/en/${s}`),
+  INDUSTRIAS: FUENTES.industrias.map((s) => `/industria/${s}`),
+  RUTA_ES: [rutaConstante('RUTA_ES')].filter(Boolean),
+  RUTA_EN: [rutaConstante('RUTA_EN')].filter(Boolean),
+};
+
 function enlacesDe(src) {
   const limpio = sinComentarios(src);
   const salida = new Set();
@@ -218,6 +259,9 @@ function enlacesDe(src) {
       const h = m[1].replace(/\/$/, '') || '/';
       if (!h.startsWith('/api/')) salida.add(h);
     }
+  }
+  for (const [marca, rutasDerivadas] of Object.entries(ENLACES_DERIVADOS)) {
+    if (new RegExp(`\\b${marca}\\b`).test(limpio)) for (const r of rutasDerivadas) salida.add(r);
   }
   // Plantillas: `/productos/${p.slug}` → /productos/[slug]
   const interpolados = [/href=\{\s*`(\/[^`]*)`\s*\}/g, /href:\s*`(\/[^`]*)`/g];
@@ -306,25 +350,39 @@ const endpointsApi = recorrer('app/api', (n) => n === 'route.ts').map((a) => ({
 
 const NAV = sinComentarios(leer('components/Navbar.tsx'));
 const PIE = sinComentarios(leer('components/Footer.tsx'));
-const enlacesGlobales = new Set([
-  ...enlacesDe(NAV),
-  ...enlacesDe(PIE),
-  // El menú deriva los sectores de lib/industrias.ts: se expanden a mano
-  // porque el enlace se construye en runtime y el regex no lo ve.
-  ...(/INDUSTRIAS\.map/.test(NAV) ? FUENTES.industrias.map((s) => `/industria/${s}`) : []),
-]);
+// Los sectores del menú y las cuñas del pie se construyen en runtime: los
+// resuelve enlacesDe() con ENLACES_DERIVADOS, no una expansión a mano aquí.
+const enlacesGlobales = new Set([...enlacesDe(NAV), ...enlacesDe(PIE)]);
 
 /** Plantilla de una ruta concreta: /productos/foo → /productos/[slug] */
 function plantillaDe(ruta) {
   const partes = ruta.split('/').filter(Boolean);
-  for (const r of rutas) {
+
+  /**
+   * LA EXACTA GANA, Y EL COMODÍN VA AL FINAL.
+   *
+   * `app/(es)/[...resto]/page.tsx` es la ruta de reserva del sitio, y como su
+   * único segmento empieza por «[», casaba con CUALQUIER ruta de un segmento:
+   * /productos, /contacto, /cotizacion y las otras treinta y nueve resolvían a
+   * la plantilla comodín. Los enlaces del menú se contabilizaban entonces como
+   * entrantes de `/[...resto]`, y sus destinos reales quedaban con cero — es
+   * decir, huérfanos. El orden de comprobación no era un detalle: era el
+   * informe entero.
+   */
+  const exacta = rutas.find((r) => r.ruta === ruta);
+  if (exacta) return exacta;
+
+  const casa = (r, { comodin }) => {
     const p = r.ruta.split('/').filter(Boolean);
-    if (p.length !== partes.length) continue;
+    if (p.some((seg) => seg.startsWith('[...')) !== comodin) return false;
+    if (!comodin && p.length !== partes.length) return false;
     // Un segmento dinámico casa con cualquier cosa, y el marcador «[slug]» que
     // deja un enlace interpolado casa con cualquier segmento dinámico.
-    if (p.every((seg, i) => seg.startsWith('[') || partes[i].startsWith('[') || seg === partes[i])) return r;
-  }
-  return null;
+    return p.every((seg, i) => seg.startsWith('[') || (partes[i] ?? '').startsWith('[') || seg === partes[i]);
+  };
+  return (
+    rutas.find((r) => casa(r, { comodin: false })) ?? rutas.find((r) => casa(r, { comodin: true })) ?? null
+  );
 }
 
 /** Todas las URLs concretas que el sitio publica. */
@@ -403,6 +461,24 @@ for (const { hacia } of aristas) {
   const clave = plantilla ? plantilla.ruta : hacia;
   entrantes.set(clave, (entrantes.get(clave) ?? 0) + 1);
 }
+
+/**
+ * HUÉRFANAS QUE SÍ PUEDEN SERLO, CON SU MOTIVO.
+ *
+ * Una página sin enlaces entrantes es, salvo excepción, una página que nadie
+ * va a encontrar. Las excepciones existen y son tres decisiones, no descuidos:
+ * el retorno de una pasarela de pago al que sólo se llega pagando, y el acceso
+ * de clientes, que además está prohibido en robots.txt. Cualquier otra ruta
+ * huérfana hace fallar `--check`, y con él `npm run seo:consistency` en CI.
+ *
+ * Añadir una entrada aquí es una decisión que se escribe con su motivo. Lo que
+ * no se puede es dejar que la lista crezca sola.
+ */
+const HUERFANAS_PERMITIDAS = {
+  '/checkout/exito': 'retorno de la pasarela: se llega desde Stripe, no desde el sitio',
+  '/login': 'acceso de clientes: bloqueado en robots.txt y enlazado sólo cuando Auth.js está configurado',
+  '/dashboard': 'tras autenticación',
+};
 
 const huerfanas = rutas
   .filter((r) => r.ruta !== '/')
@@ -601,12 +677,22 @@ const estado = {
   },
 };
 
-mkdirSync(join(RAIZ, 'audit'), { recursive: true });
+/**
+ * `--no-escribir` existe para que una PRUEBA pueda ejecutar este auditor sin
+ * dejar el árbol de trabajo sucio. audit/current-state.json está versionado y
+ * es un artefacto: si `npm test` lo reescribiera en cada pasada, cada sesión
+ * empezaría con un archivo modificado que nadie pidió, y el ruido termina en
+ * un `git add .` que commitea cualquier otra cosa de paso.
+ */
+const escribir = !ARGS.has('--no-escribir');
 const destino = join(RAIZ, 'audit/current-state.json');
-writeFileSync(destino, `${JSON.stringify(estado, null, 2)}\n`, 'utf8');
+if (escribir) {
+  mkdirSync(join(RAIZ, 'audit'), { recursive: true });
+  writeFileSync(destino, `${JSON.stringify(estado, null, 2)}\n`, 'utf8');
+}
 
 const r = estado.resumen;
-console.log(`audit/current-state.json escrito (${relative(RAIZ, destino)})`);
+if (escribir) console.log(`audit/current-state.json escrito (${relative(RAIZ, destino)})`);
 console.log(
   `  ${r.plantillasDePagina} plantillas · ${r.urlsPublicas} URLs públicas · ` +
     `${r.endpointsMaquina} endpoints de máquina`,
@@ -626,11 +712,27 @@ if (ARGS.has('--resumen')) {
     console.log('\nINCONSISTENCIAS:');
     for (const i of inconsistencias) console.log(`  ${i.archivo}:${i.linea}  ${i.porque}\n    ${i.texto}`);
   }
-  if (huerfanas.length) console.log(`\nHUÉRFANAS:\n  ${huerfanas.join('\n  ')}`);
+  if (huerfanas.length) {
+    console.log('\nHUÉRFANAS:');
+    for (const r of huerfanas) {
+      const motivo = HUERFANAS_PERMITIDAS[r];
+      console.log(motivo ? `  ${r}  — declarada: ${motivo}` : `  ${r}  ← SIN ENLACES ENTRANTES`);
+    }
+  }
   if (sinBreadcrumb.length) console.log(`\nSIN BreadcrumbList:\n  ${sinBreadcrumb.join('\n  ')}`);
 }
 
+const huerfanasNoDeclaradas = huerfanas.filter((r) => !(r in HUERFANAS_PERMITIDAS));
+
 if (ARGS.has('--check') && inconsistencias.length) {
   console.error(`\n${inconsistencias.length} inconsistencia(s): una cifra que ya vive en una fuente de verdad está escrita a mano.`);
+  process.exit(1);
+}
+
+if (ARGS.has('--check') && huerfanasNoDeclaradas.length) {
+  console.error(
+    `\n${huerfanasNoDeclaradas.length} página(s) sin un solo enlace entrante:\n  ${huerfanasNoDeclaradas.join('\n  ')}\n` +
+      'Enlácelas desde el menú, el pie o una página que las contenga, o declare el motivo en HUERFANAS_PERMITIDAS.',
+  );
   process.exit(1);
 }
