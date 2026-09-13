@@ -1,0 +1,110 @@
+From 8286b00361a93f2169272306a6018ec4268080e0 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 13 Sep 2026 18:44:25 +0000
+Subject: [PATCH] =?UTF-8?q?G2:=20la=20intenci=C3=B3n=20=C2=ABcorredor?=
+ =?UTF-8?q?=C2=BB=20no=20ten=C3=ADa=20nombre=20en=20la=20interfaz=20y=20tu?=
+ =?UTF-8?q?mb=C3=B3=20tsc?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+La entrega B2 añadió la intención «corredor» al mapa de consultas y actualizó
+el orden del riel en lib/search/topic-map.ts, pero se dejó la otra tabla que
+enumera las intenciones una por una: ETIQUETA en components/RielComercial.tsx,
+declarada como Record<Intencion, string>. Ese tipo no admite huecos, así que
+el gate se detuvo en tipos con un error en un componente que el parche no
+tocaba:
+
+  components/RielComercial.tsx(36,7): error TS2741: Property 'corredor' is
+  missing in type ... but required in type 'Record<Intencion, string>'
+
+Arreglo: la etiqueta que faltaba —«Exportación»—, que es como se llama esa
+salida para el lector del riel.
+
+Y una prueba para que el aviso llegue antes y en el idioma del problema. El
+error de tipos dice «falta una propiedad»; lo que de verdad pasaba es que una
+intención nueva no tenía nombre para el comprador que la ve en un chip.
+test/mapa-consultas.test.ts recorre ahora las intenciones declaradas en
+data/topic-map.json y exige que cada una aparezca en la tabla del componente.
+Se comprueba sobre el texto del archivo, no importándolo: es un componente de
+cliente y aquí sólo interesa esa tabla.
+
+Verificación: 21/21 en test/mapa-consultas.test.ts, incluida la prueba nueva
+—comprobada además al revés, quitando la etiqueta: falla nombrando «corredor»—.
+El registro de npm está bloqueado por política de red en este entorno, así que
+tsc y el build los corre el gate de scripts/aplicar-entrega.sh.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UxmuN1emKoms4zAxwLB8RX
+---
+ components/RielComercial.tsx |  8 ++++++++
+ test/mapa-consultas.test.ts  | 22 +++++++++++++++++++++-
+ 2 files changed, 29 insertions(+), 1 deletion(-)
+
+diff --git a/components/RielComercial.tsx b/components/RielComercial.tsx
+index 7568417..9f6f2a3 100644
+--- a/components/RielComercial.tsx
++++ b/components/RielComercial.tsx
+@@ -33,6 +33,13 @@ interface Props {
+   className?: string;
+ }
+ 
++/**
++ * Una etiqueta por intención, y el tipo lo exige: `Record<Intencion, string>`
++ * no admite huecos, así que la etapa que añada una intención nueva no compila
++ * hasta que decida cómo se llama en la interfaz. Es deliberado — un chip vacío
++ * en el riel es una salida que el lector no entiende—, y test/mapa-consultas
++ * comprueba lo mismo desde el otro lado, contra las intenciones del JSON.
++ */
+ const ETIQUETA: Record<Cluster['intencion'], string> = {
+   comercial: 'Producto',
+   sector: 'Sector',
+@@ -41,6 +48,7 @@ const ETIQUETA: Record<Cluster['intencion'], string> = {
+   transaccional: 'Cotizar',
+   local: 'Cobertura',
+   entidad: 'La empresa',
++  corredor: 'Exportación',
+ };
+ 
+ export default function RielComercial({
+diff --git a/test/mapa-consultas.test.ts b/test/mapa-consultas.test.ts
+index 4f67511..b18816e 100644
+--- a/test/mapa-consultas.test.ts
++++ b/test/mapa-consultas.test.ts
+@@ -1,5 +1,5 @@
+ import { describe, it, expect } from 'vitest';
+-import { existsSync } from 'node:fs';
++import { existsSync, readFileSync } from 'node:fs';
+ import { join } from 'node:path';
+ import {
+   clusters,
+@@ -158,6 +158,26 @@ describe('mapa de consultas: una consulta, una página', () => {
+     expect(raras).toEqual([]);
+   });
+ 
++  /**
++   * CADA INTENCIÓN SE LLAMA DE ALGUNA MANERA EN LA INTERFAZ.
++   *
++   * El riel comercial pinta un chip con el nombre de la intención del vecino.
++   * Su tabla es un `Record<Intencion, string>`, así que añadir una intención
++   * al JSON sin etiquetarla rompe `tsc` — y así pasó al introducir «corredor»:
++   * el mapa, las pruebas y el build de datos estaban verdes, y la compilación
++   * de tipos se cayó en un componente que nadie había tocado.
++   *
++   * Esta prueba lo dice antes y en el idioma del problema: la intención nueva
++   * no tiene nombre para el lector. Se comprueba sobre el TEXTO del componente
++   * porque es un componente de cliente y aquí sólo interesa su tabla.
++   */
++  it('cada intención tiene etiqueta en el riel comercial', () => {
++    const fuente = readFileSync(join(raiz, 'components/RielComercial.tsx'), 'utf8');
++    const bloque = fuente.slice(fuente.indexOf('const ETIQUETA'), fuente.indexOf('export default'));
++    const sinEtiqueta = Object.keys(intenciones).filter((i) => !new RegExp(`\\b${i}\\s*:`).test(bloque));
++    expect(sinEtiqueta, 'añada la etiqueta en components/RielComercial.tsx').toEqual([]);
++  });
++
+   it('los términos no llevan espacios sobrantes ni están duplicados dentro de su clúster', () => {
+     const sucios: string[] = [];
+     for (const c of clusters) {
+-- 
+2.43.0
+
