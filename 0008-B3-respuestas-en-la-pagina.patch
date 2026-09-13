@@ -1,0 +1,1109 @@
+From 8f8a261f73b9c42c058a7ad19ea08812badf7fac Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 13 Sep 2026 21:12:08 +0000
+Subject: [PATCH] =?UTF-8?q?B3:=20las=2022=20respuestas=20dejan=20de=20ser?=
+ =?UTF-8?q?=20s=C3=B3lo=20para=20m=C3=A1quinas=20=E2=80=94=20visibles=20en?=
+ =?UTF-8?q?=20su=20p=C3=A1gina=20y=20marcadas=20como=20FAQPage?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+B2 escribió las 22 respuestas que preceden a una orden de compra, con su
+límite pegado, y las publicó en /llms.txt y en /mapa-consultas.json. Un agente
+las leía; una persona no. Y eso bloqueaba lo siguiente: marcar un FAQPage con
+preguntas que la página no muestra es lo que un buscador descarta, con razón
+—sería decirle al rastreador algo que su lector no puede comprobar—.
+
+QUÉ ENTRA
+
+· `pregunta` en cada una de las 22 entradas: la misma consulta escrita como la
+  haría una persona en voz alta. «big bags FIBC a medida Perú» es una cadena de
+  búsqueda, no una pregunta, y marcarla como si lo fuera ensucia el grafo.
+
+· faqsDeRuta(ruta): devuelve las preguntas de una ruta en el formato que ya
+  usan los bloques de preguntas frecuentes y faqSchema, con EL LÍMITE DENTRO de
+  la respuesta. Un motor que cite el fragmento se lleva la condición; en una
+  línea aparte sería lo primero que se cae al resumir.
+
+· Las páginas que ya tenían preguntas frecuentes las mezclan con las suyas: las
+  tres cuñas en español, las tres en inglés, /exportacion, /fabricar-o-importar
+  y su gemela inglesa, las fichas de producto, las familias y las guías de
+  recursos. Una sola lista visible, un solo FAQPage — no dos.
+
+· components/PreguntasDeCompra.tsx para las que no lo tenían: /nosotros,
+  /biblioteca/[slug], /en/rfq y la puerta en portugués. Si la ruta no tiene
+  respuestas escritas no pinta nada y no emite nada: un FAQPage vacío es ruido.
+
+· /pt entra al grafo: hasta hoy no emitía JSON-LD. Ahora declara WebPage,
+  BreadcrumbList y su FAQPage con las cinco respuestas en portugués.
+
+EL IDIOMA DEL MARCADO DEJÓ DE MENTIR. webPageSchema y faqSchema fijaban
+inLanguage: es-PE para todo el sitio, así que las seis páginas en inglés y la
+portuguesa declaraban ser españolas en su propio dato estructurado mientras su
+<html lang> decía otra cosa. Ambos generadores aceptan ahora el idioma de la
+página, y las cuñas inglesas, /en/rfq, /en/sourcing-from-peru y /pt declaran
+el suyo.
+
+LO QUE LO MANTIENE. Cinco pruebas nuevas: cada pregunta está escrita como
+pregunta y no repite la cadena de búsqueda; la respuesta publicada contiene la
+respuesta Y el límite; CADA UNA de las 17 rutas con respuestas tiene un archivo
+que las publica —con la tabla explícita de qué archivo cubre qué ruta, de modo
+que una consulta nueva hacia una página que nadie publica falla con nombre—;
+las páginas en inglés y portugués declaran su idioma; y ninguna pregunta se
+duplica dentro de la misma página.
+
+LO QUE NO ENTRA: ninguna afirmación nueva —el texto es el de B2, que ya pasó
+las pruebas de precio, plazo y certificación en tres idiomas—, ningún Review,
+ningún AggregateRating, ningún areaServed continental, y ningún FAQPage
+duplicado en páginas que ya tenían uno.
+
+VERIFICACIÓN. 715 pruebas verdes en este entorno (las once restantes fallan por
+paquetes que la política de red no deja instalar aquí), el auditor de enlaces
+sigue en cero huérfanas no declaradas, y los archivos tocados pasan el
+transpilador de TSX uno a uno. tsc, lint y build los corre el gate.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UxmuN1emKoms4zAxwLB8RX
+---
+ app/(en)/en/rfq/page.tsx                      |  5 +-
+ app/(en)/en/sourcing-from-peru/page.tsx       |  8 +-
+ app/(es)/biblioteca/[slug]/page.tsx           |  5 +
+ app/(es)/exportacion/page.tsx                 | 13 ++-
+ app/(es)/nosotros/page.tsx                    |  8 ++
+ app/(es)/productos/[slug]/page.tsx            |  5 +-
+ app/(es)/productos/familia/[slug]/page.tsx    |  8 +-
+ app/(es)/recursos/[slug]/page.tsx             |  7 +-
+ app/(pt)/pt/page.tsx                          | 44 +++++++++
+ components/CunaHub.tsx                        | 13 ++-
+ components/CunaHubEn.tsx                      | 13 ++-
+ components/FabricarOImportar.tsx              |  6 +-
+ components/PreguntasDeCompra.tsx              | 69 +++++++++++++
+ .../2026-09-14-respuestas-en-la-pagina.md     | 67 +++++++++++++
+ lib/consultas-dinero.ts                       | 58 +++++++++++
+ lib/schema.ts                                 | 18 +++-
+ test/consultas-dinero.test.ts                 | 97 ++++++++++++++++++-
+ 17 files changed, 425 insertions(+), 19 deletions(-)
+ create mode 100644 components/PreguntasDeCompra.tsx
+ create mode 100644 docs/entregas/2026-09-14-respuestas-en-la-pagina.md
+
+diff --git a/app/(en)/en/rfq/page.tsx b/app/(en)/en/rfq/page.tsx
+index 4efb046..909c25d 100644
+--- a/app/(en)/en/rfq/page.tsx
++++ b/app/(en)/en/rfq/page.tsx
+@@ -7,6 +7,7 @@ import { INCOTERMS_SALIDA } from '@/lib/exportacion';
+ import { JsonLd } from '@/components/JsonLd';
+ import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
+ import { OG_IMAGEN } from '@/lib/meta';
++import PreguntasDeCompra from '@/components/PreguntasDeCompra';
+ 
+ /**
+  * RFQ EN INGLÉS.
+@@ -54,7 +55,7 @@ export default async function RfqEnPage({
+     <div className="mx-auto max-w-3xl px-6 py-14">
+       <JsonLd
+         data={[
+-          webPageSchema({ url: URL_PAGINA, name: TITLE, description: DESCRIPTION }),
++          webPageSchema({ url: URL_PAGINA, name: TITLE, description: DESCRIPTION, inLanguage: 'en' }),
+           breadcrumbSchema(
+             [
+               { name: 'Home', url: `${SITE.url}/` },
+@@ -105,6 +106,8 @@ export default async function RfqEnPage({
+         preselectedProduct={encontrado?.name}
+         slugOrigen={encontrado?.slug}
+       />
++
++      <PreguntasDeCompra ruta="/en/rfq" titulo="Before you send it" idioma="en" />
+     </div>
+   );
+ }
+diff --git a/app/(en)/en/sourcing-from-peru/page.tsx b/app/(en)/en/sourcing-from-peru/page.tsx
+index 0fce9ea..f4d0ca9 100644
+--- a/app/(en)/en/sourcing-from-peru/page.tsx
++++ b/app/(en)/en/sourcing-from-peru/page.tsx
+@@ -10,6 +10,7 @@ import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
+ import { OG_IMAGEN } from '@/lib/meta';
+ import CierreComercial from '@/components/CierreComercial';
+ import { ACCIONES_EN } from '@/lib/acciones';
++import { faqsDeRuta } from '@/lib/consultas-dinero';
+ 
+ /**
+  * SOURCING HUB EN INGLÉS — la puerta del comprador extranjero.
+@@ -86,6 +87,8 @@ const FAQS = [
+   },
+ ];
+ 
++const FAQS_TODAS = [...FAQS, ...faqsDeRuta('/en/sourcing-from-peru')];
++
+ export default function SourcingFromPeruPage() {
+   const respuestaDirecta =
+     `${SITE.legalName} (Peruvian tax ID ${SITE.ruc}, registered since 2009) manufactures industrial ` +
+@@ -104,6 +107,7 @@ export default function SourcingFromPeruPage() {
+             name: TITLE,
+             description: respuestaDirecta,
+             speakable: ['.respuesta-directa'],
++            inLanguage: 'en',
+           }),
+           breadcrumbSchema(
+             [
+@@ -113,7 +117,7 @@ export default function SourcingFromPeruPage() {
+             ],
+             `${URL_PAGINA}#breadcrumb`,
+           ),
+-          faqSchema(FAQS, URL_PAGINA),
++          faqSchema(FAQS_TODAS, URL_PAGINA, 'en'),
+         ]}
+       />
+ 
+@@ -252,7 +256,7 @@ export default function SourcingFromPeruPage() {
+           Frequently asked, before the first RFQ
+         </h2>
+         <dl className="space-y-6">
+-          {FAQS.map((f) => (
++          {FAQS_TODAS.map((f) => (
+             <div key={f.q}>
+               <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
+               <dd className="mt-1 text-gray-700 leading-relaxed">{f.a}</dd>
+diff --git a/app/(es)/biblioteca/[slug]/page.tsx b/app/(es)/biblioteca/[slug]/page.tsx
+index ac18100..5f85597 100644
+--- a/app/(es)/biblioteca/[slug]/page.tsx
++++ b/app/(es)/biblioteca/[slug]/page.tsx
+@@ -14,6 +14,7 @@ import {
+   itemListSchema,
+   webPageSchema,
+ } from '@/lib/schema';
++import PreguntasDeCompra from '@/components/PreguntasDeCompra';
+ 
+ type Props = { params: Promise<{ slug: string }> };
+ export const dynamicParams = false;
+@@ -129,6 +130,10 @@ export default async function GuidePage({ params }: Props) {
+           <li key={p.slug}><Link href={`/productos/${p.slug}`} className="text-[#059669]">{p.name}</Link></li>
+         ))}
+       </ul>
++
++      {/* «Para cotizar» son preguntas SIN respuesta: dependen del proyecto de
++          quien lee. Éstas son las que esta guía sí contesta, con su límite. */}
++      <PreguntasDeCompra ruta={`/biblioteca/${g.slug}`} titulo="Lo que esta guía sí contesta" />
+     </div>
+   );
+ }
+diff --git a/app/(es)/exportacion/page.tsx b/app/(es)/exportacion/page.tsx
+index 6cccc19..845cbd3 100644
+--- a/app/(es)/exportacion/page.tsx
++++ b/app/(es)/exportacion/page.tsx
+@@ -8,6 +8,7 @@ import { webPageSchema, breadcrumbSchema, faqSchema, businessRef } from '@/lib/s
+ import { INCOTERMS_SALIDA } from '@/lib/entidad-feed';
+ import { MERCADOS } from '@/lib/exportacion';
+ import WhatsAppLink from '@/components/WhatsAppLink';
++import { faqsDeRuta } from '@/lib/consultas-dinero';
+ 
+ export const metadata: Metadata = {
+   title: 'Exportación desde el Perú',
+@@ -53,6 +54,14 @@ const FAQS = [
+   },
+ ];
+ 
++/**
++ * Las respuestas de compra de esta ruta —Chile, Ecuador, los Incoterms— viven
++ * en lib/consultas-dinero.ts, con su límite dentro de la respuesta, y se
++ * publican aquí y en el FAQPage. La misma fuente que leen /llms.txt y
++ * /mapa-consultas.json: el agente y la persona ven lo mismo.
++ */
++const FAQS_TODAS = [...FAQS, ...faqsDeRuta('/exportacion')];
++
+ export default function ExportacionPage() {
+   const esquema = ranurasProceso().find((r) => r.id === 'proceso:exportacion-flujo');
+   const url = `${SITE.url}/exportacion`;
+@@ -114,7 +123,7 @@ export default function ExportacionPage() {
+               })),
+             },
+           },
+-          faqSchema(FAQS, url),
++          faqSchema(FAQS_TODAS, url),
+         ]}
+       />
+       <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">SUMINISTRO INTERNACIONAL</div>
+@@ -153,7 +162,7 @@ export default function ExportacionPage() {
+ 
+       <h2 className="mt-12 text-xl font-semibold text-[#0A2540]">Preguntas frecuentes</h2>
+       <dl className="mt-4 space-y-5">
+-        {FAQS.map((f) => (
++        {FAQS_TODAS.map((f) => (
+           <div key={f.q}>
+             <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
+             <dd className="mt-1 text-gray-700">{f.a}</dd>
+diff --git a/app/(es)/nosotros/page.tsx b/app/(es)/nosotros/page.tsx
+index d703f08..48871cf 100644
+--- a/app/(es)/nosotros/page.tsx
++++ b/app/(es)/nosotros/page.tsx
+@@ -6,6 +6,7 @@ import Image from 'next/image';
+ import { JsonLd } from '@/components/JsonLd';
+ import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
+ import { OG_IMAGEN } from '@/lib/meta';
++import PreguntasDeCompra from '@/components/PreguntasDeCompra';
+ 
+ const URL_NOSOTROS = `${SITE.url}/nosotros`;
+ 
+@@ -108,6 +109,13 @@ export default function NosotrosPage() {
+           <Link href="/contacto" className="inline-block bg-white text-[#0A2540] btn btn-lg btn-primary font-semibold hover:bg-white/90 transition-all">Contáctenos hoy</Link>
+         </div>
+       </div>
++
++      <div className="max-w-5xl mx-auto px-6">
++        <PreguntasDeCompra
++          ruta="/nosotros"
++          siguiente={{ href: '/confianza', label: 'Qué NO afirma esta empresa →' }}
++        />
++      </div>
+     </div>
+   );
+ }
+diff --git a/app/(es)/productos/[slug]/page.tsx b/app/(es)/productos/[slug]/page.tsx
+index c126edd..957fe22 100644
+--- a/app/(es)/productos/[slug]/page.tsx
++++ b/app/(es)/productos/[slug]/page.tsx
+@@ -25,6 +25,7 @@ import { guides } from '@/lib/guides';
+ import { cunaDeProducto } from '@/lib/cunas';
+ import DatosParaCotizar from '@/components/DatosParaCotizar';
+ import { ACCIONES } from '@/lib/acciones';
++import { faqsDeRuta } from '@/lib/consultas-dinero';
+ 
+ interface Props {
+   params: Promise<{ slug: string }>;
+@@ -85,7 +86,9 @@ export default async function ProductDetailPage({ params }: Props) {
+   const rutaProducto = `/productos/${product.slug}`;
+   const respuestaDirecta = respuestaDirectaProducto(product);
+   const rfq = rfqWhatsAppProducto(product);
+-  const faqs = productFaqs(product);
++  // Las preguntas de compra que esta ficha contesta (lib/consultas-dinero.ts)
++  // viajan con las derivadas del catálogo: mismo bloque visible, mismo FAQPage.
++  const faqs = [...productFaqs(product), ...faqsDeRuta(`/productos/${product.slug}`)];
+   const arquitecturas = solutionsForProduct(product.slug);
+   const glosarioRel = terminosParaProducto(product.slug);
+   const relatedProducts = products
+diff --git a/app/(es)/productos/familia/[slug]/page.tsx b/app/(es)/productos/familia/[slug]/page.tsx
+index afce5f1..0bd7fb3 100644
+--- a/app/(es)/productos/familia/[slug]/page.tsx
++++ b/app/(es)/productos/familia/[slug]/page.tsx
+@@ -15,6 +15,7 @@ import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
+ import RielComercial from '@/components/RielComercial';
+ import CierreComercial from '@/components/CierreComercial';
+ import { ACCIONES } from '@/lib/acciones';
++import { faqsDeRuta } from '@/lib/consultas-dinero';
+ 
+ /**
+  * Página de familia (/productos/familia/[slug]).
+@@ -66,6 +67,9 @@ export default async function FamilyPage({ params }: Props) {
+   const { family, content } = resolved;
+ 
+   const url = `${SITE.url}/productos/familia/${slug}`;
++  // Preguntas de compra de esta familia (lib/consultas-dinero.ts) junto a las
++  // suyas: mismo bloque visible, mismo FAQPage, el límite dentro de la respuesta.
++  const faqs = [...content.faqs, ...faqsDeRuta(`/productos/familia/${family.slug}`)];
+   const imagen = ranurasFamilia().find((r) => r.id === `familia:${slug}`);
+   const items = products.filter((p) => p.category === family.name);
+   // ¿Existe /comparar para esta familia? La misma función que genera la ruta.
+@@ -108,7 +112,7 @@ export default async function FamilyPage({ params }: Props) {
+               url: `${SITE.url}/productos/${p.slug}`,
+             })),
+           }),
+-          faqSchema(content.faqs, url),
++          faqSchema(faqs, url),
+           ...(imagen
+             ? [imageObjectSchema({
+                 url: imagen.ruta, ancho: imagen.ancho, alto: imagen.alto,
+@@ -269,7 +273,7 @@ export default async function FamilyPage({ params }: Props) {
+           Preguntas frecuentes
+         </h2>
+         <dl className="space-y-6">
+-          {content.faqs.map((f) => (
++          {faqs.map((f) => (
+             <div key={f.q}>
+               <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
+               <dd className="mt-1 text-gray-700">{f.a}</dd>
+diff --git a/app/(es)/recursos/[slug]/page.tsx b/app/(es)/recursos/[slug]/page.tsx
+index a818e6e..dad8d95 100644
+--- a/app/(es)/recursos/[slug]/page.tsx
++++ b/app/(es)/recursos/[slug]/page.tsx
+@@ -23,6 +23,7 @@ import {
+ import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
+ import CierreComercial from '@/components/CierreComercial';
+ import { ACCIONES } from '@/lib/acciones';
++import { faqsDeRuta } from '@/lib/consultas-dinero';
+ 
+ /**
+  * Plantilla de artículo técnico.
+@@ -82,6 +83,8 @@ export default async function ArticlePage({ params }: Props) {
+   if (!a) notFound();
+ 
+   const url = `${SITE.url}/recursos/${a.slug}`;
++  // Preguntas de compra de esta guía (lib/consultas-dinero.ts) junto a las suyas.
++  const faqs = [...a.faqs, ...faqsDeRuta(`/recursos/${a.slug}`)];
+   const relatedProducts = a.relatedProducts
+     .map((s) => products.find((p) => p.slug === s))
+     .filter((p): p is NonNullable<typeof p> => Boolean(p));
+@@ -133,7 +136,7 @@ export default async function ArticlePage({ params }: Props) {
+             ],
+             `${url}#breadcrumb`,
+           ),
+-          faqSchema(a.faqs, url),
++          faqSchema(faqs, url),
+           ...(a.howTo
+             ? [
+                 howToSchema({
+@@ -302,7 +305,7 @@ export default async function ArticlePage({ params }: Props) {
+           Preguntas frecuentes
+         </h2>
+         <dl className="space-y-6">
+-          {a.faqs.map((f) => (
++          {faqs.map((f) => (
+             <div key={f.q}>
+               <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
+               <dd className="mt-1 text-gray-700">{f.a}</dd>
+diff --git a/app/(pt)/pt/page.tsx b/app/(pt)/pt/page.tsx
+index a8d4227..f553205 100644
+--- a/app/(pt)/pt/page.tsx
++++ b/app/(pt)/pt/page.tsx
+@@ -3,6 +3,9 @@ import Link from 'next/link';
+ import Image from 'next/image';
+ import { SITE } from '@/lib/site';
+ import { PRODUCT_COUNT, FAMILY_COUNT } from '@/lib/facts';
++import { JsonLd } from '@/components/JsonLd';
++import { webPageSchema, breadcrumbSchema, faqSchema } from '@/lib/schema';
++import { faqsDeRuta } from '@/lib/consultas-dinero';
+ 
+ /**
+  * hreflang — se declara SOLO entre estas tres páginas.
+@@ -29,9 +32,35 @@ export const metadata: Metadata = {
+   alternates: { canonical: '/pt', languages: ALTERNOS },
+ };
+ 
++/**
++ * As cinco perguntas de compra em português vivem em lib/consultas-dinero.ts.
++ * Aqui se publicam visíveis e como FAQPage — nunca uma sem a outra: marcar
++ * perguntas que a página não mostra é o que um buscador descarta, com razão.
++ */
++const FAQS_PT = faqsDeRuta('/pt');
++
+ export default function PortuguesePage() {
++  const url = `${SITE.url}/pt`;
+   return (
+     <div className="max-w-3xl mx-auto px-6 py-14">
++      <JsonLd
++        data={[
++          webPageSchema({
++            url,
++            name: 'Fabricante peruano de têxteis industriais sob medida',
++            description: 'Fábrica em Chorrillos, Lima. Exportação para o Brasil avaliada por RFQ.',
++            inLanguage: 'pt-BR',
++          }),
++          breadcrumbSchema(
++            [
++              { name: 'Início', url: `${SITE.url}/` },
++              { name: 'Português', url },
++            ],
++            `${url}#breadcrumb`,
++          ),
++          faqSchema(FAQS_PT, url, 'pt-BR'),
++        ]}
++      />
+       {/* Mismo motivo que en /en: el <html> dice "es" y esta página no lo es. */}
+       <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">PORTUGUÊS · COMPRADOR BRASILEIRO</div>
+       <h1 className="t-display font-semibold text-[#0A2540]">Fabricante peruano de têxteis industriais sob medida</h1>
+@@ -57,6 +86,21 @@ export default function PortuguesePage() {
+         O sítio é em espanhol; esta página confirma identidade e abre o RFQ. Não há tabela de preços em BRL.
+       </p>
+       <p className="mt-6 text-sm">Vendas: {SITE.email} · WhatsApp {SITE.phoneWhatsApp}</p>
++
++      {/* Perguntas de compra = FAQPage emitido abaixo. Mesma fonte que leem
++          /llms.txt e /mapa-consultas.json: o agente e a pessoa veem o mesmo,
++          e o limite viaja dentro da resposta. */}
++      <section className="mt-12 border-t pt-10">
++        <h2 className="text-2xl font-semibold tracking-tight text-[#0A2540]">Perguntas frequentes</h2>
++        <dl className="mt-6 max-w-3xl space-y-6">
++          {FAQS_PT.map((f) => (
++            <div key={f.q}>
++              <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
++              <dd className="mt-1 text-gray-700">{f.a}</dd>
++            </div>
++          ))}
++        </dl>
++      </section>
+       <Link href="/cotizacion" className="btn mt-8 inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">Abrir RFQ</Link>
+     </div>
+   );
+diff --git a/components/CunaHub.tsx b/components/CunaHub.tsx
+index 4a3c10e..f393c25 100644
+--- a/components/CunaHub.tsx
++++ b/components/CunaHub.tsx
+@@ -17,6 +17,7 @@ import { respuestaDirectaCuna } from '@/lib/respuesta-directa';
+ import { ACTUALIZADO } from '@/lib/sitemaps';
+ import { RUTA_ES } from '@/lib/fabricar-o-importar';
+ import { ACCIONES } from '@/lib/acciones';
++import { faqsDeRuta } from '@/lib/consultas-dinero';
+ 
+ /**
+  * Página de cuña comercial (ver lib/cunas.ts). Server component compartido
+@@ -40,6 +41,14 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
+   // especificación; los huecos dicen «No declarado» (lib/comparativa.ts).
+   const comparativa = hijos.length >= 2 ? construirComparativa(hijos) : null;
+ 
++  /**
++   * Las preguntas de compra que esta página contesta —con su límite dentro de
++   * la respuesta— se publican aquí y en el FAQPage de arriba. Vienen de
++   * lib/consultas-dinero.ts, que es la misma fuente que leen /llms.txt y
++   * /mapa-consultas.json: un agente y una persona ven exactamente lo mismo.
++   */
++  const faqs = [...cuna.faqs, ...faqsDeRuta(`/${cuna.slug}`)];
++
+   return (
+     <div className="max-w-6xl mx-auto px-6 py-12">
+       <JsonLd
+@@ -57,7 +66,7 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
+             ],
+             `${url}#breadcrumb`,
+           ),
+-          faqSchema(cuna.faqs, url),
++          faqSchema(faqs, url),
+           /**
+            * Service de alcance NACIONAL. No se usa `serviceSchema` de
+            * lib/schema.ts porque ese ancla `areaServed` a una City —correcto
+@@ -289,7 +298,7 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
+       <section className="mt-14 pt-10 border-t">
+         <h2 className="font-semibold tracking-tight text-2xl mb-6">Preguntas frecuentes</h2>
+         <dl className="space-y-6 max-w-3xl">
+-          {cuna.faqs.map((f) => (
++          {faqs.map((f) => (
+             <div key={f.q}>
+               <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
+               <dd className="mt-1 text-gray-700">{f.a}</dd>
+diff --git a/components/CunaHubEn.tsx b/components/CunaHubEn.tsx
+index 9f05a39..aceda91 100644
+--- a/components/CunaHubEn.tsx
++++ b/components/CunaHubEn.tsx
+@@ -13,6 +13,7 @@ import CostoEnVivo from '@/components/CostoEnVivo';
+ import { ACTUALIZADO } from '@/lib/sitemaps';
+ import { RUTA_EN } from '@/lib/fabricar-o-importar';
+ import { ACCIONES_EN, WHATSAPP_LABEL } from '@/lib/acciones';
++import { faqsDeRuta } from '@/lib/consultas-dinero';
+ 
+ /**
+  * PÁGINA DE CUÑA EN INGLÉS (ver lib/cunas-en.ts).
+@@ -67,6 +68,13 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
+ 
+   const rfq = `/en/rfq?product=${encodeURIComponent(hijos[0]?.slug ?? '')}`;
+ 
++  /**
++   * Las preguntas de compra que esta página contesta —con su límite dentro de
++   * la respuesta— se publican aquí y en el FAQPage de arriba, desde la misma
++   * fuente que leen /llms.txt y /mapa-consultas.json.
++   */
++  const faqs = [...cuna.faqs, ...faqsDeRuta(`/en/${cuna.slug}`)];
++
+   return (
+     <div className="mx-auto max-w-6xl px-6 py-12">
+       <JsonLd
+@@ -76,6 +84,7 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
+             name: cuna.titulo,
+             description: respuestaDirecta,
+             speakable: ['.respuesta-directa'],
++            inLanguage: 'en',
+           }),
+           breadcrumbSchema(
+             [
+@@ -85,7 +94,7 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
+             ],
+             `${url}#breadcrumb`,
+           ),
+-          faqSchema(cuna.faqs, url),
++          faqSchema(faqs, url, 'en'),
+           {
+             '@context': 'https://schema.org',
+             '@type': 'Service',
+@@ -317,7 +326,7 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
+       <section className="mt-14 border-t pt-10 dark:border-[var(--border)]">
+         <h2 className="mb-6 text-2xl font-semibold tracking-tight">Frequently asked</h2>
+         <dl className="max-w-3xl space-y-6">
+-          {cuna.faqs.map((f) => (
++          {faqs.map((f) => (
+             <div key={f.q}>
+               <dt className="font-semibold text-[#0A2540] dark:text-inherit">{f.q}</dt>
+               <dd className="mt-1 text-gray-700 dark:text-gray-300">{f.a}</dd>
+diff --git a/components/FabricarOImportar.tsx b/components/FabricarOImportar.tsx
+index 23c5f2d..c01d395 100644
+--- a/components/FabricarOImportar.tsx
++++ b/components/FabricarOImportar.tsx
+@@ -22,6 +22,7 @@ import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
+ import WhatsAppLink from '@/components/WhatsAppLink';
+ import CostoEnVivo from '@/components/CostoEnVivo';
+ import { ACCIONES, WHATSAPP_LABEL } from '@/lib/acciones';
++import { faqsDeRuta } from '@/lib/consultas-dinero';
+ 
+ /**
+  * LA PÁGINA QUE DECIDE LA COMPRA, en los dos idiomas del par.
+@@ -119,7 +120,9 @@ export default async function FabricarOImportar({ idioma }: { idioma: 'es' | 'en
+   const t = T[idioma];
+   const en = idioma === 'en';
+   const url = `${SITE.url}${en ? RUTA_EN : RUTA_ES}`;
+-  const faqs = en ? FAQS_FABRICAR_EN : FAQS_FABRICAR;
++  // Las respuestas de compra de esta ruta se publican con las suyas, en el
++  // bloque visible y en el FAQPage, desde lib/consultas-dinero.ts.
++  const faqs = [...(en ? FAQS_FABRICAR_EN : FAQS_FABRICAR), ...faqsDeRuta(en ? RUTA_EN : RUTA_ES)];
+   const noNosCompre = en ? NO_NOS_COMPRE_EN : NO_NOS_COMPRE;
+   const cuandoSi = en ? CUANDO_SI_EN : CUANDO_SI;
+   const frentes = en
+@@ -145,6 +148,7 @@ export default async function FabricarOImportar({ idioma }: { idioma: 'es' | 'en
+             name: t.h1,
+             description: respuestaDirecta,
+             speakable: ['.respuesta-directa'],
++            inLanguage: en ? 'en' : undefined,
+           }),
+           breadcrumbSchema([...t.verMigas], `${url}#breadcrumb`),
+           faqSchema([...faqs], url),
+diff --git a/components/PreguntasDeCompra.tsx b/components/PreguntasDeCompra.tsx
+new file mode 100644
+index 0000000..311801c
+--- /dev/null
++++ b/components/PreguntasDeCompra.tsx
+@@ -0,0 +1,69 @@
++import React from 'react';
++import Link from 'next/link';
++import { JsonLd } from '@/components/JsonLd';
++import { faqSchema } from '@/lib/schema';
++import { faqsDeRuta } from '@/lib/consultas-dinero';
++import { SITE } from '@/lib/site';
++
++/**
++ * LAS PREGUNTAS DE COMPRA, VISIBLES Y MARCADAS, EN LA PÁGINA QUE LAS CONTESTA.
++ *
++ * lib/consultas-dinero.ts guarda las 22 consultas que preceden a una orden con
++ * su respuesta citable y su límite. Hasta ahora vivían sólo en /llms.txt y en
++ * /mapa-consultas.json: un agente las leía y una persona no.
++ *
++ * Las páginas que YA tenían un bloque de preguntas frecuentes las mezclan con
++ * las suyas —una sola lista, un solo FAQPage—. Este componente es para las que
++ * no lo tenían: publica el bloque visible y emite el FAQPage de esa ruta. Si la
++ * ruta no tiene respuestas escritas, no pinta nada y no emite nada, que es lo
++ * correcto: un FAQPage vacío es ruido en el grafo.
++ *
++ * REGLA QUE NO SE NEGOCIA: el marcado sólo describe lo que el visitante puede
++ * leer. Emitir preguntas que la página no muestra es lo que un buscador
++ * descarta, y con razón — sería decirle algo que su lector no puede comprobar.
++ */
++
++interface Props {
++  /** Ruta canónica de la página, sin dominio. Ej.: '/nosotros'. */
++  ruta: string;
++  titulo?: string;
++  /** Idioma de las preguntas, si no es el del sitio. */
++  idioma?: string;
++  /** Enlace del siguiente paso, si la página quiere cerrarlo aquí. */
++  siguiente?: { href: string; label: string };
++  className?: string;
++}
++
++export default function PreguntasDeCompra({
++  ruta,
++  titulo = 'Preguntas frecuentes',
++  idioma,
++  siguiente,
++  className = '',
++}: Props) {
++  const faqs = faqsDeRuta(ruta);
++  if (faqs.length === 0) return null;
++
++  return (
++    <section className={`mt-14 border-t pt-10 ${className}`.trim()}>
++      <JsonLd data={faqSchema(faqs, `${SITE.url}${ruta}`, idioma)} />
++      <h2 className="mb-6 text-2xl font-semibold tracking-tight text-[#0A2540]">{titulo}</h2>
++      <dl className="max-w-3xl space-y-6">
++        {faqs.map((f) => (
++          <div key={f.q}>
++            <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
++            <dd className="mt-1 text-gray-700">{f.a}</dd>
++          </div>
++        ))}
++      </dl>
++      {siguiente ? (
++        <Link
++          href={siguiente.href}
++          className="mt-6 inline-flex min-h-[44px] items-center text-sm font-medium text-[#059669] hover:underline"
++        >
++          {siguiente.label}
++        </Link>
++      ) : null}
++    </section>
++  );
++}
+diff --git a/docs/entregas/2026-09-14-respuestas-en-la-pagina.md b/docs/entregas/2026-09-14-respuestas-en-la-pagina.md
+new file mode 100644
+index 0000000..b64d38e
+--- /dev/null
++++ b/docs/entregas/2026-09-14-respuestas-en-la-pagina.md
+@@ -0,0 +1,67 @@
++# B3 — las 22 respuestas dejan de ser sólo para máquinas
++
++**Fecha:** 2026-09-14 · **Base:** `main` con 0002 a 0007 aplicados ·
++**Rutas que ahora publican su respuesta:** 17 · **Pruebas nuevas:** 5
++
++## 1. El hueco que dejó B2
++
++La etapa B2 escribió las 22 respuestas que preceden a una orden de compra, con
++su límite pegado, y las publicó en `/llms.txt` y en `/mapa-consultas.json`. Un
++agente las leía. **Una persona no.**
++
++Y eso bloqueaba justo lo que venía después. Marcar un `FAQPage` con preguntas
++que la página no muestra es lo que un buscador descarta —con razón: sería
++decirle al rastreador algo que su lector no puede comprobar—. Sin el bloque
++visible, no había forma honesta de emitir el dato estructurado.
++
++## 2. Qué entra
++
++- **`pregunta`** en cada una de las 22 entradas: la misma consulta escrita como
++  la haría una persona en voz alta. Una cadena de búsqueda —«big bags FIBC a
++  medida Perú»— no es una pregunta, y marcarla como si lo fuera es basura en el
++  grafo.
++- **`faqsDeRuta(ruta)`**: devuelve las preguntas de una ruta en el formato que
++  ya usan los bloques de preguntas frecuentes y `faqSchema`, con **el límite
++  dentro de la respuesta**. Un motor que cite el fragmento se lleva la
++  condición con él; en una línea aparte sería lo primero que se cae al resumir.
++- **Las páginas que ya tenían preguntas frecuentes las mezclan**: las tres
++  cuñas en español, las tres en inglés, `/exportacion`, `/fabricar-o-importar`
++  y su gemela inglesa, las fichas de producto, las familias y las guías de
++  recursos. Una sola lista visible, un solo `FAQPage`.
++- **`components/PreguntasDeCompra.tsx`** para las que no lo tenían:
++  `/nosotros`, `/biblioteca/[slug]`, `/en/rfq` y la puerta en portugués. Si la
++  ruta no tiene respuestas escritas, no pinta nada y no emite nada — un
++  `FAQPage` vacío es ruido.
++- **`/pt` entra al grafo**: hasta hoy no emitía JSON-LD. Ahora declara
++  `WebPage`, `BreadcrumbList` y su `FAQPage` con las cinco respuestas en
++  portugués.
++
++## 3. El idioma del marcado dejó de mentir
++
++`webPageSchema` y `faqSchema` fijaban `inLanguage: es-PE` para todo el sitio.
++Las seis páginas en inglés y la portuguesa declaraban por tanto ser españolas
++en su propio dato estructurado, mientras su `<html lang>` decía otra cosa. Los
++dos generadores aceptan ahora el idioma de la página; las cuñas inglesas,
++`/en/rfq`, `/en/sourcing-from-peru` y `/pt` declaran el suyo.
++
++## 4. Lo que lo mantiene
++
++Cinco pruebas nuevas en `test/consultas-dinero.test.ts`:
++
++- cada pregunta está escrita como pregunta y no repite la cadena de búsqueda;
++- la respuesta publicada contiene la respuesta **y** el límite;
++- **cada una de las 17 rutas con respuestas tiene un archivo que las publica**,
++  con una tabla explícita de qué archivo cubre qué ruta: si mañana una consulta
++  nueva apunta a una página que nadie publica, la prueba lo dice con nombre;
++- las páginas en inglés y en portugués declaran su idioma en el marcado;
++- ninguna pregunta se duplica dentro de la misma página.
++
++## 5. Lo que NO entra
++
++- Ninguna afirmación nueva: el texto es exactamente el de B2, que ya pasó las
++  pruebas de precio, plazo y certificación en tres idiomas.
++- Ningún `Review`, ningún `AggregateRating`, ningún `areaServed` continental.
++  El grafo sigue con un solo `Organization`, un solo `LocalBusiness` y un solo
++  `WebSite`, referenciados por `@id`.
++- Ningún `FAQPage` nuevo en páginas que ya tenían uno: se mezclan las preguntas
++  en el existente en vez de emitir dos, que es lo que confunde al rastreador.
+diff --git a/lib/consultas-dinero.ts b/lib/consultas-dinero.ts
+index 3ebf07a..7e8aa89 100644
+--- a/lib/consultas-dinero.ts
++++ b/lib/consultas-dinero.ts
+@@ -1,6 +1,7 @@
+ import { SITE } from './site';
+ import { INCOTERMS_SALIDA } from './entidad-feed';
+ import { contarPalabras } from './respuesta-directa';
++import { clusters } from './search/topic-map';
+ 
+ /**
+  * CONSULTAS DE DINERO — la respuesta citable de cada trabajo de compra.
+@@ -46,6 +47,13 @@ export interface ConsultaDinero {
+   idioma: IdiomaConsulta;
+   /** La consulta tal como la escribe o la dicta un comprador. */
+   consulta: string;
++  /**
++   * La misma consulta, escrita como la haría una persona en voz alta. Es lo
++   * que se publica como pregunta visible y como `Question` del FAQPage: una
++   * cadena de búsqueda no es una pregunta, y marcar una como si lo fuera es
++   * exactamente el tipo de dato estructurado que Google descarta.
++   */
++  pregunta: string;
+   /** Párrafo extractable, 40–80 palabras. Sin precio, plazo ni certificación propia. */
+   respuesta: string;
+   /** El límite, en la misma unidad de texto que la respuesta. */
+@@ -63,6 +71,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'hub-big-bags',
+     idioma: 'es',
+     consulta: 'big bags FIBC a medida Perú',
++    pregunta: '¿Quién fabrica big bags FIBC a medida en el Perú?',
+     respuesta: `Los big bags se cortan y cosen en la planta de ${PLANTA}, sobre la medida y la carga que usted declare: capacidad, densidad del material, tipo de tapa y de fondo, asas y factor de seguridad. No hay lista de precios porque cada lote se confecciona contra especificación. Con medidas, cantidad y ciudad de entrega, la cotización sale con la ficha técnica del material.`,
+     limite:
+       'Esta empresa no se atribuye certificación propia: la norma que exija su comprador o su terminal se trata como requisito del proyecto, no como credencial nuestra.',
+@@ -72,6 +81,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'decision-fibc',
+     idioma: 'es',
+     consulta: 'big bags para el Callao ISO 21898',
++    pregunta: '¿Y si mi comprador o el terminal del Callao exige ISO 21898?',
+     respuesta: `Si su embarque por el Callao exige ISO 21898, esa exigencia es del comprador o del terminal. Lo que hace la planta es confeccionar contra el factor de seguridad, el tipo de asa y el ensayo que su expediente pida, y entregar con la cotización la documentación disponible del material. Indíquenos qué pide el pliego antes de cotizar y se responde punto por punto.`,
+     limite:
+       'No declaramos ISO 21898 ni ninguna otra certificación a nombre de esta empresa. Citamos la norma ajena porque la pide el puerto o el comprador.',
+@@ -81,6 +91,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'hub-lonas-camiones',
+     idioma: 'es',
+     consulta: 'lonas y toldos para camión Perú',
++    pregunta: '¿Fabrican e instalan lonas y toldos para camión en el Perú?',
+     respuesta: `Las lonas y los toldos de camión se confeccionan a la medida del vehículo y se instalan con personal propio de la planta de ${PLANTA}. Para cotizar hacen falta las medidas de la tolva o del chasis, las unidades de la flota, el gramaje o el uso previsto y la ciudad de entrega. El alcance de instalación se define en la cotización.`,
+     limite:
+       'No hay lista de precios en líneas a medida, y la instalación llega hasta donde la cotización declare: no se promete cobertura nacional por defecto.',
+@@ -90,6 +101,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'corredor-exportacion',
+     idioma: 'es',
+     consulta: 'lonas para camión Chile',
++    pregunta: '¿Pueden despachar lonas para camión a Chile?',
+     respuesta: `La confección ocurre en ${PLANTA} y el embarque a Chile se evalúa operación por operación: la carga sale ${INCOTERMS} y el comprador define transporte y despacho aduanero. No mantenemos stock ni representación comercial del otro lado de la frontera. Envíe medidas, unidades, destino y el Incoterm que usa su empresa, y la cotización vuelve con la lista de documentos.`,
+     limite:
+       'No afirmamos cobertura continental. Chile es un corredor de RFQ, no un mercado con presencia declarada, y cada embarque se evalúa por separado.',
+@@ -99,6 +111,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'importar-desde-peru',
+     idioma: 'es',
+     consulta: 'lonas para camión Ecuador',
++    pregunta: '¿Pueden despachar lonas para camión a Ecuador?',
+     respuesta: `Para Ecuador la carga sale marítima o terrestre según el volumen, siempre desde ${PLANTA} y bajo el Incoterm que se acuerde antes del precio. La confección es a medida del vehículo, así que el RFQ necesita medidas, unidades y uso. La página de compra internacional enumera qué documentos debe enviar su empresa para que la cotización salga completa.`,
+     limite:
+       'Ecuador es un corredor de cotización: no hay oficina, stock ni instalación declarada en destino, y cada operación se evalúa por separado.',
+@@ -108,6 +121,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'hub-ventilacion-minera',
+     idioma: 'es',
+     consulta: 'mangas de ventilación minera Perú',
++    pregunta: '¿Quién fabrica mangas de ventilación para mina o túnel en el Perú?',
+     respuesta: `Las mangas para mina y túnel se confeccionan en ${PLANTA} según diámetro, longitud de tramo, tipo de unión y presión de trabajo del ventilador. El caudal se predimensiona con la calculadora abierta del sitio, que declara sus límites y no sustituye el cálculo del ingeniero de ventilación. Con diámetro, tramos y cantidad, la cotización sale con ficha técnica.`,
+     limite:
+       'La calculadora no entrega pérdida de carga certificada, y esta empresa no se atribuye ensayo ni certificación propia de comportamiento al fuego.',
+@@ -117,6 +131,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'geomembrana-pvc',
+     idioma: 'es',
+     consulta: 'geomembrana PVC para poza o canal',
++    pregunta: '¿Cómo se especifica una geomembrana de PVC para una poza o un canal?',
+     respuesta: `Para poza o canal, el PVC se especifica por espesor, ancho de rollo, tipo de unión y exposición —a intemperie o cubierto—. La superficie se predimensiona con la calculadora del sitio y se confirma con los taludes y el perímetro de anclaje reales. Si el expediente pide otro polímero, se lo decimos y se cotiza la línea que corresponde.`,
+     limite:
+       'Las líneas bajo pedido no publican especificaciones numéricas: la ficha técnica y el certificado de lote los emite el fabricante del material con la cotización.',
+@@ -126,6 +141,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'geomembrana-hdpe',
+     idioma: 'es',
+     consulta: 'expediente que pide geomembrana HDPE',
++    pregunta: '¿Qué hacen cuando el expediente pide geomembrana HDPE?',
+     respuesta: `Cuando el expediente pide HDPE, esta empresa no finge fabricarlo: el HDPE llega por importación directa o por aliado técnico, y la ficha técnica y el certificado de lote los emite el fabricante del material. Lo que aporta la planta de ${PLANTA} es la confección a medida de lo que sí fabrica, y la instalación o supervisión que la cotización declare.`,
+     limite:
+       'No fabricamos geomembrana HDPE. Se suministra y, cuando el alcance lo incluye, se instala con personal propio, sin atribuirnos el ensayo del fabricante.',
+@@ -135,6 +151,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'familia-mallas',
+     idioma: 'es',
+     consulta: 'malla raschel antiáfida anti-granizo',
++    pregunta: '¿Qué malla necesito: raschel, antiáfida o anti-granizo?',
+     respuesta:
+       'Raschel para sombra, antiáfida para exclusión de insectos y anti-pájaro o anti-granizo para daño mecánico resuelven problemas distintos: porcentaje de sombra, mesh de la trama y resistencia al impacto. Se confeccionan a medida, con refuerzos y ojales según el sistema de tensado del predio. Para cotizar hacen falta hectáreas, cultivo, altura de estructura y ciudad.',
+     limite:
+@@ -145,6 +162,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'decision-fabricar-importar',
+     idioma: 'es',
+     consulta: 'fabricar en Perú o importar',
++    pregunta: '¿Me conviene fabricar en el Perú o importar?',
+     respuesta: `Fabricar en Lima gana cuando la medida es propia, el lote es mediano y el proyecto no tolera esperar un contenedor. Importar gana en líneas estandarizadas de gran volumen. La comparación publicada pone los costos que no aparecen en el precio de origen: flete, seguro, tributos, almacenaje, inmovilizado y el riesgo de una medida equivocada que ya no se corrige.`,
+     limite:
+       'No publicamos una comparación de precios: la decisión se hace con las cifras de su operación, y esta empresa fabrica una parte del catálogo e importa otra.',
+@@ -154,6 +172,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'corredor-exportacion',
+     idioma: 'es',
+     consulta: 'EXW Lima FOB Callao textil industrial',
++    pregunta: '¿Bajo qué Incoterm sale la carga desde Lima o el Callao?',
+     respuesta: `La carga sale bajo tres Incoterms: ${INCOTERMS_SALIDA.map((i) => `${i.codigo} en ${i.punto.toLowerCase()}`).join(', ')}. El Incoterm se fija antes del precio porque define dónde cambia la responsabilidad sobre la carga. Cada operación internacional se evalúa por separado, y la cotización enumera los documentos que acompañan el embarque y qué datos debe enviar su empresa.`,
+     limite:
+       'No ofrecemos despacho en destino ni instalación fuera de lo que la cotización declare: la responsabilidad termina en el punto del Incoterm acordado.',
+@@ -163,6 +182,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'entidad',
+     idioma: 'es',
+     consulta: 'fabricante de geomembranas y textil industrial en Chorrillos',
++    pregunta: '¿Qué fabrica exactamente la planta de Chorrillos?',
+     respuesta: `Plastilonas Peruanas SAC, RUC ${SITE.ruc}, opera una planta de confección en ${PLANTA}: big bags, lonas y cobertores, estructuras textiles, mangas de ventilación, mallas agrícolas y accesorios. En geosintéticos, una parte se confecciona y otra se importa o se suministra bajo pedido, y el catálogo lo declara ficha por ficha antes de que usted pregunte.`,
+     limite:
+       'Hay una sola planta y está en Chorrillos. No hay sucursales, filiales ni red de distribución que esta empresa pueda declarar hoy.',
+@@ -174,6 +194,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'en-fibc',
+     idioma: 'en',
+     consulta: 'FIBC big bags manufactured in Peru',
++    pregunta: 'Who manufactures FIBC big bags in Peru?',
+     respuesta: `FIBC big bags are cut and sewn at our own plant in ${PLANTA}, Peru, against the capacity, safe working load, top and bottom fittings and safety factor you specify. There is no price list: every lot is built to specification. Send dimensions, quantity and the port or city of delivery and the quotation comes back with the material data sheet.`,
+     limite:
+       'We claim no ISO, ASTM or food-grade certification of our own. A standard your buyer or terminal requires is handled as a project requirement, not as our credential.',
+@@ -183,6 +204,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'en-tarps',
+     idioma: 'en',
+     consulta: 'truck tarpaulins from Peru',
++    pregunta: 'Can I buy made-to-measure truck tarpaulins from Peru?',
+     respuesta: `Truck tarpaulins, covers and sider curtains are made to the vehicle at our plant in ${PLANTA}, Peru. Quoting needs the body or chassis dimensions, the number of units, the fabric weight or intended use, and where the goods are collected. Fitting by our own crew is available in Lima and is written into the quotation when it applies.`,
+     limite:
+       'No price list on made-to-measure lines, and no installation outside what the quotation states. Fabrication happens in Peru; each export shipment is assessed on its own.',
+@@ -192,6 +214,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'en-ducting',
+     idioma: 'en',
+     consulta: 'mine ventilation ducting Peru',
++    pregunta: 'Who manufactures mine ventilation ducting in Peru?',
+     respuesta: `Flexible ventilation ducting for mines and tunnels is fabricated in ${PLANTA}, Peru, to the diameter, section length, coupling type and working pressure of your fan. The site publishes an open airflow calculator with its limits stated. Send diameter, number of sections and quantity, and the quotation comes back with the material data sheet.`,
+     limite:
+       'The calculator does not issue certified pressure loss, and we claim no fire-performance test or certification of our own on these lines.',
+@@ -201,6 +224,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'en-sourcing',
+     idioma: 'en',
+     consulta: 'sourcing industrial textiles from Peru',
++    pregunta: 'How do I source industrial textiles from Peru?',
+     respuesta: `Sourcing here means one plant in ${PLANTA} that fabricates to measure, plus lines we import or supply to order — the catalogue says which is which, product by product. Cargo leaves ${INCOTERMS}. You can verify the company by tax ID before talking to anyone, and the quotation lists the documents that travel with the shipment.`,
+     limite:
+       'No worldwide shipping, no subsidiary abroad and no continent-wide installation. Public foreign-trade evidence exists for Colombia; other markets are RFQ corridors.',
+@@ -210,6 +234,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'en-rfq',
+     idioma: 'en',
+     consulta: 'RFQ from an overseas buyer',
++    pregunta: 'How do I send an RFQ as an overseas buyer?',
+     respuesta:
+       'An RFQ that can be answered in one reply carries four things: what the item is, its measurements, the quantity, and the destination with the Incoterm your company uses. Add the drawing or the specification extract if you have one. English is answered the same business day during Lima business hours, by the people who run the plant.',
+     limite:
+@@ -222,6 +247,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'pt-porta',
+     idioma: 'pt',
+     consulta: 'fabricante peruano de têxteis industriais',
++    pregunta: 'Quem fabrica têxteis industriais sob medida no Peru?',
+     respuesta: `A Plastilonas Peruanas SAC, RUC (cadastro fiscal peruano) ${SITE.ruc}, opera uma fábrica de confecção em ${PLANTA}, Peru: big bags, lonas e coberturas, estruturas têxteis, dutos de ventilação e telas agrícolas. Parte dos geossintéticos é importada ou fornecida sob encomenda, e o catálogo informa isso item por item. A venda é B2B por cotação.`,
+     limite:
+       'Não temos filial no Brasil, não publicamos tabela de preços em reais e não declaramos certificação própria. Cada embarque é avaliado separadamente.',
+@@ -231,6 +257,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'pt-porta',
+     idioma: 'pt',
+     consulta: 'big bags sob medida no Peru',
++    pregunta: 'Vocês fazem big bags sob medida no Peru?',
+     respuesta: `Os big bags são cortados e costurados na fábrica de ${PLANTA}, conforme a capacidade, a densidade do material, o tipo de tampa e de fundo, as alças e o fator de segurança que você especificar. Não há tabela de preços: cada lote é feito sob especificação. Envie medidas, quantidade e destino para receber a cotação com ficha técnica.`,
+     limite:
+       'Nenhuma certificação é atribuída a esta empresa. A norma exigida pelo seu comprador ou pelo terminal é tratada como requisito do projeto.',
+@@ -240,6 +267,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'pt-porta',
+     idioma: 'pt',
+     consulta: 'exportação EXW Lima FOB Callao para o Brasil',
++    pregunta: 'Como funciona a exportação EXW Lima ou FOB Callao para o Brasil?',
+     respuesta: `A carga sai ${INCOTERMS}: na fábrica de ${PLANTA}, ao transportador indicado por você em Lima, ou embarcada no porto do Callao. O Incoterm é definido antes do preço, porque decide onde muda a responsabilidade sobre a carga. O frete marítimo para o Brasil é avaliado embarque por embarque, com os documentos listados na cotação.`,
+     limite:
+       'Sem tabela de preços em reais, sem desembaraço no destino e sem representação comercial no Brasil: o Brasil é um corredor de RFQ.',
+@@ -249,6 +277,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'pt-porta',
+     idioma: 'pt',
+     consulta: 'lona para caminhão',
++    pregunta: 'Vocês fabricam lona para caminhão sob medida?',
+     respuesta: `As lonas e coberturas para caminhão são confeccionadas sob medida do veículo na fábrica de ${PLANTA}, Peru. Para cotar são necessárias as medidas da carroceria ou do chassi, o número de unidades, a gramatura ou o uso previsto e o local de coleta. A instalação com equipe própria existe em Lima e consta na cotação quando se aplica.`,
+     limite:
+       'Não há tabela de preços em linhas sob medida nem instalação no Brasil: a confecção acontece no Peru e o transporte é avaliado por embarque.',
+@@ -258,6 +287,7 @@ export const CONSULTAS_DINERO: ConsultaDinero[] = [
+     cluster: 'pt-porta',
+     idioma: 'pt',
+     consulta: 'dutos de ventilação para mineração',
++    pregunta: 'Vocês fabricam dutos de ventilação para mineração?',
+     respuesta: `Os dutos flexíveis de ventilação para mina e túnel são confeccionados em ${PLANTA}, Peru, conforme diâmetro, comprimento do trecho, tipo de união e pressão de trabalho do ventilador. O site publica uma calculadora aberta de vazão, com os limites declarados. Envie diâmetro, número de trechos e quantidade para receber a cotação com ficha técnica.`,
+     limite:
+       'A calculadora não emite perda de carga certificada, e esta empresa não se atribui ensaio nem certificação própria de comportamento ao fogo.',
+@@ -282,3 +312,31 @@ export function palabrasDeRespuesta(c: ConsultaDinero): number {
+ 
+ /** Cuántas consultas de dinero se publican, por si una superficie lo anuncia. */
+ export const TOTAL_CONSULTAS_DINERO = CONSULTAS_DINERO.length;
++
++/**
++ * LAS RESPUESTAS, EN LA PÁGINA QUE LAS CONTESTA.
++ *
++ * Hasta ahora estas 22 respuestas vivían sólo en /llms.txt y en
++ * /mapa-consultas.json: un agente las leía y una persona no. Peor: marcar un
++ * FAQPage con respuestas que no están en la página es exactamente lo que
++ * Google descarta —y con razón, porque sería decirle al buscador algo que el
++ * visitante no puede leer—.
++ *
++ * Esta función devuelve las preguntas de una ruta en el formato que ya usan el
++ * bloque visible de preguntas frecuentes y `faqSchema`. El LÍMITE va dentro de
++ * la respuesta, no como nota aparte: un motor que cite el fragmento se lleva la
++ * condición con él.
++ */
++export function faqsDeRuta(ruta: string): { q: string; a: string }[] {
++  const porCluster = new Map(clusters.map((c) => [c.id, c.canonica]));
++  return CONSULTAS_DINERO.filter((c) => porCluster.get(c.cluster) === ruta).map((c) => ({
++    q: c.pregunta,
++    a: `${c.respuesta} ${c.limite}`,
++  }));
++}
++
++/** Rutas canónicas que tienen al menos una respuesta escrita. */
++export function rutasConRespuesta(): string[] {
++  const porCluster = new Map(clusters.map((c) => [c.id, c.canonica]));
++  return [...new Set(CONSULTAS_DINERO.map((c) => porCluster.get(c.cluster)).filter(Boolean) as string[])];
++}
+diff --git a/lib/schema.ts b/lib/schema.ts
+index 4d6bb4d..0cb9bf6 100644
+--- a/lib/schema.ts
++++ b/lib/schema.ts
+@@ -52,6 +52,13 @@ export function webPageSchema(page: {
+   /** Breadcrumb de la página, si aplica. */
+   breadcrumbId?: string;
+   type?: "WebPage" | "CollectionPage" | "AboutPage" | "ContactPage" | "ItemPage";
++  /**
++   * Idioma de ESTA página, no el del sitio. Las cuñas en inglés y la puerta en
++   * portugués declaraban `es-PE` porque este generador lo daba por hecho: un
++   * FAQPage en inglés anunciado como español es un dato estructurado que
++   * contradice lo que el rastreador lee, y el rastreador cree lo que lee.
++   */
++  inLanguage?: string;
+ }): Dict {
+   return {
+     "@context": "https://schema.org",
+@@ -62,7 +69,7 @@ export function webPageSchema(page: {
+     ...(page.description ? { description: page.description } : {}),
+     isPartOf: websiteRef(),
+     about: businessRef(),
+-    inLanguage: SITE.language,
++    inLanguage: page.inLanguage ?? SITE.language,
+     ...(page.breadcrumbId ? { breadcrumb: { "@id": page.breadcrumbId } } : {}),
+     ...(page.speakable
+       ? {
+@@ -92,13 +99,18 @@ export function breadcrumbSchema(
+   };
+ }
+ 
+-export function faqSchema(qas: { q: string; a: string }[], url?: string): Dict {
++export function faqSchema(
++  qas: { q: string; a: string }[],
++  url?: string,
++  /** Idioma de las preguntas. Por defecto, el del sitio. Ver webPageSchema. */
++  inLanguage?: string,
++): Dict {
+   return {
+     "@context": "https://schema.org",
+     "@type": "FAQPage",
+     ...(url ? { "@id": `${url}#faq` } : {}),
+     ...(url ? { url } : {}),
+-    inLanguage: SITE.language,
++    inLanguage: inLanguage ?? SITE.language,
+     mainEntity: qas.map((x) => ({
+       "@type": "Question",
+       name: x.q,
+diff --git a/test/consultas-dinero.test.ts b/test/consultas-dinero.test.ts
+index 06449be..42fa0c8 100644
+--- a/test/consultas-dinero.test.ts
++++ b/test/consultas-dinero.test.ts
+@@ -1,10 +1,12 @@
+ import { describe, it, expect } from 'vitest';
+-import { existsSync } from 'node:fs';
++import { existsSync, readFileSync } from 'node:fs';
+ import { join } from 'node:path';
+ import {
+   CONSULTAS_DINERO,
+   consultasPorIdioma,
+   palabrasDeRespuesta,
++  faqsDeRuta,
++  rutasConRespuesta,
+   type ConsultaDinero,
+ } from '@/lib/consultas-dinero';
+ import { clusters, clusterDeTermino, idiomaDe, intenciones } from '@/lib/search/topic-map';
+@@ -237,3 +239,96 @@ describe('las respuestas se publican donde un agente las lee', () => {
+     expect([...idiomas].sort()).toEqual(['en', 'es', 'pt']);
+   });
+ });
++
++describe('las respuestas se publican donde una persona puede leerlas', () => {
++  /**
++   * MARCAR LO QUE NO SE VE ES LO QUE UN BUSCADOR DESCARTA.
++   *
++   * Un FAQPage cuyas preguntas no están en la página contradice lo que el
++   * rastreador lee, y el rastreador cree lo que lee. Por eso cada respuesta de
++   * lib/consultas-dinero.ts se publica en el bloque VISIBLE de la página que la
++   * contesta, y de ahí sale el marcado — nunca al revés.
++   *
++   * Esta tabla dice qué archivo publica cada ruta. Si mañana una consulta nueva
++   * apunta a una página que nadie publica, esta prueba lo dice con nombre.
++   */
++  const PUBLICAN: { patron: RegExp; archivo: string }[] = [
++    { patron: /^\/(big-bags|lonas-camiones|ventilacion-minera)$/, archivo: 'components/CunaHub.tsx' },
++    {
++      patron: /^\/en\/(fibc-big-bags-peru|truck-tarpaulins-peru|mine-ventilation-ducting-peru)$/,
++      archivo: 'components/CunaHubEn.tsx',
++    },
++    { patron: /^\/exportacion$/, archivo: 'app/(es)/exportacion/page.tsx' },
++    {
++      patron: /^\/fabricar-o-importar$|^\/en\/manufacture-in-peru-or-import$/,
++      archivo: 'components/FabricarOImportar.tsx',
++    },
++    { patron: /^\/pt$/, archivo: 'app/(pt)/pt/page.tsx' },
++    { patron: /^\/productos\/familia\//, archivo: 'app/(es)/productos/familia/[slug]/page.tsx' },
++    { patron: /^\/productos\//, archivo: 'app/(es)/productos/[slug]/page.tsx' },
++    { patron: /^\/recursos\//, archivo: 'app/(es)/recursos/[slug]/page.tsx' },
++    { patron: /^\/biblioteca\//, archivo: 'app/(es)/biblioteca/[slug]/page.tsx' },
++    { patron: /^\/nosotros$/, archivo: 'app/(es)/nosotros/page.tsx' },
++    { patron: /^\/en\/rfq$/, archivo: 'app/(en)/en/rfq/page.tsx' },
++    { patron: /^\/en\/sourcing-from-peru$/, archivo: 'app/(en)/en/sourcing-from-peru/page.tsx' },
++  ];
++
++  it('cada pregunta está escrita como la haría una persona', () => {
++    const malas = CONSULTAS_DINERO.filter(
++      (c) => !c.pregunta.trim().endsWith('?') || c.pregunta.trim() === c.consulta.trim(),
++    ).map((c) => c.consulta);
++    expect(malas, 'una cadena de búsqueda no es una pregunta').toEqual([]);
++  });
++
++  it('la respuesta publicada lleva el límite dentro', () => {
++    for (const ruta of rutasConRespuesta()) {
++      const publicadas = faqsDeRuta(ruta);
++      expect(publicadas.length, `${ruta} no publica ninguna`).toBeGreaterThan(0);
++      for (const c of CONSULTAS_DINERO.filter((x) => faqsDeRuta(ruta).some((f) => f.q === x.pregunta))) {
++        const par = publicadas.find((f) => f.q === c.pregunta)!;
++        expect(par.a).toContain(c.respuesta);
++        expect(par.a, 'el límite no puede quedarse fuera del fragmento citable').toContain(c.limite);
++      }
++    }
++  });
++
++  it('cada ruta con respuestas tiene un archivo que las publica', () => {
++    const sinPublicar: string[] = [];
++    for (const ruta of rutasConRespuesta()) {
++      const regla = PUBLICAN.find((p) => p.patron.test(ruta));
++      if (!regla) {
++        sinPublicar.push(`${ruta}: ninguna regla`);
++        continue;
++      }
++      const src = existsSync(join(raiz, regla.archivo))
++        ? readFileSync(join(raiz, regla.archivo), 'utf8')
++        : '';
++      if (!/faqsDeRuta\(|<PreguntasDeCompra/.test(src)) sinPublicar.push(`${ruta}: ${regla.archivo} no las publica`);
++    }
++    expect(sinPublicar, 'publique las respuestas en la página, o el FAQPage estaría marcando lo que nadie ve').toEqual([]);
++  });
++
++  it('las páginas en inglés y en portugués declaran su idioma en el marcado', () => {
++    // Un FAQPage en inglés anunciado como es-PE contradice lo que el
++    // rastreador lee en la propia página.
++    const casos: [string, string][] = [
++      ['components/CunaHubEn.tsx', "'en'"],
++      ['app/(en)/en/sourcing-from-peru/page.tsx', "'en'"],
++      ['app/(en)/en/rfq/page.tsx', "'en'"],
++      ['app/(pt)/pt/page.tsx', "'pt-BR'"],
++    ];
++    for (const [archivo, idioma] of casos) {
++      const src = readFileSync(join(raiz, archivo), 'utf8');
++      expect(src.includes(idioma), `${archivo} no declara ${idioma}`).toBe(true);
++    }
++  });
++
++  it('ninguna pregunta se duplica dentro de la misma página', () => {
++    const choques: string[] = [];
++    for (const ruta of rutasConRespuesta()) {
++      const qs = faqsDeRuta(ruta).map((f) => f.q.toLowerCase());
++      if (new Set(qs).size !== qs.length) choques.push(ruta);
++    }
++    expect(choques).toEqual([]);
++  });
++});
+-- 
+2.43.0
+
