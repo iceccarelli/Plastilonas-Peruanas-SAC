@@ -14,6 +14,7 @@ import {
   itemListSchema,
   webPageSchema,
 } from '@/lib/schema';
+import PreguntasDeCompra from '@/components/PreguntasDeCompra';
 
 type Props = { params: Promise<{ slug: string }> };
 export const dynamicParams = false;
@@ -129,6 +130,10 @@ export default async function GuidePage({ params }: Props) {
           <li key={p.slug}><Link href={`/productos/${p.slug}`} className="text-[#059669]">{p.name}</Link></li>
         ))}
       </ul>
+
+      {/* «Para cotizar» son preguntas SIN respuesta: dependen del proyecto de
+          quien lee. Éstas son las que esta guía sí contesta, con su límite. */}
+      <PreguntasDeCompra ruta={`/biblioteca/${g.slug}`} titulo="Lo que esta guía sí contesta" />
     </div>
   );
 }

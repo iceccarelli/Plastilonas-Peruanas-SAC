@@ -52,6 +52,13 @@ export function webPageSchema(page: {
   /** Breadcrumb de la página, si aplica. */
   breadcrumbId?: string;
   type?: "WebPage" | "CollectionPage" | "AboutPage" | "ContactPage" | "ItemPage";
+  /**
+   * Idioma de ESTA página, no el del sitio. Las cuñas en inglés y la puerta en
+   * portugués declaraban `es-PE` porque este generador lo daba por hecho: un
+   * FAQPage en inglés anunciado como español es un dato estructurado que
+   * contradice lo que el rastreador lee, y el rastreador cree lo que lee.
+   */
+  inLanguage?: string;
 }): Dict {
   return {
     "@context": "https://schema.org",
@@ -62,7 +69,7 @@ export function webPageSchema(page: {
     ...(page.description ? { description: page.description } : {}),
     isPartOf: websiteRef(),
     about: businessRef(),
-    inLanguage: SITE.language,
+    inLanguage: page.inLanguage ?? SITE.language,
     ...(page.breadcrumbId ? { breadcrumb: { "@id": page.breadcrumbId } } : {}),
     ...(page.speakable
       ? {
@@ -92,13 +99,18 @@ export function breadcrumbSchema(
   };
 }
 
-export function faqSchema(qas: { q: string; a: string }[], url?: string): Dict {
+export function faqSchema(
+  qas: { q: string; a: string }[],
+  url?: string,
+  /** Idioma de las preguntas. Por defecto, el del sitio. Ver webPageSchema. */
+  inLanguage?: string,
+): Dict {
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     ...(url ? { "@id": `${url}#faq` } : {}),
     ...(url ? { url } : {}),
-    inLanguage: SITE.language,
+    inLanguage: inLanguage ?? SITE.language,
     mainEntity: qas.map((x) => ({
       "@type": "Question",
       name: x.q,

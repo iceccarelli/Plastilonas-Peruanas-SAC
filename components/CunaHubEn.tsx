@@ -13,6 +13,7 @@ import CostoEnVivo from '@/components/CostoEnVivo';
 import { ACTUALIZADO } from '@/lib/sitemaps';
 import { RUTA_EN } from '@/lib/fabricar-o-importar';
 import { ACCIONES_EN, WHATSAPP_LABEL } from '@/lib/acciones';
+import { faqsDeRuta } from '@/lib/consultas-dinero';
 
 /**
  * PÁGINA DE CUÑA EN INGLÉS (ver lib/cunas-en.ts).
@@ -67,6 +68,13 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
 
   const rfq = `/en/rfq?product=${encodeURIComponent(hijos[0]?.slug ?? '')}`;
 
+  /**
+   * Las preguntas de compra que esta página contesta —con su límite dentro de
+   * la respuesta— se publican aquí y en el FAQPage de arriba, desde la misma
+   * fuente que leen /llms.txt y /mapa-consultas.json.
+   */
+  const faqs = [...cuna.faqs, ...faqsDeRuta(`/en/${cuna.slug}`)];
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
       <JsonLd
@@ -76,6 +84,7 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
             name: cuna.titulo,
             description: respuestaDirecta,
             speakable: ['.respuesta-directa'],
+            inLanguage: 'en',
           }),
           breadcrumbSchema(
             [
@@ -85,7 +94,7 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
             ],
             `${url}#breadcrumb`,
           ),
-          faqSchema(cuna.faqs, url),
+          faqSchema(faqs, url, 'en'),
           {
             '@context': 'https://schema.org',
             '@type': 'Service',
@@ -317,7 +326,7 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
       <section className="mt-14 border-t pt-10 dark:border-[var(--border)]">
         <h2 className="mb-6 text-2xl font-semibold tracking-tight">Frequently asked</h2>
         <dl className="max-w-3xl space-y-6">
-          {cuna.faqs.map((f) => (
+          {faqs.map((f) => (
             <div key={f.q}>
               <dt className="font-semibold text-[#0A2540] dark:text-inherit">{f.q}</dt>
               <dd className="mt-1 text-gray-700 dark:text-gray-300">{f.a}</dd>

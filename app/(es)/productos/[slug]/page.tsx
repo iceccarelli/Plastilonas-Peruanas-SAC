@@ -25,6 +25,7 @@ import { guides } from '@/lib/guides';
 import { cunaDeProducto } from '@/lib/cunas';
 import DatosParaCotizar from '@/components/DatosParaCotizar';
 import { ACCIONES } from '@/lib/acciones';
+import { faqsDeRuta } from '@/lib/consultas-dinero';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -85,7 +86,9 @@ export default async function ProductDetailPage({ params }: Props) {
   const rutaProducto = `/productos/${product.slug}`;
   const respuestaDirecta = respuestaDirectaProducto(product);
   const rfq = rfqWhatsAppProducto(product);
-  const faqs = productFaqs(product);
+  // Las preguntas de compra que esta ficha contesta (lib/consultas-dinero.ts)
+  // viajan con las derivadas del catálogo: mismo bloque visible, mismo FAQPage.
+  const faqs = [...productFaqs(product), ...faqsDeRuta(`/productos/${product.slug}`)];
   const arquitecturas = solutionsForProduct(product.slug);
   const glosarioRel = terminosParaProducto(product.slug);
   const relatedProducts = products

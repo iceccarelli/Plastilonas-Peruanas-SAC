@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
 import { OG_IMAGEN } from '@/lib/meta';
+import PreguntasDeCompra from '@/components/PreguntasDeCompra';
 
 const URL_NOSOTROS = `${SITE.url}/nosotros`;
 
@@ -107,6 +108,13 @@ export default function NosotrosPage() {
           </p>
           <Link href="/contacto" className="inline-block bg-white text-[#0A2540] btn btn-lg btn-primary font-semibold hover:bg-white/90 transition-all">Contáctenos hoy</Link>
         </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-6">
+        <PreguntasDeCompra
+          ruta="/nosotros"
+          siguiente={{ href: '/confianza', label: 'Qué NO afirma esta empresa →' }}
+        />
       </div>
     </div>
   );

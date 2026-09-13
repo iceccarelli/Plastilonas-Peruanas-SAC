@@ -8,6 +8,7 @@ import { webPageSchema, breadcrumbSchema, faqSchema, businessRef } from '@/lib/s
 import { INCOTERMS_SALIDA } from '@/lib/entidad-feed';
 import { MERCADOS } from '@/lib/exportacion';
 import WhatsAppLink from '@/components/WhatsAppLink';
+import { faqsDeRuta } from '@/lib/consultas-dinero';
 
 export const metadata: Metadata = {
   title: 'Exportación desde el Perú',
@@ -52,6 +53,14 @@ const FAQS = [
     a: 'No. La venta es B2B por cotización y no hay lista de precios en ninguna moneda. El precio depende de especificación, volumen, Incoterm y destino.',
   },
 ];
+
+/**
+ * Las respuestas de compra de esta ruta —Chile, Ecuador, los Incoterms— viven
+ * en lib/consultas-dinero.ts, con su límite dentro de la respuesta, y se
+ * publican aquí y en el FAQPage. La misma fuente que leen /llms.txt y
+ * /mapa-consultas.json: el agente y la persona ven lo mismo.
+ */
+const FAQS_TODAS = [...FAQS, ...faqsDeRuta('/exportacion')];
 
 export default function ExportacionPage() {
   const esquema = ranurasProceso().find((r) => r.id === 'proceso:exportacion-flujo');
@@ -114,7 +123,7 @@ export default function ExportacionPage() {
               })),
             },
           },
-          faqSchema(FAQS, url),
+          faqSchema(FAQS_TODAS, url),
         ]}
       />
       <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">SUMINISTRO INTERNACIONAL</div>
@@ -153,7 +162,7 @@ export default function ExportacionPage() {
 
       <h2 className="mt-12 text-xl font-semibold text-[#0A2540]">Preguntas frecuentes</h2>
       <dl className="mt-4 space-y-5">
-        {FAQS.map((f) => (
+        {FAQS_TODAS.map((f) => (
           <div key={f.q}>
             <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
             <dd className="mt-1 text-gray-700">{f.a}</dd>

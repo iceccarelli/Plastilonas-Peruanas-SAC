@@ -22,6 +22,7 @@ import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
 import WhatsAppLink from '@/components/WhatsAppLink';
 import CostoEnVivo from '@/components/CostoEnVivo';
 import { ACCIONES, WHATSAPP_LABEL } from '@/lib/acciones';
+import { faqsDeRuta } from '@/lib/consultas-dinero';
 
 /**
  * LA PÁGINA QUE DECIDE LA COMPRA, en los dos idiomas del par.
@@ -119,7 +120,9 @@ export default async function FabricarOImportar({ idioma }: { idioma: 'es' | 'en
   const t = T[idioma];
   const en = idioma === 'en';
   const url = `${SITE.url}${en ? RUTA_EN : RUTA_ES}`;
-  const faqs = en ? FAQS_FABRICAR_EN : FAQS_FABRICAR;
+  // Las respuestas de compra de esta ruta se publican con las suyas, en el
+  // bloque visible y en el FAQPage, desde lib/consultas-dinero.ts.
+  const faqs = [...(en ? FAQS_FABRICAR_EN : FAQS_FABRICAR), ...faqsDeRuta(en ? RUTA_EN : RUTA_ES)];
   const noNosCompre = en ? NO_NOS_COMPRE_EN : NO_NOS_COMPRE;
   const cuandoSi = en ? CUANDO_SI_EN : CUANDO_SI;
   const frentes = en
@@ -145,6 +148,7 @@ export default async function FabricarOImportar({ idioma }: { idioma: 'es' | 'en
             name: t.h1,
             description: respuestaDirecta,
             speakable: ['.respuesta-directa'],
+            inLanguage: en ? 'en' : undefined,
           }),
           breadcrumbSchema([...t.verMigas], `${url}#breadcrumb`),
           faqSchema([...faqs], url),

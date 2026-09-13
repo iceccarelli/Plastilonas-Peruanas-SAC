@@ -7,6 +7,7 @@ import { INCOTERMS_SALIDA } from '@/lib/exportacion';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
 import { OG_IMAGEN } from '@/lib/meta';
+import PreguntasDeCompra from '@/components/PreguntasDeCompra';
 
 /**
  * RFQ EN INGLÉS.
@@ -54,7 +55,7 @@ export default async function RfqEnPage({
     <div className="mx-auto max-w-3xl px-6 py-14">
       <JsonLd
         data={[
-          webPageSchema({ url: URL_PAGINA, name: TITLE, description: DESCRIPTION }),
+          webPageSchema({ url: URL_PAGINA, name: TITLE, description: DESCRIPTION, inLanguage: 'en' }),
           breadcrumbSchema(
             [
               { name: 'Home', url: `${SITE.url}/` },
@@ -105,6 +106,8 @@ export default async function RfqEnPage({
         preselectedProduct={encontrado?.name}
         slugOrigen={encontrado?.slug}
       />
+
+      <PreguntasDeCompra ruta="/en/rfq" titulo="Before you send it" idioma="en" />
     </div>
   );
 }

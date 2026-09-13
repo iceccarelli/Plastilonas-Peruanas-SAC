@@ -17,6 +17,7 @@ import { respuestaDirectaCuna } from '@/lib/respuesta-directa';
 import { ACTUALIZADO } from '@/lib/sitemaps';
 import { RUTA_ES } from '@/lib/fabricar-o-importar';
 import { ACCIONES } from '@/lib/acciones';
+import { faqsDeRuta } from '@/lib/consultas-dinero';
 
 /**
  * Página de cuña comercial (ver lib/cunas.ts). Server component compartido
@@ -40,6 +41,14 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
   // especificación; los huecos dicen «No declarado» (lib/comparativa.ts).
   const comparativa = hijos.length >= 2 ? construirComparativa(hijos) : null;
 
+  /**
+   * Las preguntas de compra que esta página contesta —con su límite dentro de
+   * la respuesta— se publican aquí y en el FAQPage de arriba. Vienen de
+   * lib/consultas-dinero.ts, que es la misma fuente que leen /llms.txt y
+   * /mapa-consultas.json: un agente y una persona ven exactamente lo mismo.
+   */
+  const faqs = [...cuna.faqs, ...faqsDeRuta(`/${cuna.slug}`)];
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
       <JsonLd
@@ -57,7 +66,7 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
             ],
             `${url}#breadcrumb`,
           ),
-          faqSchema(cuna.faqs, url),
+          faqSchema(faqs, url),
           /**
            * Service de alcance NACIONAL. No se usa `serviceSchema` de
            * lib/schema.ts porque ese ancla `areaServed` a una City —correcto
@@ -289,7 +298,7 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
       <section className="mt-14 pt-10 border-t">
         <h2 className="font-semibold tracking-tight text-2xl mb-6">Preguntas frecuentes</h2>
         <dl className="space-y-6 max-w-3xl">
-          {cuna.faqs.map((f) => (
+          {faqs.map((f) => (
             <div key={f.q}>
               <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
               <dd className="mt-1 text-gray-700">{f.a}</dd>

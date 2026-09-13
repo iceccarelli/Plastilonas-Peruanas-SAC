@@ -23,6 +23,7 @@ import {
 import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
 import CierreComercial from '@/components/CierreComercial';
 import { ACCIONES } from '@/lib/acciones';
+import { faqsDeRuta } from '@/lib/consultas-dinero';
 
 /**
  * Plantilla de artículo técnico.
@@ -82,6 +83,8 @@ export default async function ArticlePage({ params }: Props) {
   if (!a) notFound();
 
   const url = `${SITE.url}/recursos/${a.slug}`;
+  // Preguntas de compra de esta guía (lib/consultas-dinero.ts) junto a las suyas.
+  const faqs = [...a.faqs, ...faqsDeRuta(`/recursos/${a.slug}`)];
   const relatedProducts = a.relatedProducts
     .map((s) => products.find((p) => p.slug === s))
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
@@ -133,7 +136,7 @@ export default async function ArticlePage({ params }: Props) {
             ],
             `${url}#breadcrumb`,
           ),
-          faqSchema(a.faqs, url),
+          faqSchema(faqs, url),
           ...(a.howTo
             ? [
                 howToSchema({
@@ -302,7 +305,7 @@ export default async function ArticlePage({ params }: Props) {
           Preguntas frecuentes
         </h2>
         <dl className="space-y-6">
-          {a.faqs.map((f) => (
+          {faqs.map((f) => (
             <div key={f.q}>
               <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
               <dd className="mt-1 text-gray-700">{f.a}</dd>

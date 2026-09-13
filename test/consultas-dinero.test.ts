@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   CONSULTAS_DINERO,
   consultasPorIdioma,
   palabrasDeRespuesta,
+  faqsDeRuta,
+  rutasConRespuesta,
   type ConsultaDinero,
 } from '@/lib/consultas-dinero';
 import { clusters, clusterDeTermino, idiomaDe, intenciones } from '@/lib/search/topic-map';
@@ -235,5 +237,98 @@ describe('las respuestas se publican donde un agente las lee', () => {
     // tarpaulins from Peru» no es la traducción de «lonas para camión».
     const idiomas = new Set(clusters.map((c) => idiomaDe(c)));
     expect([...idiomas].sort()).toEqual(['en', 'es', 'pt']);
+  });
+});
+
+describe('las respuestas se publican donde una persona puede leerlas', () => {
+  /**
+   * MARCAR LO QUE NO SE VE ES LO QUE UN BUSCADOR DESCARTA.
+   *
+   * Un FAQPage cuyas preguntas no están en la página contradice lo que el
+   * rastreador lee, y el rastreador cree lo que lee. Por eso cada respuesta de
+   * lib/consultas-dinero.ts se publica en el bloque VISIBLE de la página que la
+   * contesta, y de ahí sale el marcado — nunca al revés.
+   *
+   * Esta tabla dice qué archivo publica cada ruta. Si mañana una consulta nueva
+   * apunta a una página que nadie publica, esta prueba lo dice con nombre.
+   */
+  const PUBLICAN: { patron: RegExp; archivo: string }[] = [
+    { patron: /^\/(big-bags|lonas-camiones|ventilacion-minera)$/, archivo: 'components/CunaHub.tsx' },
+    {
+      patron: /^\/en\/(fibc-big-bags-peru|truck-tarpaulins-peru|mine-ventilation-ducting-peru)$/,
+      archivo: 'components/CunaHubEn.tsx',
+    },
+    { patron: /^\/exportacion$/, archivo: 'app/(es)/exportacion/page.tsx' },
+    {
+      patron: /^\/fabricar-o-importar$|^\/en\/manufacture-in-peru-or-import$/,
+      archivo: 'components/FabricarOImportar.tsx',
+    },
+    { patron: /^\/pt$/, archivo: 'app/(pt)/pt/page.tsx' },
+    { patron: /^\/productos\/familia\//, archivo: 'app/(es)/productos/familia/[slug]/page.tsx' },
+    { patron: /^\/productos\//, archivo: 'app/(es)/productos/[slug]/page.tsx' },
+    { patron: /^\/recursos\//, archivo: 'app/(es)/recursos/[slug]/page.tsx' },
+    { patron: /^\/biblioteca\//, archivo: 'app/(es)/biblioteca/[slug]/page.tsx' },
+    { patron: /^\/nosotros$/, archivo: 'app/(es)/nosotros/page.tsx' },
+    { patron: /^\/en\/rfq$/, archivo: 'app/(en)/en/rfq/page.tsx' },
+    { patron: /^\/en\/sourcing-from-peru$/, archivo: 'app/(en)/en/sourcing-from-peru/page.tsx' },
+  ];
+
+  it('cada pregunta está escrita como la haría una persona', () => {
+    const malas = CONSULTAS_DINERO.filter(
+      (c) => !c.pregunta.trim().endsWith('?') || c.pregunta.trim() === c.consulta.trim(),
+    ).map((c) => c.consulta);
+    expect(malas, 'una cadena de búsqueda no es una pregunta').toEqual([]);
+  });
+
+  it('la respuesta publicada lleva el límite dentro', () => {
+    for (const ruta of rutasConRespuesta()) {
+      const publicadas = faqsDeRuta(ruta);
+      expect(publicadas.length, `${ruta} no publica ninguna`).toBeGreaterThan(0);
+      for (const c of CONSULTAS_DINERO.filter((x) => faqsDeRuta(ruta).some((f) => f.q === x.pregunta))) {
+        const par = publicadas.find((f) => f.q === c.pregunta)!;
+        expect(par.a).toContain(c.respuesta);
+        expect(par.a, 'el límite no puede quedarse fuera del fragmento citable').toContain(c.limite);
+      }
+    }
+  });
+
+  it('cada ruta con respuestas tiene un archivo que las publica', () => {
+    const sinPublicar: string[] = [];
+    for (const ruta of rutasConRespuesta()) {
+      const regla = PUBLICAN.find((p) => p.patron.test(ruta));
+      if (!regla) {
+        sinPublicar.push(`${ruta}: ninguna regla`);
+        continue;
+      }
+      const src = existsSync(join(raiz, regla.archivo))
+        ? readFileSync(join(raiz, regla.archivo), 'utf8')
+        : '';
+      if (!/faqsDeRuta\(|<PreguntasDeCompra/.test(src)) sinPublicar.push(`${ruta}: ${regla.archivo} no las publica`);
+    }
+    expect(sinPublicar, 'publique las respuestas en la página, o el FAQPage estaría marcando lo que nadie ve').toEqual([]);
+  });
+
+  it('las páginas en inglés y en portugués declaran su idioma en el marcado', () => {
+    // Un FAQPage en inglés anunciado como es-PE contradice lo que el
+    // rastreador lee en la propia página.
+    const casos: [string, string][] = [
+      ['components/CunaHubEn.tsx', "'en'"],
+      ['app/(en)/en/sourcing-from-peru/page.tsx', "'en'"],
+      ['app/(en)/en/rfq/page.tsx', "'en'"],
+      ['app/(pt)/pt/page.tsx', "'pt-BR'"],
+    ];
+    for (const [archivo, idioma] of casos) {
+      const src = readFileSync(join(raiz, archivo), 'utf8');
+      expect(src.includes(idioma), `${archivo} no declara ${idioma}`).toBe(true);
+    }
+  });
+
+  it('ninguna pregunta se duplica dentro de la misma página', () => {
+    const choques: string[] = [];
+    for (const ruta of rutasConRespuesta()) {
+      const qs = faqsDeRuta(ruta).map((f) => f.q.toLowerCase());
+      if (new Set(qs).size !== qs.length) choques.push(ruta);
+    }
+    expect(choques).toEqual([]);
   });
 });

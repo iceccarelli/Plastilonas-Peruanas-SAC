@@ -10,6 +10,7 @@ import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
 import { OG_IMAGEN } from '@/lib/meta';
 import CierreComercial from '@/components/CierreComercial';
 import { ACCIONES_EN } from '@/lib/acciones';
+import { faqsDeRuta } from '@/lib/consultas-dinero';
 
 /**
  * SOURCING HUB EN INGLÉS — la puerta del comprador extranjero.
@@ -86,6 +87,8 @@ const FAQS = [
   },
 ];
 
+const FAQS_TODAS = [...FAQS, ...faqsDeRuta('/en/sourcing-from-peru')];
+
 export default function SourcingFromPeruPage() {
   const respuestaDirecta =
     `${SITE.legalName} (Peruvian tax ID ${SITE.ruc}, registered since 2009) manufactures industrial ` +
@@ -104,6 +107,7 @@ export default function SourcingFromPeruPage() {
             name: TITLE,
             description: respuestaDirecta,
             speakable: ['.respuesta-directa'],
+            inLanguage: 'en',
           }),
           breadcrumbSchema(
             [
@@ -113,7 +117,7 @@ export default function SourcingFromPeruPage() {
             ],
             `${URL_PAGINA}#breadcrumb`,
           ),
-          faqSchema(FAQS, URL_PAGINA),
+          faqSchema(FAQS_TODAS, URL_PAGINA, 'en'),
         ]}
       />
 
@@ -252,7 +256,7 @@ export default function SourcingFromPeruPage() {
           Frequently asked, before the first RFQ
         </h2>
         <dl className="space-y-6">
-          {FAQS.map((f) => (
+          {FAQS_TODAS.map((f) => (
             <div key={f.q}>
               <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
               <dd className="mt-1 text-gray-700 leading-relaxed">{f.a}</dd>

@@ -15,6 +15,7 @@ import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
 import RielComercial from '@/components/RielComercial';
 import CierreComercial from '@/components/CierreComercial';
 import { ACCIONES } from '@/lib/acciones';
+import { faqsDeRuta } from '@/lib/consultas-dinero';
 
 /**
  * Página de familia (/productos/familia/[slug]).
@@ -66,6 +67,9 @@ export default async function FamilyPage({ params }: Props) {
   const { family, content } = resolved;
 
   const url = `${SITE.url}/productos/familia/${slug}`;
+  // Preguntas de compra de esta familia (lib/consultas-dinero.ts) junto a las
+  // suyas: mismo bloque visible, mismo FAQPage, el límite dentro de la respuesta.
+  const faqs = [...content.faqs, ...faqsDeRuta(`/productos/familia/${family.slug}`)];
   const imagen = ranurasFamilia().find((r) => r.id === `familia:${slug}`);
   const items = products.filter((p) => p.category === family.name);
   // ¿Existe /comparar para esta familia? La misma función que genera la ruta.
@@ -108,7 +112,7 @@ export default async function FamilyPage({ params }: Props) {
               url: `${SITE.url}/productos/${p.slug}`,
             })),
           }),
-          faqSchema(content.faqs, url),
+          faqSchema(faqs, url),
           ...(imagen
             ? [imageObjectSchema({
                 url: imagen.ruta, ancho: imagen.ancho, alto: imagen.alto,
@@ -269,7 +273,7 @@ export default async function FamilyPage({ params }: Props) {
           Preguntas frecuentes
         </h2>
         <dl className="space-y-6">
-          {content.faqs.map((f) => (
+          {faqs.map((f) => (
             <div key={f.q}>
               <dt className="font-semibold text-[#0A2540]">{f.q}</dt>
               <dd className="mt-1 text-gray-700">{f.a}</dd>
