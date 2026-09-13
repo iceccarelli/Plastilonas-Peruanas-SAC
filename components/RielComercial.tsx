@@ -33,6 +33,13 @@ interface Props {
   className?: string;
 }
 
+/**
+ * Una etiqueta por intención, y el tipo lo exige: `Record<Intencion, string>`
+ * no admite huecos, así que la etapa que añada una intención nueva no compila
+ * hasta que decida cómo se llama en la interfaz. Es deliberado — un chip vacío
+ * en el riel es una salida que el lector no entiende—, y test/mapa-consultas
+ * comprueba lo mismo desde el otro lado, contra las intenciones del JSON.
+ */
 const ETIQUETA: Record<Cluster['intencion'], string> = {
   comercial: 'Producto',
   sector: 'Sector',
@@ -41,6 +48,7 @@ const ETIQUETA: Record<Cluster['intencion'], string> = {
   transaccional: 'Cotizar',
   local: 'Cobertura',
   entidad: 'La empresa',
+  corredor: 'Exportación',
 };
 
 export default function RielComercial({

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   clusters,
@@ -156,6 +156,26 @@ describe('mapa de consultas: una consulta, una página', () => {
   it('la intención declarada es una de las documentadas', () => {
     const raras = clusters.filter((c) => !(c.intencion in intenciones)).map((c) => `${c.id}: ${c.intencion}`);
     expect(raras).toEqual([]);
+  });
+
+  /**
+   * CADA INTENCIÓN SE LLAMA DE ALGUNA MANERA EN LA INTERFAZ.
+   *
+   * El riel comercial pinta un chip con el nombre de la intención del vecino.
+   * Su tabla es un `Record<Intencion, string>`, así que añadir una intención
+   * al JSON sin etiquetarla rompe `tsc` — y así pasó al introducir «corredor»:
+   * el mapa, las pruebas y el build de datos estaban verdes, y la compilación
+   * de tipos se cayó en un componente que nadie había tocado.
+   *
+   * Esta prueba lo dice antes y en el idioma del problema: la intención nueva
+   * no tiene nombre para el lector. Se comprueba sobre el TEXTO del componente
+   * porque es un componente de cliente y aquí sólo interesa su tabla.
+   */
+  it('cada intención tiene etiqueta en el riel comercial', () => {
+    const fuente = readFileSync(join(raiz, 'components/RielComercial.tsx'), 'utf8');
+    const bloque = fuente.slice(fuente.indexOf('const ETIQUETA'), fuente.indexOf('export default'));
+    const sinEtiqueta = Object.keys(intenciones).filter((i) => !new RegExp(`\\b${i}\\s*:`).test(bloque));
+    expect(sinEtiqueta, 'añada la etiqueta en components/RielComercial.tsx').toEqual([]);
   });
 
   it('los términos no llevan espacios sobrantes ni están duplicados dentro de su clúster', () => {
