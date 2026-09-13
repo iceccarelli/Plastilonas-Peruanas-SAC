@@ -1,0 +1,460 @@
+From 5e0ed6033f37bd5f47737e9ff6180b1d5e913b1e Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 13 Sep 2026 23:43:49 +0000
+Subject: [PATCH] =?UTF-8?q?C2a:=20el=20configurador=20mandaba=20la=20espec?=
+ =?UTF-8?q?ificaci=C3=B3n=20del=20big=20bag=20y=20el=20formulario=20la=20t?=
+ =?UTF-8?q?iraba?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+TRES DEFECTOS DEL EMBUDO, LOS TRES SILENCIOSOS.
+
+1. /configurador envía al RFQ la configuración completa del FIBC —capacidad,
+   tapa, fondo, asas, factor de seguridad, extras— en ?notas=, y /cotizacion
+   sólo leía ?nota=. El comprador que acababa de configurar su bolsón llegaba a
+   un formulario vacío: o lo escribía otra vez, o mandaba un RFQ pobre, o se
+   iba. Lo mismo en los hubs de aplicación, que enlazan con
+   ?notas=Aplicación:… Ahora se leen los dos nombres.
+
+2. El asistente enlaza /cotizacion?origen=chat desde hace etapas y nadie leía
+   `origen`, así que «¿cuántas solicitudes produce el chat?» no tenía respuesta
+   posible — ni el chat, ni el configurador, ni las calculadoras. Ahora se lee,
+   se sanea, viaja en el lead hasta Supabase y hasta el CRM, y etiqueta el
+   evento rfq_start. Las tres superficies lo declaran.
+
+3. `source` estaba fijo en …/cotizacion: un lead enviado desde /en/rfq llegaba
+   al CRM etiquetado como si viniera del formulario en español. Ahora la fuente
+   es la ruta real que envió el formulario.
+
+LO QUE LO MANTIENE. test/parametros-cotizacion.test.ts compara LOS DOS EXTREMOS
+del enlace: recorre todos los href hacia /cotizacion y /en/rfq, extrae los
+parámetros que mandan y los contrasta con los que la página declara leer en su
+tipo searchParams. Un parámetro que nadie lee no falla en ejecución: se pierde
+en silencio, que es exactamente cómo este defecto sobrevivió. Comprueba además
+que `origen` llega al modelo del lead y que el esquema de la API lo declara
+—zod descarta en silencio lo que no declara— y que las superficies que
+producen solicitudes se identifican.
+
+NO ENTRA: ningún cambio de contenido, de diseño ni de destino; ninguna columna
+nueva en Supabase (origen viaja dentro de `payload`, que ya guarda el lead
+completo); y el modelo tipado de brief (C1) sigue pendiente. Esto es la parte
+del embudo que ya estaba construida y goteaba.
+
+VERIFICACIÓN: 719 pruebas verdes en este entorno (las once restantes fallan por
+paquetes que la política de red no deja instalar aquí), los archivos tocados
+pasan el transpilador de TSX uno a uno, y el auditor de enlaces sigue limpio.
+tsc, lint y build los corre el gate.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UxmuN1emKoms4zAxwLB8RX
+---
+ app/(es)/aplicaciones/[slug]/page.tsx         |   2 +-
+ app/(es)/configurador/page.tsx                |   6 +-
+ app/(es)/cotizacion/page.tsx                  |  34 +++++-
+ app/api/lead/route.ts                         |  17 ++-
+ components/CalculadoraForm.tsx                |   2 +-
+ components/CotizacionForm.tsx                 |  19 +++-
+ ...-09-14-nada-se-pierde-en-el-ultimo-paso.md |  58 ++++++++++
+ lib/lead.ts                                   |   6 +
+ test/parametros-cotizacion.test.ts            | 104 ++++++++++++++++++
+ 9 files changed, 237 insertions(+), 11 deletions(-)
+ create mode 100644 docs/entregas/2026-09-14-nada-se-pierde-en-el-ultimo-paso.md
+ create mode 100644 test/parametros-cotizacion.test.ts
+
+diff --git a/app/(es)/aplicaciones/[slug]/page.tsx b/app/(es)/aplicaciones/[slug]/page.tsx
+index 46a26d9..92c331e 100644
+--- a/app/(es)/aplicaciones/[slug]/page.tsx
++++ b/app/(es)/aplicaciones/[slug]/page.tsx
+@@ -96,7 +96,7 @@ export default async function AplicacionPage({ params }: Props) {
+           imagen que mide el LCP de esta página. */}
+       {foto && <ImagenContenido ranura={foto} prioridad className="mt-8" sizes="(min-width: 1024px) 900px, 100vw" />}
+       <div className="mt-8 flex flex-wrap gap-3">
+-        <Link href={`/cotizacion?notas=${encodeURIComponent('Aplicación: ' + app.name)}`} className="btn inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">RFQ de esta aplicación</Link>
++        <Link href={`/cotizacion?origen=aplicacion&notas=${encodeURIComponent('Aplicación: ' + app.name)}`} className="btn inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">RFQ de esta aplicación</Link>
+         {/* El RFQ llega con las preguntas de alcance ya listadas: el comprador
+             las completa antes de enviar y el primer mensaje ya sirve. */}
+         <WhatsAppLink
+diff --git a/app/(es)/configurador/page.tsx b/app/(es)/configurador/page.tsx
+index e7011c8..b648893 100644
+--- a/app/(es)/configurador/page.tsx
++++ b/app/(es)/configurador/page.tsx
+@@ -26,7 +26,11 @@ export default function ConfiguradorPage() {
+ 
+   function submit(e: FormEvent) {
+     e.preventDefault();
+-    router.push(`/cotizacion?producto=big-bags-bolsones-polipropileno&notas=${encodeURIComponent(fibcSummary(spec))}`);
++    // `origen` etiqueta el lead: hasta ahora no había forma de saber cuántas
++    // solicitudes salían del configurador.
++    router.push(
++      `/cotizacion?producto=big-bags-bolsones-polipropileno&origen=configurador&notas=${encodeURIComponent(fibcSummary(spec))}`,
++    );
+   }
+ 
+   const selectCls = 'w-full border border-gray-200 rounded-xl px-3 h-11 text-sm';
+diff --git a/app/(es)/cotizacion/page.tsx b/app/(es)/cotizacion/page.tsx
+index 8b0e1e5..ab1a105 100644
+--- a/app/(es)/cotizacion/page.tsx
++++ b/app/(es)/cotizacion/page.tsx
+@@ -24,7 +24,13 @@ import DatosParaCotizar from '@/components/DatosParaCotizar';
+ export default async function CotizacionPage({
+   searchParams,
+ }: {
+-  searchParams: Promise<{ producto?: string; comparativa?: string; nota?: string }>;
++  searchParams: Promise<{
++    producto?: string;
++    comparativa?: string;
++    nota?: string;
++    notas?: string;
++    origen?: string;
++  }>;
+ }) {
+   const params = await searchParams;
+   const productoParam = params.producto || undefined;
+@@ -42,9 +48,28 @@ export default async function CotizacionPage({
+     porSlug?.slug ??
+     products.find((p) => p.name === productoParam)?.slug ??
+     comparativa[0]?.slug;
+-  // `nota` llega de las calculadoras («Enviar este predimensionado a
+-  // cotización»): el resumen del cálculo prellenado en la descripción.
+-  const nota = (params.nota ?? '').slice(0, 1500) || undefined;
++  /**
++   * EL DATO QUE EL COMPRADOR YA ESCRIBIÓ NO SE PIERDE EN EL ÚLTIMO PASO.
++   *
++   * `nota` llega de las calculadoras («Enviar este predimensionado a
++   * cotización»). `notas` llega del configurador de big bags, que lleva
++   * escribiéndolo así desde que existe — y esta página sólo leía `nota`, de
++   * modo que la configuración completa del FIBC (capacidad, tapa, fondo,
++   * asas, factor de seguridad) se descartaba en silencio al llegar aquí. El
++   * comprador veía un formulario vacío y tenía que repetirla, o no la repetía.
++   *
++   * Se leen las dos. Cuál de los dos nombres es el canónico importa menos que
++   * no tirar lo que alguien ya se tomó el trabajo de definir.
++   */
++  const nota = ((params.nota ?? params.notas) ?? '').slice(0, 1500) || undefined;
++
++  /**
++   * De dónde viene el visitante: 'chat', 'configurador', 'calculadora'. El
++   * asistente enlaza ?origen=chat desde hace etapas y nadie lo leía, así que
++   * no había forma de saber cuántos RFQ produce el chat. Viaja al lead y al
++   * evento de analítica, no a la pantalla.
++   */
++  const origen = (params.origen ?? '').slice(0, 40).replace(/[^a-z0-9:_-]/gi, '') || undefined;
+   const preselectedMessage =
+     [
+       comparativa.length
+@@ -84,6 +109,7 @@ export default async function CotizacionPage({
+         preselectedProduct={preselectedProduct}
+         slugOrigen={slugOrigen}
+         preselectedMessage={preselectedMessage}
++        origen={origen}
+       />
+     </div>
+   );
+diff --git a/app/api/lead/route.ts b/app/api/lead/route.ts
+index b33af95..1942435 100644
+--- a/app/api/lead/route.ts
++++ b/app/api/lead/route.ts
+@@ -36,6 +36,8 @@ const LeadSchema = z.object({
+   utm_content: z.string().trim().max(120).optional(),
+   path: z.string().trim().max(400).optional(),
+   slug: z.string().trim().max(120).optional(),
++  /** Superficie de origen: 'chat', 'configurador', 'calculadora'. */
++  origen: z.string().trim().max(40).optional(),
+   /** Referencias de adjuntos (ruta en Storage o nombre del archivo). */
+   archivos: z.array(z.string().trim().max(300)).max(5).optional(),
+ });
+@@ -53,6 +55,12 @@ function limited(ip: string): boolean {
+   return hit.n > 12;
+ }
+ 
++/** URL de origen del lead: la ruta que envió el formulario, no una fija. */
++function fuenteDe(lead: { path?: string; origen?: string }): string {
++  const ruta = (lead.path ?? '/cotizacion').split('?')[0];
++  return `${SITE_HOST}${ruta}${lead.origen ? ` (${lead.origen})` : ''}`;
++}
++
+ function rfqId(): string {
+   const d = new Date();
+   const y = d.getUTCFullYear();
+@@ -101,7 +109,12 @@ export async function POST(req: NextRequest) {
+         country: lead.deliveryCountry || lead.country || null,
+         industry: lead.industry ?? null,
+         status: 'NEW',
+-        source: `${SITE_HOST}/cotizacion`,
++        /**
++         * La ruta REAL de la que salió el lead. Estaba fija en /cotizacion, de
++         * modo que una solicitud enviada desde /en/rfq llegaba al CRM
++         * etiquetada como si viniera del formulario en español.
++         */
++        source: fuenteDe(lead),
+         payload: lead,
+         message: [
+           lead.application,
+@@ -135,7 +148,7 @@ export async function POST(req: NextRequest) {
+           ...lead,
+           rfqId: id,
+           persisted,
+-          source: `${SITE_HOST}/cotizacion`,
++          source: fuenteDe(lead),
+           receivedAt: new Date().toISOString(),
+         }),
+       });
+diff --git a/components/CalculadoraForm.tsx b/components/CalculadoraForm.tsx
+index 3a4f78c..5f0c050 100644
+--- a/components/CalculadoraForm.tsx
++++ b/components/CalculadoraForm.tsx
+@@ -235,7 +235,7 @@ function Formulario({ calc }: { calc: NonNullable<ReturnType<typeof calculadoraP
+           {/* El predimensionado viaja al formulario como nota: el comprador no
+               vuelve a teclear lo que la calculadora ya escribió. */}
+           <Link
+-            href={`/cotizacion?nota=${encodeURIComponent(resumenParaCotizar)}`}
++            href={`/cotizacion?origen=calculadora&nota=${encodeURIComponent(resumenParaCotizar)}`}
+             className="inline-flex items-center gap-2 rounded-full border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-800 hover:border-gray-400"
+           >
+             Enviar este predimensionado a cotización
+diff --git a/components/CotizacionForm.tsx b/components/CotizacionForm.tsx
+index 5b1e0ba..58adf66 100644
+--- a/components/CotizacionForm.tsx
++++ b/components/CotizacionForm.tsx
+@@ -181,6 +181,13 @@ interface Props {
+   slugOrigen?: string;
+   /** Texto inicial del mensaje (p. ej. comparativa). */
+   preselectedMessage?: string;
++  /**
++   * Superficie de la que salió el visitante: 'chat', 'configurador',
++   * 'calculadora'. Se declara en el enlace (?origen=) y viaja al lead y al
++   * evento, nunca a la pantalla: sirve para saber qué parte del sitio produce
++   * solicitudes, que hasta ahora no se podía medir.
++   */
++  origen?: string;
+ }
+ 
+ function leerUtm(): Record<string, string> {
+@@ -194,7 +201,14 @@ function leerUtm(): Record<string, string> {
+   return out;
+ }
+ 
+-export default function CotizacionForm({ opciones, idioma = 'es', preselectedProduct, slugOrigen, preselectedMessage }: Props) {
++export default function CotizacionForm({
++  opciones,
++  idioma = 'es',
++  preselectedProduct,
++  slugOrigen,
++  preselectedMessage,
++  origen,
++}: Props) {
+   const t = T[idioma];
+   const [isSubmitting, setIsSubmitting] = React.useState(false);
+   const [isSuccess, setIsSuccess] = React.useState(false);
+@@ -257,7 +271,7 @@ export default function CotizacionForm({ opciones, idioma = 'es', preselectedPro
+     if (preselectedMessage) setValue('mensaje', preselectedMessage);
+   }, [preselectedMessage, setValue]);
+   React.useEffect(() => {
+-    trackQuoteStarted('pagina', preselectedProduct, slugOrigen);
++    trackQuoteStarted(origen ?? 'pagina', preselectedProduct, slugOrigen);
+   }, [preselectedProduct, slugOrigen]);
+ 
+   // ── Adjuntos ─────────────────────────────────────────────────────────────
+@@ -374,6 +388,7 @@ export default function CotizacionForm({ opciones, idioma = 'es', preselectedPro
+       ...leerUtm(),
+       path: typeof window !== 'undefined' ? window.location.pathname + window.location.search : undefined,
+       slug: slugOrigen,
++      origen,
+       archivos: refsArchivos,
+       language: idioma,
+     });
+diff --git a/docs/entregas/2026-09-14-nada-se-pierde-en-el-ultimo-paso.md b/docs/entregas/2026-09-14-nada-se-pierde-en-el-ultimo-paso.md
+new file mode 100644
+index 0000000..72ab0c5
+--- /dev/null
++++ b/docs/entregas/2026-09-14-nada-se-pierde-en-el-ultimo-paso.md
+@@ -0,0 +1,58 @@
++# C2a — el configurador mandaba la especificación y el formulario la tiraba
++
++**Fecha:** 2026-09-14 · **Base:** `main` con 0002 a 0008 aplicados ·
++**Defectos cerrados:** 3 · **Pruebas nuevas:** 4
++
++## 1. El más caro: la configuración del big bag se descartaba
++
++`/configurador` deja al comprador definir su FIBC —capacidad, tipo de tapa y de
++fondo, asas, factor de seguridad, extras— y lo envía al RFQ con la
++configuración completa en `?notas=`.
++
++`/cotizacion` sólo leía `?nota=`.
++
++El resultado: quien se tomó el trabajo de configurar su bolsón llegaba a un
++formulario **vacío**, sin una palabra de lo que acababa de definir. O lo
++escribía otra vez, o mandaba un RFQ pobre, o se iba. Lo mismo pasaba en los
++ocho hubs de aplicación, que enlazan con `?notas=Aplicación: …`.
++
++Ahora la página lee los dos nombres. Cuál sea el canónico importa menos que no
++tirar lo que alguien ya definió.
++
++## 2. El segundo: el chat no se podía medir
++
++El asistente enlaza `/cotizacion?origen=chat` desde hace etapas. Nadie leía
++`origen`. La pregunta «¿cuántas solicitudes produce el asistente?» no tenía
++respuesta posible — ni el chat, ni el configurador, ni las calculadoras.
++
++`origen` se lee, se sanea, viaja en el lead hasta Supabase y hasta el CRM, y
++etiqueta el evento `rfq_start`. El configurador, las calculadoras y los hubs de
++aplicación ahora lo declaran.
++
++## 3. El tercero: todos los leads decían venir de /cotizacion
++
++`source` estaba fijo en `…/cotizacion`, así que una solicitud enviada desde
++`/en/rfq` —un comprador extranjero— llegaba al CRM etiquetada como si viniera
++del formulario en español. Ahora la fuente es la ruta real que envió el
++formulario, con el origen entre paréntesis cuando existe.
++
++## 4. Lo que lo mantiene
++
++`test/parametros-cotizacion.test.ts` compara **los dos extremos del enlace**:
++recorre todos los `href` hacia `/cotizacion` y `/en/rfq`, extrae los parámetros
++que mandan, y los contrasta con los que la página declara leer en su tipo
++`searchParams`. Un parámetro que nadie lee no falla en tiempo de ejecución: se
++pierde en silencio, que es como este defecto sobrevivió tanto.
++
++Además comprueba que `origen` llega al modelo del lead y que el esquema de la
++API lo declara —zod descarta en silencio lo que no está declarado—, y que las
++tres superficies que producen solicitudes se identifican.
++
++## 5. Lo que NO entra
++
++- Ningún cambio de contenido, de diseño ni de destino: los mismos enlaces, las
++  mismas páginas.
++- Ninguna columna nueva en Supabase: `origen` viaja dentro de `payload`, que ya
++  guarda el lead completo.
++- El modelo tipado de brief (C1) sigue pendiente. Esto es la parte del embudo
++  que ya estaba construida y goteaba.
+diff --git a/lib/lead.ts b/lib/lead.ts
+index c040576..70509e2 100644
+--- a/lib/lead.ts
++++ b/lib/lead.ts
+@@ -36,6 +36,12 @@ export interface LeadPayload {
+   path?: string;
+   /** Slug del producto de origen, si el enlace lo trajo. */
+   slug?: string;
++  /**
++   * Superficie que originó la solicitud: 'chat', 'configurador',
++   * 'calculadora'. Llega por ?origen= y permite responder una pregunta que
++   * hasta ahora no tenía datos: qué parte del sitio produce RFQ.
++   */
++  origen?: string;
+   /** Referencias de adjuntos: ruta en Storage o nombre del archivo. */
+   archivos?: string[];
+ }
+diff --git a/test/parametros-cotizacion.test.ts b/test/parametros-cotizacion.test.ts
+new file mode 100644
+index 0000000..30a6f74
+--- /dev/null
++++ b/test/parametros-cotizacion.test.ts
+@@ -0,0 +1,104 @@
++import { describe, it, expect } from 'vitest';
++import { readdirSync, readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++/**
++ * NADA DE LO QUE EL COMPRADOR YA DIJO SE PIERDE EN EL ÚLTIMO PASO.
++ *
++ * EL DEFECTO QUE ESTO CIERRA. El configurador de big bags enviaba al RFQ la
++ * configuración completa —capacidad, tapa, fondo, asas, factor de seguridad—
++ * en `?notas=`, y /cotizacion sólo leía `?nota=`. El dato se descartaba en
++ * silencio: el comprador que se había tomado el trabajo de configurar su
++ * bolsón llegaba a un formulario vacío. Lo mismo con los hubs de aplicación.
++ * Y el asistente enlazaba `?origen=chat` desde hacía etapas sin que nadie lo
++ * leyera, así que no había forma de saber cuántas solicitudes produce el chat.
++ *
++ * Un parámetro que nadie lee no falla: se pierde. Por eso esta prueba compara
++ * los DOS lados —lo que los enlaces mandan y lo que las páginas leen— en vez
++ * de confiar en que quien añada un enlace se acuerde del otro extremo.
++ */
++
++const raiz = process.cwd();
++
++/** Páginas de destino y el archivo donde declaran lo que leen. */
++const DESTINOS: Record<string, string> = {
++  '/cotizacion': 'app/(es)/cotizacion/page.tsx',
++  '/en/rfq': 'app/(en)/en/rfq/page.tsx',
++};
++
++function fuentes(dir: string, out: string[] = []): string[] {
++  for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
++    if (e.name === 'node_modules' || e.name.startsWith('.')) continue;
++    const rel = `${dir}/${e.name}`;
++    if (e.isDirectory()) fuentes(rel, out);
++    else if (/\.tsx?$/.test(e.name)) out.push(rel);
++  }
++  return out;
++}
++
++const archivos = [...fuentes('app'), ...fuentes('components')];
++
++/** Parámetros que una página declara leer, según su tipo `searchParams`. */
++function leidosPor(archivo: string): Set<string> {
++  const src = readFileSync(join(raiz, archivo), 'utf8');
++  const bloque = src.match(/searchParams:\s*Promise<\{([\s\S]*?)\}>/);
++  if (!bloque) return new Set();
++  return new Set([...bloque[1].matchAll(/(\w+)\??:/g)].map((m) => m[1]));
++}
++
++/** Enlaces literales hacia una página de destino, con sus parámetros. */
++function enviados(): { archivo: string; destino: string; param: string }[] {
++  const out: { archivo: string; destino: string; param: string }[] = [];
++  for (const f of archivos) {
++    const src = readFileSync(join(raiz, f), 'utf8');
++    for (const m of src.matchAll(/\/(cotizacion|en\/rfq)\?([^`"')\s]*)/g)) {
++      const destino = `/${m[1]}`;
++      for (const trozo of m[2].split('&')) {
++        const clave = trozo.match(/^([a-zA-Z_]+)=/);
++        if (clave) out.push({ archivo: f, destino, param: clave[1] });
++      }
++    }
++  }
++  return out;
++}
++
++describe('los dos extremos del enlace al RFQ coinciden', () => {
++  it('cada parámetro enviado lo lee la página de destino', () => {
++    const huerfanos: string[] = [];
++    for (const { archivo, destino, param } of enviados()) {
++      const pagina = DESTINOS[destino];
++      if (!pagina) {
++        huerfanos.push(`${archivo} → ${destino} (destino desconocido)`);
++        continue;
++      }
++      if (!leidosPor(pagina).has(param)) huerfanos.push(`${archivo} manda ?${param}= y ${pagina} no lo lee`);
++    }
++    expect(huerfanos.join('\n'), 'un parámetro que nadie lee no falla: se pierde').toBe('');
++  });
++
++  it('/cotizacion sigue leyendo los cuatro que recibe de verdad', () => {
++    const leidos = leidosPor(DESTINOS['/cotizacion']);
++    for (const p of ['producto', 'comparativa', 'nota', 'notas', 'origen']) {
++      expect(leidos.has(p), `/cotizacion dejó de leer ?${p}=`).toBe(true);
++    }
++  });
++
++  it('el origen viaja hasta el lead y hasta el CRM', () => {
++    // Sin esto, «¿cuántos RFQ salen del chat?» no tiene respuesta posible.
++    expect(readFileSync(join(raiz, 'lib/lead.ts'), 'utf8')).toContain('origen?: string');
++    const api = readFileSync(join(raiz, 'app/api/lead/route.ts'), 'utf8');
++    expect(api, 'zod descarta en silencio lo que no declara').toMatch(/origen:\s*z\.string\(\)/);
++    expect(api, 'la fuente del lead es la ruta real, no una fija').toContain('fuenteDe(lead)');
++  });
++
++  it('las superficies que producen solicitudes se identifican', () => {
++    const conOrigen = enviados().filter((e) => e.param === 'origen').map((e) => e.archivo);
++    for (const archivo of [
++      'components/Chatbot.tsx',
++      'components/CalculadoraForm.tsx',
++      'app/(es)/configurador/page.tsx',
++    ]) {
++      expect(conOrigen, `${archivo} no etiqueta su origen`).toContain(archivo);
++    }
++  });
++});
+-- 
+2.43.0
+
