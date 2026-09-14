@@ -24,6 +24,7 @@ import {
 } from "@/lib/search/topic-map";
 import { CONSULTAS_DINERO, consultasPorIdioma } from "@/lib/consultas-dinero";
 import { ACCIONES } from "@/lib/acciones";
+import { bloqueLlmsTxt } from "@/lib/api-publica";
 
 /**
  * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
@@ -644,7 +645,7 @@ Atribución sugerida al citar: ${SITE.legalName} (RUC ${SITE.ruc}), ${base}
 - [Métodos de cálculo en JSON](${base}/calculadoras/formulas.json)
 - [Feed RSS de novedades](${base}/novedades/rss.xml)
 - [JSON Feed de novedades](${base}/novedades/feed.json)
-`;
+${bloqueLlmsTxt()}`;
 
   return new Response(body, {
     headers: {

@@ -58,3 +58,10 @@ audit/domain-redirect.json
 # mediciones y capturas. Se regenera con `npm run diagnostico`; versionarla
 # metería megas de PNG en la historia por cada pasada.
 /.diagnostico/
+
+# Servicio de Fly (servicio/): dependencias y JavaScript compilado. Se
+# reconstruyen con `npm install && npm run build` dentro de servicio/, y el
+# despliegue los genera en la imagen.
+/servicio/node_modules/
+/servicio/dist/
+/servicio/package-lock.json

@@ -13,7 +13,12 @@ const compat = new FlatCompat({ baseDirectory: __dirname });
 const eslintConfig = [
   ...compat.extends('next/core-web-vitals'),
   {
-    ignores: ['.next/**', 'node_modules/**', 'public/**', 'next-env.d.ts', '*.sh'],
+    // `servicio/` es un proceso Node independiente que se despliega en Fly con
+    // su propio tsconfig, sus propias pruebas y su propia construcción: el
+    // Dockerfile corre `tsc` y `node --test` antes de publicar nada. Las reglas
+    // de `next/core-web-vitals` —pensadas para páginas y componentes— no
+    // aplican a un servidor HTTP sin React.
+    ignores: ['.next/**', 'node_modules/**', 'public/**', 'next-env.d.ts', '*.sh', 'servicio/**'],
   },
   {
     rules: {

@@ -1,0 +1,18 @@
+{
+  "name": "plastilonas-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API publica y servidor MCP de Plastilonas Peruanas SAC: predimensionamiento, catalogo y solicitudes de cotizacion.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/servicio/src/index.js",
+    "dev": "npm run build && npm start",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test dist/servicio/test"
+  },
+  "devDependencies": {
+    "typescript": "5.6.3",
+    "@types/node": "22.7.5"
+  }
+}

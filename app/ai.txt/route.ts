@@ -2,6 +2,7 @@ import { SITE, HORARIO } from "@/lib/site";
 import { COUNT_STATEMENT, FABRICACION_PROPIA_COUNT, PRODUCT_COUNT, YEARS_STATEMENT } from "@/lib/facts";
 import { products } from "@/lib/products";
 import { ACCIONES } from '@/lib/acciones';
+import { bloqueAiTxt } from "@/lib/api-publica";
 
 /**
  * /ai.txt — identidad y política de citación para agentes de IA.
@@ -135,7 +136,7 @@ La lista completa de límites, en versión humana: ${base}/confianza
   - ${base}/indicadores/datos.json — indicadores con fuente y fecha
 - Al usar una calculadora, cite también su apartado «noCubre».
 - Método editorial y verificación de cada dato: ${base}/metodo
-`;
+${bloqueAiTxt()}`;
 
   return new Response(body, {
     headers: {
