@@ -1,0 +1,28 @@
+# CONTEXTO DE CONSTRUCCIÓN DE LA IMAGEN DEL SERVICIO (servicio/ → Fly.io).
+#
+# VIVE EN LA RAÍZ PORQUE ES DONDE DOCKER LO LEE: el archivo se busca en la raíz
+# del CONTEXTO, no junto al Dockerfile. Estaba en servicio/, donde no hacía
+# nada, y el primer despliegue subió al constructor 2,1 GB en 44.727 archivos
+# —844 MB de node_modules, 680 MB de .next, 512 MB de .git—. Eso no es una
+# molestia de velocidad: es el contenido íntegro del repositorio, historia
+# incluida, viajando a un constructor remoto en cada despliegue.
+#
+# SE EXCLUYE TODO Y SE VUELVE A INCLUIR LO POCO QUE LA IMAGEN NECESITA. Al
+# revés —enumerar lo que sobra— se olvida siempre algo, y lo que se olvida se
+# sube. Así, lo que no está nombrado aquí no puede acabar en la imagen.
+#
+# La imagen del servicio necesita exactamente tres cosas: su propio código, y
+# los dos módulos del sitio de los que importa el cálculo y la identidad.
+# Cualquier import nuevo desde lib/ hay que añadirlo aquí Y en el Dockerfile —
+# y test/despliegue-servicio.test.ts falla si los dos no dicen lo mismo.
+
+*
+
+!lib
+lib/*
+!lib/calculadoras.ts
+!lib/site.ts
+
+!servicio
+servicio/node_modules
+servicio/dist

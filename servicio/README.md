@@ -38,17 +38,32 @@ Toda respuesta trae `limites`, `fuente`, `cita_sugerida` y `siguiente_paso`.
   dos números y nadie sabe cuál se cotizó.
 - **Su propio gate.** El `Dockerfile` corre `tsc` y `node --test` antes de
   construir la imagen: si algo está en rojo, no se despliega.
+- **Contexto de construcción mínimo.** El `.dockerignore` vive en la RAÍZ del
+  repositorio —que es donde Docker lo lee— y excluye todo para volver a incluir
+  sólo `lib/calculadoras.ts`, `lib/site.ts` y `servicio/`: **175 kB en 20
+  archivos**, frente a los 2,1 GB en 44.727 archivos que se subían cuando el
+  archivo estaba en `servicio/`, donde no filtraba nada.
 
 ## Desplegar
 
-Desde la **raíz del repositorio** (el contexto de construcción es la raíz, porque
-el servicio importa `lib/`):
+Desde la **raíz del repositorio** (el contexto de construcción es la raíz,
+porque el servicio importa `lib/`):
 
 ```bash
 fly auth login
-fly launch --config servicio/fly.toml --dockerfile servicio/Dockerfile --no-deploy --copy-config --name plastilonas-api
-fly deploy --config servicio/fly.toml --dockerfile servicio/Dockerfile .
+fly launch --config servicio/fly.toml --no-deploy --copy-config --name plastilonas-api
+npm run desplegar:api          # fly deploy . --config servicio/fly.toml
 ```
+
+**No pase `--dockerfile`.** flyctl resuelve esa ruta contra el `fly.toml`, no
+contra el directorio de trabajo: `--dockerfile servicio/Dockerfile` junto a
+`--config servicio/fly.toml` busca `servicio/servicio/Dockerfile`. La ruta vive
+en `[build] dockerfile = "Dockerfile"` dentro del propio `fly.toml`, donde sólo
+se puede leer de una manera.
+
+`fly launch` reescribe `servicio/fly.toml` con su propia plantilla. Después de
+lanzarlo, recupere el del repositorio —lleva la región, el escalado a cero, el
+health check y las variables— con `git checkout -- servicio/fly.toml`.
 
 Después, apunte `ORIGEN_API` a la URL real (se publica en el OpenAPI, en el
 descriptor MCP y en la consola):

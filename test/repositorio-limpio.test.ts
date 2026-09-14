@@ -36,6 +36,10 @@ import { join } from 'node:path';
 
 /** Archivos de raíz que SÍ deben existir. Todo lo demás sobra. */
 const RAIZ_PERMITIDA = new Set<string>([
+  // Docker lee el .dockerignore en la raíz del CONTEXTO de construcción, que
+  // para la imagen de servicio/ es la raíz del repositorio. Puesto en
+  // servicio/ no hacía nada y el primer despliegue subió 2,1 GB.
+  '.dockerignore',
   '.env.example',
   '.gitignore',
   'README.md',

@@ -9,6 +9,10 @@ app = "plastilonas-api"
 primary_region = "gru"
 
 [build]
+  # Relativo a ESTE archivo, no al directorio de trabajo: flyctl lo resuelve
+  # contra el fly.toml. No pase --dockerfile por línea de comandos; con
+  # `--config servicio/fly.toml` la bandera se resuelve también contra esta
+  # carpeta y acaba buscando servicio/servicio/Dockerfile.
   dockerfile = "Dockerfile"
 
 [env]

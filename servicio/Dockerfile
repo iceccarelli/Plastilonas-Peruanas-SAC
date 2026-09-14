@@ -1,9 +1,20 @@
 # Contexto de construcción: la RAÍZ del repositorio, no servicio/.
 # El servicio importa lib/calculadoras.ts del sitio a propósito: el cálculo que
 # publica esta API tiene que ser exactamente el que muestra la web, no una copia
-# que se desincroniza. Se despliega con:
+# que se desincroniza.
 #
-#   fly deploy --config servicio/fly.toml --dockerfile servicio/Dockerfile .
+# SE DESPLIEGA DESDE LA RAÍZ, SIN --dockerfile:
+#
+#   npm run desplegar:api          (= fly deploy . --config servicio/fly.toml)
+#
+# flyctl resuelve la ruta del Dockerfile RELATIVA AL fly.toml, no al directorio
+# de trabajo. Medido: `--dockerfile servicio/Dockerfile` con
+# `--config servicio/fly.toml` buscó servicio/servicio/Dockerfile y falló. Por
+# eso la ruta vive en `[build] dockerfile = "Dockerfile"` dentro del fly.toml,
+# donde sólo se puede leer de una manera, y la bandera no se usa.
+#
+# El .dockerignore está en la RAÍZ del repositorio, que es donde Docker lo lee:
+# excluye todo y vuelve a incluir sólo lo que estas tres líneas COPY necesitan.
 #
 FROM node:22-alpine AS construccion
 WORKDIR /obra
