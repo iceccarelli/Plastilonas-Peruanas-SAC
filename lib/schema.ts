@@ -613,3 +613,75 @@ export function softwareApplicationSchema(app: {
       : {}),
   };
 }
+
+/**
+ * API WEB — `WebAPI` de schema.org, que existe de verdad.
+ *
+ * Es el tipo correcto y está documentado: `WebAPI` es subtipo de `Service`, y
+ * `documentation` y `potentialAction: EntryPoint` son sus propiedades. No hace
+ * falta inventar nada, que es justo lo que esta constitución prohíbe: un
+ * `@type` que schema.org no define no refuerza una entidad, la ensucia.
+ *
+ * Se emite SÓLO cuando la API responde de verdad. Declarar en el grafo de la
+ * empresa un servicio que devuelve un error es la misma mentira que declararlo
+ * en /ai.txt, con la diferencia de que ésta queda indexada.
+ */
+export function webApiSchema(api: {
+  url: string;
+  origen: string;
+  documentacion: string;
+  mcp: string;
+  nombre: string;
+  descripcion: string;
+  herramientas: { nombre: string; paraQue: string }[];
+}): Dict {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebAPI",
+    "@id": `${api.url}#webapi`,
+    name: api.nombre,
+    description: api.descripcion,
+    url: api.origen,
+    documentation: api.documentacion,
+    provider: organizationRef(),
+    inLanguage: SITE.language,
+    // Sin autenticación y sin coste de acceso: es el dato que decide si un
+    // agente se molesta en intentar la llamada.
+    isAccessibleForFree: true,
+    termsOfService: `${SITE.url}/terminos`,
+    /**
+     * Los puntos de entrada reales, no una lista de deseos. `EntryPoint` con
+     * `contentType` y `httpMethod` es lo que permite a un cliente decidir cómo
+     * llamar sin leer prosa.
+     */
+    potentialAction: [
+      {
+        "@type": "ConsumeAction",
+        name: "Leer el contrato OpenAPI",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: api.documentacion,
+          httpMethod: "GET",
+          contentType: "application/json",
+        },
+      },
+      {
+        "@type": "ConsumeAction",
+        name: "Ejecutar herramientas por MCP (JSON-RPC 2.0)",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: api.mcp,
+          httpMethod: "POST",
+          contentType: "application/json",
+        },
+      },
+    ],
+    // Qué sabe hacer, en el vocabulario del grafo: cada herramienta como una
+    // capacidad nombrada, que es lo que un agente compara contra su tarea.
+    serviceOutput: api.herramientas.map((h) => ({
+      "@type": "Thing",
+      name: h.nombre,
+      description: h.paraQue,
+    })),
+  };
+}

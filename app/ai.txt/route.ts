@@ -136,6 +136,7 @@ La lista completa de límites, en versión humana: ${base}/confianza
   - ${base}/indicadores/datos.json — indicadores con fuente y fecha
 - Al usar una calculadora, cite también su apartado «noCubre».
 - Método editorial y verificación de cada dato: ${base}/metodo
+- Qué se puede leer y qué se puede ejecutar por programa: ${base}/integraciones
 ${bloqueAiTxt()}`;
 
   return new Response(body, {

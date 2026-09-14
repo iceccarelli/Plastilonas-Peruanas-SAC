@@ -14,6 +14,7 @@ import { INDUSTRIAS } from "@/lib/industrias";
 import { applications } from "@/lib/applications";
 import { guides } from "@/lib/guides";
 import { SUPERFICIES_INDEXABLES } from "@/lib/superficies-maquina";
+import { RUTA_INTEGRACIONES } from "@/lib/integraciones";
 import { cunas } from "@/lib/cunas";
 import { CUNAS_EN } from "@/lib/cunas-en";
 import { RUTA_ES, RUTA_EN, FABRICAR_ACTUALIZADO } from "@/lib/fabricar-o-importar";
@@ -97,6 +98,9 @@ export function seccionPaginas(): EntradaSitemap[] {
     { url: `${SITE.url}/distribuidores`, lastModified: paginas, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE.url}/confianza`, lastModified: paginas, changeFrequency: "yearly", priority: 0.7 },
     { url: `${SITE.url}/metodo`, lastModified: paginas, changeFrequency: "yearly", priority: 0.7 },
+    // La puerta de los programas y los agentes: describe las superficies de
+    // datos abiertas y, cuando está desplegada, la API con servidor MCP.
+    { url: `${SITE.url}${RUTA_INTEGRACIONES}`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE.url}/en`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },
     // Hub de compra en inglés: la puerta del comprador extranjero. No lleva
     // hreflang (no es traducción de ninguna página, es una síntesis), así que

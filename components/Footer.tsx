@@ -77,6 +77,9 @@ export default function Footer() {
       { label: 'Partners de ingeniería', href: '/socios' },
       { label: 'Centro de confianza', href: '/confianza' },
       { label: 'Cómo se publica este sitio', href: '/metodo' },
+      // Un integrador o un agente no entra por el menú comercial: entra
+      // buscando el contrato. Aquí está, y así la página no cuelga de nada.
+      { label: 'Integraciones: API, MCP y datos', href: '/integraciones' },
       { label: 'English', href: '/en' },
       { label: 'Português', href: '/pt' },
     ]},

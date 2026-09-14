@@ -645,6 +645,7 @@ Atribución sugerida al citar: ${SITE.legalName} (RUC ${SITE.ruc}), ${base}
 - [Métodos de cálculo en JSON](${base}/calculadoras/formulas.json)
 - [Feed RSS de novedades](${base}/novedades/rss.xml)
 - [JSON Feed de novedades](${base}/novedades/feed.json)
+- [Integraciones: qué se puede leer y qué se puede ejecutar](${base}/integraciones)
 ${bloqueLlmsTxt()}`;
 
   return new Response(body, {
