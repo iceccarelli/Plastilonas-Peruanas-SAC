@@ -1,0 +1,881 @@
+From f2808ab40743b11093d3e47679712fc19e273273 Mon Sep 17 00:00:00 2001
+From: Claude Opus 5 <noreply@anthropic.com>
+Date: Mon, 14 Sep 2026 16:02:14 +0000
+Subject: [PATCH] feat(integraciones): la puerta por la que un programa y un
+ agente encuentran esto
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+La API está viva —verificado contra producción: /v1/salud devuelve estado vivo,
+y /v1/catalogo?q=geomembrana para poza de relaves devuelve las cuatro
+geomembranas del catálogo real con sus límites— y hasta hoy nada del sitio
+apuntaba a ella. Un activo que nadie encuentra vale lo mismo que no tenerlo.
+
+/integraciones es la página de los dos lectores que deciden este mercado: un
+integrador que evalúa en dos minutos si esto le sirve, y un agente que necesita
+saber qué puede ejecutar y con qué límites.
+
+Se publica siempre, porque la mitad de lo que describe es cierta siempre: las
+ocho superficies en JSON —36 fichas de producto, 43 términos con su unidad, los
+cinco métodos con su fórmula— llevan etapas publicadas y no dependen de que
+ningún servicio esté levantado. El bloque ejecutable aparece sólo cuando la API
+responde de verdad.
+
+La lista de superficies no se escribe a mano: se deriva de
+SUPERFICIES_INDEXABLES, la misma que alimenta el sitemap y robots.txt. Publicar
+una novena y olvidarse de describirla aquí es imposible, y la prueba exige
+además que cada una tenga un manejador que la sirva.
+
+Se añade al grafo un nodo WebAPI —tipo que schema.org define de verdad,
+subtipo de Service— colgando del @id de la organización, con sus dos EntryPoint
+reales (GET al OpenAPI, POST al MCP), isAccessibleForFree y las seis
+herramientas como capacidades. Sólo con la API declarada: un servicio que
+devuelve error declarado en el grafo es la misma mentira que en /ai.txt,
+indexada.
+
+test/integraciones.test.ts: enlazada desde el pie, el sitemap y las dos
+superficies de texto; describe todas las superficies y ninguna más; sin la
+variable de entorno no hay bloque ni nodo; el nodo no inventa AggregateRating,
+Review ni Offer con precio; y las tres reglas —sin precios, cada dato con sus
+límites, cada dato con su fuente— viajan con la página.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UxmuN1emKoms4zAxwLB8RX
+---
+ app/(es)/integraciones/page.tsx               | 240 ++++++++++++++++++
+ app/ai.txt/route.ts                           |   1 +
+ app/llms.txt/route.ts                         |   1 +
+ components/Footer.tsx                         |   3 +
+ .../2026-09-14-la-puerta-de-los-programas.md  | 110 ++++++++
+ lib/integraciones.ts                          | 157 ++++++++++++
+ lib/schema.ts                                 |  72 ++++++
+ lib/sitemaps.ts                               |   4 +
+ test/integraciones.test.ts                    | 147 +++++++++++
+ 9 files changed, 735 insertions(+)
+ create mode 100644 app/(es)/integraciones/page.tsx
+ create mode 100644 docs/entregas/2026-09-14-la-puerta-de-los-programas.md
+ create mode 100644 lib/integraciones.ts
+ create mode 100644 test/integraciones.test.ts
+
+diff --git a/app/(es)/integraciones/page.tsx b/app/(es)/integraciones/page.tsx
+new file mode 100644
+index 0000000..9f5ada9
+--- /dev/null
++++ b/app/(es)/integraciones/page.tsx
+@@ -0,0 +1,240 @@
++import type { Metadata } from 'next';
++import Link from 'next/link';
++import { SITE } from '@/lib/site';
++import { JsonLd } from '@/components/JsonLd';
++import { webPageSchema, breadcrumbSchema, webApiSchema } from '@/lib/schema';
++import {
++  superficiesDeDatos,
++  LO_QUE_EJECUTA,
++  REGLAS,
++  bloqueApi,
++  RUTA_INTEGRACIONES,
++} from '@/lib/integraciones';
++import { calculadoras } from '@/lib/calculadoras';
++import { products } from '@/lib/products';
++import { terminos } from '@/lib/glosario';
++import CierreComercial from '@/components/CierreComercial';
++import { ACCIONES } from '@/lib/acciones';
++import PreguntasDeCompra from '@/components/PreguntasDeCompra';
++
++export const metadata: Metadata = {
++  title: 'Integraciones: API, MCP y datos abiertos',
++  description:
++    'Catálogo, glosario y métodos de cálculo en JSON abierto, y una API con servidor MCP para calcular, especificar y cotizar por programa. Sin precios publicados.',
++  alternates: { canonical: RUTA_INTEGRACIONES },
++};
++
++/**
++ * LA PÁGINA QUE EXISTE PARA QUE NOS ENCUENTRE UN PROGRAMA.
++ *
++ * El comprador industrial de este rubro ya no busca sólo con los ojos: busca
++ * preguntándole a un asistente, y su empresa carga catálogos en un ERP. Esta
++ * página es la puerta de esos dos, y está escrita para los dos: un integrador
++ * decide en dos minutos si esto le sirve, y un agente encuentra aquí lo que
++ * puede ejecutar y con qué límites.
++ *
++ * SE PUBLICA SIEMPRE, PORQUE LA MITAD DE LO QUE DESCRIBE ES CIERTA SIEMPRE: las
++ * ocho superficies en JSON llevan etapas publicadas y no dependen de que ningún
++ * servicio esté levantado. El bloque ejecutable —API y MCP— aparece sólo cuando
++ * responde de verdad.
++ */
++export default function IntegracionesPage() {
++  const url = `${SITE.url}${RUTA_INTEGRACIONES}`;
++  const superficies = superficiesDeDatos();
++  const api = bloqueApi();
++
++  return (
++    <div className="mx-auto max-w-4xl px-6 py-14">
++      <JsonLd
++        data={[
++          webPageSchema({
++            url,
++            name: 'Integraciones: API, MCP y datos abiertos',
++            description:
++              'Superficies de datos abiertas y, cuando está desplegada, una API con servidor MCP para calcular, especificar y cotizar por programa.',
++          }),
++          breadcrumbSchema([
++            { name: 'Inicio', url: SITE.url },
++            { name: 'Integraciones', url },
++          ]),
++          ...(api
++            ? [
++                webApiSchema({
++                  url,
++                  origen: api.origen,
++                  documentacion: api.openapi,
++                  mcp: api.mcp,
++                  nombre: `API de especificación y cotización — ${SITE.legalName}`,
++                  descripcion:
++                    'Catálogo de fabricación, predimensionamiento con fórmula publicada y registro de solicitudes de cotización. No devuelve precios.',
++                  herramientas: api.herramientas,
++                }),
++              ]
++            : []),
++        ]}
++      />
++
++      <div className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#059669]">
++        Para programas y para agentes
++      </div>
++      <h1 className="t-display font-semibold tracking-tight text-[#0A2540]">
++        Nuestros datos técnicos son abiertos, y se pueden ejecutar
++      </h1>
++      <p className="mt-5 max-w-2xl text-lg text-gray-600">
++        El catálogo de fabricación, el vocabulario del rubro y los {calculadoras.length} métodos
++        de predimensionamiento están publicados en JSON, sin clave y sin registro. Un sistema de
++        compras los puede cargar hoy; un agente los puede citar hoy.
++      </p>
++
++      {/* ── Lo que siempre es cierto ─────────────────────────────────── */}
++      <h2 className="mt-14 text-2xl font-semibold tracking-tight text-[#0A2540]">
++        Datos abiertos: {superficies.length} superficies, sin clave
++      </h2>
++      <p className="mt-3 text-gray-600">
++        {products.length} fichas de producto con sus especificaciones, {terminos.length} términos
++        del rubro con la unidad en la que se mide cada uno, y los métodos de cálculo con su
++        fórmula a la vista. Se consultan y se citan libremente indicando la fuente.
++      </p>
++      <div className="mt-6 overflow-x-auto">
++        <table className="w-full text-sm">
++          <thead>
++            <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
++              <th className="py-2 pr-4 font-semibold">Superficie</th>
++              <th className="py-2 pr-4 font-semibold">Qué contiene</th>
++              <th className="py-2 font-semibold">Para qué sirve</th>
++            </tr>
++          </thead>
++          <tbody>
++            {superficies.map((s) => (
++              <tr key={s.ruta} className="border-b border-gray-100 align-top">
++                <td className="py-3 pr-4">
++                  <Link href={s.ruta} className="font-mono text-[13px] text-[#059669] hover:underline">
++                    {s.ruta}
++                  </Link>
++                </td>
++                <td className="py-3 pr-4 text-gray-700">{s.que}</td>
++                <td className="py-3 text-gray-600">{s.paraQue}</td>
++              </tr>
++            ))}
++          </tbody>
++        </table>
++      </div>
++
++      {/* ── Lo que la API añade ──────────────────────────────────────── */}
++      <h2 className="mt-14 text-2xl font-semibold tracking-tight text-[#0A2540]">
++        Y lo que un archivo no puede hacer: ejecutar
++      </h2>
++      <p className="mt-3 text-gray-600">
++        Un JSON publica la fórmula. Hace falta un servicio para aplicarla a los números de quien
++        pregunta, buscar en el catálogo con sus palabras y recibir una solicitud.
++      </p>
++      <dl className="mt-6 grid gap-5 sm:grid-cols-2">
++        {LO_QUE_EJECUTA.map((c) => (
++          <div key={c.titulo} className="rounded-2xl border border-gray-200 p-5">
++            <dt className="font-semibold text-[#0A2540]">{c.titulo}</dt>
++            <dd className="mt-2 text-sm text-gray-600">{c.detalle}</dd>
++          </div>
++        ))}
++      </dl>
++
++      {api ? (
++        <>
++          <h3 className="mt-10 text-lg font-semibold text-[#0A2540]">Cómo se conecta</h3>
++          <div className="mt-4 space-y-5">
++            <div>
++              <p className="text-sm font-semibold text-gray-700">Servidor MCP, para agentes</p>
++              <p className="mt-1 text-sm text-gray-600">
++                Transporte streamable HTTP (JSON-RPC 2.0 sobre POST). Sin autenticación: es
++                información pública de un fabricante.
++              </p>
++              <pre className="mt-2 overflow-x-auto rounded-xl bg-[#0A2540] p-4 text-[13px] leading-relaxed text-white">
++                <code>{api.ejemploMcp}</code>
++              </pre>
++            </div>
++            <div>
++              <p className="text-sm font-semibold text-gray-700">API REST, para sistemas</p>
++              <p className="mt-1 text-sm text-gray-600">
++                Contrato completo en{' '}
++                <a href={api.openapi} className="text-[#059669] hover:underline">
++                  OpenAPI 3.1
++                </a>
++                , generado desde el propio motor de cálculo.
++              </p>
++              <pre className="mt-2 overflow-x-auto rounded-xl bg-[#0A2540] p-4 text-[13px] leading-relaxed text-white">
++                <code>{api.ejemploCurl}</code>
++              </pre>
++            </div>
++          </div>
++
++          <h3 className="mt-10 text-lg font-semibold text-[#0A2540]">
++            Las {api.herramientas.length} herramientas que un agente puede ejecutar
++          </h3>
++          <ul className="mt-4 space-y-2 text-sm">
++            {api.herramientas.map((h) => (
++              <li key={h.nombre} className="flex flex-col gap-1 border-b border-gray-100 pb-2 sm:flex-row sm:gap-4">
++                <code className="shrink-0 font-mono text-[13px] text-[#059669] sm:w-72">{h.nombre}</code>
++                <span className="text-gray-600">{h.paraQue}</span>
++              </li>
++            ))}
++          </ul>
++          <p className="mt-6 text-sm text-gray-500">
++            Consola con probador y documentación:{' '}
++            <a href={api.origen} className="text-[#059669] hover:underline">
++              {api.origen.replace(/^https:\/\//, '')}
++            </a>
++          </p>
++        </>
++      ) : (
++        <p className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-gray-700">
++          El servicio ejecutable no está publicado todavía. Las {superficies.length} superficies de
++          datos de arriba sí, y no dependen de él. Si necesita ejecutar cálculos o cargar el
++          catálogo contra un endpoint, escríbanos a{' '}
++          <a href={`mailto:${SITE.email}`} className="text-[#059669] hover:underline">
++            {SITE.email}
++          </a>{' '}
++          y lo coordinamos.
++        </p>
++      )}
++
++      {/* ── Las reglas ───────────────────────────────────────────────── */}
++      <h2 className="mt-14 text-2xl font-semibold tracking-tight text-[#0A2540]">
++        Tres reglas, y las tres limitan lo que decimos
++      </h2>
++      <dl className="mt-6 space-y-5">
++        {REGLAS.map((r) => (
++          <div key={r.regla} className="border-l-2 border-[#059669] pl-5">
++            <dt className="font-semibold text-[#0A2540]">{r.regla}</dt>
++            <dd className="mt-1 text-sm text-gray-600">{r.porque}</dd>
++          </div>
++        ))}
++      </dl>
++      <p className="mt-6 text-sm text-gray-500">
++        Los cálculos son de <strong>predimensionamiento</strong>: sirven para llegar a una
++        cotización con un número propio y para entender qué variable manda. No sustituyen una
++        memoria de cálculo firmada y no autorizan a construir nada. Lo que esta empresa no afirma
++        está enumerado en{' '}
++        <Link href="/confianza" className="text-[#059669] hover:underline">
++          el centro de confianza
++        </Link>
++        , y cómo se publica cada dato, en{' '}
++        <Link href="/metodo" className="text-[#059669] hover:underline">
++          el método editorial
++        </Link>
++        .
++      </p>
++
++      <PreguntasDeCompra ruta={RUTA_INTEGRACIONES} />
++
++      <CierreComercial
++        contexto="integraciones"
++        titulo="¿Integra esto en su sistema de compras?"
++        principal={{ href: ACCIONES.cotizar.href, label: ACCIONES.cotizar.label }}
++        secundaria={{ href: '/descargas', label: 'Ver descargas y datos abiertos', flecha: true }}
++        className="mt-14"
++      >
++        Escríbanos qué necesita leer o ejecutar y desde qué sistema. Respondemos en horario
++        comercial de Lima con el contrato, un ejemplo y los límites de cada dato.
++      </CierreComercial>
++    </div>
++  );
++}
+diff --git a/app/ai.txt/route.ts b/app/ai.txt/route.ts
+index 21c59b1..287b853 100644
+--- a/app/ai.txt/route.ts
++++ b/app/ai.txt/route.ts
+@@ -136,6 +136,7 @@ La lista completa de límites, en versión humana: ${base}/confianza
+   - ${base}/indicadores/datos.json — indicadores con fuente y fecha
+ - Al usar una calculadora, cite también su apartado «noCubre».
+ - Método editorial y verificación de cada dato: ${base}/metodo
++- Qué se puede leer y qué se puede ejecutar por programa: ${base}/integraciones
+ ${bloqueAiTxt()}`;
+ 
+   return new Response(body, {
+diff --git a/app/llms.txt/route.ts b/app/llms.txt/route.ts
+index 82a7e8a..d835fa8 100644
+--- a/app/llms.txt/route.ts
++++ b/app/llms.txt/route.ts
+@@ -645,6 +645,7 @@ Atribución sugerida al citar: ${SITE.legalName} (RUC ${SITE.ruc}), ${base}
+ - [Métodos de cálculo en JSON](${base}/calculadoras/formulas.json)
+ - [Feed RSS de novedades](${base}/novedades/rss.xml)
+ - [JSON Feed de novedades](${base}/novedades/feed.json)
++- [Integraciones: qué se puede leer y qué se puede ejecutar](${base}/integraciones)
+ ${bloqueLlmsTxt()}`;
+ 
+   return new Response(body, {
+diff --git a/components/Footer.tsx b/components/Footer.tsx
+index 9dfe8b4..82299ef 100644
+--- a/components/Footer.tsx
++++ b/components/Footer.tsx
+@@ -77,6 +77,9 @@ export default function Footer() {
+       { label: 'Partners de ingeniería', href: '/socios' },
+       { label: 'Centro de confianza', href: '/confianza' },
+       { label: 'Cómo se publica este sitio', href: '/metodo' },
++      // Un integrador o un agente no entra por el menú comercial: entra
++      // buscando el contrato. Aquí está, y así la página no cuelga de nada.
++      { label: 'Integraciones: API, MCP y datos', href: '/integraciones' },
+       { label: 'English', href: '/en' },
+       { label: 'Português', href: '/pt' },
+     ]},
+diff --git a/docs/entregas/2026-09-14-la-puerta-de-los-programas.md b/docs/entregas/2026-09-14-la-puerta-de-los-programas.md
+new file mode 100644
+index 0000000..dd99be6
+--- /dev/null
++++ b/docs/entregas/2026-09-14-la-puerta-de-los-programas.md
+@@ -0,0 +1,110 @@
++# P5 — la API está viva, y hasta hoy nadie podía encontrarla
++
++**Fecha:** 2026-09-14 · **Base:** `main` con 0002 a 0017 aplicados ·
++**Página nueva:** `/integraciones` · **Nodo nuevo en el grafo:** `WebAPI`
++
++## 1. Lo que acaba de pasar, verificado contra producción
++
++```
++✔ Machine 48ed9179b22308 [app] update finished: success
++✓ DNS configuration verified — https://plastilonas-api.fly.dev/
++```
++
++Medido en vivo, no deducido:
++
++| Llamada | Respuesta |
++|---|---|
++| `GET /v1/salud` | `{"estado":"vivo","version":"1.0.0","sitio":"…vercel.app"}` |
++| `GET /v1/catalogo?q=geomembrana para poza de relaves` | las **4 geomembranas** del catálogo real, 11 familias |
++| Primer límite devuelto | «Esta API no publica precios: el precio depende de material, medidas, cantidad, destino e Incoterm» |
++
++La cadena entera funciona: el servicio en São Paulo lee el catálogo del sitio en
++Vercel, lo busca ponderando por lo que distingue, y devuelve el resultado con
++sus límites.
++
++## 2. El problema que quedaba, y es el caro
++
++**Nada apunta a ella.** Un activo que nadie encuentra vale exactamente lo mismo
++que no tenerlo. Un jefe de compras que busca «cargar catálogo de geomembranas
++en el ERP», un integrador que busca «API proveedor industrial Perú» y un agente
++que rastrea el sitio se encuentran hoy con 354 páginas que hablan de productos y
++con cero que digan qué se puede leer y qué se puede ejecutar.
++
++## 3. `/integraciones`
++
++Una página escrita para los dos lectores que decide este mercado: un integrador
++que evalúa en dos minutos si esto le sirve, y un agente que necesita saber qué
++puede ejecutar y con qué límites.
++
++**Se publica siempre, porque la mitad de lo que describe es cierta siempre.** Las
++ocho superficies en JSON —catálogo con 36 fichas, glosario con 43 términos y la
++unidad de cada uno, los cinco métodos con su fórmula, identidad, mapa de
++consultas, indicadores— llevan etapas publicadas y no dependen de que ningún
++servicio esté levantado. El bloque ejecutable aparece sólo cuando la API
++responde de verdad.
++
++Y la lista de superficies **no se escribe a mano**: se deriva de
++`SUPERFICIES_INDEXABLES`, la misma constante que alimenta el sitemap y
++`robots.txt`. Publicar una novena superficie y olvidarse de describirla aquí es
++imposible: la prueba lo dice, y además exige que cada una tenga un manejador que
++la sirva de verdad.
++
++## 4. El nodo `WebAPI`, que existe en schema.org
++
++`WebAPI` es subtipo de `Service` y está documentado; `documentation`,
++`potentialAction` y `EntryPoint` son sus propiedades. No hace falta inventar
++nada — que es justo lo que L11 prohíbe: un `@type` que schema.org no define no
++refuerza una entidad, la ensucia.
++
++El nodo cuelga del `@id` de la organización que ya existe, declara sus dos
++puntos de entrada reales —`GET` al OpenAPI, `POST` al MCP—, dice
++`isAccessibleForFree: true` (el dato que decide si un agente se molesta en
++intentar la llamada) y enumera las seis herramientas como capacidades.
++
++**Se emite sólo con la API declarada.** Declarar en el grafo de la empresa un
++servicio que devuelve un error es la misma mentira que declararlo en `/ai.txt`,
++con el agravante de que ésta queda indexada.
++
++## 5. Lo que lo mantiene
++
++`test/integraciones.test.ts`, 12 pruebas:
++
++- la página está enlazada desde el pie, el sitemap, `/llms.txt` y `/ai.txt` —una
++  página que sólo vive en el sitemap no la visita nadie y ningún agente la
++  encuentra navegando—;
++- describe **todas** las superficies indexables, ninguna más y ninguna menos, y
++  cada una tiene un manejador que la sirve;
++- sin `NEXT_PUBLIC_API_URL` no hay bloque ejecutable ni nodo `WebAPI`;
++- el nodo es `WebAPI`, cuelga de la organización, declara dos `EntryPoint` con
++  su método HTTP, y **no** inventa `AggregateRating`, `Review` ni `Offer` con
++  precio;
++- las tres reglas viajan con la página, la primera es que no hay precios, y la
++  advertencia de predimensionamiento está publicada.
++
++Verificadas en sentido contrario: añadiendo una novena superficie sin
++descripción, quitando el enlace del pie —falla también el auditor de huérfanas—
++y metiendo un `Offer` con precio en el nodo, falla exactamente la que
++corresponde.
++
++## 6. Lo que falta para que esto cobre
++
++Una variable en Vercel:
++
++```
++NEXT_PUBLIC_API_URL=https://plastilonas-api.fly.dev
++```
++
++Con ella, y sin tocar una línea más de código, el sitio empieza a publicar solo:
++el bloque ejecutable en `/integraciones`, el nodo `WebAPI` en el grafo, el
++servidor MCP y las seis herramientas en `/ai.txt` y en `/llms.txt`.
++
++Sin ella, la página sigue siendo cierta: describe los datos abiertos y dice que
++el servicio ejecutable todavía no está publicado.
++
++## 7. Lo que NO entra
++
++- Ningún dato nuevo, ninguna afirmación nueva, ningún precio.
++- No se toca el servicio: esto es todo del lado del sitio.
++- No se inventa una convención de descubrimiento. Se usa lo que existe:
++  `WebAPI` de schema.org, `/ai.txt`, `/llms.txt`, el sitemap y un enlace en el
++  pie que alcanza a las 354 páginas.
+diff --git a/lib/integraciones.ts b/lib/integraciones.ts
+new file mode 100644
+index 0000000..8da8fb8
+--- /dev/null
++++ b/lib/integraciones.ts
+@@ -0,0 +1,157 @@
++import { SITE } from './site';
++import { SUPERFICIES_INDEXABLES } from './superficies-maquina';
++import { calculadoras, CALCULADORAS_ACTUALIZADO } from './calculadoras';
++import { apiPublica, HERRAMIENTAS_MCP } from './api-publica';
++
++/**
++ * INTEGRACIONES — lo que este sitio ofrece a un programa y a un agente.
++ *
++ * DOS COSAS DISTINTAS, Y CONVIENE NO MEZCLARLAS.
++ *
++ *   LO QUE SIEMPRE ES CIERTO. El sitio publica ocho superficies en JSON y
++ *   texto plano —catálogo, glosario, métodos de cálculo, identidad, mapa de
++ *   consultas, indicadores— que cualquiera puede leer hoy, sin permiso, sin
++ *   clave y sin que nadie tenga que desplegar nada. Existen desde hace etapas.
++ *
++ *   LO QUE DEPENDE DEL SERVICIO. La API y el servidor MCP (servicio/, en
++ *   Fly.io) añaden lo que un archivo estático no puede: EJECUTAR. Calcular con
++ *   los datos del comprador, buscar en el catálogo, traducir un problema en una
++ *   especificación y registrar una solicitud de cotización.
++ *
++ * Esta página describe las dos, y la segunda sólo cuando responde de verdad
++ * —`NEXT_PUBLIC_API_URL`—. Prometer a un integrador un endpoint que devuelve un
++ * error es perder al integrador y al comprador que venía detrás.
++ */
++
++export const RUTA_INTEGRACIONES = '/integraciones';
++
++export interface SuperficieDeDatos {
++  ruta: string;
++  que: string;
++  paraQue: string;
++}
++
++/**
++ * Las superficies que el sitio publica hoy. La lista de rutas NO se escribe
++ * aquí: se toma de `SUPERFICIES_INDEXABLES`, que es la misma que alimenta el
++ * sitemap y `robots.txt`. Publicar una novena y olvidarse de esta página es
++ * entonces imposible: falta la descripción y la prueba lo dice.
++ */
++const QUE_ES: Record<string, { que: string; paraQue: string }> = {
++  '/llms.txt': {
++    que: 'Índice curado del sitio en texto plano: consulta → una sola URL.',
++    paraQue: 'Que un agente encuentre la página canónica de cada pregunta en vez de adivinar entre veinte.',
++  },
++  '/ai.txt': {
++    que: 'Identidad, política de citación y lo que esta empresa NO afirma.',
++    paraQue: 'Que un modelo cite con atribución correcta y no rellene por su cuenta lo que no está publicado.',
++  },
++  '/entidad.json': {
++    que: 'Grafo de la organización: razón social, RUC, domicilio, perfiles verificados.',
++    paraQue: 'Resolver la entidad sin depender de directorios con datos viejos.',
++  },
++  '/mapa-consultas.json': {
++    que: 'Mapa completo de consulta comercial a URL única, con intención declarada.',
++    paraQue: 'Responder una consulta con la página que de verdad la contesta.',
++  },
++  '/productos/catalogo.json': {
++    que: 'Catálogo de fabricación con especificaciones, aplicaciones, sectores y condiciones de suministro.',
++    paraQue: 'Cargar el catálogo en un ERP o en un sistema de compras. Sin precios: se cotizan por operación.',
++  },
++  '/glosario/terminos.json': {
++    que: 'Vocabulario del rubro: definición citable, en qué unidad se mide y qué decide en obra.',
++    paraQue: 'Traducir lo que pide un pliego a lo que hay que especificar.',
++  },
++  '/calculadoras/formulas.json': {
++    que: `Los ${calculadoras.length} métodos de predimensionamiento con su fórmula, sus supuestos y sus límites (revisión ${CALCULADORAS_ACTUALIZADO}).`,
++    paraQue: 'Verificar un número antes de repetirlo. Una caja negra no la puede auditar nadie.',
++  },
++  '/indicadores/datos.json': {
++    que: 'Indicadores del rubro con su fuente y su fecha.',
++    paraQue: 'Contextualizar una cotización sin inventar una serie.',
++  },
++};
++
++export function superficiesDeDatos(): SuperficieDeDatos[] {
++  return SUPERFICIES_INDEXABLES.map((ruta) => {
++    const d = QUE_ES[ruta];
++    return { ruta, que: d?.que ?? '', paraQue: d?.paraQue ?? '' };
++  });
++}
++
++/** Lo que la API añade sobre los archivos: ejecutar, no sólo leer. */
++export const LO_QUE_EJECUTA = [
++  {
++    titulo: 'Calcular con los datos del comprador',
++    detalle:
++      'Los archivos publican la fórmula; la API la aplica. Una poza de 40 × 25 × 4 devuelve los metros cuadrados, el desglose que los produce, los avisos que correspondan y lo que el cálculo no cubre.',
++  },
++  {
++    titulo: 'Encontrar el producto que corresponde',
++    detalle:
++      'Búsqueda sobre el catálogo con el texto del comprador —«bolsas para concentrado de cobre»—, ponderada por lo que distingue y no por lo que se repite.',
++  },
++  {
++    titulo: 'Traducir un problema en una especificación',
++    detalle:
++      'De «poza de relaves a 4.100 msnm con contacto ácido» a qué familia corresponde, qué variables hay que fijar, qué preguntas faltan y qué cálculo aplica. Con la certeza declarada: cuando la descripción admite varias familias, lo dice.',
++  },
++  {
++    titulo: 'Registrar una solicitud de cotización',
++    detalle:
++      'Un RFQ estructurado que entra por el mismo buzón que el formulario del sitio y devuelve su referencia.',
++  },
++] as const;
++
++/** Las tres reglas que gobiernan todo lo que sale de esta puerta. */
++export const REGLAS = [
++  {
++    regla: 'Sin precios, ni ahora ni después',
++    porque:
++      'El precio depende de material, medidas, cantidad, destino e Incoterm. Publicarlo dejaría de ser una referencia para pasar a ser una promesa que no se puede sostener.',
++  },
++  {
++    regla: 'Cada dato viaja con sus límites',
++    porque:
++      'Toda respuesta trae el campo `limites`. Un número sin ellos se usa fuera de ellos, y en una poza de relaves o en una galería de mina eso no es un error de marketing.',
++  },
++  {
++    regla: 'Cada dato viaja con su fuente',
++    porque:
++      'Toda respuesta trae la página de este sitio donde el mismo dato está publicado con su método a la vista, y la cita sugerida. Lo que no se puede verificar no se debería repetir.',
++  },
++] as const;
++
++export interface BloqueApi {
++  origen: string;
++  mcp: string;
++  openapi: string;
++  herramientas: typeof HERRAMIENTAS_MCP;
++  ejemploCurl: string;
++  ejemploMcp: string;
++}
++
++/** El bloque ejecutable, sólo cuando hay un servicio que responda. */
++export function bloqueApi(): BloqueApi | null {
++  const api = apiPublica();
++  if (!api) return null;
++  return {
++    origen: api.origen,
++    mcp: api.mcp,
++    openapi: api.openapi,
++    herramientas: api.herramientas,
++    ejemploCurl: [
++      `curl -s ${api.origen}/v1/calculos/geomembrana-poza \\`,
++      `  -H 'content-type: application/json' \\`,
++      `  -d '{"valores":{"largo":40,"ancho":25,"profundidad":4}}'`,
++    ].join('\n'),
++    ejemploMcp: [
++      `curl -s ${api.mcp} \\`,
++      `  -H 'content-type: application/json' \\`,
++      `  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`,
++    ].join('\n'),
++  };
++}
++
++/** Enlace a esta página para las superficies de texto. Siempre existe. */
++export const ENLACE_INTEGRACIONES = `${SITE.url}${RUTA_INTEGRACIONES}`;
+diff --git a/lib/schema.ts b/lib/schema.ts
+index 0cb9bf6..a906263 100644
+--- a/lib/schema.ts
++++ b/lib/schema.ts
+@@ -613,3 +613,75 @@ export function softwareApplicationSchema(app: {
+       : {}),
+   };
+ }
++
++/**
++ * API WEB — `WebAPI` de schema.org, que existe de verdad.
++ *
++ * Es el tipo correcto y está documentado: `WebAPI` es subtipo de `Service`, y
++ * `documentation` y `potentialAction: EntryPoint` son sus propiedades. No hace
++ * falta inventar nada, que es justo lo que esta constitución prohíbe: un
++ * `@type` que schema.org no define no refuerza una entidad, la ensucia.
++ *
++ * Se emite SÓLO cuando la API responde de verdad. Declarar en el grafo de la
++ * empresa un servicio que devuelve un error es la misma mentira que declararlo
++ * en /ai.txt, con la diferencia de que ésta queda indexada.
++ */
++export function webApiSchema(api: {
++  url: string;
++  origen: string;
++  documentacion: string;
++  mcp: string;
++  nombre: string;
++  descripcion: string;
++  herramientas: { nombre: string; paraQue: string }[];
++}): Dict {
++  return {
++    "@context": "https://schema.org",
++    "@type": "WebAPI",
++    "@id": `${api.url}#webapi`,
++    name: api.nombre,
++    description: api.descripcion,
++    url: api.origen,
++    documentation: api.documentacion,
++    provider: organizationRef(),
++    inLanguage: SITE.language,
++    // Sin autenticación y sin coste de acceso: es el dato que decide si un
++    // agente se molesta en intentar la llamada.
++    isAccessibleForFree: true,
++    termsOfService: `${SITE.url}/terminos`,
++    /**
++     * Los puntos de entrada reales, no una lista de deseos. `EntryPoint` con
++     * `contentType` y `httpMethod` es lo que permite a un cliente decidir cómo
++     * llamar sin leer prosa.
++     */
++    potentialAction: [
++      {
++        "@type": "ConsumeAction",
++        name: "Leer el contrato OpenAPI",
++        target: {
++          "@type": "EntryPoint",
++          urlTemplate: api.documentacion,
++          httpMethod: "GET",
++          contentType: "application/json",
++        },
++      },
++      {
++        "@type": "ConsumeAction",
++        name: "Ejecutar herramientas por MCP (JSON-RPC 2.0)",
++        target: {
++          "@type": "EntryPoint",
++          urlTemplate: api.mcp,
++          httpMethod: "POST",
++          contentType: "application/json",
++        },
++      },
++    ],
++    // Qué sabe hacer, en el vocabulario del grafo: cada herramienta como una
++    // capacidad nombrada, que es lo que un agente compara contra su tarea.
++    serviceOutput: api.herramientas.map((h) => ({
++      "@type": "Thing",
++      name: h.nombre,
++      description: h.paraQue,
++    })),
++  };
++}
+diff --git a/lib/sitemaps.ts b/lib/sitemaps.ts
+index 26f6187..a453122 100644
+--- a/lib/sitemaps.ts
++++ b/lib/sitemaps.ts
+@@ -14,6 +14,7 @@ import { INDUSTRIAS } from "@/lib/industrias";
+ import { applications } from "@/lib/applications";
+ import { guides } from "@/lib/guides";
+ import { SUPERFICIES_INDEXABLES } from "@/lib/superficies-maquina";
++import { RUTA_INTEGRACIONES } from "@/lib/integraciones";
+ import { cunas } from "@/lib/cunas";
+ import { CUNAS_EN } from "@/lib/cunas-en";
+ import { RUTA_ES, RUTA_EN, FABRICAR_ACTUALIZADO } from "@/lib/fabricar-o-importar";
+@@ -97,6 +98,9 @@ export function seccionPaginas(): EntradaSitemap[] {
+     { url: `${SITE.url}/distribuidores`, lastModified: paginas, changeFrequency: "monthly", priority: 0.6 },
+     { url: `${SITE.url}/confianza`, lastModified: paginas, changeFrequency: "yearly", priority: 0.7 },
+     { url: `${SITE.url}/metodo`, lastModified: paginas, changeFrequency: "yearly", priority: 0.7 },
++    // La puerta de los programas y los agentes: describe las superficies de
++    // datos abiertas y, cuando está desplegada, la API con servidor MCP.
++    { url: `${SITE.url}${RUTA_INTEGRACIONES}`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },
+     { url: `${SITE.url}/en`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },
+     // Hub de compra en inglés: la puerta del comprador extranjero. No lleva
+     // hreflang (no es traducción de ninguna página, es una síntesis), así que
+diff --git a/test/integraciones.test.ts b/test/integraciones.test.ts
+new file mode 100644
+index 0000000..beb8e5c
+--- /dev/null
++++ b/test/integraciones.test.ts
+@@ -0,0 +1,147 @@
++import { describe, it, expect, beforeEach, afterEach } from 'vitest';
++import { readFileSync, existsSync } from 'node:fs';
++import { join } from 'node:path';
++import { superficiesDeDatos, bloqueApi, REGLAS, LO_QUE_EJECUTA, RUTA_INTEGRACIONES } from '@/lib/integraciones';
++import { SUPERFICIES_INDEXABLES } from '@/lib/superficies-maquina';
++import { webApiSchema } from '@/lib/schema';
++import { HERRAMIENTAS_MCP } from '@/lib/api-publica';
++
++/**
++ * LA PUERTA DE LOS PROGRAMAS Y LOS AGENTES.
++ *
++ * El comprador de este rubro ya no busca sólo con los ojos: pregunta a un
++ * asistente, y su empresa carga catálogos en un ERP. `/integraciones` existe
++ * para esos dos, y tiene una tentación evidente: prometer capacidades que
++ * todavía no responden. Estas pruebas la cierran.
++ */
++
++const raiz = process.cwd();
++const leer = (rel: string) => readFileSync(join(raiz, rel), 'utf8');
++const anterior = process.env.NEXT_PUBLIC_API_URL;
++
++beforeEach(() => { delete process.env.NEXT_PUBLIC_API_URL; });
++afterEach(() => {
++  if (anterior === undefined) delete process.env.NEXT_PUBLIC_API_URL;
++  else process.env.NEXT_PUBLIC_API_URL = anterior;
++});
++
++describe('la página existe y no cuelga de nada', () => {
++  it('la plantilla está donde dice la ruta canónica', () => {
++    expect(RUTA_INTEGRACIONES).toBe('/integraciones');
++    expect(existsSync(join(raiz, 'app/(es)/integraciones/page.tsx'))).toBe(true);
++  });
++
++  it('está enlazada desde el pie, en el sitemap y en las dos superficies de texto', () => {
++    // Una página que sólo existe en el sitemap es una página que nadie visita
++    // y que ningún agente encuentra navegando.
++    expect(leer('components/Footer.tsx')).toContain("href: '/integraciones'");
++    expect(leer('lib/sitemaps.ts')).toContain('RUTA_INTEGRACIONES');
++    expect(leer('app/llms.txt/route.ts')).toContain('/integraciones');
++    expect(leer('app/ai.txt/route.ts')).toContain('/integraciones');
++  });
++});
++
++describe('lo que la página promete es lo que el sitio publica', () => {
++  it('describe TODAS las superficies indexables, ninguna más y ninguna menos', () => {
++    /**
++     * La lista no se escribe a mano: se deriva de `SUPERFICIES_INDEXABLES`, la
++     * misma que alimenta el sitemap y robots.txt. Publicar una novena superficie
++     * y olvidarse de describirla aquí es entonces imposible.
++     */
++    const rutas = superficiesDeDatos().map((s) => s.ruta);
++    expect(rutas).toEqual([...SUPERFICIES_INDEXABLES]);
++    for (const s of superficiesDeDatos()) {
++      expect(s.que, `${s.ruta} sin descripción`).not.toBe('');
++      expect(s.paraQue, `${s.ruta} sin motivo`).not.toBe('');
++    }
++  });
++
++  it('cada superficie descrita se sirve de verdad', () => {
++    // Prometer un JSON que devuelve 404 es peor que no prometerlo.
++    for (const { ruta } of superficiesDeDatos()) {
++      const enGrupo = `app/(es)${ruta}/route.ts`;
++      const enRaiz = `app${ruta}/route.ts`;
++      expect(
++        existsSync(join(raiz, enGrupo)) || existsSync(join(raiz, enRaiz)),
++        `no hay manejador para ${ruta}`,
++      ).toBe(true);
++    }
++  });
++});
++
++describe('no se promete un servicio que todavía no responde', () => {
++  it('sin la variable de entorno no hay bloque ejecutable', () => {
++    expect(bloqueApi()).toBeNull();
++  });
++
++  it('con ella, los ejemplos apuntan al origen declarado', () => {
++    process.env.NEXT_PUBLIC_API_URL = 'https://plastilonas-api.fly.dev';
++    const api = bloqueApi();
++    expect(api?.mcp).toBe('https://plastilonas-api.fly.dev/mcp');
++    expect(api?.ejemploCurl).toContain('https://plastilonas-api.fly.dev/v1/calculos/geomembrana-poza');
++    expect(api?.ejemploMcp).toContain('tools/list');
++    expect(api?.herramientas).toEqual(HERRAMIENTAS_MCP);
++  });
++
++  it('el nodo WebAPI del grafo sólo se emite con la API declarada', () => {
++    // Declarar en el grafo de la empresa un servicio que devuelve un error es
++    // la misma mentira que declararlo en /ai.txt, indexada.
++    const pagina = leer('app/(es)/integraciones/page.tsx');
++    expect(pagina).toContain('...(api');
++    expect(pagina).toContain('webApiSchema');
++  });
++});
++
++describe('el nodo WebAPI usa tipos que schema.org define', () => {
++  it('es WebAPI, cuelga de la organización y declara sus puntos de entrada', () => {
++    const nodo = webApiSchema({
++      url: 'https://sitio/integraciones',
++      origen: 'https://api',
++      documentacion: 'https://api/openapi.json',
++      mcp: 'https://api/mcp',
++      nombre: 'x',
++      descripcion: 'y',
++      herramientas: [{ nombre: 'h', paraQue: 'z' }],
++    }) as Record<string, unknown>;
++
++    expect(nodo['@type'], 'WebAPI es subtipo de Service y existe; inventar un tipo ensucia el grafo').toBe('WebAPI');
++    expect(nodo.provider).toBeTruthy();
++    expect(nodo.isAccessibleForFree).toBe(true);
++    const acciones = nodo.potentialAction as { target: { urlTemplate: string; httpMethod: string } }[];
++    expect(acciones).toHaveLength(2);
++    expect(acciones.map((a) => a.target.httpMethod).sort()).toEqual(['GET', 'POST']);
++    expect(acciones.some((a) => a.target.urlTemplate === 'https://api/mcp')).toBe(true);
++  });
++
++  it('no inventa AggregateRating, Review ni Offer con precio', () => {
++    const texto = JSON.stringify(
++      webApiSchema({
++        url: 'u', origen: 'o', documentacion: 'd', mcp: 'm', nombre: 'n', descripcion: 'x',
++        herramientas: [],
++      }),
++    );
++    for (const prohibido of ['aggregateRating', 'review', 'price', 'offers']) {
++      expect(texto.toLowerCase(), `el nodo no puede declarar ${prohibido}`).not.toContain(prohibido.toLowerCase());
++    }
++  });
++});
++
++describe('las reglas que limitan lo que se dice viajan con la página', () => {
++  it('las tres están escritas, y la primera es que no hay precios', () => {
++    expect(REGLAS).toHaveLength(3);
++    expect(REGLAS[0]!.regla).toMatch(/[Ss]in precios/);
++    for (const r of REGLAS) expect(r.porque.length, `«${r.regla}» sin motivo`).toBeGreaterThan(60);
++  });
++
++  it('la página publica la advertencia de predimensionamiento', () => {
++    // Sin ella, un integrador puede tomar el número por un cálculo de ingeniería.
++    const p = leer('app/(es)/integraciones/page.tsx');
++    expect(p).toContain('predimensionamiento');
++    expect(p).toMatch(/no autorizan a construir/);
++  });
++
++  it('nada de lo que la página promete ejecutar incluye un precio', () => {
++    const texto = JSON.stringify(LO_QUE_EJECUTA);
++    expect(texto.toLowerCase()).not.toMatch(/\bprecio|\bcosto|\btarifa/);
++  });
++});
+-- 
+2.43.0
+
