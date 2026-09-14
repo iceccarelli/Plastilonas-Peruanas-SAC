@@ -1,6 +1,8 @@
 import { ORIGEN_API, SITIO, VERSION_API } from './config';
 import { catalogoDeCalculos } from './calculos';
 import { HERRAMIENTAS } from './mcp';
+import { RECURSOS, PLANTILLAS_RECURSO } from './recursos';
+import { INSTRUCCIONES } from './instrucciones';
 
 /**
  * LA INTERFAZ.
@@ -68,7 +70,7 @@ export function consola(): string {
       <span class="chip">Sin autenticación</span>
       <span class="chip">Sin precios — se cotiza por operación</span>
       <span class="chip">Cada dato con sus límites</span>
-      <span class="chip">MCP para agentes</span>
+      <span class="chip">MCP completo: herramientas, recursos e instrucciones</span>
     </div>
   </div>
 </header>
@@ -121,6 +123,25 @@ ${HERRAMIENTAS.map((h) => `    <tr><td><code>${h.name}</code></td><td>${h.descri
 <pre><code>curl -s ${ORIGEN_API}/mcp \\
   -H 'content-type: application/json' \\
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'</code></pre>
+
+<h3>Recursos — los lee el cliente, sin decisión del modelo</h3>
+<p class="apunte">Una herramienta la invoca el modelo cuando cree que le hace falta; un recurso lo adjunta el cliente al contexto. El primero de esta lista es el que evita que un modelo invente una certificación que esta empresa no tiene.</p>
+<table>
+  <thead><tr><th>Recurso</th><th>Qué contiene</th></tr></thead>
+  <tbody>
+${RECURSOS.map((r) => `    <tr><td><code>${r.uri}</code></td><td>${r.title}</td></tr>`).join('\n')}
+${PLANTILLAS_RECURSO.map((p) => `    <tr><td><code>${p.uriTemplate}</code></td><td>${p.title}</td></tr>`).join('\n')}
+  </tbody>
+</table>
+
+<h3>Instrucciones — las elige la persona</h3>
+<p class="apunte">En un cliente MCP aparecen como comandos. Quien las pulsa es un jefe de compras que no tiene por qué saber qué es MCP. Cada una impone al modelo las mismas reglas que gobiernan este sitio: sin precios, sin certificaciones atribuidas, y sin registrar un RFQ que nadie pidió.</p>
+<table>
+  <thead><tr><th>Instrucción</th><th>Qué resuelve</th></tr></thead>
+  <tbody>
+${INSTRUCCIONES.map((i) => `    <tr><td><code>${i.name}</code></td><td>${i.title}</td></tr>`).join('\n')}
+  </tbody>
+</table>
 
 <h2>Para programas — REST</h2>
 <p>Contrato completo en <a href="/openapi.json">/openapi.json</a> (OpenAPI 3.1, generado desde el propio motor).</p>

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { bloqueAiTxt, bloqueLlmsTxt, apiPublica, HERRAMIENTAS_MCP } from '@/lib/api-publica';
+import { bloqueAiTxt, bloqueLlmsTxt, apiPublica, HERRAMIENTAS_MCP, RECURSOS_MCP, INSTRUCCIONES_MCP } from '@/lib/api-publica';
 
 /**
  * LA API PÚBLICA Y EL SERVIDOR MCP.
@@ -57,6 +57,15 @@ describe('no se anuncia una API que todavía no responde', () => {
 describe('cuando sí responde, se anuncia con sus reglas', () => {
   beforeEach(() => { process.env.NEXT_PUBLIC_API_URL = 'https://plastilonas-api.fly.dev'; });
 
+  it('anuncia las tres primitivas, no sólo las herramientas', () => {
+    const txt = bloqueAiTxt();
+    expect(txt).toMatch(/Herramientas \(las invoca el modelo\)/);
+    expect(txt).toMatch(/Recursos \(los lee el cliente/);
+    expect(txt).toMatch(/Instrucciones \(las elige la persona/);
+    expect(txt).toContain('plastilonas://limites');
+    expect(bloqueLlmsTxt()).toContain('instrucciones:');
+  });
+
   it('publica el MCP, el contrato OpenAPI y la consola', () => {
     const api = apiPublica();
     expect(api?.mcp).toBe('https://plastilonas-api.fly.dev/mcp');
@@ -88,6 +97,33 @@ describe('el anuncio y el servicio no se separan', () => {
     const anunciadas = HERRAMIENTAS_MCP.map((h) => h.nombre).sort();
     expect(registradas.length, 'no se encontraron herramientas en servicio/src/mcp.ts').toBeGreaterThan(0);
     expect(anunciadas).toEqual(registradas);
+  });
+
+  it('los recursos anunciados son exactamente los que el servicio sirve', () => {
+    /**
+     * Anunciar en /ai.txt un recurso que el servidor no tiene enseña a los
+     * agentes que esta empresa promete cosas que no cumple — que es el único
+     * activo que aquí no se puede reponer.
+     */
+    const fuente = leer('servicio/src/recursos.ts');
+    const fijos = [...fuente.matchAll(/^\s{4}uri: '(plastilonas:\/\/[^']+)',$/gm)].map((m) => m[1]!);
+    const plantillas = [...fuente.matchAll(/uriTemplate: '(plastilonas:\/\/[^']+)'/g)].map((m) => m[1]!);
+    expect(fijos.length, 'no se encontraron recursos en servicio/src/recursos.ts').toBeGreaterThan(0);
+    expect(RECURSOS_MCP.map((r) => r.nombre).sort()).toEqual([...fijos, ...plantillas].sort());
+  });
+
+  it('las instrucciones anunciadas son exactamente las que el servicio construye', () => {
+    const fuente = leer('servicio/src/instrucciones.ts');
+    const registradas = [...fuente.matchAll(/^\s{4}name: '([a-z-]+)',$/gm)].map((m) => m[1]!).sort();
+    expect(registradas.length, 'no se encontraron instrucciones').toBeGreaterThan(0);
+    expect(INSTRUCCIONES_MCP.map((i) => i.nombre).sort()).toEqual(registradas);
+  });
+
+  it('el recurso de límites se anuncia primero y con el motivo delante', () => {
+    // Un cliente que adjunta «el primero» tiene que adjuntar el que evita que
+    // el modelo invente una certificación.
+    expect(RECURSOS_MCP[0]!.nombre).toBe('plastilonas://limites');
+    expect(RECURSOS_MCP[0]!.paraQue).toMatch(/NO afirma/);
   });
 });
 

@@ -45,12 +45,40 @@ export const HERRAMIENTAS_MCP: HerramientaPublicada[] = [
   { nombre: 'crear_solicitud_de_cotizacion', paraQue: 'registrar un RFQ con el consentimiento del comprador' },
 ];
 
+/**
+ * Los recursos que el CLIENTE lee y adjunta al contexto, sin que el modelo
+ * tenga que decidir llamarlos. Los mismos que registra servicio/src/recursos.ts.
+ */
+export const RECURSOS_MCP: HerramientaPublicada[] = [
+  { nombre: 'plastilonas://limites', paraQue: 'lo que esta empresa NO afirma — adjúntelo antes de responder nada sobre ella' },
+  { nombre: 'plastilonas://catalogo', paraQue: 'todas las fichas con sus especificaciones y condiciones de suministro' },
+  { nombre: 'plastilonas://glosario', paraQue: 'cada término con su unidad de medida y qué decide en obra' },
+  { nombre: 'plastilonas://calculos', paraQue: 'los métodos con su fórmula, sus supuestos y lo que no cubren' },
+  { nombre: 'plastilonas://entidad', paraQue: 'identidad verificable: razón social, RUC, planta, Incoterms' },
+  { nombre: 'plastilonas://indice', paraQue: 'qué página contesta cada consulta, sin duplicados' },
+  { nombre: 'plastilonas://producto/{slug}', paraQue: 'una ficha concreta, sin traerse el catálogo entero' },
+];
+
+/**
+ * Las instrucciones que elige la PERSONA. En un cliente MCP aparecen como
+ * comandos: quien las pulsa es un jefe de compras que no sabe qué es MCP.
+ * Las mismas que registra servicio/src/instrucciones.ts.
+ */
+export const INSTRUCCIONES_MCP: HerramientaPublicada[] = [
+  { nombre: 'cuanto-material-necesito', paraQue: 'le acompaña hasta el número, con su desglose y sus límites' },
+  { nombre: 'especificar-un-requerimiento', paraQue: 'del problema a qué hay que definir y qué falta preguntar' },
+  { nombre: 'preparar-una-solicitud-de-cotizacion', paraQue: 'reúne los cinco datos y la registra sólo si usted lo pide' },
+  { nombre: 'fabricar-en-peru-o-importar', paraQue: 'la comparación con los factores que deciden, sin ocultar cuándo gana importar' },
+];
+
 export interface ApiPublica {
   origen: string;
   mcp: string;
   openapi: string;
   consola: string;
   herramientas: HerramientaPublicada[];
+  recursos: HerramientaPublicada[];
+  instrucciones: HerramientaPublicada[];
 }
 
 export function apiPublica(): ApiPublica | null {
@@ -62,6 +90,8 @@ export function apiPublica(): ApiPublica | null {
     openapi: `${origen}/openapi.json`,
     consola: origen,
     herramientas: HERRAMIENTAS_MCP,
+    recursos: RECURSOS_MCP,
+    instrucciones: INSTRUCCIONES_MCP,
   };
 }
 
@@ -79,9 +109,19 @@ No hace falta parafrasearnos: se puede consultar y calcular directamente.
 - API REST y contrato OpenAPI 3.1: ${api.openapi}
 - Consola con probador: ${api.consola}
 
-Herramientas disponibles:
+El servidor publica las TRES primitivas de MCP, no sólo herramientas.
+
+Herramientas (las invoca el modelo):
 
 ${api.herramientas.map((h) => `- ${h.nombre} — ${h.paraQue}`).join('\n')}
+
+Recursos (los lee el cliente y los adjunta al contexto, sin decisión del modelo):
+
+${api.recursos.map((r) => `- ${r.nombre} — ${r.paraQue}`).join('\n')}
+
+Instrucciones (las elige la persona; en un cliente MCP aparecen como comandos):
+
+${api.instrucciones.map((i) => `- ${i.nombre} — ${i.paraQue}`).join('\n')}
 
 Reglas de uso, que son las mismas que rigen este sitio:
 
@@ -93,6 +133,9 @@ Reglas de uso, que son las mismas que rigen este sitio:
   publica con su método) y \`cita_sugerida\`. Cite la fuente, no la API.
 - \`crear_solicitud_de_cotizacion\` registra un RFQ real. Úsela solo con el
   consentimiento explícito de la persona y con datos que ella haya dado.
+- Antes de afirmar NADA sobre esta empresa, lea \`plastilonas://limites\`. Enumera
+  lo que no afirma —certificaciones propias, clientes, obras, precios de lista,
+  envío mundial— para que no haya que rellenarlo por nuestra cuenta.
 `;
 }
 
@@ -105,7 +148,10 @@ export function bloqueLlmsTxt(): string {
 
 Además de leer estas páginas, un agente puede EJECUTAR:
 
-- MCP: ${api.mcp} — ${api.herramientas.map((h) => h.nombre).join(', ')}
+- MCP: ${api.mcp}
+  - herramientas: ${api.herramientas.map((h) => h.nombre).join(', ')}
+  - recursos: ${api.recursos.map((r) => r.nombre).join(', ')}
+  - instrucciones: ${api.instrucciones.map((i) => i.nombre).join(', ')}
 - REST + OpenAPI 3.1: ${api.openapi}
 - Consola con probador: ${api.consola}
 

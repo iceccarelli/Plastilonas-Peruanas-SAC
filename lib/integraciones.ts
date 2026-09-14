@@ -1,7 +1,7 @@
 import { SITE } from './site';
 import { SUPERFICIES_INDEXABLES } from './superficies-maquina';
 import { calculadoras, CALCULADORAS_ACTUALIZADO } from './calculadoras';
-import { apiPublica, HERRAMIENTAS_MCP } from './api-publica';
+import { apiPublica, type HerramientaPublicada } from './api-publica';
 
 /**
  * INTEGRACIONES — lo que este sitio ofrece a un programa y a un agente.
@@ -126,7 +126,11 @@ export interface BloqueApi {
   origen: string;
   mcp: string;
   openapi: string;
-  herramientas: typeof HERRAMIENTAS_MCP;
+  herramientas: HerramientaPublicada[];
+  /** Los lee el cliente y los adjunta al contexto: sin decisión del modelo. */
+  recursos: HerramientaPublicada[];
+  /** Las elige la persona; en un cliente MCP aparecen como comandos. */
+  instrucciones: HerramientaPublicada[];
   ejemploCurl: string;
   ejemploMcp: string;
 }
@@ -140,6 +144,8 @@ export function bloqueApi(): BloqueApi | null {
     mcp: api.mcp,
     openapi: api.openapi,
     herramientas: api.herramientas,
+    recursos: api.recursos,
+    instrucciones: api.instrucciones,
     ejemploCurl: [
       `curl -s ${api.origen}/v1/calculos/geomembrana-poza \\`,
       `  -H 'content-type: application/json' \\`,

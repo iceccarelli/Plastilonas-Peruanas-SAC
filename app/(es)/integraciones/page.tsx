@@ -177,6 +177,40 @@ export default function IntegracionesPage() {
               </li>
             ))}
           </ul>
+          <h3 className="mt-10 text-lg font-semibold text-[#0A2540]">
+            Y las otras dos primitivas, que casi ningún servidor publica
+          </h3>
+          <p className="mt-2 text-sm text-gray-600">
+            Una herramienta la invoca el modelo cuando cree que le hace falta. Un{' '}
+            <strong>recurso</strong> lo lee el cliente y lo adjunta al contexto —no hay decisión que
+            acertar—, y una <strong>instrucción</strong> la elige la persona: en un cliente MCP
+            aparece como un comando. Por eso esto lo puede usar quien no sabe qué es MCP.
+          </p>
+
+          <p className="mt-6 text-sm font-semibold text-gray-700">
+            Recursos ({api.recursos.length}) — el cliente los adjunta
+          </p>
+          <ul className="mt-3 space-y-2 text-sm">
+            {api.recursos.map((r) => (
+              <li key={r.nombre} className="flex flex-col gap-1 border-b border-gray-100 pb-2 sm:flex-row sm:gap-4">
+                <code className="shrink-0 font-mono text-[13px] text-[#059669] sm:w-72">{r.nombre}</code>
+                <span className="text-gray-600">{r.paraQue}</span>
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-8 text-sm font-semibold text-gray-700">
+            Instrucciones ({api.instrucciones.length}) — las elige usted
+          </p>
+          <ul className="mt-3 space-y-2 text-sm">
+            {api.instrucciones.map((i) => (
+              <li key={i.nombre} className="flex flex-col gap-1 border-b border-gray-100 pb-2 sm:flex-row sm:gap-4">
+                <code className="shrink-0 font-mono text-[13px] text-[#059669] sm:w-72">{i.nombre}</code>
+                <span className="text-gray-600">{i.paraQue}</span>
+              </li>
+            ))}
+          </ul>
+
           <p className="mt-6 text-sm text-gray-500">
             Consola con probador y documentación:{' '}
             <a href={api.origen} className="text-[#059669] hover:underline">

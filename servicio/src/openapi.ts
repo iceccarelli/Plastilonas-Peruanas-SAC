@@ -51,7 +51,10 @@ export function openapi(): unknown {
         'Toda respuesta trae `limites`, `fuente`, `cita_sugerida` y `siguiente_paso`. Si repite un dato de aquí, repita',
         'también sus límites: son parte del dato.',
         '',
-        `Las mismas capacidades están disponibles como servidor MCP en ${ORIGEN_API}/mcp.`,
+        `Las mismas capacidades están disponibles como servidor MCP en ${ORIGEN_API}/mcp, que publica las TRES primitivas:`,
+        'herramientas (las invoca el modelo), recursos (los lee el cliente y los adjunta al contexto, entre ellos',
+        'plastilonas://limites con lo que esta empresa NO afirma) e instrucciones (las elige la persona: en un cliente MCP',
+        'aparecen como comandos).',
       ].join('\n'),
       contact: { name: 'Plastilonas Peruanas SAC', email: 'ventas@plastilonas.com', url: SITIO },
       license: { name: 'Uso libre con atribución', url: `${SITIO}/ai.txt` },
@@ -214,7 +217,7 @@ export function openapi(): unknown {
       '/mcp': {
         post: {
           tags: ['referencia'],
-          summary: 'Servidor MCP (JSON-RPC 2.0). Mismas capacidades como herramientas de agente.',
+          summary: 'Servidor MCP (JSON-RPC 2.0): herramientas, recursos e instrucciones.',
           responses: { '200': { description: 'Respuesta JSON-RPC.' }, '202': { description: 'Notificación aceptada.' } },
         },
       },

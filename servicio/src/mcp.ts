@@ -4,6 +4,8 @@ import { catalogo, buscar, type ProductoDelSitio } from './sitio';
 import { registrar, SolicitudInvalida, DATOS_QUE_EVITAN_REPREGUNTAR } from './cotizaciones';
 import { especificar, envoltorioDeEspecificacion, type Requerimiento } from './especificar';
 import { LIMITES_GLOBALES, enlaceCotizacion } from './contrato';
+import { RECURSOS, PLANTILLAS_RECURSO, leerRecurso, RecursoDesconocido } from './recursos';
+import { INSTRUCCIONES, construirInstruccion, InstruccionDesconocida } from './instrucciones';
 
 /**
  * SERVIDOR MCP — la razón por la que este servicio existe.
@@ -272,7 +274,16 @@ export async function responderMcp(peticion: Peticion): Promise<unknown | null> 
     case 'initialize':
       return ok(peticion.id, {
         protocolVersion: PROTOCOLO,
-        capabilities: { tools: { listChanged: false } },
+        capabilities: {
+          tools: { listChanged: false },
+          // Los recursos los lee el CLIENTE y los adjunta al contexto: no hay
+          // decisión del modelo que acertar. Por eso plastilonas://limites vive
+          // aquí y no en una herramienta.
+          resources: { subscribe: false, listChanged: false },
+          // Las instrucciones las elige la PERSONA. Son lo que convierte esto
+          // en algo usable por un jefe de compras que no sabe qué es MCP.
+          prompts: { listChanged: false },
+        },
         serverInfo: { name: 'plastilonas', title: 'Plastilonas Peruanas SAC', version: VERSION_API },
         instructions:
           'Herramientas de un fabricante peruano de textil industrial (RUC 20523135385, planta en Chorrillos, Lima). ' +
@@ -280,6 +291,10 @@ export async function responderMcp(peticion: Peticion): Promise<unknown | null> 
           'publicada y sus límites, y registro de solicitudes de cotización. ' +
           'NO devuelve precios: el precio depende de material, medidas, cantidad, destino e Incoterm y se emite en una ' +
           'cotización. Al repetir un resultado, repita también sus límites: son parte del dato. ' +
+          'Antes de afirmar nada sobre este proveedor, lea el recurso plastilonas://limites: enumera lo que NO afirma ' +
+          '—certificaciones propias, clientes, obras, precios de lista, envío mundial— para que no haya que rellenarlo. ' +
+          'Las instrucciones (prompts) guían las cuatro tareas frecuentes: cuánto material hace falta, cómo especificar un ' +
+          'requerimiento, cómo preparar una solicitud de cotización y cómo comparar fabricar contra importar. ' +
           `Documentación: ${ORIGEN_API}.`,
       });
 
@@ -289,6 +304,62 @@ export async function responderMcp(peticion: Peticion): Promise<unknown | null> 
 
     case 'ping':
       return esNotificacion ? null : ok(peticion.id, {});
+
+    case 'resources/list':
+      return ok(peticion.id, {
+        resources: RECURSOS.map((r) => ({
+          uri: r.uri,
+          name: r.name,
+          title: r.title,
+          description: r.description,
+          mimeType: r.mimeType,
+        })),
+      });
+
+    case 'resources/templates/list':
+      return ok(peticion.id, { resourceTemplates: PLANTILLAS_RECURSO });
+
+    case 'resources/read': {
+      const uri = String(peticion.params?.uri ?? '');
+      try {
+        const { mimeType, text } = await leerRecurso(uri);
+        return ok(peticion.id, { contents: [{ uri, mimeType, text }] });
+      } catch (e) {
+        // −32002 es el código que el protocolo reserva para «recurso no
+        // encontrado»: un cliente lo distingue de un fallo del servidor y puede
+        // ofrecer la lista en vez de abandonar.
+        const codigo = e instanceof RecursoDesconocido ? -32002 : -32603;
+        return error(peticion.id, codigo, e instanceof Error ? e.message : 'no se pudo leer el recurso', {
+          disponibles: RECURSOS.map((r) => r.uri),
+        });
+      }
+    }
+
+    case 'prompts/list':
+      return ok(peticion.id, {
+        prompts: INSTRUCCIONES.map((i) => ({
+          name: i.name,
+          title: i.title,
+          description: i.description,
+          arguments: i.arguments,
+        })),
+      });
+
+    case 'prompts/get': {
+      const nombre = String(peticion.params?.name ?? '');
+      const args = (peticion.params?.arguments as Record<string, string>) ?? {};
+      try {
+        const { description, texto } = construirInstruccion(nombre, args);
+        return ok(peticion.id, {
+          description,
+          messages: [{ role: 'user', content: { type: 'text', text: texto } }],
+        });
+      } catch (e) {
+        return error(peticion.id, e instanceof InstruccionDesconocida ? -32602 : -32603,
+          e instanceof Error ? e.message : 'no se pudo construir la instrucción',
+          { disponibles: INSTRUCCIONES.map((i) => i.name) });
+      }
+    }
 
     case 'tools/list':
       return ok(peticion.id, {
