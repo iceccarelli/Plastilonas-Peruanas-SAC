@@ -9,7 +9,7 @@
     "start": "node dist/servicio/src/index.js",
     "dev": "npm run build && npm start",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run build && node --test dist/servicio/test"
+    "test": "npm run build && node --test dist/servicio/test/*.test.js"
   },
   "devDependencies": {
     "typescript": "5.6.3",

@@ -36,8 +36,11 @@ Toda respuesta trae `limites`, `fuente`, `cita_sugerida` y `siguiente_paso`.
 - **Un solo cálculo.** Importa `lib/calculadoras.ts` del sitio, el mismo módulo
   que usa la web. Nunca una copia: dos implementaciones de la misma fórmula dan
   dos números y nadie sabe cuál se cotizó.
-- **Su propio gate.** El `Dockerfile` corre `tsc` y `node --test` antes de
-  construir la imagen: si algo está en rojo, no se despliega.
+- **Su propio gate, en tres pasos.** El `Dockerfile` corre `tsc`, comprueba que
+  el ejecutable existe donde el `CMD` lo busca, y corre las 36 pruebas —doce de
+  ellas levantando el servidor de verdad en un puerto efímero y preguntándole—.
+  Si algo está en rojo, la imagen no se construye y no se despliega nada. Que
+  compile no es que sirva.
 - **Contexto de construcción mínimo.** El `.dockerignore` vive en la RAÍZ del
   repositorio —que es donde Docker lo lee— y excluye todo para volver a incluir
   sólo `lib/calculadoras.ts`, `lib/site.ts` y `servicio/`: **175 kB en 20
@@ -90,8 +93,14 @@ empresa promete cosas que no cumple.
 ```bash
 cd servicio && npm install
 npm run build && npm start          # http://localhost:8080
-npm test
+npm test                            # compila y corre 36 pruebas sobre el JS compilado
 ```
+
+`npm test` pasa un **patrón de archivos**, no un directorio: `node --test
+dist/servicio/test` no busca dentro — intenta ejecutar el directorio como módulo
+y falla con «Cannot find module», que no dice nada de lo que ocurre. Medido en
+Node 22 con el mismo árbol: la forma de directorio reporta 1 prueba y 1 fallo;
+el patrón reporta las 36 y pasa.
 
 ## Superficie
 

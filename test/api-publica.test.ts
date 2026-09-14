@@ -135,7 +135,11 @@ describe('el servicio respeta las mismas reglas que el sitio', () => {
     // despliega por otra vía y necesita el suyo. Vive en el Dockerfile: si tsc
     // falla o una prueba se pone en rojo, la imagen no se construye.
     const docker = leer('servicio/Dockerfile');
-    expect(docker).toMatch(/npm run build && node --test/);
+    // La FORMA exacta del gate —patrón de archivos, comprobación del
+    // ejecutable— la fija test/despliegue-servicio.test.ts, que es su sitio.
+    // Aquí sólo se exige que exista: compilar y probar antes de publicar.
+    expect(docker).toMatch(/npm run build/);
+    expect(docker).toMatch(/node --test/);
     expect(existsSync(join(raiz, 'servicio/fly.toml'))).toBe(true);
     expect(existsSync(join(raiz, 'servicio/test/api.test.ts'))).toBe(true);
   });

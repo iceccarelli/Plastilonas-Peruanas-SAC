@@ -23,10 +23,25 @@ RUN cd servicio && npm install --no-audit --no-fund
 COPY lib/calculadoras.ts lib/site.ts ./lib/
 COPY servicio/src ./servicio/src
 COPY servicio/test ./servicio/test
-# El gate del servicio vive aquí: si `tsc` falla o una prueba se pone en rojo,
-# la imagen no se construye y no se despliega nada. El sitio tiene su gate en
-# scripts/aplicar-entrega.sh; éste tiene el suyo donde le corresponde.
-RUN cd servicio && npm run build && node --test dist/servicio/test
+# El gate del servicio vive aquí: si `tsc` falla, si el ejecutable no aparece
+# donde se espera o si una prueba se pone en rojo, la imagen no se construye y
+# no se despliega nada. El sitio tiene su gate en scripts/aplicar-entrega.sh;
+# éste tiene el suyo donde le corresponde.
+#
+# SE PASAN LOS ARCHIVOS, NO EL DIRECTORIO. `node --test <directorio>` no busca
+# dentro: intenta EJECUTAR el directorio como módulo y falla con
+# «Cannot find module», que no dice nada de lo que ocurre. Medido en Node 22
+# con el mismo árbol: la forma de directorio reporta 1 prueba y 1 fallo; el
+# patrón de archivos reporta las 25 y pasa. Con barra final tampoco cambia.
+#
+# El `test -f` intermedio no es paranoia: `tsc` compila con `rootDir: ".."`,
+# así que la salida queda en dist/servicio/src/. Si alguien cambia esa opción,
+# la imagen se construiría con un CMD que apunta a un archivo inexistente y el
+# fallo aparecería en producción, al arrancar la máquina.
+RUN cd servicio \
+ && npm run build \
+ && test -f dist/servicio/src/index.js \
+ && node --test dist/servicio/test/*.test.js
 
 FROM node:22-alpine AS produccion
 ENV NODE_ENV=production
