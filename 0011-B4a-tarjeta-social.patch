@@ -1,0 +1,554 @@
+From 770fcd0c62f645c13780d88419583ee864a96173 Mon Sep 17 00:00:00 2001
+From: Claude Opus 5 <noreply@anthropic.com>
+Date: Mon, 14 Sep 2026 00:12:43 +0000
+Subject: [PATCH] =?UTF-8?q?fix(og):=20apagar=20el=20aviso=20de=20metadataB?=
+ =?UTF-8?q?ase=20por=20su=20causa,=20y=20devolver=20a=20cada=20p=C3=A1gina?=
+ =?UTF-8?q?=20el=20t=C3=ADtulo=20de=20su=20tarjeta?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+El aviso «metadataBase property in metadata export is not set … using
+http://localhost:3000» salía en cada build aunque los tres layouts raíz lo
+declaran. La causa, leída en la fuente de Next 15.5: hacía falta una ruta SIN
+metadataBase con una imagen social relativa que resolver, y sólo hay una,
+/_not-found, que Next genera por su cuenta.
+
+app/opengraph-image.tsx vivía en la raíz de app/ y, por la convención de
+ficheros, la heredaba todo el árbol —/_not-found incluida—. Al no existir
+app/layout.tsx (cada grupo sirve su propio <html lang>), Next inserta para esa
+ruta un layout por defecto que no declara metadataBase. La imagen se muda a
+app/(es)/opengraph-image.tsx: la URL pública no cambia, porque los grupos de
+ruta no aparecen en la dirección, y ahora la hereda un layout que sí lo declara.
+
+Al levantar esa piedra aparecieron dos cosas peores, del mismo asunto:
+
+El layout de (es) fijaba openGraph.title y openGraph.description con el texto
+de la portada. Next sólo rellena el título de la tarjeta con el de la página si
+nadie lo ha fijado antes, así que 19 plantillas —unas 30 páginas: /aplicaciones
+y sus fichas, /biblioteca, /exportacion, /confianza, /compradores, /compras,
+/calidad, /distribuidores, /socios, /proyectos, /configurador— se compartían
+con el título de la portada. Retiradas las dos líneas, cada página aporta el
+suyo.
+
+/en y /pt eran las dos únicas páginas sin imagen propia: vivían de la herencia
+que había que cortar. Sus layouts la declaran ahora explícitamente, sin título
+ni descripción, para que cada página aporte los suyos. Y og:locale pasa a
+idioma_TERRITORIO en las seis páginas en inglés, que es como lo define Open
+Graph.
+
+test/tarjeta-social.test.ts sostiene las cuatro reglas sin repetir lo que ya
+vigila regresiones-ui.test.ts. Verificadas en sentido contrario: devolviendo el
+archivo a la raíz fallan dos; fijando un título en el layout falla la tercera;
+escribiendo locale: 'en' falla la cuarta.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UxmuN1emKoms4zAxwLB8RX
+---
+ app/(en)/en/fibc-big-bags-peru/page.tsx       |   2 +-
+ .../en/manufacture-in-peru-or-import/page.tsx |   2 +-
+ .../en/mine-ventilation-ducting-peru/page.tsx |   2 +-
+ app/(en)/en/rfq/page.tsx                      |   2 +-
+ app/(en)/en/sourcing-from-peru/page.tsx       |   2 +-
+ app/(en)/en/truck-tarpaulins-peru/page.tsx    |   2 +-
+ app/(en)/layout.tsx                           |  14 ++
+ app/(es)/layout.tsx                           |  13 +-
+ app/{ => (es)}/opengraph-image.tsx            |  11 ++
+ app/(pt)/layout.tsx                           |  14 ++
+ .../2026-09-14-la-tarjeta-que-se-comparte.md  | 127 +++++++++++++++++
+ lib/meta.ts                                   |   8 +-
+ test/tarjeta-social.test.ts                   | 129 ++++++++++++++++++
+ 13 files changed, 317 insertions(+), 11 deletions(-)
+ rename app/{ => (es)}/opengraph-image.tsx (95%)
+ create mode 100644 docs/entregas/2026-09-14-la-tarjeta-que-se-comparte.md
+ create mode 100644 test/tarjeta-social.test.ts
+
+diff --git a/app/(en)/en/fibc-big-bags-peru/page.tsx b/app/(en)/en/fibc-big-bags-peru/page.tsx
+index e59de53..476bfd1 100644
+--- a/app/(en)/en/fibc-big-bags-peru/page.tsx
++++ b/app/(en)/en/fibc-big-bags-peru/page.tsx
+@@ -32,7 +32,7 @@ export const metadata: Metadata = {
+     title: cuna.titulo,
+     description: cuna.descripcion,
+     url: `${SITE.url}/en/fibc-big-bags-peru`,
+-    locale: 'en',
++    locale: 'en_US',
+     type: 'website',
+   },
+ };
+diff --git a/app/(en)/en/manufacture-in-peru-or-import/page.tsx b/app/(en)/en/manufacture-in-peru-or-import/page.tsx
+index befd620..ef577bb 100644
+--- a/app/(en)/en/manufacture-in-peru-or-import/page.tsx
++++ b/app/(en)/en/manufacture-in-peru-or-import/page.tsx
+@@ -23,7 +23,7 @@ export const metadata: Metadata = {
+     title: TITLE,
+     description: DESCRIPTION,
+     url: `${SITE.url}/en/manufacture-in-peru-or-import`,
+-    locale: 'en',
++    locale: 'en_US',
+     type: 'website',
+   },
+ };
+diff --git a/app/(en)/en/mine-ventilation-ducting-peru/page.tsx b/app/(en)/en/mine-ventilation-ducting-peru/page.tsx
+index 79a73b1..f94230f 100644
+--- a/app/(en)/en/mine-ventilation-ducting-peru/page.tsx
++++ b/app/(en)/en/mine-ventilation-ducting-peru/page.tsx
+@@ -32,7 +32,7 @@ export const metadata: Metadata = {
+     title: cuna.titulo,
+     description: cuna.descripcion,
+     url: `${SITE.url}/en/mine-ventilation-ducting-peru`,
+-    locale: 'en',
++    locale: 'en_US',
+     type: 'website',
+   },
+ };
+diff --git a/app/(en)/en/rfq/page.tsx b/app/(en)/en/rfq/page.tsx
+index 909c25d..d448302 100644
+--- a/app/(en)/en/rfq/page.tsx
++++ b/app/(en)/en/rfq/page.tsx
+@@ -37,7 +37,7 @@ export const metadata: Metadata = {
+   description: DESCRIPTION,
+   alternates: { canonical: '/en/rfq' },
+   openGraph: {
+-    images: OG_IMAGEN, title: TITLE, description: DESCRIPTION, url: URL_PAGINA, locale: 'en', type: 'website' },
++    images: OG_IMAGEN, title: TITLE, description: DESCRIPTION, url: URL_PAGINA, locale: 'en_US', type: 'website' },
+ };
+ 
+ export default async function RfqEnPage({
+diff --git a/app/(en)/en/sourcing-from-peru/page.tsx b/app/(en)/en/sourcing-from-peru/page.tsx
+index f4d0ca9..2f7ba6c 100644
+--- a/app/(en)/en/sourcing-from-peru/page.tsx
++++ b/app/(en)/en/sourcing-from-peru/page.tsx
+@@ -50,7 +50,7 @@ export const metadata: Metadata = {
+     title: TITLE,
+     description: DESCRIPTION,
+     url: URL_PAGINA,
+-    locale: 'en',
++    locale: 'en_US',
+     type: 'website',
+   },
+ };
+diff --git a/app/(en)/en/truck-tarpaulins-peru/page.tsx b/app/(en)/en/truck-tarpaulins-peru/page.tsx
+index cffcef9..53a2a69 100644
+--- a/app/(en)/en/truck-tarpaulins-peru/page.tsx
++++ b/app/(en)/en/truck-tarpaulins-peru/page.tsx
+@@ -32,7 +32,7 @@ export const metadata: Metadata = {
+     title: cuna.titulo,
+     description: cuna.descripcion,
+     url: `${SITE.url}/en/truck-tarpaulins-peru`,
+-    locale: 'en',
++    locale: 'en_US',
+     type: 'website',
+   },
+ };
+diff --git a/app/(en)/layout.tsx b/app/(en)/layout.tsx
+index 827adf4..4d6df7b 100644
+--- a/app/(en)/layout.tsx
++++ b/app/(en)/layout.tsx
+@@ -7,6 +7,7 @@ import Analytics from '@/components/Analytics';
+ import ConsentBanner from '@/components/ConsentBanner';
+ import AuthProvider from '@/components/AuthProvider';
+ import { SITE } from '@/lib/site';
++import { OG_IMAGEN } from '@/lib/meta';
+ 
+ /**
+  * Layout raíz del grupo (en) — existe para UNA cosa: que /en sirva
+@@ -30,6 +31,19 @@ export const metadata: Metadata = {
+     template: '%s | Plastilonas',
+   },
+   metadataBase: new URL(SITE.url),
++  // La tarjeta que se ve al compartir el enlace. Sin este bloque, /en y /pt
++  // eran las dos únicas páginas del sitio que salían SIN og:image propio: lo
++  // tomaban de la imagen de fichero que vivía en la raíz de app/ y se heredaba
++  // por todo el árbol. Esa herencia se retiró —alcanzaba también a la ruta
++  // /_not-found, que no tiene metadataBase y resolvía contra localhost—, así
++  // que aquí la imagen se pide explícitamente, como en (es).
++  // Sin `title` ni `description`: Next los rellena con los de la página, que
++  // son los suyos y no los de la portada.
++  openGraph: {
++    images: OG_IMAGEN,
++    locale: 'en_US',
++    type: 'website',
++  },
+ };
+ 
+ export default function EnglishLayout({ children }: { children: React.ReactNode }) {
+diff --git a/app/(es)/layout.tsx b/app/(es)/layout.tsx
+index 936eafd..d9378f8 100644
+--- a/app/(es)/layout.tsx
++++ b/app/(es)/layout.tsx
+@@ -81,11 +81,16 @@ export const metadata: Metadata = {
+     // Declarada explícitamente: cuando una página define su propio objeto
+     // `openGraph`, reemplaza al del padre —imágenes incluidas—, así que la
+     // imagen de fichero por sí sola no llegaba a ninguna página en español.
++    // La genera app/(es)/opengraph-image.tsx y se pide por URL desde OG_IMAGEN.
+     images: OG_IMAGEN,
+-    title: 'Plastilonas Peruanas SAC | Soluciones Textiles Industriales — Fabricación e Importación Directa',
+-    description: 'Portafolio integral de soluciones textiles industriales en el Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
+-    // og:image lo genera app/opengraph-image.tsx (antes apuntaba a un archivo
+-    // inexistente /images/og-image.jpg y las vistas previas salían en blanco).
++    // SIN `title` NI `description` A PROPÓSITO. Estaban fijados al texto de la
++    // portada, y toda página en español que no declara su propio `openGraph`
++    // —/aplicaciones, /biblioteca, /exportacion, /confianza, las fichas de
++    // aplicación…— los heredaba tal cual: compartir cualquiera de ellas por
++    // WhatsApp mostraba el título de la portada. Al no declararlos aquí, Next
++    // rellena og:title y og:description con el título y la descripción YA
++    // resueltos de cada página, que es lo que el que recibe el enlace necesita
++    // leer para decidir si lo abre.
+     locale: 'es_PE',
+     type: 'website',
+   },
+diff --git a/app/opengraph-image.tsx b/app/(es)/opengraph-image.tsx
+similarity index 95%
+rename from app/opengraph-image.tsx
+rename to app/(es)/opengraph-image.tsx
+index 8acb654..c745c4b 100644
+--- a/app/opengraph-image.tsx
++++ b/app/(es)/opengraph-image.tsx
+@@ -7,6 +7,17 @@ import { SITE, TELEFONOS } from '@/lib/site';
+  * Runtime Node: la ruta se prerenderiza estática (elimina la advertencia
+  * "edge runtime disables static generation"). El logo va incrustado como data
+  * URI (96px, sin lectura de disco ni red) — fiable en cualquier bundling.
++ *
++ * POR QUÉ VIVE DENTRO DEL GRUPO (es) Y NO EN LA RAÍZ DE app/. La URL es la
++ * misma —los grupos de ruta no aparecen en la dirección: sigue sirviéndose en
++ * /opengraph-image—, pero el segmento en el que vive sí importa. Un archivo de
++ * metadatos en la raíz de app/ lo hereda TODA ruta del árbol, incluida la
++ * /_not-found que Next genera por su cuenta; y esa ruta, al no haber
++ * app/layout.tsx, corre bajo un layout por defecto que no declara
++ * metadataBase. Next entonces resolvía esta imagen contra http://localhost:3000
++ * y lo avisaba en cada build. Dentro de (es) la hereda un layout que sí declara
++ * metadataBase, y las páginas la piden explícitamente con OG_IMAGEN
++ * (lib/meta.ts), que es lo que de verdad les pone la tarjeta.
+  */
+ 
+ export const runtime = 'nodejs';
+diff --git a/app/(pt)/layout.tsx b/app/(pt)/layout.tsx
+index b0a41b8..bf9b3db 100644
+--- a/app/(pt)/layout.tsx
++++ b/app/(pt)/layout.tsx
+@@ -8,6 +8,7 @@ import Analytics from '@/components/Analytics';
+ import ConsentBanner from '@/components/ConsentBanner';
+ import AuthProvider from '@/components/AuthProvider';
+ import { SITE } from '@/lib/site';
++import { OG_IMAGEN } from '@/lib/meta';
+ 
+ /**
+  * Layout raíz del grupo (pt) — existe para UNA cosa: que /pt sirva
+@@ -31,6 +32,19 @@ export const metadata: Metadata = {
+     template: '%s | Plastilonas',
+   },
+   metadataBase: new URL(SITE.url),
++  // La tarjeta que se ve al compartir el enlace. Sin este bloque, /en y /pt
++  // eran las dos únicas páginas del sitio que salían SIN og:image propio: lo
++  // tomaban de la imagen de fichero que vivía en la raíz de app/ y se heredaba
++  // por todo el árbol. Esa herencia se retiró —alcanzaba también a la ruta
++  // /_not-found, que no tiene metadataBase y resolvía contra localhost—, así
++  // que aquí la imagen se pide explícitamente, como en (es).
++  // Sin `title` ni `description`: Next los rellena con los de la página, que
++  // son los suyos y no los de la portada.
++  openGraph: {
++    images: OG_IMAGEN,
++    locale: 'pt_BR',
++    type: 'website',
++  },
+ };
+ 
+ export default function PortugueseLayout({ children }: { children: React.ReactNode }) {
+diff --git a/docs/entregas/2026-09-14-la-tarjeta-que-se-comparte.md b/docs/entregas/2026-09-14-la-tarjeta-que-se-comparte.md
+new file mode 100644
+index 0000000..29545ac
+--- /dev/null
++++ b/docs/entregas/2026-09-14-la-tarjeta-que-se-comparte.md
+@@ -0,0 +1,127 @@
++# B4a — el aviso del build tenía nombre, y detrás había treinta tarjetas mal
++
++**Fecha:** 2026-09-14 · **Base:** `main` con 0002 a 0010 aplicados ·
++**Archivos tocados:** 13 · **Neto:** +50 de código, +129 de prueba, +138 de nota ·
++**Avisos de build:** 1 → 0
++
++## 1. El aviso
++
++Cada build terminaba con esto, y llevaba etapas terminando así:
++
++```
++⚠ metadataBase property in metadata export is not set for resolving social
++  open graph or twitter images, using "http://localhost:3000".
++```
++
++Los tres layouts raíz —`(es)`, `(en)`, `(pt)`— declaran `metadataBase`. Por eso
++lo dejé sin tocar en la entrega anterior: no se apaga un aviso que no se
++entiende. Ahora se entiende, leído en la fuente de Next 15.5
++(`packages/next/src/lib/metadata/resolvers/resolve-opengraph.ts`):
++
++```ts
++const shouldWarn =
++  !isUsingVercelSystemEnvironmentVariables &&
++  !metadataBase &&
++  (process.env.NODE_ENV === 'production' || !isStaticMetadataRouteFile)
++```
++
++Hace falta una ruta **sin** `metadataBase` que aun así tenga una imagen social
++relativa que resolver. En este repositorio hay exactamente una, y no la
++escribió nadie: **`/_not-found`**, la que Next genera por su cuenta.
++
++El encadenado, verificado en `next-app-loader`:
++
++1. `app/opengraph-image.tsx` vivía en la **raíz** de `app/`. Por la convención
++   de ficheros de Next, un archivo de metadatos en un segmento lo hereda todo
++   lo que cuelga de él — y la raíz es todo el sitio, `/_not-found` incluida.
++2. Este sitio no tiene `app/layout.tsx`: cada grupo de idioma sirve su propio
++   `<html lang>`, que es toda la razón de que los grupos existan. Cuando no hay
++   layout raíz, Next **inserta uno por defecto** para `/_not-found`
++   (`rootLayout = defaultLayoutPath`), y ese layout no declara `metadataBase`.
++3. Imagen relativa + `metadataBase` nulo + build de producción = el aviso. Una
++   vez, porque es `warnOnce`.
++
++En Vercel no aparece —`process.env.VERCEL` lo desactiva—, lo que explica que
++haya sobrevivido tanto: sólo se ve en el gate.
++
++**El arreglo:** la imagen se muda a `app/(es)/opengraph-image.tsx`. La URL
++pública no cambia, porque los grupos de ruta no aparecen en la dirección: se
++sigue sirviendo en `/opengraph-image`, que es lo que declara `OG_IMAGEN`. Lo
++que cambia es quién la hereda: un layout que sí declara `metadataBase`.
++
++## 2. Lo que apareció al levantar esa piedra
++
++Tirar del hilo de «quién hereda qué imagen» dejó a la vista dos cosas peores
++que el aviso. Las tres son el mismo asunto —la tarjeta que ve quien recibe el
++enlace— y por eso viajan juntas.
++
++### a) Treinta páginas en español compartían el título de la portada
++
++El layout de `(es)` declaraba `openGraph.title` y `openGraph.description` con
++el texto de la portada. En Next, `postProcessMetadata` rellena el título de la
++tarjeta con el de la página **sólo si nadie lo ha fijado antes**
++(`inheritFromMetadata`). Estaba fijado. Así que toda página en español sin
++`openGraph` propio ni en su plantilla ni en su layout salía a compartirse con
++el título y la descripción de la portada. Contadas recorriendo la cadena de
++cada página: **19 plantillas, unas 30 páginas**.
++
++```
++/aplicaciones y sus 8 fichas · /biblioteca y sus 5 · /exportacion
++/confianza · /compradores · /compras · /calidad · /distribuidores
++/socios · /proyectos · /configurador · y la ruta de reserva
++```
++
++(Se quedan fuera `/contacto`, `/productos` y `/cotizacion`: sus layouts ya
++declaraban la tarjeta con texto propio. Y `/carrito`, `/checkout`, `/login` y
++`/dashboard`, que estaban igual pero no se comparten.)
++
++Pegue `/aplicaciones/toldos-camion` en un grupo de WhatsApp y la tarjeta decía
++«Plastilonas Peruanas SAC | Soluciones Textiles Industriales». El comprador no
++sabía qué le habían mandado.
++
++Se retiran las dos líneas. Next pasa a rellenar `og:title` y `og:description`
++con los **ya resueltos** de cada página — plantilla de título incluida.
++
++### b) `/en` y `/pt` eran las dos únicas páginas sin imagen propia
++
++Los layouts de `(en)` y `(pt)` no declaraban `openGraph`. Vivían de la herencia
++del archivo en la raíz — la misma herencia que había que cortar. Ahora declaran
++la imagen explícitamente, como `(es)`, y sin título ni descripción, para que
++cada página aporte los suyos.
++
++Son las dos puertas de entrada de un comprador extranjero. La primera cosa que
++ese comprador hace con un proveedor que le interesa es reenviar el enlace.
++
++### c) `og:locale` decía `en`
++
++Open Graph define `og:locale` como `idioma_TERRITORIO`. Las seis páginas en
++inglés declaraban `en` a secas. Quien lo toma al pie de la letra lo descarta;
++quien no, cae a su valor por defecto, que da la casualidad de que es `en_US`.
++Cuesta un guión bajo y ahora hay una prueba que lo exige.
++
++## 3. Lo que lo mantiene
++
++`test/tarjeta-social.test.ts`, 10 pruebas. No repite lo que ya vigila
++`test/regresiones-ui.test.ts` —que ningún `openGraph` declarado se quede sin
++`images`—; cubre lo que aquélla no puede ver:
++
++- cada layout raíz declara `metadataBase` y una imagen, y **no** fija título ni
++  descripción de tarjeta;
++- ningún archivo de metadatos sociales cuelga de la raíz de `app/`, con el
++  motivo escrito entero para que la regla no parezca una manía;
++- `/opengraph-image` existe como ruta **exactamente una vez** —cero sería un
++  404 en las 43 páginas que la piden, dos sería un conflicto de ruta en Next—;
++- `og:locale` siempre en formato `idioma_TERRITORIO`.
++
++Verificadas las tres reglas nuevas en sentido contrario: devolviendo el archivo
++a la raíz fallan dos; poniendo un `title` en el layout de `(es)` falla la
++tercera; escribiendo `locale: 'en'` falla la cuarta.
++
++## 4. Lo que NO entra
++
++- No se toca el contenido de la imagen: el mismo logo, el mismo 1200×630.
++- No se tocan `app/icon.png` ni `app/apple-icon.png`, que siguen en la raíz. Los
++  iconos se sirven como rutas relativas y no pasan por el resolvedor que emitía
++  el aviso; moverlos sería ruido.
++- Sigue pendiente el resto de B4: los presupuestos de longitud de `title` y
++  `description` en `lib/meta.ts`, que es otro asunto y otro parche.
+diff --git a/lib/meta.ts b/lib/meta.ts
+index 7a96963..7f974a8 100644
+--- a/lib/meta.ts
++++ b/lib/meta.ts
+@@ -145,7 +145,7 @@ export const descripcionCabe = (d: string): boolean => d.trim().length <= MAX_DE
+ /**
+  * IMAGEN DE VISTA PREVIA — una, compartida, y declarada explícitamente.
+  *
+- * EL DEFECTO QUE CIERRA. `app/opengraph-image.tsx` genera la tarjeta de 1200×630
++ * EL DEFECTO QUE CIERRA. `app/(es)/opengraph-image.tsx` genera la tarjeta de 1200×630
+  * con el logo real, y un comentario en el layout daba por hecho que con eso
+  * bastaba. No bastaba: en Next, cuando una página declara su propio objeto
+  * `openGraph`, ese objeto REEMPLAZA al del padre —imágenes incluidas—, y las
+@@ -163,6 +163,12 @@ export const descripcionCabe = (d: string): boolean => d.trim().length <= MAX_DE
+  * La ruta se declara relativa a propósito: `metadataBase` (los tres layouts
+  * raíz) la resuelve al host canónico del momento, así que el día del corte a
+  * www.plastilonas.com no hay que tocar 43 archivos.
++ *
++ * Y por eso la imagen vive DENTRO de un grupo de idioma y no en la raíz de
++ * app/: allí la heredaba también la /_not-found que Next genera sola, que corre
++ * bajo un layout por defecto sin `metadataBase` y la resolvía contra
++ * http://localhost:3000. La URL pública no cambia —los grupos de ruta no
++ * aparecen en la dirección—, y test/tarjeta-social.test.ts lo sostiene.
+  */
+ export const OG_IMAGEN = [
+   {
+diff --git a/test/tarjeta-social.test.ts b/test/tarjeta-social.test.ts
+new file mode 100644
+index 0000000..90c1198
+--- /dev/null
++++ b/test/tarjeta-social.test.ts
+@@ -0,0 +1,129 @@
++import { describe, it, expect } from 'vitest';
++import { readdirSync, readFileSync, existsSync } from 'node:fs';
++import { join } from 'node:path';
++
++/**
++ * LA TARJETA QUE SE COMPARTE.
++ *
++ * El canal comercial de esta empresa es WhatsApp: un enlace reenviado a un jefe
++ * de compras es, muchas veces, el primer contacto. Sin tarjeta —imagen, título
++ * y descripción— ese enlace es una línea de texto azul. Con tarjeta es una
++ * pieza con el logo y el nombre de la página.
++ *
++ * `test/regresiones-ui.test.ts` ya vigila que ningún `openGraph` declarado se
++ * quede sin `images`. Aquí se vigila lo que aquella prueba no puede ver: que
++ * toda página tenga un `openGraph` en su cadena, que la imagen se resuelva
++ * contra el host canónico y no contra localhost, y que el título de la tarjeta
++ * sea el de la página y no el de la portada.
++ */
++
++const raiz = process.cwd();
++const leer = (rel: string) => readFileSync(join(raiz, rel), 'utf8');
++
++/** Los layouts raíz: uno por grupo de idioma. No hay app/layout.tsx —cada
++ *  grupo sirve su propio <html lang> y ésa es toda su razón de existir. */
++const LAYOUTS_RAIZ = readdirSync(join(raiz, 'app'), { withFileTypes: true })
++  .filter((e) => e.isDirectory() && e.name.startsWith('('))
++  .map((e) => `app/${e.name}/layout.tsx`)
++  .filter((rel) => existsSync(join(raiz, rel)));
++
++describe('toda página tiene tarjeta en su cadena', () => {
++  it('hay un layout raíz por grupo de idioma y ninguno más', () => {
++    expect(LAYOUTS_RAIZ.length).toBeGreaterThanOrEqual(3);
++    expect(existsSync(join(raiz, 'app/layout.tsx')), 'un app/layout.tsx chocaría con los <html> de cada grupo').toBe(false);
++  });
++
++  for (const rel of LAYOUTS_RAIZ) {
++    it(`${rel} declara metadataBase y una imagen de tarjeta`, () => {
++      const src = leer(rel);
++      // Sin metadataBase, Next resuelve la imagen contra http://localhost:3000
++      // y la tarjeta llega rota a quien recibe el enlace.
++      expect(src).toContain('metadataBase: new URL(SITE.url)');
++      // Con imagen declarada aquí, ninguna página del grupo puede quedarse sin
++      // ella: la hereda salvo que declare su propio openGraph, y en ese caso
++      // regresiones-ui.test.ts exige que también declare images.
++      expect(src).toMatch(/openGraph:\s*\{[\s\S]*?images:\s*OG_IMAGEN/);
++    });
++
++    it(`${rel} no fija el título ni la descripción de la tarjeta`, () => {
++      /**
++       * DEFECTO CORREGIDO. El layout de (es) traía `openGraph.title` y
++       * `openGraph.description` con el texto de la portada. Toda página en
++       * español que no declara su propio `openGraph` —/aplicaciones,
++       * /biblioteca, /exportacion, /confianza y una veintena más— los heredaba
++       * tal cual: compartir cualquiera de ellas mostraba el título de la
++       * portada, no el suyo. Al no declararlos, Next rellena og:title y
++       * og:description con los YA resueltos de cada página.
++       */
++      const src = leer(rel);
++      const i = src.indexOf('openGraph: {');
++      expect(i, 'este layout debería declarar openGraph').toBeGreaterThan(-1);
++      const bloque = src.slice(i, src.indexOf('\n  },', i));
++      expect(bloque, 'el título de la tarjeta lo pone cada página').not.toMatch(/^\s*title:/m);
++      expect(bloque, 'la descripción de la tarjeta la pone cada página').not.toMatch(/^\s*description:/m);
++    });
++  }
++});
++
++describe('la imagen de la tarjeta se resuelve contra el host canónico', () => {
++  it('ningún archivo de metadatos sociales cuelga de la raíz de app/', () => {
++    /**
++     * POR QUÉ ESTA REGLA, QUE PARECE UNA MANÍA.
++     *
++     * `app/opengraph-image.tsx` servía la imagen en /opengraph-image y, por la
++     * convención de ficheros de Next, la heredaba TODA ruta del árbol. Entre
++     * ellas la /_not-found que Next genera por su cuenta: al no existir
++     * app/layout.tsx, esa ruta corre bajo un layout por defecto que no declara
++     * `metadataBase`, y Next resolvía la imagen contra http://localhost:3000 y
++     * lo avisaba en cada build («metadataBase property in metadata export is
++     * not set…»). Un aviso permanente en el build es un aviso que se deja de
++     * leer, y debajo se esconde el siguiente.
++     *
++     * Dentro de un grupo de idioma la URL pública es la misma —los grupos de
++     * ruta no aparecen en la dirección— y la hereda un layout que sí declara
++     * metadataBase.
++     */
++    const intrusos = readdirSync(join(raiz, 'app'), { withFileTypes: true })
++      .filter((e) => e.isFile() && /^(opengraph|twitter)-image\b/.test(e.name))
++      .map((e) => `app/${e.name}`);
++    expect(intrusos, 'muévalo dentro de un grupo de idioma: la URL no cambia').toEqual([]);
++  });
++
++  it('la URL que declara OG_IMAGEN existe como ruta, una sola vez', () => {
++    // Si el archivo desaparece o se duplica, OG_IMAGEN apunta a un 404 —o Next
++    // falla por conflicto de ruta— y las 43 páginas que la piden se quedan sin
++    // imagen sin que nada más lo note.
++    expect(leer('lib/meta.ts')).toContain("url: '/opengraph-image'");
++    const hallados: string[] = [];
++    const recorrer = (dir: string) => {
++      for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
++        if (e.isDirectory()) recorrer(`${dir}/${e.name}`);
++        else if (/^opengraph-image\.(tsx?|jsx?|png|jpe?g|gif)$/.test(e.name)) hallados.push(`${dir}/${e.name}`);
++      }
++    };
++    recorrer('app');
++    expect(hallados.length, `rutas /opengraph-image encontradas: ${hallados.join(', ')}`).toBe(1);
++  });
++});
++
++describe('og:locale se declara como lo espera quien lee la tarjeta', () => {
++  it('siempre en formato idioma_TERRITORIO', () => {
++    // Open Graph define og:locale como language_TERRITORY. Las páginas en
++    // inglés declaraban `en` a secas: los lectores que no lo toleran caen a su
++    // valor por defecto, que es precisamente en_US, pero el que sí lo toma al
++    // pie de la letra lo descarta. Cuesta un guión bajo.
++    const malos: string[] = [];
++    const recorrer = (dir: string) => {
++      for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
++        const rel = `${dir}/${e.name}`;
++        if (e.isDirectory()) { recorrer(rel); continue; }
++        if (!/\.tsx?$/.test(e.name)) continue;
++        for (const m of leer(rel).matchAll(/\blocale:\s*'([^']+)'/g)) {
++          if (!/^[a-z]{2}_[A-Z]{2}$/.test(m[1])) malos.push(`${rel} → ${m[1]}`);
++        }
++      }
++    };
++    recorrer('app');
++    expect(malos).toEqual([]);
++  });
++});
+-- 
+2.43.0
+
