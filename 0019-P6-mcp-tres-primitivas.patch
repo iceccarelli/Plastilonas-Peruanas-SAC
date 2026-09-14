@@ -1,0 +1,1132 @@
+From 6089393998c395d0f7feda9d2334d42c766d12a9 Mon Sep 17 00:00:00 2001
+From: Claude Opus 5 <noreply@anthropic.com>
+Date: Mon, 14 Sep 2026 17:50:45 +0000
+Subject: [PATCH] =?UTF-8?q?feat(mcp):=20las=20tres=20primitivas=20?=
+ =?UTF-8?q?=E2=80=94=20recursos=20que=20el=20cliente=20adjunta=20e=20instr?=
+ =?UTF-8?q?ucciones=20que=20elige=20la=20persona?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Verificado primero: /ai.txt en producción ya anuncia el servidor MCP y sus seis
+herramientas, y el servidor responde. La cadena está en pie. Lo que sigue es
+hacer que ese servidor valga lo que puede valer.
+
+MCP tiene tres primitivas y casi todos los servidores que circulan publican
+una. Nosotros también. La diferencia no es de catálogo: una HERRAMIENTA la
+invoca el modelo cuando cree que le hace falta; un RECURSO lo lee el cliente y
+lo adjunta al contexto, sin decisión que acertar; una INSTRUCCIÓN la elige la
+persona, y en un cliente MCP aparece como un comando.
+
+Los recursos arreglan el fallo más caro de este rubro. Un modelo que no ha leído
+nuestros límites rellena: inventa una certificación, da un plazo, cita un
+precio. Hasta hoy evitarlo dependía de que el modelo decidiera averiguarlo, y no
+lo hace porque no sabe que le falta. plastilonas://limites es el primero de la
+lista, su descripción empieza por «ADJUNTE ESTE RECURSO ANTES DE RESPONDER» y
+sirve /ai.txt sin duplicar nada: si el sitio añade un límite, llega solo. Con
+otros cinco —catálogo, glosario, métodos con su fórmula, identidad, índice— y
+una plantilla producto/{slug} para leer una ficha sin el catálogo entero.
+
+Las instrucciones cambian a quién sirve esto. Sin ellas el servidor funciona
+sólo si el modelo acierta a llamarlo; con ellas una persona abre su asistente,
+elige un comando y el proveedor la guía con su propio método: cuánto material
+necesita, cómo especificar un requerimiento —enseñando a leer el campo certeza
+antes de hablar—, cómo preparar una solicitud completa, y cómo comparar
+fabricar contra importar diciendo en qué casos gana importar.
+
+Cada instrucción impone al modelo las mismas cinco reglas que gobiernan el sitio
+antes que la tarea: sin precios ni aproximados, sin certificaciones ni clientes
+atribuidos, los límites junto al número, ningún RFQ sin consentimiento, y citar
+la fuente y no la API. Un proveedor que entrega el guion también entrega las
+restricciones; si no, el guion se usa para vender de más.
+
+servicio/test/mcp-completo.test.ts: 14 pruebas nuevas, 50 en total sobre el
+JavaScript compilado. Y test/api-publica.test.ts sube a 16 exigiendo que los
+recursos y las instrucciones anunciados en /ai.txt sean exactamente los que el
+servicio sirve.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UxmuN1emKoms4zAxwLB8RX
+---
+ app/(es)/integraciones/page.tsx               |  34 ++++
+ .../2026-09-14-las-tres-primitivas.md         | 124 ++++++++++++
+ lib/api-publica.ts                            |  50 ++++-
+ lib/integraciones.ts                          |  10 +-
+ servicio/src/consola.ts                       |  23 ++-
+ servicio/src/instrucciones.ts                 | 185 ++++++++++++++++++
+ servicio/src/mcp.ts                           |  73 ++++++-
+ servicio/src/openapi.ts                       |   7 +-
+ servicio/src/recursos.ts                      | 150 ++++++++++++++
+ servicio/test/mcp-completo.test.ts            | 160 +++++++++++++++
+ test/api-publica.test.ts                      |  38 +++-
+ 11 files changed, 845 insertions(+), 9 deletions(-)
+ create mode 100644 docs/entregas/2026-09-14-las-tres-primitivas.md
+ create mode 100644 servicio/src/instrucciones.ts
+ create mode 100644 servicio/src/recursos.ts
+ create mode 100644 servicio/test/mcp-completo.test.ts
+
+diff --git a/app/(es)/integraciones/page.tsx b/app/(es)/integraciones/page.tsx
+index 9f5ada9..08ac4b5 100644
+--- a/app/(es)/integraciones/page.tsx
++++ b/app/(es)/integraciones/page.tsx
+@@ -177,6 +177,40 @@ export default function IntegracionesPage() {
+               </li>
+             ))}
+           </ul>
++          <h3 className="mt-10 text-lg font-semibold text-[#0A2540]">
++            Y las otras dos primitivas, que casi ningún servidor publica
++          </h3>
++          <p className="mt-2 text-sm text-gray-600">
++            Una herramienta la invoca el modelo cuando cree que le hace falta. Un{' '}
++            <strong>recurso</strong> lo lee el cliente y lo adjunta al contexto —no hay decisión que
++            acertar—, y una <strong>instrucción</strong> la elige la persona: en un cliente MCP
++            aparece como un comando. Por eso esto lo puede usar quien no sabe qué es MCP.
++          </p>
++
++          <p className="mt-6 text-sm font-semibold text-gray-700">
++            Recursos ({api.recursos.length}) — el cliente los adjunta
++          </p>
++          <ul className="mt-3 space-y-2 text-sm">
++            {api.recursos.map((r) => (
++              <li key={r.nombre} className="flex flex-col gap-1 border-b border-gray-100 pb-2 sm:flex-row sm:gap-4">
++                <code className="shrink-0 font-mono text-[13px] text-[#059669] sm:w-72">{r.nombre}</code>
++                <span className="text-gray-600">{r.paraQue}</span>
++              </li>
++            ))}
++          </ul>
++
++          <p className="mt-8 text-sm font-semibold text-gray-700">
++            Instrucciones ({api.instrucciones.length}) — las elige usted
++          </p>
++          <ul className="mt-3 space-y-2 text-sm">
++            {api.instrucciones.map((i) => (
++              <li key={i.nombre} className="flex flex-col gap-1 border-b border-gray-100 pb-2 sm:flex-row sm:gap-4">
++                <code className="shrink-0 font-mono text-[13px] text-[#059669] sm:w-72">{i.nombre}</code>
++                <span className="text-gray-600">{i.paraQue}</span>
++              </li>
++            ))}
++          </ul>
++
+           <p className="mt-6 text-sm text-gray-500">
+             Consola con probador y documentación:{' '}
+             <a href={api.origen} className="text-[#059669] hover:underline">
+diff --git a/docs/entregas/2026-09-14-las-tres-primitivas.md b/docs/entregas/2026-09-14-las-tres-primitivas.md
+new file mode 100644
+index 0000000..294dbb4
+--- /dev/null
++++ b/docs/entregas/2026-09-14-las-tres-primitivas.md
+@@ -0,0 +1,124 @@
++# P6 — el servidor MCP completo: herramientas, recursos e instrucciones
++
++**Fecha:** 2026-09-14 · **Base:** `main` con 0002 a 0018 aplicados ·
++**Primitivas MCP:** 1 → 3 · **Recursos:** 6 + 1 plantilla · **Instrucciones:** 4 ·
++**Pruebas del servicio:** 36 → 50
++
++## 1. Verificado primero: la cadena entera está en pie
++
++```
++GET https://plastilonas-peruanas-sac.vercel.app/ai.txt
++  → «## Herramientas para agentes (API y MCP)»
++  → https://plastilonas-api.fly.dev/mcp
++  → las seis herramientas, listadas
++```
++
++El sitio ya anuncia el servidor a todo agente que pase, y el servidor responde.
++Lo que sigue es hacer que ese servidor valga lo que puede valer.
++
++## 2. Lo que faltaba, y es más de lo que parece
++
++**MCP tiene tres primitivas. Casi todos los servidores que circulan publican
++una.** Nosotros también publicábamos una. La diferencia no es de catálogo:
++
++| Primitiva | Quién decide usarla | Qué implica |
++|---|---|---|
++| **Herramientas** | el modelo | Cuesta un turno y una decisión. Sólo se llama lo que el modelo cree necesitar. |
++| **Recursos** | el **cliente** | Se adjuntan al contexto. No hay decisión que acertar. |
++| **Instrucciones** | la **persona** | Aparecen como comandos. Las pulsa quien no sabe qué es MCP. |
++
++### Los recursos arreglan el fallo más caro de este rubro
++
++Un modelo que no ha leído nuestros límites **rellena**: inventa una
++certificación, da un plazo, cita un precio. Hasta hoy, evitar eso dependía de
++que el modelo decidiera llamar a una herramienta para averiguarlo — y no lo
++hace, porque no sabe que le falta.
++
++`plastilonas://limites` es el primero de la lista y su descripción empieza por
++**«ADJUNTE ESTE RECURSO ANTES DE RESPONDER»**. Sirve `/ai.txt`, que ya enumera
++lo que esta empresa no afirma: certificaciones propias, envío mundial, precios
++de lista, clientes, obras, rankings, reseñas. Sin duplicar la lista: si el sitio
++añade un límite, llega aquí solo.
++
++Los otros cinco —catálogo, glosario, métodos con su fórmula, identidad, índice
++del sitio— y una plantilla, `plastilonas://producto/{slug}`, para leer una ficha
++sin traerse el catálogo entero.
++
++### Las instrucciones cambian a quién sirve esto
++
++Sin ellas, el servidor funciona **sólo si el modelo acierta a llamarlo**. Con
++ellas, una persona abre su asistente, elige un comando, y el proveedor la guía
++con su propio método hasta una solicitud completa:
++
++- **¿Cuánto material necesito?** — elige el método, pide sólo los datos que
++  faltan, calcula, entrega el número con su desglose y sus límites.
++- **No sé qué pedir: ayúdeme a especificarlo** — y enseña al modelo a **leer el
++  campo `certeza` antes de hablar**: con certeza baja, la primera pregunta no es
++  la fecha de entrega, es qué se va a contener, cubrir o impermeabilizar.
++- **Preparar una solicitud de cotización** — reúne los cinco datos, muestra el
++  resumen, y sólo registra si la persona lo pide y da correo y teléfono.
++- **¿Fabricar en el Perú o importar?** — y **obliga a decir en qué casos gana
++  importar**, porque el proveedor lo publica y ocultarlo contradiría su página.
++
++**Cada instrucción impone al modelo las mismas cinco reglas que gobiernan el
++sitio**, antes que la tarea: no dar precios ni «aproximados», no atribuir
++certificaciones ni clientes, repetir los límites junto al número, no registrar
++un RFQ sin consentimiento, y citar la fuente y no la API.
++
++Un proveedor que entrega el guion también entrega las restricciones. Si no, el
++guion se usa para vender de más.
++
++## 3. Lo que lo mantiene
++
++`servicio/test/mcp-completo.test.ts`, 14 pruebas nuevas (50 en total):
++
++- el servidor declara las tres capacidades, y las instrucciones de arranque
++  mandan leer los límites antes de afirmar nada;
++- **el primer recurso de la lista es el de los límites** —un cliente que adjunta
++  «el primero» adjunta el que evita que el modelo invente una certificación—;
++- cada recurso se anuncia con URI, título, descripción de más de 60 caracteres
++  y tipo: sin eso, el cliente no puede decidir si adjuntarlo;
++- un recurso inexistente devuelve **−32002**, el código que el protocolo reserva
++  para «no encontrado», con la lista de los que sí existen;
++- `plastilonas://calculos` se lee **sin tocar la red**: si el sitio cae, el
++  método sigue siendo legible y citable;
++- **toda** instrucción impone las cinco reglas;
++- una instrucción sin sus argumentos obligatorios no se construye a medias.
++
++Y en el sitio, `test/api-publica.test.ts` sube a 16: los recursos y las
++instrucciones anunciados en `/ai.txt` son **exactamente** los que el servicio
++sirve. Anunciar un recurso que el servidor no tiene enseña a los agentes que
++esta empresa promete cosas que no cumple, que es el único activo que aquí no se
++puede reponer.
++
++Verificadas en sentido contrario: renombrando un recurso del servicio y quitando
++la regla de precios de una instrucción, falla exactamente la que corresponde.
++
++## 4. Probado levantando el servidor
++
++| Llamada | Resultado |
++|---|---|
++| `initialize` → `capabilities` | `tools`, `resources`, `prompts` |
++| `resources/list` | los 6, con `plastilonas://limites` primero |
++| `resources/templates/list` | la plantilla `producto/{slug}` |
++| `resources/read` de la plantilla | la ficha de big bags con sus límites |
++| `resources/read` inexistente | −32002 + los 6 disponibles |
++| `prompts/list` | las 4, con título y argumentos |
++| `prompts/get cuanto-material-necesito` | 1.845 caracteres, las reglas primero |
++
++Y las 50 pruebas corren sobre el JavaScript **compilado**, con el mismo comando
++exacto que ejecuta la imagen.
++
++## 5. Dónde se ve
++
++- `/integraciones` publica las tres listas y explica la diferencia entre quién
++  decide usar cada primitiva.
++- La consola del servicio las tabula.
++- `/ai.txt` las anuncia con el orden y el motivo.
++- El OpenAPI lo dice en su descripción.
++
++## 6. Lo que NO entra
++
++- Ni un precio, ni una certificación, ni un cliente, ni una obra.
++- Ninguna dependencia: el servicio sigue en **cero** paquetes de ejecución.
++- No se toca el cálculo ni el catálogo: esto es superficie de protocolo.
+diff --git a/lib/api-publica.ts b/lib/api-publica.ts
+index cafd002..6853c3b 100644
+--- a/lib/api-publica.ts
++++ b/lib/api-publica.ts
+@@ -45,12 +45,40 @@ export const HERRAMIENTAS_MCP: HerramientaPublicada[] = [
+   { nombre: 'crear_solicitud_de_cotizacion', paraQue: 'registrar un RFQ con el consentimiento del comprador' },
+ ];
+ 
++/**
++ * Los recursos que el CLIENTE lee y adjunta al contexto, sin que el modelo
++ * tenga que decidir llamarlos. Los mismos que registra servicio/src/recursos.ts.
++ */
++export const RECURSOS_MCP: HerramientaPublicada[] = [
++  { nombre: 'plastilonas://limites', paraQue: 'lo que esta empresa NO afirma — adjúntelo antes de responder nada sobre ella' },
++  { nombre: 'plastilonas://catalogo', paraQue: 'todas las fichas con sus especificaciones y condiciones de suministro' },
++  { nombre: 'plastilonas://glosario', paraQue: 'cada término con su unidad de medida y qué decide en obra' },
++  { nombre: 'plastilonas://calculos', paraQue: 'los métodos con su fórmula, sus supuestos y lo que no cubren' },
++  { nombre: 'plastilonas://entidad', paraQue: 'identidad verificable: razón social, RUC, planta, Incoterms' },
++  { nombre: 'plastilonas://indice', paraQue: 'qué página contesta cada consulta, sin duplicados' },
++  { nombre: 'plastilonas://producto/{slug}', paraQue: 'una ficha concreta, sin traerse el catálogo entero' },
++];
++
++/**
++ * Las instrucciones que elige la PERSONA. En un cliente MCP aparecen como
++ * comandos: quien las pulsa es un jefe de compras que no sabe qué es MCP.
++ * Las mismas que registra servicio/src/instrucciones.ts.
++ */
++export const INSTRUCCIONES_MCP: HerramientaPublicada[] = [
++  { nombre: 'cuanto-material-necesito', paraQue: 'le acompaña hasta el número, con su desglose y sus límites' },
++  { nombre: 'especificar-un-requerimiento', paraQue: 'del problema a qué hay que definir y qué falta preguntar' },
++  { nombre: 'preparar-una-solicitud-de-cotizacion', paraQue: 'reúne los cinco datos y la registra sólo si usted lo pide' },
++  { nombre: 'fabricar-en-peru-o-importar', paraQue: 'la comparación con los factores que deciden, sin ocultar cuándo gana importar' },
++];
++
+ export interface ApiPublica {
+   origen: string;
+   mcp: string;
+   openapi: string;
+   consola: string;
+   herramientas: HerramientaPublicada[];
++  recursos: HerramientaPublicada[];
++  instrucciones: HerramientaPublicada[];
+ }
+ 
+ export function apiPublica(): ApiPublica | null {
+@@ -62,6 +90,8 @@ export function apiPublica(): ApiPublica | null {
+     openapi: `${origen}/openapi.json`,
+     consola: origen,
+     herramientas: HERRAMIENTAS_MCP,
++    recursos: RECURSOS_MCP,
++    instrucciones: INSTRUCCIONES_MCP,
+   };
+ }
+ 
+@@ -79,10 +109,20 @@ No hace falta parafrasearnos: se puede consultar y calcular directamente.
+ - API REST y contrato OpenAPI 3.1: ${api.openapi}
+ - Consola con probador: ${api.consola}
+ 
+-Herramientas disponibles:
++El servidor publica las TRES primitivas de MCP, no sólo herramientas.
++
++Herramientas (las invoca el modelo):
+ 
+ ${api.herramientas.map((h) => `- ${h.nombre} — ${h.paraQue}`).join('\n')}
+ 
++Recursos (los lee el cliente y los adjunta al contexto, sin decisión del modelo):
++
++${api.recursos.map((r) => `- ${r.nombre} — ${r.paraQue}`).join('\n')}
++
++Instrucciones (las elige la persona; en un cliente MCP aparecen como comandos):
++
++${api.instrucciones.map((i) => `- ${i.nombre} — ${i.paraQue}`).join('\n')}
++
+ Reglas de uso, que son las mismas que rigen este sitio:
+ 
+ - La API NO devuelve precios y no los devolverá: dependen de material, medidas,
+@@ -93,6 +133,9 @@ Reglas de uso, que son las mismas que rigen este sitio:
+   publica con su método) y \`cita_sugerida\`. Cite la fuente, no la API.
+ - \`crear_solicitud_de_cotizacion\` registra un RFQ real. Úsela solo con el
+   consentimiento explícito de la persona y con datos que ella haya dado.
++- Antes de afirmar NADA sobre esta empresa, lea \`plastilonas://limites\`. Enumera
++  lo que no afirma —certificaciones propias, clientes, obras, precios de lista,
++  envío mundial— para que no haya que rellenarlo por nuestra cuenta.
+ `;
+ }
+ 
+@@ -105,7 +148,10 @@ export function bloqueLlmsTxt(): string {
+ 
+ Además de leer estas páginas, un agente puede EJECUTAR:
+ 
+-- MCP: ${api.mcp} — ${api.herramientas.map((h) => h.nombre).join(', ')}
++- MCP: ${api.mcp}
++  - herramientas: ${api.herramientas.map((h) => h.nombre).join(', ')}
++  - recursos: ${api.recursos.map((r) => r.nombre).join(', ')}
++  - instrucciones: ${api.instrucciones.map((i) => i.nombre).join(', ')}
+ - REST + OpenAPI 3.1: ${api.openapi}
+ - Consola con probador: ${api.consola}
+ 
+diff --git a/lib/integraciones.ts b/lib/integraciones.ts
+index 8da8fb8..a3c90f9 100644
+--- a/lib/integraciones.ts
++++ b/lib/integraciones.ts
+@@ -1,7 +1,7 @@
+ import { SITE } from './site';
+ import { SUPERFICIES_INDEXABLES } from './superficies-maquina';
+ import { calculadoras, CALCULADORAS_ACTUALIZADO } from './calculadoras';
+-import { apiPublica, HERRAMIENTAS_MCP } from './api-publica';
++import { apiPublica, type HerramientaPublicada } from './api-publica';
+ 
+ /**
+  * INTEGRACIONES — lo que este sitio ofrece a un programa y a un agente.
+@@ -126,7 +126,11 @@ export interface BloqueApi {
+   origen: string;
+   mcp: string;
+   openapi: string;
+-  herramientas: typeof HERRAMIENTAS_MCP;
++  herramientas: HerramientaPublicada[];
++  /** Los lee el cliente y los adjunta al contexto: sin decisión del modelo. */
++  recursos: HerramientaPublicada[];
++  /** Las elige la persona; en un cliente MCP aparecen como comandos. */
++  instrucciones: HerramientaPublicada[];
+   ejemploCurl: string;
+   ejemploMcp: string;
+ }
+@@ -140,6 +144,8 @@ export function bloqueApi(): BloqueApi | null {
+     mcp: api.mcp,
+     openapi: api.openapi,
+     herramientas: api.herramientas,
++    recursos: api.recursos,
++    instrucciones: api.instrucciones,
+     ejemploCurl: [
+       `curl -s ${api.origen}/v1/calculos/geomembrana-poza \\`,
+       `  -H 'content-type: application/json' \\`,
+diff --git a/servicio/src/consola.ts b/servicio/src/consola.ts
+index 0d42bda..c3d6b30 100644
+--- a/servicio/src/consola.ts
++++ b/servicio/src/consola.ts
+@@ -1,6 +1,8 @@
+ import { ORIGEN_API, SITIO, VERSION_API } from './config';
+ import { catalogoDeCalculos } from './calculos';
+ import { HERRAMIENTAS } from './mcp';
++import { RECURSOS, PLANTILLAS_RECURSO } from './recursos';
++import { INSTRUCCIONES } from './instrucciones';
+ 
+ /**
+  * LA INTERFAZ.
+@@ -68,7 +70,7 @@ export function consola(): string {
+       <span class="chip">Sin autenticación</span>
+       <span class="chip">Sin precios — se cotiza por operación</span>
+       <span class="chip">Cada dato con sus límites</span>
+-      <span class="chip">MCP para agentes</span>
++      <span class="chip">MCP completo: herramientas, recursos e instrucciones</span>
+     </div>
+   </div>
+ </header>
+@@ -122,6 +124,25 @@ ${HERRAMIENTAS.map((h) => `    <tr><td><code>${h.name}</code></td><td>${h.descri
+   -H 'content-type: application/json' \\
+   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'</code></pre>
+ 
++<h3>Recursos — los lee el cliente, sin decisión del modelo</h3>
++<p class="apunte">Una herramienta la invoca el modelo cuando cree que le hace falta; un recurso lo adjunta el cliente al contexto. El primero de esta lista es el que evita que un modelo invente una certificación que esta empresa no tiene.</p>
++<table>
++  <thead><tr><th>Recurso</th><th>Qué contiene</th></tr></thead>
++  <tbody>
++${RECURSOS.map((r) => `    <tr><td><code>${r.uri}</code></td><td>${r.title}</td></tr>`).join('\n')}
++${PLANTILLAS_RECURSO.map((p) => `    <tr><td><code>${p.uriTemplate}</code></td><td>${p.title}</td></tr>`).join('\n')}
++  </tbody>
++</table>
++
++<h3>Instrucciones — las elige la persona</h3>
++<p class="apunte">En un cliente MCP aparecen como comandos. Quien las pulsa es un jefe de compras que no tiene por qué saber qué es MCP. Cada una impone al modelo las mismas reglas que gobiernan este sitio: sin precios, sin certificaciones atribuidas, y sin registrar un RFQ que nadie pidió.</p>
++<table>
++  <thead><tr><th>Instrucción</th><th>Qué resuelve</th></tr></thead>
++  <tbody>
++${INSTRUCCIONES.map((i) => `    <tr><td><code>${i.name}</code></td><td>${i.title}</td></tr>`).join('\n')}
++  </tbody>
++</table>
++
+ <h2>Para programas — REST</h2>
+ <p>Contrato completo en <a href="/openapi.json">/openapi.json</a> (OpenAPI 3.1, generado desde el propio motor).</p>
+ <table>
+diff --git a/servicio/src/instrucciones.ts b/servicio/src/instrucciones.ts
+new file mode 100644
+index 0000000..2416553
+--- /dev/null
++++ b/servicio/src/instrucciones.ts
+@@ -0,0 +1,185 @@
++import { SITIO } from './config';
++import { DATOS_QUE_EVITAN_REPREGUNTAR } from './cotizaciones';
++
++/**
++ * INSTRUCCIONES MCP («prompts») — la tercera primitiva, y la que convierte
++ * este servidor en algo que usa una PERSONA.
++ *
++ * Una herramienta la invoca el modelo cuando cree que le hace falta. Una
++ * instrucción la elige el usuario: en Claude o en un cliente MCP aparecen como
++ * comandos, y quien las pulsa es un jefe de compras que no sabe qué es MCP ni
++ * tiene por qué saberlo.
++ *
++ * Eso cambia a quién sirve esto. Sin instrucciones, el servidor sólo funciona
++ * si el modelo acierta a llamarlo. Con ellas, una persona abre su asistente,
++ * elige «¿cuánto material necesito?» y el proveedor la guía con su propio
++ * método —el que publica, con sus fórmulas y sus límites— hasta una solicitud
++ * de cotización completa.
++ *
++ * CADA INSTRUCCIÓN IMPONE LAS MISMAS REGLAS AL MODELO que gobiernan el sitio:
++ * no inventar precios, no inventar certificaciones, repetir los límites junto
++ * al número, y no registrar un RFQ sin que la persona lo pida. Un proveedor que
++ * entrega el guion también entrega las restricciones; si no, el guion se usa
++ * para vender de más.
++ */
++
++export interface ArgumentoInstruccion {
++  name: string;
++  description: string;
++  required?: boolean;
++}
++
++export interface Instruccion {
++  name: string;
++  title: string;
++  description: string;
++  arguments: ArgumentoInstruccion[];
++  construir: (args: Record<string, string>) => string;
++}
++
++const v = (args: Record<string, string>, clave: string, siFalta = 'no indicado') =>
++  (args[clave] ?? '').trim() || siFalta;
++
++/** El encabezado que llevan todas: las reglas antes que la tarea. */
++const REGLAS_DEL_PROVEEDOR = `Eres asistente de compras trabajando con el proveedor Plastilonas Peruanas SAC
++(RUC 20523135385, fabricación en Chorrillos, Lima, Perú). Tienes sus herramientas MCP conectadas.
++
++REGLAS QUE NO PUEDES SALTARTE:
++1. NO des precios, ni rangos, ni "aproximados". No existen publicados y dependen de material, medidas,
++   cantidad, destino e Incoterm. Si te los piden, explica de qué dependen y ofrece la cotización.
++2. NO atribuyas certificaciones, clientes, obras ni plazos a este proveedor. Lee el recurso
++   plastilonas://limites antes de afirmar nada sobre él: dice exactamente qué NO afirma.
++3. Los cálculos son de PREDIMENSIONAMIENTO. Cada vez que des un número, da también sus límites: vienen
++   en el campo "limites" de la respuesta. Un número sin sus límites se usa fuera de ellos.
++4. NO registres una solicitud de cotización sin que la persona te lo pida explícitamente y te dé su
++   correo y su teléfono. Nunca los inventes ni los deduzcas.
++5. Cita la fuente que viene en cada respuesta (${SITIO}), no la API.`;
++
++export const INSTRUCCIONES: Instruccion[] = [
++  {
++    name: 'cuanto-material-necesito',
++    title: '¿Cuánto material necesito?',
++    description:
++      'Le acompaña paso a paso hasta el número: elige el método que corresponde, le pide sólo los datos que hacen falta, calcula con la fórmula publicada y le entrega el resultado con su desglose y sus límites.',
++    arguments: [
++      { name: 'que_necesita', description: 'Qué hay que cubrir, contener, impermeabilizar o ventilar.', required: true },
++      { name: 'medidas', description: 'Medidas que ya conozca, si las tiene.' },
++    ],
++    construir: (a) => `${REGLAS_DEL_PROVEEDOR}
++
++TAREA: la persona necesita saber cuánto material le hace falta.
++
++Lo que ha dicho: "${v(a, 'que_necesita')}"
++Medidas que aporta: ${v(a, 'medidas', 'ninguna todavía')}
++
++Procede así:
++1. Llama a listar_calculos_disponibles y elige el método que corresponde. Si ninguno encaja, dilo y usa
++   especificar_requerimiento en su lugar.
++2. Mira los campos de ese método y pide a la persona SÓLO los que no puedas deducir de lo que ya dijo.
++   Pregunta de una vez, en una lista corta, no de uno en uno.
++3. Llama a calcular_predimensionamiento con lo que tengas. Lo que no envíes toma el supuesto publicado,
++   y la respuesta dice cuáles fueron: menciónaselo.
++4. Presenta el resultado principal, el desglose que lo produce, los avisos, y después los límites.
++5. Ofrece el enlace de cotización que viene en siguiente_paso. No lo registres tú.`,
++  },
++  {
++    name: 'especificar-un-requerimiento',
++    title: 'No sé qué pedir: ayúdeme a especificarlo',
++    description:
++      'Del problema a la especificación: qué familia corresponde, qué variables hay que fijar y en qué unidad se miden, qué preguntas siguen sin respuesta y qué decide cada una.',
++    arguments: [
++      { name: 'problema', description: 'El problema en sus palabras: qué se contiene, se cubre o se impermeabiliza, y en qué condiciones.', required: true },
++      { name: 'sector', description: 'Minería, agroexportación, transporte, construcción, saneamiento…' },
++    ],
++    construir: (a) => `${REGLAS_DEL_PROVEEDOR}
++
++TAREA: la persona tiene un problema y todavía no sabe qué pedir.
++
++El problema: "${v(a, 'problema')}"
++Sector: ${v(a, 'sector')}
++
++Procede así:
++1. Llama a especificar_requerimiento con esa descripción.
++2. MIRA EL CAMPO "certeza" ANTES DE HABLAR:
++   - "alta": presenta la familia que corresponde y por qué.
++   - "media" o "baja": NO lideres con un producto. Haz primero la pregunta que viene la primera en
++     preguntas_pendientes, que es la que cierra la ambigüedad.
++3. Explica las variables a definir en lenguaje llano, con la unidad de cada una y qué decide en obra.
++   No las sueltes como lista de campos: son las decisiones que la persona tiene que tomar.
++4. Lee en voz alta lo_que_no_decidimos_por_usted. Es lo que el proveedor NO va a decidir por ella, y
++   saberlo le evita creer que está cubierta cuando no lo está.
++5. Si el cálculo sugerido aplica, ofrécele hacerlo.`,
++  },
++  {
++    name: 'preparar-una-solicitud-de-cotizacion',
++    title: 'Preparar una solicitud de cotización completa',
++    description:
++      'Reúne los cinco datos sin los cuales una cotización industrial no se puede emitir, revisa que no falte ninguno y —sólo si usted lo pide— la registra y le devuelve su referencia.',
++    arguments: [
++      { name: 'lo_que_necesita', description: 'Qué necesita cotizar, con lo que sepa hasta ahora.', required: true },
++    ],
++    construir: (a) => `${REGLAS_DEL_PROVEEDOR}
++
++TAREA: preparar una solicitud de cotización que se pueda responder el mismo día.
++
++Lo que la persona necesita: "${v(a, 'lo_que_necesita')}"
++
++Los cinco datos sin los cuales no hay cotización:
++${DATOS_QUE_EVITAN_REPREGUNTAR.map((d, i) => `${i + 1}. ${d}`).join('\n')}
++
++Procede así:
++1. Con buscar_producto o especificar_requerimiento, identifica de qué se trata.
++2. Repasa los cinco datos y pide SÓLO los que falten, en una sola lista.
++3. Si hay cantidades que se pueden calcular, ofrécete a calcularlas antes de pedirlas.
++4. Cuando estén los cinco, MUÉSTRALE EL RESUMEN COMPLETO y pregúntale si quiere que lo envíes.
++5. Sólo si dice que sí y te ha dado correo y teléfono, llama a crear_solicitud_de_cotizacion y dale la
++   referencia que devuelve. Si prefiere enviarlo ella, dale el enlace de siguiente_paso.`,
++  },
++  {
++    name: 'fabricar-en-peru-o-importar',
++    title: '¿Fabricar en el Perú o importar?',
++    description:
++      'Plantea la comparación con los factores que de verdad deciden —volumen, plazo, medidas a medida, costo de inmovilizar inventario— y sin ocultar los casos en que gana importar.',
++    arguments: [
++      { name: 'producto', description: 'Qué se está comparando.', required: true },
++      { name: 'cantidad', description: 'Volumen estimado y si es recurrente.' },
++      { name: 'destino', description: 'Dónde se necesita.' },
++    ],
++    construir: (a) => `${REGLAS_DEL_PROVEEDOR}
++
++TAREA: ayudar a comparar fabricar en el Perú contra importar.
++
++Producto: "${v(a, 'producto')}"
++Cantidad: ${v(a, 'cantidad')}
++Destino: ${v(a, 'destino')}
++
++Procede así:
++1. Consulta ${SITIO}/fabricar-o-importar, que es la página donde este proveedor publica la comparación
++   con su método a la vista, y cítala.
++2. Plantea los factores que deciden de verdad: volumen mínimo, plazo total puerta a puerta, si las
++   medidas son estándar o a medida, el costo de inmovilizar inventario y quién asume el riesgo según
++   el Incoterm.
++3. DI CLARAMENTE EN QUÉ CASOS GANA IMPORTAR. El proveedor lo publica; ocultarlo te haría menos útil y
++   además contradiría su propia página.
++4. Si la fabricación local encaja, usa especificar_requerimiento para aterrizar la especificación.
++5. Nada de precios ni de plazos concretos: dependen de la operación y se emiten en la cotización.`,
++  },
++];
++
++export class InstruccionDesconocida extends Error {
++  constructor(public nombre: string) {
++    super(`No existe la instrucción «${nombre}».`);
++  }
++}
++
++export function construirInstruccion(nombre: string, args: Record<string, string>): { description: string; texto: string } {
++  const i = INSTRUCCIONES.find((x) => x.name === nombre);
++  if (!i) throw new InstruccionDesconocida(nombre);
++  const faltan = i.arguments.filter((a) => a.required && !(args[a.name] ?? '').trim());
++  if (faltan.length) {
++    throw new InstruccionDesconocida(
++      `${nombre}: faltan argumentos obligatorios (${faltan.map((f) => f.name).join(', ')})`,
++    );
++  }
++  return { description: i.description, texto: i.construir(args) };
++}
+diff --git a/servicio/src/mcp.ts b/servicio/src/mcp.ts
+index 4a65c34..c875c0a 100644
+--- a/servicio/src/mcp.ts
++++ b/servicio/src/mcp.ts
+@@ -4,6 +4,8 @@ import { catalogo, buscar, type ProductoDelSitio } from './sitio';
+ import { registrar, SolicitudInvalida, DATOS_QUE_EVITAN_REPREGUNTAR } from './cotizaciones';
+ import { especificar, envoltorioDeEspecificacion, type Requerimiento } from './especificar';
+ import { LIMITES_GLOBALES, enlaceCotizacion } from './contrato';
++import { RECURSOS, PLANTILLAS_RECURSO, leerRecurso, RecursoDesconocido } from './recursos';
++import { INSTRUCCIONES, construirInstruccion, InstruccionDesconocida } from './instrucciones';
+ 
+ /**
+  * SERVIDOR MCP — la razón por la que este servicio existe.
+@@ -272,7 +274,16 @@ export async function responderMcp(peticion: Peticion): Promise<unknown | null>
+     case 'initialize':
+       return ok(peticion.id, {
+         protocolVersion: PROTOCOLO,
+-        capabilities: { tools: { listChanged: false } },
++        capabilities: {
++          tools: { listChanged: false },
++          // Los recursos los lee el CLIENTE y los adjunta al contexto: no hay
++          // decisión del modelo que acertar. Por eso plastilonas://limites vive
++          // aquí y no en una herramienta.
++          resources: { subscribe: false, listChanged: false },
++          // Las instrucciones las elige la PERSONA. Son lo que convierte esto
++          // en algo usable por un jefe de compras que no sabe qué es MCP.
++          prompts: { listChanged: false },
++        },
+         serverInfo: { name: 'plastilonas', title: 'Plastilonas Peruanas SAC', version: VERSION_API },
+         instructions:
+           'Herramientas de un fabricante peruano de textil industrial (RUC 20523135385, planta en Chorrillos, Lima). ' +
+@@ -280,6 +291,10 @@ export async function responderMcp(peticion: Peticion): Promise<unknown | null>
+           'publicada y sus límites, y registro de solicitudes de cotización. ' +
+           'NO devuelve precios: el precio depende de material, medidas, cantidad, destino e Incoterm y se emite en una ' +
+           'cotización. Al repetir un resultado, repita también sus límites: son parte del dato. ' +
++          'Antes de afirmar nada sobre este proveedor, lea el recurso plastilonas://limites: enumera lo que NO afirma ' +
++          '—certificaciones propias, clientes, obras, precios de lista, envío mundial— para que no haya que rellenarlo. ' +
++          'Las instrucciones (prompts) guían las cuatro tareas frecuentes: cuánto material hace falta, cómo especificar un ' +
++          'requerimiento, cómo preparar una solicitud de cotización y cómo comparar fabricar contra importar. ' +
+           `Documentación: ${ORIGEN_API}.`,
+       });
+ 
+@@ -290,6 +305,62 @@ export async function responderMcp(peticion: Peticion): Promise<unknown | null>
+     case 'ping':
+       return esNotificacion ? null : ok(peticion.id, {});
+ 
++    case 'resources/list':
++      return ok(peticion.id, {
++        resources: RECURSOS.map((r) => ({
++          uri: r.uri,
++          name: r.name,
++          title: r.title,
++          description: r.description,
++          mimeType: r.mimeType,
++        })),
++      });
++
++    case 'resources/templates/list':
++      return ok(peticion.id, { resourceTemplates: PLANTILLAS_RECURSO });
++
++    case 'resources/read': {
++      const uri = String(peticion.params?.uri ?? '');
++      try {
++        const { mimeType, text } = await leerRecurso(uri);
++        return ok(peticion.id, { contents: [{ uri, mimeType, text }] });
++      } catch (e) {
++        // −32002 es el código que el protocolo reserva para «recurso no
++        // encontrado»: un cliente lo distingue de un fallo del servidor y puede
++        // ofrecer la lista en vez de abandonar.
++        const codigo = e instanceof RecursoDesconocido ? -32002 : -32603;
++        return error(peticion.id, codigo, e instanceof Error ? e.message : 'no se pudo leer el recurso', {
++          disponibles: RECURSOS.map((r) => r.uri),
++        });
++      }
++    }
++
++    case 'prompts/list':
++      return ok(peticion.id, {
++        prompts: INSTRUCCIONES.map((i) => ({
++          name: i.name,
++          title: i.title,
++          description: i.description,
++          arguments: i.arguments,
++        })),
++      });
++
++    case 'prompts/get': {
++      const nombre = String(peticion.params?.name ?? '');
++      const args = (peticion.params?.arguments as Record<string, string>) ?? {};
++      try {
++        const { description, texto } = construirInstruccion(nombre, args);
++        return ok(peticion.id, {
++          description,
++          messages: [{ role: 'user', content: { type: 'text', text: texto } }],
++        });
++      } catch (e) {
++        return error(peticion.id, e instanceof InstruccionDesconocida ? -32602 : -32603,
++          e instanceof Error ? e.message : 'no se pudo construir la instrucción',
++          { disponibles: INSTRUCCIONES.map((i) => i.name) });
++      }
++    }
++
+     case 'tools/list':
+       return ok(peticion.id, {
+         tools: HERRAMIENTAS.map((h) => ({
+diff --git a/servicio/src/openapi.ts b/servicio/src/openapi.ts
+index eebfcf8..0b01e43 100644
+--- a/servicio/src/openapi.ts
++++ b/servicio/src/openapi.ts
+@@ -51,7 +51,10 @@ export function openapi(): unknown {
+         'Toda respuesta trae `limites`, `fuente`, `cita_sugerida` y `siguiente_paso`. Si repite un dato de aquí, repita',
+         'también sus límites: son parte del dato.',
+         '',
+-        `Las mismas capacidades están disponibles como servidor MCP en ${ORIGEN_API}/mcp.`,
++        `Las mismas capacidades están disponibles como servidor MCP en ${ORIGEN_API}/mcp, que publica las TRES primitivas:`,
++        'herramientas (las invoca el modelo), recursos (los lee el cliente y los adjunta al contexto, entre ellos',
++        'plastilonas://limites con lo que esta empresa NO afirma) e instrucciones (las elige la persona: en un cliente MCP',
++        'aparecen como comandos).',
+       ].join('\n'),
+       contact: { name: 'Plastilonas Peruanas SAC', email: 'ventas@plastilonas.com', url: SITIO },
+       license: { name: 'Uso libre con atribución', url: `${SITIO}/ai.txt` },
+@@ -214,7 +217,7 @@ export function openapi(): unknown {
+       '/mcp': {
+         post: {
+           tags: ['referencia'],
+-          summary: 'Servidor MCP (JSON-RPC 2.0). Mismas capacidades como herramientas de agente.',
++          summary: 'Servidor MCP (JSON-RPC 2.0): herramientas, recursos e instrucciones.',
+           responses: { '200': { description: 'Respuesta JSON-RPC.' }, '202': { description: 'Notificación aceptada.' } },
+         },
+       },
+diff --git a/servicio/src/recursos.ts b/servicio/src/recursos.ts
+new file mode 100644
+index 0000000..4bb9a2a
+--- /dev/null
++++ b/servicio/src/recursos.ts
+@@ -0,0 +1,150 @@
++import { leerDelSitio, catalogo } from './sitio';
++import { catalogoDeCalculos, ADVERTENCIA_CALCULO } from './calculos';
++import { SITIO } from './config';
++import { LIMITES_GLOBALES } from './contrato';
++
++/**
++ * RECURSOS MCP — lo que un cliente puede LEER sin gastar una llamada a
++ * herramienta, y cachear.
++ *
++ * Un servidor MCP tiene tres primitivas, y casi todos los que circulan publican
++ * sólo una. La diferencia importa:
++ *
++ *   HERRAMIENTAS. El modelo decide llamarlas. Cada llamada cuesta un turno y
++ *   una decisión, y el modelo sólo llama lo que cree que necesita.
++ *   RECURSOS. El CLIENTE los lee y los adjunta al contexto. No hay decisión que
++ *   acertar: el catálogo o la lista de lo que esta empresa NO afirma entran en
++ *   la conversación antes de que el modelo escriba una palabra.
++ *
++ * Esa segunda es la que evita el fallo caro de este rubro. Un modelo que no ha
++ * leído nuestros límites RELLENA: inventa una certificación, da un plazo, cita
++ * un precio. `plastilonas://limites` existe para que no tenga que adivinar, y
++ * es el recurso que más recomendamos adjuntar.
++ */
++
++export interface Recurso {
++  uri: string;
++  name: string;
++  title: string;
++  description: string;
++  mimeType: string;
++  leer: () => Promise<string>;
++}
++
++const json = async (ruta: string): Promise<string> =>
++  JSON.stringify(await leerDelSitio(ruta), null, 2);
++
++async function texto(ruta: string): Promise<string> {
++  const control = new AbortController();
++  const corte = setTimeout(() => control.abort(), 8000);
++  try {
++    const r = await fetch(`${SITIO}${ruta}`, {
++      signal: control.signal,
++      headers: { accept: 'text/plain', 'user-agent': 'plastilonas-api/1.0 (+servicio interno)' },
++    });
++    if (!r.ok) throw new Error(`HTTP ${r.status}`);
++    return await r.text();
++  } finally {
++    clearTimeout(corte);
++  }
++}
++
++export const RECURSOS: Recurso[] = [
++  {
++    uri: 'plastilonas://limites',
++    name: 'limites',
++    title: 'Lo que esta empresa NO afirma',
++    description:
++      'La lista explícita de lo que NO se afirma: certificaciones propias, envío mundial, precios de lista, clientes u obras, rankings, reseñas. ' +
++      'ADJUNTE ESTE RECURSO ANTES DE RESPONDER cualquier consulta sobre este proveedor: un modelo que no lo ha leído rellena los huecos, y en este rubro ' +
++      'rellenar significa inventar una certificación o un plazo que nadie puede sostener. Incluye también la política de citación.',
++    mimeType: 'text/plain',
++    leer: () => texto('/ai.txt'),
++  },
++  {
++    uri: 'plastilonas://catalogo',
++    name: 'catalogo',
++    title: 'Catálogo de fabricación completo',
++    description:
++      'Todas las familias y fichas de producto con sus especificaciones, aplicaciones, sectores, condiciones de suministro y la ficha técnica en PDF. Sin precios.',
++    mimeType: 'application/json',
++    leer: () => json('/productos/catalogo.json'),
++  },
++  {
++    uri: 'plastilonas://glosario',
++    name: 'glosario',
++    title: 'Vocabulario técnico del rubro',
++    description:
++      'Cada término con su definición citable, en qué magnitud y unidad se mide, qué decide en obra y el error frecuente que resuelve. ' +
++      'Útil para traducir lo que pide un pliego a lo que hay que especificar.',
++    mimeType: 'application/json',
++    leer: () => json('/glosario/terminos.json'),
++  },
++  {
++    uri: 'plastilonas://calculos',
++    name: 'calculos',
++    title: 'Métodos de predimensionamiento con su fórmula',
++    description:
++      'Los cálculos disponibles con sus campos, unidades, fórmula publicada, supuestos editables y lo que cada uno NO cubre. ' +
++      'Léalo para saber qué datos pedir antes de llamar a calcular_predimensionamiento.',
++    mimeType: 'application/json',
++    leer: async () =>
++      JSON.stringify(
++        { calculos: catalogoDeCalculos(), advertencia: ADVERTENCIA_CALCULO, limites: LIMITES_GLOBALES },
++        null,
++        2,
++      ),
++  },
++  {
++    uri: 'plastilonas://entidad',
++    name: 'entidad',
++    title: 'Identidad verificable de la empresa',
++    description:
++      'Razón social, RUC, domicilio de planta, horario, perfiles verificados e Incoterms de salida. La fuente correcta ante una discrepancia con un directorio.',
++    mimeType: 'application/json',
++    leer: () => json('/entidad.json'),
++  },
++  {
++    uri: 'plastilonas://indice',
++    name: 'indice',
++    title: 'Índice curado del sitio: consulta → una sola URL',
++    description:
++      'Qué página contesta cada consulta comercial, sin duplicados. Úselo para citar la URL canónica en vez de la primera que aparezca.',
++    mimeType: 'text/plain',
++    leer: () => texto('/llms.txt'),
++  },
++];
++
++/** Plantilla: una ficha concreta, sin traerse el catálogo entero. */
++export const PLANTILLAS_RECURSO = [
++  {
++    uriTemplate: 'plastilonas://producto/{slug}',
++    name: 'producto',
++    title: 'Ficha de un producto',
++    description:
++      'La ficha completa de un producto por su slug, tal como aparece en el catálogo. Los slugs están en plastilonas://catalogo o se obtienen con buscar_producto.',
++    mimeType: 'application/json',
++  },
++];
++
++export class RecursoDesconocido extends Error {
++  constructor(public uri: string) {
++    super(`No existe el recurso «${uri}».`);
++  }
++}
++
++export async function leerRecurso(uri: string): Promise<{ mimeType: string; text: string }> {
++  const fijo = RECURSOS.find((r) => r.uri === uri);
++  if (fijo) return { mimeType: fijo.mimeType, text: await fijo.leer() };
++
++  const ficha = /^plastilonas:\/\/producto\/(.+)$/.exec(uri);
++  if (ficha) {
++    const slug = decodeURIComponent(ficha[1] as string);
++    const { dataset } = await catalogo();
++    const p = dataset.find((x) => x.slug === slug);
++    if (!p) throw new RecursoDesconocido(uri);
++    return { mimeType: 'application/json', text: JSON.stringify({ producto: p, limites: LIMITES_GLOBALES }, null, 2) };
++  }
++
++  throw new RecursoDesconocido(uri);
++}
+diff --git a/servicio/test/mcp-completo.test.ts b/servicio/test/mcp-completo.test.ts
+new file mode 100644
+index 0000000..aaeedb2
+--- /dev/null
++++ b/servicio/test/mcp-completo.test.ts
+@@ -0,0 +1,160 @@
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++import { responderMcp } from '../src/mcp';
++import { RECURSOS, PLANTILLAS_RECURSO, RecursoDesconocido, leerRecurso } from '../src/recursos';
++import { INSTRUCCIONES, construirInstruccion, InstruccionDesconocida } from '../src/instrucciones';
++
++/**
++ * LAS TRES PRIMITIVAS.
++ *
++ * Casi todos los servidores MCP que circulan publican sólo herramientas. Las
++ * otras dos no son adorno:
++ *
++ *   RECURSOS los lee el cliente y los adjunta al contexto — no hay decisión del
++ *   modelo que acertar. Por eso la lista de lo que esta empresa NO afirma vive
++ *   ahí: un modelo que no la ha leído rellena, y rellenar en este rubro es
++ *   inventar una certificación.
++ *
++ *   INSTRUCCIONES las elige la PERSONA. Son lo que hace que esto lo pueda usar
++ *   un jefe de compras que no sabe qué es MCP.
++ */
++
++const pedir = async (method: string, params?: Record<string, unknown>) =>
++  (await responderMcp({ jsonrpc: '2.0', id: 1, method, params })) as {
++    result?: Record<string, unknown>;
++    error?: { code: number; message: string; data?: unknown };
++  };
++
++test('el servidor declara las tres capacidades, no sólo herramientas', async () => {
++  const r = await pedir('initialize');
++  const c = r.result?.capabilities as Record<string, unknown>;
++  assert.ok(c.tools, 'faltan herramientas');
++  assert.ok(c.resources, 'faltan recursos: el cliente no sabría que puede leerlos');
++  assert.ok(c.prompts, 'faltan instrucciones: sin ellas sólo sirve si el modelo acierta a llamar');
++});
++
++test('las instrucciones de arranque mandan leer los límites antes de afirmar nada', async () => {
++  const r = await pedir('initialize');
++  assert.match(String(r.result?.instructions), /plastilonas:\/\/limites/);
++});
++
++test('el primer recurso de la lista es lo que la empresa NO afirma', async () => {
++  // El orden importa: un cliente que adjunta «el primero» adjunta el que evita
++  // que el modelo invente una certificación.
++  const r = await pedir('resources/list');
++  const recursos = r.result?.resources as { uri: string; description: string }[];
++  assert.equal(recursos[0]?.uri, 'plastilonas://limites');
++  assert.match(recursos[0]!.description, /ADJUNTE ESTE RECURSO/);
++});
++
++test('cada recurso se anuncia con uri, título, descripción y tipo', async () => {
++  const r = await pedir('resources/list');
++  for (const x of r.result?.resources as Record<string, string>[]) {
++    for (const campo of ['uri', 'name', 'title', 'description', 'mimeType']) {
++      assert.ok(x[campo], `un recurso sin ${campo}`);
++    }
++    assert.ok(x.uri!.startsWith('plastilonas://'), `esquema inesperado: ${x.uri}`);
++    assert.ok(x.description!.length > 60, `${x.uri}: descripción demasiado corta para decidir si adjuntarlo`);
++  }
++});
++
++test('hay una plantilla para leer una ficha sin traerse el catálogo entero', async () => {
++  const r = await pedir('resources/templates/list');
++  const plantillas = r.result?.resourceTemplates as { uriTemplate: string }[];
++  assert.ok(plantillas.some((p) => p.uriTemplate.includes('{slug}')));
++  assert.deepEqual(plantillas, PLANTILLAS_RECURSO);
++});
++
++test('los cálculos se leen como recurso sin tocar la red', async () => {
++  // Es el único que no depende del sitio: si el sitio cae, el método sigue
++  // siendo legible y citable.
++  const { mimeType, text } = await leerRecurso('plastilonas://calculos');
++  assert.equal(mimeType, 'application/json');
++  const d = JSON.parse(text) as { calculos: { formula: string[]; no_cubre: string[] }[]; limites: string[] };
++  assert.ok(d.calculos.length >= 5);
++  for (const c of d.calculos) {
++    assert.ok(c.formula.length > 0);
++    assert.ok(c.no_cubre.length > 0);
++  }
++  assert.ok(d.limites.length > 0);
++});
++
++test('un recurso inexistente devuelve −32002 y la lista de los que sí existen', async () => {
++  // −32002 es el código que el protocolo reserva para «no encontrado»: un
++  // cliente lo distingue de un fallo del servidor y puede ofrecer la lista.
++  const r = await pedir('resources/read', { uri: 'plastilonas://inventado' });
++  assert.equal(r.error?.code, -32002);
++  assert.ok(((r.error?.data as { disponibles: string[] }).disponibles ?? []).length >= 6);
++  await assert.rejects(() => leerRecurso('plastilonas://inventado'), RecursoDesconocido);
++});
++
++test('las cuatro instrucciones se anuncian con sus argumentos', async () => {
++  const r = await pedir('prompts/list');
++  const prompts = r.result?.prompts as { name: string; title: string; description: string; arguments: unknown[] }[];
++  assert.ok(prompts.length >= 4);
++  assert.deepEqual(
++    prompts.map((p) => p.name).sort(),
++    INSTRUCCIONES.map((i) => i.name).sort(),
++  );
++  for (const p of prompts) {
++    assert.ok(p.title, `${p.name} sin título: en un cliente MCP el título es lo que ve la persona`);
++    assert.ok(p.description.length > 60, `${p.name}: descripción demasiado corta`);
++    assert.ok(Array.isArray(p.arguments));
++  }
++});
++
++test('TODA instrucción impone las reglas del proveedor antes que la tarea', () => {
++  /**
++   * Un proveedor que entrega el guion también entrega las restricciones. Si no,
++   * el guion se usa para vender de más: precios inventados, certificaciones
++   * atribuidas y un RFQ registrado sin que nadie lo pidiera.
++   */
++  for (const i of INSTRUCCIONES) {
++    const args = Object.fromEntries(i.arguments.map((a) => [a.name, 'prueba']));
++    const { texto } = construirInstruccion(i.name, args);
++    assert.match(texto, /NO des precios/, `${i.name} no prohíbe dar precios`);
++    assert.match(texto, /NO atribuyas certificaciones/, `${i.name} no prohíbe atribuir certificaciones`);
++    assert.match(texto, /PREDIMENSIONAMIENTO/, `${i.name} no recuerda el límite del cálculo`);
++    assert.match(texto, /NO registres una solicitud/, `${i.name} no exige consentimiento para el RFQ`);
++    assert.match(texto, /RUC 20523135385/, `${i.name} no identifica al proveedor`);
++  }
++});
++
++test('una instrucción sin sus argumentos obligatorios no se construye a medias', async () => {
++  const r = await pedir('prompts/get', { name: 'cuanto-material-necesito', arguments: {} });
++  assert.equal(r.error?.code, -32602);
++  assert.match(String(r.error?.message), /que_necesita/);
++});
++
++test('una instrucción inexistente devuelve la lista de las que hay', async () => {
++  const r = await pedir('prompts/get', { name: 'no-existe', arguments: {} });
++  assert.equal(r.error?.code, -32602);
++  assert.ok(((r.error?.data as { disponibles: string[] }).disponibles ?? []).length >= 4);
++  assert.throws(() => construirInstruccion('no-existe', {}), InstruccionDesconocida);
++});
++
++test('la instrucción de especificar enseña a leer la certeza antes de hablar', async () => {
++  // Es la diferencia entre un agente que lidera con la familia equivocada y uno
++  // que hace primero la pregunta que cierra la ambigüedad.
++  const r = await pedir('prompts/get', {
++    name: 'especificar-un-requerimiento',
++    arguments: { problema: 'poza de relaves', sector: 'Minería' },
++  });
++  const texto = ((r.result?.messages as { content: { text: string } }[])[0]!).content.text;
++  assert.match(texto, /certeza/);
++  assert.match(texto, /NO lideres con un producto/);
++  assert.match(texto, /lo_que_no_decidimos_por_usted/);
++});
++
++test('la instrucción de fabricar o importar obliga a decir cuándo gana importar', () => {
++  // El proveedor lo publica en su sitio; ocultarlo contradiría su propia página.
++  const { texto } = construirInstruccion('fabricar-en-peru-o-importar', { producto: 'big bags' });
++  assert.match(texto, /GANA IMPORTAR/);
++});
++
++test('el recurso de límites apunta a la superficie que el sitio ya publica', () => {
++  // Sin duplicar la lista: si el sitio añade un límite, aquí llega solo.
++  const limites = RECURSOS.find((r) => r.uri === 'plastilonas://limites');
++  assert.ok(limites);
++  assert.equal(limites!.mimeType, 'text/plain');
++});
+diff --git a/test/api-publica.test.ts b/test/api-publica.test.ts
+index 5eea6f3..f8314bf 100644
+--- a/test/api-publica.test.ts
++++ b/test/api-publica.test.ts
+@@ -1,7 +1,7 @@
+ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+ import { readFileSync, existsSync } from 'node:fs';
+ import { join } from 'node:path';
+-import { bloqueAiTxt, bloqueLlmsTxt, apiPublica, HERRAMIENTAS_MCP } from '@/lib/api-publica';
++import { bloqueAiTxt, bloqueLlmsTxt, apiPublica, HERRAMIENTAS_MCP, RECURSOS_MCP, INSTRUCCIONES_MCP } from '@/lib/api-publica';
+ 
+ /**
+  * LA API PÚBLICA Y EL SERVIDOR MCP.
+@@ -57,6 +57,15 @@ describe('no se anuncia una API que todavía no responde', () => {
+ describe('cuando sí responde, se anuncia con sus reglas', () => {
+   beforeEach(() => { process.env.NEXT_PUBLIC_API_URL = 'https://plastilonas-api.fly.dev'; });
+ 
++  it('anuncia las tres primitivas, no sólo las herramientas', () => {
++    const txt = bloqueAiTxt();
++    expect(txt).toMatch(/Herramientas \(las invoca el modelo\)/);
++    expect(txt).toMatch(/Recursos \(los lee el cliente/);
++    expect(txt).toMatch(/Instrucciones \(las elige la persona/);
++    expect(txt).toContain('plastilonas://limites');
++    expect(bloqueLlmsTxt()).toContain('instrucciones:');
++  });
++
+   it('publica el MCP, el contrato OpenAPI y la consola', () => {
+     const api = apiPublica();
+     expect(api?.mcp).toBe('https://plastilonas-api.fly.dev/mcp');
+@@ -89,6 +98,33 @@ describe('el anuncio y el servicio no se separan', () => {
+     expect(registradas.length, 'no se encontraron herramientas en servicio/src/mcp.ts').toBeGreaterThan(0);
+     expect(anunciadas).toEqual(registradas);
+   });
++
++  it('los recursos anunciados son exactamente los que el servicio sirve', () => {
++    /**
++     * Anunciar en /ai.txt un recurso que el servidor no tiene enseña a los
++     * agentes que esta empresa promete cosas que no cumple — que es el único
++     * activo que aquí no se puede reponer.
++     */
++    const fuente = leer('servicio/src/recursos.ts');
++    const fijos = [...fuente.matchAll(/^\s{4}uri: '(plastilonas:\/\/[^']+)',$/gm)].map((m) => m[1]!);
++    const plantillas = [...fuente.matchAll(/uriTemplate: '(plastilonas:\/\/[^']+)'/g)].map((m) => m[1]!);
++    expect(fijos.length, 'no se encontraron recursos en servicio/src/recursos.ts').toBeGreaterThan(0);
++    expect(RECURSOS_MCP.map((r) => r.nombre).sort()).toEqual([...fijos, ...plantillas].sort());
++  });
++
++  it('las instrucciones anunciadas son exactamente las que el servicio construye', () => {
++    const fuente = leer('servicio/src/instrucciones.ts');
++    const registradas = [...fuente.matchAll(/^\s{4}name: '([a-z-]+)',$/gm)].map((m) => m[1]!).sort();
++    expect(registradas.length, 'no se encontraron instrucciones').toBeGreaterThan(0);
++    expect(INSTRUCCIONES_MCP.map((i) => i.nombre).sort()).toEqual(registradas);
++  });
++
++  it('el recurso de límites se anuncia primero y con el motivo delante', () => {
++    // Un cliente que adjunta «el primero» tiene que adjuntar el que evita que
++    // el modelo invente una certificación.
++    expect(RECURSOS_MCP[0]!.nombre).toBe('plastilonas://limites');
++    expect(RECURSOS_MCP[0]!.paraQue).toMatch(/NO afirma/);
++  });
+ });
+ 
+ describe('el servicio respeta las mismas reglas que el sitio', () => {
+-- 
+2.43.0
+
