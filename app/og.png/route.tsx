@@ -56,6 +56,24 @@ export function GET(): Response {
       >
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 10, background: 'linear-gradient(90deg, #059669, #10B981)', display: 'flex' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          {/*
+            ESTE <img> NO LLEGA NUNCA A UN NAVEGADOR, Y POR ESO LA REGLA NO APLICA.
+
+            `@next/next/no-img-element` existe para proteger el LCP de una
+            página HTML: recomienda <Image> de next/image, que emite srcset,
+            lazy loading y un componente de cliente. Aquí no hay página: satori
+            —el motor de `ImageResponse`— interpreta un subconjunto de HTML y
+            CSS y devuelve un PNG. No ejecuta componentes de React del cliente
+            ni entiende srcset, así que <Image> no se puede usar y <img> con un
+            data URI es exactamente lo que corresponde.
+
+            El aviso apareció al convertir el archivo en manejador de ruta
+            (entrega 0012): el plugin de ESLint de Next exime a los archivos de
+            convención de metadatos —`opengraph-image.tsx` lo era— y a un
+            `route.tsx` no. Se silencia la línea, no el archivo ni la regla: si
+            mañana alguien añade una foto de verdad aquí, vuelve a avisar.
+          */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={LOGO_SRC} width={72} height={72} style={{ borderRadius: 18 }} alt="" />
           <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 22, letterSpacing: 4, fontWeight: 600 }}>
             PLASTILONAS PERUANAS SAC
