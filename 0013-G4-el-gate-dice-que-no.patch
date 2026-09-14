@@ -1,0 +1,239 @@
+From b9c77f486b6816522ee66805e0b48b902e25bef2 Mon Sep 17 00:00:00 2001
+From: Claude Opus 5 <noreply@anthropic.com>
+Date: Mon, 14 Sep 2026 07:19:23 +0000
+Subject: [PATCH] fix(gate): una advertencia de lint vuelve a detener la
+ entrega
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+El gate imprimió la advertencia que introdujo 0012 —@next/next/no-img-element
+en la tarjeta social— y empujó igual. Es la segunda vez en esta serie: 0009
+dejó una de react-hooks/exhaustive-deps y también se empujó. Un lint con «sólo
+una advertencia conocida» deja de ser una señal: a la segunda no se lee, y a la
+tercera no se distingue una nueva de la vieja.
+
+npm run lint pasa a correr con --max-warnings=0. Una advertencia detiene el
+gate antes del push y la arregla quien la introdujo, que es cuando cuesta
+barato.
+
+La advertencia concreta se silencia por línea, con el motivo al lado. La regla
+protege el LCP de una página HTML recomendando <Image> de next/image; este
+archivo no es una página: satori interpreta un subconjunto de HTML y CSS y
+devuelve un PNG, no ejecuta componentes de cliente ni entiende srcset, así que
+<Image> no se puede usar. Apareció al convertir el archivo en manejador de ruta
+en 0012, porque el plugin de ESLint exime a los archivos de convención de
+metadatos y a un route.tsx no.
+
+test/gate.test.ts vigila el único mecanismo que separa este repositorio de la
+rama que se despliega: que lint lleve --max-warnings=0, que el gate corra las
+cuatro comprobaciones y las cuatro antes del push, y que conserve
+set -euo pipefail. Verificadas las tres en sentido contrario.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UxmuN1emKoms4zAxwLB8RX
+---
+ app/og.png/route.tsx                          | 18 ++++
+ .../2026-09-14-el-gate-dice-que-no.md         | 89 +++++++++++++++++++
+ package.json                                  |  2 +-
+ test/gate.test.ts                             | 50 +++++++++++
+ 4 files changed, 158 insertions(+), 1 deletion(-)
+ create mode 100644 docs/entregas/2026-09-14-el-gate-dice-que-no.md
+ create mode 100644 test/gate.test.ts
+
+diff --git a/app/og.png/route.tsx b/app/og.png/route.tsx
+index eb21f36..2a74a2d 100644
+--- a/app/og.png/route.tsx
++++ b/app/og.png/route.tsx
+@@ -56,6 +56,24 @@ export function GET(): Response {
+       >
+         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 10, background: 'linear-gradient(90deg, #059669, #10B981)', display: 'flex' }} />
+         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
++          {/*
++            ESTE <img> NO LLEGA NUNCA A UN NAVEGADOR, Y POR ESO LA REGLA NO APLICA.
++
++            `@next/next/no-img-element` existe para proteger el LCP de una
++            página HTML: recomienda <Image> de next/image, que emite srcset,
++            lazy loading y un componente de cliente. Aquí no hay página: satori
++            —el motor de `ImageResponse`— interpreta un subconjunto de HTML y
++            CSS y devuelve un PNG. No ejecuta componentes de React del cliente
++            ni entiende srcset, así que <Image> no se puede usar y <img> con un
++            data URI es exactamente lo que corresponde.
++
++            El aviso apareció al convertir el archivo en manejador de ruta
++            (entrega 0012): el plugin de ESLint de Next exime a los archivos de
++            convención de metadatos —`opengraph-image.tsx` lo era— y a un
++            `route.tsx` no. Se silencia la línea, no el archivo ni la regla: si
++            mañana alguien añade una foto de verdad aquí, vuelve a avisar.
++          */}
++          {/* eslint-disable-next-line @next/next/no-img-element */}
+           <img src={LOGO_SRC} width={72} height={72} style={{ borderRadius: 18 }} alt="" />
+           <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 22, letterSpacing: 4, fontWeight: 600 }}>
+             PLASTILONAS PERUANAS SAC
+diff --git a/docs/entregas/2026-09-14-el-gate-dice-que-no.md b/docs/entregas/2026-09-14-el-gate-dice-que-no.md
+new file mode 100644
+index 0000000..8589571
+--- /dev/null
++++ b/docs/entregas/2026-09-14-el-gate-dice-que-no.md
+@@ -0,0 +1,89 @@
++# G4 — el gate imprimía la advertencia y empujaba igual
++
++**Fecha:** 2026-09-14 · **Base:** `main` con 0002 a 0012 aplicados ·
++**Archivos tocados:** 4 · **Advertencias de lint:** 1 → 0 · **Pruebas nuevas:** 3
++
++## 1. Lo que pasó dos veces
++
++```
++./app/og.png/route.tsx
++59:11  Warning: Using `<img>` could result in slower LCP …  @next/next/no-img-element
++```
++
++El gate lo imprimió, siguió, construyó y **empujó**. Es la segunda vez en esta
++serie:
++
++| Entrega | Advertencia introducida | Qué hizo el gate |
++|---|---|---|
++| 0009 | `react-hooks/exhaustive-deps` en `CotizacionForm` | imprimir y empujar |
++| 0012 | `@next/next/no-img-element` en la tarjeta social | imprimir y empujar |
++
++Las dos las arreglé en la entrega siguiente. El problema no son las dos
++advertencias: es que **un lint con «sólo una advertencia conocida» deja de ser
++una señal**. A la segunda ya no se lee, y a la tercera no se distingue una nueva
++de la vieja.
++
++## 2. Por qué apareció ésta, y por qué la regla no aplica aquí
++
++`@next/next/no-img-element` protege el LCP de una página HTML: recomienda
++`<Image>` de `next/image`, que emite `srcset`, carga diferida y un componente de
++cliente.
++
++`app/og.png/route.tsx` no es una página. Satori —el motor de `ImageResponse`—
++interpreta un subconjunto de HTML y CSS y devuelve un PNG: no ejecuta
++componentes de React del cliente ni entiende `srcset`. `<Image>` **no se puede
++usar**, y un `<img>` con un data URI es exactamente lo que corresponde.
++
++El aviso apareció al convertir el archivo en manejador de ruta (entrega 0012):
++el plugin de ESLint de Next exime a los archivos de convención de metadatos
++—`opengraph-image.tsx` lo era— y a un `route.tsx` no.
++
++Se silencia **la línea**, con el motivo escrito entero al lado. No el archivo y
++no la regla: si mañana alguien mete aquí una fotografía de verdad, vuelve a
++avisar.
++
++## 3. Lo que entra para que no haya una tercera vez
++
++`"lint": "next lint --max-warnings=0"`.
++
++Una advertencia pasa a ser un fallo: el gate **para antes del push** y quien la
++introdujo la arregla en el momento, que es cuando cuesta barato. La alternativa
++—arreglarla en la entrega siguiente— es la que llevamos dos veces.
++
++Se comprueba que hoy son cero: el último gate completo imprimió exactamente una
++advertencia, la de este parche.
++
++## 4. Lo que lo mantiene
++
++`test/gate.test.ts`, 3 pruebas sobre el único mecanismo que separa este
++repositorio de la rama que se despliega:
++
++- `npm run lint` lleva `--max-warnings=0`;
++- `scripts/aplicar-entrega.sh` corre las **cuatro** comprobaciones —typecheck,
++  pruebas, lint, build— y las cuatro **antes** del `git push`;
++- el script conserva `set -euo pipefail`, sin el cual un typecheck en rojo
++  imprime el error y el script sigue hasta el push como si nada.
++
++Verificadas en sentido contrario: quitando `--max-warnings=0`, quitando
++`npm run lint` del gate y cambiando `set -euo pipefail` por `set -u`, falla
++exactamente la que corresponde.
++
++## 5. Comprobación en producción de la entrega anterior
++
++Aprovechando el despliegue de 0012, medido sobre el sitio en vivo:
++
++| | |
++|---|---|
++| `/en/truck-tarpaulins-peru` → `og:image` | `https://…/og.png` ✅ |
++| `/en/truck-tarpaulins-peru` → `og:locale` | `en_US` ✅ |
++| `/og.png` | devuelve imagen ✅ |
++| `/opengraph-image` | redirige a la imagen ✅ |
++
++Las siete páginas que servían un 404 como tarjeta ya no lo hacen.
++
++## 6. Lo que sigue pendiente
++
++El gate sigue sin comprobar que las URLs que el HTML emite existan: 0011 pasó
++las cuatro etapas y salió con `og:image` apuntando a un 404. Eso necesita
++recorrer el sitio construido y pedir cada `og:image`, cada `canonical` y cada
++enlace interno. Es el siguiente parche.
+diff --git a/package.json b/package.json
+index 0ca1eee..e7f1c52 100644
+--- a/package.json
++++ b/package.json
+@@ -6,7 +6,7 @@
+     "dev": "next dev",
+     "build": "next build",
+     "start": "next start",
+-    "lint": "next lint",
++    "lint": "next lint --max-warnings=0",
+     "test": "vitest run",
+     "test:watch": "vitest",
+     "test:smoke": "bash scripts/smoke.sh",
+diff --git a/test/gate.test.ts b/test/gate.test.ts
+new file mode 100644
+index 0000000..0922725
+--- /dev/null
++++ b/test/gate.test.ts
+@@ -0,0 +1,50 @@
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++/**
++ * EL GATE TIENE QUE SER UNA SEÑAL BINARIA.
++ *
++ * `scripts/aplicar-entrega.sh` es lo único que separa este repositorio de la
++ * rama que se despliega: typecheck, pruebas, lint y build, y sólo después el
++ * push. Vale lo que valga su capacidad de decir NO.
++ *
++ * DOS VECES EN ESTA MISMA SERIE DE ENTREGAS el lint pasó de cero advertencias a
++ * una, y las dos veces el gate lo imprimió y empujó igual: la 0009, con una
++ * dependencia que faltaba en un efecto; y la 0012, al convertir la tarjeta
++ * social en manejador de ruta. Una advertencia conocida deja de leerse a la
++ * segunda, y a la tercera ya no se distingue de una nueva. `--max-warnings=0`
++ * convierte esa advertencia en un fallo: el gate para, y quien la introdujo la
++ * arregla antes de empujar, que es cuando cuesta barato.
++ */
++
++const raiz = process.cwd();
++const pkg = JSON.parse(readFileSync(join(raiz, 'package.json'), 'utf8'));
++const gate = readFileSync(join(raiz, 'scripts/aplicar-entrega.sh'), 'utf8');
++
++describe('el gate de entregas dice que no cuando toca', () => {
++  it('una advertencia de lint detiene la entrega', () => {
++    expect(
++      pkg.scripts.lint,
++      'sin --max-warnings=0 una advertencia se imprime y se empuja igual',
++    ).toContain('--max-warnings=0');
++  });
++
++  it('corre las cuatro comprobaciones, y las cuatro antes del push', () => {
++    // Quitar una de las cuatro es la forma barata de que un parche pase. Que
++    // cueste al menos borrar una línea que dice por qué está.
++    const pasos = ['npm run typecheck', 'npm test', 'npm run lint', 'npm run build'];
++    for (const paso of pasos) expect(gate, `el gate ya no corre «${paso}»`).toContain(paso);
++    const push = gate.indexOf('git push origin main');
++    expect(push, 'el gate debe empujar').toBeGreaterThan(-1);
++    for (const paso of pasos) {
++      expect(gate.indexOf(paso), `«${paso}» corre después del push`).toBeLessThan(push);
++    }
++  });
++
++  it('se detiene al primer fallo', () => {
++    // Sin `set -e`, un typecheck en rojo imprime el error y el script sigue
++    // hasta el push como si nada.
++    expect(gate).toMatch(/^set -euo pipefail$/m);
++  });
++});
+-- 
+2.43.0
+
