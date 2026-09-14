@@ -4,6 +4,7 @@ import { SITIO, ORIGEN_API, VERSION_API, LIMITE_COTIZACIONES } from './config';
 import { catalogo, entidad, glosario, mapaConsultas, buscar, estadoCache, SitioCaido } from './sitio';
 import { catalogoDeCalculos, ejecutar, CalculoInvalido, notaParaCotizacion, ADVERTENCIA_CALCULO } from './calculos';
 import { registrar, SolicitudInvalida, DATOS_QUE_EVITAN_REPREGUNTAR } from './cotizaciones';
+import { especificar, envoltorioDeEspecificacion, RequerimientoVacio, type Requerimiento } from './especificar';
 import { responderMcp } from './mcp';
 import { openapi } from './openapi';
 import { consola } from './consola';
@@ -112,6 +113,35 @@ enviar('/v1/calculos/:slug', ({ res, params, cuerpo }) => {
       // 422 y no 400: la petición está bien formada; lo que no cierra es la
       // geometría o el rango. Un agente puede corregir el valor y reintentar.
       fallo(res, e.codigo === 'calculo_desconocido' ? 404 : 422, e.codigo, e.message, e.detalle);
+      return;
+    }
+    throw e;
+  }
+});
+
+/* ── Especificación ──────────────────────────────────────────────────── */
+
+enviar('/v1/especificar', async ({ res, cuerpo }) => {
+  try {
+    const e = await especificar((cuerpo ?? {}) as Requerimiento);
+    const env = envoltorioDeEspecificacion(e);
+    json(res, 200, {
+      datos: e,
+      limites: env.limites,
+      fuente: `${SITIO}/productos`,
+      cita_sugerida: `Plastilonas Peruanas SAC (RUC 20523135385), ${SITIO}/productos`,
+      siguiente_paso: env.siguiente_paso,
+      generado: new Date().toISOString(),
+    }, { 'Cache-Control': 'no-store' });
+  } catch (e) {
+    if (e instanceof RequerimientoVacio) {
+      fallo(res, 422, 'requerimiento_vacio', e.message, {
+        ejemplo: {
+          descripcion: 'Poza de relaves a 4100 msnm, contacto con solucion acida, 8 anos de vida util',
+          sector: 'Mineria',
+          datos: { cantidad: '2400 m2' },
+        },
+      });
       return;
     }
     throw e;

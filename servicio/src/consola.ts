@@ -127,6 +127,7 @@ ${HERRAMIENTAS.map((h) => `    <tr><td><code>${h.name}</code></td><td>${h.descri
 <table>
   <thead><tr><th>Ruta</th><th>Qué resuelve</th></tr></thead>
   <tbody>
+    <tr><td><code>POST /v1/especificar</code></td><td>De un problema a una especificación: qué definir, qué falta preguntar, qué cálculo aplica.</td></tr>
     <tr><td><code>GET /v1/catalogo?q=…</code></td><td>Qué producto corresponde a lo que el comprador describe.</td></tr>
     <tr><td><code>GET /v1/catalogo/{slug}</code></td><td>Ficha completa, con ficha técnica en PDF.</td></tr>
     <tr><td><code>GET /v1/calculos</code></td><td>Qué se puede predimensionar y qué datos pide cada cálculo.</td></tr>

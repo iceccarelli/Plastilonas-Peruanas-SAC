@@ -125,6 +125,48 @@ export function openapi(): unknown {
           },
         },
       },
+      '/v1/especificar': {
+        post: {
+          tags: ['catalogo'],
+          summary: 'Traduce un problema a una especificación: qué definir y qué falta preguntar.',
+          description:
+            'Devuelve la familia que corresponde, las variables que gobiernan su especificación —con su unidad y por qué importan, tomadas ' +
+            'del glosario publicado—, las preguntas que siguen sin respuesta y el cálculo que aplica. Declara también lo que NO decide por ' +
+            'el comprador: compatibilidad química con un fluido concreto, vida útil bajo una exposición dada, diseño estructural y las ' +
+            'certificaciones que fija su pliego.',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['descripcion'],
+                  properties: {
+                    descripcion: { type: 'string' },
+                    sector: { type: 'string' },
+                    aplicacion: { type: 'string' },
+                    datos: { type: 'object' },
+                  },
+                },
+                examples: {
+                  poza: {
+                    summary: 'Poza de relaves en altura',
+                    value: {
+                      descripcion: 'Poza de relaves a 4100 msnm con contacto acido y 8 anos de vida util',
+                      sector: 'Mineria',
+                      datos: { cantidad: '2400 m2' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': { description: 'Especificación con sus preguntas pendientes.', content: { 'application/json': { schema: sobre('Especificación.') } } },
+            '422': { description: 'La descripción es demasiado corta para especificar nada.' },
+          },
+        },
+      },
       '/v1/glosario': { get: { tags: ['referencia'], summary: 'Términos del rubro con su definición canónica.', responses: { '200': { description: 'Glosario.' } } } },
       '/v1/respuestas': { get: { tags: ['referencia'], summary: 'Consultas comerciales y su página canónica.', responses: { '200': { description: 'Mapa de consultas.' } } } },
       '/v1/cotizaciones': {

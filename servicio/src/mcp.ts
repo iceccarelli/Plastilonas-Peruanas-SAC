@@ -2,6 +2,7 @@ import { ORIGEN_API, SITIO, VERSION_API } from './config';
 import { catalogoDeCalculos, ejecutar, CalculoInvalido, notaParaCotizacion } from './calculos';
 import { catalogo, buscar, type ProductoDelSitio } from './sitio';
 import { registrar, SolicitudInvalida, DATOS_QUE_EVITAN_REPREGUNTAR } from './cotizaciones';
+import { especificar, envoltorioDeEspecificacion, type Requerimiento } from './especificar';
 import { LIMITES_GLOBALES, enlaceCotizacion } from './contrato';
 
 /**
@@ -101,6 +102,41 @@ export const HERRAMIENTAS: Herramienta[] = [
           url: enlaceCotizacion({ nota: notaParaCotizacion(hecho), origen: 'mcp:calculo' }),
         },
       };
+    },
+  },
+  {
+    name: 'especificar_requerimiento',
+    title: 'Traducir un problema a una especificación',
+    description:
+      'Convierte la descripción de un problema —«poza de relaves a 4100 msnm con contacto ácido», «despachar concentrado a granel a Callao», ' +
+      '«cubrir 3 hectáreas de vivero»— en qué familia corresponde, QUÉ VARIABLES hay que definir (con su unidad y por qué importan), qué ' +
+      'preguntas siguen sin respuesta y qué cálculo aplica. Llámese ANTES de buscar_producto o de calcular cuando el usuario describe una ' +
+      'necesidad y todavía no sabe qué pedir: es el trabajo que hace un ingeniero de aplicaciones antes de que exista una cotización. ' +
+      'Declara explícitamente lo que NO decide por el comprador.',
+    inputSchema: objeto(
+      {
+        descripcion: cadena('El problema en palabras del comprador: qué se contiene, se cubre o se impermeabiliza, y en qué condiciones.'),
+        sector: cadena('Minería, agroexportación, transporte, construcción, saneamiento…'),
+        aplicacion: cadena('Uso concreto, si lo dijo.'),
+        datos: {
+          type: 'object',
+          description: 'Lo que ya se sabe. Lo que falte se devuelve como pregunta pendiente.',
+          properties: {
+            producto: cadena('Producto o familia, si ya está decidido.'),
+            medidas: cadena('Medidas o especificación.'),
+            cantidad: cadena('Cantidad y unidad.'),
+            ciudad_entrega: cadena('Ciudad o puerto.'),
+            pais_entrega: cadena('País, si sale del Perú.'),
+            fecha_necesaria: cadena('Fecha en destino.'),
+          },
+          additionalProperties: false,
+        },
+      },
+      ['descripcion'],
+    ),
+    ejecutar: async (args) => {
+      const e = await especificar(args as unknown as Requerimiento);
+      return { ...e, ...envoltorioDeEspecificacion(e) };
     },
   },
   {

@@ -35,10 +35,11 @@ export interface HerramientaPublicada {
   paraQue: string;
 }
 
-/** Las mismas cinco que registra servicio/src/mcp.ts. */
+/** Las mismas seis que registra servicio/src/mcp.ts. */
 export const HERRAMIENTAS_MCP: HerramientaPublicada[] = [
   { nombre: 'listar_calculos_disponibles', paraQue: 'saber qué se puede predimensionar y qué datos pide cada cálculo' },
   { nombre: 'calcular_predimensionamiento', paraQue: 'obtener el número con su desglose, su fórmula y sus límites' },
+  { nombre: 'especificar_requerimiento', paraQue: 'traducir un problema en qué familia corresponde, qué variables hay que definir y qué preguntas faltan' },
   { nombre: 'buscar_producto', paraQue: 'encontrar qué se fabrica para lo que el comprador describe' },
   { nombre: 'ficha_de_producto', paraQue: 'leer la especificación completa y la ficha técnica' },
   { nombre: 'crear_solicitud_de_cotizacion', paraQue: 'registrar un RFQ con el consentimiento del comprador' },

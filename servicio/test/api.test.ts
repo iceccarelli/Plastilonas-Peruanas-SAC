@@ -4,8 +4,9 @@ import { ejecutar, catalogoDeCalculos, CalculoInvalido, notaParaCotizacion } fro
 import { validar, SolicitudInvalida } from '../src/cotizaciones';
 import { responderMcp, HERRAMIENTAS } from '../src/mcp';
 import { openapi } from '../src/openapi';
-import { puntuar, type ProductoDelSitio } from '../src/sitio';
+import { puntuar, buscar, buscarConPuntaje, certezaDe, type ProductoDelSitio } from '../src/sitio';
 import { LIMITES_GLOBALES, enlaceCotizacion } from '../src/contrato';
+import { envoltorioDeEspecificacion, especificar, RequerimientoVacio, type Especificacion } from '../src/especificar';
 
 /**
  * Lo que estas pruebas protegen no es que el código corra: es que la API no
@@ -161,14 +162,109 @@ test('OpenAPI se genera con los slugs reales del motor', () => {
   assert.deepEqual([...enumerado].sort(), catalogoDeCalculos().map((c) => c.slug).sort());
 });
 
+const ficha = (extra: Partial<ProductoDelSitio> = {}): ProductoDelSitio => ({
+  slug: 'geomembrana-hdpe', name: 'Geomembrana HDPE', url: '', familia: 'Geosintéticos', familiaUrl: '',
+  descripcionCorta: 'Impermeabilización de pozas', descripcion: 'Revestimiento de pozas de relaves y canales.',
+  especificaciones: [], aplicaciones: ['pozas de relaves'], beneficios: [], sectores: ['minería'],
+  suministro: { origen: null, disponibilidad: '', plazoReferencial: null, documentacion: '' },
+  fichaTecnicaPdf: '', terminosClave: [], arquitecturas: [], ...ficha_extra(extra),
+});
+function ficha_extra(e: Partial<ProductoDelSitio>): Partial<ProductoDelSitio> { return e; }
+
 test('la búsqueda puntúa el nombre por encima del cuerpo y no inventa coincidencias', () => {
-  const p = (extra: Partial<ProductoDelSitio> = {}): ProductoDelSitio => ({
-    slug: 'geomembrana-hdpe', name: 'Geomembrana HDPE', url: '', familia: 'Geosintéticos', familiaUrl: '',
-    descripcionCorta: 'Impermeabilización de pozas', descripcion: '', especificaciones: [],
-    aplicaciones: ['pozas de relaves'], beneficios: [], sectores: ['minería'],
-    suministro: { origen: null, disponibilidad: '', plazoReferencial: null, documentacion: '' },
-    fichaTecnicaPdf: '', terminosClave: [], arquitecturas: [], ...extra,
-  });
-  assert.ok(puntuar(p(), 'geomembrana') > puntuar(p(), 'relaves'));
-  assert.equal(puntuar(p(), 'automóviles'), 0);
+  assert.ok(puntuar(ficha(), 'geomembrana') > puntuar(ficha(), 'relaves'));
+  assert.equal(puntuar(ficha(), 'automóviles'), 0);
+});
+
+test('se comparan palabras, no subcadenas: «sol» no encuentra «soldadura»', () => {
+  // Medido sobre el catálogo real: «cubrir hectáreas de vivero del sol»
+  // devolvía biombos para SOLdadura. Una palabra corta usada como subcadena es
+  // un comodín, y el resultado se presenta con la misma confianza que uno bueno.
+  const biombo = ficha({ slug: 'biombo', name: 'Biombo para soldadura', descripcion: 'Protección en trabajos de soldadura.' });
+  assert.equal(puntuar(biombo, 'sol'), 0);
+  // Y desde cinco letras sí se admite la variante morfológica.
+  const manga = ficha({ slug: 'mangas', name: 'Mangas de ventilación', descripcion: 'Ventilación de labores.' });
+  assert.ok(puntuar(manga, 'manga') > 0);
+});
+
+test('un producto que sólo coincide en vocabulario genérico no es candidato', () => {
+  /**
+   * «Años», «vida» y «útil» aparecen en media docena de fichas; sumadas
+   * bastaban para colar una malla antiáfidos en la consulta de una poza de
+   * relaves. Se exige al menos una coincidencia que DISTINGA.
+   */
+  const catalogo = [
+    ficha({ slug: 'geomembrana', name: 'Geomembrana HDPE', descripcion: 'Revestimiento de pozas de relaves. Larga vida útil.' }),
+    ficha({ slug: 'malla', name: 'Malla antiáfidos', familia: 'Mallas', descripcion: 'Protección de cultivos. Larga vida útil.', aplicaciones: ['invernadero'], sectores: ['agricultura'] }),
+    ficha({ slug: 'lona', name: 'Lona para camión', familia: 'Lonas', descripcion: 'Cobertura de carga. Larga vida útil.', aplicaciones: ['transporte'], sectores: ['transporte'] }),
+  ];
+  const encontrados = buscar(catalogo, 'poza de relaves con larga vida útil').map((p) => p.slug);
+  assert.deepEqual(encontrados, ['geomembrana']);
+});
+
+test('la certeza dice cuánto se puede fiar un agente de la lista', () => {
+  // Una lista insegura presentada como segura es cómo un comprador acaba con
+  // el producto equivocado.
+  const uno = [{ producto: ficha(), puntos: 9, ventaja: Infinity, en_nombre: true }];
+  assert.equal(certezaDe(uno), 'alta');
+  assert.equal(certezaDe([]), 'baja');
+  // Separarse del segundo no basta si ninguna palabra tocó un nombre.
+  assert.equal(certezaDe([{ producto: ficha(), puntos: 2.9, ventaja: 3, en_nombre: false }]), 'baja');
+  // Empate entre dos productos de LA MISMA familia: la familia es la respuesta,
+  // y lo abierto —qué polímero— ya es una de las preguntas pendientes.
+  const otra = ficha({ slug: 'malla', familia: 'Mallas' });
+  assert.equal(
+    certezaDe([{ producto: ficha(), puntos: 9, ventaja: 1.02, en_nombre: true }, { producto: ficha({ slug: 'pe' }), puntos: 8.8, ventaja: 1.02, en_nombre: true }]),
+    'alta',
+  );
+  // Entre familias distintas manda la separación.
+  assert.equal(certezaDe([{ producto: ficha(), puntos: 9, ventaja: 2, en_nombre: true }, { producto: otra, puntos: 4.5, ventaja: 2, en_nombre: true }]), 'alta');
+  assert.equal(certezaDe([{ producto: ficha(), puntos: 9, ventaja: 1.2, en_nombre: true }, { producto: otra, puntos: 7.5, ventaja: 1.2, en_nombre: true }]), 'media');
+  assert.equal(certezaDe([{ producto: ficha(), puntos: 9, ventaja: 1.05, en_nombre: true }, { producto: otra, puntos: 8.6, ventaja: 1.05, en_nombre: true }]), 'baja');
+});
+
+test('buscarConPuntaje descarta lo que queda muy por debajo del mejor', () => {
+  const catalogo = [
+    ficha({ slug: 'geomembrana', name: 'Geomembrana HDPE para pozas' }),
+    ficha({ slug: 'tuberia', name: 'Tubería HDPE', familia: 'Fluidos', descripcion: 'Conducción.', aplicaciones: ['conducción'], sectores: ['minería'] }),
+  ];
+  const r = buscarConPuntaje(catalogo, 'geomembrana para poza');
+  assert.equal(r[0]?.producto.slug, 'geomembrana');
+  assert.ok(r.every((c) => c.puntos >= (r[0]?.puntos ?? 0) * 0.55));
+});
+
+test('una descripción demasiado corta no se especifica, se devuelve la pregunta', async () => {
+  await assert.rejects(() => especificar({ descripcion: 'lona' }), RequerimientoVacio);
+});
+
+test('una especificación declara lo que NO se decide por el comprador', () => {
+  // Compatibilidad química, vida útil bajo exposición, diseño estructural y las
+  // certificaciones del pliego: cuatro decisiones que se firman, y aquí no se
+  // firma nada. Callarlas induce a usar el resto fuera de sus límites.
+  const e: Especificacion = {
+    entendido: { descripcion: 'x' },
+    certeza: 'alta',
+    candidatos: [],
+    variables_a_definir: [],
+    preguntas_pendientes: [],
+    calculo_sugerido: null,
+    lo_que_no_decidimos_por_usted: [],
+  };
+  const env = envoltorioDeEspecificacion(e);
+  assert.match(env.limites[0]!, /no una recomendación de ingeniería/);
+  assert.equal(env.siguiente_paso.accion, 'solicitar_cotizacion');
+  assert.match(env.siguiente_paso.url, /\/cotizacion\?/);
+});
+
+test('con preguntas pendientes, el siguiente paso es completarlas, no cotizar', () => {
+  const e: Especificacion = {
+    entendido: { descripcion: 'x' },
+    certeza: 'baja',
+    candidatos: [],
+    variables_a_definir: [],
+    preguntas_pendientes: ['¿qué cantidad?'],
+    calculo_sugerido: null,
+    lo_que_no_decidimos_por_usted: [],
+  };
+  assert.equal(envoltorioDeEspecificacion(e).siguiente_paso.accion, 'completar_datos');
 });
