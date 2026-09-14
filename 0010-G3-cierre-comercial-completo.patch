@@ -1,0 +1,394 @@
+From 74c34511bbbc954b23dc66f7dd66b9a7fce929e5 Mon Sep 17 00:00:00 2001
+From: Claude Opus 5 <noreply@anthropic.com>
+Date: Sun, 13 Sep 2026 23:55:33 +0000
+Subject: [PATCH] =?UTF-8?q?fix(cierre):=20migrar=20las=20dos=20p=C3=A1gina?=
+ =?UTF-8?q?s=20que=20exent=C3=A9=20sin=20comprobar,=20y=20cerrar=20la=20ad?=
+ =?UTF-8?q?vertencia=20de=20lint=20de=200009?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+La entrega 0007 dejó tres archivos fuera de CierreComercial declarando en
+PINTAN_TARJETA que los tres eran «componentes de cliente». Dos no lo son:
+CunaHubEn y FabricarOImportar son funciones async de servidor y ninguno
+declara 'use client'. El motivo lo escribí por analogía y no lo verifiqué.
+
+Una lista de excepciones vale lo que valga su motivo: una entrada falsa es un
+permiso permanente para divergir que nadie puede rebatir leyendo el código.
+Los dos quedan migrados y la lista baja a una —/marco/evaluacion, que sí corre
+en el navegador.
+
+Son además las dos superficies de mayor intención del sitio: la comparación
+fabricar-contra-importar en ambos idiomas y las cuñas en inglés. Cerraban con
+un bloque sin min-h-[44px] declarado y sin role="group".
+
+CierreComercial recibe whatsappMensaje? para que migrar no cueste precisión:
+estas páginas abren WhatsApp con un mensaje ya situado en su conversación, y
+sustituirlo por el genérico habría sido un retroceso comercial.
+
+Se corrige también la advertencia react-hooks/exhaustive-deps que introdujo
+0009 en CotizacionForm: origen entra en el arreglo de dependencias porque el
+evento rfq_start lo usa, y sin él un cambio de superficie dentro de la misma
+navegación reportaría el origen anterior — la atribución que 0009 vino a
+arreglar. El lint de este repositorio estaba en cero y vuelve a estarlo.
+
+La prueba de contexto acepta ahora también la forma de expresión
+—contexto={`...`}—, que es como lo declaran los bloques que sirven varias
+páginas con una plantilla; el regex anterior sólo veía literales. Verificado
+en sentido contrario: devolviendo la clase de la tarjeta a CunaHubEn, la
+prueba falla nombrando el archivo.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UxmuN1emKoms4zAxwLB8RX
+---
+ components/CierreComercial.tsx                | 10 +-
+ components/CotizacionForm.tsx                 | 10 +-
+ components/CunaHubEn.tsx                      | 46 ++++-----
+ components/FabricarOImportar.tsx              | 35 +++----
+ .../2026-09-13-la-excepcion-sin-comprobar.md  | 99 +++++++++++++++++++
+ test/acciones.test.ts                         | 22 +++--
+ 6 files changed, 162 insertions(+), 60 deletions(-)
+ create mode 100644 docs/entregas/2026-09-13-la-excepcion-sin-comprobar.md
+
+diff --git a/components/CierreComercial.tsx b/components/CierreComercial.tsx
+index ad2b286..6029436 100644
+--- a/components/CierreComercial.tsx
++++ b/components/CierreComercial.tsx
+@@ -43,6 +43,13 @@ interface Props {
+   secundaria?: AccionCierre;
+   /** Añade el botón de WhatsApp al grupo. Por defecto, sí en español. */
+   whatsapp?: boolean;
++  /**
++   * Mensaje con el que abre WhatsApp, cuando la página tiene uno mejor que el
++   * genérico: las cuñas comerciales llevan el suyo, con el producto y los
++   * datos que esa línea necesita. Sin esto, migrarlas al bloque común habría
++   * cambiado un mensaje específico por uno de plantilla, que es peor.
++   */
++  whatsappMensaje?: string;
+   /** Punto de salida para atribución: 'recursos', 'producto:big-bags', 'en-sourcing'. */
+   contexto: string;
+   idioma?: IdiomaAccion;
+@@ -62,6 +69,7 @@ export default function CierreComercial({
+   principal,
+   secundaria,
+   whatsapp = true,
++  whatsappMensaje,
+   contexto,
+   idioma = 'es',
+   nota,
+@@ -91,7 +99,7 @@ export default function CierreComercial({
+         {whatsapp ? (
+           <WhatsAppLink
+             context={contexto}
+-            message={mensajeWhatsApp(contexto, idioma)}
++            message={whatsappMensaje ?? mensajeWhatsApp(contexto, idioma)}
+             className={SECUNDARIO}
+           >
+             {WHATSAPP_LABEL[idioma]}
+diff --git a/components/CotizacionForm.tsx b/components/CotizacionForm.tsx
+index 58adf66..d21327a 100644
+--- a/components/CotizacionForm.tsx
++++ b/components/CotizacionForm.tsx
+@@ -270,9 +270,17 @@ export default function CotizacionForm({
+   React.useEffect(() => {
+     if (preselectedMessage) setValue('mensaje', preselectedMessage);
+   }, [preselectedMessage, setValue]);
++  /**
++   * `rfq_start` se dispara una vez por combinación de producto, slug y origen.
++   * `origen` entró en el arreglo de dependencias porque el evento lo usa: sin
++   * él, un cambio de superficie —del configurador al chat dentro de la misma
++   * navegación— seguiría reportando el origen anterior. Es además la
++   * advertencia de `react-hooks/exhaustive-deps` que introdujo la entrega
++   * 0009, y el lint de este repositorio estaba en cero.
++   */
+   React.useEffect(() => {
+     trackQuoteStarted(origen ?? 'pagina', preselectedProduct, slugOrigen);
+-  }, [preselectedProduct, slugOrigen]);
++  }, [origen, preselectedProduct, slugOrigen]);
+ 
+   // ── Adjuntos ─────────────────────────────────────────────────────────────
+   const onArchivos = (e: React.ChangeEvent<HTMLInputElement>) => {
+diff --git a/components/CunaHubEn.tsx b/components/CunaHubEn.tsx
+index aceda91..06e663f 100644
+--- a/components/CunaHubEn.tsx
++++ b/components/CunaHubEn.tsx
+@@ -14,6 +14,7 @@ import { ACTUALIZADO } from '@/lib/sitemaps';
+ import { RUTA_EN } from '@/lib/fabricar-o-importar';
+ import { ACCIONES_EN, WHATSAPP_LABEL } from '@/lib/acciones';
+ import { faqsDeRuta } from '@/lib/consultas-dinero';
++import CierreComercial from '@/components/CierreComercial';
+ 
+ /**
+  * PÁGINA DE CUÑA EN INGLÉS (ver lib/cunas-en.ts).
+@@ -342,33 +343,24 @@ export default async function CunaHubEn({ cuna }: { cuna: CunaEn }) {
+       </p>
+ 
+       {/* CTA final */}
+-      <div className="mt-14 rounded-3xl bg-[#0A2540] p-10 text-center text-white">
+-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">Send the four data points</h2>
+-        <p className="mx-auto mb-7 max-w-lg text-white/80">
+-          Product, dimensions or quantity, destination city or port, and the date you need it. We
+-          reply within business hours ({HORARIO.corto}, Lima time) with a datasheet, or with the
+-          questions still missing.
+-        </p>
+-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
+-          <Link
+-            href={rfq}
+-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
+-          >
+-            {ACCIONES_EN.rfq.label}
+-          </Link>
+-          <WhatsAppLink
+-            context={`cuna-en-final:${cuna.slug}`}
+-            message={cuna.whatsapp}
+-            className="inline-flex items-center justify-center rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
+-          >
+-            {WHATSAPP_LABEL.en}
+-          </WhatsAppLink>
+-        </div>
+-        <p className="mt-5 text-sm text-white/60">
+-          {SITE.email} · {TELEFONOS.central.display} · {SITE.legalName} · RUC {SITE.ruc} ·
+-          Chorrillos, Lima, Peru
+-        </p>
+-      </div>
++      <CierreComercial
++        contexto={`cuna-en-final:${cuna.slug}`}
++        idioma="en"
++        titulo="Send the four data points"
++        principal={{ href: rfq, label: ACCIONES_EN.rfq.label }}
++        whatsappMensaje={cuna.whatsapp}
++        className="mt-14"
++        nota={
++          <>
++            {SITE.email} · {TELEFONOS.central.display} · {SITE.legalName} · RUC {SITE.ruc} ·
++            Chorrillos, Lima, Peru
++          </>
++        }
++      >
++        Product, dimensions or quantity, destination city or port, and the date you need it. We
++        reply within business hours ({HORARIO.corto}, Lima time) with a datasheet, or with the
++        questions still missing.
++      </CierreComercial>
+     </div>
+   );
+ }
+diff --git a/components/FabricarOImportar.tsx b/components/FabricarOImportar.tsx
+index c01d395..dfac654 100644
+--- a/components/FabricarOImportar.tsx
++++ b/components/FabricarOImportar.tsx
+@@ -19,9 +19,9 @@ import { cunas } from '@/lib/cunas';
+ import { CUNAS_EN } from '@/lib/cunas-en';
+ import { JsonLd } from '@/components/JsonLd';
+ import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/schema';
+-import WhatsAppLink from '@/components/WhatsAppLink';
++import CierreComercial from '@/components/CierreComercial';
+ import CostoEnVivo from '@/components/CostoEnVivo';
+-import { ACCIONES, WHATSAPP_LABEL } from '@/lib/acciones';
++import { ACCIONES } from '@/lib/acciones';
+ import { faqsDeRuta } from '@/lib/consultas-dinero';
+ 
+ /**
+@@ -69,7 +69,6 @@ const T = {
+     ctaH: 'Haga la comparación con números suyos',
+     ctaP: `Envíe producto, medidas o cantidad, ciudad de entrega y fecha. Respondemos en horario comercial (${HORARIO.corto}) con ficha técnica, y si su caso es de los que gana la importación, se lo decimos.`,
+     ctaBoton: ACCIONES.cotizar.label,
+-    ctaWa: 'WhatsApp comercial',
+     waMsg:
+       'Hola, estoy comparando fabricar en Lima contra importar. Producto: ___. Cantidad y medidas: ___. Ciudad de entrega: ___.',
+     rfq: '/cotizacion',
+@@ -108,7 +107,6 @@ const T = {
+     ctaH: 'Run the comparison with your own numbers',
+     ctaP: `Send product, dimensions or quantity, delivery city or port, and the date you need it. We reply within business hours (${HORARIO.corto}, Lima time) with a datasheet — and if yours is one of the cases importing wins, we will say so.`,
+     ctaBoton: 'Request a quotation',
+-    ctaWa: WHATSAPP_LABEL.en,
+     waMsg:
+       'Hello, I am comparing manufacturing in Lima against importing. Product: ___. Quantity and dimensions: ___. Destination city or port: ___.',
+     rfq: '/en/rfq',
+@@ -309,25 +307,16 @@ export default async function FabricarOImportar({ idioma }: { idioma: 'es' | 'en
+ 
+       <p className="mt-12 text-sm text-gray-500">{t.revisada(FABRICAR_ACTUALIZADO)}</p>
+ 
+-      <div className="mt-14 rounded-3xl bg-[#0A2540] p-10 text-center text-white">
+-        <h2 className="mb-3 text-3xl font-semibold tracking-tight">{t.ctaH}</h2>
+-        <p className="mx-auto mb-7 max-w-xl text-white/80">{t.ctaP}</p>
+-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
+-          <Link
+-            href={t.rfq}
+-            className="inline-flex items-center justify-center rounded-2xl bg-white px-10 py-3.5 font-semibold text-[#0A2540] hover:bg-white/90"
+-          >
+-            {t.ctaBoton}
+-          </Link>
+-          <WhatsAppLink
+-            context={`fabricar-o-importar:${idioma}`}
+-            message={t.waMsg}
+-            className="inline-flex items-center justify-center rounded-2xl border border-white/30 px-8 py-3.5 font-medium hover:bg-white/10"
+-          >
+-            {t.ctaWa}
+-          </WhatsAppLink>
+-        </div>
+-      </div>
++      <CierreComercial
++        contexto={`fabricar-o-importar:${idioma}`}
++        idioma={en ? 'en' : 'es'}
++        titulo={t.ctaH}
++        principal={{ href: t.rfq, label: t.ctaBoton }}
++        whatsappMensaje={t.waMsg}
++        className="mt-14"
++      >
++        {t.ctaP}
++      </CierreComercial>
+     </div>
+   );
+ }
+diff --git a/docs/entregas/2026-09-13-la-excepcion-sin-comprobar.md b/docs/entregas/2026-09-13-la-excepcion-sin-comprobar.md
+new file mode 100644
+index 0000000..cad3614
+--- /dev/null
++++ b/docs/entregas/2026-09-13-la-excepcion-sin-comprobar.md
+@@ -0,0 +1,99 @@
++# G3 — la excepción sin comprobar, y la advertencia de lint que dejé abierta
++
++**Fecha:** 2026-09-13 · **Base:** `main` con 0002 a 0009 aplicados ·
++**Archivos tocados:** 5 · **Neto:** +3 líneas · **Excepciones:** 3 → 1
++
++Este parche corrige dos cosas que escribí yo. Ninguna de las dos es un
++hallazgo: son deuda propia, y se paga antes de seguir construyendo encima.
++
++## 1. La excepción que declaré sin comprobarla
++
++La entrega F3b (0007) movió la tarjeta azul de cierre a
++`components/CierreComercial.tsx` y dejó tres archivos fuera, declarados en
++`PINTAN_TARJETA` con este motivo:
++
++> Las tres son componentes de **cliente**: no pueden renderizar un componente
++> de servidor.
++
++De las tres, **dos no lo son**. Ni `components/CunaHubEn.tsx` ni
++`components/FabricarOImportar.tsx` declaran `'use client'`; ambos son
++`async function`, que es exactamente lo contrario. Escribí el motivo por
++analogía con la tercera y no lo verifiqué.
++
++Importa más de lo que parece. Una prueba con una lista de excepciones vale lo
++que valga la lista: cada entrada es un permiso permanente para volver a
++divergir, y una entrada cuyo motivo es falso es un permiso que nadie puede
++rebatir leyendo el código, porque el código dice otra cosa. La regla se afloja
++sola.
++
++Las dos quedan migradas. La lista baja a una, y esa sí lo es:
++`app/(es)/marco/evaluacion/page.tsx` declara `'use client'` porque la
++autoevaluación calcula y descarga el brief en el navegador, sin enviar nada al
++servidor.
++
++**Consecuencia comercial, no cosmética.** `FabricarOImportar` sirve
++`/fabricar-o-importar` y `/en/manufacture-in-peru-or-import` —la página donde un
++comprador decide si fabrica en Lima o importa un contenedor, la decisión
++anterior a cualquier cotización— y `CunaHubEn` sirve las cuñas en inglés. Eran
++las páginas de mayor intención del sitio cerrando con un bloque que nadie
++mantenía: sin `min-h-[44px]` declarado y sin `role="group"`. Ahora entran por
++el mismo sitio que las otras quince.
++
++### Lo que no se pierde al migrar
++
++El bloque común abría WhatsApp con el mensaje genérico de `mensajeWhatsApp()`.
++Estas dos páginas traen el suyo —«estoy comparando fabricar en Lima contra
++importar…», y el de cada cuña con su producto—, que es mejor que el de
++plantilla porque llega ya situado en la conversación. Por eso
++`CierreComercial` recibe `whatsappMensaje?`: la página conserva su mensaje, y
++el resto sigue tomando el común. Migrar no puede costar precisión.
++
++Único cambio visible: el párrafo de `FabricarOImportar` pasa de `max-w-xl` a
++`max-w-lg`, que es el ancho del bloque compartido y el de las otras quince
++páginas. Es la uniformidad que se pedía.
++
++## 2. La advertencia de lint que introdujo 0009
++
++`npm run lint` estaba en cero. La entrega 0009 añadió `origen` al efecto de
++`trackQuoteStarted` en `components/CotizacionForm.tsx` sin añadirlo al arreglo
++de dependencias, y `react-hooks/exhaustive-deps` lo avisó.
++
++No es sólo higiene. El efecto reporta de qué superficie salió el RFQ, y con
++`origen` fuera de las dependencias un cambio de origen dentro de la misma
++navegación seguiría reportando el anterior — que es justo la atribución que
++0009 existía para arreglar. Corregido, con el motivo escrito al lado.
++
++Un lint en cero es una señal binaria y útil; un lint con «sólo una
++advertencia conocida» deja de serlo a la segunda.
++
++## 3. Lo que lo mantiene
++
++`test/acciones.test.ts` (16 pruebas, sin cambios de alcance):
++
++- la comprobación de contexto acepta ahora tanto `contexto="recursos"` como
++  ``contexto={`cuna-en-final:${slug}`}`` — los bloques que sirven varias
++  páginas con la misma plantilla lo declaran como expresión, y la versión
++  anterior del regex sólo veía literales, con lo que los habría dado por
++  válidos sin mirarlos;
++- verificado en sentido contrario: devolviendo la clase de la tarjeta a
++  `CunaHubEn.tsx`, la prueba falla nombrando el archivo.
++
++## 4. Lo que NO entra
++
++- No se cambia ningún texto de contenido, ningún destino, ninguna afirmación
++  ni ningún dato.
++- No se toca `PINTAN_TARJETA` para ampliarlo: la única entrada que queda se
++  migrará el día que su bloque deje de depender de estado del navegador.
++- **Queda una divergencia de vocabulario, y se declara en vez de arreglarse
++  de contrabando.** El botón principal en inglés de `FabricarOImportar` dice
++  «Request a quotation»; el de `CunaHubEn` toma `ACCIONES_EN.rfq.label`, que
++  hoy es «RFQ form (in English)». Son dos nombres para el mismo botón — lo que
++  0007 vino a terminar. No se unifica aquí porque unificarlo obliga a decidir
++  cuál de los dos es el bueno, y «(in English)» es una aclaración pensada para
++  quien llega desde una página en español, no para un comprador que ya está
++  leyendo en inglés. Eso es una decisión de copia sobre las páginas en inglés
++  completas, no un renombrado al paso.
++- Sigue pendiente y sin diagnosticar el aviso de build `metadataBase property
++  in metadata export is not set`: los tres layouts de grupo sí lo declaran, y
++  hasta saber de dónde sale no se toca nada — un aviso mal apagado es peor que
++  un aviso.
+diff --git a/test/acciones.test.ts b/test/acciones.test.ts
+index 3de4c5c..e5b65cf 100644
+--- a/test/acciones.test.ts
++++ b/test/acciones.test.ts
+@@ -25,17 +25,20 @@ const raiz = process.cwd();
+ const TARJETA = 'rounded-3xl bg-[#0A2540] p-10 text-center text-white';
+ 
+ /**
+- * Quién puede seguir pintando la tarjeta a mano, y por qué. Las tres son
+- * componentes de CLIENTE: no pueden renderizar un componente de servidor, y
+- * convertir CierreComercial en cliente enviaría JavaScript a las quince
+- * páginas estáticas que hoy no lo necesitan. Se migran el día que su bloque
+- * deje de depender de estado del navegador.
++ * Quién puede seguir pintando la tarjeta a mano, y por qué.
++ *
++ * LA LISTA ERA MÁS LARGA Y EL MOTIVO ERA FALSO. La entrega 0007 declaró aquí
++ * CunaHubEn y FabricarOImportar como «componentes de cliente» que no podían
++ * renderizar uno de servidor. No lo son: ninguno declara 'use client'. La
++ * excepción se escribió sin comprobarla, y una excepción sin comprobar es una
++ * regla que se afloja sola. Los dos están migrados.
++ *
++ * Queda una, y ésta sí lo es: /marco/evaluacion corre en el navegador porque
++ * la autoevaluación calcula y descarga el brief sin enviar nada al servidor.
+  */
+ const PINTAN_TARJETA: Record<string, string> = {
+   'components/CierreComercial.tsx': 'es el componente',
+   'app/(es)/marco/evaluacion/page.tsx': "página de cliente ('use client'): la evaluación vive en el navegador",
+-  'components/CunaHubEn.tsx': 'componente de cliente',
+-  'components/FabricarOImportar.tsx': 'componente de cliente',
+ };
+ 
+ /** El título de /cotizacion no es un botón: es el nombre de la página. */
+@@ -152,7 +155,10 @@ describe('la tarjeta que cierra una página vive en un solo archivo', () => {
+     for (const f of archivos) {
+       const src = readFileSync(join(raiz, f), 'utf8');
+       for (const m of src.matchAll(/<CierreComercial\b([\s\S]*?)>/g)) {
+-        if (!/\bcontexto="/.test(m[1])) sinContexto.push(f);
++        // Vale el literal —contexto="recursos"— y vale la expresión
++        // —contexto={`cuna-en-final:${cuna.slug}`}—, que es como lo declaran
++        // los bloques que sirven varias páginas con la misma plantilla.
++        if (!/\bcontexto=("|\{)/.test(m[1])) sinContexto.push(f);
+       }
+     }
+     expect(sinContexto, 'sin contexto, el clic de WhatsApp no dice de qué página salió').toEqual([]);
+-- 
+2.43.0
+
