@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: URL_PAGINA,
-    locale: 'en',
+    locale: 'en_US',
     type: 'website',
   },
 };

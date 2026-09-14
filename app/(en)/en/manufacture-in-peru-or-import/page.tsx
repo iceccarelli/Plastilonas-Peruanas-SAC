@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: `${SITE.url}/en/manufacture-in-peru-or-import`,
-    locale: 'en',
+    locale: 'en_US',
     type: 'website',
   },
 };

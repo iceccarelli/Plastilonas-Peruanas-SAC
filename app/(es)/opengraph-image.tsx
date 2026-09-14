@@ -7,6 +7,17 @@ import { SITE, TELEFONOS } from '@/lib/site';
  * Runtime Node: la ruta se prerenderiza estática (elimina la advertencia
  * "edge runtime disables static generation"). El logo va incrustado como data
  * URI (96px, sin lectura de disco ni red) — fiable en cualquier bundling.
+ *
+ * POR QUÉ VIVE DENTRO DEL GRUPO (es) Y NO EN LA RAÍZ DE app/. La URL es la
+ * misma —los grupos de ruta no aparecen en la dirección: sigue sirviéndose en
+ * /opengraph-image—, pero el segmento en el que vive sí importa. Un archivo de
+ * metadatos en la raíz de app/ lo hereda TODA ruta del árbol, incluida la
+ * /_not-found que Next genera por su cuenta; y esa ruta, al no haber
+ * app/layout.tsx, corre bajo un layout por defecto que no declara
+ * metadataBase. Next entonces resolvía esta imagen contra http://localhost:3000
+ * y lo avisaba en cada build. Dentro de (es) la hereda un layout que sí declara
+ * metadataBase, y las páginas la piden explícitamente con OG_IMAGEN
+ * (lib/meta.ts), que es lo que de verdad les pone la tarjeta.
  */
 
 export const runtime = 'nodejs';

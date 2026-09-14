@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/en/rfq' },
   openGraph: {
-    images: OG_IMAGEN, title: TITLE, description: DESCRIPTION, url: URL_PAGINA, locale: 'en', type: 'website' },
+    images: OG_IMAGEN, title: TITLE, description: DESCRIPTION, url: URL_PAGINA, locale: 'en_US', type: 'website' },
 };
 
 export default async function RfqEnPage({

@@ -7,6 +7,7 @@ import Analytics from '@/components/Analytics';
 import ConsentBanner from '@/components/ConsentBanner';
 import AuthProvider from '@/components/AuthProvider';
 import { SITE } from '@/lib/site';
+import { OG_IMAGEN } from '@/lib/meta';
 
 /**
  * Layout raíz del grupo (en) — existe para UNA cosa: que /en sirva
@@ -30,6 +31,19 @@ export const metadata: Metadata = {
     template: '%s | Plastilonas',
   },
   metadataBase: new URL(SITE.url),
+  // La tarjeta que se ve al compartir el enlace. Sin este bloque, /en y /pt
+  // eran las dos únicas páginas del sitio que salían SIN og:image propio: lo
+  // tomaban de la imagen de fichero que vivía en la raíz de app/ y se heredaba
+  // por todo el árbol. Esa herencia se retiró —alcanzaba también a la ruta
+  // /_not-found, que no tiene metadataBase y resolvía contra localhost—, así
+  // que aquí la imagen se pide explícitamente, como en (es).
+  // Sin `title` ni `description`: Next los rellena con los de la página, que
+  // son los suyos y no los de la portada.
+  openGraph: {
+    images: OG_IMAGEN,
+    locale: 'en_US',
+    type: 'website',
+  },
 };
 
 export default function EnglishLayout({ children }: { children: React.ReactNode }) {

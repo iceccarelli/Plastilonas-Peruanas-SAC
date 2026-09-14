@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     title: cuna.titulo,
     description: cuna.descripcion,
     url: `${SITE.url}/en/mine-ventilation-ducting-peru`,
-    locale: 'en',
+    locale: 'en_US',
     type: 'website',
   },
 };

@@ -81,11 +81,16 @@ export const metadata: Metadata = {
     // Declarada explícitamente: cuando una página define su propio objeto
     // `openGraph`, reemplaza al del padre —imágenes incluidas—, así que la
     // imagen de fichero por sí sola no llegaba a ninguna página en español.
+    // La genera app/(es)/opengraph-image.tsx y se pide por URL desde OG_IMAGEN.
     images: OG_IMAGEN,
-    title: 'Plastilonas Peruanas SAC | Soluciones Textiles Industriales — Fabricación e Importación Directa',
-    description: 'Portafolio integral de soluciones textiles industriales en el Perú: big bags, geosintéticos, estructuras y arquitectura textil, mallas, ventilación y lonas a medida. Fabricación propia, instalación e importación directa.',
-    // og:image lo genera app/opengraph-image.tsx (antes apuntaba a un archivo
-    // inexistente /images/og-image.jpg y las vistas previas salían en blanco).
+    // SIN `title` NI `description` A PROPÓSITO. Estaban fijados al texto de la
+    // portada, y toda página en español que no declara su propio `openGraph`
+    // —/aplicaciones, /biblioteca, /exportacion, /confianza, las fichas de
+    // aplicación…— los heredaba tal cual: compartir cualquiera de ellas por
+    // WhatsApp mostraba el título de la portada. Al no declararlos aquí, Next
+    // rellena og:title y og:description con el título y la descripción YA
+    // resueltos de cada página, que es lo que el que recibe el enlace necesita
+    // leer para decidir si lo abre.
     locale: 'es_PE',
     type: 'website',
   },

@@ -145,7 +145,7 @@ export const descripcionCabe = (d: string): boolean => d.trim().length <= MAX_DE
 /**
  * IMAGEN DE VISTA PREVIA — una, compartida, y declarada explícitamente.
  *
- * EL DEFECTO QUE CIERRA. `app/opengraph-image.tsx` genera la tarjeta de 1200×630
+ * EL DEFECTO QUE CIERRA. `app/(es)/opengraph-image.tsx` genera la tarjeta de 1200×630
  * con el logo real, y un comentario en el layout daba por hecho que con eso
  * bastaba. No bastaba: en Next, cuando una página declara su propio objeto
  * `openGraph`, ese objeto REEMPLAZA al del padre —imágenes incluidas—, y las
@@ -163,6 +163,12 @@ export const descripcionCabe = (d: string): boolean => d.trim().length <= MAX_DE
  * La ruta se declara relativa a propósito: `metadataBase` (los tres layouts
  * raíz) la resuelve al host canónico del momento, así que el día del corte a
  * www.plastilonas.com no hay que tocar 43 archivos.
+ *
+ * Y por eso la imagen vive DENTRO de un grupo de idioma y no en la raíz de
+ * app/: allí la heredaba también la /_not-found que Next genera sola, que corre
+ * bajo un layout por defecto sin `metadataBase` y la resolvía contra
+ * http://localhost:3000. La URL pública no cambia —los grupos de ruta no
+ * aparecen en la dirección—, y test/tarjeta-social.test.ts lo sostiene.
  */
 export const OG_IMAGEN = [
   {
