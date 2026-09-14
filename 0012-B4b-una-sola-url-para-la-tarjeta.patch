@@ -1,0 +1,449 @@
+From 87d13bb7320008138208ad0210db8bfa4c71a7f5 Mon Sep 17 00:00:00 2001
+From: Claude Opus 5 <noreply@anthropic.com>
+Date: Mon, 14 Sep 2026 00:39:28 +0000
+Subject: [PATCH] =?UTF-8?q?fix(og):=20una=20sola=20URL=20para=20la=20tarje?=
+ =?UTF-8?q?ta=20social=20=E2=80=94=20reparar=20el=20404=20que=20introdujo?=
+ =?UTF-8?q?=200011?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+0011 mudó app/opengraph-image.tsx al grupo (es) para apagar el aviso de
+metadataBase. Lo apagó, y rompió la imagen: Next añade un sufijo de hash a la
+ruta de un archivo de metadatos cuando algún segmento padre es un grupo
+(getMetadataRouteSuffix), así que /opengraph-image pasó a ser
+/opengraph-image-35z9gd y el literal de lib/meta.ts quedó apuntando a un 404.
+
+Medido sobre el sitio desplegado, no deducido: /en/fibc-big-bags-peru y /pt
+sirven og:image = https://…/opengraph-image, y esa URL devuelve 404. Son las
+siete páginas del comprador extranjero —las seis en inglés y /pt—, justo las
+que 0011 acababa de arreglar. Las páginas en español se salvaron por accidente:
+el archivo de convención de (es) pisaba el images: OG_IMAGEN de su propio
+layout, de modo que el sitio venía sirviendo dos URLs distintas para la misma
+imagen sin que nadie lo notara.
+
+La imagen deja de ser un archivo de convención y pasa a ser un manejador de
+ruta en app/og.png/route.tsx — el mismo patrón que /ai.txt, /entidad.json y
+/version.json. No se hereda por el árbol, así que la /_not-found sin
+metadataBase no la ve y el aviso no vuelve; y su URL es su carpeta, así que
+OG_IMAGEN puede apuntarla con un literal. Una sola URL para los tres idiomas,
+la misma en el HTML y en el JSON-LD.
+
+next.config.ts redirige /opengraph-image a /og.png con un 301: las tarjetas ya
+cacheadas por WhatsApp y LinkedIn no tienen por qué perderse.
+
+La regla que escribí en 0011 —«ningún archivo social en la raíz de app/»— era
+la equivocada: prohibía una ubicación cuando el problema era la convención. Se
+reemplaza por cuatro que sí cierran el caso, entre ellas la que habría atrapado
+esto: la URL que declara OG_IMAGEN tiene que existir como ruta servible.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UxmuN1emKoms4zAxwLB8RX
+---
+ app/(es)/layout.tsx                           |  2 +-
+ .../opengraph-image.tsx => og.png/route.tsx}  | 49 ++++++----
+ components/StructuredData.tsx                 |  2 +-
+ ...2026-09-14-una-sola-url-para-la-tarjeta.md | 98 +++++++++++++++++++
+ lib/meta.ts                                   | 19 ++--
+ next.config.ts                                | 11 +++
+ test/regresiones-ui.test.ts                   |  6 +-
+ test/tarjeta-social.test.ts                   | 81 +++++++++------
+ 8 files changed, 208 insertions(+), 60 deletions(-)
+ rename app/{(es)/opengraph-image.tsx => og.png/route.tsx} (90%)
+ create mode 100644 docs/entregas/2026-09-14-una-sola-url-para-la-tarjeta.md
+
+diff --git a/app/(es)/layout.tsx b/app/(es)/layout.tsx
+index d9378f8..d73ee92 100644
+--- a/app/(es)/layout.tsx
++++ b/app/(es)/layout.tsx
+@@ -81,7 +81,7 @@ export const metadata: Metadata = {
+     // Declarada explícitamente: cuando una página define su propio objeto
+     // `openGraph`, reemplaza al del padre —imágenes incluidas—, así que la
+     // imagen de fichero por sí sola no llegaba a ninguna página en español.
+-    // La genera app/(es)/opengraph-image.tsx y se pide por URL desde OG_IMAGEN.
++    // La genera app/og.png/route.tsx y se pide por URL desde OG_IMAGEN.
+     images: OG_IMAGEN,
+     // SIN `title` NI `description` A PROPÓSITO. Estaban fijados al texto de la
+     // portada, y toda página en español que no declara su propio `openGraph`
+diff --git a/app/(es)/opengraph-image.tsx b/app/og.png/route.tsx
+similarity index 90%
+rename from app/(es)/opengraph-image.tsx
+rename to app/og.png/route.tsx
+index c745c4b..eb21f36 100644
+--- a/app/(es)/opengraph-image.tsx
++++ b/app/og.png/route.tsx
+@@ -2,32 +2,43 @@ import { ImageResponse } from 'next/og';
+ import { SITE, TELEFONOS } from '@/lib/site';
+ 
+ /**
+- * Imagen Open Graph (1200x630) con el logo REAL de la marca.
++ * LA TARJETA SOCIAL, 1200×630, CON EL LOGO REAL — servida en /og.png.
+  *
+- * Runtime Node: la ruta se prerenderiza estática (elimina la advertencia
+- * "edge runtime disables static generation"). El logo va incrustado como data
+- * URI (96px, sin lectura de disco ni red) — fiable en cualquier bundling.
++ * Runtime Node y `force-static`: se prerenderiza una vez en el build. El logo
++ * va incrustado como data URI (96 px, sin lectura de disco ni red), fiable en
++ * cualquier bundling.
+  *
+- * POR QUÉ VIVE DENTRO DEL GRUPO (es) Y NO EN LA RAÍZ DE app/. La URL es la
+- * misma —los grupos de ruta no aparecen en la dirección: sigue sirviéndose en
+- * /opengraph-image—, pero el segmento en el que vive sí importa. Un archivo de
+- * metadatos en la raíz de app/ lo hereda TODA ruta del árbol, incluida la
+- * /_not-found que Next genera por su cuenta; y esa ruta, al no haber
+- * app/layout.tsx, corre bajo un layout por defecto que no declara
+- * metadataBase. Next entonces resolvía esta imagen contra http://localhost:3000
+- * y lo avisaba en cada build. Dentro de (es) la hereda un layout que sí declara
+- * metadataBase, y las páginas la piden explícitamente con OG_IMAGEN
+- * (lib/meta.ts), que es lo que de verdad les pone la tarjeta.
++ * POR QUÉ ES UN MANEJADOR DE RUTA Y NO `opengraph-image.tsx`, QUE ERA LO
++ * IDIOMÁTICO. Porque la URL de un archivo de metadatos NO la decide uno:
++ *
++ *   - en la raíz de app/ se sirve en /opengraph-image, pero la hereda TODA
++ *     ruta del árbol, incluida la /_not-found que Next genera por su cuenta;
++ *     y ésa, al no haber app/layout.tsx, corre bajo un layout por defecto sin
++ *     `metadataBase`, así que Next resolvía la imagen contra localhost y lo
++ *     avisaba en cada build;
++ *   - dentro de un grupo de idioma no la hereda /_not-found —el aviso se
++ *     apagó—, pero Next le añade un sufijo de hash cuando algún segmento padre
++ *     es un grupo (`getMetadataRouteSuffix`): la ruta pasó a ser
++ *     /opengraph-image-35z9gd y `OG_IMAGEN`, que apunta por URL, quedó
++ *     apuntando a un 404. Lo pagó la entrega 0011 y lo delató su propio build.
++ *
++ * Un manejador de ruta no participa de ninguna de las dos cosas: no se hereda
++ * por el árbol y su URL es literalmente su carpeta. El mismo patrón que
++ * /ai.txt, /entidad.json y /version.json en este repositorio.
++ *
++ * El nombre viejo sigue vivo: next.config.ts redirige /opengraph-image aquí,
++ * de forma permanente, para las tarjetas ya cacheadas por WhatsApp y LinkedIn.
+  */
+ 
+ export const runtime = 'nodejs';
+-export const alt = 'Plastilonas Peruanas SAC — Soluciones textiles industriales a medida';
+-export const size = { width: 1200, height: 630 };
+-export const contentType = 'image/png';
++export const dynamic = 'force-static';
++
++/** Las mismas medidas que declara OG_IMAGEN en lib/meta.ts. */
++const SIZE = { width: 1200, height: 630 };
+ 
+ const LOGO_SRC = 'data:image/png;base64,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';
+ 
+-export default function OpengraphImage() {
++export function GET(): Response {
+   return new ImageResponse(
+     (
+       <div
+@@ -69,6 +80,6 @@ export default function OpengraphImage() {
+         </div>
+       </div>
+     ),
+-    { ...size }
++    { ...SIZE }
+   );
+ }
+diff --git a/components/StructuredData.tsx b/components/StructuredData.tsx
+index b133173..205b469 100644
+--- a/components/StructuredData.tsx
++++ b/components/StructuredData.tsx
+@@ -65,7 +65,7 @@ export default function StructuredData() {
+     legalName: SITE.legalName,
+     description: SITE.description,
+     url: base,
+-    image: `${base}/opengraph-image`,
++    image: `${base}/og.png`,
+     logo: `${base}/logo.png`,
+     telephone: SITE.phoneWhatsApp,
+     email: SITE.email,
+diff --git a/docs/entregas/2026-09-14-una-sola-url-para-la-tarjeta.md b/docs/entregas/2026-09-14-una-sola-url-para-la-tarjeta.md
+new file mode 100644
+index 0000000..a69a91b
+--- /dev/null
++++ b/docs/entregas/2026-09-14-una-sola-url-para-la-tarjeta.md
+@@ -0,0 +1,98 @@
++# B4b — la entrega 0011 dejó siete páginas con la tarjeta rota, y lo dijo su propio build
++
++**Fecha:** 2026-09-14 · **Base:** `main` con 0002 a 0011 aplicados ·
++**Archivos tocados:** 8 · **Páginas con `og:image` roto:** 7 → 0
++
++## 1. Lo que rompí
++
++La entrega 0011 apagó el aviso de `metadataBase` mudando
++`app/opengraph-image.tsx` de la raíz de `app/` al grupo `(es)`. El aviso
++desapareció —el diagnóstico era correcto— pero el build siguiente mostró esto:
++
++```
++├ ○ /opengraph-image-35z9gd      ← antes:  ○ /opengraph-image
++```
++
++La causa, en la fuente de Next 15.5 (`lib/metadata/get-metadata-route.ts`):
++
++```ts
++const segments = parentPathname.split('/')
++if (segments.some((seg) => isGroupSegment(seg) || isParallelRouteSegment(seg))) {
++  suffix = djb2Hash(parentPathname).toString(36).slice(0, 6)   // '35z9gd'
++}
++```
++
++**La URL de un archivo de metadatos no la decide este repositorio.** En la raíz
++se llama `/opengraph-image`; bajo un grupo de ruta, Next le cuelga un hash. Y
++`lib/meta.ts` apuntaba a la URL con un literal.
++
++### Medido sobre el sitio desplegado, no deducido
++
++| Página | `og:image` servido | |
++|---|---|---|
++| `/aplicaciones/toldos-camion` | `/opengraph-image-35z9gd?ddd8a8d3` | 200 |
++| `/productos/big-bags-…` | su propia foto de producto | 200 |
++| `/en/fibc-big-bags-peru` | `/opengraph-image` | **404** |
++| `/pt` | `/opengraph-image` | **404** |
++
++`https://…/opengraph-image` devuelve hoy **404**, comprobado directamente.
++
++Rotas: las **seis páginas en inglés y `/pt`** — las siete que existen para el
++comprador extranjero, las que 0011 acababa de arreglar. Las páginas en español
++se salvaron por accidente, y ese accidente es el segundo hallazgo.
++
++## 2. El accidente que enseña dónde estaba el error de diseño
++
++`/aplicaciones/toldos-camion` no sirve `/opengraph-image`: sirve la ruta con
++hash. Es decir, **el archivo de convención de `(es)` pisa el `images: OG_IMAGEN`
++del layout de su propio grupo**. En español, `OG_IMAGEN` llevaba etapas siendo
++decorativo: lo que salía al HTML era la URL generada por Next.
++
++De ahí que el sitio tuviera dos URLs para la misma imagen —una en español, otra
++declarada en `lib/meta.ts`— y que sólo se notara cuando una de las dos se cayó.
++
++## 3. Lo que entra
++
++La imagen deja de ser un archivo de convención de Next y pasa a ser un
++**manejador de ruta**: `app/og.png/route.tsx`, servido en `/og.png`. Mismo
++patrón que `/ai.txt`, `/entidad.json` y `/version.json`, que ya viven así en
++este repositorio.
++
++Un manejador de ruta no participa de las dos cosas que rompieron:
++
++- **no se hereda por el árbol**, así que la `/_not-found` que Next genera sola
++  —la que corre sin `metadataBase`— no la ve, y el aviso del build no vuelve;
++- **su URL es literalmente su carpeta**, así que `OG_IMAGEN` puede apuntarla con
++  un literal sin que Next se la cambie por debajo.
++
++Resultado: **una sola URL para la tarjeta, en los tres idiomas**, la misma que
++declara `lib/meta.ts` y la misma que emite el JSON-LD de `StructuredData`.
++
++`next.config.ts` redirige `/opengraph-image` → `/og.png` con un 301 permanente:
++WhatsApp, LinkedIn y Slack guardan la imagen por URL, y los enlaces compartidos
++antes de hoy no tienen por qué perder su tarjeta.
++
++## 4. Lo que lo mantiene
++
++La regla que escribí en 0011 —«ningún archivo social en la raíz de `app/`»— era
++la equivocada: prohibía una ubicación cuando el problema era la convención
++entera. Se reemplaza, en `test/tarjeta-social.test.ts`:
++
++- ningún `opengraph-image.*` ni `twitter-image.*` en **ninguna parte** de `app/`;
++- la URL que declara `OG_IMAGEN` **existe** como manejador de ruta —esto es lo
++  que habría atrapado 0011 antes de salir—;
++- el 301 del nombre viejo sigue declarado;
++- la tarjeta se prerenderiza (`force-static`) y no se calcula en cada visita de
++  rastreador.
++
++Las cuatro, verificadas en sentido contrario: creando un `opengraph-image.tsx`,
++apuntando `OG_IMAGEN` a una carpeta inexistente, quitando el redirect y
++quitando `force-static`, falla exactamente la que corresponde.
++
++## 5. Lo que esto me deja dicho
++
++0011 pasó el gate entero —typecheck, 844 pruebas, lint, build— y aun así salió
++rota. El gate no comprueba que las URLs que el HTML emite existan. Las pruebas
++nuevas cierran este caso concreto; la comprobación general —recorrer el sitio
++construido y pedir cada `og:image`, cada `canonical` y cada enlace— no existe
++todavía y es lo que debería existir. Va anotado para su propio parche.
+diff --git a/lib/meta.ts b/lib/meta.ts
+index 7f974a8..8069f42 100644
+--- a/lib/meta.ts
++++ b/lib/meta.ts
+@@ -145,7 +145,7 @@ export const descripcionCabe = (d: string): boolean => d.trim().length <= MAX_DE
+ /**
+  * IMAGEN DE VISTA PREVIA — una, compartida, y declarada explícitamente.
+  *
+- * EL DEFECTO QUE CIERRA. `app/(es)/opengraph-image.tsx` genera la tarjeta de 1200×630
++ * EL DEFECTO QUE CIERRA. `app/og.png/route.tsx` genera la tarjeta de 1200×630
+  * con el logo real, y un comentario en el layout daba por hecho que con eso
+  * bastaba. No bastaba: en Next, cuando una página declara su propio objeto
+  * `openGraph`, ese objeto REEMPLAZA al del padre —imágenes incluidas—, y las
+@@ -164,15 +164,20 @@ export const descripcionCabe = (d: string): boolean => d.trim().length <= MAX_DE
+  * raíz) la resuelve al host canónico del momento, así que el día del corte a
+  * www.plastilonas.com no hay que tocar 43 archivos.
+  *
+- * Y por eso la imagen vive DENTRO de un grupo de idioma y no en la raíz de
+- * app/: allí la heredaba también la /_not-found que Next genera sola, que corre
+- * bajo un layout por defecto sin `metadataBase` y la resolvía contra
+- * http://localhost:3000. La URL pública no cambia —los grupos de ruta no
+- * aparecen en la dirección—, y test/tarjeta-social.test.ts lo sostiene.
++ * Y POR ESO LA IMAGEN YA NO ES UN ARCHIVO DE METADATOS DE NEXT, sino un
++ * manejador de ruta en `/og.png`. Con la convención `opengraph-image.tsx`, la
++ * URL no la decide uno: en la raíz de app/ la hereda la /_not-found —que corre
++ * sin `metadataBase` y la resolvía contra localhost—, y dentro de un grupo de
++ * idioma Next le añade un sufijo de hash y la ruta pasa a llamarse
++ * /opengraph-image-35z9gd. Esto último se pagó en la entrega 0011: esta URL
++ * quedó apuntando a un 404 en las 43 páginas que la piden. Un manejador de
++ * ruta no se hereda por el árbol y su URL es su carpeta.
++ * test/tarjeta-social.test.ts lo sostiene, y next.config.ts redirige el nombre
++ * viejo para las tarjetas ya cacheadas.
+  */
+ export const OG_IMAGEN = [
+   {
+-    url: '/opengraph-image',
++    url: '/og.png',
+     width: 1200,
+     height: 630,
+     // El alt viaja con la imagen: es lo que lee quien recibe la tarjeta con un
+diff --git a/next.config.ts b/next.config.ts
+index 2a2ee4d..1f52034 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -94,6 +94,17 @@ const nextConfig: NextConfig = {
+   // tira.
+   async redirects() {
+     return [
++      /**
++       * LA TARJETA SOCIAL CAMBIÓ DE URL, Y LAS YA COMPARTIDAS NO.
++       *
++       * La imagen se servía en /opengraph-image por la convención de archivos
++       * de Next. Dejó de ser un archivo de convención —su URL no la decidía
++       * este repositorio, y la entrega 0011 la rompió al mudarla— y ahora es un
++       * manejador de ruta en /og.png. WhatsApp, LinkedIn y Slack guardan la
++       * imagen por URL: sin esto, cada enlace ya compartido pierde su tarjeta.
++       */
++      { source: '/opengraph-image', destination: '/og.png', permanent: true },
++
+       { source: '/industrias', destination: '/industria', permanent: true },
+       { source: '/industrias/mineria', destination: '/industria/mineria', permanent: true },
+       { source: '/industrias/agricultura', destination: '/industria/agroexportacion', permanent: true },
+diff --git a/test/regresiones-ui.test.ts b/test/regresiones-ui.test.ts
+index 20706bf..fc4277b 100644
+--- a/test/regresiones-ui.test.ts
++++ b/test/regresiones-ui.test.ts
+@@ -247,14 +247,14 @@ describe('las fuentes son nuestras', () => {
+ 
+ describe('cada enlace compartido lleva su tarjeta', () => {
+   it('la imagen de vista previa se declara una vez, con medidas y alt', () => {
+-    // DEFECTO: app/opengraph-image.tsx generaba la tarjeta y un comentario daba
+-    // por hecho que con eso bastaba. No bastaba: en Next, una página que
++    // DEFECTO: la tarjeta ya se generaba —hoy en app/og.png/route.tsx— y un
++    // comentario daba por hecho que con eso bastaba. No bastaba: una página que
+     // declara su propio objeto `openGraph` REEMPLAZA el del padre, imágenes
+     // incluidas. Medido sobre el HTML servido: 0 de las 214 páginas en español
+     // emitían og:image. El canal comercial de esta empresa es WhatsApp.
+     const src = leer('lib/meta.ts');
+     expect(src).toContain('export const OG_IMAGEN');
+-    expect(src).toContain("url: '/opengraph-image'");
++    expect(src).toContain("url: '/og.png'");
+     expect(src).toContain('width: 1200');
+     expect(src).toContain('height: 630');
+     expect(src).toContain('alt:');
+diff --git a/test/tarjeta-social.test.ts b/test/tarjeta-social.test.ts
+index 90c1198..5ce300f 100644
+--- a/test/tarjeta-social.test.ts
++++ b/test/tarjeta-social.test.ts
+@@ -65,44 +65,67 @@ describe('toda página tiene tarjeta en su cadena', () => {
+   }
+ });
+ 
+-describe('la imagen de la tarjeta se resuelve contra el host canónico', () => {
+-  it('ningún archivo de metadatos sociales cuelga de la raíz de app/', () => {
++describe('la URL de la tarjeta la decide este repositorio', () => {
++  it('la imagen NO es un archivo de metadatos de Next, en ninguna parte de app/', () => {
+     /**
+-     * POR QUÉ ESTA REGLA, QUE PARECE UNA MANÍA.
++     * LA REGLA QUE ESCRIBÍ EN 0011 ERA LA EQUIVOCADA, Y EL ERROR SE VIO EN EL
++     * BUILD SIGUIENTE.
+      *
+-     * `app/opengraph-image.tsx` servía la imagen en /opengraph-image y, por la
+-     * convención de ficheros de Next, la heredaba TODA ruta del árbol. Entre
+-     * ellas la /_not-found que Next genera por su cuenta: al no existir
+-     * app/layout.tsx, esa ruta corre bajo un layout por defecto que no declara
+-     * `metadataBase`, y Next resolvía la imagen contra http://localhost:3000 y
+-     * lo avisaba en cada build («metadataBase property in metadata export is
+-     * not set…»). Un aviso permanente en el build es un aviso que se deja de
+-     * leer, y debajo se esconde el siguiente.
++     * `app/opengraph-image.tsx` en la raíz de app/ lo heredaba TODA ruta del
++     * árbol, incluida la /_not-found que Next genera sola: al no existir
++     * app/layout.tsx, esa ruta corre bajo un layout por defecto sin
++     * `metadataBase`, Next resolvía la imagen contra http://localhost:3000 y lo
++     * avisaba en cada build. La entrega 0011 movió el archivo a app/(es)/ para
++     * apagar el aviso —y lo apagó—, pero Next añade un sufijo de hash a la ruta
++     * cuando algún segmento padre es un grupo (`getMetadataRouteSuffix`): la
++     * ruta pasó a ser /opengraph-image-35z9gd y `OG_IMAGEN`, que apunta por
++     * URL, quedó apuntando a un 404 en las 43 páginas que la piden.
+      *
+-     * Dentro de un grupo de idioma la URL pública es la misma —los grupos de
+-     * ruta no aparecen en la dirección— y la hereda un layout que sí declara
+-     * metadataBase.
++     * La lección no es «póngalo aquí y no allá»: es que la URL de un archivo de
++     * convención no la decide este repositorio. Un manejador de ruta sí, y no
++     * se hereda por el árbol. Por eso la regla prohíbe la convención ENTERA, no
++     * una ubicación.
+      */
+-    const intrusos = readdirSync(join(raiz, 'app'), { withFileTypes: true })
+-      .filter((e) => e.isFile() && /^(opengraph|twitter)-image\b/.test(e.name))
+-      .map((e) => `app/${e.name}`);
+-    expect(intrusos, 'muévalo dentro de un grupo de idioma: la URL no cambia').toEqual([]);
+-  });
+-
+-  it('la URL que declara OG_IMAGEN existe como ruta, una sola vez', () => {
+-    // Si el archivo desaparece o se duplica, OG_IMAGEN apunta a un 404 —o Next
+-    // falla por conflicto de ruta— y las 43 páginas que la piden se quedan sin
+-    // imagen sin que nada más lo note.
+-    expect(leer('lib/meta.ts')).toContain("url: '/opengraph-image'");
+-    const hallados: string[] = [];
++    const convencion: string[] = [];
+     const recorrer = (dir: string) => {
+       for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
+-        if (e.isDirectory()) recorrer(`${dir}/${e.name}`);
+-        else if (/^opengraph-image\.(tsx?|jsx?|png|jpe?g|gif)$/.test(e.name)) hallados.push(`${dir}/${e.name}`);
++        const rel = `${dir}/${e.name}`;
++        if (e.isDirectory()) { recorrer(rel); continue; }
++        if (/^(opengraph|twitter)-image\d*\.(tsx?|jsx?|png|jpe?g|gif|svg)$/.test(e.name)) convencion.push(rel);
+       }
+     };
+     recorrer('app');
+-    expect(hallados.length, `rutas /opengraph-image encontradas: ${hallados.join(', ')}`).toBe(1);
++    expect(
++      convencion,
++      'sírvala como manejador de ruta (app/og.png/route.tsx): su URL es su carpeta y nadie la hereda',
++    ).toEqual([]);
++  });
++
++  it('la URL que declara OG_IMAGEN existe como ruta servible', () => {
++    // Sin esto, cambiar la carpeta rompe en silencio las 43 páginas que piden
++    // la tarjeta: el HTML sigue emitiendo og:image y lo que llega es un 404.
++    const url = leer('lib/meta.ts').match(/url:\s*'([^']+)'/)?.[1];
++    expect(url, 'OG_IMAGEN debe declarar su URL').toBeTruthy();
++    expect(url!.startsWith('/'), 'relativa, para que metadataBase la resuelva').toBe(true);
++    const carpeta = `app${url}`;
++    const existe =
++      existsSync(join(raiz, carpeta, 'route.ts')) || existsSync(join(raiz, carpeta, 'route.tsx'));
++    expect(existe, `no hay manejador de ruta en ${carpeta}`).toBe(true);
++  });
++
++  it('el nombre viejo sigue redirigiendo a la tarjeta', () => {
++    // WhatsApp, LinkedIn y Slack guardan la imagen por URL. Los enlaces
++    // compartidos antes del cambio pierden su tarjeta sin este 301.
++    const cfg = leer('next.config.ts');
++    expect(cfg).toMatch(/source:\s*'\/opengraph-image',\s*destination:\s*'\/og\.png',\s*permanent:\s*true/);
++  });
++
++  it('la tarjeta se prerenderiza y no se calcula en cada petición', () => {
++    // Es una imagen fija: generarla por petición gasta tiempo de función cada
++    // vez que un rastreador social pasa, y pasan mucho.
++    const src = leer('app/og.png/route.tsx');
++    expect(src).toContain("export const dynamic = 'force-static'");
++    expect(src).toContain("export const runtime = 'nodejs'");
+   });
+ });
+ 
+-- 
+2.43.0
+
