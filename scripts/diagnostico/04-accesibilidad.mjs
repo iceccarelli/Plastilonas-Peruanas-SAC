@@ -4,8 +4,8 @@
  * que ninguna prueba de este repositorio puede ver — contraste insuficiente,
  * roles mal puestos, orden de foco, nombres accesibles ausentes.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
-import { BASE, lanzarNavegador } from './rutas.mjs';
+import { readFileSync } from 'node:fs';
+import { BASE, lanzarNavegador, guardar } from './rutas.mjs';
 
 const axe = readFileSync('node_modules/axe-core/axe.min.js', 'utf8');
 
@@ -60,7 +60,7 @@ for (const m of MODOS) {
   console.error(`  ✓ ${m.nombre}`);
 }
 await nav.close();
-writeFileSync('.diagnostico/04-accesibilidad.json', JSON.stringify(todo, null, 1));
+guardar('04-accesibilidad.json', todo);
 
 const porRegla = {};
 for (const v of todo) {

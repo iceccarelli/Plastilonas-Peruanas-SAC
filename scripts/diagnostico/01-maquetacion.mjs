@@ -10,10 +10,11 @@
  *  5. JERARQUÍA DE ENCABEZADOS: un solo H1, sin saltos de nivel.
  *  6. TABLAS ANCHAS que no viven dentro de un contenedor con scroll propio.
  */
-import { writeFileSync } from 'node:fs';
-import { BASE, REPRESENTATIVAS, VIEWPORTS, lanzarNavegador } from './rutas.mjs';
+import { BASE, REPRESENTATIVAS, VIEWPORTS, lanzarNavegador, guardar, avance } from './rutas.mjs';
 
 const HALLAZGOS = [];
+const TOTAL = VIEWPORTS.length * REPRESENTATIVAS.length;
+let MEDIDAS = 0;
 const push = (o) => HALLAZGOS.push(o);
 
 const AUDITORIA = () => {
@@ -165,11 +166,12 @@ for (const vp of VIEWPORTS) {
       push({ ruta, vp: vp.nombre, estado, error: String(e).slice(0, 200) });
     }
     await page.close();
+    avance(++MEDIDAS, TOTAL, `${vp.nombre} ${ruta}`);
   }
   await ctx.close();
   console.error(`  ✓ ${vp.nombre} (${vp.width}px)`);
 }
 
 await navegador.close();
-writeFileSync('.diagnostico/01-maquetacion.json', JSON.stringify(HALLAZGOS, null, 1));
-console.error('escrito .diagnostico/01-maquetacion.json — ' + HALLAZGOS.length + ' mediciones');
+guardar('01-maquetacion.json', HALLAZGOS);
+console.error(HALLAZGOS.length + ' mediciones');

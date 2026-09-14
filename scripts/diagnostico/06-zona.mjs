@@ -1,4 +1,5 @@
-import { BASE, lanzarNavegador } from './rutas.mjs';
+import { BASE, lanzarNavegador, carpeta } from './rutas.mjs';
+const DESTINO = carpeta();
 const [ruta, sel, nombre, oscuro] = process.argv.slice(2);
 const nav = await lanzarNavegador();
 const ctx = await nav.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, colorScheme: oscuro==='1'?'dark':'light' });
@@ -8,5 +9,5 @@ await p.goto(BASE + ruta, { waitUntil: 'domcontentloaded' });
 await p.waitForTimeout(1500);
 const el = p.locator(sel).first();
 await el.scrollIntoViewIfNeeded(); await p.waitForTimeout(500);
-await el.screenshot({ path: `.diagnostico/${nombre}.png` });
+await el.screenshot({ path: `${DESTINO}/${nombre}.png` });
 await nav.close(); console.error('ok');

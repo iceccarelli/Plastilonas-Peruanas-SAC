@@ -33,8 +33,31 @@ apagar() {
     kill "$SERVIDOR" 2>/dev/null || true
     wait "$SERVIDOR" 2>/dev/null || true
   fi
+  # Idempotente: `interrumpir` apaga y sale, y el trap EXIT vuelve a llamar a
+  # esta función. Sin esta línea el apagado se anuncia dos veces.
+  SERVIDOR=""
 }
-trap apagar EXIT INT TERM
+
+# UN Ctrl-C ABORTA EL DIAGNÓSTICO ENTERO, no el paso en curso.
+#
+# `trap apagar EXIT INT TERM` mataba el servidor al llegar la señal Y DEJABA
+# QUE EL BUCLE SIGUIERA. Medido: se interrumpió el paso 01 y los cinco pasos
+# siguientes corrieron contra un servidor muerto, cada uno con su propio
+# ECONNREFUSED. El informe decía «5 pasos fallaron» —cinco causas distintas
+# que investigar— cuando la causa era una y la había puesto el operador.
+#
+# Ahora INT y TERM tienen su propio manejador y salen con 130, el código que
+# la convención reserva para «lo paró una señal». El EXIT sigue apagando el
+# servidor: pase lo que pase, no queda un `next start` ocupando el puerto.
+interrumpir() {
+  echo >&2
+  echo "── Interrumpido. Se aborta el diagnóstico completo. ──" >&2
+  echo "   Lo que se alcanzó a escribir está en .diagnostico/" >&2
+  apagar
+  exit 130
+}
+trap apagar EXIT
+trap interrumpir INT TERM
 
 if [ "${1:-}" = "--build" ] || [ ! -f .next/BUILD_ID ]; then
   echo "── Compilando el sitio ──"
@@ -73,9 +96,15 @@ for PASO in \
 do
   echo
   echo "── ${PASO} ──"
+  INICIO=$SECONDS
   # Sin `set -e`: que un paso falle no puede impedir que corran los otros cinco.
   # Un informe de cinco medidas vale más que ninguna.
-  node "scripts/diagnostico/${PASO}.mjs" || { echo "   ⚠ ${PASO} falló"; FALLOS=$((FALLOS+1)); }
+  if node "scripts/diagnostico/${PASO}.mjs"; then
+    echo "   ${PASO} terminó en $((SECONDS - INICIO))s"
+  else
+    echo "   ⚠ ${PASO} falló tras $((SECONDS - INICIO))s"
+    FALLOS=$((FALLOS+1))
+  fi
 done
 
 echo

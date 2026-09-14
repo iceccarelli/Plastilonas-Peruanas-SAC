@@ -1,7 +1,6 @@
 /** Capturas para MIRAR la maqueta, no sólo medirla. Móvil y escritorio, claro y oscuro. */
-import { mkdirSync } from 'node:fs';
-import { BASE, lanzarNavegador } from './rutas.mjs';
-mkdirSync('.diagnostico/capturas', { recursive: true });
+import { BASE, lanzarNavegador, carpeta } from './rutas.mjs';
+const DESTINO = carpeta('capturas');
 
 const RUTAS = process.argv[2] ? [process.argv[2]] : [
   '/', '/productos', '/big-bags', '/fabricar-o-importar',
@@ -25,7 +24,7 @@ for (const mo of MODOS) {
     await p.goto(BASE + r, { waitUntil: 'domcontentloaded' });
     await p.waitForTimeout(1400);
     const nombre = (r === '/' ? 'home' : r.replace(/\//g, '_').replace(/^_/, ''));
-    await p.screenshot({ path: `.diagnostico/capturas/${nombre}__${mo.n}.png`, fullPage: false });
+    await p.screenshot({ path: `${DESTINO}/${nombre}__${mo.n}.png`, fullPage: false });
     await p.close();
   }
   await ctx.close();

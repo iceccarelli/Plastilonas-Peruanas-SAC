@@ -5,8 +5,7 @@
  * estado del DOM cambió. Un botón que renderiza y no hace nada pasa todas las
  * pruebas de este repositorio menos ésta.
  */
-import { writeFileSync } from 'node:fs';
-import { BASE, lanzarNavegador } from './rutas.mjs';
+import { BASE, lanzarNavegador, guardar } from './rutas.mjs';
 
 const R = [];
 const ok = (nombre, pasa, detalle = '') => {
@@ -238,6 +237,6 @@ try {
 
 await p.close();
 await nav.close();
-writeFileSync('.diagnostico/02-interaccion.json', JSON.stringify(R, null, 1));
+guardar('02-interaccion.json', R);
 const fallos = R.filter((x) => !x.pasa).length;
 console.error(`\n${R.length - fallos}/${R.length} comprobaciones de interacción pasan`);

@@ -9,8 +9,7 @@
  *  · títulos y descripciones duplicados entre páginas
  *  · consistencia de marco: ¿cada grupo de idioma sirve SU cabecera y pie?
  */
-import { writeFileSync } from 'node:fs';
-import { BASE, todasLasRutas } from './rutas.mjs';
+import { BASE, todasLasRutas, guardar, avance } from './rutas.mjs';
 
 const rutas = await todasLasRutas();
 const enSitemap = new Set(rutas);
@@ -44,7 +43,7 @@ async function estado(p) {
 let i = 0;
 for (const ruta of rutas) {
   i++;
-  if (i % 40 === 0) console.error(`  ${i}/${rutas.length}`);
+  avance(i, rutas.length, ruta);
   const res = await fetch(BASE + ruta);
   const html = await res.text();
   const esHtml = (res.headers.get('content-type') || '').includes('text/html');
@@ -119,7 +118,7 @@ const salida = {
   idiomas: [...meta.entries()].filter(([, m]) => m.esHtml).reduce((a, [r, m]) => { (a[m.lang] = a[m.lang] || []).push(r); return a; }, {}),
   masEnlazadas: [...entrantes.entries()].map(([r, s]) => [r, s.size]).sort((a, b) => b[1] - a[1]).slice(0, 15),
 };
-writeFileSync('.diagnostico/03-arquitectura.json', JSON.stringify(salida, null, 1));
+guardar('03-arquitectura.json', salida);
 
 console.error('\n== RESUMEN ==');
 console.error('rutas rastreadas:', rutas.length);

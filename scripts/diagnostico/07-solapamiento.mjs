@@ -3,8 +3,7 @@
  * La barra inferior de contacto y el lanzador del asistente viven encima del
  * contenido. Se comprueba, al pie de cada página, qué control queda debajo.
  */
-import { writeFileSync } from 'node:fs';
-import { BASE, lanzarNavegador } from './rutas.mjs';
+import { BASE, lanzarNavegador, guardar } from './rutas.mjs';
 
 const RUTAS = ['/', '/productos', '/productos/big-bags-bolsones-polipropileno', '/big-bags',
   '/fabricar-o-importar', '/cotizacion', '/calculadoras/big-bags-por-viaje', '/contacto',
@@ -60,5 +59,5 @@ for (const ruta of RUTAS) {
   await p.close();
 }
 await nav.close();
-writeFileSync('.diagnostico/07-solapamiento.json', JSON.stringify(out, null, 1));
+guardar('07-solapamiento.json', out);
 console.error('padding-bottom del body: ' + [...new Set(out.map((o) => o.padBody))].join(', '));

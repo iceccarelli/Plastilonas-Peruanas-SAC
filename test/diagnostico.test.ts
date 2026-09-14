@@ -103,3 +103,99 @@ describe('el diagnóstico se ejecuta con un comando y no deja procesos sueltos',
     expect(pkg.scripts['diagnostico:navegador']).toBeTruthy();
   });
 });
+
+/**
+ * EL DIAGNÓSTICO TERMINA, ESCRIBE Y DICE POR DÓNDE VA.
+ *
+ * Lo medido en la máquina del operador, con Chromium ya instalado y el
+ * servidor en pie: cinco de seis pasos «fallaron». Ninguno por un defecto del
+ * sitio.
+ *
+ *   04-accesibilidad: ✓ movil-claro ✓ movil-oscuro ✓ escritorio-claro
+ *                     ✓ escritorio-oscuro
+ *                     ENOENT: open '.diagnostico/04-accesibilidad.json'
+ *
+ * Auditó los cuatro modos con axe-core y tiró el informe en la última línea,
+ * porque `.diagnostico/` está en .gitignore —no viene en el clon— y sólo
+ * 05-capturas la creaba. Y el paso 01 abre 222 páginas sin imprimir nada, así
+ * que se leyó como colgado y se cortó con Ctrl-C; el `trap ... EXIT INT TERM`
+ * mató el servidor y dejó seguir el bucle, y los cinco pasos restantes
+ * fallaron con ECONNREFUSED. Un Ctrl-C, cinco falsos culpables.
+ */
+describe('el diagnóstico escribe donde dice que escribe', () => {
+  it('la carpeta de salida se crea en el módulo común, no en cada paso', () => {
+    const src = leer('scripts/diagnostico/rutas.mjs');
+    expect(src, 'sin guardar(), cada paso vuelve a poder olvidarse del mkdir').toContain('export function guardar');
+    expect(src, 'las capturas necesitan subcarpeta').toContain('export function carpeta');
+    expect(src).toMatch(/mkdirSync\(ruta, \{ recursive: true \}\)/);
+  });
+
+  it('ningún paso nombra .diagnostico/ por su cuenta', () => {
+    // Ésta es la regresión de verdad: el día que alguien escriba
+    // `writeFileSync('.diagnostico/09-x.json')` vuelve el ENOENT. Se prohíbe
+    // la ruta literal en los pasos; el único que la conoce es rutas.mjs.
+    const culpables: string[] = [];
+    for (const f of PASOS) {
+      const src = leer(`scripts/diagnostico/${f}`)
+        .replace(/\/\*[\s\S]*?\*\//g, '')   // los comentarios sí pueden citarla
+        .replace(/^\s*\/\/.*$/gm, '');
+      if (src.includes('.diagnostico/')) culpables.push(f);
+    }
+    expect(culpables, 'use guardar() o carpeta() de rutas.mjs').toEqual([]);
+  });
+
+  it('todo paso que produce un informe pasa por guardar() o carpeta()', () => {
+    const sinSalida: string[] = [];
+    for (const f of PASOS) {
+      const src = leer(`scripts/diagnostico/${f}`);
+      // 08-presupuesto lee .next y sólo imprime: no escribe informe.
+      if (!/writeFileSync|screenshot\(/.test(src)) continue;
+      if (!/\bguardar\(|\bcarpeta\(/.test(src)) sinSalida.push(f);
+    }
+    expect(sinSalida).toEqual([]);
+  });
+});
+
+describe('un Ctrl-C aborta el diagnóstico, no sólo el paso en curso', () => {
+  it('INT y TERM tienen su propio manejador y salen con 130', () => {
+    const sh = leer('scripts/diagnostico.sh');
+    // Reproducido antes del arreglo: con `trap apagar EXIT INT TERM`, una sola
+    // señal mataba el servidor y el bucle continuaba → FALLOS=5.
+    // Anclado a principio de línea a propósito: el comentario del guion CITA la
+    // línea vieja para explicar por qué se fue, y citarla no es tenerla.
+    expect(sh, 'INT no puede compartir manejador con EXIT: apaga y deja seguir').not.toMatch(/^trap apagar EXIT INT/m);
+    expect(sh).toMatch(/^trap interrumpir INT TERM$/m);
+    expect(sh, '130 es el código convenido para «lo paró una señal»').toMatch(/exit 130/);
+  });
+
+  it('el servidor se sigue apagando pase lo que pase', () => {
+    // El arreglo no puede costar la garantía anterior: sin trap EXIT queda un
+    // `next start` ocupando el puerto y el siguiente intento falla por otra razón.
+    const sh = leer('scripts/diagnostico.sh');
+    expect(sh).toMatch(/trap apagar EXIT\s*$/m);
+    expect(sh, 'interrumpir() apaga y sale; el trap EXIT vuelve a llamar a apagar()').toMatch(/SERVIDOR=""/);
+  });
+});
+
+describe('los pasos largos dicen por dónde van', () => {
+  it('01 y 03 informan del avance', () => {
+    // 01 abre 37 rutas × 6 viewports con 1.2 s de pausa en cada una. Mudo, son
+    // varios minutos que se leen como «colgado», y se cortan.
+    for (const f of ['01-maquetacion.mjs', '03-arquitectura.mjs']) {
+      expect(leer(`scripts/diagnostico/${f}`), `${f} mide cientos de páginas en silencio`).toMatch(/\bavance\(/);
+    }
+  });
+
+  it('sin terminal, el avance no escupe una línea por medida', () => {
+    // 222 líneas en un registro de CI no son progreso, son ruido. Medido: 12.
+    const src = leer('scripts/diagnostico/rutas.mjs');
+    expect(src).toContain('process.stderr.isTTY');
+    expect(src, 'se anuncia por decenas de porcentaje').toMatch(/Math\.floor\(pct \/ 10\)/);
+  });
+
+  it('el guion dice cuánto tardó cada paso', () => {
+    const sh = leer('scripts/diagnostico.sh');
+    expect(sh).toMatch(/INICIO=\$SECONDS/);
+    expect(sh).toMatch(/\$\(\(SECONDS - INICIO\)\)/);
+  });
+});

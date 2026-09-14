@@ -122,7 +122,7 @@ export { BASE };
  * Y si no hay ninguno, el error dice el comando exacto que lo arregla.
  */
 
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const CANDIDATOS = () => [
@@ -178,4 +178,67 @@ export async function lanzarNavegador() {
       ].join('\n'),
     );
   }
+}
+
+/**
+ * DÓNDE SE ESCRIBE — creado, no supuesto.
+ *
+ * Los ocho pasos escriben en `.diagnostico/`, y uno solo —05-capturas— la
+ * creaba. Los demás llamaban a `writeFileSync('.diagnostico/NN-x.json')`
+ * directamente, así que en una máquina donde esa carpeta no existía (está
+ * ignorada por git: no viene en el clon) el paso MEDÍA BIEN y moría al
+ * guardar:
+ *
+ *   ✓ movil-claro  ✓ movil-oscuro  ✓ escritorio-claro  ✓ escritorio-oscuro
+ *   ENOENT: no such file or directory, open '.diagnostico/04-accesibilidad.json'
+ *
+ * Cuatro modos auditados con axe-core, tirados a la basura en la última línea.
+ * El coste real no es el error: es que el informe se pierde entero y el fallo
+ * parece del sitio cuando es del arné.
+ *
+ * La carpeta se crea aquí, en el módulo que importan los ocho, y no en cada
+ * uno: así ningún paso futuro puede olvidarse. `test/diagnostico.test.ts`
+ * prohíbe que un paso vuelva a nombrar la ruta por su cuenta.
+ */
+export const SALIDA = '.diagnostico';
+
+/** Crea `.diagnostico/[sub]` si no existe y devuelve la ruta. */
+export function carpeta(sub = '') {
+  const ruta = sub ? `${SALIDA}/${sub}` : SALIDA;
+  mkdirSync(ruta, { recursive: true });
+  return ruta;
+}
+
+/** Guarda el informe de un paso. Crea la carpeta primero, siempre. */
+export function guardar(nombre, datos) {
+  carpeta();
+  const ruta = `${SALIDA}/${nombre}`;
+  writeFileSync(ruta, JSON.stringify(datos, null, 1));
+  console.error(`escrito ${ruta}`);
+  return ruta;
+}
+
+/**
+ * POR DÓNDE VA — el paso 01 abre 37 rutas × 6 viewports = 222 páginas, con
+ * una pausa de 1.2 s en cada una. Son varios minutos SIN IMPRIMIR NADA, y eso
+ * no se lee como «trabajando»: se lee como «colgado». Se interrumpió con Ctrl-C
+ * a mitad, que es la reacción correcta ante un comando mudo.
+ *
+ * En terminal se reescribe una sola línea. Sin terminal —CI, salida
+ * redirigida— 222 líneas serían ruido, así que se anuncia cada 10 %: once
+ * líneas, las justas para saber que avanza y a qué ritmo.
+ */
+const hitos = new Map();
+export function avance(hecho, total, etiqueta = '') {
+  const pct = Math.round((hecho / total) * 100);
+  const linea = `  ${String(pct).padStart(3)}%  ${hecho}/${total}  ${etiqueta}`;
+  if (process.stderr.isTTY) {
+    process.stderr.write('\r' + linea.slice(0, 110).padEnd(110));
+    if (hecho >= total) process.stderr.write('\n');
+    return;
+  }
+  const decena = Math.floor(pct / 10);
+  if (hitos.get(total) === decena && hecho < total) return;
+  hitos.set(total, decena);
+  console.error(linea);
 }
