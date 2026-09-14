@@ -5,9 +5,8 @@
  * estado del DOM cambió. Un botón que renderiza y no hace nada pasa todas las
  * pruebas de este repositorio menos ésta.
  */
-import { chromium } from 'playwright';
 import { writeFileSync } from 'node:fs';
-import { BASE, LANZAR } from './rutas.mjs';
+import { BASE, lanzarNavegador } from './rutas.mjs';
 
 const R = [];
 const ok = (nombre, pasa, detalle = '') => {
@@ -15,7 +14,7 @@ const ok = (nombre, pasa, detalle = '') => {
   console.error(`  ${pasa ? '✓' : '✗'} ${nombre}${detalle ? ' — ' + detalle : ''}`);
 };
 
-const nav = await chromium.launch(LANZAR);
+const nav = await lanzarNavegador();
 
 /* ─────────────── MÓVIL 390×844 ─────────────── */
 const movil = await nav.newContext({

@@ -1,7 +1,6 @@
-import { chromium } from 'playwright';
-import { BASE, LANZAR } from './rutas.mjs';
+import { BASE, lanzarNavegador } from './rutas.mjs';
 const [ruta, sel, nombre, oscuro] = process.argv.slice(2);
-const nav = await chromium.launch(LANZAR);
+const nav = await lanzarNavegador();
 const ctx = await nav.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, colorScheme: oscuro==='1'?'dark':'light' });
 await ctx.addInitScript(`try{localStorage.setItem('theme','${oscuro==='1'?'dark':'light'}')}catch(e){}`);
 const p = await ctx.newPage();

@@ -198,8 +198,16 @@ describe('el arné de diagnóstico sigue en su sitio', () => {
   });
 
   it('se puede lanzar con un comando y su salida está ignorada', () => {
+    /**
+     * `npm run diagnostico` encadenaba los seis pasos con `&&` y dejaba a quien
+     * lo corriera la tarea de levantar el servidor aparte — con unas
+     * instrucciones que mandaban al fondo la cadena entera y medían sobre un
+     * sitio que aún no existía. Ahora apunta al guion que compila, levanta,
+     * espera a que conteste, mide y apaga. La forma exacta la fija
+     * test/diagnostico.test.ts; aquí sólo se exige que siga siendo UN comando.
+     */
     const pkg = JSON.parse(leer('package.json'));
-    expect(pkg.scripts.diagnostico).toContain('scripts/diagnostico/');
+    expect(pkg.scripts.diagnostico).toContain('scripts/diagnostico');
     expect(pkg.devDependencies['axe-core'], 'axe-core es la fuente del veredicto').toBeTruthy();
     expect(leer('.gitignore')).toContain('/.diagnostico/');
   });
@@ -328,6 +336,8 @@ describe('el peso de las páginas donde entra el dinero', () => {
     expect(() => leer('scripts/diagnostico/08-presupuesto.mjs')).not.toThrow();
     const pkg = JSON.parse(leer('package.json'));
     expect(pkg.scripts['diagnostico:peso']).toContain('08-presupuesto.mjs');
-    expect(pkg.scripts.diagnostico).toContain('08-presupuesto.mjs');
+    // El paso ya no se nombra en package.json: lo ejecuta el guion, junto con
+    // los otros cinco. Se comprueba donde ahora vive la lista.
+    expect(leer('scripts/diagnostico.sh')).toContain('08-presupuesto');
   });
 });

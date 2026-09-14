@@ -1,7 +1,6 @@
 /** Capturas para MIRAR la maqueta, no sólo medirla. Móvil y escritorio, claro y oscuro. */
-import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
-import { BASE, LANZAR } from './rutas.mjs';
+import { BASE, lanzarNavegador } from './rutas.mjs';
 mkdirSync('.diagnostico/capturas', { recursive: true });
 
 const RUTAS = process.argv[2] ? [process.argv[2]] : [
@@ -14,7 +13,7 @@ const MODOS = [
   { n: 'escritorio-claro', w: 1440, h: 950, m: false, osc: false },
   { n: 'escritorio-oscuro', w: 1440, h: 950, m: false, osc: true },
 ];
-const nav = await chromium.launch(LANZAR);
+const nav = await lanzarNavegador();
 for (const mo of MODOS) {
   const ctx = await nav.newContext({
     viewport: { width: mo.w, height: mo.h }, isMobile: mo.m, hasTouch: mo.m,

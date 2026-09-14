@@ -4,9 +4,8 @@
  * que ninguna prueba de este repositorio puede ver — contraste insuficiente,
  * roles mal puestos, orden de foco, nombres accesibles ausentes.
  */
-import { chromium } from 'playwright';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { BASE, LANZAR } from './rutas.mjs';
+import { BASE, lanzarNavegador } from './rutas.mjs';
 
 const axe = readFileSync('node_modules/axe-core/axe.min.js', 'utf8');
 
@@ -23,7 +22,7 @@ const MODOS = [
   { nombre: 'escritorio-oscuro', w: 1440, h: 900, movil: false, oscuro: true },
 ];
 
-const nav = await chromium.launch(LANZAR);
+const nav = await lanzarNavegador();
 const todo = [];
 
 for (const m of MODOS) {

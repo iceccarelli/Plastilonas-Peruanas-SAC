@@ -10,9 +10,8 @@
  *  5. JERARQUÍA DE ENCABEZADOS: un solo H1, sin saltos de nivel.
  *  6. TABLAS ANCHAS que no viven dentro de un contenedor con scroll propio.
  */
-import { chromium } from 'playwright';
 import { writeFileSync } from 'node:fs';
-import { BASE, REPRESENTATIVAS, VIEWPORTS, LANZAR } from './rutas.mjs';
+import { BASE, REPRESENTATIVAS, VIEWPORTS, lanzarNavegador } from './rutas.mjs';
 
 const HALLAZGOS = [];
 const push = (o) => HALLAZGOS.push(o);
@@ -126,7 +125,7 @@ const AUDITORIA = () => {
   };
 };
 
-const navegador = await chromium.launch(LANZAR);
+const navegador = await lanzarNavegador();
 
 for (const vp of VIEWPORTS) {
   const ctx = await navegador.newContext({

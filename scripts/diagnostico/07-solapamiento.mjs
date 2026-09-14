@@ -3,15 +3,14 @@
  * La barra inferior de contacto y el lanzador del asistente viven encima del
  * contenido. Se comprueba, al pie de cada página, qué control queda debajo.
  */
-import { chromium } from 'playwright';
 import { writeFileSync } from 'node:fs';
-import { BASE, LANZAR } from './rutas.mjs';
+import { BASE, lanzarNavegador } from './rutas.mjs';
 
 const RUTAS = ['/', '/productos', '/productos/big-bags-bolsones-polipropileno', '/big-bags',
   '/fabricar-o-importar', '/cotizacion', '/calculadoras/big-bags-por-viaje', '/contacto',
   '/indicadores', '/marco/evaluacion', '/configurador', '/carrito', '/en/rfq'];
 
-const nav = await chromium.launch(LANZAR);
+const nav = await lanzarNavegador();
 const ctx = await nav.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
   userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' });
 const out = [];

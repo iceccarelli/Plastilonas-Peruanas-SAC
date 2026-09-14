@@ -9,9 +9,17 @@
  * fallaba. Este arné mide la página RENDERIZADA, que es la que ve el
  * comprador.
  *
- * Uso: levantar el sitio compilado en el puerto 4000 y `npm run diagnostico`.
- *   npm run build && npx next start -p 4000 &
- *   npm run diagnostico
+ * Uso: `npm run diagnostico`, y ya está.
+ *
+ * Las instrucciones anteriores eran éstas, y son una trampa:
+ *
+ *     npm run build && npx next start -p 4000 &
+ *     npm run diagnostico
+ *
+ * El `&` manda al fondo la cadena ENTERA, así que el diagnóstico arranca
+ * mientras `next build` todavía compila y pide páginas a un servidor que no
+ * existe. Ahora `scripts/diagnostico.sh` compila si hace falta, levanta el
+ * sitio, ESPERA a que conteste, mide y lo apaga pase lo que pase.
  *
  * La salida (JSON y capturas) va a .diagnostico/, que está ignorado.
  */
@@ -85,7 +93,89 @@ export const VIEWPORTS = [
 
 export { BASE };
 
-/** El Chromium preinstalado del contenedor; la versión fijada de playwright
- *  espera otra revisión y descargarla no es posible aquí. */
-export const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
-export const LANZAR = { executablePath: CHROME, args: ['--no-sandbox', '--disable-dev-shm-usage'] };
+/**
+ * DÓNDE ESTÁ CHROMIUM — buscado, no supuesto.
+ *
+ * Esta línea decía una sola ruta absoluta:
+ * `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`. Era el Chromium
+ * preinstalado de UN contenedor concreto, y funcionó mientras ese contenedor
+ * existió. Fuera de él —en un Codespace, en el portátil de cualquiera, en CI—
+ * el arné entero moría con este mensaje:
+ *
+ *   browserType.launch: Failed to launch chromium because executable doesn't
+ *   exist at /opt/pw-browsers/chromium-1194/chrome-linux/chrome
+ *
+ * Que no dice qué hacer. Y la consecuencia es peor que un error feo: el ÚNICO
+ * instrumento de este repositorio que mide la página renderizada —desborde
+ * horizontal, objetivos táctiles reales, contraste, enlaces rotos— dejó de
+ * poder ejecutarse en ninguna máquina. Las 902 pruebas leen archivos; esto es
+ * lo que abre un navegador, y estaba apagado sin que nada lo dijera.
+ *
+ * Ahora se busca en orden, y lo primero que exista gana:
+ *
+ *   1. `DIAG_CHROME` — quien sabe dónde está lo dice y se acabó la discusión.
+ *   2. El que Playwright haya instalado en esta máquina (`executablePath()`),
+ *      que es el caso normal después de `npx playwright install chromium`.
+ *   3. Rutas de contenedores preaprovisionados, la del sandbox incluida.
+ *   4. El Chromium o el Chrome del sistema.
+ *
+ * Y si no hay ninguno, el error dice el comando exacto que lo arregla.
+ */
+
+import { existsSync } from 'node:fs';
+import { chromium } from 'playwright';
+
+const CANDIDATOS = () => [
+  process.env.DIAG_CHROME,
+  (() => {
+    try {
+      return chromium.executablePath();
+    } catch {
+      return null;
+    }
+  })(),
+  '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  '/opt/pw-browsers/chromium/chrome-linux/chrome',
+  '/usr/bin/chromium',
+  '/usr/bin/chromium-browser',
+  '/usr/bin/google-chrome',
+  '/usr/bin/google-chrome-stable',
+].filter(Boolean);
+
+export function buscarChrome() {
+  return CANDIDATOS().find((ruta) => existsSync(ruta)) ?? null;
+}
+
+export const CHROME = buscarChrome();
+
+/**
+ * Los argumentos no son opcionales: sin `--no-sandbox` Chromium no arranca
+ * dentro de un contenedor sin privilegios, y sin `--disable-dev-shm-usage` se
+ * queda sin memoria compartida en mitad de una captura.
+ */
+export const ARGS = ['--no-sandbox', '--disable-dev-shm-usage'];
+
+export const LANZAR = CHROME ? { executablePath: CHROME, args: ARGS } : { args: ARGS };
+
+/**
+ * Lo que usan los seis scripts. Falla con el comando exacto en vez de con una
+ * ruta que a nadie le dice nada.
+ */
+export async function lanzarNavegador() {
+  try {
+    return await chromium.launch(LANZAR);
+  } catch (e) {
+    const detalle = e instanceof Error ? e.message.split('\n')[0] : String(e);
+    throw new Error(
+      [
+        'No se pudo abrir Chromium para el diagnóstico.',
+        '',
+        `  Detalle: ${detalle}`,
+        `  Buscado en: ${CANDIDATOS().join('\n              ')}`,
+        '',
+        '  Instálelo con:   npx playwright install chromium',
+        '  O indique el suyo:   DIAG_CHROME=/ruta/a/chrome npm run diagnostico',
+      ].join('\n'),
+    );
+  }
+}
