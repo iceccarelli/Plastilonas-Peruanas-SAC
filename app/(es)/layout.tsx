@@ -81,7 +81,7 @@ export const metadata: Metadata = {
     // Declarada explícitamente: cuando una página define su propio objeto
     // `openGraph`, reemplaza al del padre —imágenes incluidas—, así que la
     // imagen de fichero por sí sola no llegaba a ninguna página en español.
-    // La genera app/(es)/opengraph-image.tsx y se pide por URL desde OG_IMAGEN.
+    // La genera app/og.png/route.tsx y se pide por URL desde OG_IMAGEN.
     images: OG_IMAGEN,
     // SIN `title` NI `description` A PROPÓSITO. Estaban fijados al texto de la
     // portada, y toda página en español que no declara su propio `openGraph`

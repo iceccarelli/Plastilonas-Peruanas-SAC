@@ -65,7 +65,7 @@ export default function StructuredData() {
     legalName: SITE.legalName,
     description: SITE.description,
     url: base,
-    image: `${base}/opengraph-image`,
+    image: `${base}/og.png`,
     logo: `${base}/logo.png`,
     telephone: SITE.phoneWhatsApp,
     email: SITE.email,

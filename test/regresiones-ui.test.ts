@@ -247,14 +247,14 @@ describe('las fuentes son nuestras', () => {
 
 describe('cada enlace compartido lleva su tarjeta', () => {
   it('la imagen de vista previa se declara una vez, con medidas y alt', () => {
-    // DEFECTO: app/opengraph-image.tsx generaba la tarjeta y un comentario daba
-    // por hecho que con eso bastaba. No bastaba: en Next, una página que
+    // DEFECTO: la tarjeta ya se generaba —hoy en app/og.png/route.tsx— y un
+    // comentario daba por hecho que con eso bastaba. No bastaba: una página que
     // declara su propio objeto `openGraph` REEMPLAZA el del padre, imágenes
     // incluidas. Medido sobre el HTML servido: 0 de las 214 páginas en español
     // emitían og:image. El canal comercial de esta empresa es WhatsApp.
     const src = leer('lib/meta.ts');
     expect(src).toContain('export const OG_IMAGEN');
-    expect(src).toContain("url: '/opengraph-image'");
+    expect(src).toContain("url: '/og.png'");
     expect(src).toContain('width: 1200');
     expect(src).toContain('height: 630');
     expect(src).toContain('alt:');

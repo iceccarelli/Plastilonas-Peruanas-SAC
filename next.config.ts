@@ -94,6 +94,17 @@ const nextConfig: NextConfig = {
   // tira.
   async redirects() {
     return [
+      /**
+       * LA TARJETA SOCIAL CAMBIÓ DE URL, Y LAS YA COMPARTIDAS NO.
+       *
+       * La imagen se servía en /opengraph-image por la convención de archivos
+       * de Next. Dejó de ser un archivo de convención —su URL no la decidía
+       * este repositorio, y la entrega 0011 la rompió al mudarla— y ahora es un
+       * manejador de ruta en /og.png. WhatsApp, LinkedIn y Slack guardan la
+       * imagen por URL: sin esto, cada enlace ya compartido pierde su tarjeta.
+       */
+      { source: '/opengraph-image', destination: '/og.png', permanent: true },
+
       { source: '/industrias', destination: '/industria', permanent: true },
       { source: '/industrias/mineria', destination: '/industria/mineria', permanent: true },
       { source: '/industrias/agricultura', destination: '/industria/agroexportacion', permanent: true },

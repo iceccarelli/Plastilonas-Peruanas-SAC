@@ -145,7 +145,7 @@ export const descripcionCabe = (d: string): boolean => d.trim().length <= MAX_DE
 /**
  * IMAGEN DE VISTA PREVIA — una, compartida, y declarada explícitamente.
  *
- * EL DEFECTO QUE CIERRA. `app/(es)/opengraph-image.tsx` genera la tarjeta de 1200×630
+ * EL DEFECTO QUE CIERRA. `app/og.png/route.tsx` genera la tarjeta de 1200×630
  * con el logo real, y un comentario en el layout daba por hecho que con eso
  * bastaba. No bastaba: en Next, cuando una página declara su propio objeto
  * `openGraph`, ese objeto REEMPLAZA al del padre —imágenes incluidas—, y las
@@ -164,15 +164,20 @@ export const descripcionCabe = (d: string): boolean => d.trim().length <= MAX_DE
  * raíz) la resuelve al host canónico del momento, así que el día del corte a
  * www.plastilonas.com no hay que tocar 43 archivos.
  *
- * Y por eso la imagen vive DENTRO de un grupo de idioma y no en la raíz de
- * app/: allí la heredaba también la /_not-found que Next genera sola, que corre
- * bajo un layout por defecto sin `metadataBase` y la resolvía contra
- * http://localhost:3000. La URL pública no cambia —los grupos de ruta no
- * aparecen en la dirección—, y test/tarjeta-social.test.ts lo sostiene.
+ * Y POR ESO LA IMAGEN YA NO ES UN ARCHIVO DE METADATOS DE NEXT, sino un
+ * manejador de ruta en `/og.png`. Con la convención `opengraph-image.tsx`, la
+ * URL no la decide uno: en la raíz de app/ la hereda la /_not-found —que corre
+ * sin `metadataBase` y la resolvía contra localhost—, y dentro de un grupo de
+ * idioma Next le añade un sufijo de hash y la ruta pasa a llamarse
+ * /opengraph-image-35z9gd. Esto último se pagó en la entrega 0011: esta URL
+ * quedó apuntando a un 404 en las 43 páginas que la piden. Un manejador de
+ * ruta no se hereda por el árbol y su URL es su carpeta.
+ * test/tarjeta-social.test.ts lo sostiene, y next.config.ts redirige el nombre
+ * viejo para las tarjetas ya cacheadas.
  */
 export const OG_IMAGEN = [
   {
-    url: '/opengraph-image',
+    url: '/og.png',
     width: 1200,
     height: 630,
     // El alt viaja con la imagen: es lo que lee quien recibe la tarjeta con un

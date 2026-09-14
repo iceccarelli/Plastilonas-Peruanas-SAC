@@ -65,44 +65,67 @@ describe('toda página tiene tarjeta en su cadena', () => {
   }
 });
 
-describe('la imagen de la tarjeta se resuelve contra el host canónico', () => {
-  it('ningún archivo de metadatos sociales cuelga de la raíz de app/', () => {
+describe('la URL de la tarjeta la decide este repositorio', () => {
+  it('la imagen NO es un archivo de metadatos de Next, en ninguna parte de app/', () => {
     /**
-     * POR QUÉ ESTA REGLA, QUE PARECE UNA MANÍA.
+     * LA REGLA QUE ESCRIBÍ EN 0011 ERA LA EQUIVOCADA, Y EL ERROR SE VIO EN EL
+     * BUILD SIGUIENTE.
      *
-     * `app/opengraph-image.tsx` servía la imagen en /opengraph-image y, por la
-     * convención de ficheros de Next, la heredaba TODA ruta del árbol. Entre
-     * ellas la /_not-found que Next genera por su cuenta: al no existir
-     * app/layout.tsx, esa ruta corre bajo un layout por defecto que no declara
-     * `metadataBase`, y Next resolvía la imagen contra http://localhost:3000 y
-     * lo avisaba en cada build («metadataBase property in metadata export is
-     * not set…»). Un aviso permanente en el build es un aviso que se deja de
-     * leer, y debajo se esconde el siguiente.
+     * `app/opengraph-image.tsx` en la raíz de app/ lo heredaba TODA ruta del
+     * árbol, incluida la /_not-found que Next genera sola: al no existir
+     * app/layout.tsx, esa ruta corre bajo un layout por defecto sin
+     * `metadataBase`, Next resolvía la imagen contra http://localhost:3000 y lo
+     * avisaba en cada build. La entrega 0011 movió el archivo a app/(es)/ para
+     * apagar el aviso —y lo apagó—, pero Next añade un sufijo de hash a la ruta
+     * cuando algún segmento padre es un grupo (`getMetadataRouteSuffix`): la
+     * ruta pasó a ser /opengraph-image-35z9gd y `OG_IMAGEN`, que apunta por
+     * URL, quedó apuntando a un 404 en las 43 páginas que la piden.
      *
-     * Dentro de un grupo de idioma la URL pública es la misma —los grupos de
-     * ruta no aparecen en la dirección— y la hereda un layout que sí declara
-     * metadataBase.
+     * La lección no es «póngalo aquí y no allá»: es que la URL de un archivo de
+     * convención no la decide este repositorio. Un manejador de ruta sí, y no
+     * se hereda por el árbol. Por eso la regla prohíbe la convención ENTERA, no
+     * una ubicación.
      */
-    const intrusos = readdirSync(join(raiz, 'app'), { withFileTypes: true })
-      .filter((e) => e.isFile() && /^(opengraph|twitter)-image\b/.test(e.name))
-      .map((e) => `app/${e.name}`);
-    expect(intrusos, 'muévalo dentro de un grupo de idioma: la URL no cambia').toEqual([]);
-  });
-
-  it('la URL que declara OG_IMAGEN existe como ruta, una sola vez', () => {
-    // Si el archivo desaparece o se duplica, OG_IMAGEN apunta a un 404 —o Next
-    // falla por conflicto de ruta— y las 43 páginas que la piden se quedan sin
-    // imagen sin que nada más lo note.
-    expect(leer('lib/meta.ts')).toContain("url: '/opengraph-image'");
-    const hallados: string[] = [];
+    const convencion: string[] = [];
     const recorrer = (dir: string) => {
       for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
-        if (e.isDirectory()) recorrer(`${dir}/${e.name}`);
-        else if (/^opengraph-image\.(tsx?|jsx?|png|jpe?g|gif)$/.test(e.name)) hallados.push(`${dir}/${e.name}`);
+        const rel = `${dir}/${e.name}`;
+        if (e.isDirectory()) { recorrer(rel); continue; }
+        if (/^(opengraph|twitter)-image\d*\.(tsx?|jsx?|png|jpe?g|gif|svg)$/.test(e.name)) convencion.push(rel);
       }
     };
     recorrer('app');
-    expect(hallados.length, `rutas /opengraph-image encontradas: ${hallados.join(', ')}`).toBe(1);
+    expect(
+      convencion,
+      'sírvala como manejador de ruta (app/og.png/route.tsx): su URL es su carpeta y nadie la hereda',
+    ).toEqual([]);
+  });
+
+  it('la URL que declara OG_IMAGEN existe como ruta servible', () => {
+    // Sin esto, cambiar la carpeta rompe en silencio las 43 páginas que piden
+    // la tarjeta: el HTML sigue emitiendo og:image y lo que llega es un 404.
+    const url = leer('lib/meta.ts').match(/url:\s*'([^']+)'/)?.[1];
+    expect(url, 'OG_IMAGEN debe declarar su URL').toBeTruthy();
+    expect(url!.startsWith('/'), 'relativa, para que metadataBase la resuelva').toBe(true);
+    const carpeta = `app${url}`;
+    const existe =
+      existsSync(join(raiz, carpeta, 'route.ts')) || existsSync(join(raiz, carpeta, 'route.tsx'));
+    expect(existe, `no hay manejador de ruta en ${carpeta}`).toBe(true);
+  });
+
+  it('el nombre viejo sigue redirigiendo a la tarjeta', () => {
+    // WhatsApp, LinkedIn y Slack guardan la imagen por URL. Los enlaces
+    // compartidos antes del cambio pierden su tarjeta sin este 301.
+    const cfg = leer('next.config.ts');
+    expect(cfg).toMatch(/source:\s*'\/opengraph-image',\s*destination:\s*'\/og\.png',\s*permanent:\s*true/);
+  });
+
+  it('la tarjeta se prerenderiza y no se calcula en cada petición', () => {
+    // Es una imagen fija: generarla por petición gasta tiempo de función cada
+    // vez que un rastreador social pasa, y pasan mucho.
+    const src = leer('app/og.png/route.tsx');
+    expect(src).toContain("export const dynamic = 'force-static'");
+    expect(src).toContain("export const runtime = 'nodejs'");
   });
 });
 
