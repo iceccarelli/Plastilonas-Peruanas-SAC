@@ -25,7 +25,7 @@ export default function CheckoutSuccessPage() {
         entrega por correo electrónico. Nuestro equipo comercial se pondrá en
         contacto para coordinar el envío.
       </p>
-      <div className="mt-10 flex flex-wrap gap-4 justify-center">
+      <div role="group" aria-label="Qué hacer ahora" className="mt-10 flex flex-wrap justify-center gap-4">
         <Link
           href="/productos"
           className="inline-block bg-[#0A2540] hover:bg-[#059669] text-white font-semibold px-8 py-3 rounded-2xl transition-colors"

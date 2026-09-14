@@ -26,7 +26,7 @@ export default function SociosPage() {
         <li>Muestras y fichas de lote cuando el material las tiene</li>
         <li>Apoyo de especificación — no sustituimos al ingeniero del proyecto</li>
       </ul>
-      <div className="mt-8 flex flex-wrap gap-3">
+      <div role="group" aria-label="Acciones para partners" className="mt-8 flex flex-wrap gap-3">
         <Link href="/cotizacion" className="btn inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">RFQ de partner</Link>
         <Link href="/distribuidores" className="btn inline-flex border border-gray-200 px-5 py-3 rounded-2xl">Canal de distribución</Link>
       </div>

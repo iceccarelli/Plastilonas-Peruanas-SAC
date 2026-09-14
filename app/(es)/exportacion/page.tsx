@@ -139,7 +139,12 @@ export default function ExportacionPage() {
           FOB Callao son dos puntos distintos de la misma cadena. */}
       {esquema && <ImagenContenido ranura={esquema} prioridad className="mt-8" sizes="(min-width: 768px) 720px, 100vw" />}
 
-      <table className="mt-8 w-full text-sm">
+      {/* La tabla de mercados tiene tres columnas de texto: en un teléfono de
+          360 px sin este contenedor es la PÁGINA la que se mueve de lado, no la
+          tabla. Un comprador que no sabe que puede deslizar cree que le falta
+          contenido, y el que lo sabe pierde el sitio donde estaba leyendo. */}
+      <div className="mt-8 overflow-x-auto">
+      <table className="w-full text-sm">
         <tbody>
           {MERCADOS.map((m) => (
             <tr key={m.pais} className="border-t border-gray-100">
@@ -150,6 +155,7 @@ export default function ExportacionPage() {
           ))}
         </tbody>
       </table>
+      </div>
       <h2 className="mt-12 text-xl font-semibold text-[#0A2540]">Punto de entrega cotizable</h2>
       <dl className="mt-4 space-y-3">
         {INCOTERMS_SALIDA.map((i) => (

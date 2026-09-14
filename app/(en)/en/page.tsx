@@ -64,7 +64,7 @@ export default function EnglishPage() {
         We manufacture in Peru. International supply is evaluated per order. We do not offer automatic worldwide shipping.
       </p>
       <p className="mt-6 text-sm">Sales: {SITE.email} · WhatsApp {SITE.phoneWhatsApp}</p>
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+      <div role="group" aria-label="Next steps" className="mt-8 flex flex-col gap-3 sm:flex-row">
         <Link href="/en/sourcing-from-peru" className="inline-flex items-center justify-center rounded-2xl bg-[#0A2540] px-5 py-3 font-semibold text-white hover:bg-[#059669]">
           How to source from Peru →
         </Link>

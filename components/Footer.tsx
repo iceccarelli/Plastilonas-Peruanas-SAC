@@ -252,7 +252,9 @@ export default function Footer() {
             hueco muerto al final de la página. */}
         <div className="mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-y-4 text-xs text-white/50">
           <div>© {currentYear} {SITE.legalName}. Todos los derechos reservados. RUC: {SITE.ruc}</div>
-          <div className="flex items-center gap-x-6">
+          {/* Envuelve: los dos rótulos legales suman más de 300 px y en un
+              teléfono de 360 px empujaban la fila fuera del ancho. */}
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
             <Link href="/privacidad" className="inline-flex min-h-[44px] items-center hover:text-white transition-colors">Política de Privacidad</Link>
             <Link href="/terminos" className="inline-flex min-h-[44px] items-center hover:text-white transition-colors">Términos y Condiciones</Link>
             <span className="hidden md:inline">Hecho en Perú</span>

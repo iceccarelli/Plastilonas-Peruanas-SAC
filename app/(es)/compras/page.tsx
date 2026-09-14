@@ -37,7 +37,7 @@ export default function ComprasPage() {
           </div>
         ))}
       </dl>
-      <div className="mt-10 flex flex-wrap gap-3">
+      <div role="group" aria-label="Siguientes pasos para un comprador" className="mt-10 flex flex-wrap gap-3">
         <Link href="/cotizacion" className="btn inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">Registrar RFQ</Link>
         <Link href="/confianza" className="btn inline-flex border border-gray-200 px-5 py-3 rounded-2xl">Due diligence</Link>
         <Link href="/biblioteca" className="btn inline-flex border border-gray-200 px-5 py-3 rounded-2xl">Guías técnicas</Link>

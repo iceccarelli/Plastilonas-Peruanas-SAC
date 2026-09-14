@@ -662,7 +662,10 @@ export default function Navbar() {
                                 key={h.href}
                                 href={h.href}
                                 onClick={cerrarYa}
-                                className={`block rounded-lg px-3 py-1.5 pl-6 text-sm hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] ${isActive(h.href) ? 'text-[#059669]' : 'text-gray-600 dark:text-[var(--text-muted)]'}`}
+                                // 30 px de alto en el menú que se usa CON EL PULGAR: por debajo del
+                                // objetivo táctil de 44 px (WCAG 2.5.8). El padding no basta
+                                // porque depende de que nadie lo toque; `min-h` lo declara.
+                                className={`flex min-h-[44px] items-center rounded-lg px-3 pl-6 text-sm hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] ${isActive(h.href) ? 'text-[#059669]' : 'text-gray-600 dark:text-[var(--text-muted)]'}`}
                               >
                                 {h.label}
                               </Link>

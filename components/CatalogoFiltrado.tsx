@@ -12,6 +12,7 @@ import {
   sourcingLabels,
 } from '@/lib/products';
 import type { Availability } from '@/lib/types';
+import { ACCIONES } from '@/lib/acciones';
 import ProductCard from '@/components/ProductCard';
 import ProductRotator from '@/components/ProductRotator';
 import FilterControls from '@/components/FilterControls';
@@ -283,9 +284,36 @@ export default function CatalogoFiltrado() {
                         </div>
                         <Link href={`/productos/${product.slug}`} className="font-semibold text-xl tracking-tight text-[#0A2540] group-hover:text-[#059669] block mb-2">{product.name}</Link>
                         <p className="text-sm text-gray-600 line-clamp-2 mb-4">{product.shortDescription}</p>
-                        <div className="flex gap-3">
-                          <Link href={`/productos/${product.slug}`} className="text-sm font-medium text-[#059669]">Ver detalles →</Link>
-                          <Link href={`/cotizacion?producto=${encodeURIComponent(product.name)}`} className="text-sm font-semibold text-white bg-[#0A2540] px-5 py-1.5 rounded-full text-xs">Cotizar este producto</Link>
+                        {/*
+                          LAS DOS ACCIONES DE UNA FICHA, COMO UN GRUPO.
+
+                          Estaban sueltas y con tres defectos medibles: el botón
+                          de cotizar medía 26 px de alto —`py-1.5` con
+                          `text-xs`—, la fila no envolvía, así que en un
+                          teléfono de 360 px las dos acciones se apretaban o se
+                          salían, y el rótulo decía «Cotizar este producto»: un
+                          NOVENO nombre escrito a mano para el mismo botón que
+                          lib/acciones.ts ya nombra. Se repite en las 36 fichas
+                          del catálogo, que es la superficie comercial con más
+                          tráfico del sitio.
+                        */}
+                        <div
+                          role="group"
+                          aria-label={`Acciones para ${product.name}`}
+                          className="flex flex-wrap items-center gap-x-4 gap-y-2"
+                        >
+                          <Link
+                            href={`/productos/${product.slug}`}
+                            className="inline-flex min-h-[44px] items-center text-sm font-medium text-[#059669]"
+                          >
+                            Ver detalles →
+                          </Link>
+                          <Link
+                            href={`${ACCIONES.cotizarProducto.href}?producto=${encodeURIComponent(product.name)}`}
+                            className="inline-flex min-h-[44px] items-center rounded-full bg-[#0A2540] px-5 text-sm font-semibold text-white hover:bg-[#0A2540]/90"
+                          >
+                            {ACCIONES.cotizarProducto.label}
+                          </Link>
                         </div>
                       </div>
                     </div>

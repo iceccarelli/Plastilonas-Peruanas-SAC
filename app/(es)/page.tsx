@@ -340,7 +340,7 @@ export default function Home() {
               están publicados.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3 shrink-0">
+          <div role="group" aria-label="Cómo comprobar lo que publicamos" className="flex flex-wrap gap-3 shrink-0">
             <Link href="/confianza" className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-[#0A2540] hover:border-[#059669] transition-colors">Centro de confianza</Link>
             <Link href="/metodo" className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-[#0A2540] hover:border-[#059669] transition-colors">Cómo se publica este sitio</Link>
           </div>

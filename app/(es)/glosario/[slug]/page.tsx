@@ -299,7 +299,7 @@ export default async function TerminoPage({ params }: Props) {
           ¿Necesita aplicar este criterio a un proyecto concreto? Envíenos la
           especificación y le devolvemos la propuesta técnica junto con la cotización.
         </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
+        <div role="group" aria-label="Acciones comerciales" className="flex flex-col justify-center gap-3 sm:flex-row">
           <Link
             href="/cotizacion"
             className="inline-flex items-center justify-center rounded-2xl bg-[#0A2540] px-8 py-3 font-semibold text-white hover:bg-[#059669]"

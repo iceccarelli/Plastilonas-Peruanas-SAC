@@ -118,6 +118,9 @@ export default function LineChart({ grafico }: { grafico: Grafico }) {
         <summary className="cursor-pointer text-sm font-medium text-[#059669] hover:underline">
           Ver los datos en tabla
         </summary>
+        {/* El contenedor con scroll propio: sin él, una tabla de datos
+            de cuatro columnas mueve de lado la PÁGINA entera en un teléfono. */}
+        <div className="overflow-x-auto">
         <table className="mt-3 w-full border-collapse text-sm">
           <caption className="sr-only">{grafico.titulo}</caption>
           <thead>
@@ -135,6 +138,7 @@ export default function LineChart({ grafico }: { grafico: Grafico }) {
             ))}
           </tbody>
         </table>
+        </div>
       </details>
     </figure>
   );
