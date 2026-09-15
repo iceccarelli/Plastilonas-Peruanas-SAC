@@ -1,0 +1,590 @@
+From 4b8cbf706f2265ef7f7279989be10c3bd9dac09f Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 14 Sep 2026 18:53:28 +0000
+Subject: [PATCH] =?UTF-8?q?fix(diagnostico):=20el=20arn=C3=A9=20med=C3=ADa?=
+ =?UTF-8?q?=20bien=20y=20tiraba=20el=20informe,=20y=20un=20Ctrl-C=20produc?=
+ =?UTF-8?q?=C3=ADa=20cinco=20culpables=20falsos?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Con Chromium ya encontrado (0021), el diagnóstico devolvió 5 de 6 pasos
+fallidos. Ninguno era un defecto del sitio.
+
+(a) `.diagnostico/` está en .gitignore —no viene en el clon— y de los ocho
+    pasos sólo 05-capturas la creaba. El paso 04 auditó los cuatro modos con
+    axe-core y murió al guardar: «ENOENT: open .diagnostico/04-...json».
+    Ahora la carpeta se crea en rutas.mjs, detrás de guardar() y carpeta(),
+    y ningún paso vuelve a nombrar la ruta.
+
+(b) `trap apagar EXIT INT TERM` mataba el servidor al llegar la señal y
+    dejaba seguir el bucle: un Ctrl-C en el paso 01 produjo cuatro
+    ECONNREFUSED en cascada. INT/TERM tienen manejador propio y salen con
+    130; el trap EXIT se queda.
+
+(c) El paso 01 abre 222 páginas sin imprimir nada, y por eso se leyó como
+    colgado y se cortó. avance() reescribe una línea en terminal y anuncia
+    por decenas sin ella: 12 líneas, no 222. El guion cronometra cada paso.
+
+Reproducido y medido antes de arreglar, y verificado al revés: deshacer
+cada arreglo pone roja una prueba distinta.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UxmuN1emKoms4zAxwLB8RX
+---
+ .../2026-09-14-un-ctrl-c-cinco-culpables.md   | 122 ++++++++++++++++++
+ scripts/diagnostico.sh                        |  33 ++++-
+ scripts/diagnostico/01-maquetacion.mjs        |  10 +-
+ scripts/diagnostico/02-interaccion.mjs        |   5 +-
+ scripts/diagnostico/03-arquitectura.mjs       |   7 +-
+ scripts/diagnostico/04-accesibilidad.mjs      |   6 +-
+ scripts/diagnostico/05-capturas.mjs           |   7 +-
+ scripts/diagnostico/06-zona.mjs               |   5 +-
+ scripts/diagnostico/07-solapamiento.mjs       |   5 +-
+ scripts/diagnostico/rutas.mjs                 |  65 +++++++++-
+ test/diagnostico.test.ts                      |  96 ++++++++++++++
+ 11 files changed, 335 insertions(+), 26 deletions(-)
+ create mode 100644 docs/entregas/2026-09-14-un-ctrl-c-cinco-culpables.md
+
+diff --git a/docs/entregas/2026-09-14-un-ctrl-c-cinco-culpables.md b/docs/entregas/2026-09-14-un-ctrl-c-cinco-culpables.md
+new file mode 100644
+index 0000000..a2d45f1
+--- /dev/null
++++ b/docs/entregas/2026-09-14-un-ctrl-c-cinco-culpables.md
+@@ -0,0 +1,122 @@
++# P9 — un Ctrl-C, cinco culpables falsos, y un informe tirado a la basura
++
++**Fecha:** 2026-09-14 · **Base:** `main` con 0002 a 0021 aplicados ·
++**Pasos que fallaban por defecto propio del arné:** 5 de 6 → 0
++
++## 1. Lo que devolvió el comando
++
++0021 arregló que el arné encontrara Chromium, y se notó: el registro dice
++`servidor listo` y el paso 04 auditó los cuatro modos con axe-core sin una
++queja. Después, cinco de seis pasos «fallaron». **Ninguno por un defecto del
++sitio.** Los tres defectos eran del instrumento, y los tres estaban en mi
++código.
++
++## 2. Defecto (a) — el informe se escribía en una carpeta que no existe
++
++El paso 04 midió entero y murió en la última línea:
++
++```
++  ✓ movil-claro
++  ✓ movil-oscuro
++  ✓ escritorio-claro
++  ✓ escritorio-oscuro
++ENOENT: no such file or directory, open '.diagnostico/04-accesibilidad.json'
++```
++
++`.diagnostico/` está en `.gitignore`, así que **no viene en el clon**. De los
++ocho pasos, sólo `05-capturas.mjs` la creaba; los otros siete llamaban a
++`writeFileSync('.diagnostico/NN-x.json')` a pelo. En cualquier máquina recién
++clonada —la suya— el trabajo se hacía y se tiraba al guardar.
++
++Reproducido y medido antes de tocar nada, en una carpeta vacía:
++
++```
++viejo camino (writeFileSync directo): ENOENT
++.diagnostico existe antes: false
++escrito .diagnostico/04-accesibilidad.json
++.diagnostico existe después: true
++```
++
++**Arreglo:** la carpeta se crea en `rutas.mjs`, el módulo que importan los
++ocho, detrás de `guardar(nombre, datos)` y `carpeta(sub)`. No se añadió un
++`mkdirSync` a cada paso: eso es el mismo error repetido siete veces esperando
++a que alguien escriba el octavo. Ningún paso vuelve a nombrar la ruta.
++
++## 3. Defecto (b) — un Ctrl-C mataba el servidor y dejaba seguir el bucle
++
++En el registro hay una `q` suelta y un `^C` en mitad del paso 01. A partir de
++ahí, cuatro `ECONNREFUSED` en cascada. La causa es una línea que escribí yo:
++
++```bash
++trap apagar EXIT INT TERM
++```
++
++La señal apagaba el servidor **y el bucle continuaba**. Un informe que dice
++«5 pasos fallaron» son cinco causas que investigar; la causa era una, y la
++había puesto el operador a propósito.
++
++Reproducido con las dos versiones y una señal a los 2 s:
++
++```
++===== viejo =====            ===== nuevo =====
++-- 01                        -- 01
++apagando                     ── Interrumpido. Se aborta el diagnóstico completo. ──
++-- 02   ECONNREFUSED         apagando
++-- 03   ECONNREFUSED         código de salida: 130
++-- 04   ECONNREFUSED
++-- 07   ECONNREFUSED
++-- 08   ECONNREFUSED
++FALLOS=5
++```
++
++**Arreglo:** `INT`/`TERM` tienen manejador propio, que apaga y sale con **130**
++—el código convenido para «lo paró una señal»—. El `trap apagar EXIT` se queda:
++la garantía de no dejar un `next start` ocupando el puerto no se negocia.
++
++## 4. Defecto (c) — el paso 01 era mudo durante varios minutos
++
++37 rutas × 6 viewports = **222 páginas**, con 1.2 s de pausa en cada una, sin
++imprimir una sola línea hasta terminar. Eso no se lee como «trabajando». Se lee
++como colgado, y se corta — que es exactamente lo que pasó y lo que disparó (b).
++
++**Arreglo:** `avance(hecho, total, etiqueta)`. En terminal reescribe una sola
++línea. Sin terminal —CI, salida redirigida— 222 líneas serían ruido, así que
++anuncia por decenas de porcentaje. Medido: **12 líneas**, no 222. El guion,
++además, dice cuánto tardó cada paso.
++
++## 5. Lo que impide que vuelva
++
++Seis pruebas nuevas en `test/diagnostico.test.ts`, y la que importa no
++comprueba que el arreglo esté: comprueba que **el defecto no pueda volver a
++escribirse**. Ningún paso puede nombrar `.diagnostico/` por su cuenta.
++
++Verificado al revés, deshaciendo cada arreglo por separado:
++
++| Arreglo deshecho | Prueba que se pone roja |
++|---|---|
++| `guardar()` → `writeFileSync` literal en 04 | «todo paso que produce un informe pasa por guardar() o carpeta()» |
++| `trap apagar EXIT INT TERM` de vuelta | «el servidor se sigue apagando pase lo que pase» |
++| `avance()` fuera de 01 | «01 y 03 informan del avance» |
++
++Restaurado: 16 pruebas, 0 fallos.
++
++## 6. Lo único que se midió limpio la vez pasada
++
++`08-presupuesto` pasó, y merece quedar escrito porque es la única medida real
++que sobrevivió al desastre:
++
++```
++✓ Ninguna ruta excede su presupuesto
++  /(es)/page                   180.9 kB  (presupuesto 195 kB)
++  /(es)/productos/page         174.7 kB
++  /(es)/marco/evaluacion/page  160.8 kB
++  /(es)/cotizacion/page        143.9 kB  (presupuesto 165 kB)
++  /(en)/en/rfq/page            143.9 kB
++```
++
++## 7. Lo que sigue
++
++`npm run diagnostico` completo, sin Ctrl-C. Ahora termina, escribe y dice por
++dónde va, así que lo que devuelva serán **defectos del sitio** —desborde
++horizontal, objetivos táctiles, contraste, enlaces rotos— y no del
++instrumento. El siguiente parche sale de esos números.
+diff --git a/scripts/diagnostico.sh b/scripts/diagnostico.sh
+index 29961bf..8f1074e 100755
+--- a/scripts/diagnostico.sh
++++ b/scripts/diagnostico.sh
+@@ -33,8 +33,31 @@ apagar() {
+     kill "$SERVIDOR" 2>/dev/null || true
+     wait "$SERVIDOR" 2>/dev/null || true
+   fi
++  # Idempotente: `interrumpir` apaga y sale, y el trap EXIT vuelve a llamar a
++  # esta función. Sin esta línea el apagado se anuncia dos veces.
++  SERVIDOR=""
+ }
+-trap apagar EXIT INT TERM
++
++# UN Ctrl-C ABORTA EL DIAGNÓSTICO ENTERO, no el paso en curso.
++#
++# `trap apagar EXIT INT TERM` mataba el servidor al llegar la señal Y DEJABA
++# QUE EL BUCLE SIGUIERA. Medido: se interrumpió el paso 01 y los cinco pasos
++# siguientes corrieron contra un servidor muerto, cada uno con su propio
++# ECONNREFUSED. El informe decía «5 pasos fallaron» —cinco causas distintas
++# que investigar— cuando la causa era una y la había puesto el operador.
++#
++# Ahora INT y TERM tienen su propio manejador y salen con 130, el código que
++# la convención reserva para «lo paró una señal». El EXIT sigue apagando el
++# servidor: pase lo que pase, no queda un `next start` ocupando el puerto.
++interrumpir() {
++  echo >&2
++  echo "── Interrumpido. Se aborta el diagnóstico completo. ──" >&2
++  echo "   Lo que se alcanzó a escribir está en .diagnostico/" >&2
++  apagar
++  exit 130
++}
++trap apagar EXIT
++trap interrumpir INT TERM
+ 
+ if [ "${1:-}" = "--build" ] || [ ! -f .next/BUILD_ID ]; then
+   echo "── Compilando el sitio ──"
+@@ -73,9 +96,15 @@ for PASO in \
+ do
+   echo
+   echo "── ${PASO} ──"
++  INICIO=$SECONDS
+   # Sin `set -e`: que un paso falle no puede impedir que corran los otros cinco.
+   # Un informe de cinco medidas vale más que ninguna.
+-  node "scripts/diagnostico/${PASO}.mjs" || { echo "   ⚠ ${PASO} falló"; FALLOS=$((FALLOS+1)); }
++  if node "scripts/diagnostico/${PASO}.mjs"; then
++    echo "   ${PASO} terminó en $((SECONDS - INICIO))s"
++  else
++    echo "   ⚠ ${PASO} falló tras $((SECONDS - INICIO))s"
++    FALLOS=$((FALLOS+1))
++  fi
+ done
+ 
+ echo
+diff --git a/scripts/diagnostico/01-maquetacion.mjs b/scripts/diagnostico/01-maquetacion.mjs
+index 6dd9064..166d813 100644
+--- a/scripts/diagnostico/01-maquetacion.mjs
++++ b/scripts/diagnostico/01-maquetacion.mjs
+@@ -10,10 +10,11 @@
+  *  5. JERARQUÍA DE ENCABEZADOS: un solo H1, sin saltos de nivel.
+  *  6. TABLAS ANCHAS que no viven dentro de un contenedor con scroll propio.
+  */
+-import { writeFileSync } from 'node:fs';
+-import { BASE, REPRESENTATIVAS, VIEWPORTS, lanzarNavegador } from './rutas.mjs';
++import { BASE, REPRESENTATIVAS, VIEWPORTS, lanzarNavegador, guardar, avance } from './rutas.mjs';
+ 
+ const HALLAZGOS = [];
++const TOTAL = VIEWPORTS.length * REPRESENTATIVAS.length;
++let MEDIDAS = 0;
+ const push = (o) => HALLAZGOS.push(o);
+ 
+ const AUDITORIA = () => {
+@@ -165,11 +166,12 @@ for (const vp of VIEWPORTS) {
+       push({ ruta, vp: vp.nombre, estado, error: String(e).slice(0, 200) });
+     }
+     await page.close();
++    avance(++MEDIDAS, TOTAL, `${vp.nombre} ${ruta}`);
+   }
+   await ctx.close();
+   console.error(`  ✓ ${vp.nombre} (${vp.width}px)`);
+ }
+ 
+ await navegador.close();
+-writeFileSync('.diagnostico/01-maquetacion.json', JSON.stringify(HALLAZGOS, null, 1));
+-console.error('escrito .diagnostico/01-maquetacion.json — ' + HALLAZGOS.length + ' mediciones');
++guardar('01-maquetacion.json', HALLAZGOS);
++console.error(HALLAZGOS.length + ' mediciones');
+diff --git a/scripts/diagnostico/02-interaccion.mjs b/scripts/diagnostico/02-interaccion.mjs
+index ad1b2b9..299261c 100644
+--- a/scripts/diagnostico/02-interaccion.mjs
++++ b/scripts/diagnostico/02-interaccion.mjs
+@@ -5,8 +5,7 @@
+  * estado del DOM cambió. Un botón que renderiza y no hace nada pasa todas las
+  * pruebas de este repositorio menos ésta.
+  */
+-import { writeFileSync } from 'node:fs';
+-import { BASE, lanzarNavegador } from './rutas.mjs';
++import { BASE, lanzarNavegador, guardar } from './rutas.mjs';
+ 
+ const R = [];
+ const ok = (nombre, pasa, detalle = '') => {
+@@ -238,6 +237,6 @@ try {
+ 
+ await p.close();
+ await nav.close();
+-writeFileSync('.diagnostico/02-interaccion.json', JSON.stringify(R, null, 1));
++guardar('02-interaccion.json', R);
+ const fallos = R.filter((x) => !x.pasa).length;
+ console.error(`\n${R.length - fallos}/${R.length} comprobaciones de interacción pasan`);
+diff --git a/scripts/diagnostico/03-arquitectura.mjs b/scripts/diagnostico/03-arquitectura.mjs
+index 114563e..b3dbc8a 100644
+--- a/scripts/diagnostico/03-arquitectura.mjs
++++ b/scripts/diagnostico/03-arquitectura.mjs
+@@ -9,8 +9,7 @@
+  *  · títulos y descripciones duplicados entre páginas
+  *  · consistencia de marco: ¿cada grupo de idioma sirve SU cabecera y pie?
+  */
+-import { writeFileSync } from 'node:fs';
+-import { BASE, todasLasRutas } from './rutas.mjs';
++import { BASE, todasLasRutas, guardar, avance } from './rutas.mjs';
+ 
+ const rutas = await todasLasRutas();
+ const enSitemap = new Set(rutas);
+@@ -44,7 +43,7 @@ async function estado(p) {
+ let i = 0;
+ for (const ruta of rutas) {
+   i++;
+-  if (i % 40 === 0) console.error(`  ${i}/${rutas.length}`);
++  avance(i, rutas.length, ruta);
+   const res = await fetch(BASE + ruta);
+   const html = await res.text();
+   const esHtml = (res.headers.get('content-type') || '').includes('text/html');
+@@ -119,7 +118,7 @@ const salida = {
+   idiomas: [...meta.entries()].filter(([, m]) => m.esHtml).reduce((a, [r, m]) => { (a[m.lang] = a[m.lang] || []).push(r); return a; }, {}),
+   masEnlazadas: [...entrantes.entries()].map(([r, s]) => [r, s.size]).sort((a, b) => b[1] - a[1]).slice(0, 15),
+ };
+-writeFileSync('.diagnostico/03-arquitectura.json', JSON.stringify(salida, null, 1));
++guardar('03-arquitectura.json', salida);
+ 
+ console.error('\n== RESUMEN ==');
+ console.error('rutas rastreadas:', rutas.length);
+diff --git a/scripts/diagnostico/04-accesibilidad.mjs b/scripts/diagnostico/04-accesibilidad.mjs
+index aabc7c1..6468bfd 100644
+--- a/scripts/diagnostico/04-accesibilidad.mjs
++++ b/scripts/diagnostico/04-accesibilidad.mjs
+@@ -4,8 +4,8 @@
+  * que ninguna prueba de este repositorio puede ver — contraste insuficiente,
+  * roles mal puestos, orden de foco, nombres accesibles ausentes.
+  */
+-import { readFileSync, writeFileSync } from 'node:fs';
+-import { BASE, lanzarNavegador } from './rutas.mjs';
++import { readFileSync } from 'node:fs';
++import { BASE, lanzarNavegador, guardar } from './rutas.mjs';
+ 
+ const axe = readFileSync('node_modules/axe-core/axe.min.js', 'utf8');
+ 
+@@ -60,7 +60,7 @@ for (const m of MODOS) {
+   console.error(`  ✓ ${m.nombre}`);
+ }
+ await nav.close();
+-writeFileSync('.diagnostico/04-accesibilidad.json', JSON.stringify(todo, null, 1));
++guardar('04-accesibilidad.json', todo);
+ 
+ const porRegla = {};
+ for (const v of todo) {
+diff --git a/scripts/diagnostico/05-capturas.mjs b/scripts/diagnostico/05-capturas.mjs
+index f679664..307771c 100644
+--- a/scripts/diagnostico/05-capturas.mjs
++++ b/scripts/diagnostico/05-capturas.mjs
+@@ -1,7 +1,6 @@
+ /** Capturas para MIRAR la maqueta, no sólo medirla. Móvil y escritorio, claro y oscuro. */
+-import { mkdirSync } from 'node:fs';
+-import { BASE, lanzarNavegador } from './rutas.mjs';
+-mkdirSync('.diagnostico/capturas', { recursive: true });
++import { BASE, lanzarNavegador, carpeta } from './rutas.mjs';
++const DESTINO = carpeta('capturas');
+ 
+ const RUTAS = process.argv[2] ? [process.argv[2]] : [
+   '/', '/productos', '/big-bags', '/fabricar-o-importar',
+@@ -25,7 +24,7 @@ for (const mo of MODOS) {
+     await p.goto(BASE + r, { waitUntil: 'domcontentloaded' });
+     await p.waitForTimeout(1400);
+     const nombre = (r === '/' ? 'home' : r.replace(/\//g, '_').replace(/^_/, ''));
+-    await p.screenshot({ path: `.diagnostico/capturas/${nombre}__${mo.n}.png`, fullPage: false });
++    await p.screenshot({ path: `${DESTINO}/${nombre}__${mo.n}.png`, fullPage: false });
+     await p.close();
+   }
+   await ctx.close();
+diff --git a/scripts/diagnostico/06-zona.mjs b/scripts/diagnostico/06-zona.mjs
+index 823a439..356a12a 100644
+--- a/scripts/diagnostico/06-zona.mjs
++++ b/scripts/diagnostico/06-zona.mjs
+@@ -1,4 +1,5 @@
+-import { BASE, lanzarNavegador } from './rutas.mjs';
++import { BASE, lanzarNavegador, carpeta } from './rutas.mjs';
++const DESTINO = carpeta();
+ const [ruta, sel, nombre, oscuro] = process.argv.slice(2);
+ const nav = await lanzarNavegador();
+ const ctx = await nav.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, colorScheme: oscuro==='1'?'dark':'light' });
+@@ -8,5 +9,5 @@ await p.goto(BASE + ruta, { waitUntil: 'domcontentloaded' });
+ await p.waitForTimeout(1500);
+ const el = p.locator(sel).first();
+ await el.scrollIntoViewIfNeeded(); await p.waitForTimeout(500);
+-await el.screenshot({ path: `.diagnostico/${nombre}.png` });
++await el.screenshot({ path: `${DESTINO}/${nombre}.png` });
+ await nav.close(); console.error('ok');
+diff --git a/scripts/diagnostico/07-solapamiento.mjs b/scripts/diagnostico/07-solapamiento.mjs
+index 1aff747..b06dc2d 100644
+--- a/scripts/diagnostico/07-solapamiento.mjs
++++ b/scripts/diagnostico/07-solapamiento.mjs
+@@ -3,8 +3,7 @@
+  * La barra inferior de contacto y el lanzador del asistente viven encima del
+  * contenido. Se comprueba, al pie de cada página, qué control queda debajo.
+  */
+-import { writeFileSync } from 'node:fs';
+-import { BASE, lanzarNavegador } from './rutas.mjs';
++import { BASE, lanzarNavegador, guardar } from './rutas.mjs';
+ 
+ const RUTAS = ['/', '/productos', '/productos/big-bags-bolsones-polipropileno', '/big-bags',
+   '/fabricar-o-importar', '/cotizacion', '/calculadoras/big-bags-por-viaje', '/contacto',
+@@ -60,5 +59,5 @@ for (const ruta of RUTAS) {
+   await p.close();
+ }
+ await nav.close();
+-writeFileSync('.diagnostico/07-solapamiento.json', JSON.stringify(out, null, 1));
++guardar('07-solapamiento.json', out);
+ console.error('padding-bottom del body: ' + [...new Set(out.map((o) => o.padBody))].join(', '));
+diff --git a/scripts/diagnostico/rutas.mjs b/scripts/diagnostico/rutas.mjs
+index a5025f4..66783d3 100644
+--- a/scripts/diagnostico/rutas.mjs
++++ b/scripts/diagnostico/rutas.mjs
+@@ -122,7 +122,7 @@ export { BASE };
+  * Y si no hay ninguno, el error dice el comando exacto que lo arregla.
+  */
+ 
+-import { existsSync } from 'node:fs';
++import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+ import { chromium } from 'playwright';
+ 
+ const CANDIDATOS = () => [
+@@ -179,3 +179,66 @@ export async function lanzarNavegador() {
+     );
+   }
+ }
++
++/**
++ * DÓNDE SE ESCRIBE — creado, no supuesto.
++ *
++ * Los ocho pasos escriben en `.diagnostico/`, y uno solo —05-capturas— la
++ * creaba. Los demás llamaban a `writeFileSync('.diagnostico/NN-x.json')`
++ * directamente, así que en una máquina donde esa carpeta no existía (está
++ * ignorada por git: no viene en el clon) el paso MEDÍA BIEN y moría al
++ * guardar:
++ *
++ *   ✓ movil-claro  ✓ movil-oscuro  ✓ escritorio-claro  ✓ escritorio-oscuro
++ *   ENOENT: no such file or directory, open '.diagnostico/04-accesibilidad.json'
++ *
++ * Cuatro modos auditados con axe-core, tirados a la basura en la última línea.
++ * El coste real no es el error: es que el informe se pierde entero y el fallo
++ * parece del sitio cuando es del arné.
++ *
++ * La carpeta se crea aquí, en el módulo que importan los ocho, y no en cada
++ * uno: así ningún paso futuro puede olvidarse. `test/diagnostico.test.ts`
++ * prohíbe que un paso vuelva a nombrar la ruta por su cuenta.
++ */
++export const SALIDA = '.diagnostico';
++
++/** Crea `.diagnostico/[sub]` si no existe y devuelve la ruta. */
++export function carpeta(sub = '') {
++  const ruta = sub ? `${SALIDA}/${sub}` : SALIDA;
++  mkdirSync(ruta, { recursive: true });
++  return ruta;
++}
++
++/** Guarda el informe de un paso. Crea la carpeta primero, siempre. */
++export function guardar(nombre, datos) {
++  carpeta();
++  const ruta = `${SALIDA}/${nombre}`;
++  writeFileSync(ruta, JSON.stringify(datos, null, 1));
++  console.error(`escrito ${ruta}`);
++  return ruta;
++}
++
++/**
++ * POR DÓNDE VA — el paso 01 abre 37 rutas × 6 viewports = 222 páginas, con
++ * una pausa de 1.2 s en cada una. Son varios minutos SIN IMPRIMIR NADA, y eso
++ * no se lee como «trabajando»: se lee como «colgado». Se interrumpió con Ctrl-C
++ * a mitad, que es la reacción correcta ante un comando mudo.
++ *
++ * En terminal se reescribe una sola línea. Sin terminal —CI, salida
++ * redirigida— 222 líneas serían ruido, así que se anuncia cada 10 %: once
++ * líneas, las justas para saber que avanza y a qué ritmo.
++ */
++const hitos = new Map();
++export function avance(hecho, total, etiqueta = '') {
++  const pct = Math.round((hecho / total) * 100);
++  const linea = `  ${String(pct).padStart(3)}%  ${hecho}/${total}  ${etiqueta}`;
++  if (process.stderr.isTTY) {
++    process.stderr.write('\r' + linea.slice(0, 110).padEnd(110));
++    if (hecho >= total) process.stderr.write('\n');
++    return;
++  }
++  const decena = Math.floor(pct / 10);
++  if (hitos.get(total) === decena && hecho < total) return;
++  hitos.set(total, decena);
++  console.error(linea);
++}
+diff --git a/test/diagnostico.test.ts b/test/diagnostico.test.ts
+index f176c18..6045cdb 100644
+--- a/test/diagnostico.test.ts
++++ b/test/diagnostico.test.ts
+@@ -103,3 +103,99 @@ describe('el diagnóstico se ejecuta con un comando y no deja procesos sueltos',
+     expect(pkg.scripts['diagnostico:navegador']).toBeTruthy();
+   });
+ });
++
++/**
++ * EL DIAGNÓSTICO TERMINA, ESCRIBE Y DICE POR DÓNDE VA.
++ *
++ * Lo medido en la máquina del operador, con Chromium ya instalado y el
++ * servidor en pie: cinco de seis pasos «fallaron». Ninguno por un defecto del
++ * sitio.
++ *
++ *   04-accesibilidad: ✓ movil-claro ✓ movil-oscuro ✓ escritorio-claro
++ *                     ✓ escritorio-oscuro
++ *                     ENOENT: open '.diagnostico/04-accesibilidad.json'
++ *
++ * Auditó los cuatro modos con axe-core y tiró el informe en la última línea,
++ * porque `.diagnostico/` está en .gitignore —no viene en el clon— y sólo
++ * 05-capturas la creaba. Y el paso 01 abre 222 páginas sin imprimir nada, así
++ * que se leyó como colgado y se cortó con Ctrl-C; el `trap ... EXIT INT TERM`
++ * mató el servidor y dejó seguir el bucle, y los cinco pasos restantes
++ * fallaron con ECONNREFUSED. Un Ctrl-C, cinco falsos culpables.
++ */
++describe('el diagnóstico escribe donde dice que escribe', () => {
++  it('la carpeta de salida se crea en el módulo común, no en cada paso', () => {
++    const src = leer('scripts/diagnostico/rutas.mjs');
++    expect(src, 'sin guardar(), cada paso vuelve a poder olvidarse del mkdir').toContain('export function guardar');
++    expect(src, 'las capturas necesitan subcarpeta').toContain('export function carpeta');
++    expect(src).toMatch(/mkdirSync\(ruta, \{ recursive: true \}\)/);
++  });
++
++  it('ningún paso nombra .diagnostico/ por su cuenta', () => {
++    // Ésta es la regresión de verdad: el día que alguien escriba
++    // `writeFileSync('.diagnostico/09-x.json')` vuelve el ENOENT. Se prohíbe
++    // la ruta literal en los pasos; el único que la conoce es rutas.mjs.
++    const culpables: string[] = [];
++    for (const f of PASOS) {
++      const src = leer(`scripts/diagnostico/${f}`)
++        .replace(/\/\*[\s\S]*?\*\//g, '')   // los comentarios sí pueden citarla
++        .replace(/^\s*\/\/.*$/gm, '');
++      if (src.includes('.diagnostico/')) culpables.push(f);
++    }
++    expect(culpables, 'use guardar() o carpeta() de rutas.mjs').toEqual([]);
++  });
++
++  it('todo paso que produce un informe pasa por guardar() o carpeta()', () => {
++    const sinSalida: string[] = [];
++    for (const f of PASOS) {
++      const src = leer(`scripts/diagnostico/${f}`);
++      // 08-presupuesto lee .next y sólo imprime: no escribe informe.
++      if (!/writeFileSync|screenshot\(/.test(src)) continue;
++      if (!/\bguardar\(|\bcarpeta\(/.test(src)) sinSalida.push(f);
++    }
++    expect(sinSalida).toEqual([]);
++  });
++});
++
++describe('un Ctrl-C aborta el diagnóstico, no sólo el paso en curso', () => {
++  it('INT y TERM tienen su propio manejador y salen con 130', () => {
++    const sh = leer('scripts/diagnostico.sh');
++    // Reproducido antes del arreglo: con `trap apagar EXIT INT TERM`, una sola
++    // señal mataba el servidor y el bucle continuaba → FALLOS=5.
++    // Anclado a principio de línea a propósito: el comentario del guion CITA la
++    // línea vieja para explicar por qué se fue, y citarla no es tenerla.
++    expect(sh, 'INT no puede compartir manejador con EXIT: apaga y deja seguir').not.toMatch(/^trap apagar EXIT INT/m);
++    expect(sh).toMatch(/^trap interrumpir INT TERM$/m);
++    expect(sh, '130 es el código convenido para «lo paró una señal»').toMatch(/exit 130/);
++  });
++
++  it('el servidor se sigue apagando pase lo que pase', () => {
++    // El arreglo no puede costar la garantía anterior: sin trap EXIT queda un
++    // `next start` ocupando el puerto y el siguiente intento falla por otra razón.
++    const sh = leer('scripts/diagnostico.sh');
++    expect(sh).toMatch(/trap apagar EXIT\s*$/m);
++    expect(sh, 'interrumpir() apaga y sale; el trap EXIT vuelve a llamar a apagar()').toMatch(/SERVIDOR=""/);
++  });
++});
++
++describe('los pasos largos dicen por dónde van', () => {
++  it('01 y 03 informan del avance', () => {
++    // 01 abre 37 rutas × 6 viewports con 1.2 s de pausa en cada una. Mudo, son
++    // varios minutos que se leen como «colgado», y se cortan.
++    for (const f of ['01-maquetacion.mjs', '03-arquitectura.mjs']) {
++      expect(leer(`scripts/diagnostico/${f}`), `${f} mide cientos de páginas en silencio`).toMatch(/\bavance\(/);
++    }
++  });
++
++  it('sin terminal, el avance no escupe una línea por medida', () => {
++    // 222 líneas en un registro de CI no son progreso, son ruido. Medido: 12.
++    const src = leer('scripts/diagnostico/rutas.mjs');
++    expect(src).toContain('process.stderr.isTTY');
++    expect(src, 'se anuncia por decenas de porcentaje').toMatch(/Math\.floor\(pct \/ 10\)/);
++  });
++
++  it('el guion dice cuánto tardó cada paso', () => {
++    const sh = leer('scripts/diagnostico.sh');
++    expect(sh).toMatch(/INICIO=\$SECONDS/);
++    expect(sh).toMatch(/\$\(\(SECONDS - INICIO\)\)/);
++  });
++});
+-- 
+2.43.0
+
