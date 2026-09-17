@@ -57,7 +57,7 @@ Buscar `TODO(HUMAN)` en el repositorio localiza el punto exacto.
 
 ## 5. WhatsApp Business (fuera de alcance del agente)
 
-- [ ] Verificación / API de WhatsApp Business para el +51 946 085 270. El
+- [ ] Verificación / API de WhatsApp Business para el +51 924 875 632. El
       sitio usa enlaces `wa.me`, que funcionan sin la API.
 
 ## 6. Datos a verificar (marcados VERIFY en el código)

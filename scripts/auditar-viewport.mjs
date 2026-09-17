@@ -252,7 +252,7 @@ function medirEnPagina(tactilMinimo) {
     //
     // Esto se comprobaba antes con `el.closest('p, li')`, que es la etiqueta
     // equivocada: acusaba el teléfono de /cotizacion —«…por WhatsApp al
-    // +51 946 085 270 para una atención inmediata.»— por vivir en un <div> en
+    // +51 924 875 632 para una atención inmediata.»— por vivir en un <div> en
     // lugar de un <p>, y habría exculpado cualquier enlace suelto metido
     // dentro de un párrafo vacío de texto.
     //

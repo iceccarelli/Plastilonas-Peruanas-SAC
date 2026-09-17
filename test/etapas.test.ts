@@ -57,10 +57,14 @@ describe('etapa 1 — descubribilidad', () => {
     }
   });
 
-  it('la ficha de producto usa la plantilla «a medida en Perú»', () => {
-    expect(leer('app/(es)/productos/[slug]/page.tsx')).toContain(
-      'a medida en Perú | Plastilonas Peruanas SAC',
-    );
+  it('la ficha de producto usa la plantilla «a medida en Perú», con el presupuesto de lib/meta.ts', () => {
+    const src = leer('app/(es)/productos/[slug]/page.tsx');
+    // El título pasa por tituloAjustado (65 caracteres con la plantilla del
+    // layout, `%s | Plastilonas`) y no por un sufijo propio con la razón
+    // social completa: ese sufijo largo era lo que hacía que las 40 fichas
+    // de producto pasaran de 65 caracteres en el HTML generado.
+    expect(src).toContain("tituloAjustado(product.metaTitle ?? product.name, 'a medida en Perú')");
+    expect(src).not.toContain('a medida en Perú | Plastilonas Peruanas SAC');
   });
 
   it('el sitemap declara lastmod con más de una fecha distinta', () => {
@@ -314,7 +318,7 @@ describe('etapa 11 — el camino en inglés se cierra', () => {
     );
     expect(form).toContain('≤2 working hours');
     // El placeholder inglés tampoco es un número de la empresa.
-    expect(form).not.toContain('946 085 270');
+    expect(form).not.toContain('924 875 632');
   });
 
   it('el lead declara su idioma, campo que /api/lead aceptaba y nunca recibía', () => {

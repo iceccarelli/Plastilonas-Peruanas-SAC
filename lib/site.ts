@@ -104,7 +104,7 @@ export const SITE = {
   description:
     "Fabricante peruano de textil industrial a medida: big bags FIBC, lonas y cobertores, geosintéticos, estructuras, ventilación minera y mallas agrícolas.",
 
-  phoneWhatsApp: "+51946085270",
+  phoneWhatsApp: "+51924875632",
   phoneCentral: "+51998117065",
   email: "ventas@plastilonas.com",
 
