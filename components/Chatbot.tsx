@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { whatsappUrl, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 import { INICIOS, seguimientosPara } from '@/lib/chat/intents';
+import ChatMarkdown from '@/components/ChatMarkdown';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -171,7 +172,11 @@ export default function Chatbot() {
                           : 'bg-white border border-gray-100 shadow-sm rounded-tl-none'
                       }`}
                     >
-                      {message.content}
+                      {message.role === 'assistant' ? (
+                        <ChatMarkdown content={message.content} />
+                      ) : (
+                        message.content
+                      )}
                     </div>
                     {message.role === 'user' && (
                       <div className="w-7 h-7 bg-gray-200 text-gray-600 rounded-2xl flex-shrink-0 flex items-center justify-center mt-0.5">

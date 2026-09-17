@@ -32,27 +32,34 @@ export interface Seguimiento {
   chips: ChipIntencion[];
 }
 
-/** Botones del estado vacío: los trabajos que la gente realmente trae. */
+/**
+ * Botones del estado vacío. Las primeras cuatro son las líneas prioritarias
+ * de la empresa (lib/products.ts#PRODUCTOS_PRIORITARIOS): mismo orden, mismo
+ * nombre comercial que la portada y el mega menú, para que un visitante que
+ * abre el chat vea la misma oferta que ve en cualquier otra parte del sitio.
+ * Las dos últimas cubren los trabajos frecuentes que no son una de las
+ * cuatro y siguen mereciendo botón propio.
+ */
 export const INICIOS: ChipIntencion[] = [
   {
-    etiqueta: 'Cubrir carga u obra',
-    mensaje: 'Necesito cubrir carga, acopio u obra con lona o cobertor a medida.',
+    etiqueta: 'Mantas cobertoras',
+    mensaje: 'Necesito mantas cobertoras o toldos para cubrir carga de camión a medida.',
+  },
+  {
+    etiqueta: 'Mallas antiáfidas para granos',
+    mensaje: 'Necesito malla antiáfida para proteger cultivo de granos o mosca blanca.',
+  },
+  {
+    etiqueta: 'Mangas de ventilación',
+    mensaje: 'Necesito mangas de ventilación para mina o túnel.',
+  },
+  {
+    etiqueta: 'Carpas y techos con lonas',
+    mensaje: 'Necesito una carpa o un techo de lona con estructura metálica.',
   },
   {
     etiqueta: 'Big bags o envases',
     mensaje: 'Necesito big bags o envases para carga a granel.',
-  },
-  {
-    etiqueta: 'Impermeabilizar poza o canal',
-    mensaje: 'Necesito geomembrana para impermeabilizar una poza o un canal.',
-  },
-  {
-    etiqueta: 'Ventilación de mina',
-    mensaje: 'Necesito mangas de ventilación para mina subterránea.',
-  },
-  {
-    etiqueta: 'Proteger cultivo',
-    mensaje: 'Necesito malla para proteger cultivo: sombra, antigranizo o antiáfida.',
   },
   {
     etiqueta: '¿Qué fabrican ustedes?',
