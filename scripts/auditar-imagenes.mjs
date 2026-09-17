@@ -52,8 +52,19 @@ for (const f of [join(raiz, 'app'), join(raiz, 'components'), join(raiz, 'lib')]
     literales.get(r).add(f.replace(raiz + '/', ''));
   }
 }
+/**
+ * Una ruta con pinta de imagen puede no ser un archivo de `public/`: Next
+ * permite generarla en tiempo de petición con un manejador de ruta —
+ * `app/og.png/route.tsx` sirve `/og.png` así, documentado en lib/meta.ts—.
+ * `/og.png` es justo esa ruta: aparece como literal en lib/meta.ts (el `url`
+ * de OG_IMAGEN) y no vive en `public/`, así que sin esta comprobación el
+ * auditor la marcaba como rota estando servida de verdad.
+ */
+const esImagenGenerada = (ruta) =>
+  existsSync(join(raiz, 'app', ruta, 'route.ts')) || existsSync(join(raiz, 'app', ruta, 'route.tsx'));
+
 for (const [ruta, quien] of literales) {
-  if (!existsSync(join(raiz, 'public', ruta))) {
+  if (!existsSync(join(raiz, 'public', ruta)) && !esImagenGenerada(ruta)) {
     errores.push({ tipo: 'ruta-sin-archivo', ruta, quien: [...quien] });
   }
 }

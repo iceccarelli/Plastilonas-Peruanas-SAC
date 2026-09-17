@@ -20,7 +20,7 @@ import PreguntasDeCompra from '@/components/PreguntasDeCompra';
 export const metadata: Metadata = {
   title: 'Integraciones: API, MCP y datos abiertos',
   description:
-    'Catálogo, glosario y métodos de cálculo en JSON abierto, y una API con servidor MCP para calcular, especificar y cotizar por programa. Sin precios publicados.',
+    'Catálogo, glosario y métodos de cálculo en JSON abierto, y una API con servidor MCP para calcular y cotizar por programa. Sin precios publicados.',
   alternates: { canonical: RUTA_INTEGRACIONES },
 };
 

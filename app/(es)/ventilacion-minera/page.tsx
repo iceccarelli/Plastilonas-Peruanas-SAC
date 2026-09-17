@@ -21,7 +21,9 @@ const ALTERNOS = {
 } as const;
 
 export const metadata: Metadata = {
-  title: { absolute: `${cuna.titulo} | Plastilonas Peruanas SAC` },
+  // Plantilla corta del layout (`%s | Plastilonas`, 65 caracteres): un
+  // sufijo con la razón social completa pasaba el <title> de 65 caracteres.
+  title: cuna.titulo,
   description: cuna.descripcion,
   alternates: { canonical: '/ventilacion-minera', languages: ALTERNOS },
   openGraph: {

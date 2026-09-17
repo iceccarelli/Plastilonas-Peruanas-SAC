@@ -59,7 +59,7 @@ export const CUNAS_EN: CunaEn[] = [
     h1: 'Custom truck tarpaulins, curtain siders and covers, made in Peru',
     titulo: 'Truck tarpaulins and curtain siders made in Peru',
     descripcion:
-      'Truck tarpaulins, covers and curtain siders cut and sewn at our own plant in Chorrillos, Lima, and fitted by our own crew. Quoted against dimensions and delivery city.',
+      'Truck tarpaulins, covers and curtain siders cut, sewn and fitted at our plant in Chorrillos, Lima. Quoted against dimensions and delivery city.',
     intro: [
       'A truck tarpaulin is bought twice: once on price, and once more because it was bought on price. What decides service life is not the catalogue but the specification — the right fabric weight for the route, reinforced seams where the load rubs, and a tensioning system one driver can operate alone.',
       'We cut and sew covers, tarpaulins and curtain siders against the real dimensions of the body, and fit them with our own crew in Lima. For fleets the same drawing repeats on every unit: the part for truck 12 is identical to the part for truck 1.',
@@ -107,9 +107,9 @@ export const CUNAS_EN: CunaEn[] = [
     slugEs: 'ventilacion-minera',
     slug: 'mine-ventilation-ducting-peru',
     h1: 'Mine and tunnel ventilation ducting, manufactured to specification in Peru',
-    titulo: 'Mine ventilation ducting made to specification in Peru',
+    titulo: 'Mine ventilation ducting made to spec in Peru',
     descripcion:
-      'Flexible ventilation ducting for mines and tunnels, manufactured in Chorrillos, Lima: diameter and section length against specification. RFQ with a technical checklist.',
+      'Flexible ventilation ducting for mines and tunnels, made in Chorrillos, Lima: diameter and section length against spec. RFQ with a technical checklist.',
     intro: [
       'Diameter is the easy figure on a ventilation duct. What decides fan consumption for the whole life of the heading is the quality of the joints, the internal roughness and how much the installed run leaks.',
       'We manufacture ducting for mine and tunnel ventilation against specification — diameter, section length, forcing or exhausting duty — at the Chorrillos plant in Lima, together with the accessories that complete the run.',
@@ -160,7 +160,7 @@ export const CUNAS_EN: CunaEn[] = [
     h1: 'FIBC bulk bags of 1 and 2 tonnes, cut and sewn in Lima, Peru',
     titulo: 'FIBC big bags cut and sewn in Lima, Peru',
     descripcion:
-      'FIBC bulk bags of 1 and 2 tonnes cut and sewn in Chorrillos, Lima: skirt top, discharge spout, polyethylene liner. Quoted against capacity, quantity and destination.',
+      'FIBC bulk bags of 1 and 2 tonnes, cut and sewn in Chorrillos, Lima: skirt top, discharge spout, PE liner. Quoted against capacity and destination.',
     intro: [
       'An FIBC is specified by what it will hold and how it will be lifted, not by its photograph. Capacity (1 or 2 tonnes), safety factor, the type of top and discharge, and whether the cargo requires an inner liner: those four decisions define the correct bag.',
       'We cut and sew FIBC bulk bags at the Chorrillos plant in Lima in the configurations the operation asks for: skirt top, discharge spout, polyethylene liner. For bulk shipments, Polytarp sacks complete the line as a declared direct import.',

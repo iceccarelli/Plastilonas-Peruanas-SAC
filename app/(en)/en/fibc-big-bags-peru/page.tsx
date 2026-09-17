@@ -24,7 +24,7 @@ const ALTERNOS = {
 const cuna = cunaEnPorSlug('fibc-big-bags-peru')!;
 
 export const metadata: Metadata = {
-  title: { absolute: `${cuna.titulo} | ${SITE.legalName}` },
+  title: cuna.titulo,
   description: cuna.descripcion,
   alternates: { canonical: '/en/fibc-big-bags-peru', languages: ALTERNOS },
   openGraph: {

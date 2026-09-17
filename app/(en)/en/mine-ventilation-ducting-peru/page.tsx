@@ -24,7 +24,7 @@ const ALTERNOS = {
 const cuna = cunaEnPorSlug('mine-ventilation-ducting-peru')!;
 
 export const metadata: Metadata = {
-  title: { absolute: `${cuna.titulo} | ${SITE.legalName}` },
+  title: cuna.titulo,
   description: cuna.descripcion,
   alternates: { canonical: '/en/mine-ventilation-ducting-peru', languages: ALTERNOS },
   openGraph: {

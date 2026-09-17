@@ -39,10 +39,12 @@ import { faqsDeRuta } from '@/lib/consultas-dinero';
 const URL_PAGINA = `${SITE.url}/en/sourcing-from-peru`;
 const TITLE = 'Sourcing industrial textiles from Peru';
 const DESCRIPTION =
-  'How to buy FIBC big bags, truck tarpaulins and mine ventilation ducting from a Peruvian manufacturer: identity, Incoterms, what we make vs. supply, and the RFQ checklist.';
+  'How to buy FIBC bags, truck tarpaulins and mine ventilation ducting from Peru: identity, Incoterms, make vs. supply, and the RFQ checklist.';
 
 export const metadata: Metadata = {
-  title: { absolute: `${TITLE} | ${SITE.legalName}` },
+  // Short layout template (`%s | Plastilonas`, 65-char budget): a suffix
+  // with the full legal name pushed the <title> past 65 characters.
+  title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/en/sourcing-from-peru' },
   openGraph: {

@@ -367,11 +367,23 @@ for (const [d, rutas] of porDescripcion) {
 }
 
 // --- Huérfanas ------------------------------------------------------
-// Una página a la que no llega ni un enlace del propio sitio existe solo en el
-// sitemap. Se rastrea peor, no acumula señal interna y, en la práctica, es
-// contenido que nadie encuentra navegando.
+// Una página PÚBLICA a la que no llega ni un enlace del propio sitio existe
+// solo en el sitemap. Se rastrea peor, no acumula señal interna y, en la
+// práctica, es contenido que nadie encuentra navegando.
+//
+// Las rutas transaccionales de abajo NO son ese caso: son estado del
+// comprador (carrito, checkout), no contenido editorial, y por eso mismo
+// robots.ts las DISALLOW explícitamente (no deben indexarse ni rastrearse) y
+// ningún enlace de navegación o pie las apunta a propósito — un enlace fake
+// solo para satisfacer este auditor sería peor que la ausencia de enlace.
+// test/rutas-privadas.test.ts prueba que la lista de abajo coincide con el
+// DISALLOW real de robots.ts, así que esta excepción no puede desalinearse
+// en silencio ni usarse para esconder una huérfana pública de verdad.
+const RUTAS_PRIVADAS = new Set(['/carrito', '/checkout', '/checkout/exito']);
+
 for (const p of paginas) {
   if (p.ruta === '/') continue;
+  if (RUTAS_PRIVADAS.has(p.ruta)) continue;
   if (!recibenEnlace.has(p.ruta)) {
     anota('aviso', 'huerfana', p.ruta, 'ninguna página del sitio enlaza aquí');
   }

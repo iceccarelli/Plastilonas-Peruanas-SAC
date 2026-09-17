@@ -15,12 +15,14 @@ const ALTERNOS = {
   'x-default': '/fabricar-o-importar',
 } as const;
 
-const TITLE = '¿Fabricar en Lima o importar? La comparación completa';
+const TITLE = '¿Fabricar en Lima o importar? Comparación completa';
 const DESCRIPTION =
-  'Diez criterios, incluidos los tres que gana la importación, y el costo real de importar: ad valorem sobre CIF, IGV, IPM, percepción, despacho y días de financiamiento.';
+  'Diez criterios, incluidos los tres que gana la importación, y el costo real de importar: ad valorem, IGV, IPM, percepción, despacho y financiamiento.';
 
 export const metadata: Metadata = {
-  title: { absolute: `${TITLE} | ${SITE.legalName}` },
+  // Plantilla corta del layout (`%s | Plastilonas`, 65 caracteres): el sufijo
+  // con la razón social completa pasaba el <title> de 65 caracteres.
+  title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/fabricar-o-importar', languages: ALTERNOS },
   openGraph: {

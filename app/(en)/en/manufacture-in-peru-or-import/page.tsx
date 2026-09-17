@@ -12,10 +12,12 @@ const ALTERNOS = {
 
 const TITLE = 'Manufacture in Peru or import? The full comparison';
 const DESCRIPTION =
-  'Ten criteria, including the three importing wins, and what an import into Peru actually costs: ad valorem duty on CIF, IGV, IPM, advance perception, clearance and days of financing.';
+  'Ten criteria, including the three importing wins, and the real cost of importing: ad valorem duty, IGV, IPM, perception, clearance and financing.';
 
 export const metadata: Metadata = {
-  title: { absolute: `${TITLE} | ${SITE.legalName}` },
+  // Short layout template (`%s | Plastilonas`, 65-char budget): a suffix
+  // with the full legal name pushed the <title> past 65 characters.
+  title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/en/manufacture-in-peru-or-import', languages: ALTERNOS },
   openGraph: {
