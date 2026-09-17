@@ -1,5 +1,5 @@
 import { SITE } from './site';
-import { products, productFamilies, sourcingLabels, availabilityLabels, sectors } from './products';
+import { products, productFamilies, sourcingLabels, availabilityLabels, sectors, productosPrioritarios } from './products';
 import { familyContent } from './families';
 import { terminosParaProducto } from './glosario';
 import { solutionsForProduct } from './solutions';
@@ -36,6 +36,7 @@ export const CATALOGO_VERSION = '1.0';
 
 export function buildCatalogoJson(): string {
   const base = SITE.url;
+  const ordenPrioritario = new Map(productosPrioritarios().map((pp) => [pp.slug, pp.orden]));
   return `${JSON.stringify(
     {
       $schema: 'https://schema.org',
@@ -73,6 +74,19 @@ export function buildCatalogoJson(): string {
       totalProductos: products.length,
       totalFamilias: productFamilies.length,
       sectores: sectors,
+      // Las cuatro líneas que la empresa prioriza para comprador y agente:
+      // mismo dato que consumen la portada, el mega menú y el chatbot
+      // (lib/products.ts#productosPrioritarios). "Prioritario" es una
+      // decisión comercial, no una promesa de inventario — la disponibilidad
+      // de cada una sigue siendo la declarada en `suministro.disponibilidad`
+      // del propio producto, abajo en `dataset`.
+      productosPrioritarios: productosPrioritarios().map((p) => ({
+        orden: p.orden,
+        slug: p.slug,
+        etiqueta: p.etiquetaPrioritaria,
+        posicionamiento: p.posicionamiento,
+        url: `${base}/productos/${p.slug}`,
+      })),
       familias: productFamilies.map((f) => ({
         '@type': 'DataCatalog',
         name: f.name,
@@ -105,6 +119,7 @@ export function buildCatalogoJson(): string {
             p.documentation ??
             'Ficha técnica y certificado del fabricante se entregan con la cotización.',
         },
+        prioridadComercial: ordenPrioritario.get(p.slug) ?? null,
         fichaTecnicaPdf: `${base}/productos/${p.slug}/ficha-tecnica.pdf`,
         // Los términos que gobiernan su especificación: para que un agente
         // pueda explicar QUÉ hay que definir, no solo qué se vende.

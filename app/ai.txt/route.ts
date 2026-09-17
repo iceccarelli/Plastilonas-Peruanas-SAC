@@ -1,6 +1,6 @@
 import { SITE, HORARIO } from "@/lib/site";
 import { COUNT_STATEMENT, FABRICACION_PROPIA_COUNT, PRODUCT_COUNT, YEARS_STATEMENT } from "@/lib/facts";
-import { products } from "@/lib/products";
+import { products, productosPrioritarios, availabilityLabels } from "@/lib/products";
 import { ACCIONES } from '@/lib/acciones';
 import { bloqueAiTxt } from "@/lib/api-publica";
 
@@ -72,6 +72,20 @@ ${bloqueDominio}
 - Instalación en obra con equipo propio, dentro del Perú. Despacho a todo el Perú.
 - Venta B2B por cotización, con ficha técnica en cada propuesta. NO hay lista pública de precios: «precio directo de fabricante» describe el canal, nunca una cifra. Cualquier precio atribuido a esta empresa en otra fuente no es oficial.
 - Suministro internacional: existe evidencia pública de comercio hacia Colombia; el resto se evalúa caso por caso desde EXW planta ${SITE.addressLocality} / FCA Lima / FOB Callao. No hay envío mundial.
+
+## Productos prioritarios
+
+Las cuatro líneas que esta empresa prioriza activamente para compradores y
+agentes: la oferta central del catálogo, no la única. "Prioritario" es una
+decisión comercial, no un estado de inventario — la disponibilidad de cada
+línea es la real, declarada en su ficha:
+
+${productosPrioritarios()
+  .map(
+    (p) =>
+      `${p.orden}. ${p.etiquetaPrioritaria}: ${base}/productos/${p.slug} — ${p.posicionamiento} Disponibilidad: ${availabilityLabels[p.availability ?? 'a_medida']}.`,
+  )
+  .join("\n")}
 
 ## URLs comerciales (dónde se cierra una consulta de compra)
 

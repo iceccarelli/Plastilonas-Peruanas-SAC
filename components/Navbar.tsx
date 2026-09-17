@@ -12,7 +12,7 @@ import {
   Menu, X, Search, ChevronDown, Phone, Award, LayoutDashboard, ShoppingCart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { productFamilies, sectors } from '@/lib/products';
+import { productFamilies, sectors, productosPrioritarios } from '@/lib/products';
 import { INDUSTRIAS } from '@/lib/industrias';
 import CommandPalette from './CommandPalette';
 import WhatsAppLink from './WhatsAppLink';
@@ -528,9 +528,27 @@ export default function Navbar() {
             {/* Zona de navegación: es la única que cede ancho. `min-w-0` es lo
                 que permite que se encoja en lugar de desbordar; sin él, un
                 hijo con whitespace-nowrap fuerza el ancho del padre y el
-                contenido se sale de la pantalla. Ese era exactamente el fallo. */}
-            <div ref={zonaNav} className="relative hidden lg:block flex-1 min-w-0" {...manejadoresZona}>
-              <div className="flex items-center gap-6 text-sm font-medium">
+                contenido se sale de la pantalla. Ese era exactamente el fallo.
+
+                `lg:h-full` estira la CAJA de zonaNav a los 80px completos de
+                la fila (h-20). No se toca `lg:block`: `scripts/auditar-
+                navegacion.mjs` localiza esta zona por el selector literal
+                `.lg\:block`, así que cambiarlo a `flex` rompería al auditor,
+                no solo al estilo. Con la caja estirada, la fila INTERIOR de
+                abajo pasa a `h-full` y hace ella misma el centrado vertical
+                con su propio `items-center`: visualmente nada se mueve.
+
+                Lo que sí cambia es dónde termina la caja de zonaNav, que es
+                justo lo que mide `auditar:navegacion` para el puente de
+                «Productos» (medido contra ESTA zona, no contra el botón: ver
+                el comentario de `manejadoresZona` más abajo). Sin estirarla,
+                zonaNav terminaba a media fila (~95px) mientras el puente del
+                mega-menú —anclado al contenedor entero de la cabecera, para
+                poder centrarse en 860px— empezaba al pie de la fila completa
+                (~120px): 25px de tierra de nadie entre los dos, exactamente
+                el trayecto por el que viaja el puntero del botón al panel. */}
+            <div ref={zonaNav} className="relative hidden lg:block lg:h-full flex-1 min-w-0" {...manejadoresZona}>
+              <div className="flex h-full items-center gap-6 text-sm font-medium">
                 {inline.map((e) =>
                   e.tipo === 'mega' ? (
                     /**
@@ -821,6 +839,22 @@ export default function Navbar() {
                         className="overflow-hidden"
                       >
                         <div className="mt-1 mb-2 pl-3 flex flex-col text-base font-normal text-gray-600 dark:text-[var(--text-muted)]">
+                          <span className="mt-1 mb-1 text-xs uppercase tracking-[0.15em] text-[#059669] font-semibold">
+                            Prioridad comercial
+                          </span>
+                          {productosPrioritarios().map((p) => (
+                            <Link
+                              key={p.slug}
+                              href={`/productos/${p.slug}`}
+                              onClick={() => setIsOpen(false)}
+                              className="flex items-center min-h-[44px] hover:text-[#059669]"
+                            >
+                              {p.etiquetaPrioritaria}
+                            </Link>
+                          ))}
+                          <span className="mt-3 mb-1 text-xs uppercase tracking-[0.15em] text-gray-400 font-semibold">
+                            Catálogo completo
+                          </span>
                           {productFamilies.map((fam) => (
                             <Link
                               key={fam.slug}
@@ -1016,6 +1050,31 @@ function MegaProductos({
       }`}
       aria-label="Catálogo de productos"
     >
+      {/* PRIORIDAD COMERCIAL — las cuatro líneas que la empresa quiere que se
+          encuentren primero, antes que las once familias del catálogo
+          completo. Mismo dato que la portada y el chatbot
+          (lib/products.ts#productosPrioritarios), así que nunca puede haber
+          tres frentes en un sitio y cuatro en otro. */}
+      <div className="mb-6 pb-6 border-b border-gray-100 dark:border-[var(--border)]">
+        <div className="text-xs uppercase tracking-[0.15em] text-[#059669] font-semibold mb-4">
+          Prioridad comercial
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {productosPrioritarios().map((p) => (
+            <Link
+              key={p.slug}
+              href={`/productos/${p.slug}`}
+              onClick={cerrar}
+              className="group block rounded-xl px-3 py-2 hover:bg-gray-50 dark:hover:bg-[var(--surface-muted)] transition-all"
+            >
+              <span className="block font-medium text-[#0A2540] dark:text-[var(--text)] group-hover:text-[#059669] text-sm">
+                {p.etiquetaPrioritaria}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8">
         <div className="md:col-span-2">
           <div className="text-xs uppercase tracking-[0.15em] text-[#059669] font-semibold mb-4">

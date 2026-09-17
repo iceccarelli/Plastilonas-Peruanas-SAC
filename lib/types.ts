@@ -45,6 +45,14 @@ export interface Product {
   gallery: string[];
   featured: boolean;
   popular: boolean;
+  /**
+   * Título corto para <title>, SOLO cuando `name` no cabe en el presupuesto
+   * de lib/meta.ts (65 caracteres con el sufijo de marca). Nunca se usa en
+   * H1, breadcrumbs, JSON-LD ni en el catálogo para agentes: ahí sigue
+   * publicándose `name` completo. Preserva el término de búsqueda principal;
+   * no es un recorte mecánico.
+   */
+  metaTitle?: string;
 
   // --- Estado de oferta (nuevo) --------------------------------------------
   /** Cómo lo entregamos. Si se omite, la UI no muestra badge de origen. */

@@ -1,14 +1,14 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
-import { products } from '@/lib/products';
+import { products, esProductoPrioritario } from '@/lib/products';
 import ProductGallery from '@/components/ProductGallery';
 import { mapaDeTomas } from '@/lib/galeria';
 import ProductBuyBox from '@/components/ProductBuyBox';
 import ProductAvailability from '@/components/ProductAvailability';
 import ProductStructuredData from '@/components/ProductStructuredData';
 import { SITE } from '@/lib/site';
-import { descripcionDeTexto } from '@/lib/meta';
+import { descripcionDeTexto, tituloAjustado } from '@/lib/meta';
 import WhatsAppLink from '@/components/WhatsAppLink';
 import TrackView from '@/components/TrackView';
 import DatasheetButton from '@/components/DatasheetButton';
@@ -52,11 +52,16 @@ export async function generateMetadata({ params }: Props) {
   const canonical = `/productos/${product.slug}`;
   const ogTitle = `${product.name} — Plastilonas Peruanas SAC`;
   const ogImage = product.image ? `${SITE.url}${product.image}` : undefined;
+  // Título de <title>: «{Producto}: a medida en Perú | Plastilonas», con el
+  // MISMO presupuesto y la MISMA plantilla del layout (`%s | Plastilonas`,
+  // 65 caracteres) que usa el resto del sitio — no un sufijo propio con la
+  // razón social completa, que era lo que hacía que las 40 fichas de producto
+  // pasaran de 65 caracteres. `metaTitle` sólo existe en el puñado de
+  // productos cuyo `name` por sí solo ya supera el presupuesto; para el resto
+  // se usa `name` completo.
+  const tituloSeo = tituloAjustado(product.metaTitle ?? product.name, 'a medida en Perú');
   return {
-    // Plantilla de ficha de producto: «{Producto} a medida en Perú | Plastilonas
-    // Peruanas SAC». Va como `absolute` para no heredar además el sufijo del
-    // layout y terminar con la marca dos veces.
-    title: { absolute: `${product.name} a medida en Perú | Plastilonas Peruanas SAC` },
+    title: tituloSeo,
     description: descripcionDeTexto(product.shortDescription),
     alternates: { canonical },
     openGraph: {
@@ -152,6 +157,11 @@ export default async function ProductDetailPage({ params }: Props) {
           <div className="flex items-center gap-3 mb-4">
             <span className="badge bg-emerald-100 text-emerald-700">{product.category}</span>
             {product.popular && <span className="badge bg-amber-100 text-amber-700">Más vendido</span>}
+            {/* Prioridad comercial, no urgencia de inventario: la disponibilidad
+                real sigue viniendo de <ProductAvailability> más abajo. */}
+            {esProductoPrioritario(product.slug) && (
+              <span className="badge bg-[#0A2540] text-white">Oferta prioritaria</span>
+            )}
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-semibold text-[#0A2540] leading-tight md:leading-none mb-5">{product.name}</h1>

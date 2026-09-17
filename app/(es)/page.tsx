@@ -3,7 +3,7 @@ import { SITE, HORARIO } from '@/lib/site';
 import { FABRICACION_PROPIA_COUNT, YEARS_OPERATING } from '@/lib/facts';
 import Link from 'next/link';
 import { ArrowRight, Phone, ShieldCheck, MapPin, Truck, FileText } from 'lucide-react';
-import { products, productFamilies, sectors } from '@/lib/products';
+import { products, productFamilies, sectors, productosPrioritarios } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
 import FeaturedDeck from '@/components/FeaturedDeck';
 import SectorTicker from '@/components/SectorTicker';
@@ -92,6 +92,12 @@ export default function Home() {
   // cambian solas. Escribirlo a mano fue lo que hizo que la portada dijera
   // «desde 2009» mientras lib/site.ts era la única fuente que podía saberlo.
   const anios = YEARS_OPERATING;
+  // Las cuatro líneas que la empresa prioriza para comprador y agente de IA
+  // por igual: mismo dato que consumen el mega menú, la ficha de producto,
+  // el chatbot y /llms.txt. Server-rendered aquí a propósito — ningún
+  // rastreador ni comprador sin JS debe depender de una pestaña o un hover
+  // para verlas.
+  const prioritarios = productosPrioritarios();
   /**
    * Líneas que se confeccionan en la planta de Chorrillos, contadas del propio
    * catálogo. Sustituye a un «100% a medida» escrito a mano que el catálogo
@@ -204,6 +210,31 @@ export default function Home() {
             ))}
           </div>
 
+        </div>
+      </section>
+
+      {/* ===== 1b-2 · LAS CUATRO LÍNEAS PRIORITARIAS — el frente comercial
+           inmediato de la portada, antes que el catálogo completo o las tres
+           cuñas profundas de abajo. Server-rendered con <ProductCard>, el
+           mismo componente que usa el catálogo: un comprador o un rastreador
+           sin JavaScript las ve en el primer HTML, no tras un hover o una
+           pestaña. ===== */}
+      <section className="bg-white section-pad">
+        <div className="max-w-7xl mx-auto px-6">
+          <Reveal>
+            <SectionHeading
+              eyebrow="Prioridad comercial"
+              title="4 líneas que puede cotizar hoy con Plastilonas"
+              className="mb-9"
+            />
+          </Reveal>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {prioritarios.map((p, i) => (
+              <Reveal key={p.slug} delay={0.04 * i}>
+                <ProductCard product={p} showSector={false} />
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 

@@ -337,6 +337,7 @@ export const products: Product[] = [
     id: '16',
     slug: 'cobertores-agricolas-multimaterial',
     name: 'Cobertores Multimaterial (Polytarp, PE, Raschel, Térmico, PP)',
+    metaTitle: 'Cobertores Multimaterial: Polytarp y Raschel',
     category: 'Lonas y Cobertores',
     sector: ['Agricultura', 'Industrial', 'Logística'],
     shortDescription: 'Línea completa de cobertores en Polytarp, polietileno, Raschel, térmico y polipropileno para protección de cultivos, insumos y mercadería.',
@@ -643,6 +644,7 @@ export const products: Product[] = [
     id: '20',
     slug: 'galpones-invernaderos-estructurados',
     name: 'Galpones, Techos Ligeros e Invernaderos Estructurados',
+    metaTitle: 'Galpones e Invernaderos Estructurados',
     category: 'Estructuras y Arquitectura Textil',
     sector: ['Agricultura', 'Industrial', 'Construcción'],
     shortDescription: 'Galpones, techos ligeros e invernaderos estructurados a medida para agricultura protegida, almacenamiento y producción.',
@@ -1352,6 +1354,7 @@ export const products: Product[] = [
     id: '32',
     slug: 'accesorios-instalacion',
     name: 'Accesorios de Instalación (Ojalillos, Sogas, Tensores, Tubos)',
+    metaTitle: 'Accesorios de Instalación: Ojalillos y Tensores',
     category: 'Accesorios y Complementos',
     sector: ['Industrial', 'Transporte', 'Construcción', 'Agricultura'],
     shortDescription: 'Ojalillos metálicos, sogas (sisal, driza, cabo), tensores, ganchos y tubos: todo lo necesario para instalar lonas, mallas y estructuras.',
@@ -1690,3 +1693,85 @@ export const availabilityLabels: Record<string, string> = {
   a_medida: 'Fabricación a medida',
   bajo_pedido: 'Suministro a proyecto'
 };
+
+// -----------------------------------------------------------------------------
+// PRODUCTOS PRIORITARIOS — las cuatro líneas que la empresa quiere que un
+// comprador (o un agente de IA) encuentre primero: portada, mega menú, ficha
+// de producto, chatbot y superficies para agentes derivan TODOS de esta
+// misma lista. No es una segunda tabla de catálogo: cada entrada solo declara
+// el slug, la etiqueta comercial, el posicionamiento de una línea y el orden;
+// el resto (specs, sourcing, availability, imágenes) sigue viniendo de
+// `products`, así que no hay dos fuentes que puedan divergir.
+//
+// REGLA DE HONESTIDAD: "prioritario" es una decisión comercial (a qué
+// oferta se empuja tráfico y conversación), no un estado de inventario. La
+// disponibilidad que se muestra sigue siendo la de `Product.availability`
+// tal cual está declarada — nunca "siempre en stock".
+// -----------------------------------------------------------------------------
+export interface ProductoPrioritario {
+  /** Debe existir en `products` — verificado por test/productos-prioritarios.test.ts. */
+  slug: string;
+  /** Etiqueta corta de venta, como se quiere que la vea un comprador. */
+  etiqueta: string;
+  /** Una línea de posicionamiento comercial (no repite la shortDescription). */
+  posicionamiento: string;
+  /** Orden de presentación. Único y estable: no se deriva del índice del array. */
+  orden: number;
+}
+
+export const PRODUCTOS_PRIORITARIOS: ProductoPrioritario[] = [
+  {
+    slug: 'mantas-cobertores-toldos-camiones',
+    etiqueta: 'Mantas cobertoras',
+    posicionamiento: 'Protección de carga en ruta: lluvia, sol y polvo, confeccionada a la medida de su carrocería.',
+    orden: 1,
+  },
+  {
+    slug: 'mallas-antiafidas',
+    etiqueta: 'Mallas antiáfidas para granos',
+    posicionamiento: 'Barrera física contra áfidos, mosca blanca y otras plagas, con la densidad que exige su cultivo.',
+    orden: 2,
+  },
+  {
+    slug: 'mangas-ventilacion-minas-tuneles',
+    etiqueta: 'Mangas de ventilación',
+    posicionamiento: 'Ventilación de mina y túnel a medida de diámetro, largo de tramo y régimen de impulsión.',
+    orden: 3,
+  },
+  {
+    slug: 'carpas-lona-estructuras-metalicas',
+    etiqueta: 'Carpas y techos con lonas',
+    posicionamiento: 'Hangares, galpones y cubiertas con estructura metálica galvanizada, 100% a su medida.',
+    orden: 4,
+  },
+];
+
+export type ProductoPrioritarioResuelto = Product & {
+  etiquetaPrioritaria: string;
+  posicionamiento: string;
+  orden: number;
+};
+
+/**
+ * Los cuatro productos prioritarios resueltos contra el catálogo real, en
+ * orden determinístico. Lanza en tiempo de importación si un slug quedó
+ * huérfano — un focus product que no resuelve es peor que no tener ninguno,
+ * porque cada superficie que lo consume (portada, menú, chatbot, /llms.txt)
+ * asumiría en silencio que apunta a algo real.
+ */
+export function productosPrioritarios(): ProductoPrioritarioResuelto[] {
+  return [...PRODUCTOS_PRIORITARIOS]
+    .sort((a, b) => a.orden - b.orden)
+    .map((pp) => {
+      const producto = products.find((p) => p.slug === pp.slug);
+      if (!producto) {
+        throw new Error(`PRODUCTOS_PRIORITARIOS declara el slug "${pp.slug}", que no existe en products.`);
+      }
+      return { ...producto, etiquetaPrioritaria: pp.etiqueta, posicionamiento: pp.posicionamiento, orden: pp.orden };
+    });
+}
+
+/** ¿Esta ficha de producto es una de las cuatro líneas prioritarias? */
+export function esProductoPrioritario(slug: string): boolean {
+  return PRODUCTOS_PRIORITARIOS.some((pp) => pp.slug === slug);
+}
