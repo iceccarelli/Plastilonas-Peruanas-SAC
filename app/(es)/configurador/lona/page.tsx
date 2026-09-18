@@ -39,7 +39,7 @@ export default function ConfiguradorLonaPage() {
         .
       </p>
       <div className="mt-10">
-        <LonaConfigurador />
+        <LonaConfigurador barraMovil />
       </div>
     </div>
   );

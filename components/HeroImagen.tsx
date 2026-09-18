@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { HERO_IMAGENES } from '@/lib/hero-imagenes';
+import { useMovimiento } from '@/lib/usar-movimiento';
 
 /**
  * LA FOTOGRAFÍA DEL HERO — un rotador CONTROLADO sobre el lote de lib/hero-imagenes.ts.
@@ -46,14 +47,40 @@ import { HERO_IMAGENES } from '@/lib/hero-imagenes';
  * lote ya estaba en el repositorio. El coste real de mostrarlo, con las
  * cuatro reglas de arriba, es cero en el primer pintado.
  *
- * EL MOVIMIENTO. Escala y desplazamiento muy lentos (tipo Ken Burns) sobre la
- * diapositiva activa, con el origen de la transformación escalonado por
- * índice para que dos giros seguidos no se muevan igual. Es CSS: `transform`
- * y `opacity`, las dos propiedades que el compositor anima sin repintar.
+ * EL MOVIMIENTO — Y EL DEFECTO QUE TENÍA. Esto decía «tipo Ken Burns» y no lo
+ * era: sólo escalaba de 1 a 1.09, sin desplazamiento, así que el encuadre
+ * crecía pero no RECORRÍA nada. Y había algo peor: la diapositiva activa se
+ * pintaba YA con su transformación final. Como el primer cuadro nace activo,
+ * la foto que más se ve —la del LCP— nunca llegaba a moverse; la escala sólo
+ * se notaba, y a medias, a partir del segundo giro.
+ *
+ * Ahora cada diapositiva tiene un PAR de encuadres, «de» y «a»: un
+ * desplazamiento de un par de puntos porcentuales en una dirección distinta
+ * por diapositiva, combinado con la escala. La activa va de «de» a «a» en
+ * dieciséis segundos, y el primer cuadro arranca en «de» y salta a «a» en el
+ * tick siguiente al montaje (`arrancado`), que es lo que hace que el recorrido
+ * exista también en la primera foto. El fundido se alargó a 2.2 s: un corte de
+ * 1.4 s sobre un movimiento tan lento se veía como un parpadeo.
+ *
+ * Sigue siendo CSS: `transform` y `opacity`, las dos propiedades que el
+ * compositor anima sin repintar. Cero JavaScript por cuadro.
  */
 
 /** Origen de la transformación por diapositiva: evita que todas paneen igual. */
 const ORIGENES = ['50% 50%', '30% 40%', '70% 45%', '40% 65%', '60% 35%'] as const;
+
+/**
+ * Encuadre inicial y final de cada diapositiva. Cinco recorridos que se turnan:
+ * dos diapositivas seguidas nunca paneán en la misma dirección, así que el
+ * lote de veinte no se siente como veinte veces el mismo efecto.
+ */
+const RECORRIDOS = [
+  { de: 'translate(-2.4%, 1.2%) scale(1.015)', a: 'translate(2.2%, -1.4%) scale(1.115)' },
+  { de: 'translate(2.6%, -1.0%) scale(1.02)', a: 'translate(-2.0%, 1.6%) scale(1.12)' },
+  { de: 'translate(0%, -2.2%) scale(1.09)', a: 'translate(-1.6%, 1.8%) scale(1.0)' },
+  { de: 'translate(-1.8%, -1.8%) scale(1.01)', a: 'translate(1.8%, 1.8%) scale(1.13)' },
+  { de: 'translate(1.4%, 2.0%) scale(1.1)', a: 'translate(-1.4%, -1.6%) scale(1.02)' },
+] as const;
 
 /** Intervalo entre giros, en milisegundos. Lento a propósito. */
 const MIN_MS = 8_000;
@@ -64,14 +91,28 @@ export default function HeroImagen() {
   const [indice, setIndice] = useState(0);
   /** Índices ya montados. Empieza y, sin movimiento, se queda en [0]. */
   const [montadas, setMontadas] = useState<number[]>([0]);
+  /** Falso hasta el tick siguiente al montaje: es lo que echa a andar el paneo. */
+  const [arrancado, setArrancado] = useState(false);
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /**
+   * La misma pregunta que hacen el despiece de la lona y los carruseles, en un
+   * solo sitio: `lib/usar-movimiento.ts`. Devuelve `false` en el primer render,
+   * así que el HTML servido y el primer render del cliente coinciden y quien
+   * pidió menos movimiento no ve arrancar nada.
+   */
+  const mover = useMovimiento();
 
   useEffect(() => {
     if (HERO_IMAGENES.length < 2) return;
     // Un solo lote, una sola foto: si el visitante pide menos movimiento, la
     // portada se queda como estaba antes de este componente.
-    const consulta = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-    if (!consulta || consulta.matches) return;
+    if (!mover) return;
+
+    // El primer cuadro nace con su encuadre de salida y pasa al de llegada en
+    // cuanto el navegador ha pintado: sin esto no hay transición que animar y
+    // la foto del LCP se queda clavada en su encuadre final.
+    const arranque = requestAnimationFrame(() => setArrancado(true));
 
     let vivo = true;
 
@@ -102,9 +143,10 @@ export default function HeroImagen() {
 
     return () => {
       vivo = false;
+      cancelAnimationFrame(arranque);
       if (temporizador.current) clearTimeout(temporizador.current);
     };
-  }, []);
+  }, [mover]);
 
   if (fallo) {
     // Sin fotografía no se finge una: el panel conserva el azul del sitio.
@@ -145,8 +187,16 @@ export default function HeroImagen() {
               filter: 'saturate(1.12) contrast(1.03)',
               opacity: activa ? 1 : 0,
               transformOrigin: ORIGENES[i % ORIGENES.length],
-              transform: activa ? 'scale(1.09)' : 'scale(1)',
-              transition: 'opacity 1400ms ease-in-out, transform 15000ms linear',
+              // Sin movimiento no hay transformación en absoluto: la foto se
+              // sirve tal cual, que es la página que había antes del rotador.
+              transform: !mover
+                ? 'none'
+                : activa && arrancado
+                  ? RECORRIDOS[i % RECORRIDOS.length].a
+                  : RECORRIDOS[i % RECORRIDOS.length].de,
+              transition: mover
+                ? 'opacity 2200ms ease-in-out, transform 16000ms cubic-bezier(0.22,0.61,0.36,1)'
+                : 'none',
               willChange: 'opacity, transform',
             }}
           />

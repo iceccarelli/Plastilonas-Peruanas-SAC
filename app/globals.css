@@ -367,8 +367,17 @@ a:hover, button:hover {
    Purely responsive: desktop is untouched. Mirrors AWS/Square density.
    ═══════════════════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
-  /* 1. Kill any accidental horizontal scroll */
-  html, body { max-width: 100%; overflow-x: hidden; }
+  /* 1. Kill any accidental horizontal scroll — con `clip`, no con `hidden`.
+     `overflow-x: hidden` convierte al elemento en CONTENEDOR DE SCROLL en los
+     dos ejes (el eje visible pasa a `auto` por regla del propio CSS). Con
+     `hidden` en <body>, todo `position: sticky` de dentro se pegaba al
+     scrollport de <body> —que no se mueve nunca— en lugar de al viewport: en
+     un teléfono NINGÚN elemento pegajoso del sitio se pegaba, y no había
+     forma de verlo salvo probándolo. `overflow-x: clip` recorta igual y NO
+     crea contenedor de scroll, así que el eje vertical sigue siendo del
+     viewport y lo pegajoso vuelve a pegarse. Lo destapó el despiece del
+     configurador de lona, que en 393px se iba de pantalla al bajar. */
+  html, body { max-width: 100%; overflow-x: clip; }
 
   /* 2. Section vertical rhythm: 80px -> 48px. Reclaims dead space. */
   section.py-20, section.py-24 { padding-top: 3rem; padding-bottom: 3rem; }

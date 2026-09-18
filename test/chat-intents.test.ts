@@ -118,7 +118,12 @@ describe('el widget y la portada usan las intenciones de verdad', () => {
     expect(heroImagen).toContain('priority');
     expect(heroImagen).not.toContain('Math.random');
     //  2. El movimiento se pide: con prefers-reduced-motion no hay rotación.
-    expect(heroImagen).toContain('prefers-reduced-motion: reduce');
+    //     La consulta dejó de estar copiada a mano aquí y vive en
+    //     `lib/usar-movimiento.ts`, que es de donde la leen también el despiece
+    //     de la lona y los carruseles. La garantía es la misma; lo que cambia
+    //     es que ahora hay UNA implementación que auditar y no seis.
+    expect(heroImagen).toContain('useMovimiento');
+    expect(leer('lib/usar-movimiento.ts')).toContain('prefers-reduced-motion: reduce');
     //  3. No se precarga el lote: sólo las diapositivas ya montadas.
     expect(heroImagen).toContain('montadas');
     expect(heroImagen).toContain("loading={i === 0 ? undefined : 'lazy'}");

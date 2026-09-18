@@ -299,7 +299,11 @@ export default function Home() {
               title="Arme su lona capa por capa"
               description="Material, gramaje, ancho, color, acabado, confección y tratamientos. El resumen viaja al RFQ tal cual: no calcula precio."
               className="mb-9"
-              action={<Link href="/configurador/lona" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Abrir el configurador completo <ArrowRight className="w-4 h-4" /></Link>}
+              /* Estaba en `hidden md:flex`: invisible justamente en el teléfono,
+                 que es donde una pared de píldoras más cansa y donde más falta
+                 hace el atajo a la página completa. Ahora acompaña al título en
+                 todos los anchos, como el «ver todo» del resto de secciones. */
+              action={<Link href="/configurador/lona" className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Abrir el configurador completo <ArrowRight className="w-4 h-4" /></Link>}
             />
           </Reveal>
           <Reveal delay={0.05}>
@@ -307,9 +311,6 @@ export default function Home() {
               <LonaConfigurador />
             </div>
           </Reveal>
-          <p className="mt-6 text-center text-sm text-gray-500 md:hidden">
-            <Link href="/configurador/lona" className="font-medium text-[#059669] hover:underline">Abrir el configurador completo</Link>
-          </p>
         </div>
       </section>
 

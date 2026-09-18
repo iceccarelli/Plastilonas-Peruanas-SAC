@@ -110,8 +110,13 @@ describe('el resumen sobrevive al viaje por la URL', () => {
 describe('ni precio ni certificado propio en ninguna superficie de la lona', () => {
   const FUENTES = [
     'lib/lona-config.ts',
+    // La traducción de especificación a dibujo y los pictogramas compartidos
+    // también son superficie pública: si un sello o un importe se cuela, se
+    // cuela por el texto de una capa igual que por el de una píldora.
+    'lib/lona-visual.ts',
     'components/LonaConfigurador.tsx',
     'components/LonaExploded.tsx',
+    'components/LonaIconos.tsx',
     'app/(es)/configurador/lona/page.tsx',
   ];
 
