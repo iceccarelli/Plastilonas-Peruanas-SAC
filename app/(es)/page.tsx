@@ -23,6 +23,7 @@ const FOTO_SERVICIO: Record<string, string> = {
   lightbulb: '/images/servicio-asesoria.webp',
 };
 import HeroImagen from '@/components/HeroImagen';
+import LonaConfigurador from '@/components/LonaConfigurador';
 import { novedades, tipoLabels } from '@/lib/novedades';
 import { cunas } from '@/lib/cunas';
 import SectionHeading from '@/components/SectionHeading';
@@ -282,6 +283,33 @@ export default function Home() {
           <Reveal delay={0.05}>
             <FeaturedDeck products={featuredProducts} />
           </Reveal>
+        </div>
+      </section>
+
+      {/* ===== 2a · CONFIGURADOR DE LONA — la línea que más se pide, especificable
+           aquí mismo. Va después del catálogo porque primero se elige familia y
+           luego se especifica; y va en la portada porque un RFQ con gramaje,
+           ancho y confección dentro vale más que uno que dice «necesito lonas».
+           El despiece y las cuatro preguntas viven dentro del componente. ===== */}
+      <section className="bg-gray-50 section-pad">
+        <div className="max-w-7xl mx-auto px-6">
+          <Reveal>
+            <SectionHeading
+              eyebrow="Especifique antes de pedir"
+              title="Arme su lona capa por capa"
+              description="Material, gramaje, ancho, color, acabado, confección y tratamientos. El resumen viaja al RFQ tal cual: no calcula precio."
+              className="mb-9"
+              action={<Link href="/configurador/lona" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Abrir el configurador completo <ArrowRight className="w-4 h-4" /></Link>}
+            />
+          </Reveal>
+          <Reveal delay={0.05}>
+            <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-9">
+              <LonaConfigurador />
+            </div>
+          </Reveal>
+          <p className="mt-6 text-center text-sm text-gray-500 md:hidden">
+            <Link href="/configurador/lona" className="font-medium text-[#059669] hover:underline">Abrir el configurador completo</Link>
+          </p>
         </div>
       </section>
 

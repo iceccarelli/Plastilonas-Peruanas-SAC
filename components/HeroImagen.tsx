@@ -1,59 +1,157 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { HERO_IMAGENES } from '@/lib/hero-imagenes';
 
 /**
- * LA FOTOGRAFÍA DEL HERO — un solo archivo, servido por el optimizador.
+ * LA FOTOGRAFÍA DEL HERO — un rotador CONTROLADO sobre el lote de lib/hero-imagenes.ts.
  *
- * DOS DECISIONES, LAS DOS MEDIBLES.
+ * QUÉ CAMBIÓ Y POR QUÉ. Antes aquí vivía una sola foto fija. La razón era
+ * buena y sigue vigente en su parte importante: la versión anterior a esa
+ * servía FOTOS[0] en el HTML y, al montar, SORTEABA otra de quince y la
+ * cambiaba. Eso costaba dos descargas de ~150 KB por visita y movía el
+ * elemento LCP después de la hidratación. Lo que se corrigió entonces no fue
+ * «rotar»: fue «sortear en el primer pintado». Esa corrección se conserva
+ * entera aquí.
  *
- * 1. UNA FOTO FIJA, NO UNA AL AZAR. La versión anterior servía FOTOS[0] en el
- *    HTML y, al montar, sorteaba otra de quince y la cambiaba. El efecto real
- *    no era «cada visita ve una obra distinta»: era descargar DOS imágenes de
- *    ~150 KB en cada visita —la del servidor, que se tira, y la sorteada— y
- *    mover el elemento LCP después de la hidratación. Se pagaba ancho de banda
- *    móvil y puntuación de Core Web Vitals a cambio de una novedad que ningún
- *    comprador industrial pidió. El resto del lote sigue en el repositorio y
- *    se usa donde ilustra de verdad (galerías de proceso y de producto).
+ * LAS CUATRO REGLAS QUE ESTE ARCHIVO NO PUEDE ROMPER —si alguien vuelve a
+ * tocarlo, son estas y no otras—:
  *
- * 2. next/image EN LUGAR DE <img>. El optimizador emite AVIF y WebP con
- *    srcset por ancho de dispositivo (next.config.ts recorta deviceSizes a
- *    seis y fija quality 75). Un teléfono deja de bajar el mismo archivo de
- *    escritorio. `priority` la marca como recurso de máxima prioridad —es el
- *    LCP de la portada— y `fill` sobre el contenedor absoluto reserva el
- *    espacio, así que no hay salto de layout.
+ * 1. EL PRIMER PINTADO ES DETERMINISTA. HERO_IMAGENES[0] se renderiza en el
+ *    HTML del servidor con `priority` + `fetchPriority="high"`. No hay sorteo
+ *    de ningún tipo ni elección en cliente para el primer cuadro.
+ *    El LCP de la portada es exactamente el mismo archivo que antes.
  *
- * La foto elegida es la que corresponde a la primera cuña del H1 —lonas y
- * siders para camión—; es referencial, y así lo dice el pie sobre la imagen.
+ * 2. NO SE PRECARGA EL LOTE. Las otras diecinueve fotos no se montan hasta
+ *    que les toca: el componente sólo renderiza las diapositivas ya
+ *    «despertadas» (`montadas`), y despierta la SIGUIENTE cuando entra la
+ *    actual, es decir con ocho a catorce segundos de margen para descargarse
+ *    sin competir con nada. Un visitante que se va a los cinco segundos baja
+ *    una imagen, igual que antes.
+ *
+ * 3. EL MOVIMIENTO SE PIDE, NO SE IMPONE. Con `prefers-reduced-motion:
+ *    reduce` no hay intervalo, no hay fundido y no hay desplazamiento: la
+ *    portada se queda en la primera foto, quieta, para siempre. Es la misma
+ *    página que había antes de este cambio.
+ *
+ * 4. LA HONESTIDAD DEL PIE SIGUE ENCIMA DE LA FOTO. El pie nombra lo que se
+ *    está viendo y termina siempre en la misma declaración: imagen
+ *    referencial de la aplicación, no una obra ejecutada. Rotar fotos
+ *    multiplica por veinte las ocasiones de dar a entender lo contrario, así
+ *    que el aviso rota con ellas.
+ *
+ * POR QUÉ ROTAR, ENTONCES. La portada vende tres frentes —lonas y siders de
+ * camión, carpas y toldos, revestimiento y cerramientos— y enseñaba uno. El
+ * lote ya estaba en el repositorio. El coste real de mostrarlo, con las
+ * cuatro reglas de arriba, es cero en el primer pintado.
+ *
+ * EL MOVIMIENTO. Escala y desplazamiento muy lentos (tipo Ken Burns) sobre la
+ * diapositiva activa, con el origen de la transformación escalonado por
+ * índice para que dos giros seguidos no se muevan igual. Es CSS: `transform`
+ * y `opacity`, las dos propiedades que el compositor anima sin repintar.
  */
-const FOTO = {
-  src: '/images/hero/hero-08.webp',
-  alt: 'Camión con siders y tolderas de lona en una carretera peruana.',
-};
+
+/** Origen de la transformación por diapositiva: evita que todas paneen igual. */
+const ORIGENES = ['50% 50%', '30% 40%', '70% 45%', '40% 65%', '60% 35%'] as const;
+
+/** Intervalo entre giros, en milisegundos. Lento a propósito. */
+const MIN_MS = 8_000;
+const MAX_MS = 14_000;
 
 export default function HeroImagen() {
   const [fallo, setFallo] = useState(false);
+  const [indice, setIndice] = useState(0);
+  /** Índices ya montados. Empieza y, sin movimiento, se queda en [0]. */
+  const [montadas, setMontadas] = useState<number[]>([0]);
+  const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (HERO_IMAGENES.length < 2) return;
+    // Un solo lote, una sola foto: si el visitante pide menos movimiento, la
+    // portada se queda como estaba antes de este componente.
+    const consulta = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    if (!consulta || consulta.matches) return;
+
+    let vivo = true;
+
+    // La duración se escalona por índice —8, 10, 12, 14 s— en lugar de
+    // sortearse: el sorteo en cliente es lo que se quitó de este archivo y no
+    // vuelve ni para esto. El efecto de variedad es el mismo y el
+    // comportamiento es reproducible en una prueba.
+    const duracionDe = (i: number) => MIN_MS + ((i % 4) * (MAX_MS - MIN_MS)) / 3;
+
+    const programar = (desde: number) => {
+      temporizador.current = setTimeout(() => {
+        if (!vivo) return;
+        const siguiente = (desde + 1) % HERO_IMAGENES.length;
+        // La que viene DESPUÉS se monta ahora: le quedan ocho a catorce
+        // segundos para descargarse antes de que le toque, y en ningún
+        // momento están montadas las veinte.
+        const posterior = (siguiente + 1) % HERO_IMAGENES.length;
+        setIndice(siguiente);
+        setMontadas((m) => (m.includes(posterior) ? m : [...m, posterior]));
+        programar(siguiente);
+      }, duracionDe(desde));
+    };
+
+    // La segunda se monta al arrancar, para que el primer fundido no espere
+    // a la red. Nunca antes: el primer pintado sigue siendo una descarga.
+    setMontadas((m) => (m.includes(1) ? m : [...m, 1]));
+    programar(0);
+
+    return () => {
+      vivo = false;
+      if (temporizador.current) clearTimeout(temporizador.current);
+    };
+  }, []);
 
   if (fallo) {
     // Sin fotografía no se finge una: el panel conserva el azul del sitio.
     return <div className="absolute inset-0 bg-[#0A2540]" aria-hidden="true" />;
   }
 
+  const actual = HERO_IMAGENES[indice] ?? HERO_IMAGENES[0];
+
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <Image
-        src={FOTO.src}
-        alt={FOTO.alt}
-        fill
-        priority
-        fetchPriority="high"
-        sizes="100vw"
-        quality={75}
-        onError={() => setFallo(true)}
-        className="object-cover"
-        style={{ filter: 'saturate(1.12) contrast(1.03)' }}
-      />
+      {montadas.map((i) => {
+        const foto = HERO_IMAGENES[i];
+        if (!foto) return null;
+        const activa = i === indice;
+        return (
+          <Image
+            key={foto.src}
+            src={foto.src}
+            // Solo la primera describe la escena para lectores de pantalla:
+            // las que rotan son decorativas respecto del texto de la portada,
+            // y veinte alt encadenados serían ruido para quien no ve.
+            alt={i === 0 ? foto.alt : ''}
+            aria-hidden={i === 0 ? undefined : true}
+            fill
+            priority={i === 0}
+            fetchPriority={i === 0 ? 'high' : 'auto'}
+            loading={i === 0 ? undefined : 'lazy'}
+            sizes="100vw"
+            quality={75}
+            onError={() => {
+              // El fallo de la PRIMERA deja la portada sin foto: panel azul.
+              // El de una secundaria no se ve, porque solo se muestra unos
+              // segundos y debajo sigue habiendo fondo del sitio.
+              if (i === 0) setFallo(true);
+            }}
+            className="object-cover"
+            style={{
+              filter: 'saturate(1.12) contrast(1.03)',
+              opacity: activa ? 1 : 0,
+              transformOrigin: ORIGENES[i % ORIGENES.length],
+              transform: activa ? 'scale(1.09)' : 'scale(1)',
+              transition: 'opacity 1400ms ease-in-out, transform 15000ms linear',
+              willChange: 'opacity, transform',
+            }}
+          />
+        );
+      })}
       {/* Velo mínimo hacia el panel de texto para que el corte no sea duro.
           No hay texto encima de la foto: el velo es estético, no funcional. */}
       <div
@@ -65,8 +163,10 @@ export default function HeroImagen() {
       />
       {/* Honestidad visual: la foto ilustra la aplicación, no es una obra
           ejecutada por la empresa. Decirlo cuesta una línea; callarlo cuesta
-          la credibilidad de las fotos que sí sean propias. */}
-      <div className="absolute bottom-2 right-3 text-[10px] leading-tight text-white/70 bg-[#0A2540]/50 rounded px-2 py-0.5 pointer-events-none">
+          la credibilidad de las fotos que sí sean propias. Al rotar, el pie
+          nombra además LO QUE SE ESTÁ VIENDO. */}
+      <div className="absolute bottom-2 right-3 max-w-[85%] text-right text-[10px] leading-tight text-white/70 bg-[#0A2540]/50 rounded px-2 py-0.5 pointer-events-none">
+        <span className="hidden sm:inline">{actual.alt} </span>
         Imagen referencial de la aplicación — no es una obra ejecutada
       </div>
     </div>

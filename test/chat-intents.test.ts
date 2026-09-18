@@ -103,14 +103,25 @@ describe('el widget y la portada usan las intenciones de verdad', () => {
     expect(rutaApi).not.toMatch(/100\s*%\s*a\s*medida/i);
   });
 
-  it('la portada no superpone texto a fotografía en movimiento', () => {
-    // El hero muestra UNA foto quieta: sin carrusel (setInterval) ni zoom
-    // Ken Burns. El texto vive en su propio panel sólido.
+  it('la portada no superpone texto a fotografía, y el rotador no toca el LCP', () => {
+    // El texto vive en su propio panel sólido: nunca encima de la foto.
     expect(portada).not.toContain('HeroCarousel');
     expect(portada).toContain('HeroImagen');
-    expect(heroImagen).not.toContain('setInterval');
-    expect(heroImagen).not.toMatch(/kenburns/i);
+
+    // El hero SÍ rota desde que se centralizó el lote en lib/hero-imagenes.ts
+    // —ver el bloque de comentarios del componente—, pero con tres garantías
+    // que son las que esta prueba defiende, y no la quietud por sí misma:
+    //
+    //  1. El primer cuadro es determinista y prioritario: se sirve en el HTML
+    //     del servidor. El sorteo en cliente fue el defecto original (dos
+    //     descargas por visita, LCP movido tras la hidratación) y no vuelve.
     expect(heroImagen).toContain('priority');
+    expect(heroImagen).not.toContain('Math.random');
+    //  2. El movimiento se pide: con prefers-reduced-motion no hay rotación.
+    expect(heroImagen).toContain('prefers-reduced-motion: reduce');
+    //  3. No se precarga el lote: sólo las diapositivas ya montadas.
+    expect(heroImagen).toContain('montadas');
+    expect(heroImagen).toContain("loading={i === 0 ? undefined : 'lazy'}");
   });
 
   it('la acción primaria del hero es cotizar, no navegar', () => {

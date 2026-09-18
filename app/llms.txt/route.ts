@@ -530,6 +530,7 @@ concretas. Si no aparecen en ${base}/proyectos, no están confirmadas.
 ## Herramientas interactivas
 
 - [Configurador de FIBC / Big Bag](${base}/configurador) — arma la especificación completa de un big bag (capacidad, factor de seguridad, tipo de boca y fondo, izaje, extras) y la envía como RFQ. No devuelve precio: devuelve una especificación que se puede cotizar.
+- [Configurador de lona plastificada / rafia / polytarp](${base}/configurador/lona) — elige material, gramaje (200–900 g/m²), ancho (hasta 4.0 m), color, acabado, confección y tratamientos, y manda el resumen al RFQ. Tampoco devuelve precio.
 - [Autoevaluación del Marco de Especificación](${base}/marco/evaluacion) — puntúa un proyecto contra los ${totalCriteria()} criterios y descarga el brief.
 - [Calculadoras de predimensionamiento](${base}/calculadoras) — ${calculadoras.length} métodos con fórmula abierta.
 
@@ -577,6 +578,7 @@ ${recursosLista}
 - [Sistema de calidad](${base}/calidad)
 - [Casos de obra](${base}/proyectos)
 - [Configurador de FIBC](${base}/configurador)
+- [Configurador de lona a medida](${base}/configurador/lona)
 - [Partners de ingeniería](${base}/socios)
 - [Programa de distribuidores](${base}/distribuidores)
 

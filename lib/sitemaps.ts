@@ -93,6 +93,7 @@ export function seccionPaginas(): EntradaSitemap[] {
     { url: `${SITE.url}/calidad`, lastModified: paginas, changeFrequency: "yearly", priority: 0.6 },
     { url: `${SITE.url}/socios`, lastModified: paginas, changeFrequency: "monthly", priority: 0.55 },
     { url: `${SITE.url}/configurador`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE.url}/configurador/lona`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE.url}/compradores`, lastModified: paginas, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE.url}/exportacion`, lastModified: paginas, changeFrequency: "monthly", priority: 0.75 },
     { url: `${SITE.url}/distribuidores`, lastModified: paginas, changeFrequency: "monthly", priority: 0.6 },

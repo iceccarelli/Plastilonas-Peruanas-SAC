@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import ImagenContenido from '@/components/ImagenContenido';
+import SoloEnRuta from '@/components/SoloEnRuta';
 import { ranurasProceso } from '@/lib/imagenes';
 
 export const metadata: Metadata = {
@@ -16,10 +17,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      {/* Sólo en /configurador: el despiece es del BIG BAG. La subruta
+          /configurador/lona cuelga de este mismo layout y tiene su propio
+          esquema dentro del componente. */}
       {esquema && (
-        <div className="mx-auto max-w-3xl px-6 pt-14">
-          <ImagenContenido ranura={esquema} prioridad sizes="(min-width: 768px) 720px, 100vw" />
-        </div>
+        <SoloEnRuta ruta="/configurador">
+          <div className="mx-auto max-w-3xl px-6 pt-14">
+            <ImagenContenido ranura={esquema} prioridad sizes="(min-width: 768px) 720px, 100vw" />
+          </div>
+        </SoloEnRuta>
       )}
       {children}
     </>
