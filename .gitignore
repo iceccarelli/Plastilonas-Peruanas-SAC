@@ -50,6 +50,15 @@ gallery-code.patch
 _to_delete/
 public/images/_pruebas-tomas/
 
+# Vídeo en bruto. Seis .mp4 («01-el-oficio», «02-la-materia», «03-el-gesto» y
+# sus segundas tomas) llegaron a la raíz por la subida web de GitHub, que
+# ignora .gitignore sin avisar, y rompieron test/repositorio-limpio.test.ts.
+# El vídeo publicado se sirve desde el proveedor de medios, no desde el
+# repositorio: versionarlo mete decenas de megabytes en una historia que es
+# permanente.
+*.mp4
+*.mov
+
 # Diagnóstico del verificador de dominio: depende de la red y del DNS del día.
 # Se regenera con `npm run seo:dominio`; versionarlo guardaría un estado falso.
 audit/domain-redirect.json
