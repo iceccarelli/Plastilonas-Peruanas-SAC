@@ -154,6 +154,111 @@ export function lonaSummary(s: LonaSpec): string {
     .join('\n');
 }
 
+/* ------------------------------------------------------------------ */
+/* PRECARGA POR URL — un enlace que llega con la mitad del RFQ hecha     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * POR QUÉ EXISTE. La ficha de la lona y el hub de lonas de camión ya saben qué
+ * va a configurar el visitante: quien llega desde /lonas-camiones quiere PVC
+ * de gramaje alto, no el valor por defecto genérico. Mandarlo al configurador
+ * con las píldoras ya puestas ahorra el paso que más gente abandona.
+ *
+ * REGLA: nada de confiar en la query. Cada valor se coteja contra el enum real
+ * de este archivo; lo que no exista se ignora y cae al valor por defecto. Un
+ * `?gramaje=9999` no rompe la página ni mete una etiqueta inventada en el
+ * resumen que viaja al RFQ.
+ */
+export type LonaParams = Record<string, string | string[] | undefined>;
+
+/** Primer valor de un parámetro, normalizado; `undefined` si no vino. */
+function crudo(v: string | string[] | undefined): string | undefined {
+  const s = Array.isArray(v) ? v[0] : v;
+  const t = typeof s === 'string' ? s.trim().toLowerCase() : '';
+  return t ? t : undefined;
+}
+
+/** Valor de una fila de selección única, o el de por defecto si no encaja. */
+function valido(
+  opciones: readonly { value: string }[],
+  v: string | string[] | undefined,
+  porDefecto: string,
+): string {
+  const s = crudo(v);
+  return s && opciones.some((o) => o.value === s) ? s : porDefecto;
+}
+
+/**
+ * Lista de una fila de selección múltiple (`?confeccion=ojales,hf`). Se
+ * descartan los ids desconocidos y los repetidos; si no queda ninguno válido
+ * se conserva la selección por defecto en vez de dejar la fila vacía.
+ */
+function validos(
+  opciones: readonly { id: string }[],
+  v: string | string[] | undefined,
+  porDefecto: string[],
+): string[] {
+  const s = crudo(v);
+  if (!s) return porDefecto;
+  const ids = [
+    ...new Set(
+      s
+        .split(',')
+        .map((x) => x.trim())
+        .filter((x) => opciones.some((o) => o.id === x)),
+    ),
+  ];
+  return ids.length ? ids : porDefecto;
+}
+
+/**
+ * Especificación inicial del configurador a partir de la query. Todo lo que no
+ * se reconozca cae a `emptyLona()`: la función NO lanza y NO inventa opciones.
+ */
+export function lonaDesdeParams(params: LonaParams = {}): LonaSpec {
+  const base = emptyLona();
+  return {
+    material: valido(LONA_MATERIAL, params.material, base.material),
+    color: valido(LONA_COLOR, params.color, base.color),
+    gramaje: valido(LONA_GRAMAJE, params.gramaje, base.gramaje),
+    ancho: valido(LONA_ANCHO, params.ancho, base.ancho),
+    textura: valido(LONA_TEXTURA, params.textura, base.textura),
+    confeccion: validos(LONA_CONFECCION, params.confeccion, base.confeccion),
+    tratamientos: validos(LONA_TRATAMIENTO, params.tratamientos, base.tratamientos),
+    // Los tres campos libres no se precargan desde la URL: son datos del
+    // comprador, no de la pieza, y prellenarlos sería ponerle palabras.
+    medidas: base.medidas,
+    cantidad: base.cantidad,
+    uso: base.uso,
+  };
+}
+
+/**
+ * Enlace al configurador con las píldoras ya puestas. Se construye desde aquí
+ * —y no a mano en cada página— para que un enlace no pueda quedar apuntando a
+ * un valor que este archivo ya no ofrece: `lonaDesdeParams` y este generador
+ * leen el MISMO enum.
+ */
+export function hrefConfiguradorLona(
+  preseleccion: Partial<Pick<LonaSpec, 'material' | 'gramaje' | 'ancho' | 'color' | 'textura'>> = {},
+): string {
+  const qs = new URLSearchParams();
+  const filas = [
+    ['material', LONA_MATERIAL, preseleccion.material],
+    ['gramaje', LONA_GRAMAJE, preseleccion.gramaje],
+    ['ancho', LONA_ANCHO, preseleccion.ancho],
+    ['color', LONA_COLOR, preseleccion.color],
+    ['textura', LONA_TEXTURA, preseleccion.textura],
+  ] as const;
+  for (const [clave, opciones, valor] of filas) {
+    if (valor && (opciones as readonly { value: string }[]).some((o) => o.value === valor)) {
+      qs.set(clave, valor);
+    }
+  }
+  const cola = qs.toString();
+  return cola ? `/configurador/lona?${cola}` : '/configurador/lona';
+}
+
 /**
  * LO QUE HAY QUE PREGUNTARLE A CUALQUIER PROVEEDOR.
  *

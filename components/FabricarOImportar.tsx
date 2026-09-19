@@ -71,7 +71,9 @@ const T = {
     ctaBoton: ACCIONES.cotizar.label,
     waMsg:
       'Hola, estoy comparando fabricar en Lima contra importar. Producto: ___. Cantidad y medidas: ___. Ciudad de entrega: ___.',
-    rfq: '/cotizacion',
+    // Con `?origen=`: esta página es larga y cara de escribir; sin la
+    // etiqueta no hay forma de saber cuántas solicitudes devuelve.
+    rfq: '/cotizacion?origen=fabricar-o-importar',
     otroIdioma: { href: RUTA_EN, label: 'Read this page in English' },
   },
   en: {
@@ -109,7 +111,7 @@ const T = {
     ctaBoton: 'Request a quotation',
     waMsg:
       'Hello, I am comparing manufacturing in Lima against importing. Product: ___. Quantity and dimensions: ___. Destination city or port: ___.',
-    rfq: '/en/rfq',
+    rfq: '/en/rfq?origen=fabricar-o-importar',
     otroIdioma: { href: RUTA_ES, label: 'Leer esta página en español' },
   },
 } as const;

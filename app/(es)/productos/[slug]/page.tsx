@@ -26,6 +26,8 @@ import { cunaDeProducto } from '@/lib/cunas';
 import DatosParaCotizar from '@/components/DatosParaCotizar';
 import { ACCIONES } from '@/lib/acciones';
 import { faqsDeRuta } from '@/lib/consultas-dinero';
+import { configuradorDe } from '@/lib/configuradores';
+import { SlidersHorizontal } from 'lucide-react';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -91,6 +93,8 @@ export default async function ProductDetailPage({ params }: Props) {
   const rutaProducto = `/productos/${product.slug}`;
   const respuestaDirecta = respuestaDirectaProducto(product);
   const rfq = rfqWhatsAppProducto(product);
+  /** Configurador propio de esta ficha, si existe (lib/configuradores.ts). */
+  const configurador = configuradorDe(product.slug);
   // Las preguntas de compra que esta ficha contesta (lib/consultas-dinero.ts)
   // viajan con las derivadas del catálogo: mismo bloque visible, mismo FAQPage.
   const faqs = [...productFaqs(product), ...faqsDeRuta(`/productos/${product.slug}`)];
@@ -199,6 +203,28 @@ export default async function ProductDetailPage({ params }: Props) {
             </WhatsAppLink>
             <DatasheetButton slug={product.slug} nombre={product.name} />
           </div>
+
+          {/* EL DESVÍO QUE PRODUCE UN RFQ MEJOR. Cuando esta ficha tiene
+              configurador, el comprador puede llegar al formulario con la
+              especificación ya escrita en `?notas=` en vez de con un campo de
+              texto en blanco. El enlace llega precargado con el punto de
+              partida habitual de la ficha y todo sigue siendo editable. */}
+          {configurador && (
+            <Link
+              href={configurador.href}
+              className="mb-9 flex items-start gap-3 rounded-2xl border border-[#059669]/30 bg-[#059669]/5 p-5 transition-colors hover:border-[#059669]"
+            >
+              <SlidersHorizontal className="mt-0.5 h-5 w-5 shrink-0 text-[#059669]" />
+              <span>
+                <span className="block font-semibold text-[#0A2540]">
+                  {configurador.label}
+                </span>
+                <span className="mt-1 block text-sm leading-relaxed text-gray-600">
+                  {configurador.detalle}
+                </span>
+              </span>
+            </Link>
+          )}
 
           {/* Quick Specs */}
           <div className="bg-gray-50 rounded-3xl p-7 text-sm">

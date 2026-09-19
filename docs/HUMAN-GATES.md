@@ -14,6 +14,12 @@ Buscar `TODO(HUMAN)` en el repositorio localiza el punto exacto.
 - [ ] Confirmado lo anterior EN PRODUCCIÓN, poner `ENFORCE_BRAND_DOMAIN=true`:
       activa el 308 duro vercel.app/apex → www (middleware.ts). **No activar
       antes de que el certificado de www funcione.**
+- [ ] **Antes de tocar cualquiera de las variables de arriba**, ejecutar el
+      checklist de corte: `docs/mudanza-plastilonas-com.md` §6. Lleva los
+      nombres reales de las cuatro variables que el código lee hoy y el orden
+      en que se aplican (DNS -> SSL -> variable -> redeploy -> `ENFORCE_BRAND_DOMAIN`).
+      **Ojo:** §6.2 documenta que este archivo y ese runbook no coinciden en si
+      el canónico es el apex o `www`; hay que decidirlo por escrito antes.
 - [ ] Completar el inventario de URLs del Apache legado en
       `docs/redirects-legado-apache.md` y cargar las redirecciones página a
       página.
@@ -35,7 +41,9 @@ Buscar `TODO(HUMAN)` en el repositorio localiza el punto exacto.
 
 - [ ] `CRM_WEBHOOK_URL` (o el heredado `N8N_WEBHOOK_URL`): endpoint que recibe
       cada lead en JSON. Sin la variable, el lead queda en Supabase (si está
-      configurado) y en WhatsApp.
+      configurado) y en WhatsApp. **Cómo filtrar por superficie de origen
+      (`configurador-lona`, `chat`, `calculadora`, `industria:<slug>`) dentro
+      del flujo de n8n: `docs/origen-de-los-leads.md`.**
 - [ ] `RESEND_API_KEY` + `LEAD_EMAIL_TO` (opcional): copia de cada RFQ por
       correo a ventas. Sin las variables no se envía nada y nada falla.
 - [ ] `ANTHROPIC_API_KEY` para el asistente del sitio (ya soportado; sin la
@@ -49,7 +57,9 @@ Buscar `TODO(HUMAN)` en el repositorio localiza el punto exacto.
 - [ ] **Fichas de proyecto autorizadas**: lib/projects.ts tiene 5 borradores
       con `verificado: false`. Publicar una exige autorización escrita del
       cliente; al poner `verificado: true` la ficha aparece en /proyectos sin
-      tocar la página.
+      tocar la página. **Las cinco fichas, una a una, con la lista de lo que el
+      área comercial debe confirmar antes de ese cambio:
+      `docs/verificacion-proyectos-pendientes.md`.**
 - [ ] **Google Business Profile** de la planta de Chorrillos (dueño humano);
       cuando exista, añadir su URL a `SITE.sameAs`.
 - [ ] Limpiar el Instagram antes de añadirlo a `sameAs` (regla del encargo:

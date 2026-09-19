@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, AlertTriangle, MapPin } from 'lucide-react';
+import { ArrowRight, AlertTriangle, MapPin, PenLine, SlidersHorizontal } from 'lucide-react';
+import { configuradorDe } from '@/lib/configuradores';
 import { SITE } from '@/lib/site';
 import {
   INDUSTRIAS,
@@ -83,6 +84,14 @@ export default async function IndustriaPage({ params }: Props) {
   const guias = guiasDe(ind);
   // Los diagramas de este sector, en el mismo orden que `problemas`.
   const diagramasError = ranurasErrorCompra().filter((r) => r.id.startsWith(`error:${ind.slug}:`));
+  /**
+   * Configurador que le sirve a este sector, DERIVADO de sus productos ancla
+   * —no una lista escrita a mano—. Transporte hereda el de lona porque agrupa
+   * la ficha de lona plastificada; minería hereda el de FIBC por los big bags.
+   * El sector sin ficha configurable no enseña la tarjeta y nadie tiene que
+   * acordarse de quitarla.
+   */
+  const configurador = ancla.map((p) => configuradorDe(p.slug)).find(Boolean);
 
 
   return (
@@ -209,6 +218,53 @@ export default async function IndustriaPage({ params }: Props) {
         </div>
       </section>
 
+      {/* CÓMO SE ESCRIBE EL RFQ DE ESTE SECTOR. La sección anterior advierte;
+          ésta acciona. Cada par sale de la tabla de especificaciones que la
+          ficha ya publica (lib/industrias.ts lo documenta), y el bloque
+          termina donde tiene que terminar: en el configurador o en el
+          formulario, no en otro enlace de lectura. */}
+      {ind.especificar && ind.especificar.length > 0 && (
+        <section className="mb-14">
+          <h2 className="mb-2 text-2xl font-semibold tracking-tight text-[#0A2540]">
+            Lo que falta en casi todos los RFQ de {ind.nombre.toLowerCase()}
+          </h2>
+          <p className="mb-6 text-sm text-gray-600">
+            El error al redactar la solicitud y, enfrente, el dato que lo corrige.
+            Todos salen de la ficha técnica del producto, no de una estadística.
+          </p>
+          <ul className="space-y-4">
+            {ind.especificar.map((e) => (
+              <li key={e.error} className="rounded-2xl border border-neutral-200 p-5">
+                <div className="flex items-start gap-2.5">
+                  <PenLine className="mt-0.5 h-4 w-4 shrink-0 text-[#059669]" />
+                  <h3 className="font-semibold text-[#0A2540]">{e.error}</h3>
+                </div>
+                <p className="mt-2 pl-7 text-sm leading-relaxed text-gray-700">{e.enElRFQ}</p>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            {configurador && (
+              <Link
+                href={configurador.href}
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-[#059669] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#047857]"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                {configurador.label}
+              </Link>
+            )}
+            <Link
+              href={`/cotizacion?origen=industria:${ind.slug}`}
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-gray-200 px-6 py-3 text-sm font-medium text-[#0A2540] transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
+            >
+              Escribir el RFQ con estos datos
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+      )}
+
       <section className="mb-14">
         <h2 className="mb-2 text-2xl font-semibold tracking-tight text-[#0A2540]">
           Productos ancla del sector
@@ -329,8 +385,11 @@ export default async function IndustriaPage({ params }: Props) {
         >
           Cotización técnica por WhatsApp
         </WhatsAppLink>
+        {/* Con `?origen=`: sin él no hay forma de saber cuántas solicitudes
+            produce cada hub de sector, y una página que no se puede medir no
+            se puede defender cuando toque decidir dónde escribir la próxima. */}
         <Link
-          href="/cotizacion"
+          href={`/cotizacion?origen=industria:${ind.slug}`}
           className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-6 py-3 font-medium text-gray-700 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
         >
           Formulario de cotización

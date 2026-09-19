@@ -18,6 +18,7 @@ import { ACTUALIZADO } from '@/lib/sitemaps';
 import { RUTA_ES } from '@/lib/fabricar-o-importar';
 import { ACCIONES } from '@/lib/acciones';
 import { faqsDeRuta } from '@/lib/consultas-dinero';
+import { configuradorDe } from '@/lib/configuradores';
 
 /**
  * Página de cuña comercial (ver lib/cunas.ts). Server component compartido
@@ -36,6 +37,14 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
   const calculadora = cuna.calculadoraSlug
     ? calculadoras.find((c) => c.slug === cuna.calculadoraSlug)
     : undefined;
+  /**
+   * Configurador del hub, DERIVADO de las fichas que agrupa — no una lista
+   * paralela. /lonas-camiones agrupa `lona-plastificada-rafia-polytarp`, así
+   * que hereda el configurador de lona precargado; /big-bags hereda el de
+   * FIBC. El hub que no agrupe ninguna ficha configurable no enseña la
+   * tarjeta, y el día que se mueva una ruta se mueve en un solo sitio.
+   */
+  const configurador = hijos.map((p) => configuradorDe(p.slug)).find(Boolean);
   const respuestaDirecta = respuestaDirectaCuna(cuna, hijos);
   // Matriz honesta: una fila solo si dos o más líneas declaran esa
   // especificación; los huecos dicen «No declarado» (lib/comparativa.ts).
@@ -274,6 +283,13 @@ export default async function CunaHub({ cuna }: { cuna: Cuna }) {
             <Link href={`/industria/${industria.slug}`} className="group block rounded-2xl border border-gray-100 p-5 hover:border-[#059669]/40 transition-colors">
               <span className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Industria</span>
               <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669]">{industria.nombre}</span>
+            </Link>
+          )}
+          {configurador && (
+            <Link href={configurador.href} className="group block rounded-2xl border border-[#059669]/30 bg-[#059669]/5 p-5 hover:border-[#059669] transition-colors">
+              <span className="block text-xs uppercase tracking-wide text-[#047857] mb-1">Configurador</span>
+              <span className="block font-semibold text-[#0A2540] group-hover:text-[#059669]">{configurador.label}</span>
+              <span className="mt-1 block text-sm leading-relaxed text-gray-600">{configurador.detalle}</span>
             </Link>
           )}
           {calculadora && (

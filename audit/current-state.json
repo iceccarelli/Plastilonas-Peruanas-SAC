@@ -1,9 +1,9 @@
 {
   "generadoPor": "scripts/auditar-estado.mjs",
-  "commit": "00bc618",
+  "commit": "dac865f",
   "resumen": {
-    "plantillasDePagina": 64,
-    "urlsPublicas": 236,
+    "plantillasDePagina": 65,
+    "urlsPublicas": 237,
     "endpointsMaquina": 25,
     "endpointsApi": 5,
     "productos": 40,
@@ -19,8 +19,8 @@
     "clustersDeConsulta": 86,
     "terminosMapeados": 805,
     "paginasSinCanonical": 3,
-    "paginasSinEsquema": 18,
-    "paginasProfundasSinBreadcrumbSchema": 5,
+    "paginasSinEsquema": 19,
+    "paginasProfundasSinBreadcrumbSchema": 6,
     "paginasHuerfanas": 2,
     "paginasAMasDeTresClics": 2,
     "inconsistencias": 0
@@ -107,7 +107,7 @@
         "/en",
         "/en/sourcing-from-peru"
       ],
-      "lineas": 114
+      "lineas": 122
     },
     {
       "ruta": "/en/sourcing-from-peru",
@@ -459,6 +459,23 @@
       "lineas": 68
     },
     {
+      "ruta": "/configurador/lona",
+      "archivo": "app/(es)/configurador/lona/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "Configurador de lona plastificada, rafia y polytarp",
+      "tituloDerivado": false,
+      "h1": "Configurador de lona a medida",
+      "canonical": "/configurador/lona",
+      "esquemas": [],
+      "enlacesSalientes": [
+        "/configurador",
+        "/productos/lona-plastificada-rafia-polytarp"
+      ],
+      "lineas": 68
+    },
+    {
       "ruta": "/configurador",
       "archivo": "app/(es)/configurador/page.tsx",
       "dinamica": false,
@@ -761,7 +778,7 @@
         "/recursos/[slug]",
         "/soluciones/[slug]"
       ],
-      "lineas": 348
+      "lineas": 407
     },
     {
       "ruta": "/industria",
@@ -1130,6 +1147,7 @@
       "enlacesSalientes": [
         "/[slug]",
         "/confianza",
+        "/configurador/lona",
         "/cotizacion",
         "/metodo",
         "/nosotros",
@@ -1137,7 +1155,7 @@
         "/novedades/[slug]",
         "/productos"
       ],
-      "lineas": 385
+      "lineas": 414
     },
     {
       "ruta": "/privacidad",
@@ -1225,7 +1243,7 @@
         "/productos/[slug]",
         "/soluciones/[slug]"
       ],
-      "lineas": 413
+      "lineas": 439
     },
     {
       "ruta": "/productos/familia/[slug]/comparar",
@@ -2881,6 +2899,7 @@
       "/compradores",
       "/compras",
       "/confianza",
+      "/configurador/lona",
       "/configurador",
       "/contacto",
       "/cotizacion",
@@ -2924,7 +2943,7 @@
       "/ventilacion-minera",
       "/pt"
     ],
-    "aristas": 253,
+    "aristas": 256,
     "enlacesGlobales": [
       "/",
       "/aplicaciones",
@@ -2996,6 +3015,7 @@
       "/compras": 1,
       "/confianza": 1,
       "/configurador": 1,
+      "/configurador/lona": 1,
       "/contacto": 1,
       "/cotizacion": 1,
       "/dashboard": 1,
@@ -3077,6 +3097,7 @@
       "/carrito",
       "/checkout/exito",
       "/checkout",
+      "/configurador/lona",
       "/configurador",
       "/dashboard",
       "/fabricar-o-importar",
@@ -3091,7 +3112,8 @@
       "/en/manufacture-in-peru-or-import",
       "/en/mine-ventilation-ducting-peru",
       "/en/truck-tarpaulins-peru",
-      "/checkout/exito"
+      "/checkout/exito",
+      "/configurador/lona"
     ],
     "inconsistencias": []
   }

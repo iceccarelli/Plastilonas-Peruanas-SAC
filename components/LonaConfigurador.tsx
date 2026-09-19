@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, FileText } from 'lucide-react';
+import DatasheetButton from '@/components/DatasheetButton';
 import LonaExploded from '@/components/LonaExploded';
 import {
   BarraProporcion,
@@ -63,6 +64,9 @@ import {
  * —no sólo leyendas— y pulsa la capa afectada. Es la misma información en dos
  * formas.
  */
+
+/** Ficha del catálogo de la que salen TODAS las opciones de este configurador. */
+const SLUG_LONA = 'lona-plastificada-rafia-polytarp';
 
 /** Píldora de una fila de selección única o múltiple. */
 function Pastilla({
@@ -166,10 +170,18 @@ function Fila({
 export default function LonaConfigurador({
   /** Sólo la página completa añade la barra de acción fija en móvil. */
   barraMovil = false,
+  /**
+   * Especificación de arranque, ya validada contra los enums por
+   * `lonaDesdeParams` en el servidor. Sirve a los enlaces precargados
+   * (`/configurador/lona?material=pvc&gramaje=700-900`) que llegan desde la
+   * ficha del producto y desde el hub de lonas de camión.
+   */
+  inicial,
 }: {
   barraMovil?: boolean;
+  inicial?: LonaSpec;
 }) {
-  const [spec, setSpec] = useState<LonaSpec>(emptyLona);
+  const [spec, setSpec] = useState<LonaSpec>(() => inicial ?? emptyLona());
   const [foco, setFoco] = useState<1 | 2 | 3 | 4 | null>(null);
   /** Cada cambio incrementa el contador: es lo que dispara el pulso del dibujo. */
   const [pulso, setPulso] = useState(0);
@@ -455,6 +467,19 @@ export default function LonaConfigurador({
             Pedir cotización con ficha técnica
           </Link>
         </div>
+        {/* LA FICHA, EN SU PROPIA LÍNEA. No entra en el grupo de arriba: ése
+            pasa a fila a partir de `sm` y un tercer botón con rótulo largo lo
+            devolvía a desbordar justo en 640px, que es el defecto que
+            `auditar:viewport` ya cazó una vez aquí. El PDF sale del generador
+            del catálogo (lib/datasheet.ts) — no hay una segunda tubería. */}
+        <div>
+          <DatasheetButton
+            slug={SLUG_LONA}
+            nombre="Lona plastificada, rafia y polytarp"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-gray-200 px-5 py-3 text-sm font-medium text-[#0A2540] transition-colors hover:border-[#059669] hover:text-[#047857]"
+          />
+        </div>
+
         <p className="text-xs text-gray-500">
           Resumen preliminar para el RFQ. No calcula precio ni sustituye la ficha técnica del
           lote: el gramaje y el ancho se confirman por escrito en la cotización.

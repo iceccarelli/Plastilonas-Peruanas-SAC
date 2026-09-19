@@ -574,9 +574,12 @@ describe('etapa 13 — fabricar en Lima o importar', () => {
     expect(tpl).toContain("idioma }: { idioma: 'es' | 'en' }");
     expect(leer('app/(es)/fabricar-o-importar/page.tsx')).toContain('idioma="es"');
     expect(leer('app/(en)/en/manufacture-in-peru-or-import/page.tsx')).toContain('idioma="en"');
-    // El RFQ de cada idioma va al formulario de ese idioma (etapa 11).
-    expect(tpl).toContain("rfq: '/cotizacion'");
-    expect(tpl).toContain("rfq: '/en/rfq'");
+    // El RFQ de cada idioma va al formulario de ese idioma (etapa 11), y
+    // ambos enlaces llevan `?origen=` desde que esta página empezó a medirse:
+    // lo que importa es el destino, no que la cadena sea literal.
+    expect(tpl).toContain("rfq: '/cotizacion?");
+    expect(tpl).toContain("rfq: '/en/rfq?");
+    expect(tpl).toContain('origen=fabricar-o-importar');
   });
 
   it('la página se enlaza donde se decide, no sólo desde el sitemap', () => {

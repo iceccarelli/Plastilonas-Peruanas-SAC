@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import LonaConfigurador from '@/components/LonaConfigurador';
+import { lonaDesdeParams, type LonaParams } from '@/lib/lona-config';
 
 export const metadata: Metadata = {
   title: 'Configurador de lona plastificada, rafia y polytarp',
@@ -13,7 +14,27 @@ export const metadata: Metadata = {
  * Hermana del configurador de FIBC, con el mismo contrato: arma una
  * especificación y la manda al RFQ. Cambia el producto, no las reglas.
  */
-export default function ConfiguradorLonaPage() {
+/**
+ * PRECARGA POR URL. La ficha del producto y el hub de lonas de camión enlazan
+ * aquí con `?material=`, `?gramaje=`, `?ancho=`, `?color=` y `?textura=`: el
+ * comprador llega con las píldoras ya puestas en lugar de empezar de cero.
+ * `lonaDesdeParams` coteja cada valor contra el enum de lib/lona-config.ts, así
+ * que un parámetro basura no rompe nada — simplemente cae al valor por defecto.
+ */
+export default async function ConfiguradorLonaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    material?: string;
+    gramaje?: string;
+    ancho?: string;
+    color?: string;
+    textura?: string;
+    confeccion?: string;
+    tratamientos?: string;
+  }>;
+}) {
+  const inicial = lonaDesdeParams((await searchParams) as LonaParams);
   return (
     <div className="max-w-6xl mx-auto px-6 py-14">
       <div className="uppercase tracking-[0.15em] text-xs text-[#059669] font-semibold mb-3">
@@ -39,7 +60,7 @@ export default function ConfiguradorLonaPage() {
         .
       </p>
       <div className="mt-10">
-        <LonaConfigurador barraMovil />
+        <LonaConfigurador barraMovil inicial={inicial} />
       </div>
     </div>
   );

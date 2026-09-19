@@ -43,10 +43,17 @@ export const metadata: Metadata = {
 export default async function RfqEnPage({
   searchParams,
 }: {
-  searchParams: Promise<{ product?: string }>;
+  searchParams: Promise<{ product?: string; origen?: string }>;
 }) {
   const params = await searchParams;
   const buscado = params.product || undefined;
+  /**
+   * Superficie de la que llegó el visitante, igual que en /cotizacion. El
+   * embudo en inglés no tenía forma de decir de dónde salía un RFQ: todos
+   * llegaban etiquetados como «pagina». Se sanea con el mismo criterio que la
+   * página en español y viaja al lead, nunca a la pantalla.
+   */
+  const origen = (params.origen ?? '').slice(0, 40).replace(/[^a-z0-9:_-]/gi, '') || undefined;
   const encontrado = buscado
     ? products.find((p) => p.slug === buscado || p.name === buscado)
     : undefined;
@@ -105,6 +112,7 @@ export default async function RfqEnPage({
         opciones={products.map((p) => ({ slug: p.slug, name: p.name }))}
         preselectedProduct={encontrado?.name}
         slugOrigen={encontrado?.slug}
+        origen={origen}
       />
 
       <PreguntasDeCompra ruta="/en/rfq" titulo="Before you send it" idioma="en" />

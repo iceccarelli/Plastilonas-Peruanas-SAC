@@ -67,6 +67,19 @@ export interface Industria {
   intro: string;
   /** Qué se rompe cuando se compra sin criterio en este sector. */
   problemas: { titulo: string; detalle: string }[];
+  /**
+   * CÓMO SE REDACTA EL RFQ SIN DEJARSE UN DATO.
+   *
+   * `problemas` dice qué se rompe; esto dice qué escribir para que no se
+   * rompa. Es la diferencia entre una advertencia y una acción: cada entrada
+   * nombra el error concreto al redactar la solicitud y, enfrente, el dato que
+   * lo corrige — SACADO DE LA TABLA DE ESPECIFICACIONES QUE LA FICHA YA
+   * PUBLICA en lib/products.ts (o de los enums de lib/lona-config.ts en el
+   * caso de la lona). No hay un solo número aquí que no esté también en una
+   * ficha del catálogo, y no hay estadística de mercado ni caso de cliente:
+   * esas dos cosas este repositorio no puede sostenerlas.
+   */
+  especificar?: { error: string; enElRFQ: string }[];
   /** Orden de presentación. Deben existir y llevar la etiqueta (lo verifica el test). */
   ancla: string[];
   /** Departamentos donde este sector concentra demanda. */
@@ -110,6 +123,28 @@ export const INDUSTRIAS: Industria[] = [
         titulo: 'El plazo de importación no entra en el cronograma',
         detalle:
           'Cuando la pieza viene de fuera, el cronograma de avance queda atado a un contenedor. Fabricar en Lima cambia el plazo de semanas a días y permite corregir una medida sin repetir el ciclo completo.',
+      },
+    ],
+    especificar: [
+      {
+        error: '«Manga de 600 mm» y nada más.',
+        enElRFQ:
+          'La ficha fabrica de 300 a 2000 mm, en tramos de 10, 20 o 30 m, y declara presión de trabajo hasta 5000 Pa según diámetro y refuerzo. Con el diámetro solo no se puede cortar: falta el largo de tramo, la presión del ventilador y si lleva espiral de acero galvanizado embebido, que es opcional y cambia la pieza entera.',
+      },
+      {
+        error: 'Dar por hecho que la manga viene antiestática y retardante de llama.',
+        enElRFQ:
+          'La ficha declara esas propiedades, pero también declara «antiestático opcional». En un frente donde el reglamento interno lo exige, eso se pide por escrito en el RFQ y se contrasta contra la ficha técnica del material que acompaña la cotización.',
+      },
+      {
+        error: 'Pedir el espesor de la geomembrana sin decir el ancho de rollo.',
+        enElRFQ:
+          'El PVC se fabrica en 0.5, 0.75, 1.0, 1.5 y 2.0 mm, con rollo estándar de hasta 2.0 m de ancho (anchos especiales por proyecto). El ancho decide cuántas soldaduras de campo lleva la poza, y cada soldadura es un punto que hay que ensayar y registrar.',
+      },
+      {
+        error: 'No decir qué contiene la poza.',
+        enElRFQ:
+          'La compatibilidad química del polímero manda sobre el espesor. Agua industrial, solución y relave no son el mismo problema, y la respuesta correcta puede ser otro material antes que otro milímetro.',
       },
     ],
     ancla: [
@@ -168,6 +203,23 @@ export const INDUSTRIAS: Industria[] = [
           'Comprar el ancho de rollo que había en stock obliga a traslapar o a cortar. Ambas cosas se pagan en merma y en horas de instalación.',
       },
     ],
+    especificar: [
+      {
+        error: '«Malla antiáfida» sin densidad de trama.',
+        enElRFQ:
+          'La ficha fabrica 17x17, 25x25 y 40x40 hilos por pulgada, y son tres mallas distintas. La densidad fija el paso —y con él la plaga que excluye— pero también la transmisión de luz, que va de 85% a 95% según la trama. Cerrar de más se paga en temperatura bajo la malla.',
+      },
+      {
+        error: 'No declarar el ancho de rollo que sirve al módulo del campo.',
+        enElRFQ:
+          'Hay 1.5, 2.0, 3.0, 4.0 y 6.0 m, en largos de 50 m, 100 m o rollo personalizado. El ancho se elige contra el módulo real del campo: comprar «el que había» es comprar traslape y horas de instalación.',
+      },
+      {
+        error: 'Pedir la malla sin decir cuántas campañas debe durar.',
+        enElRFQ:
+          'La ficha declara HDPE 100% virgen con tratamiento UV y una vida útil de 3 a 5 años en condiciones de campo. Si el plan de reposición del fundo es otro, conviene que la cotización lo diga antes y no la segunda campaña.',
+      },
+    ],
     ancla: [
       'mallas-antiafidas',
       'malla-raschel-sombra',
@@ -221,6 +273,28 @@ export const INDUSTRIAS: Industria[] = [
           'Son tres materiales con vidas útiles y costos distintos. Elegir mal no se nota el primer mes: se nota en el ciclo de reposición.',
       },
     ],
+    especificar: [
+      {
+        error: '«Lona reforzada», sin un solo g/m².',
+        enElRFQ:
+          'El rango de fabricación va de 200 a 900 g/m², y los cobertores de camión se confeccionan entre 450 y 850 g/m² según si la lona es cruda, teñida o encerada. «Reforzada» no es un número; el g/m² que aparece por escrito en la cotización sí lo es.',
+      },
+      {
+        error: 'Pedir un paño de más de 4.0 m sin decidir la unión.',
+        enElRFQ:
+          'Hasta 4.0 m sale en una sola pieza. Por encima hay unión soldada, y en un toldo importa dónde cae esa unión respecto a los arcos y al sentido en que tira la soga.',
+      },
+      {
+        error: 'Suponer que los tratamientos vienen «de fábrica».',
+        enElRFQ:
+          'Son cuatro y se piden uno a uno: anti-UV, ignífugo, antiestático y antibacteriano. Ninguno viene incluido por el hecho de que el material sea PVC.',
+      },
+      {
+        error: 'Dejar los ojales fuera del RFQ.',
+        enElRFQ:
+          'La ficha confecciona ojales de latón macizo reforzado cada 50 cm en todo el perímetro. Si el sistema de amarre de la flota pide otro paso o refuerzo local en las esquinas, ese es el dato que hay que escribir: es donde se rasga un toldo, no en el centro del paño.',
+      },
+    ],
     ancla: [
       'mantas-cobertores-toldos-camiones',
       'siders-tolderas-camiones',
@@ -271,6 +345,28 @@ export const INDUSTRIAS: Industria[] = [
         titulo: 'Lona por un lado, estructura por otro, instalación por un tercero',
         detalle:
           'Con tres proveedores, la responsabilidad se reparte hasta desaparecer: cada uno cumplió su parte y el conjunto igual falla. Un solo responsable es lo que hace reclamable el resultado.',
+      },
+    ],
+    especificar: [
+      {
+        error: 'Pedir «una carpa de 600 m²».',
+        enElRFQ:
+          'Lo que dimensiona es el vano libre —la ficha cubre de 6 a 30 m sin columnas intermedias—, la altura (3 a 12 m) y la carga de viento de la zona, con diseño según normas locales. El área sale de esos tres datos; nunca al revés.',
+      },
+      {
+        error: 'Dejar la lona de la carpa fuera de la especificación.',
+        enElRFQ:
+          'La ficha declara PVC plastificado de 650 a 900 g/m², anti-UV, impermeable y retardante de llama. Una estructura correcta con una lona sin especificar es media compra.',
+      },
+      {
+        error: '«Geotextil» a secas como especificación.',
+        enElRFQ:
+          'La ficha declara dos construcciones —tejido y no tejido punzonado— y cinco funciones: separación, filtración, drenaje, refuerzo y protección. La función manda qué propiedad gobierna, y el gramaje por sí solo no la contiene.',
+      },
+      {
+        error: 'No decir cuántos módulos ni en qué orden se monta.',
+        enElRFQ:
+          'La longitud se arma en módulos de 3 o 6 m y es ilimitada. Declararla junto con puertas, ventanas y ventilación evita el peor caso: modificar una estructura ya galvanizada en obra.',
       },
     ],
     ancla: [
