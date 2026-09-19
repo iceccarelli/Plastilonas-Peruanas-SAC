@@ -914,3 +914,73 @@ main h1, main h2, main h3 { letter-spacing: -0.02em; }
 .dark main [class*="border-amber-200/"] {
   border-color: color-mix(in srgb, #f59e0b 30%, var(--surface-raised)) !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DESPIECE DE LONA — el movimiento de reposo, en CSS y no en JS
+   ═══════════════════════════════════════════════════════════════════
+
+   POR QUÉ NO ESTÁ EN framer-motion, QUE ES LO QUE USA EL RESTO DEL SITIO.
+   Porque allí NO FUNCIONABA. framer-motion resuelve `x`/`y`/`scale` de un
+   elemento SVG por el atributo `transform`, y para construirlo necesita haber
+   medido la caja del elemento; en un `<g>` no la mide, así que escribía la
+   opacidad y se tragaba el desplazamiento en silencio. El resultado era el
+   peor posible: cuatro animaciones declaradas, con sus muelles y sus desfases,
+   y un dibujo COMPLETAMENTE QUIETO en pantalla. Se cazó midiendo el
+   `getBoundingClientRect()` de cada capa durante 18 segundos en Chromium, no
+   leyendo el código.
+
+   En CSS, con `transform-box: fill-box`, el `transform` de un `<g>` es un
+   transform de composición normal y corriente: lo ejecuta el compositor, sin
+   pasar por el hilo principal ni por React. Cada capa trae su amplitud, su
+   periodo y su desfase en variables, que es lo que evita que las cuatro se
+   muevan como un bloque.
+
+   Las dos animaciones se APAGAN —no se ralentizan— con
+   `prefers-reduced-motion: reduce`, y el componente además no pone las clases
+   cuando el dibujo está fuera de pantalla. */
+
+@keyframes lona-flote {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(calc(var(--lona-amp, 2) * -1px)); }
+}
+
+/* GIRO DE PLATAFORMA: va y VUELVE entre dos topes. No es un giro continuo
+   —eso marea—, es la oscilación de guiñada con la que se enseña un producto.
+   Las capas de arriba y las de abajo llevan amplitudes de signo contrario:
+   la pila se abre en abanico y el ojo lo lee como que el bloque está girando. */
+@keyframes lona-giro {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(calc(var(--lona-giro, 0) * 1px)); }
+  75%      { transform: translateX(calc(var(--lona-giro, 0) * -1px)); }
+}
+
+/* Pulso de la capa que acaba de cambiar: se levanta, pasa de largo y se
+   asienta. La curva con rebote hace el trabajo que hacía el muelle. */
+@keyframes lona-pulso {
+  0%   { transform: translateY(-7px) scale(1.055); }
+  58%  { transform: translateY(1px) scale(0.994); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* El suelo respira con la pila: sólo opacidad y escala horizontal. */
+@keyframes lona-suelo {
+  0%, 100% { opacity: 0.62; transform: scaleX(1); }
+  50%      { opacity: 0.85; transform: scaleX(1.05); }
+}
+
+.lona-flote { animation: lona-flote var(--lona-dur, 6s) ease-in-out var(--lona-ret, 0s) infinite; }
+.lona-giro  { animation: lona-giro var(--lona-giro-dur, 16s) ease-in-out infinite; }
+.lona-pulso { animation: lona-pulso 460ms cubic-bezier(0.34, 1.4, 0.64, 1); }
+.lona-suelo { animation: lona-suelo 5.2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Sin excepciones y sin versión «lenta»: quien pide menos movimiento no
+     quiere el mismo bucle a medio gas. El esquema se queda quieto con la
+     MISMA geometría, que es la información. Lo único que sobrevive es el
+     aislado al señalar una capa, porque lo dispara el usuario y ocurre de
+     golpe: eso se resuelve en el componente, no aquí. */
+  .lona-flote,
+  .lona-giro,
+  .lona-pulso,
+  .lona-suelo { animation: none !important; }
+}

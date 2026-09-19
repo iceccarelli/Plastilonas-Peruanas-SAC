@@ -14,7 +14,13 @@ import {
   MuestraMaterial,
   MuestraTextura,
 } from '@/components/LonaIconos';
-import { capasDeLona, fraccionAncho, fraccionGramaje } from '@/lib/lona-visual';
+import {
+  capasDeLona,
+  fraccionAncho,
+  fraccionGramaje,
+  layerParaControl,
+  type Capa,
+} from '@/lib/lona-visual';
 import {
   emptyLona,
   lonaColorHex,
@@ -135,13 +141,36 @@ function Swatch({ hex, activa }: { hex: string; activa: boolean }) {
  */
 function Fila({
   titulo,
+  control,
+  onSeñalar,
   scroller = false,
   children,
 }: {
   titulo: string;
+  /**
+   * Id del control —`material`, `gramaje`, `confeccion`…—. `layerParaControl`
+   * lo traduce a la capa que esta fila gobierna, y señalar la fila AÍSLA esa
+   * capa en el dibujo.
+   */
+  control: string;
+  onSeñalar: (capa: Capa | null) => void;
   scroller?: boolean;
   children: ReactNode;
 }) {
+  const capa = layerParaControl(control);
+  /**
+   * RATÓN Y TECLADO, LA MISMA SEÑAL. `onFocus`/`onBlur` de React son
+   * `focusin`/`focusout`: BURBUJEAN desde el botón hasta este `<fieldset>`, así
+   * que quien recorre las píldoras con el tabulador ve exactamente lo mismo que
+   * quien pasa el ratón. Es un estado VISUAL y transitorio: no toca el
+   * `aria-pressed` de ninguna píldora ni cambia la selección.
+   */
+  const señales = {
+    onMouseEnter: () => onSeñalar(capa),
+    onMouseLeave: () => onSeñalar(null),
+    onFocus: () => onSeñalar(capa),
+    onBlur: () => onSeñalar(null),
+  };
   return (
     /* `min-w-0` NO ES DECORACIÓN. Un <fieldset> nace con
        `min-inline-size: min-content` por hoja de estilo del navegador: se
@@ -150,7 +179,7 @@ function Fila({
        dejar que el contenedor con scroll hiciera su trabajo, y la PÁGINA
        entera se movía de lado 57px en un iPad mini. Lo encontró
        `npm run auditar:viewport`, no una revisión a ojo. */
-    <fieldset className="border-0 p-0 m-0 min-w-0">
+    <fieldset {...señales} className="border-0 p-0 m-0 min-w-0">
       <legend className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500 mb-2.5">
         {titulo}
       </legend>
@@ -185,6 +214,13 @@ export default function LonaConfigurador({
   const [foco, setFoco] = useState<1 | 2 | 3 | 4 | null>(null);
   /** Cada cambio incrementa el contador: es lo que dispara el pulso del dibujo. */
   const [pulso, setPulso] = useState(0);
+  /**
+   * Capa que el usuario está señalando ahora mismo. Nada que ver con la
+   * selección: el despiece apaga las otras tres mientras dura, y al soltar
+   * vuelve todo. Vive aquí y no dentro del dibujo porque la señal nace en las
+   * filas de píldoras.
+   */
+  const [aislada, setAislada] = useState<Capa | null>(null);
   const router = useRouter();
 
   const set = <K extends keyof LonaSpec>(k: K, v: LonaSpec[K]) =>
@@ -231,6 +267,8 @@ export default function LonaConfigurador({
             spec={spec}
             foco={foco}
             pulso={pulso}
+            aislada={aislada}
+            onAislar={setAislada}
             className="h-[42vh] max-h-[330px] min-h-[210px] lg:h-auto lg:max-h-none lg:min-h-0"
           />
           <div className="border-b border-gray-100 lg:hidden" />
@@ -257,7 +295,7 @@ export default function LonaConfigurador({
             </div>
             <ol className="space-y-3">
               {capas.map((c) => {
-                const activa = foco === c.n;
+                const activa = (aislada ?? foco) === c.n;
                 return (
                   <li
                     key={c.n}
@@ -304,7 +342,7 @@ export default function LonaConfigurador({
       </aside>
 
       <div className="order-2 min-w-0 space-y-6 lg:order-none lg:col-start-1 lg:row-start-1">
-        <Fila titulo="Material">
+        <Fila titulo="Material" control="material" onSeñalar={setAislada}>
           {LONA_MATERIAL.map((o) => (
             <Pastilla
               key={o.value}
@@ -320,7 +358,7 @@ export default function LonaConfigurador({
           ))}
         </Fila>
 
-        <Fila titulo="Color (orientativo — se casa contra muestra física)" scroller>
+        <Fila titulo="Color (orientativo — se casa contra muestra física)" control="color" onSeñalar={setAislada} scroller>
           {LONA_COLOR.map((o) => (
             <Pastilla
               key={o.value}
@@ -336,7 +374,7 @@ export default function LonaConfigurador({
           ))}
         </Fila>
 
-        <Fila titulo="Gramaje" scroller>
+        <Fila titulo="Gramaje" control="gramaje" onSeñalar={setAislada} scroller>
           {LONA_GRAMAJE.map((o) => (
             <Pastilla
               key={o.value}
@@ -352,7 +390,7 @@ export default function LonaConfigurador({
           ))}
         </Fila>
 
-        <Fila titulo="Ancho del paño" scroller>
+        <Fila titulo="Ancho del paño" control="ancho" onSeñalar={setAislada} scroller>
           {LONA_ANCHO.map((o) => (
             <Pastilla
               key={o.value}
@@ -368,7 +406,7 @@ export default function LonaConfigurador({
           ))}
         </Fila>
 
-        <Fila titulo="Acabado">
+        <Fila titulo="Acabado" control="textura" onSeñalar={setAislada}>
           {LONA_TEXTURA.map((o) => (
             <Pastilla
               key={o.value}
@@ -384,7 +422,7 @@ export default function LonaConfigurador({
           ))}
         </Fila>
 
-        <Fila titulo="Confección (varias)">
+        <Fila titulo="Confección (varias)" control="confeccion" onSeñalar={setAislada}>
           {LONA_CONFECCION.map((o) => (
             <Pastilla
               key={o.id}
@@ -400,7 +438,7 @@ export default function LonaConfigurador({
           ))}
         </Fila>
 
-        <Fila titulo="Tratamientos (varios)">
+        <Fila titulo="Tratamientos (varios)" control="tratamientos" onSeñalar={setAislada}>
           {LONA_TRATAMIENTO.map((o) => (
             <Pastilla
               key={o.id}

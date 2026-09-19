@@ -15,10 +15,31 @@
 export function TrazosConfeccion({ id }: { id: string }) {
   switch (id) {
     case 'ojales':
+      // Aro, barril y agujero: los tres anillos de un ojal de verdad. El
+      // interior va RELLENO —es un agujero, no una tercera circunferencia— y
+      // un arco corto arriba a la izquierda hace de reflejo, el mismo origen
+      // de luz que usan los degradados del despiece.
       return (
         <>
-          <circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" strokeWidth="1.6" />
-          <circle cx="8" cy="8" r="2.2" fill="none" stroke="currentColor" strokeWidth="1.2" />
+          <circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          <circle
+            cx="8"
+            cy="8"
+            r="3.7"
+            fill="none"
+            stroke="currentColor"
+            strokeOpacity="0.55"
+            strokeWidth="0.9"
+          />
+          <circle cx="8" cy="8" r="2.4" fill="currentColor" fillOpacity="0.9" />
+          <path
+            d="M4.4 5.9A4.7 4.7 0 0 1 8 3.6"
+            fill="none"
+            stroke="currentColor"
+            strokeOpacity="0.45"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
         </>
       );
     case 'hf':
@@ -172,6 +193,45 @@ export function IconoTratamiento({ id, className = 'h-4 w-4' }: { id: string; cl
 }
 
 /**
+ * EL MISMO ENTRELAZADO QUE EL DESPIECE, EN MINIATURA.
+ *
+ * La muestra de la píldora y la cara 02 del dibujo tienen que ser el mismo
+ * material, no dos dibujos parecidos: si la píldora enseña una rejilla y el
+ * despiece un tejido, el comprador no sabe cuál de los dos le están vendiendo.
+ * El ligamento es el de `components/LonaExploded.tsx` —urdimbre continua, trama
+ * que pasa por encima en media pasada y por debajo en la otra— con el azulejo
+ * reducido al lienzo de 20×20 de la muestra.
+ */
+function TejidoMuestra({
+  id,
+  paso,
+  sombra,
+  luz,
+}: {
+  id: string;
+  paso: number;
+  sombra: string;
+  luz: string;
+}) {
+  const u = paso;
+  const d = u * 0.74;
+  const o = (u - d) / 2;
+  return (
+    <pattern id={id} width={2 * u} height={2 * u} patternUnits="userSpaceOnUse">
+      {/* trama por debajo: sólo la sombra del cruce */}
+      <rect x={u} y={o} width={u} height={d} fill={sombra} fillOpacity="0.5" />
+      <rect x={0} y={u + o} width={u} height={d} fill={sombra} fillOpacity="0.5" />
+      {/* urdimbre continua */}
+      <rect x={o} y={0} width={d} height={2 * u} fill={sombra} fillOpacity="0.3" />
+      <rect x={u + o} y={0} width={d} height={2 * u} fill={sombra} fillOpacity="0.3" />
+      {/* trama por encima: tapa la urdimbre en media pasada */}
+      <rect x={0} y={o} width={u} height={d} fill={luz} fillOpacity="0.26" />
+      <rect x={u} y={u + o} width={u} height={d} fill={luz} fillOpacity="0.26" />
+    </pattern>
+  );
+}
+
+/**
  * Muestra de material: el mismo aspecto que tendrá la cara 02 del despiece.
  * Es el argumento de la píldora — «rafia» no significa nada hasta que se ve
  * que es un tejido y no una lámina.
@@ -187,17 +247,9 @@ export function MuestraMaterial({
   return (
     <svg viewBox="0 0 20 20" className={`shrink-0 rounded-[5px] ${className}`} aria-hidden="true">
       <defs>
-        {material === 'rafia' && (
-          <pattern id={`${id}-p`} width="4" height="4" patternUnits="userSpaceOnUse">
-            <path d="M0 1h4M0 3h4" stroke="#0A2540" strokeOpacity="0.45" strokeWidth="1.2" />
-            <path d="M1 0v4M3 0v4" stroke="#0A2540" strokeOpacity="0.3" strokeWidth="1.2" />
-          </pattern>
-        )}
+        {material === 'rafia' && <TejidoMuestra id={`${id}-p`} paso={2.6} sombra="#0A2540" luz="#FFFFFF" />}
         {material === 'algodon' && (
-          <pattern id={`${id}-p`} width="3" height="3" patternUnits="userSpaceOnUse">
-            <path d="M0 0h3M0 1.5h3" stroke="#78350F" strokeOpacity="0.35" strokeWidth="0.9" />
-            <path d="M0.75 0v3M2.25 0v3" stroke="#78350F" strokeOpacity="0.28" strokeWidth="0.9" />
-          </pattern>
+          <TejidoMuestra id={`${id}-p`} paso={1.8} sombra="#78350F" luz="#FFF7ED" />
         )}
         {material === 'pvc' && (
           <linearGradient id={`${id}-p`} x1="0" y1="0" x2="1" y2="1">
