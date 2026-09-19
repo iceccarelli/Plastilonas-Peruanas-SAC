@@ -23,3 +23,21 @@ export const LEYENDA_REFERENCIAL = {
   es: 'Imagen referencial de la aplicación: no documenta una obra ejecutada.',
   en: 'Illustrative image of the application: it does not document a project delivered by this company.',
 } as const;
+
+/**
+ * LA MISMA REGLA, EN MOVIMIENTO.
+ *
+ * Las tres piezas de `lib/cine.ts` son fotografía en movimiento del producto y
+ * del oficio. Un vídeo pide más crédito que una foto —se parece más a un
+ * reportaje— y por eso la leyenda tiene que ser, si acaso, más explícita: dice
+ * lo mismo que la de las fotos y lo dice nombrando lo que un espectador podría
+ * suponer por su cuenta, que es que está viendo una obra entregada.
+ *
+ * Vive aquí, junto a la otra, por el motivo de siempre: dos redacciones
+ * parecidas envejecen a ritmos distintos y la más blanda es la que acaba
+ * leyendo quien homologa.
+ */
+export const LEYENDA_CINE = {
+  es: 'Fotografía en movimiento del producto y del oficio. No representa una obra nominada.',
+  en: 'Moving photography of the product and the craft. It does not represent a named project.',
+} as const;

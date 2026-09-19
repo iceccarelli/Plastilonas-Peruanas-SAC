@@ -16,6 +16,8 @@ import RielComercial from '@/components/RielComercial';
 import CierreComercial from '@/components/CierreComercial';
 import { ACCIONES } from '@/lib/acciones';
 import { faqsDeRuta } from '@/lib/consultas-dinero';
+import CinePlayer from '@/components/CinePlayer';
+import { cineDeFamilia, RUTA_CINE, duracionLegible } from '@/lib/cine';
 
 /**
  * Página de familia (/productos/familia/[slug]).
@@ -75,6 +77,9 @@ export default async function FamilyPage({ params }: Props) {
   // ¿Existe /comparar para esta familia? La misma función que genera la ruta.
   const comparable = comparableFamilies().some((f) => f.slug === slug);
   const sectores = Array.from(new Set(items.flatMap((p) => p.sector)));
+  // La pieza de la trilogía en la que este material aparece de verdad, o
+  // ninguna. Ver lib/cine.ts: los repartos no se solapan.
+  const cine = cineDeFamilia(slug);
   const sourcings = Array.from(new Set(items.map((p) => p.sourcing).filter(Boolean))) as string[];
   const disponibilidades = Array.from(
     new Set(items.map((p) => p.availability ?? 'a_medida')),
@@ -213,6 +218,35 @@ export default async function FamilyPage({ params }: Props) {
             Comparar las {items.length} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+      )}
+
+      {/* LA PELÍCULA DE ESTA FAMILIA, SI LA HAY. Va DESPUÉS de las fichas y
+          de la comparación: el vídeo no especifica nada, y quien llega aquí
+          está eligiendo. Es como mucho una, y no por vigilancia sino porque
+          `lib/cine.ts` reparte las familias entre las tres piezas sin
+          solaparlas. Se incrusta sin JSON-LD: el VideoObject canónico de cada
+          pieza vive en /oficio, y declararlo dos veces parte el nodo en dos. */}
+      {cine && (
+        <section className="mb-14">
+          <div className="mb-5 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <span className="font-mono text-sm tabular-nums text-[#059669]">{cine.n}</span>
+            <h2 className="text-2xl font-semibold tracking-tight text-[#0A2540]">
+              {cine.titulo}
+            </h2>
+            <span className="text-sm text-gray-500">{cine.antetitulo}</span>
+            <span className="ml-auto font-mono text-xs tabular-nums text-gray-400">
+              {duracionLegible(cine.durationSec)}
+            </span>
+          </div>
+          <CinePlayer pieza={cine} />
+          <p className="mt-4 max-w-2xl leading-relaxed text-gray-700">{cine.sinopsis}</p>
+          <Link
+            href={RUTA_CINE}
+            className="mt-3 inline-flex min-h-[44px] items-center text-sm font-medium text-[#059669] hover:underline"
+          >
+            Ver la trilogía completa →
+          </Link>
+        </section>
       )}
 
       <section className="mb-14">

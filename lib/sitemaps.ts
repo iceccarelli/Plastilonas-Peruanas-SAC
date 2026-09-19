@@ -18,6 +18,7 @@ import { RUTA_INTEGRACIONES } from "@/lib/integraciones";
 import { cunas } from "@/lib/cunas";
 import { CUNAS_EN } from "@/lib/cunas-en";
 import { RUTA_ES, RUTA_EN, FABRICAR_ACTUALIZADO } from "@/lib/fabricar-o-importar";
+import { RUTA_CINE, CINE_PUBLICADO } from "@/lib/cine";
 
 /**
  * SITEMAPS — índice + cuatro secciones, con lastmod REAL.
@@ -86,6 +87,11 @@ export function seccionPaginas(): EntradaSitemap[] {
     { url: `${SITE.url}${RUTA_ES}`, lastModified: d(FABRICAR_ACTUALIZADO), changeFrequency: "monthly", priority: 0.9 },
     { url: `${SITE.url}/servicios`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE.url}/nosotros`, lastModified: paginas, changeFrequency: "monthly", priority: 0.6 },
+    // La sala de la trilogía. `lastmod` es la fecha de publicación de las
+    // piezas, no la de las páginas: esta URL sólo cambia cuando cambia el
+    // cine, y darle la fecha general sería el lastmod falso que el
+    // comentario de arriba existe para evitar.
+    { url: `${SITE.url}${RUTA_CINE}`, lastModified: d(CINE_PUBLICADO), changeFrequency: "yearly", priority: 0.5 },
     { url: `${SITE.url}/contacto`, lastModified: paginas, changeFrequency: "yearly", priority: 0.6 },
     { url: `${SITE.url}/cotizacion`, lastModified: paginas, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE.url}/proyectos`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },

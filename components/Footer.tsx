@@ -11,6 +11,7 @@ import SocialIcons from '@/components/SocialIcons';
 import FooterAccordion, { type FSection } from '@/components/FooterAccordion';
 import { products } from '@/lib/products';
 import { ACCIONES } from '@/lib/acciones';
+import { RUTA_CINE } from '@/lib/cine';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -56,6 +57,10 @@ export default function Footer() {
       { label: 'Marco de Especificación', href: '/marco' },
       { label: 'Novedades', href: '/novedades' },
       { label: 'Sobre Nosotros', href: '/nosotros' },
+      // La sala de la trilogía. Va aquí y NO en el menú principal a
+      // propósito: es material editorial que se encuentra, no una
+      // campaña que se empuja.
+      { label: 'El oficio: tres piezas en vídeo', href: RUTA_CINE },
       { label: 'Nuestros Servicios', href: '/servicios' },
       { label: 'Contacto', href: '/contacto' },
     ]},

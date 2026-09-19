@@ -30,6 +30,12 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
+      // Los navegadores aplican `media-src` a <video src>. Heredado de
+      // default-src ya estaría permitido, pero declararlo explícito evita
+      // que el día que default-src se endurezca las tres piezas de
+      // /oficio dejen de reproducirse sin que nadie relacione una cosa
+      // con la otra. Sólo 'self': el cine se sirve desde este origen.
+      "media-src 'self'",
       "font-src 'self' data:",
       "connect-src 'self' https: wss:",
       "frame-ancestors 'self'",

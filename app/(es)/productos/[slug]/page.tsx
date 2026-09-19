@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
 import { products, esProductoPrioritario } from '@/lib/products';
 import ProductGallery from '@/components/ProductGallery';
 import { mapaDeTomas } from '@/lib/galeria';
+import CinePlayer from '@/components/CinePlayer';
+import { cineDeProducto, RUTA_CINE, duracionLegible } from '@/lib/cine';
 import ProductBuyBox from '@/components/ProductBuyBox';
 import ProductAvailability from '@/components/ProductAvailability';
 import ProductStructuredData from '@/components/ProductStructuredData';
@@ -114,6 +116,9 @@ export default async function ProductDetailPage({ params }: Props) {
   // que debe concentrar la señal de «lona camión», «manga ventilación» o
   // «big bags», y sus propias fichas hijas son quienes mejor se la pasan.
   const cuna = cunaDeProducto(product.slug);
+  // La pieza de la trilogía en la que este material aparece de verdad, o
+  // ninguna. Nunca dos: ver lib/cine.ts.
+  const cine = cineDeProducto(product.slug);
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
@@ -413,6 +418,37 @@ export default async function ProductDetailPage({ params }: Props) {
             ))}
           </div>
         </div>
+      )}
+
+      {/* LA PELÍCULA EN LA QUE ESTE MATERIAL APARECE, SI APARECE.
+
+          Va aquí abajo y NO junto a <ProductGallery>: la galería es lo que se
+          usa para especificar —vista general, detalle de acabado, escala— y un
+          vídeo al lado compite con ella por la atención justo en el momento en
+          que el comprador está midiendo. Aquí llega quien ya leyó la ficha.
+
+          Como mucho una, por construcción: `lib/cine.ts` reparte los slugs de
+          producto entre las tres piezas sin solaparlos. Sin JSON-LD: el
+          VideoObject canónico de cada pieza se emite una sola vez, en /oficio. */}
+      {cine && (
+        <section className="mt-16 pt-10 border-t">
+          <div className="mb-5 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <span className="font-mono text-sm tabular-nums text-[#059669]">{cine.n}</span>
+            <h2 className="font-semibold tracking-tight text-2xl text-[#0A2540]">{cine.titulo}</h2>
+            <span className="text-sm text-gray-500">{cine.antetitulo}</span>
+            <span className="ml-auto font-mono text-xs tabular-nums text-gray-400">
+              {duracionLegible(cine.durationSec)}
+            </span>
+          </div>
+          <CinePlayer pieza={cine} />
+          <p className="mt-4 max-w-2xl leading-relaxed text-gray-700">{cine.sinopsis}</p>
+          <Link
+            href={RUTA_CINE}
+            className="mt-3 inline-flex min-h-[44px] items-center text-sm font-medium text-[#059669] hover:underline"
+          >
+            Ver la trilogía completa →
+          </Link>
+        </section>
       )}
 
       {/* Checklist transversal: los mismos 4 datos que pide el formulario. */}

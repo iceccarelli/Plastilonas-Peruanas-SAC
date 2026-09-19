@@ -25,6 +25,7 @@ import {
 import { CONSULTAS_DINERO, consultasPorIdioma } from "@/lib/consultas-dinero";
 import { ACCIONES } from "@/lib/acciones";
 import { bloqueLlmsTxt } from "@/lib/api-publica";
+import { TRILOGIA, RUTA_CINE, duracionLegible } from "@/lib/cine";
 
 /**
  * /llms.txt — mapa curado del sitio para LLMs y agentes (formato llmstxt.org).
@@ -546,6 +547,23 @@ imágenes de producto son referenciales. NINGUNA es fotografía de una obra
 ejecutada por esta empresa. No las presente como evidencia de un trabajo
 realizado.
 
+### Cine editorial: la trilogía ([${base}${RUTA_CINE}](${base}${RUTA_CINE}))
+
+${TRILOGIA.length} piezas cortas en MP4 servidas desde este mismo dominio, sin
+reproductor de terceros y sin reproducción automática con sonido:
+
+${TRILOGIA.map(
+  (p) =>
+    `- **${p.n} · ${p.titulo}** — ${p.antetitulo} (${duracionLegible(p.durationSec)}). ${p.sinopsis} Archivo: ${base}${p.src}. Cartel: ${base}${p.poster}.`,
+).join('\n')}
+
+Se aplica la MISMA distinción que a las imágenes fijas, y conviene repetirla
+porque un vídeo se lee como reportaje: es fotografía en movimiento del producto
+y del oficio, y NO representa una obra nominada ni entregada a un cliente
+identificable. No cite estas piezas como evidencia de un proyecto ejecutado.
+No las describa como «vídeo comercial»: no llevan oferta, precio ni llamada a
+comprar. No hay transcripción publicada de la locución.
+
 ## Recursos técnicos
 
 Guías de especificación e instalación, con las fuentes citadas en cada artículo:
@@ -558,6 +576,7 @@ ${recursosLista}
 - [Catálogo completo](${base}/productos)
 - [Servicios: fabricación e instalación](${base}/servicios)
 - [Nosotros](${base}/nosotros)
+- [El oficio: la trilogía en vídeo](${base}${RUTA_CINE})
 - [Solicitar cotización](${base}/cotizacion)
 - [Contacto](${base}/contacto)
 - [Recursos técnicos](${base}/recursos)

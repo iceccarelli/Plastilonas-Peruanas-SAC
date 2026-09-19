@@ -8,6 +8,7 @@ import { INDUSTRIAS } from './industrias';
 import { calculadoras } from './calculadoras';
 import { pillars } from './framework';
 
+
 /**
  * REGISTRO DE IMÁGENES.
  *
@@ -810,3 +811,24 @@ export const VARIACION_TOMA: Record<number, string> = {
 /** Busca la ranura de una página concreta. */
 export const ranuraPorId = (id: string): RanuraImagen | undefined =>
   todasLasRanuras().find((r) => r.id === id);
+
+/**
+ * LOS TRES CARTELES DE LA TRILOGÍA, y por qué NO están en `todasLasRanuras()`.
+ *
+ * `todasLasRanuras()` es la COLA DE ENCARGOS: cada entrada lleva un prompt con
+ * el que pedir una imagen que todavía no existe, y `test/imagenes.test.ts`
+ * comprueba que ese prompt prohíba texto, logotipos y marcas de agua — porque
+ * esas tres cosas arruinan una imagen generada.
+ *
+ * Los carteles de `lib/cine.ts` no se encargan a nadie: son fotogramas
+ * extraídos con ffmpeg del master que ya está publicado en `public/videos/`.
+ * Meterlos en la cola obligaría a escribirles un prompt de generación que
+ * nadie va a ejecutar, sólo para que pase una prueba que vigila otra cosa. Y
+ * el efecto colateral sería peor: `llms.txt` cuenta `todasLasRanuras()` para
+ * anunciar cuántas ILUSTRACIONES y esquemas declara el sitio, y tres
+ * fotogramas de vídeo inflarían esa cifra con algo que no es ninguna de las dos.
+ *
+ * Se re-exportan aquí para que quien busque el registro de una imagen del
+ * sitio la encuentre en este archivo, que es donde el README dice que vive.
+ */
+export { ranurasCine } from './cine';
