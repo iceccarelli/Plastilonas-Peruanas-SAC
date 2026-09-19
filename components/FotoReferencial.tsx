@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { LEYENDA_REFERENCIAL } from '@/lib/leyendas';
 
 /**
  * Fotografía ILUSTRATIVA con su etiqueta de honestidad, en un solo sitio.
@@ -38,10 +39,7 @@ export default function FotoReferencial({
         />
       </div>
       <figcaption className="mt-2 text-xs text-gray-500">
-        {alt}{' '}
-        {idioma === 'en'
-          ? 'Illustrative image of the application: it does not document a project delivered by this company.'
-          : 'Imagen referencial de la aplicación: no documenta una obra ejecutada.'}
+        {alt} {LEYENDA_REFERENCIAL[idioma]}
       </figcaption>
     </figure>
   );

@@ -40,6 +40,7 @@ export const familyContent: FamilyContent[] = [
     intro: [
       'El envase industrial es el último eslabón entre su producto terminado y el cliente, y el primero que falla cuando se especifica por precio unitario. Un bolsón que se rompe en cancha, un film que no unitiza la paleta o un saco que no resiste la estiba convierten un ahorro de céntimos por unidad en pérdida de producto, parada de despacho e incidente de seguridad.',
       'Esta familia cubre el envase de material a granel y la protección de carga paletizada. Todo se define por especificación: capacidad real según densidad aparente, configuración de boca y fondo, tratamientos y documentación exigida por el destino.',
+      'El bolsón se juzga con la mano y con el gancho: el tacto del tejido, la costura de la faja y cómo se comporta el asa cuando el montacargas la levanta. Las fotografías de esta línea están hechas a esa distancia, no a la del catálogo.',
     ],
     selectionCriteria: [
       {
@@ -92,6 +93,7 @@ export const familyContent: FamilyContent[] = [
     intro: [
       'La lona es el producto donde la confección pesa más que el material. Dos cobertores del mismo rollo se comportan de forma completamente distinta según el paso de costura, el refuerzo del perímetro, la distancia entre ojalillos y el tratamiento del borde: ahí es donde una lona dura tres temporadas o se rasga en la primera tormenta.',
       'Esta familia cubre desde el cobertor de camión que trabaja a 90 km/h con carga viva hasta la manta térmica de proceso industrial. Todo se confecciona a la medida real del elemento a cubrir, no a medidas de catálogo.',
+      'Las tomas de esta familia insisten en el borde —el ojal, el orillo con soga, el refuerzo triangular de la esquina— porque una lona se rompe por ahí mucho antes que por el paño. Y la cobertura se juzga sobre el montón, la paca o el patio de secado, con el viento entrando por el perímetro, no en la ficha técnica.',
     ],
     selectionCriteria: [
       {
@@ -139,6 +141,7 @@ export const familyContent: FamilyContent[] = [
     intro: [
       'Una cobertura textil es una estructura, no una lona grande. El textil trabaja a tracción y transmite las cargas de viento y de nieve a un sistema estructural que debe estar dimensionado para recibirlas: cuando falla una carpa industrial, casi nunca falla la tela, falla el anclaje o el cálculo de la carga que nadie hizo.',
       'Esta familia cubre desde el módulo de campamento minero hasta la cubierta tensada arquitectónica. Cada proyecto parte de la geometría, la ubicación y las cargas del sitio.',
+      'Por eso las tomas de esta línea están hechas desde abajo, mirando el mástil, el cable y el punto de anclaje: una cubierta tensada es una estructura y la membrana es su piel, no su cálculo.',
     ],
     selectionCriteria: [
       {
@@ -186,6 +189,7 @@ export const familyContent: FamilyContent[] = [
     intro: [
       'En agroexportación la malla no es un insumo de ferretería: es una barrera sanitaria y un instrumento de manejo de radiación. La densidad de trama de una antiáfida determina qué insecto pasa y cuál no; el porcentaje de sombra de una raschel cambia la temperatura de hoja y, con ella, el comportamiento del cultivo.',
       'Esta familia se abastece por importación directa, lo que permite mantener densidades y porcentajes consistentes entre lotes: un cambio de trama entre campañas invalida la comparación agronómica del ciclo anterior.',
+      'Las fotografías muestran la malla ya montada —el pasillo sombreado, la trama a contraluz—, que es donde se comprueba si el porcentaje de sombra es el que se pidió y si el tejido resiste el punto de amarre.',
     ],
     selectionCriteria: [
       {
@@ -233,6 +237,7 @@ export const familyContent: FamilyContent[] = [
     intro: [
       'La manga es el último tramo del sistema de ventilación y el punto donde se pierde el aire que el proyecto ya pagó. El síntoma es siempre el mismo: el ventilador cumple su curva, el cálculo dice que hay caudal suficiente y la medición en el frente no llega.',
       'Se fabrican a medida porque el diámetro, la longitud de tramo, el sistema de unión y el refuerzo se derivan del cálculo de caudal y de las condiciones reales de la labor, no de un catálogo de medidas estándar.',
+      'Las tomas de esta línea se detienen donde conviene mirar: el codo, la costura del tramo y el acople. El aire que llega al frente se decide en la unión, no en el material del ducto.',
     ],
     selectionCriteria: [
       {
@@ -280,6 +285,7 @@ export const familyContent: FamilyContent[] = [
     intro: [
       'En impermeabilización, el material es la parte fácil. Una geomembrana bien especificada y mal instalada se comporta peor que una lámina más delgada bien instalada: las filtraciones aparecen en la soldadura, en las penetraciones y en la zanja de anclaje, casi nunca en el centro del panel.',
       'Esta familia cubre la barrera (geomembranas), la protección y separación (geotextiles), el refuerzo (geomallas) y el drenaje (geocompuestos). Las líneas técnicas se abastecen bajo pedido con ficha y certificado de lote del fabricante entregados en la cotización: no publicamos como propios números de certificado que no podemos respaldar.',
+      'Las fotografías se acercan al borde y al rollo a medio tender —el anclaje perimetral, el solape sobre el talud—, porque es ahí donde la impermeabilización se gana o se pierde.',
     ],
     selectionCriteria: [
       {
@@ -379,6 +385,7 @@ export const familyContent: FamilyContent[] = [
     intro: [
       'Los elementos de protección colectiva se especifican por el riesgo que controlan, no por su apariencia. Un biombo de soldadura existe para que la radiación del arco no alcance a quien pasa al lado; una barrera acústica, para que el nivel de presión sonora baje del otro lado de la línea de propiedad.',
       'Se fabrican a medida porque el espacio que deben proteger y la fuente que deben contener son siempre particulares.',
+      'El biombo sólo se deja fotografiar bien en el instante en que trabaja: con la chispa contra el paño y con alguien pasando al lado. Fuera de ese instante, un biombo y una cortina cualquiera se parecen demasiado.',
     ],
     selectionCriteria: [
       {
