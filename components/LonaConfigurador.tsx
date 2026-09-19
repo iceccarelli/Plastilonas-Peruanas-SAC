@@ -23,18 +23,26 @@ import {
 } from '@/lib/lona-visual';
 import {
   emptyLona,
+  llevaOjales,
   lonaColorHex,
   lonaGramajeLabel,
   lonaMaterialLabel,
   lonaSummary,
   LONA_ANCHO,
+  LONA_BORDE,
+  LONA_CANTIDAD,
   LONA_COLOR,
   LONA_CONFECCION,
   LONA_GRAMAJE,
   LONA_MATERIAL,
+  LONA_MEDIDAS,
+  LONA_OJALES,
+  LONA_OJALES_CANTIDAD,
+  LONA_OJALES_DISTANCIA,
   LONA_PREGUNTAS,
   LONA_TEXTURA,
   LONA_TRATAMIENTO,
+  LONA_USO,
   type LonaSpec,
 } from '@/lib/lona-config';
 
@@ -193,6 +201,46 @@ function Fila({
         {children}
       </div>
     </fieldset>
+  );
+}
+
+/**
+ * Fila de selección ÚNICA sobre un enum de `lib/lona-config.ts`. Existe para
+ * que las filas nuevas —ojales, medidas, cantidad, uso— no se escriban a mano
+ * una a una, y VIVE EN EL MÓDULO por la misma razón que `Capa` y `Bloque` en
+ * `LonaExploded.tsx`: declarada dentro del render sería un tipo de componente
+ * nuevo en cada pulsación y React desmontaría la fila entera —perdiendo el
+ * foco del teclado— cada vez que se toca una píldora.
+ *
+ * NO HAY `<input>` EN NINGUNA DE ESTAS FILAS. Todo lo que el comprador puede
+ * decir aquí es un valor de enum, y por eso nada de lo que teclee puede llegar
+ * al dibujo ni al RFQ sin pasar por el catálogo.
+ */
+function FilaEnum({
+  titulo,
+  control,
+  opciones,
+  valor,
+  onElegir,
+  onSeñalar,
+  scroller = false,
+}: {
+  titulo: string;
+  control: string;
+  opciones: readonly { value: string; label: string }[];
+  valor: string;
+  onElegir: (v: string) => void;
+  onSeñalar: (capa: Capa | null) => void;
+  scroller?: boolean;
+}) {
+  return (
+    <Fila titulo={titulo} control={control} onSeñalar={onSeñalar} scroller={scroller}>
+      {opciones.map((o) => (
+        <Pastilla key={o.value} activa={valor === o.value} onClick={() => onElegir(o.value)}>
+          {o.label}
+        </Pastilla>
+      ))}
+    </Fila>
   );
 }
 
@@ -438,6 +486,74 @@ export default function LonaConfigurador({
           ))}
         </Fila>
 
+        {/* OJALES — BLOQUE PROPIO, Y UNA SOLA FUENTE DE VERDAD.
+            Antes «Ojales» era una píldora más dentro de «Confección», al lado
+            de velcro y cremallera: no había dónde decir cuántos, cada cuánto
+            ni con qué borde, y el dibujo tenía que adivinarlo del ancho. Ahora
+            la pregunta binaria manda —`spec.ojales`— y las tres filas de
+            detalle sólo existen cuando la respuesta es «Con ojales». Con «Sin
+            ojales» la capa 04 no dibuja NI UN aro.
+            Lo que sigue sin decirse, aquí y en el dibujo: diámetro, material
+            del aro y referencia de herraje. Eso lo fija la planta. */}
+        <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4 space-y-5">
+          <FilaEnum
+            titulo="¿Lleva ojales?"
+            control="ojales"
+            opciones={LONA_OJALES}
+            valor={spec.ojales}
+            onSeñalar={setAislada}
+            onElegir={(v) => {
+              set('ojales', v);
+              marcar(4);
+            }}
+          />
+
+          {llevaOjales(spec) && (
+            <>
+              <FilaEnum
+                titulo="Cantidad de ojales"
+                control="ojalesCantidad"
+                opciones={LONA_OJALES_CANTIDAD}
+                valor={spec.ojalesCantidad}
+                onSeñalar={setAislada}
+                scroller
+                onElegir={(v) => {
+                  set('ojalesCantidad', v);
+                  marcar(4);
+                }}
+              />
+              <FilaEnum
+                titulo="Distancia entre ojales"
+                control="ojalesDistancia"
+                opciones={LONA_OJALES_DISTANCIA}
+                valor={spec.ojalesDistancia}
+                onSeñalar={setAislada}
+                scroller
+                onElegir={(v) => {
+                  set('ojalesDistancia', v);
+                  marcar(4);
+                }}
+              />
+              <FilaEnum
+                titulo="Acabado del borde / doblez"
+                control="ojalesBorde"
+                opciones={LONA_BORDE}
+                valor={spec.ojalesBorde}
+                onSeñalar={setAislada}
+                scroller
+                onElegir={(v) => {
+                  set('ojalesBorde', v);
+                  marcar(4);
+                }}
+              />
+              <p className="text-xs text-gray-500">
+                El esquema dibuja los ojales de forma ilustrativa: número topado, sin diámetro, sin
+                material del aro y sin referencia de herraje. Eso se fija en la cotización.
+              </p>
+            </>
+          )}
+        </div>
+
         <Fila titulo="Tratamientos (varios)" control="tratamientos" onSeñalar={setAislada}>
           {LONA_TRATAMIENTO.map((o) => (
             <Pastilla
@@ -454,24 +570,47 @@ export default function LonaConfigurador({
           ))}
         </Fila>
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          {(
-            [
-              ['medidas', 'Medidas del paño'],
-              ['cantidad', 'Cantidad'],
-              ['uso', 'Uso previsto'],
-            ] as const
-          ).map(([k, label]) => (
-            <label key={k} className="block text-sm text-gray-600">
-              {label}
-              <input
-                className="mt-1 h-11 w-full rounded-xl border border-gray-200 px-3 text-sm text-[#0A2540]"
-                value={spec[k]}
-                onChange={(e) => set(k, e.target.value)}
-              />
-            </label>
-          ))}
-        </div>
+        {/* MEDIDAS, CANTIDAD Y USO — antes tres `<input>` de texto libre.
+            Llegaban al RFQ como «unos 6 por 12», «varios» y «para el camión»:
+            el comercial volvía a preguntar las tres cosas. Ahora son listas
+            cerradas, así que la respuesta es siempre comparable y nada
+            tecleado por un desconocido viaja sin validar hasta un correo. La
+            salida a «a medida / cotización» sigue estando en las tres. */}
+        <FilaEnum
+          titulo="Medidas del paño"
+          control="medidas"
+          opciones={LONA_MEDIDAS}
+          valor={spec.medidas}
+          onSeñalar={setAislada}
+          scroller
+          onElegir={(v) => {
+            set('medidas', v);
+            marcar(4);
+          }}
+        />
+
+        {/* CANTIDAD: además del RFQ, escala el escenario entero
+            (`escalaEscenario` en lib/lona-visual.ts). No aísla ninguna capa
+            —no gobierna ninguna—, así que no llama a `marcar`. */}
+        <FilaEnum
+          titulo="Cantidad"
+          control="cantidad"
+          opciones={LONA_CANTIDAD}
+          valor={spec.cantidad}
+          onSeñalar={setAislada}
+          scroller
+          onElegir={(v) => set('cantidad', v)}
+        />
+
+        <FilaEnum
+          titulo="Uso previsto"
+          control="uso"
+          opciones={LONA_USO}
+          valor={spec.uso}
+          onSeñalar={setAislada}
+          scroller
+          onElegir={(v) => set('uso', v)}
+        />
 
         <div
           role="group"

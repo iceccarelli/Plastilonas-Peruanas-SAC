@@ -6,6 +6,8 @@ import {
   anchoMetros,
   apartadoCapa,
   capasDeLona,
+  escalaEscenario,
+  extensionOjales,
   fraccionAncho,
   fraccionGramaje,
   gramajeMedio,
@@ -15,23 +17,31 @@ import {
   pasoTramaNucleo,
   specToVisualState,
   tinteAcabado,
+  CONTROLES_SIN_CAPA,
   GIRO_GRADOS,
   GIRO_SEGUNDOS,
   GRAMAJE_MAX,
   GRAMAJE_MIN,
+  NOMBRES_DE_CAPA,
   OJALES_MAX,
   OPACIDAD_APAGADA,
   type Capa,
 } from '@/lib/lona-visual';
 import {
   emptyLona,
+  LONA_BORDE,
+  LONA_CANTIDAD,
   LONA_CONFECCION,
   LONA_ANCHO,
   LONA_COLOR,
   LONA_GRAMAJE,
   LONA_MATERIAL,
+  LONA_MEDIDAS,
+  LONA_OJALES_CANTIDAD,
+  LONA_OJALES_DISTANCIA,
   LONA_TEXTURA,
   LONA_TRATAMIENTO,
+  LONA_USO,
   type LonaSpec,
 } from '@/lib/lona-config';
 
@@ -111,9 +121,11 @@ describe('specToVisualState — cada campo mueve algo distinto', () => {
   });
 
   it('la confección entra y sale como pictograma, en el orden del catálogo', () => {
-    const v = specToVisualState(con({ confeccion: ['cremallera', 'ojales'] }));
-    expect(v.pictogramas).toEqual(['ojales', 'cremallera']);
+    const v = specToVisualState(con({ confeccion: ['cremallera', 'velcro'] }));
+    expect(v.pictogramas).toEqual(['velcro', 'cremallera']);
     expect(specToVisualState(con({ confeccion: [] })).pictogramas).toEqual([]);
+    // Y los ojales NO viajan por aquí: tienen su propio campo.
+    expect(v.pictogramas).not.toContain('ojales');
   });
 
   it('cada tratamiento suma capa, y los cuatro no borran el color', () => {
@@ -166,12 +178,12 @@ describe('ningún número se sale de la ficha real', () => {
 describe('capasDeLona — la lista dice lo que el comprador eligió', () => {
   it('nombra los tratamientos y la confección elegidos, no un genérico', () => {
     const capas = capasDeLona(
-      con({ tratamientos: ['uv', 'ignifugo'], confeccion: ['ojales'], ancho: '4.0' }),
+      con({ tratamientos: ['uv', 'ignifugo'], confeccion: ['costura'], ancho: '4.0' }),
     );
     expect(capas).toHaveLength(4);
     expect(capas[0].texto).toContain('Anti-UV');
     expect(capas[0].texto).toContain('Ignífugo');
-    expect(capas[3].texto).toContain('Ojales');
+    expect(capas[3].texto).toContain('Costura reforzada');
     expect(capas[3].texto).toContain('hasta 4.0 m en una pieza');
   });
 
@@ -179,6 +191,70 @@ describe('capasDeLona — la lista dice lo que el comprador eligió', () => {
     const capas = capasDeLona(con({ tratamientos: [], confeccion: [] }));
     expect(capas[0].texto).toContain('se piden uno a uno');
     expect(capas[3].texto.length).toBeGreaterThan(30);
+  });
+
+  it('las cuatro capas llevan número Y nombre comercial, en orden 01 → 04', () => {
+    const capas = capasDeLona(emptyLona());
+    expect(capas.map((c) => c.n)).toEqual([1, 2, 3, 4]);
+    expect(capas.map((c) => c.titulo)).toEqual([
+      'Acabado superficial',
+      'Cara plastificada',
+      'Núcleo tejido (trama)',
+      'Borde y confección',
+    ]);
+    // Los nombres salen de UN array compartido, no de cuatro literales sueltos.
+    expect(capas.map((c) => c.titulo)).toEqual([...NOMBRES_DE_CAPA]);
+  });
+
+  it('la 04 dice el sub-pliego de ojales, y «sin ojales» cuando no los lleva', () => {
+    const conOjales = capasDeLona(
+      con({ ojales: 'con', ojalesCantidad: '12', ojalesDistancia: '25', ojalesBorde: 'hf' }),
+    );
+    expect(conOjales[3].texto).toContain('12 ojales');
+    expect(conOjales[3].texto).toContain('Cada 25 cm');
+    // La etiqueta va tal cual: «HF» son siglas, no una palabra en minúscula.
+    expect(conOjales[3].texto).toContain('Orilla soldada HF');
+
+    const sinOjales = capasDeLona(con({ ojales: 'sin' }));
+    expect(sinOjales[3].texto).toContain('Sin ojales');
+    expect(sinOjales[3].texto).not.toContain('Cada 50 cm');
+  });
+
+  it('el dibujo y la lista comparten los rótulos: un solo origen, no dos copias', () => {
+    const exploded = leer('components/LonaExploded.tsx');
+    const conf = leer('components/LonaConfigurador.tsx');
+    // Ni el SVG ni el configurador escriben un nombre de capa a mano: los dos
+    // lo sacan de `capasDeLona`. Si alguien vuelve a teclear uno, esto se cae.
+    for (const nombre of NOMBRES_DE_CAPA) {
+      expect(exploded, `${nombre} escrito a mano en el SVG`).not.toContain(nombre);
+      expect(conf, `${nombre} escrito a mano en el configurador`).not.toContain(nombre);
+    }
+    expect(exploded).toContain('capasDeLona');
+    expect(exploded, 'la llamada del SVG dejó de rotular la capa').toContain('{nombre}');
+    expect(conf).toContain('capasDeLona');
+    expect(conf).toContain('{c.titulo}');
+  });
+});
+
+describe('la pila se lee de arriba abajo: 01 arriba, 04 abajo', () => {
+  const exploded = leer('components/LonaExploded.tsx');
+
+  it('ALTURA es creciente, así que el número 01 es el de la y más pequeña', () => {
+    const m = exploded.match(/const ALTURA = \[([^\]]+)\]/);
+    expect(m, 'desapareció la pila de alturas del despiece').toBeTruthy();
+    const alturas = m![1].split(',').map((x) => Number(x.trim()));
+    expect(alturas).toHaveLength(4);
+    for (let i = 1; i < alturas.length; i++) {
+      expect(
+        alturas[i],
+        'la pila quedó invertida: 01 tiene que ser la capa de ARRIBA',
+      ).toBeGreaterThan(alturas[i - 1]);
+    }
+  });
+
+  it('las capas se dibujan en el mismo orden en que se listan', () => {
+    const orden = [...exploded.matchAll(/<Capa n=\{(\d)\}/g)].map((x) => Number(x[1]));
+    expect(orden).toEqual([1, 2, 3, 4]);
   });
 });
 
@@ -321,7 +397,45 @@ describe('el gramaje también CIERRA la trama del núcleo', () => {
 describe('ojales: cuántos se DIBUJAN, que no es cuántos lleva el paño', () => {
   it('sin ojales pedidos no se dibuja ninguno', () => {
     expect(numeroDeOjales('4.0', false)).toBe(0);
-    expect(specToVisualState(con({ confeccion: ['hf'] })).ojales).toBe(0);
+    expect(specToVisualState(con({ ojales: 'sin' })).ojales).toBe(0);
+    // Y con cualquier detalle puesto: «Sin ojales» gana siempre.
+    expect(
+      specToVisualState(con({ ojales: 'sin', ojalesCantidad: '16', ojalesDistancia: '25' })).ojales,
+    ).toBe(0);
+  });
+
+  it('«Sin ojales» apaga también el borde: no queda un doblez huérfano', () => {
+    expect(specToVisualState(con({ ojales: 'sin', ojalesBorde: 'hf' })).borde).toBeNull();
+    expect(specToVisualState(con({ ojales: 'con', ojalesBorde: 'hf' })).borde).toBe('hf');
+  });
+
+  it('el dibujo NO renderiza ojales cuando la cuenta es cero', () => {
+    // La guardia vive en el SVG: `if (!ojales) return null` dentro de la rama
+    // de ojales, y el grupo entero se monta sólo con `v.ojales > 0`. Cero
+    // ojales significa ni un `<Ojal>`, no diez ojales transparentes.
+    const exploded = leer('components/LonaExploded.tsx');
+    expect(exploded).toContain('if (!ojales) return null;');
+    expect(exploded).toContain('{v.ojales > 0 && (');
+  });
+
+  it('la CANTIDAD elegida manda sobre la heurística del ancho', () => {
+    for (const o of LONA_OJALES_CANTIDAD.filter((c) => c.value !== 'definir')) {
+      const n = specToVisualState(con({ ojalesCantidad: o.value })).ojales;
+      expect(n).toBe(Math.min(OJALES_MAX, Number(o.value)));
+    }
+    // Cambiar la cantidad cambia el dibujo, que es el punto de todo esto.
+    expect(specToVisualState(con({ ojalesCantidad: '4' })).ojales).not.toBe(
+      specToVisualState(con({ ojalesCantidad: '8' })).ojales,
+    );
+  });
+
+  it('con «A definir» se vuelve a la heurística del ancho, sin inventar un número', () => {
+    for (const o of LONA_ANCHO) {
+      expect(numeroDeOjales(o.value, true, 'definir')).toBe(numeroDeOjales(o.value, true));
+    }
+    const a = specToVisualState(con({ ojalesCantidad: 'definir', ancho: '1.5' })).ojales;
+    const b = specToVisualState(con({ ojalesCantidad: 'definir', ancho: '4.0' })).ojales;
+    expect(b).toBeGreaterThan(a);
   });
 
   it('más ancho, más ojales: creciente y sin empates dentro del rango', () => {
@@ -340,12 +454,103 @@ describe('ojales: cuántos se DIBUJAN, que no es cuántos lleva el paño', () =>
     expect(OJALES_MAX).toBeLessThanOrEqual(10);
     // «Más de 4.0 m» no dispara el dibujo al infinito: se queda en el tope.
     expect(numeroDeOjales('union', true)).toBe(OJALES_MAX);
+    // Y 16 ojales pedidos tampoco: el tope es del DIBUJO, y el RFQ sí dice 16.
+    expect(numeroDeOjales('4.0', true, '16')).toBe(OJALES_MAX);
   });
 
-  it('la confección elegida es la que decide, no el ancho por su cuenta', () => {
-    const conOjales = specToVisualState(con({ confeccion: LONA_CONFECCION.map((c) => c.id) }));
-    expect(conOjales.ojales).toBeGreaterThan(0);
-    expect(specToVisualState(con({ confeccion: [] })).ojales).toBe(0);
+  it('el bloque de ojales es la única fuente: la confección ya no vota', () => {
+    const conConfeccion = specToVisualState(
+      con({ ojales: 'sin', confeccion: LONA_CONFECCION.map((c) => c.id) }),
+    );
+    expect(conConfeccion.ojales).toBe(0);
+    expect(specToVisualState(con({ ojales: 'con', confeccion: [] })).ojales).toBeGreaterThan(0);
+  });
+
+  it('la DISTANCIA aprieta o abre la hilera: creciente con los centímetros', () => {
+    const cm = ['25', '50', '75', '100'];
+    const ext = cm.map(extensionOjales);
+    for (let i = 1; i < ext.length; i++) {
+      expect(ext[i], `${cm[i]} cm debería abrir más que ${cm[i - 1]} cm`).toBeGreaterThan(ext[i - 1]);
+    }
+    for (const e of ext) {
+      expect(e).toBeGreaterThan(0);
+      expect(e).toBeLessThanOrEqual(1);
+    }
+    // «A definir» ni se cierra del todo ni se abre del todo.
+    const definir = extensionOjales('definir');
+    expect(definir).toBeGreaterThan(ext[0]);
+    expect(definir).toBeLessThanOrEqual(ext[ext.length - 1]);
+    // Y el estado visual la arrastra: cambiar la fila cambia el dibujo.
+    for (const o of LONA_OJALES_DISTANCIA) {
+      expect(specToVisualState(con({ ojalesDistancia: o.value })).extensionOjales).toBe(
+        extensionOjales(o.value),
+      );
+    }
+  });
+
+  it('cada acabado de borde llega al dibujo, y el SVG sabe dibujar los cuatro', () => {
+    const exploded = leer('components/LonaExploded.tsx');
+    expect(exploded).toMatch(/^function Borde\(/m);
+    for (const o of LONA_BORDE.filter((b) => b.value !== 'definir')) {
+      expect(specToVisualState(con({ ojalesBorde: o.value })).borde).toBe(o.value);
+      expect(exploded, `el borde ${o.value} no se dibuja`).toContain(`id === '${o.value}'`);
+    }
+    // «A definir» no dibuja un acabado que nadie eligió.
+    expect(exploded).not.toContain("id === 'definir'");
+  });
+});
+
+describe('escalaEscenario — la cantidad pedida se ve en el tamaño', () => {
+  const tramos = LONA_CANTIDAD.map((o) => o.value);
+
+  it('es monótona NO decreciente en el orden de los tramos', () => {
+    const escalas = tramos.map(escalaEscenario);
+    for (let i = 1; i < escalas.length; i++) {
+      expect(
+        escalas[i],
+        `${tramos[i]} no puede dibujarse más pequeño que ${tramos[i - 1]}`,
+      ).toBeGreaterThanOrEqual(escalas[i - 1]);
+    }
+  });
+
+  it('el extremo pequeño y el grande sí se distinguen', () => {
+    expect(escalaEscenario('1')).toBeLessThan(escalaEscenario('2-5'));
+    expect(escalaEscenario('21-50')).toBeGreaterThan(escalaEscenario('6-10'));
+    expect(escalaEscenario('1')).toBeCloseTo(0.85, 2);
+    expect(escalaEscenario('mas-50')).toBeCloseTo(1.12, 2);
+  });
+
+  it('se queda en un margen sobrio: ni desaparece ni se sale del lienzo', () => {
+    for (const t of tramos) {
+      expect(escalaEscenario(t)).toBeGreaterThanOrEqual(0.8);
+      expect(escalaEscenario(t)).toBeLessThanOrEqual(1.2);
+    }
+    // Un valor inventado no encoge el dibujo: se queda en tamaño natural.
+    expect(escalaEscenario('setecientos')).toBe(1);
+  });
+
+  it('NO compite con los morfos por campo: el ancho y el espesor no la miran', () => {
+    // La escala es una transformación EXTERIOR. Si se hubiera mezclado con la
+    // geometría, cambiar la cantidad movería `medioAncho` o `espesorNucleo`.
+    const base = specToVisualState(con({ cantidad: '1' }));
+    const mucho = specToVisualState(con({ cantidad: '21-50' }));
+    expect(mucho.medioAncho).toBe(base.medioAncho);
+    expect(mucho.espesorNucleo).toBe(base.espesorNucleo);
+    expect(mucho.pasoTramaNucleo).toBe(base.pasoTramaNucleo);
+    expect(mucho.escala).toBeGreaterThan(base.escala);
+    // Y en el SVG vive en un grupo propio, por fuera de la pila de capas.
+    const exploded = leer('components/LonaExploded.tsx');
+    expect(exploded).toContain('animate={{ scale: v.escala }}');
+  });
+
+  it('el uso previsto no toca el dibujo: es dato comercial, no geometría', () => {
+    const estados = LONA_USO.map((o) => specToVisualState(con({ uso: o.value })));
+    for (const e of estados) expect(e).toEqual(estados[0]);
+  });
+
+  it('las medidas del paño tampoco pisan el ancho, que tiene su propia fila', () => {
+    const anchos = LONA_MEDIDAS.map((o) => specToVisualState(con({ medidas: o.value })).medioAncho);
+    expect(new Set(anchos).size).toBe(1);
   });
 });
 
@@ -397,6 +602,16 @@ describe('layerParaControl — qué capa enseña cada fila de píldoras', () => 
     expect(layerParaControl('ancho')).toBe(4);
     expect(layerParaControl('confeccion')).toBe(4);
     expect(layerParaControl('tratamientos')).toBe(1);
+    // El bloque de ojales entero mira a la capa 04: borde y confección.
+    for (const c of ['ojales', 'ojalesCantidad', 'ojalesDistancia', 'ojalesBorde', 'medidas']) {
+      expect(layerParaControl(c), `${c} dejó de apuntar a la capa 04`).toBe(4);
+    }
+  });
+
+  it('los controles de escenario NO aíslan ninguna capa, y está declarado', () => {
+    // «Cantidad» escala el conjunto y «Uso previsto» no toca el dibujo:
+    // aislar una capa al señalarlos mentiría sobre qué gobierna la fila.
+    for (const c of CONTROLES_SIN_CAPA) expect(layerParaControl(c)).toBeNull();
   });
 
   it('un control desconocido no aísla nada en vez de aislar la capa 1', () => {
@@ -412,11 +627,20 @@ describe('layerParaControl — qué capa enseña cada fila de píldoras', () => 
 
   it('cada fila del configurador declara un control que el mapa conoce', () => {
     const conf = leer('components/LonaConfigurador.tsx');
-    for (const m of conf.matchAll(/<Fila[^>]*control="([^"]+)"/g)) {
-      expect(layerParaControl(m[1]), `<Fila control="${m[1]}"> no apunta a ninguna capa`).not.toBeNull();
+    const sinCapa: readonly string[] = CONTROLES_SIN_CAPA;
+    const controles = [...conf.matchAll(/<Fila(?:Enum)?\b[\s\S]{0,200}?control="([^"]+)"/g)].map(
+      (m) => m[1],
+    );
+    for (const c of controles) {
+      if (sinCapa.includes(c)) continue;
+      expect(layerParaControl(c), `<Fila control="${c}"> no apunta a ninguna capa`).not.toBeNull();
     }
-    // Las siete filas están enganchadas, no tres.
-    expect([...conf.matchAll(/<Fila[^>]*control="/g)]).toHaveLength(7);
+    // Siete filas eran antes. Ahora hay además el bloque de ojales (4) y las
+    // tres listas que sustituyeron a los campos de texto: catorce en total.
+    expect(controles).toHaveLength(14);
+    for (const c of ['ojales', 'ojalesCantidad', 'ojalesDistancia', 'ojalesBorde', 'medidas', 'cantidad', 'uso']) {
+      expect(controles, `la fila ${c} desapareció del configurador`).toContain(c);
+    }
   });
 });
 

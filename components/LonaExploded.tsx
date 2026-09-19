@@ -277,18 +277,34 @@ function Ojal({ x, y, r = 4.4 }: { x: number; y: number; r?: number }) {
  *   · costura    → hilván discontinuo por dentro de todo el perímetro
  *   · ojales     → en el canto inferior, que es donde se ven
  */
-function Confeccion({ id, y, W, ojales }: { id: string; y: number; W: number; ojales: number }) {
+function Confeccion({
+  id,
+  y,
+  W,
+  ojales,
+  extension = 0.88,
+}: {
+  id: string;
+  y: number;
+  W: number;
+  ojales: number;
+  /** Fracción del canto que ocupa la hilera: es la DISTANCIA entre ojales. */
+  extension?: number;
+}) {
   const { L, T, R, B, C } = esquinas(y, W);
 
   if (id === 'ojales') {
+    // CERO ES CERO. Sin ojales pedidos no se dibuja ni un aro: no hay ojales
+    // transparentes, ni de radio cero, ni un grupo vacío con su sombra.
     if (!ojales) return null;
     const n = haciaDentro(B, C);
+    // La hilera se centra en el canto y ocupa `extension` de él: a 25 cm se
+    // cierra sobre el centro y a 100 cm se estira de esquina a esquina.
+    const inicio = (1 - extension) / 2;
     return (
       <>
         {Array.from({ length: ojales }, (_, i) => {
-          // El recorrido se ENCOGE un 12 %: pegado a la esquina el ojal
-          // queda a caballo de dos cantos y parece suelto.
-          const p = desplazar(puntoCanto(y, W, 0.06 + ((i + 0.5) / ojales) * 0.88), n, 7);
+          const p = desplazar(puntoCanto(y, W, inicio + ((i + 0.5) / ojales) * extension), n, 7);
           return <Ojal key={i} x={p[0]} y={p[1]} r={Math.max(3.2, Math.min(4.6, W / 26))} />;
         })}
       </>
@@ -388,6 +404,128 @@ function Confeccion({ id, y, W, ojales }: { id: string; y: number; W: number; oj
 }
 
 /**
+ * EL DOBLEZ DEL BORDE, DIBUJADO EN EL CANTO DE LA 04.
+ *
+ * Los cuatro acabados se dibujan con los MISMOS primitivos que ya usaba la
+ * confección —el cordón de soldadura HF y el hilván discontinuo—, encogidos al
+ * perímetro. No se inventa un lenguaje gráfico nuevo para decir lo mismo:
+ *
+ *   · dobladillo           → una línea fina y limpia por dentro del canto
+ *   · dobladillo-reforzado → línea doble y más gruesa: el doblez con cinta o soga
+ *   · hf                   → el cordón de alta frecuencia, con su halo de calor
+ *   · costura-doble        → dos hilvanes discontinuos, uno por dentro del otro
+ *   · definir              → nada: no se dibuja un acabado que no se ha elegido
+ *
+ * Como todo lo de este esquema, es ILUSTRATIVO: no declara ancho de doblez, ni
+ * paso de puntada, ni referencia de cinta.
+ */
+function Borde({ id, y, W }: { id: string; y: number; W: number }) {
+  const { L, T, R, B, C } = esquinas(y, W);
+  const anillo = (k: number) =>
+    [L, T, R, B]
+      .map((q) => entre2(C, q, k))
+      .map((q) => `${q[0]},${q[1]}`)
+      .join(' ');
+
+  if (id === 'dobladillo') {
+    return (
+      <polygon
+        points={anillo(0.93)}
+        fill="none"
+        stroke="#E2E8F0"
+        strokeOpacity="0.7"
+        strokeWidth="0.9"
+        strokeLinejoin="round"
+      />
+    );
+  }
+
+  if (id === 'dobladillo-reforzado') {
+    return (
+      <>
+        <polygon
+          points={anillo(0.94)}
+          fill="none"
+          stroke="#E2E8F0"
+          strokeOpacity="0.85"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+        <polygon
+          points={anillo(0.86)}
+          fill="none"
+          stroke="#CBD5E1"
+          strokeOpacity="0.7"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+      </>
+    );
+  }
+
+  if (id === 'hf') {
+    // Mismo cordón que `Confeccion id="hf"`: halo de calor ancho y traslúcido
+    // debajo, dos filos claros encima. Aquí recorre el perímetro.
+    return (
+      <>
+        <polygon
+          points={anillo(0.9)}
+          fill="none"
+          stroke="#93C5FD"
+          strokeOpacity="0.22"
+          strokeWidth="7"
+          strokeLinejoin="round"
+        />
+        <polygon
+          points={anillo(0.92)}
+          fill="none"
+          stroke="#DBEAFE"
+          strokeOpacity="0.85"
+          strokeWidth="1.1"
+          strokeLinejoin="round"
+        />
+        <polygon
+          points={anillo(0.87)}
+          fill="none"
+          stroke="#BFDBFE"
+          strokeOpacity="0.6"
+          strokeWidth="1.1"
+          strokeLinejoin="round"
+        />
+      </>
+    );
+  }
+
+  if (id === 'costura-doble') {
+    // Mismo hilván que `Confeccion id="costura"`, pero DOBLE: dos pasadas.
+    return (
+      <>
+        <polygon
+          points={anillo(0.92)}
+          fill="none"
+          stroke="#E2E8F0"
+          strokeOpacity="0.85"
+          strokeWidth="1.2"
+          strokeDasharray="4 3"
+          strokeLinejoin="round"
+        />
+        <polygon
+          points={anillo(0.84)}
+          fill="none"
+          stroke="#CBD5E1"
+          strokeOpacity="0.75"
+          strokeWidth="1.2"
+          strokeDasharray="4 3"
+          strokeLinejoin="round"
+        />
+      </>
+    );
+  }
+
+  return null;
+}
+
+/**
  * Cada capa flota con sus propios números, se desplaza de lado con el giro de
  * plataforma y, si es la que acaba de cambiar, su grupo interno se vuelve a
  * montar (`key` con el contador de pulsos) y entra con un muelle.
@@ -400,6 +538,7 @@ function Confeccion({ id, y, W, ojales }: { id: string; y: number; W: number; oj
  */
 function Capa({
   n,
+  nombre,
   W,
   foco,
   pulso,
@@ -410,6 +549,14 @@ function Capa({
   children,
 }: {
   n: NumCapa;
+  /**
+   * Nombre comercial corto de la capa. Viene de `capasDeLona` —el MISMO array
+   * que alimenta la lista «Las cuatro capas» del configurador—, así que la
+   * llamada del dibujo y el rótulo de la lista no pueden decir cosas
+   * distintas. Se enseña sólo en la capa señalada: cuatro rótulos a la vez
+   * sobre un dibujo de 320 px serían ruido.
+   */
+  nombre: string;
   W: number;
   foco: NumCapa | null;
   pulso: number;
@@ -511,6 +658,26 @@ function Capa({
           >
             0{n}
           </text>
+          {(esta || destacada) && (
+            /* El halo blanco (`paint-order: stroke`) es lo que mantiene el
+               nombre legible cuando cae sobre el propio paño: sin él, un
+               rótulo gris sobre navy no se lee. */
+            <text
+              x="297"
+              y={y + H + 4}
+              fontSize="6.6"
+              fontWeight="600"
+              fill={VERDE_OSC}
+              textAnchor="end"
+              stroke="#ffffff"
+              strokeWidth="2.2"
+              strokeOpacity="0.9"
+              paintOrder="stroke"
+              style={{ letterSpacing: '0.02em' }}
+            >
+              {nombre}
+            </text>
+          )}
         </g>
       </g>
     </g>
@@ -599,6 +766,8 @@ export default function LonaExploded({
   const v = specToVisualState(spec);
   const capas = capasDeLona(spec);
   const W = v.medioAncho;
+  /** Nombre comercial por capa, del mismo array que la lista del configurador. */
+  const nombre = (n: NumCapa) => capas.find((c) => c.n === n)?.titulo ?? '';
 
   const capaFoco = capas.find((c) => c.n === (aislada ?? foco));
 
@@ -610,7 +779,9 @@ export default function LonaExploded({
         viewBox="-14 -8 328 330"
         className="mx-auto block w-full max-w-[320px] min-h-0 flex-1"
         role="img"
-        aria-label={`Esquema del despiece de una lona en ${lonaGramajeLabel(spec.gramaje)}, ${lonaAnchoLabel(spec.ancho).toLowerCase()}: acabado, cara plastificada, núcleo tejido y confección inferior.`}
+        // Las cuatro capas se nombran con los MISMOS rótulos que la lista de
+        // al lado: un lector de pantalla y un ojo oyen y leen lo mismo.
+        aria-label={`Esquema del despiece de una lona en ${lonaGramajeLabel(spec.gramaje)}, ${lonaAnchoLabel(spec.ancho).toLowerCase()}, de arriba abajo: ${capas.map((c) => `0${c.n} ${c.titulo.toLowerCase()}`).join(', ')}.`}
       >
         <defs>
           {/* TEJIDOS. Mismo ligamento, tres escalas y tres paletas. */}
@@ -708,9 +879,24 @@ export default function LonaExploded({
           <ellipse cx={CX} cy="300" rx={W * 0.48} ry="6" fill={NAVY} fillOpacity="0.26" />
         </g>
 
+        {/* ESCALA DEL ESCENARIO — la CANTIDAD pedida, en un solo transform.
+            Va en un grupo EXTERIOR y no dentro de ninguna capa: el ancho del
+            paño, el espesor del núcleo y el paso de la trama se siguen
+            calculando exactamente igual y esta escala los multiplica a todos
+            por igual en vez de competir con ellos. Muelle, el mismo que usan
+            el barniz y el pulso, y con reduced-motion se pone de golpe. */}
+        <motion.g
+          animate={{ scale: v.escala }}
+          initial={false}
+          transition={mover ? MUELLE : INSTANTE}
+          style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+        >
         <g filter="url(#lona-sombra)">
-          {/* 01 · ACABADO. Un barniz traslúcido, no un rectángulo blanco. */}
-          <Capa n={1} W={W} foco={foco} pulso={pulso} mover={mover} aislada={aislada} aislar={aislar} onAislar={señalar}>
+          {/* 01 · ACABADO SUPERFICIAL. La capa de ARRIBA de la pila: es la que
+              mira al sol y a la lluvia, y `ALTURA[0]` es la y más pequeña del
+              viewBox. 01 arriba, 04 abajo — el número se lee de arriba abajo
+              igual que en la lista «Las cuatro capas». */}
+          <Capa n={1} nombre={nombre(1)} W={W} foco={foco} pulso={pulso} mover={mover} aislada={aislada} aislar={aislar} onAislar={señalar}>
             <Bloque
               n={1}
               W={W}
@@ -757,7 +943,7 @@ export default function LonaExploded({
           </Capa>
 
           {/* 02 · CARA PLASTIFICADA. Color, material y acabado, los tres. */}
-          <Capa n={2} W={W} foco={foco} pulso={pulso} mover={mover} aislada={aislada} aislar={aislar} onAislar={señalar}>
+          <Capa n={2} nombre={nombre(2)} W={W} foco={foco} pulso={pulso} mover={mover} aislada={aislada} aislar={aislar} onAislar={señalar}>
             <Bloque
               n={2}
               W={W}
@@ -809,7 +995,7 @@ export default function LonaExploded({
           </Capa>
 
           {/* 03 · NÚCLEO TEJIDO. El gramaje se ve como espesor Y como cierre. */}
-          <Capa n={3} W={W} foco={foco} pulso={pulso} mover={mover} aislada={aislada} aislar={aislar} onAislar={señalar}>
+          <Capa n={3} nombre={nombre(3)} W={W} foco={foco} pulso={pulso} mover={mover} aislada={aislada} aislar={aislar} onAislar={señalar}>
             <Bloque
               n={3}
               W={W}
@@ -833,8 +1019,9 @@ export default function LonaExploded({
             />
           </Capa>
 
-          {/* 04 · CONFECCIÓN. Cada elección ocupa su canto, no flota encima. */}
-          <Capa n={4} W={W} foco={foco} pulso={pulso} mover={mover} aislada={aislada} aislar={aislar} onAislar={señalar}>
+          {/* 04 · BORDE Y CONFECCIÓN. La capa de ABAJO de la pila. Cada
+              elección ocupa su canto, no flota encima. */}
+          <Capa n={4} nombre={nombre(4)} W={W} foco={foco} pulso={pulso} mover={mover} aislada={aislada} aislar={aislar} onAislar={señalar}>
             <Bloque n={4} W={W} foco={foco} relleno={NAVY} borde={NAVY} espesor={3} sombraLado={NAVY} />
             <polygon points={caraPuntos(ALTURA[3], W)} fill="url(#lona-luz-mate)" stroke="none" />
             {v.unionSoldada && (
@@ -850,6 +1037,39 @@ export default function LonaExploded({
               />
             )}
             <AnimatePresence>
+              {/* EL DOBLEZ DEL BORDE. Sólo existe cuando el paño lleva ojales:
+                  `v.borde` es null con «Sin ojales» y aquí no se dibuja nada. */}
+              {v.borde && (
+                <motion.g
+                  key={`borde-${v.borde}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={mover ? MUELLE : INSTANTE}
+                >
+                  <Borde id={v.borde} y={ALTURA[3]} W={W} />
+                </motion.g>
+              )}
+              {/* LOS OJALES. Una sola fuente: `v.ojales`, que vale 0 cuando el
+                  bloque dice «Sin ojales». Ya no cuelgan de la fila de
+                  confección, así que no hay dos controles que discrepen. */}
+              {v.ojales > 0 && (
+                <motion.g
+                  key="ojales"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={mover ? MUELLE : INSTANTE}
+                >
+                  <Confeccion
+                    id="ojales"
+                    y={ALTURA[3]}
+                    W={W}
+                    ojales={v.ojales}
+                    extension={v.extensionOjales}
+                  />
+                </motion.g>
+              )}
               {v.pictogramas.map((id) => (
                 <motion.g
                   key={id}
@@ -864,6 +1084,7 @@ export default function LonaExploded({
             </AnimatePresence>
           </Capa>
         </g>
+        </motion.g>
       </svg>
 
       {/* Pie vivo: en un teléfono la lista de cuatro capas no cabe junto al
@@ -879,8 +1100,8 @@ export default function LonaExploded({
           </>
         ) : (
           <span className="text-gray-500">
-            Cuatro capas: acabado, cara plastificada, núcleo tejido y confección. Toque una opción
-            y mire cuál cambia.
+            {capas.map((c) => c.titulo.toLowerCase()).join(', ')}. Toque una opción y mire cuál
+            cambia.
           </span>
         )}
       </p>

@@ -7,10 +7,13 @@ import {
   lonaDesdeParams,
   lonaSummary,
   LONA_ANCHO,
+  LONA_CANTIDAD,
   LONA_CONFECCION,
   LONA_GRAMAJE,
   LONA_MATERIAL,
+  LONA_MEDIDAS,
   LONA_TRATAMIENTO,
+  LONA_USO,
   type LonaSpec,
 } from '@/lib/lona-config';
 import { CONFIGURADORES, configuradorDe } from '@/lib/configuradores';
@@ -40,9 +43,13 @@ const SPEC: LonaSpec = {
   textura: 'brillante',
   confeccion: ['costura', 'velcro'],
   tratamientos: ['ignifugo', 'antiestatico'],
-  medidas: '12.0 × 4.5 m',
-  cantidad: '8 paños',
-  uso: 'Cobertura de acopio a la intemperie',
+  ojales: 'con',
+  ojalesCantidad: '12',
+  ojalesDistancia: '25',
+  ojalesBorde: 'costura-doble',
+  medidas: '8x18',
+  cantidad: '11-20',
+  uso: 'mineria',
 };
 
 describe('precarga del configurador por URL', () => {
@@ -66,8 +73,13 @@ describe('precarga del configurador por URL', () => {
       ancho: '-1',
       color: '<script>',
       textura: '',
-      confeccion: 'ojales,NOEXISTE,ojales',
+      confeccion: 'hf,NOEXISTE,hf',
       tratamientos: 'nada,de,esto,existe',
+      ojales: 'quizá',
+      ojales_cantidad: 'las que hagan falta',
+      medidas: '6 por 12',
+      cantidad: 'varios',
+      uso: 'lo de siempre',
     });
     expect(sucio.material).toBe(base.material);
     expect(sucio.gramaje).toBe(base.gramaje);
@@ -75,9 +87,16 @@ describe('precarga del configurador por URL', () => {
     expect(sucio.color).toBe(base.color);
     expect(sucio.textura).toBe(base.textura);
     // Los ids válidos sobreviven y los inventados desaparecen, sin repetidos.
-    expect(sucio.confeccion).toEqual(['ojales']);
+    expect(sucio.confeccion).toEqual(['hf']);
     // Ninguno válido ⇒ se conserva la selección por defecto, no una fila vacía.
     expect(sucio.tratamientos).toEqual(base.tratamientos);
+    // Y las filas nuevas —ojales y las tres que dejaron de ser texto libre—
+    // tampoco dejan pasar nada tecleado.
+    expect(sucio.ojales).toBe(base.ojales);
+    expect(sucio.ojalesCantidad).toBe(base.ojalesCantidad);
+    expect(sucio.medidas).toBe(base.medidas);
+    expect(sucio.cantidad).toBe(base.cantidad);
+    expect(sucio.uso).toBe(base.uso);
   });
 
   it('sin parámetros devuelve exactamente la especificación por defecto', () => {
@@ -128,9 +147,35 @@ describe('la especificación llega entera hasta el RFQ', () => {
     expect(resumen).toContain('Más de 4.0 m (unión soldada)');
     expect(resumen).toContain('Costura reforzada');
     expect(resumen).toContain('Ignífugo');
-    expect(resumen).toContain('12.0 × 4.5 m');
-    expect(resumen).toContain('8 paños');
-    expect(resumen).toContain('Cobertura de acopio a la intemperie');
+    expect(resumen).toContain('8 × 18 m');
+    expect(resumen).toContain('11 – 20 paños');
+    expect(resumen).toContain('Minería/campamento');
+  });
+
+  it('el sub-pliego de ojales sobrevive entero hasta las notas del RFQ', () => {
+    // Las tres decisiones nuevas —cuántos, cada cuánto y con qué borde— son
+    // exactamente el tipo de dato que antes se perdía entre eslabones.
+    expect(resumen).toContain(
+      'Ojales: 12 ojales, cada 25 cm entre ojales, borde en orilla con costura doble reforzada.',
+    );
+    const notas = new URL(
+      `https://x.test/cotizacion?notas=${encodeURIComponent(resumen)}`,
+    ).searchParams.get('notas')!;
+    expect(notas).toContain('12 ojales');
+    expect(notas).toContain('cada 25 cm');
+    expect(notas).toContain('costura doble reforzada');
+    expect(notas).toContain('8 × 18 m');
+    expect(notas).toContain('11 – 20 paños');
+    expect(notas).toContain('Minería/campamento');
+  });
+
+  it('«Sin ojales» llega al RFQ como ausencia, no como cantidad cero', () => {
+    const sin = lonaSummary({ ...SPEC, ojales: 'sin' });
+    expect(sin).not.toMatch(/^Ojales:/m);
+    expect(sin).not.toContain('12 ojales');
+    // El resto de la especificación no se resiente.
+    expect(sin).toContain('Polytarp PE');
+    expect(sin).toContain('8 × 18 m');
   });
 
   it('no filtra un precio ni una certificación por la puerta de atrás', () => {
@@ -160,11 +205,34 @@ describe('la especificación llega entera hasta el RFQ', () => {
       textura: 'esmerilado',
       confeccion: LONA_CONFECCION.map((o) => o.id),
       tratamientos: LONA_TRATAMIENTO.map((o) => o.id),
-      medidas: 'x'.repeat(120),
-      cantidad: 'x'.repeat(120),
-      uso: 'x'.repeat(240),
+      ojales: 'con',
+      ojalesCantidad: 'definir',
+      ojalesDistancia: 'definir',
+      // La etiqueta más larga de las cinco, con el sub-pliego entero puesto.
+      ojalesBorde: 'dobladillo-reforzado',
+      medidas: 'medida',
+      cantidad: 'mas-50',
+      uso: 'cerramiento',
     });
     expect(maximo.length).toBeLessThan(1500);
+  });
+
+  it('ya no hay resumen ilimitado: los tres campos libres eran la fuga', () => {
+    // Antes medidas/cantidad/uso eran `<input>` y el tope de 1500 caracteres
+    // de /cotizacion dependía de que nadie pegara un párrafo. Ahora el resumen
+    // MÁS LARGO posible es finito y se puede calcular.
+    let mayor = 0;
+    for (const m of LONA_MEDIDAS) {
+      for (const c of LONA_CANTIDAD) {
+        for (const u of LONA_USO) {
+          mayor = Math.max(
+            mayor,
+            lonaSummary({ ...SPEC, medidas: m.value, cantidad: c.value, uso: u.value }).length,
+          );
+        }
+      }
+    }
+    expect(mayor).toBeLessThan(1500);
   });
 
   it('el CTA del configurador sigue mandando notas Y origen', () => {

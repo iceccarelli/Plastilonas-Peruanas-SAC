@@ -16,11 +16,15 @@
  */
 
 import {
+  llevaOjales,
   lonaAnchoLabel,
+  lonaBordeLabel,
   lonaColorHex,
   lonaColorLabel,
   lonaGramajeLabel,
   lonaMaterialLabel,
+  lonaOjalesCantidadLabel,
+  lonaOjalesDistanciaLabel,
   lonaTexturaLabel,
   LONA_CONFECCION,
   LONA_TRATAMIENTO,
@@ -50,6 +54,25 @@ export interface EstadoVisual {
   pasoTramaNucleo: number;
   /** Cuántos ojales se dibujan en el canto de la capa 04 (0 si no se piden). */
   ojales: number;
+  /**
+   * Fracción (0..1) del canto inferior que ocupa la hilera de ojales. Es como
+   * se ve la DISTANCIA elegida: a 25 cm la hilera se cierra sobre sí misma y a
+   * 100 cm se estira de esquina a esquina. No pretende ser una conversión
+   * cm→px: es una diferencia relativa legible, igual que el swatch de color.
+   */
+  extensionOjales: number;
+  /**
+   * Acabado del borde de la capa 04, o `null` cuando el paño va sin ojales
+   * (entonces el bloque de ojales no se ha contestado y no hay doblez que
+   * dibujar).
+   */
+  borde: string | null;
+  /**
+   * Escala del ESCENARIO entero. Depende sólo de la cantidad pedida y se
+   * aplica como transformación exterior: no toca la geometría por campo
+   * —ancho, gramaje— que sigue calculándose igual.
+   */
+  escala: number;
   /** Tinte del barniz de la capa 01 según los tratamientos pedidos. */
   tinteAcabado: string;
   /** El acabado mate APLANA cualquier reflejo: no hay banda de brillo. */
@@ -163,11 +186,79 @@ export function pasoTramaNucleo(gramaje: string): number {
 export const OJALES_MAX = 10;
 const OJALES_MIN = 4;
 
-/** Ojales visibles en el canto de la capa 04. 0 si no se han pedido. */
-export function numeroDeOjales(ancho: string, llevaOjales: boolean): number {
-  if (!llevaOjales) return 0;
+/**
+ * Ojales visibles en el canto de la capa 04. 0 si no se han pedido —y cero
+ * significa CERO: la capa 04 no dibuja ni un aro, no dibuja aros invisibles.
+ *
+ * Manda la CANTIDAD elegida cuando hay una: si el comprador pide 12, se ven 12
+ * (topados por `OJALES_MAX`, que es lo que declara que el dibujo ilustra y no
+ * despieza). Con «A definir» no hay cantidad que respetar y se vuelve a la
+ * heurística de siempre, la del ancho.
+ */
+export function numeroDeOjales(
+  ancho: string,
+  lleva: boolean,
+  cantidad: string = 'definir',
+): number {
+  if (!lleva) return 0;
+  const pedidos = Number(cantidad);
+  if (Number.isFinite(pedidos) && pedidos > 0) {
+    return Math.min(OJALES_MAX, Math.max(OJALES_MIN, Math.round(pedidos)));
+  }
   const bruto = Math.round(anchoMetros(ancho) * 2.5);
   return Math.min(OJALES_MAX, Math.max(OJALES_MIN, bruto));
+}
+
+/**
+ * Fracción del canto que ocupa la hilera de ojales según la distancia pedida.
+ * Estrictamente CRECIENTE con los centímetros: más paso, hilera más abierta.
+ * Con «A definir» se usa el reparto de siempre, ni el más cerrado ni el más
+ * abierto.
+ */
+const EXTENSION_POR_DISTANCIA: Record<string, number> = {
+  '25': 0.45,
+  '50': 0.66,
+  '75': 0.83,
+  '100': 1,
+};
+
+/** Reparto por defecto, el que había antes de que la distancia fuera un dato. */
+export const EXTENSION_OJALES_DEFECTO = 0.88;
+
+export function extensionOjales(distancia: string): number {
+  return EXTENSION_POR_DISTANCIA[distancia] ?? EXTENSION_OJALES_DEFECTO;
+}
+
+/* ------------------------------------------------------------------ */
+/* ESCALA DEL ESCENARIO — la cantidad pedida se ve en el tamaño         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Factor de escala del conjunto según el tramo de cantidad. NO es una
+ * proporción de nada —un pedido de 50 paños no es 1.12 veces uno de 1—: es una
+ * señal de magnitud, la misma idea que la barra de proporción de las píldoras.
+ *
+ * MONÓTONA NO DECRECIENTE en el orden de `LONA_CANTIDAD`: los dos tramos
+ * centrales comparten factor a propósito (son «lo normal» y deben verse igual),
+ * pero la escala no puede bajar cuando la cantidad sube.
+ *
+ * SE COMPONE, NO COMPITE. Se aplica como `transform` de un grupo EXTERIOR en
+ * el SVG; el ancho del paño, el espesor del núcleo y el paso de la trama se
+ * siguen calculando igual y ninguno los pisa.
+ */
+const ESCALA_POR_CANTIDAD: Record<string, number> = {
+  '1': 0.85,
+  '2-5': 1,
+  '6-10': 1,
+  '11-20': 1.06,
+  '21-50': 1.12,
+  'mas-50': 1.12,
+};
+
+export const ESCALA_DEFECTO = 1;
+
+export function escalaEscenario(cantidad: string): number {
+  return ESCALA_POR_CANTIDAD[cantidad] ?? ESCALA_DEFECTO;
 }
 
 /* ------------------------------------------------------------------ */
@@ -231,7 +322,22 @@ const CAPA_POR_CONTROL: Record<string, Capa> = {
   ancho: 4,
   confeccion: 4,
   tratamientos: 1,
+  // El bloque de ojales entero vive en la capa 04 —borde y confección—, que es
+  // donde se ven los aros y el doblez.
+  ojales: 4,
+  ojalesCantidad: 4,
+  ojalesDistancia: 4,
+  ojalesBorde: 4,
+  medidas: 4,
 };
+
+/**
+ * CONTROLES DE ESCENARIO, no de capa. «Cantidad» escala el conjunto y «Uso
+ * previsto» no toca el dibujo: aislar una capa al señalarlos MENTIRÍA sobre
+ * qué gobierna cada fila. Se declaran aquí para que la prueba de fuente
+ * distinga «sin capa a propósito» de «alguien se olvidó de mapearlo».
+ */
+export const CONTROLES_SIN_CAPA = ['cantidad', 'uso'] as const;
 
 export function layerParaControl(controlId: string): Capa | null {
   return CAPA_POR_CONTROL[controlId] ?? null;
@@ -308,7 +414,12 @@ export function specToVisualState(spec: LonaSpec): EstadoVisual {
     patronMaterial: material.patron,
     gradienteCara: material.gradiente,
     pasoTramaNucleo: pasoTramaNucleo(spec.gramaje),
-    ojales: numeroDeOjales(spec.ancho, spec.confeccion.includes('ojales')),
+    // UNA sola fuente de verdad: `spec.ojales`. La fila de confección ya no
+    // tiene voz aquí, así que no hay dos controles que puedan discrepar.
+    ojales: numeroDeOjales(spec.ancho, llevaOjales(spec), spec.ojalesCantidad),
+    extensionOjales: extensionOjales(spec.ojalesDistancia),
+    borde: llevaOjales(spec) ? spec.ojalesBorde : null,
+    escala: escalaEscenario(spec.cantidad),
     tinteAcabado: tinteAcabado(tratamientos),
     aplanado: spec.textura === 'mate',
     colorCara: lonaColorHex(spec.color) || '#94A3B8',
@@ -345,6 +456,25 @@ export function fraccionAncho(valor: string): number {
 }
 
 /**
+ * NOMBRE COMERCIAL DE CADA CAPA — una sola fuente para el dibujo y la lista.
+ *
+ * Antes la llamada del SVG decía «01» a secas y la lista de al lado decía
+ * «Acabado / tratamiento superficial»: dos rótulos para la misma capa, y nada
+ * que impidiera que uno de los dos se quedara atrás. Ahora los dos salen de
+ * `capasDeLona` y no hay forma de que discrepen.
+ *
+ * El ORDEN de este array es el orden de la pila: 01 ARRIBA (la cara que mira
+ * al tiempo) y 04 ABAJO (el borde y la confección). `ALTURA` en
+ * `components/LonaExploded.tsx` es creciente por la misma razón.
+ */
+export const NOMBRES_DE_CAPA = [
+  'Acabado superficial',
+  'Cara plastificada',
+  'Núcleo tejido (trama)',
+  'Borde y confección',
+] as const;
+
+/**
  * Las cuatro capas y lo que cada una dice, ya con las etiquetas de la
  * especificación dentro. Vivía dentro del SVG; se saca para que la lista se
  * pueda colocar donde haga falta —en móvil debajo, en escritorio al lado— sin
@@ -354,29 +484,35 @@ export function capasDeLona(spec: LonaSpec): { n: 1 | 2 | 3 | 4; titulo: string;
   const esTejido = spec.material === 'rafia' || spec.material === 'algodon';
   const tratamientos = LONA_TRATAMIENTO.filter((t) => spec.tratamientos.includes(t.id));
   const confeccion = LONA_CONFECCION.filter((c) => spec.confeccion.includes(c.id));
+  // Las etiquetas van TAL CUAL las declara el enum: bajarlas a minúsculas
+  // convertía «Orilla soldada HF» en «orilla soldada hf», que ya no es el
+  // nombre de nada.
+  const bordeYOjales = llevaOjales(spec)
+    ? `${lonaOjalesCantidadLabel(spec.ojalesCantidad)} · ${lonaOjalesDistanciaLabel(spec.ojalesDistancia)} · ${lonaBordeLabel(spec.ojalesBorde)}`
+    : 'Sin ojales';
 
   return [
     {
       n: 1,
-      titulo: 'Acabado / tratamiento superficial',
+      titulo: NOMBRES_DE_CAPA[0],
       texto: tratamientos.length
         ? `${tratamientos.map((t) => t.label).join(', ')} — se piden uno a uno; ninguno viene incluido por defecto.`
         : 'Anti-UV, ignífugo, antiestático o antibacteriano — se piden uno a uno, no vienen incluidos por defecto.',
     },
     {
       n: 2,
-      titulo: 'Cara plastificada',
+      titulo: NOMBRES_DE_CAPA[1],
       texto: `${lonaMaterialLabel(spec.material)} · color ${lonaColorLabel(spec.color).toLowerCase()} · acabado ${lonaTexturaLabel(spec.textura).toLowerCase()}. Es la cara que recibe sol, lluvia y logo impreso.`,
     },
     {
       n: 3,
-      titulo: 'Núcleo tejido / trama',
+      titulo: NOMBRES_DE_CAPA[2],
       texto: `${esTejido ? 'Trama tejida' : 'Base de rafia PP tejida'} · ${lonaGramajeLabel(spec.gramaje)}. El gramaje es lo que aguanta el desgarro; el rango de trabajo va de 200 a 900 g/m².`,
     },
     {
       n: 4,
-      titulo: 'Cara inferior y confección',
-      texto: `${confeccion.length ? confeccion.map((c) => c.label).join(', ') : 'Backing, borde reforzado, ojales y cierre'} · ${lonaAnchoLabel(spec.ancho).toLowerCase()}. Hasta 4.0 m en una pieza; por encima, unión soldada.`,
+      titulo: NOMBRES_DE_CAPA[3],
+      texto: `${bordeYOjales}${confeccion.length ? ` · ${confeccion.map((c) => c.label).join(', ')}` : ''} · ${lonaAnchoLabel(spec.ancho).toLowerCase()}. Hasta 4.0 m en una pieza; por encima, unión soldada.`,
     },
   ];
 }
