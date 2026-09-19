@@ -443,8 +443,15 @@ describe('etapa 12 — las tres cuñas hablan inglés', () => {
     // /confianza promete no publicar obra ejecutada. Una etiqueta que sólo
     // existe en español convierte la misma foto en un caso de éxito implícito
     // para el lector inglés.
+    // La frase ya no vive dentro del componente: la galería de producto
+    // necesitaba decir exactamente lo mismo bajo las vistas de instalación y
+    // escala, y una segunda redacción es una redacción que se ablanda sola.
+    // Se comprueba en su sitio único, y que el componente siga leyéndola de
+    // ahí en vez de reintroducir un literal propio.
+    const leyendas = leer('lib/leyendas.ts');
+    expect(leyendas).toContain('does not document a project delivered');
     const foto = leer('components/FotoReferencial.tsx');
-    expect(foto).toContain('does not document a project delivered');
+    expect(foto).toContain('LEYENDA_REFERENCIAL[idioma]');
     expect(leer('components/CunaHubEn.tsx')).toContain('idioma="en"');
   });
 

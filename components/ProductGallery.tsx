@@ -5,6 +5,20 @@ import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight, Expand } from 'lucide-react';
 import { Product } from '@/lib/types';
 import ProductVisual from '@/components/ProductVisual';
+import { LEYENDA_REFERENCIAL } from '@/lib/leyendas';
+
+/**
+ * Vistas que se leen como obra y por eso llevan leyenda.
+ *
+ * `general` y `detalle` muestran el producto: una lona doblada, un ojal, un
+ * tramo de manga. Nadie las confunde con una obra. `instalacion` y `escala`
+ * muestran el producto PUESTO —un talud revestido, un patio de secado, una
+ * playa de estacionamiento cubierta— y ahí sí: sin decir nada, la foto pasa
+ * por caso de éxito. Es exactamente lo que /confianza promete no hacer, y la
+ * rotación de tomas lo agravó, porque ahora esas vistas traen además la toma
+ * con gente trabajando.
+ */
+const VISTAS_CON_LEYENDA = new Set(['instalacion', 'escala']);
 
 function prettify(src: string): string {
   const base = src.split('/').pop()?.replace(/\.[a-z0-9]+$/i, '') ?? '';
@@ -169,6 +183,12 @@ export default function ProductGallery({
         >
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#059669]" aria-hidden="true" />
           {activeCaption}
+        </p>
+      )}
+
+      {VISTAS_CON_LEYENDA.has(viewKey(activeSrc) ?? '') && (
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          {LEYENDA_REFERENCIAL.es}
         </p>
       )}
 
