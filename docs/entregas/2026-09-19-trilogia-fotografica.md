@@ -17,8 +17,10 @@ fotografía honesta, y el resolutor de `lib/galeria.ts` admite hasta
 `MAX_TOMAS = 4`. El material nuevo entró por tanto como **tomas 2, 3 y 4**
 sobre la toma 1 existente. Consecuencias deliberadas:
 
-- No se desplazó ni se perdió ninguna imagen publicada. No hay archivos
-  «archivados» ni renombrados: el diff sólo añade.
+- Sólo dos ranuras se reordenaron, y con motivo declarado (ver «Las dos
+  ranuras unificadas» más abajo): `mangas-ventilacion-minas-tuneles/general`
+  y `lona-plastificada-rafia-polytarp/general`. En el resto el diff sólo
+  añade: ninguna otra imagen publicada se desplazó ni se renombró.
 - `lib/products.ts` **no se tocó**. Ni `image`, ni `gallery`, ni
   `specifications`, ni `sourcing`, ni `availability`. Los sufijos `-2`,
   `-3` y `-4` no aparecen en ninguna galería: el resolutor los encuentra en
@@ -55,9 +57,9 @@ describen como personal de la empresa en ningún texto alternativo ni leyenda.
 
 | archivo_origen | fase | slug | vista | toma | ruta_final | tipo | nota de honestidad |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `mangas-ventilacion-minas-tuneles-general-producto.jpg` | phase1 | `mangas-ventilacion-minas-tuneles` | general | 2 | `/images/galeria/mangas-ventilacion-minas-tuneles-general-2.webp` | foto | Manga flexible de ventilación fotografiada como producto. No hay labor identificada ni obra nominada. |
-| `mangas-ventilacion-minas-tuneles-general-producto-02.jpg` | phase2 | `mangas-ventilacion-minas-tuneles` | general | 3 | `/images/galeria/mangas-ventilacion-minas-tuneles-general-3.webp` | foto | Manga flexible de ventilación fotografiada como producto. No hay labor identificada ni obra nominada. |
-| `mangas-ventilacion-minas-tuneles-general-producto-03.jpg` | phase3 | `mangas-ventilacion-minas-tuneles` | general | 4 | `/images/galeria/mangas-ventilacion-minas-tuneles-general-4.webp` | foto | Manga flexible de ventilación fotografiada como producto. No hay labor identificada ni obra nominada. |
+| `mangas-ventilacion-minas-tuneles-general-producto.jpg` | phase1 | `mangas-ventilacion-minas-tuneles` | general | **1** | `/images/galeria/mangas-ventilacion-minas-tuneles-general.webp` | foto | Rollo de manga textil flexible naranja sobre fondo neutro. **Promovida a toma 1**: desplaza la ductería metálica rígida que ocupaba la ranura. No hay labor identificada ni obra nominada. |
+| `mangas-ventilacion-minas-tuneles-general-producto-02.jpg` | phase2 | `mangas-ventilacion-minas-tuneles` | general | 2 | `/images/galeria/mangas-ventilacion-minas-tuneles-general-2.webp` | foto | Manga flexible de ventilación fotografiada como producto. No hay labor identificada ni obra nominada. |
+| `mangas-ventilacion-minas-tuneles-general-producto-03.jpg` | phase3 | `mangas-ventilacion-minas-tuneles` | general | 3 | `/images/galeria/mangas-ventilacion-minas-tuneles-general-3.webp` | foto | Manga flexible de ventilación fotografiada como producto. No hay labor identificada ni obra nominada. |
 | `mangas-ventilacion-minas-tuneles-detalle-codo.jpg` | phase1 | `mangas-ventilacion-minas-tuneles` | detalle | 2 | `/images/galeria/mangas-ventilacion-minas-tuneles-detalle-2.webp` | foto | Codo y costura del tramo en taller. La persona que aparece en la toma 4 no se presenta como personal de la empresa. |
 | `mangas-ventilacion-minas-tuneles-detalle-codo-02.jpg` | phase2 | `mangas-ventilacion-minas-tuneles` | detalle | 3 | `/images/galeria/mangas-ventilacion-minas-tuneles-detalle-3.webp` | foto | Codo y costura del tramo en taller. La persona que aparece en la toma 4 no se presenta como personal de la empresa. |
 | `mangas-ventilacion-minas-tuneles-detalle-codo-03.jpg` | phase3 | `mangas-ventilacion-minas-tuneles` | detalle | 4 | `/images/galeria/mangas-ventilacion-minas-tuneles-detalle-4.webp` | foto | Codo y costura del tramo en taller. La persona que aparece en la toma 4 no se presenta como personal de la empresa. |
@@ -67,9 +69,9 @@ describen como personal de la empresa en ningún texto alternativo ni leyenda.
 | `mangas-ventilacion-minas-tuneles-escala-taller.jpg` | phase1 | `mangas-ventilacion-minas-tuneles` | escala | 2 | `/images/galeria/mangas-ventilacion-minas-tuneles-escala-2.webp` | foto | Tramo tendido en patio con una persona de referencia de tamaño. Sin atribución de personal. |
 | `mangas-ventilacion-minas-tuneles-escala-taller-02.jpg` | phase2 | `mangas-ventilacion-minas-tuneles` | escala | 3 | `/images/galeria/mangas-ventilacion-minas-tuneles-escala-3.webp` | foto | Tramo tendido en patio con una persona de referencia de tamaño. Sin atribución de personal. |
 | `mangas-ventilacion-minas-tuneles-escala-taller-03.jpg` | phase3 | `mangas-ventilacion-minas-tuneles` | escala | 4 | `/images/galeria/mangas-ventilacion-minas-tuneles-escala-4.webp` | foto | Tramo tendido en patio con una persona de referencia de tamaño. Sin atribución de personal. |
-| `lona-plastificada-rafia-polytarp-general-verde.jpg` | phase1 | `lona-plastificada-rafia-polytarp` | general | 2 | `/images/galeria/lona-plastificada-rafia-polytarp-general-2.webp` | foto | Lona doblada sobre fondo neutro. Fotografía de producto. |
-| `lona-plastificada-rafia-polytarp-general-verde-02.jpg` | phase2 | `lona-plastificada-rafia-polytarp` | general | 3 | `/images/galeria/lona-plastificada-rafia-polytarp-general-3.webp` | foto | Lona doblada sobre fondo neutro. Fotografía de producto. |
-| `lona-plastificada-rafia-polytarp-general-verde-03.jpg` | phase3 | `lona-plastificada-rafia-polytarp` | general | 4 | `/images/galeria/lona-plastificada-rafia-polytarp-general-4.webp` | foto | Lona doblada sobre fondo neutro. Fotografía de producto. |
+| `lona-plastificada-rafia-polytarp-general-verde.jpg` | phase1 | `lona-plastificada-rafia-polytarp` | general | **1** | `/images/galeria/lona-plastificada-rafia-polytarp-general.webp` | foto | Lona verde plegada sobre fondo neutro, con ojal y orillo a la vista. **Promovida a toma 1**: desplaza la escena de obra andina que ocupaba la ranura. Fotografía de producto. |
+| `lona-plastificada-rafia-polytarp-general-verde-02.jpg` | phase2 | `lona-plastificada-rafia-polytarp` | general | 2 | `/images/galeria/lona-plastificada-rafia-polytarp-general-2.webp` | foto | Lona doblada sobre fondo neutro. Fotografía de producto. |
+| `lona-plastificada-rafia-polytarp-general-verde-03.jpg` | phase3 | `lona-plastificada-rafia-polytarp` | general | 3 | `/images/galeria/lona-plastificada-rafia-polytarp-general-3.webp` | foto | Lona doblada sobre fondo neutro. Fotografía de producto. |
 | `lona-plastificada-rafia-polytarp-detalle-ojal-plata.jpg` | phase1 | `lona-plastificada-rafia-polytarp` | detalle | 2 | `/images/galeria/lona-plastificada-rafia-polytarp-detalle-2.webp` | foto | Ojal, refuerzo y soga. Fotografía de material. |
 | `lona-plastificada-rafia-polytarp-detalle-ojal-plata-02.jpg` | phase2 | `lona-plastificada-rafia-polytarp` | detalle | 3 | `/images/galeria/lona-plastificada-rafia-polytarp-detalle-3.webp` | foto | Ojal, refuerzo y soga. Fotografía de material. |
 | `lona-plastificada-rafia-polytarp-detalle-ojal-plata-03.jpg` | phase3 | `lona-plastificada-rafia-polytarp` | detalle | 4 | `/images/galeria/lona-plastificada-rafia-polytarp-detalle-4.webp` | foto | Ojal, refuerzo y soga. Fotografía de material. |
@@ -170,18 +172,90 @@ Una foto de menos es mejor que una ranura mentirosa.
 | `big-bags-bolsones-polipropileno-general-apilados` | 1, 3 | Fardos de bolsones plegados y montacargas. `general` y `escala` ya tienen trío; se publicó sólo phase2, que es el único primer plano de tejido y faja del lote. |
 | `geomembrana-polietileno-pe-hdpe-general-poza` | 3 | La misma poza bajo cielo estrellado. Es una imagen de campaña, no de catálogo: rompe el estilo de luz natural que sostiene el resto de la serie. |
 
+## Las dos ranuras unificadas
+
+Dos ranuras `general` mezclaban sujetos distintos dentro de la misma rotación.
+Una ranura es la MISMA vista capturada otra vez; si el sujeto cambia entre
+tomas, el cruce no informa, confunde. Se unificaron así:
+
+**`mangas-ventilacion-minas-tuneles` / `general`.** La toma 1 publicada
+mostraba ductería metálica rígida dentro de un túnel. La empresa fabrica manga
+textil flexible: el sujeto no era el producto. Las tres tomas nuevas sí lo son.
+Resultado final, sin huecos de numeración:
+
+| toma | archivo | qué muestra |
+| --- | --- | --- |
+| 1 | `mangas-ventilacion-minas-tuneles-general.webp` | Rollo de manga naranja completo sobre piso neutro. Vista general de catálogo. |
+| 2 | `mangas-ventilacion-minas-tuneles-general-2.webp` | Vista axial por la boca: espiral de refuerzo y jareta. |
+| 3 | `mangas-ventilacion-minas-tuneles-general-3.webp` | Manga acoplada a un ventilador portátil. |
+
+La fotografía desplazada (ductería metálica en túnel) **no se archivó ni se
+reubicó: se retiró del árbol servido**. Se estudió pasarla a la ranura
+`instalacion` de este mismo producto y no cabía por dos razones
+independientes: esa ranura ya está llena —cuatro tomas, el tope de
+`MAX_TOMAS`— y su sujeto sigue siendo ductería rígida, de modo que publicarla
+bajo «instalación de manga» presentaría un producto ajeno como si fuera el
+propio. Queda en la historia de git, que es donde tiene que estar una imagen
+que se extrajo de un ZIP y se decidió no publicar.
+
+**`lona-plastificada-rafia-polytarp` / `general`.** Mismo caso: la toma 1 era
+una escena de obra andina —lonas cubriendo acopios en un valle— conviviendo
+con fotografía de producto de estudio. Resultado final:
+
+| toma | archivo | qué muestra |
+| --- | --- | --- |
+| 1 | `lona-plastificada-rafia-polytarp-general.webp` | Lona verde plegada sobre fondo neutro, ojal y orillo a la vista. |
+| 2 | `lona-plastificada-rafia-polytarp-general-2.webp` | Esquina reforzada con ojal metálico. |
+| 3 | `lona-plastificada-rafia-polytarp-general-3.webp` | Ojal pasado por soga, sobre el tejido. |
+
+Las tres son ahora el mismo sujeto —la misma lona verde, la misma luz de
+estudio—, así que el cruce funciona como debe. La escena andina desplazada
+tampoco se archivó: la ranura `instalacion` de este producto ya publica dos
+tomas de lona naranja cubriendo equipo en altiplano andino (tomas 2 y 3), de
+modo que el contexto de obra sigue representado y la imagen desplazada era
+redundante; además esa ranura también está en el tope de cuatro tomas. Se
+retiró del árbol servido y queda en la historia de git.
+
+Ninguna de las dos ranuras quedó con huecos de numeración, y ninguna cadena
+del resto de la galería se tocó. La comprobación completa —ningún `-N`
+huérfano, ninguna cadena con agujeros, nada por encima de `MAX_TOMAS`, ninguna
+toma idéntica byte a byte— se pasó sobre las 228 imágenes de
+`public/images/galeria/`.
+
+## Sobre la marca de agua y los fotogramas reconstruidos
+
+**Decidido, no pendiente.** Parte del material nuevo son fotogramas de
+catálogo reconstruidos, con el logotipo y las palabras «Plastilonas Peruanas»
+incrustados. Se aceptan como tomas legítimas de galería. La norma de la casa
+es que una imagen de catálogo no necesita documentar una obra ejecutada
+mientras no diga que la documenta: la leyenda de honestidad —«imagen
+referencial, no documenta una obra ejecutada»— sigue aplicándose en todas las
+ranuras donde ya aplicaba, y es ella la que hace la revelación.
+
+Lo que no se hace, y no se hizo: presentarlas como obra verificada. No se
+tocó `lib/projects.ts`, no se marcó ningún `verificado: true`, y ninguna
+leyenda afirma autoría de una obra concreta.
+
+Queda una observación de marca, no de honestidad: las tomas nuevas llevan
+marca de agua y varias tomas 1 heredadas no, de modo que en el cruce se nota
+el cambio. Es una decisión estética pendiente de criterio comercial, no un
+problema de veracidad.
+
 ## Qué debería mirar una persona antes de fusionar
 
-1. **Las tomas 1 de `mangas-ventilacion-minas-tuneles`.** Las cuatro vistas
-   base publicadas hoy muestran ductería metálica rígida y, en `detalle`, una
-   lona plateada con ojales. La empresa fabrica manga textil flexible. No se
-   tocaron —el encargo era añadir tomas, no desplazar— pero, ahora que las
-   tomas 2 a 4 muestran el producto real, el contraste dentro de la misma
-   ranura es visible y conviene decidirlo con criterio comercial.
-2. **La marca de agua.** Todas las tomas nuevas llevan el logotipo y las
-   palabras «Plastilonas Peruanas» incrustados, y las tomas 1 existentes no.
-   En el cruce se nota. Es una decisión de marca, no de honestidad.
+1. **Las tomas 1 restantes de `mangas-ventilacion-minas-tuneles`.** La ranura
+   `general` ya quedó resuelta (ver arriba), pero `detalle` conserva como toma
+   1 una lona plateada con ojales que no es manga textil, y `instalacion`
+   conserva una escena de ductería metálica. Ambas ranuras están en el tope de
+   cuatro tomas, así que corregirlas exige decidir qué toma sale, y eso es
+   criterio comercial, no técnico. Queda señalado, no resuelto.
+2. **La marca de agua.** Las tomas nuevas llevan el logotipo incrustado y
+   varias tomas 1 heredadas no. En el cruce se nota. Es una decisión de marca,
+   no de honestidad; los fotogramas reconstruidos ya están aceptados como
+   norma de la casa (ver la sección anterior).
 3. **El ciclo de cuatro tomas dura 40 s.** Lo dice el propio comentario de
    `lib/galeria.ts`: nadie lo ve entero. Treinta ranuras rotan ahora, y
-   veinticuatro de ellas con cuatro tomas.
+   veintidós de ellas con cuatro tomas. Tras la unificación de las dos ranuras
+   `general`, el inventario final es de 34 ranuras con más de una toma
+   repartidas en 13 productos, sobre 228 WebP en `public/images/galeria/`.
 
