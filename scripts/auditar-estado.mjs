@@ -237,6 +237,10 @@ const RUTAS_FABRICAR = sinComentarios(leer('lib/fabricar-o-importar.ts'));
 const rutaConstante = (nombre) =>
   RUTAS_FABRICAR.match(new RegExp(`${nombre}\\s*=\\s*['"]([^'"]+)['"]`))?.[1] ?? null;
 
+/** La sala de la trilogía, leída de lib/cine.ts y no escrita otra vez aquí. */
+const RUTA_CINE =
+  sinComentarios(leer('lib/cine.ts')).match(/RUTA_CINE\s*=\s*['"]([^'"]+)['"]/)?.[1] ?? null;
+
 const ENLACES_DERIVADOS = {
   ENLACES_CUNAS: FUENTES.cunas.map((s) => `/${s}`),
   ENLACES_CUNAS_EN: FUENTES.cunasEn.map((s) => `/en/${s}`),
@@ -244,6 +248,7 @@ const ENLACES_DERIVADOS = {
   INDUSTRIAS: FUENTES.industrias.map((s) => `/industria/${s}`),
   RUTA_ES: [rutaConstante('RUTA_ES')].filter(Boolean),
   RUTA_EN: [rutaConstante('RUTA_EN')].filter(Boolean),
+  RUTA_CINE: [RUTA_CINE].filter(Boolean),
 };
 
 function enlacesDe(src) {

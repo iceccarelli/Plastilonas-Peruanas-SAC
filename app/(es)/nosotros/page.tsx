@@ -7,6 +7,8 @@ import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbSchema, webPageSchema } from '@/lib/schema';
 import { OG_IMAGEN } from '@/lib/meta';
 import PreguntasDeCompra from '@/components/PreguntasDeCompra';
+import CinePlayer from '@/components/CinePlayer';
+import { PIEZA_PORTADA, RUTA_CINE, duracionLegible } from '@/lib/cine';
 
 const URL_NOSOTROS = `${SITE.url}/nosotros`;
 
@@ -77,6 +79,32 @@ export default function NosotrosPage() {
           </figure>
         ))}
       </div>
+
+      {/* UNA pieza, no tres. «El oficio» es la que corresponde aquí: es
+          literalmente «una lectura de Plastilonas Peruanas», que es lo que esta
+          página intenta ser en texto. Las otras dos se enlazan, no se
+          incrustan: tres vídeos seguidos en una página institucional dejan de
+          ser material editorial y pasan a ser una parrilla. */}
+      <section className="mt-16">
+        <div className="mb-5 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+          <span className="font-mono text-sm tabular-nums text-[#059669]">{PIEZA_PORTADA.n}</span>
+          <h2 className="text-2xl font-semibold tracking-tight text-[#0A2540]">
+            {PIEZA_PORTADA.titulo}
+          </h2>
+          <span className="text-sm text-gray-500">{PIEZA_PORTADA.antetitulo}</span>
+          <span className="ml-auto font-mono text-xs tabular-nums text-gray-400">
+            {duracionLegible(PIEZA_PORTADA.durationSec)}
+          </span>
+        </div>
+        <CinePlayer pieza={PIEZA_PORTADA} />
+        <p className="mt-4 max-w-2xl leading-relaxed text-gray-700">{PIEZA_PORTADA.sinopsis}</p>
+        <Link
+          href={RUTA_CINE}
+          className="mt-4 inline-flex min-h-[44px] items-center text-sm font-medium text-[#059669] hover:underline"
+        >
+          Ver las tres piezas en la sala →
+        </Link>
+      </section>
 
       <div className="mt-14 grid md:grid-cols-3 gap-6">
         {[

@@ -574,6 +574,63 @@ export function imageObjectSchema(img: {
 }
 
 /**
+ * Pieza de cine editorial (lib/cine.ts), como VideoObject.
+ *
+ * Todos los campos salen del archivo publicado o del registro: `duration` de
+ * ffprobe, `thumbnailUrl` del fotograma extraído del propio master,
+ * `contentUrl` de la ruta que el sitio sirve de verdad. Un VideoObject con una
+ * duración estimada o una miniatura que no pertenece al vídeo es un dato
+ * estructurado que se desmiente descargando el archivo.
+ *
+ * `description` lleva pegado el pie de honestidad. No es redundancia: el nodo
+ * viaja SOLO —un buscador lo puede presentar sin la página— y si la única
+ * advertencia vive en el `<figcaption>`, el vídeo acaba citado como prueba de
+ * una obra entregada en el único contexto donde nadie puede leer el desmentido.
+ *
+ * Lo que NO se emite: ni `interactionStatistic` (no hay contador de
+ * reproducciones publicable), ni `embedUrl` (no hay incrustado de terceros:
+ * `components/CinePlayer.tsx` es `<video>` nativo), ni `transcript` (no hay
+ * transcripción de la locución y no se va a inventar una).
+ */
+export function videoObjectSchema(v: {
+  /** Página donde vive la pieza. */
+  paginaUrl: string;
+  /** Discriminante de @id: hay tres en la misma página. */
+  clave: string;
+  name: string;
+  description: string;
+  /** Ruta pública del master hablado. */
+  contentUrl: string;
+  /** Ruta pública del cartel. */
+  thumbnailUrl: string;
+  /** ISO 8601, derivado de la duración real. */
+  duration: string;
+  /** YYYY-MM-DD. */
+  uploadDate: string;
+  /** El pie de honestidad, tal como se ve al pie del cuadro. */
+  pie: string;
+}): Dict {
+  return {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "@id": `${v.paginaUrl}#video-${v.clave}`,
+    name: v.name,
+    description: `${v.description} ${v.pie}`,
+    contentUrl: `${SITE.url}${v.contentUrl}`,
+    thumbnailUrl: `${SITE.url}${v.thumbnailUrl}`,
+    duration: v.duration,
+    uploadDate: v.uploadDate,
+    encodingFormat: "video/mp4",
+    inLanguage: SITE.language,
+    isFamilyFriendly: true,
+    creditText: `Fotografía en movimiento de ${SITE.legalName}`,
+    creator: organizationRef(),
+    publisher: organizationRef(),
+    isPartOf: { "@id": `${v.paginaUrl}#webpage` },
+  };
+}
+
+/**
  * Herramienta de cálculo publicada en el sitio.
  *
  * Por qué SoftwareApplication y no solo HowTo. HowTo describe un

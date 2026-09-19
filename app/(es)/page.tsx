@@ -31,6 +31,8 @@ import MachineryGallery from '@/components/MachineryGallery';
 import { Reveal } from '@/components/Reveal';
 import { OG_IMAGEN } from '@/lib/meta';
 import { ACCIONES } from '@/lib/acciones';
+import CinePlayer from '@/components/CinePlayer';
+import { PIEZA_PORTADA, RUTA_CINE } from '@/lib/cine';
 
 /**
  * Metadata propia de la home. Sin esto heredaba el title/description por
@@ -364,6 +366,46 @@ export default function Home() {
               <Link href="/nosotros" className="btn border border-white/30 text-white hover:bg-white/10 shrink-0">Conozca nuestra historia <ArrowRight className="w-4 h-4" /></Link>
             </div>
           </Reveal>
+        </div>
+      </section>
+
+      {/* ===== 3b · LA TRILOGÍA — UNA sola presencia en la portada, y es un
+           cartel con botón de reproducir, no un bucle de fondo.
+
+           Por qué cartel y no bucle. La toma muda más ligera pesa 12,6 MB.
+           Ponerla a reproducirse sola detrás del hero costaría más que todo el
+           resto de la portada junta, en un país donde buena parte del tráfico
+           entra por datos móviles, y a cambio de una decoración que nadie pidió.
+           El cartel es una imagen que el optimizador sirve en AVIF a la medida
+           de la pantalla, y el archivo de 18 MB sólo se toca si alguien pulsa.
+
+           Y NO compite por el LCP: `prioridadCartel` se queda en false, así
+           que la única imagen prioritaria de la portada sigue siendo la
+           fotografía del hero (lib/hero-imagenes.ts). ===== */}
+      <section className="bg-white section-pad">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid items-center gap-10 lg:grid-cols-2">
+            <Reveal>
+              <CinePlayer pieza={PIEZA_PORTADA} />
+            </Reveal>
+            <Reveal delay={0.05}>
+              <div className="max-w-md">
+                <div className="text-xs tracking-[2px] text-[#047857] font-semibold uppercase mb-3">
+                  Trilogía
+                </div>
+                <h2 className="t-h2 font-semibold tracking-tight text-[#0A2540] mb-4">
+                  {PIEZA_PORTADA.titulo}
+                </h2>
+                <p className="text-gray-600 leading-relaxed mb-6">{PIEZA_PORTADA.sinopsis}</p>
+                <Link
+                  href={RUTA_CINE}
+                  className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-[#059669] hover:underline"
+                >
+                  Ver las tres piezas <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </Reveal>
+          </div>
         </div>
       </section>
 
