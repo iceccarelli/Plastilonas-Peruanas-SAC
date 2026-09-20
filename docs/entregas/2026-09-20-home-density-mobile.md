@@ -218,6 +218,11 @@ las destacadas salen del catálogo, no de una lista escrita a mano.
 `FamilyCarousel.tsx` y `FeaturedDeck.tsx` quedan sin usar. **No se borraron**:
 esta entrega no retira código que otra pueda querer.
 
+> **Actualización (limpieza posterior, ver §8).** Ya se borraron. Se comprobó
+> que no quedaba ni una importación en `app/`, `components/`, `lib/`, `test/`
+> ni `scripts/` —incluidas las rutas `(en)` y `(pt)`— y ningún test los
+> ejercía. Las referencias que quedan son históricas, como ésta.
+
 **1 378 px → 924 px** a 390 px. Misma estructura en escritorio, sólo más ancha
 (el carril entra entero, el panel usa tres columnas de aire).
 
@@ -362,3 +367,121 @@ Medios sin tocar: `ls public/images/galeria/*.webp | wc -l` = **228**;
    valores de relleno.
 3. **`FamilyCarousel` y `FeaturedDeck` quedan huérfanos.** Retirarlos es una
    entrega aparte, cuando se confirme que la sección fusionada convence.
+
+**Los tres están resueltos en §8.** El dueño se pronunció: el configurador se
+queda plegado (1), las pestañas suben a 44 px en táctil (2), los huérfanos se
+borran (3).
+
+---
+
+## 8 · Limpieza posterior (`chore/home-density-cleanup`)
+
+Esta sección la añade la entrega de limpieza que cierra los tres puntos del §7.
+No reabre ninguna decisión de densidad: sólo ejecuta lo que el dueño confirmó.
+
+### 8.1 El configurador sigue plegado — sin cambios
+
+Decisión confirmada, **no se tocó una línea**. El `<details>` de
+`app/(es)/page.tsx` sigue sin atributo `open`, así que el bloque nace cerrado
+en los dos temas y en los dos anchos. Se anota aquí explícitamente para que no
+vuelva a aparecer como «pendiente de confirmar» en una entrega futura.
+
+### 8.2 Huérfanos borrados
+
+`components/FamilyCarousel.tsx` y `components/FeaturedDeck.tsx` **se borraron**.
+
+Antes de borrar se buscó cada nombre y cada ruta de fichero en todo el
+repositorio —no sólo en la portada—: `app/` con sus tres grupos de ruta
+(`(es)`, `(en)`, `(pt)`), `components/`, `lib/`, `test/`, `scripts/` y `docs/`.
+**Cero importaciones**, estáticas o dinámicas, y **cero tests** que los
+ejercieran: no hubo que retirar ningún fichero de prueba ni ninguna aserción.
+Lo único que los nombraba era prosa: la cabecera de `ExplorarCatalogo.tsx`, que
+cuenta qué sustituyó, y estas entregas. Esa prosa se conserva —es historia, y
+se marca como tal— en lugar de reescribirse.
+
+### 8.3 Las pestañas de servicio llegan a 44 px en táctil
+
+El §2 justificaba los 42 px como de **bajo riesgo**, que no es lo mismo que
+suficiente: 44 px es el mínimo, y «poco peligroso» no lo sustituye.
+
+La corrección no devuelve el relleno a su valor anterior, porque eso recrearía
+exactamente el problema de altura que el §2 venía a resolver. Se separan las
+dos cosas: el **peso visual** lo sigue fijando el relleno compacto
+(`px-3.5 py-2.5`), y el **blanco de tiro** se declara aparte, con
+`.tab-servicio { min-height: 44px }` dentro de un `@media (pointer: coarse)` en
+`app/globals.css`. Es el mismo mecanismo y el mismo sitio que ya usaba
+`.btn-sm` unas líneas más arriba: un patrón de la casa, no uno nuevo. La
+píldora ya centraba su contenido con flex, así que el contenido no se mueve;
+sólo crece la caja, 4 px. Donde hay ratón no cambia nada.
+
+**Se descartó la alternativa del seudoelemento.** Extender el área tocable con
+un `::before { position: absolute; inset: -2px }` habría dejado la caja visible
+en 42 px, pero el carril de pestañas es `overflow-x-auto`, que computa recorte
+**también en el eje vertical**: el seudoelemento saldría recortado justo donde
+se pretendía ganar. Habría medido bien en el inspector y mal con el dedo.
+
+**Medido en Chromium a 390 × 844 con `pointer: coarse` emulado**, sobre el
+`getBoundingClientRect()` real de las cuatro pestañas: ver §8.4. El carril
+completo se queda en 44 px de alto, lejos del techo de ~52 px que haría que la
+fila volviera a dominar la sección.
+
+### 8.4 Verificación
+
+**Altura de pestaña, medida, no estimada.** Chromium sobre el build de
+producción, dos contextos con el MISMO ancho de 390 px para aislar el puntero
+como única variable:
+
+| Contexto | `(pointer: coarse)` | Alto de cada pestaña | Alto del carril |
+|---|---|---|---|
+| Táctil (`hasTouch`, `isMobile`) | `true` | **44,00 px** ×4 | **44 px** |
+| Ratón (mismo ancho) | `false` | 41,50 px ×4 | 41,5 px |
+
+Las cuatro pestañas miden 44,00 px exactos en táctil —«Fabricación a Medida»
+187 px de ancho, «Instalación Propia» 164, «Importación Directa» 176,
+«Asesoría Técnica» 161— y el carril completo se queda en 44 px, muy por debajo
+del techo de ~52 px. Con ratón siguen en 41,5 px: el peso visual compacto del
+§2 está intacto donde el §2 lo quería.
+
+**Suite.** `tsc --noEmit` limpio. `npm test`: **66 ficheros, 1 071 pruebas, 0
+fallos** (incluye `huerfanas.test.ts`, que reconstruye el grafo de enlaces
+internos y habría cantado si el borrado hubiera dejado una página colgando).
+`npm run auditar:imagenes`: **0 errores, 0 avisos** sobre 517 ficheros en
+`public/` y 201 rutas citadas. `npm run build` completo sin avisos nuevos.
+
+**Ninguna línea base se tocó.** Ni el número de `docs/ui-audit-baseline.json`
+ni la base/tolerancia de `auditar:viewport`. Lo que fallara antes sigue
+fallando igual: mover la portería no es arreglar.
+
+**Ningún medio se borró ni se recodificó.** `public/images/galeria/` mantiene
+sus **228 WebP** y `public/videos/` sus **6 mp4**, sin un solo cambio en el
+índice de git. Comprobado además servido: los seis vídeos responden `206` a
+una petición por rango, y tres fichas de producto tomadas al azar
+—`mantas-cobertores-toldos-camiones` (8 fotos de galería),
+`mallas-antiafidas` (5), `mangas-ventilacion-minas-tuneles` (7)— pintan sus
+imágenes desde `/images/galeria/`.
+
+### 8.5 Estado de la portada, comprobado sobre el build de `main`
+
+La producción (`plastilonas-peruanas-sac.vercel.app`) **no es alcanzable desde
+el entorno donde se ejecutó esta limpieza**: el proxy de salida bloquea el
+dominio y el token de Vercel no tiene alcance sobre el proyecto. Así que lo que
+sigue está medido sobre el build de producción del `main` fusionado —el mismo
+código que la producción sirve—, y se anota la distinción en vez de disimularla.
+
+- **«Explorar catálogo» está fusionada.** Los `h2` de la portada son: «4 líneas
+  que puede cotizar hoy…», «Lo que más nos piden…», **«Explorar catálogo»**,
+  «Arme su lona capa por capa», «El proceso, paso a paso», «Servicios
+  integrales…», «La ventaja de un solo proveedor…», «El oficio», «Novedades».
+  **No aparece** ni «Explore el catálogo por familia» ni «Nuestras líneas
+  insignia»: las dos secciones viejas ya no existen.
+- **El WhatsApp del pie es el arreglo de dos líneas.** «WhatsApp comercial» +
+  «+51 924 875 632», fondo `rgba(255,255,255,0.06)` y texto
+  `rgba(255,255,255,0.9)`. **No hay ningún `#25D366`**: el ladrillo verde se
+  fue.
+- **El título de servicios es el compacto.** «Servicios integrales, de
+  principio a fin» a `22px` y 50,6 px de alto a 390 px de ancho.
+- **El configurador nace plegado.** Su `<details>` reporta `open === false` en
+  el DOM hidratado, igual que los cuatro del acordeón «Por qué elegirnos». Las
+  filas de píldoras no se pintan hasta que alguien lo abre.
+- **`/oficio` sirve las tres películas.** «El oficio», «La materia» y «El
+  gesto», con los seis mp4 accesibles bajo `/videos/`.

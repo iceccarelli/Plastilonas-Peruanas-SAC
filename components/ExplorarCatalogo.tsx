@@ -15,6 +15,10 @@ import { ArrowRight } from 'lucide-react';
  *   2. «Nuestras líneas insignia» — `FeaturedDeck`, una baraja de las 36
  *      fichas del catálogo que TAMBIÉN avanzaba sola cada 4 s.
  *
+ * Los dos componentes quedaron sin una sola importación tras la fusión y una
+ * limpieza posterior los borró. Se nombran aquí como HISTORIA —para que se
+ * entienda qué sustituyó este fichero—, no como código vivo: no existen.
+ *
  * Las dos estaban siempre renderizadas enteras, las dos se movían solas, y
  * ninguna respondía a la otra: elegir «Geosintéticos» en la primera no
  * cambiaba nada en la segunda. Medido a 390 px, entre las dos y sus dos

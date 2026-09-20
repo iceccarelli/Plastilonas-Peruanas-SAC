@@ -817,6 +817,21 @@ main h1, main h2, main h3 { letter-spacing: -0.02em; }
 @media (pointer: coarse) {
   .btn-sm { min-height: 44px; padding-top: 0.6rem; padding-bottom: 0.6rem; }
 }
+/* Pestañas de servicio: compactas a la vista, 44 px al dedo.
+   La compactación móvil de la fila (`px-3.5 py-2.5`) dejaba las píldoras en
+   40 px MEDIDOS, cuatro por debajo del mínimo táctil. Subir el relleno las
+   devolvería a la altura que esa compactación vino a quitar, así que la altura
+   del BLANCO de tiro se declara aparte, y sólo donde importa: en un puntero
+   grueso, `min-height: 44px` sobre una píldora que ya centra su contenido con
+   flex. El relleno —y con él el peso visual— no se toca; crece el alto de la
+   caja, 4 px, y el carril se queda en 44. Donde hay ratón no cambia nada.
+
+   No se usa un ::before con `inset: -Npx` para extender el blanco sin crecer:
+   el carril es `overflow-x-auto`, que computa recorte también en vertical, y
+   ese seudoelemento saldría recortado justo en el eje que se quería ganar. */
+@media (pointer: coarse) {
+  .tab-servicio { min-height: 44px; }
+}
 /* 48 px para la acción principal en móvil: el pulgar no apunta, aterriza. */
 .btn-lg { padding: 0.9rem 2rem; font-size: 0.95rem; min-height: 48px; }
 .btn-primary   { background: #0A2540; color: #fff; }
