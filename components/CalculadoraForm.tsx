@@ -224,11 +224,15 @@ function Formulario({ calc }: { calc: NonNullable<ReturnType<typeof calculadoraP
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        {/* Las dos acciones de cierre pasan al sistema `.btn`: el acento
+            esmeralda para la principal, el fantasma para la secundaria. En
+            móvil cada una ocupa la línea entera —antes `flex-wrap` las dejaba
+            partidas a mitad de ancho— y ambas cumplen los 44 px de alto. */}
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
           <WhatsAppLink
             context={`calculadora:${calc.slug}`}
             message={resumenParaCotizar}
-            className="inline-flex items-center gap-2 rounded-full bg-[#059669] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#047857]"
+            className="btn btn-accent w-full sm:w-auto"
           >
             Revisar este resultado con un especialista
           </WhatsAppLink>
@@ -236,7 +240,7 @@ function Formulario({ calc }: { calc: NonNullable<ReturnType<typeof calculadoraP
               vuelve a teclear lo que la calculadora ya escribió. */}
           <Link
             href={`/cotizacion?origen=calculadora&nota=${encodeURIComponent(resumenParaCotizar)}`}
-            className="inline-flex items-center gap-2 rounded-full border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-800 hover:border-gray-400"
+            className="btn btn-ghost w-full sm:w-auto"
           >
             Enviar este predimensionado a cotización
           </Link>

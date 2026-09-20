@@ -154,7 +154,12 @@ export default function OficioPage() {
                   <Link
                     key={f}
                     href={`/productos/familia/${f}`}
-                    className="rounded-full border border-gray-200 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
+                    /* `.btn btn-sm btn-ghost` en vez del píldora a mano: son
+                       enlaces de navegación a familias de producto, o sea
+                       destinos táctiles, y medían 34 px de alto. El sistema
+                       les da los 44 px en puntero grueso y el mismo hundimiento
+                       al pulsar que el resto del sitio. */
+                    className="btn btn-sm btn-ghost font-normal text-gray-700"
                   >
                     {nombreFamilia(f)}
                   </Link>

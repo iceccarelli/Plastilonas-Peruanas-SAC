@@ -736,7 +736,10 @@ export default function Navbar() {
                 onClick={() => setShowCommand(true)}
                 aria-label="Buscar productos"
                 title="Buscar productos (⌘K)"
-                className="hidden lg:flex items-center px-2.5 py-2 text-sm text-gray-500 dark:text-[var(--text-muted)] hover:text-[#0A2540] dark:hover:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] hover:border-gray-300 rounded-full transition-all active:scale-[0.985]"
+                /* Solo escritorio (`hidden lg:flex`): es un icono de 36 px y
+                   en un táctil quedaría por debajo del mínimo, pero ahí no se
+                   renderiza — la búsqueda móvil vive en el menú. */
+                className="hidden lg:flex items-center justify-center h-9 w-9 text-gray-500 dark:text-[var(--text-muted)] hover:text-[#0A2540] dark:hover:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] hover:border-gray-300 rounded-full transition-transform duration-100 active:scale-[0.97]"
               >
                 <Search className="w-4 h-4 shrink-0" />
               </button>
@@ -747,7 +750,7 @@ export default function Navbar() {
                 <Link
                   href="/dashboard"
                   aria-label="Mi cuenta"
-                  className="hidden xl:flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0A2540] hover:text-[#059669] border border-gray-200 hover:border-[#059669] rounded-full transition-all active:scale-[0.985]"
+                  className="btn btn-sm btn-ghost !hidden xl:!inline-flex font-medium"
                 >
                   {user.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -767,7 +770,11 @@ export default function Navbar() {
                   medir ni volver a él desde el historial. */}
               <Link
                 href="/cotizacion"
-                className="hidden md:inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-[#0A2540] px-4 xl:px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all active:scale-[0.985] hover:bg-[#059669] dark:bg-[#10B981] dark:text-[#0A2540] dark:hover:bg-[#34D399]"
+                /* CTA principal de la cabecera, ya sobre `.btn`: una sola
+                   definición de alto, radio y pulsado para todo el sitio. El
+                   tema oscuro conserva su inversión (esmeralda sobre navy),
+                   que `.btn-primary` no cubre. */
+                className="btn btn-primary !hidden md:!inline-flex shadow-sm dark:bg-[#10B981] dark:text-[#0A2540] dark:hover:bg-[#34D399]"
               >
                 <Award className="w-4 h-4 shrink-0" />
                 <span className="hidden xl:inline">{ACCIONES.cotizar.label}</span>
