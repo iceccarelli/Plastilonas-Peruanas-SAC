@@ -93,14 +93,14 @@ export default function SwipeDeck({
         </div>
 
         <div className="mt-6 flex items-center justify-center gap-4">
-          <button onClick={bringPrev} aria-label="Anterior" className="w-10 h-10 rounded-full bg-[#0A2540] text-white flex items-center justify-center active:scale-95 transition">
+          <button onClick={bringPrev} aria-label="Anterior" className="h-11 w-11 rounded-full bg-[#0A2540] text-white flex items-center justify-center active:scale-[0.95] transition-transform duration-100">
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-2 text-sm font-semibold text-[#0A2540] tabular-nums">
             <Hand className="w-4 h-4 text-[#059669]" />
             {frontPos} / {total} · desliza
           </div>
-          <button onClick={sendToBack} aria-label="Siguiente" className="w-10 h-10 rounded-full bg-[#0A2540] text-white flex items-center justify-center active:scale-95 transition">
+          <button onClick={sendToBack} aria-label="Siguiente" className="h-11 w-11 rounded-full bg-[#0A2540] text-white flex items-center justify-center active:scale-[0.95] transition-transform duration-100">
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>

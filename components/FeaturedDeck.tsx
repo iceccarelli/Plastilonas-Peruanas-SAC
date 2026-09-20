@@ -102,11 +102,11 @@ export default function FeaturedDeck({ products }: { products: Product[] }) {
         </div>
 
         <div className="mt-5 flex items-center justify-center gap-4">
-          <button onClick={() => step(-1)} aria-label="Anterior" className="w-10 h-10 rounded-full bg-[#0A2540] text-white flex items-center justify-center active:scale-95 transition">
+          <button onClick={() => step(-1)} aria-label="Anterior" className="h-11 w-11 rounded-full bg-[#0A2540] text-white flex items-center justify-center active:scale-[0.95] transition-transform duration-100">
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div className="text-sm font-semibold text-[#0A2540] tabular-nums min-w-[4rem] text-center">{head + 1} / {total}</div>
-          <button onClick={() => step(1)} aria-label="Siguiente" className="w-10 h-10 rounded-full bg-[#0A2540] text-white flex items-center justify-center active:scale-95 transition">
+          <button onClick={() => step(1)} aria-label="Siguiente" className="h-11 w-11 rounded-full bg-[#0A2540] text-white flex items-center justify-center active:scale-[0.95] transition-transform duration-100">
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>

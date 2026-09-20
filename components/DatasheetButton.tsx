@@ -26,10 +26,10 @@ export default function DatasheetButton({
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => trackDocumentDownload(`ficha-tecnica:${slug}`, slug)}
-      className={
-        className ??
-        'flex-1 sm:flex-none inline-flex justify-center items-center gap-2 border border-gray-200 hover:bg-gray-50 px-7 py-4 rounded-2xl font-medium text-sm'
-      }
+      /* El defecto pasa al sistema `.btn`: mismo alto, mismo radio y mismo
+         hundimiento al pulsar que el resto de acciones de la ficha. Quien
+         pase `className` sigue mandando. */
+      className={className ?? 'btn btn-lg btn-ghost w-full sm:w-auto font-medium'}
     >
       <FileDown className="w-4 h-4" /> Descargar ficha técnica (PDF)
     </a>

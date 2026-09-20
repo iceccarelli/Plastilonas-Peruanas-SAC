@@ -24,7 +24,11 @@ export default function SectorTicker({
           <Link
             key={`${it.sector}-${i}`}
             href={`/productos?sector=${encodeURIComponent(it.sector)}`}
-            className="ticker-item inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 bg-white hover:border-[#059669] transition-colors"
+            /* 38 px medidos: por debajo del mínimo táctil. Son enlaces reales
+               a los hubs de industria, no adorno, así que suben a 44 y ganan
+               el hundimiento al pulsar. `ticker-item` se conserva: de esa
+               clase cuelga la animación de la marquesina. */
+            className="ticker-item inline-flex min-h-[44px] items-center gap-2 px-4 py-2 rounded-full border border-gray-200 bg-white hover:border-[#059669] transition-[border-color,transform] duration-150 active:scale-[0.97]"
             aria-hidden={i >= items.length}
             tabIndex={i >= items.length ? -1 : 0}
           >

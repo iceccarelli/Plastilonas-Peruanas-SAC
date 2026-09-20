@@ -65,11 +65,11 @@ export default function FamilyCarousel({ families }: { families: Fam[] }) {
       </div>
 
       <div className="mt-5 flex items-center justify-center gap-3">
-        <button onClick={() => { hold(); step(-1); release(); }} aria-label="Anterior" className="w-9 h-9 rounded-full bg-[#0A2540] text-white flex items-center justify-center active:scale-95 transition">
+        <button onClick={() => { hold(); step(-1); release(); }} aria-label="Anterior" className="h-11 w-11 rounded-full bg-[#0A2540] text-white flex items-center justify-center active:scale-[0.95] transition-transform duration-100">
           <ChevronLeft className="w-4 h-4" />
         </button>
         <span className="text-xs text-gray-400">{paused ? 'en pausa' : 'avanza solo'}</span>
-        <button onClick={() => { hold(); step(1); release(); }} aria-label="Siguiente" className="w-9 h-9 rounded-full bg-[#0A2540] text-white flex items-center justify-center active:scale-95 transition">
+        <button onClick={() => { hold(); step(1); release(); }} aria-label="Siguiente" className="h-11 w-11 rounded-full bg-[#0A2540] text-white flex items-center justify-center active:scale-[0.95] transition-transform duration-100">
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

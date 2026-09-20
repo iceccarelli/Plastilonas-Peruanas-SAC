@@ -53,18 +53,18 @@ export default function FeedbackBar() {
             </p>
           </div>
           {respuesta === null ? (
-            <div className="flex gap-3">
+            <div className="flex gap-3 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => responder('si')}
-                className="inline-flex items-center gap-2 bg-[#0A2540] text-white hover:bg-[#047857] font-semibold px-7 py-3 rounded-full transition-colors"
+                className="btn btn-primary flex-1 sm:flex-none"
               >
                 Sí <ThumbsUp className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={() => responder('no')}
-                className="inline-flex items-center gap-2 bg-[#0A2540] text-white hover:bg-[#047857] font-semibold px-7 py-3 rounded-full transition-colors"
+                className="btn btn-primary flex-1 sm:flex-none"
               >
                 No <ThumbsDown className="w-4 h-4" />
               </button>
@@ -83,12 +83,12 @@ export default function FeedbackBar() {
                     onKeyDown={(e) => e.key === 'Enter' && enviarFalta()}
                     placeholder="¿Qué faltó? (una frase)"
                     maxLength={140}
-                    className="flex-1 rounded-full border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-[#059669]"
+                    className="flex-1 min-w-0 min-h-[44px] rounded-full border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-[#059669]"
                   />
                   <button
                     type="button"
                     onClick={enviarFalta}
-                    className="rounded-full bg-[#0A2540] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#047857] transition-colors"
+                    className="btn btn-primary shrink-0"
                   >
                     Enviar
                   </button>
@@ -97,7 +97,7 @@ export default function FeedbackBar() {
               <WhatsAppLink
                 context="feedback-pagina"
                 message={`Hola, estuve en ${ruta ?? 'su sitio'} y no encontré lo que buscaba. Busco: ${falta.trim()}`}
-                className="inline-flex items-center justify-center gap-2 border border-gray-200 text-[#047857] hover:border-[#059669] font-semibold px-7 py-2.5 rounded-full transition-colors text-sm"
+                className="btn btn-ghost text-[#047857]"
               >
                 O cuéntenoslo por WhatsApp
               </WhatsAppLink>
