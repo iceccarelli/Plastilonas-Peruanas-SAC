@@ -178,6 +178,13 @@ test/regresiones-ui.test.ts
 
 No se tocó `LonaExploded.tsx`. No se instaló ninguna dependencia.
 
+> **Nota posterior.** `components/FamilyCarousel.tsx` y
+> `components/FeaturedDeck.tsx`, que esta entrega tocó, **ya no existen**: la
+> portada fusionó sus dos secciones en `ExplorarCatalogo.tsx`
+> (`2026-09-20-home-density-mobile.md` §3.1) y la limpieza posterior los borró
+> al confirmar que no quedaba ninguna importación (§8.2 de esa misma entrega).
+> La lista de arriba se conserva como registro de lo que se tocó entonces.
+
 ---
 
 ## 7. Capturas

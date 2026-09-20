@@ -146,12 +146,18 @@ export default function ServiceTabs({ services }: { services: Svc[] }) {
                    a `px-3.5 py-2.5`, que MEDIDO da 40 px de alto —por debajo
                    de los 44 de un botón de acción, y a propósito: en una
                    fila de pestañas adyacentes el riesgo no es acertar la
-                   altura (el carril entero mide 40 px de arriba abajo, no
-                   hay nada encima ni debajo que tocar por error) sino
-                   acertar la HORIZONTAL, y ahí cada píldora conserva más de
-                   110 px de ancho. En `lg` recupera su tamaño de siempre,
-                   donde es una columna vertical y sí conviven verticalmente. */
-                className={`shrink-0 lg:shrink text-left flex items-center gap-2 lg:gap-3 px-3.5 py-2.5 lg:px-5 lg:py-4 rounded-2xl border transition-all duration-300 ${
+                   altura sino acertar la HORIZONTAL, y ahí cada píldora
+                   conserva más de 110 px de ancho. En `lg` recupera su tamaño
+                   de siempre, donde es una columna vertical y sí conviven
+                   verticalmente.
+
+                   Ese razonamiento explicaba por qué 40 px era de BAJO riesgo,
+                   no por qué bastaba: 44 px es el mínimo, y «poco peligroso»
+                   no es «cumple». `.tab-servicio` (globals.css) sube el blanco
+                   de tiro a 44 px SÓLO en puntero grueso, sin tocar el relleno
+                   —el peso visual compacto se conserva, la caja crece 4 px— y
+                   sin tocar nada donde hay ratón. */
+                className={`tab-servicio shrink-0 lg:shrink text-left flex items-center gap-2 lg:gap-3 px-3.5 py-2.5 lg:px-5 lg:py-4 rounded-2xl border transition-all duration-300 ${
                   on ? 'bg-[#0A2540] border-[#0A2540] text-white shadow-lg shadow-[#0A2540]/15'
                      : 'bg-white border-gray-200 text-[#0A2540] hover:border-[#047857]'
                 }`}
