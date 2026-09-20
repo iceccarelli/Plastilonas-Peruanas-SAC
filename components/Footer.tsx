@@ -123,8 +123,52 @@ export default function Footer() {
             <div className="font-semibold text-lg tracking-tight text-white">Plastilonas Peruanas SAC</div>
           </div>
           <p className="text-white/60 text-sm leading-relaxed mb-5">Fabricación e instalación propias. En el Perú desde 2009.</p>
-          <WhatsAppLink context="footer-cta" message="Hola, quisiera información sobre sus productos." className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-[#0A2540] font-semibold py-3.5 rounded-2xl mb-6 active:scale-[0.99] transition">
-            <Phone className="w-4 h-4" /> WhatsApp comercial · {WHATSAPP_DISPLAY}
+          {/* ── WhatsApp del pie (móvil) ──────────────────────────────────
+              Lo que había: una píldora de ancho completo en `bg-[#25D366]`
+              —el verde de marca de WhatsApp, al 100 %— con la frase
+              «WhatsApp comercial · +51 924 875 632» en una sola línea de
+              16 px semibold. Medido: 324 px de texto dentro de 342 px de
+              píldora a 390 px de ancho. Es decir, cabía por 18 px en el
+              teléfono más común y se partía en dos líneas en cualquiera de
+              360 o 320, que es lo que el dueño vio en producción. Un ladrillo
+              verde de borde a borde, además, compite con el «Cotizar» blanco
+              que está 40 px más arriba y que SÍ es la acción principal del
+              pie.
+
+              Lo que hay: el mismo patrón de jerarquía que la barra móvil de
+              contacto —la píldora de WhatsApp es SECUNDARIA, no un cartel—,
+              y el verde de WhatsApp pasa a ser ACENTO del icono, no fondo.
+              El número deja de competir con la etiqueta: va en una segunda
+              línea tranquila, más pequeña y tabular. Dos líneas cortas no se
+              pueden partir mal; una frase de 36 caracteres sí.
+
+              Ancho medido del bloque de texto: «WhatsApp comercial» a 15 px
+              semibold ≈ 142 px y el número a 12.5 px tabular ≈ 108 px. Con
+              icono (20) + hueco (12) + relleno (40) son 214 px: entra entero
+              a 320 px con 106 px de sobra, así que no hay ancho en el que
+              esto envuelva.
+
+              Contraste (medido sobre los píxeles compuestos, no supuesto —
+              ver docs/entregas/2026-09-20-home-density-mobile.md): el fondo
+              es `bg-white/[0.06]` sobre el navy #0A2540 del pie, que compone
+              a #1A3450; blanco sobre ese fondo da 13.9:1 y el número en
+              white/70 da 7.5:1. Los dos pasan AA con holgura a 12.5 px.
+
+              El número sigue en el nombre accesible del enlace, así que un
+              lector de pantalla anuncia el canal Y la línea. ── */}
+          <WhatsAppLink
+            context="footer-cta"
+            message="Hola, quisiera información sobre sus productos."
+            aria-label={`WhatsApp comercial ${WHATSAPP_DISPLAY}`}
+            className="group flex w-full items-center gap-3 rounded-2xl border border-white/15 bg-white/[0.06] px-5 py-3 mb-6 min-h-[56px] hover:border-[#25D366]/60 active:scale-[0.99] transition"
+          >
+            <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#25D366]/15 text-[#25D366]">
+              <Phone className="h-[18px] w-[18px]" />
+            </span>
+            <span className="flex min-w-0 flex-col text-left leading-tight">
+              <span className="text-[15px] font-semibold text-white">WhatsApp comercial</span>
+              <span className="mt-0.5 text-[12.5px] tabular-nums text-white/70 whitespace-nowrap">{WHATSAPP_DISPLAY}</span>
+            </span>
           </WhatsAppLink>
           <FooterAccordion sections={sections} />
           <div className="py-6">
@@ -204,7 +248,14 @@ export default function Footer() {
               <WhatsAppLink context="footer-contacto" message="Hola, quisiera información sobre sus productos." className="flex items-start gap-3 group">
                 <Phone className="w-4 h-4 mt-0.5 text-[#25D366] group-hover:text-[#059669]" />
                 <div>
-                  <div className="text-[#25D366]">{TELEFONOS.whatsapp.display}</div>
+                  {/* El número iba en `text-[#25D366]` — pasaba AA (7.84:1
+                      medido sobre el navy del pie) pero leía como un enlace
+                      de 2012 y rompía la simetría con la fila de teléfono de
+                      arriba, que sí usa blanco + subetiqueta apagada. El
+                      verde de WhatsApp se queda donde debe estar: en el
+                      icono, como acento. Mismo criterio que la píldora
+                      móvil de este mismo pie. */}
+                  <div className="tabular-nums text-white">{TELEFONOS.whatsapp.display}</div>
                   <div className="text-xs text-white/50">WhatsApp comercial</div>
                 </div>
               </WhatsAppLink>
