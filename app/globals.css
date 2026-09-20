@@ -389,8 +389,12 @@ a:hover, button:hover {
   section.min-h-\[92vh\] h1 { font-size: 2.15rem !important; line-height: 1.12 !important; }
   section.min-h-\[92vh\] .mt-16 { margin-top: 2rem !important; }
 
-  /* 4. Product visual placards: 224px -> 176px, lighter feel */
-  .product-card .h-56 { height: 11rem; }
+  /* 4. Product visual placards. Antes: `height: 11rem` sobre un `h-56`.
+     Con el contenedor fijo a 176 px de alto y 340 de ancho, la caja pedía un
+     1.93:1 a fotos que son todas 3:2 (1.50): el `object-cover` se comía el
+     22 % del cuadro, arriba y abajo, en el sitio donde menos pantalla hay.
+     Ahora la caja la fija el ratio (`.product-card-media` = 3/2) y aquí no se
+     toca la altura: el alto lo decide el ancho de la columna. */
 
   /* 5. Badges/labels breathe less loudly on tiny screens */
   .badge { font-size: 0.7rem; padding: 0.2rem 0.6rem; }
@@ -408,12 +412,24 @@ button[aria-pressed="true"] {
   border-color: var(--color-emerald) !important;
   box-shadow: 0 4px 14px -2px rgba(5, 150, 105, 0.45);
 }
-.product-card:active { transform: scale(0.985); }
+.product-card:active { transform: scale(0.97); }
 
-/* Card image brightens on tap/hover (the "brighten when selected" ask) */
-.product-card .h-56 { transition: filter 0.25s ease; }
-.product-card:hover .h-56,
-.product-card:active .h-56 { filter: brightness(1.12) saturate(1.08); }
+/* Card image brightens on tap/hover (the "brighten when selected" ask).
+   `.product-card-media` sustituye al antiguo `.h-56`: la altura dejó de ser
+   un número y pasó a ser un ratio, así que el gancho de estilo también. */
+.product-card .product-card-media { transition: filter 0.25s ease; }
+.product-card:active .product-card-media { filter: brightness(1.12) saturate(1.08); }
+@media (hover: hover) {
+  /* El realce por hover es la señal del ratón. En un táctil no existe el
+     hover: el `:active` de arriba es su equivalente, y por eso vive fuera. */
+  .product-card:hover .product-card-media { filter: brightness(1.12) saturate(1.08); }
+}
+/* NO se añade un `scale()` de imagen al pasar el ratón. La foto de la tarjeta
+   ya lleva `.ken-burns`, y una animación de `transform` gana a cualquier
+   declaración estática de `transform` mientras corre: el zoom de hover sería
+   invisible en las tarjetas con foto y visible solo en las que no la tienen,
+   que es peor que no tenerlo. El afordance de escritorio lo dan el elevado de
+   `.product-card:hover` y el realce de brillo de arriba. */
 
 /* ── Bright gradient selected/active state (AWS "North America" style) ── */
 .chip-selected {
@@ -586,9 +602,30 @@ main h1, main h2, main h3 { letter-spacing: -0.02em; }
 }
 .ken-burns-wrap:nth-of-type(3n) .ken-burns   { animation-duration: 26s; animation-delay: -6s; transform-origin: top left; }
 .ken-burns-wrap:nth-of-type(3n+1) .ken-burns { animation-duration: 20s; animation-delay: -3s; transform-origin: bottom right; }
+/* CORRECCIÓN 4 (2026-09-20). El techo baja de 1.06 a 1.03.
+   El razonamiento de la CORRECCIÓN 1 sigue siendo el correcto y este cambio
+   solo lo termina: con el encuadre del contenedor ya corregido a 3:2 —el
+   mismo ratio que tienen las 228 fotos de galería— el recorte del contenedor
+   es CERO, así que el único recorte que queda es el del zoom. Un 6 % se come
+   un 3 % por lado; en una toma `-detalle` ese 3 % es justamente el ojal o el
+   remate que la foto existe para enseñar. A 1.03 el movimiento se sigue
+   percibiendo y el borde del ojal sobrevive. */
 @keyframes kenburns {
-  from { transform: scale(1.01) translate(0, 0); }
-  to   { transform: scale(1.06) translate(-1%, 1%); }
+  from { transform: scale(1.005) translate(0, 0); }
+  to   { transform: scale(1.03) translate(-0.6%, 0.6%); }
+}
+/* MÓVIL: el mismo porcentaje de zoom NO es el mismo recorte percibido.
+   En 390 px de ancho, un 3 % por lado son ~12 px de foto perdidos sobre una
+   imagen que ya mide menos de la mitad que en escritorio; y el sujeto ocupa
+   proporcionalmente más del cuadro, así que lo que se recorta deja de ser
+   fondo y pasa a ser producto. Por debajo de `md` el recorrido se reduce a un
+   1 % y el paneo desaparece: queda una respiración, no un zoom. */
+@keyframes kenburns-movil {
+  from { transform: scale(1.002); }
+  to   { transform: scale(1.012); }
+}
+@media (max-width: 767px) {
+  .ken-burns { animation-name: kenburns-movil; }
 }
 /* CORRECCIÓN 3. Antes el hover bajaba animation-duration de 22 s a 12 s.
    Cambiar la duración a mitad de una animación hace que el navegador
@@ -727,14 +764,32 @@ main h1, main h2, main h3 { letter-spacing: -0.02em; }
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
   font-weight: 600; font-size: 0.875rem; line-height: 1;
-  padding: 0.75rem 1.5rem;            /* alto uniforme = 44px táctil */
+  padding: 0.75rem 1.5rem;
+  /* El comentario que había aquí decía «alto uniforme = 44px táctil» y no era
+     cierto: 12 px de relleno arriba, 12 abajo y 14 de línea suman 38, y con
+     icono 40. MEDIDO en el navegador a 390 px: 40 px. El mínimo táctil se
+     declara, no se deduce de una suma de rellenos que cualquier cambio de
+     tipografía desplaza. */
+  min-height: 44px;
   border-radius: 9999px;
   transition: background-color .2s, color .2s, transform .1s;
   white-space: nowrap;
 }
-.btn:active { transform: scale(0.985); }
+/* El pulsado, no el hover, es la señal de un táctil. 0.97 es el hundimiento
+   que usan las aplicaciones nativas: se nota sin llegar a parecer un fallo.
+   Va acompañado de una transición corta (ya declarada arriba, .1s). */
+.btn:active { transform: scale(0.97); }
+/* Altura mínima táctil. `.btn` con 0.75rem de padding y 1 de line-height mide
+   44 px justos; `.btn-sm` medía 29 px REALES —medido en el navegador, no
+   estimado—, muy por debajo del mínimo de Apple/Google, y estaba vivo en
+   pantallas táctiles (el «Cotizar» de cada tarjeta de producto). En un puntero
+   grueso recupera los 44 px; donde hay ratón conserva su tamaño compacto. */
 .btn-sm { padding: 0.5rem 1rem; font-size: 0.8125rem; }
-.btn-lg { padding: 0.9rem 2rem; font-size: 0.95rem; }
+@media (pointer: coarse) {
+  .btn-sm { min-height: 44px; padding-top: 0.6rem; padding-bottom: 0.6rem; }
+}
+/* 48 px para la acción principal en móvil: el pulgar no apunta, aterriza. */
+.btn-lg { padding: 0.9rem 2rem; font-size: 0.95rem; min-height: 48px; }
 .btn-primary   { background: #0A2540; color: #fff; }
 .btn-primary:hover   { background: #047857; }
 .btn-accent    { background: #047857; color: #fff; }
@@ -819,6 +874,26 @@ main h1, main h2, main h3 { letter-spacing: -0.02em; }
       0 6px 28px -4px rgba(16, 185, 129, 0.38);
     outline: none;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* AFORDANCES QUE NO PUEDEN SER SOLO DE RATÓN                          */
+/*                                                                     */
+/* La aurora de arriba es decorativa: dice «esto está vivo», y quien no */
+/* la ve no pierde información ni camino. Puede seguir siendo de ratón. */
+/*                                                                     */
+/* La insignia «Ampliar» de la galería NO es decorativa: es la única    */
+/* señal de que la foto se puede abrir a pantalla completa. Estaba en   */
+/* `opacity-0 group-hover:opacity-100`, es decir INVISIBLE para siempre */
+/* en un teléfono —medido: opacity 0 en 390 px—, justo donde la foto    */
+/* sale más pequeña y más falta hace ampliarla. En un puntero grueso se */
+/* muestra desde el primer pintado; donde hay ratón el hover la realza. */
+/* ------------------------------------------------------------------ */
+.pista-ampliar { opacity: 1; transition: opacity 0.25s ease, background-color 0.25s ease; }
+@media (hover: hover) and (pointer: fine) {
+  .pista-ampliar { opacity: 0; }
+  .group:hover .pista-ampliar,
+  .group:focus-within .pista-ampliar { opacity: 1; }
 }
 
 

@@ -154,15 +154,28 @@ export default async function ProductDetailPage({ params }: Props) {
         <Link href={familiaHref} className="hover:text-[#059669]">{product.category}</Link>
       </div>
 
+      {/* `min-w-0` EN LAS DOS COLUMNAS, Y NO ES COSMÉTICO.
+
+          Medido en 390 px antes de este cambio: este contenedor medía 636 px,
+          es decir 246 px fuera de la pantalla. La causa es la regla por
+          defecto de CSS Grid —un ítem de rejilla tiene `min-width: auto`, o
+          sea que no baja de su tamaño de contenido mínimo—; una fila de
+          especificación con un valor largo sin espacios estiraba la columna
+          de la derecha, la rejilla entera crecía con ella y ARRASTRABA a la
+          galería. `overflow-x: clip` en <html> tapaba el síntoma: no había
+          barra de desplazamiento, simplemente faltaba un tercio de cada foto
+          por el lado derecho. Cualquier corrección de encuadre dentro de la
+          galería era inútil mientras la galería midiese 634 px en un teléfono
+          de 390. */}
       <div className="grid lg:grid-cols-2 gap-x-14 gap-y-10">
         {/* Gallery */}
-        <div>
+        <div className="min-w-0">
           <ProductGallery product={product} tomas={mapaDeTomas(product.gallery ?? [])} />
         </div>
 
 
         {/* Info */}
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-3 mb-4">
             <span className="badge bg-emerald-100 text-emerald-700">{product.category}</span>
             {product.popular && <span className="badge bg-amber-100 text-amber-700">Más vendido</span>}
@@ -192,7 +205,7 @@ export default async function ProductDetailPage({ params }: Props) {
           <ProductBuyBox product={product} />
 
           <div className="flex flex-wrap gap-3 mb-9">
-            <Link href={`/cotizacion?producto=${encodeURIComponent(product.name)}`} className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 bg-[#0A2540] hover:bg-[#059669] text-white px-9 py-4 rounded-2xl font-semibold text-sm transition-all active:scale-[0.985]">
+            <Link href={`/cotizacion?producto=${encodeURIComponent(product.name)}`} className="btn btn-lg btn-primary w-full sm:w-auto">
               {ACCIONES.cotizarProducto.label} <ArrowRight className="w-4 h-4" />
             </Link>
             {/* El mensaje llega con el SKU y con los campos que la cotización
@@ -202,7 +215,7 @@ export default async function ProductDetailPage({ params }: Props) {
             <WhatsAppLink
               context={`rfq-producto:${product.slug}`}
               message={rfq}
-              className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 border border-gray-200 hover:bg-gray-50 px-7 py-4 rounded-2xl font-medium text-sm"
+              className="btn btn-lg btn-ghost w-full sm:w-auto font-medium"
             >
               <Phone className="w-4 h-4" /> RFQ por WhatsApp
             </WhatsAppLink>
