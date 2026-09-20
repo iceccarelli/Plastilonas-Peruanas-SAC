@@ -41,10 +41,19 @@ describe('lo que flota no tapa lo que se toca', () => {
     // DEFECTO: `position: fixed` no ocupa sitio. Al fondo de la página la barra
     // se comía «Política de Privacidad» y «Términos y Condiciones» en 11 de 13
     // rutas medidas. Son avisos legales: tienen que ser alcanzables.
+    // 2026-09-20: la barra se rehízo con jerarquía (píldora principal + dos
+    // acciones menores) y con ello cambió de alto. La prueba ya no fija el
+    // número —fijarlo obligaba a tocar la prueba en cada ajuste visual, que es
+    // como se erosionan las guardas—, sino la INVARIANTE que importa: el alto
+    // sale de UNA constante y el espaciador usa exactamente la misma, así que
+    // no pueden desincronizarse. Y sigue exigiendo el área segura.
     const src = leer('components/BarraMovilContacto.tsx');
     expect(src).toContain('aria-hidden="true"');
     expect(src).toContain('env(safe-area-inset-bottom)');
-    expect(src, 'el espaciador desapareció').toMatch(/height: 'calc\(48px \+ env\(safe-area-inset-bottom\)\)'/);
+    expect(src, 'el alto dejó de salir de una constante').toMatch(/const ALTO = \d+;/);
+    const usos = src.match(/height: `calc\(\$\{ALTO\}px \+ env\(safe-area-inset-bottom\)\)`/g) ?? [];
+    expect(usos.length, 'el espaciador y la barra dejaron de compartir alto').toBe(2);
+    expect(src, 'la barra dejó de ocultarse en /cotizacion').toContain("pathname?.startsWith('/cotizacion')");
   });
 
   it('los avisos legales no se alinean bajo el botón flotante del asistente', () => {
