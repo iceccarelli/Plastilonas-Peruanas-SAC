@@ -106,7 +106,7 @@ export default function ProductGallery({
 
   if (images.length === 0) {
     return (
-      <div className="aspect-[16/11] rounded-3xl overflow-hidden relative border border-gray-100">
+      <div className="aspect-[3/2] rounded-3xl overflow-hidden relative border border-gray-100">
         <ProductVisual product={product} variant="hero" />
       </div>
     );
@@ -127,7 +127,25 @@ export default function ProductGallery({
 
   return (
     <div>
-      <div className="aspect-[16/11] rounded-3xl overflow-hidden relative border border-gray-100 group">
+      {/*
+        EL ENCUADRE ES EL DE LAS FOTOS, NO UN NÚMERO ELEGIDO.
+
+        Aquí había `aspect-[16/11]` = 1.4545. Las 228 fotos de
+        `public/images/galeria` miden TODAS exactamente 3:2 = 1.5 (comprobado
+        archivo por archivo con sharp, no supuesto). Un contenedor a 1.4545
+        con `object-cover` recorta ~3 % del ancho de cada foto para siempre, y
+        encima de eso venía el Ken Burns. En una toma `-detalle` —un ojal, una
+        costura, un remate— ese 3 % es exactamente el borde que la foto existe
+        para enseñar.
+
+        Se descartó `aspect-auto` con medidas intrínsecas: obligaría a leer el
+        tamaño de cada archivo en servidor por ficha y, con tomas que se
+        cruzan apiladas en `position: absolute`, la altura del contenedor
+        dejaría de estar reservada antes de la descarga. Un ratio fijo
+        IGUAL al del material reserva el espacio exacto, recorta cero y no
+        introduce desplazamiento de maquetación.
+      */}
+      <div className="aspect-[3/2] rounded-3xl overflow-hidden relative border border-gray-100 group">
         {failed[active] ? (
           <ProductVisual product={product} variant="hero" />
         ) : (
@@ -142,7 +160,12 @@ export default function ProductGallery({
               alt={altFor(active, activeSrc)}
               fill
               priority
-              sizes="(max-width: 768px) 100vw, 640px"
+              /* Anchos REALES medidos en el navegador tras corregir el
+                 desborde: 342 px a 390, 720 px a 768, 522 px a 1440. El valor
+                 anterior —`(max-width: 768px) 100vw, 640px`— servía 640 px
+                 justo donde hacían falta 720 (una tableta veía la foto
+                 interpolada) y 640 donde bastaban 522. */
+              sizes="(max-width: 1023px) 100vw, 576px"
               className="ken-burns object-cover"
               onError={() => setFailed((f) => ({ ...f, [active]: true }))}
             />
@@ -163,13 +186,20 @@ export default function ProductGallery({
                   src={toma}
                   alt=""
                   fill
-                  sizes="(max-width: 768px) 100vw, 640px"
+                  sizes="(max-width: 1023px) 100vw, 576px"
                   className="ken-burns object-cover"
                 />
               </div>
             ))}
             <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none" />
-            <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/55 text-white text-xs px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            {/* «Ampliar» es la ÚNICA señal de que esta foto se abre a pantalla
+                completa. Estaba en `opacity-0 group-hover:opacity-100`, o sea
+                invisible para siempre en un teléfono —medido: opacity 0 a
+                390 px—, justo donde la foto sale más pequeña. La clase
+                `.pista-ampliar` (globals.css) la deja visible de entrada en
+                punteros gruesos y conserva el revelado por hover donde hay
+                ratón. */}
+            <span className="pista-ampliar absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/60 text-white text-xs px-3 py-1.5 pointer-events-none">
               <Expand className="w-3.5 h-3.5" /> Ampliar
             </span>
           </button>
@@ -193,8 +223,15 @@ export default function ProductGallery({
       )}
 
       {hasMultiple && (
+        /* Tira de miniaturas: 72 px de alto (era 64) y deslizamiento con
+           imán. En un teléfono cabían tres y media y la cuarta quedaba
+           cortada por el borde sin señal de que se pudiera arrastrar; con
+           `snap-x` cada miniatura se detiene alineada y se entiende que la
+           fila continúa. El estado seleccionado no depende del hover: lleva
+           anillo permanente, que es la única forma de que un táctil sepa qué
+           foto está mirando. */
         <div
-          className="mt-3 flex gap-3 overflow-x-auto pb-1"
+          className="mt-3 flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1"
           role="listbox"
           aria-label={`Galería de fotos de ${product.name}`}
         >
@@ -213,13 +250,13 @@ export default function ProductGallery({
                     : `Ver foto ${i + 1} de ${images.length} — ${product.name}`
                 }
                 title={label ?? undefined}
-                className={`relative h-16 w-24 shrink-0 rounded-xl overflow-hidden border transition-all ${
+                className={`relative h-[72px] w-[108px] shrink-0 snap-start rounded-xl overflow-hidden border-2 transition-all active:scale-[0.97] ${
                   i === active
-                    ? 'border-[#059669] ring-2 ring-[#059669]/30'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-[#047857] ring-2 ring-[#047857]/35 ring-offset-1'
+                    : 'border-gray-200 opacity-80'
                 }`}
               >
-                <Image src={src} alt="" fill sizes="96px" className="object-cover" />
+                <Image src={src} alt="" fill sizes="108px" className="object-cover" />
                 {label && (
                   <span className="absolute inset-x-0 bottom-0 bg-black/55 text-white text-[10px] leading-none py-1 text-center font-medium tracking-wide">
                     {label}
@@ -233,7 +270,11 @@ export default function ProductGallery({
 
       {lightbox && (
         <div
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 sm:p-8"
+          className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center px-3 sm:px-8"
+          style={{
+            paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
+            paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
+          }}
           role="dialog"
           aria-modal="true"
           aria-label={`${product.name} — vista ampliada`}
@@ -243,7 +284,7 @@ export default function ProductGallery({
             type="button"
             onClick={() => setLightbox(false)}
             aria-label="Cerrar galería"
-            className="absolute top-5 right-5 text-white/80 hover:text-white p-2"
+            className="absolute top-4 right-4 z-10 inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white/90 backdrop-blur transition-transform active:scale-[0.92] hover:bg-white/20 hover:text-white"
           >
             <X className="w-7 h-7" />
           </button>
@@ -254,23 +295,31 @@ export default function ProductGallery({
                 type="button"
                 onClick={(e) => { e.stopPropagation(); go(-1); }}
                 aria-label="Foto anterior"
-                className="absolute left-3 sm:left-6 text-white/80 hover:text-white p-2"
+                className="absolute left-2 sm:left-6 z-10 inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white/90 backdrop-blur transition-transform active:scale-[0.92] hover:bg-white/20 hover:text-white"
               >
-                <ChevronLeft className="w-9 h-9" />
+                <ChevronLeft className="w-7 h-7" />
               </button>
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); go(1); }}
                 aria-label="Foto siguiente"
-                className="absolute right-3 sm:right-6 text-white/80 hover:text-white p-2"
+                className="absolute right-2 sm:right-6 z-10 inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white/90 backdrop-blur transition-transform active:scale-[0.92] hover:bg-white/20 hover:text-white"
               >
-                <ChevronRight className="w-9 h-9" />
+                <ChevronRight className="w-7 h-7" />
               </button>
             </>
           )}
 
+          {/* LA VISTA AMPLIADA NO RECORTA NUNCA. Aquí había otro
+              `aspect-[16/11]` fijo: en una pantalla de 390×844 eso dejaba la
+              foto en una franja corta en medio de una pantalla negra, con el
+              resto del área segura desperdiciada. Ahora la caja ocupa todo el
+              hueco disponible (`flex-1`, `min-h-0`) y `object-contain` decide
+              el tamaño: la foto entra ENTERA y lo más grande que quepa. En una
+              vista que el usuario ha pedido expresamente para ver la foto
+              completa, forzar un encuadre es contradecir el gesto. */}
           <div
-            className="relative w-full max-w-5xl aspect-[16/11]"
+            className="relative w-full max-w-5xl flex-1 min-h-0 my-10 sm:my-12"
             onClick={(e) => e.stopPropagation()}
           >
             <Image
