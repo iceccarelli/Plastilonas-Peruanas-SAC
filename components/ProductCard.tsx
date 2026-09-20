@@ -34,8 +34,17 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
          que todo lo pulsable del sitio se sienta igual. */
       whileHover={{ y: -3 }}
       whileTap={{ scale: 0.97 }}
+      /* `whileTap` hace que Framer Motion ponga `tabIndex={0}` en el <div>
+         (ver `makeRenderlessComponent` → `props.whileTap` en su fuente), y eso
+         mete en el orden de tabulación un contenedor SIN rol, SIN nombre
+         accesible y SIN acción: se anunciaba como un bloque de texto de
+         342×560 justo antes del título, y pulsar Intro sobre él no hacía
+         nada. Medido en el recorrido de tabulación a 390 px. El hundimiento
+         al pulsar es decoración; el camino real a la ficha es el enlace del
+         título. `tabIndex={-1}` quita el tope fantasma y no quita nada más. */
+      tabIndex={-1}
       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-      className="product-card group bg-white border border-gray-100 rounded-3xl overflow-hidden flex flex-col h-full"
+      className="product-card group relative bg-white border border-gray-100 rounded-3xl overflow-hidden flex flex-col h-full"
     >
       {/* ENCUADRE 3:2, NO ALTURA FIJA.
 
@@ -70,23 +79,6 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
           <div className="absolute top-4 right-4 bg-[#059669] text-white t-micro font-bold tracking-wider px-3.5 py-1 rounded-full">MÁS VENDIDO</div>
         )}
 
-        {/* TODA LA FOTO LLEVA A LA FICHA. Antes el único camino desde la
-            tarjeta era el enlace «Ver especificaciones» de abajo: 162×28 px
-            de texto fino al final de un bloque cuya parte grande y obvia —la
-            foto— no hacía nada al tocarla. Es un enlace superpuesto y no un
-            <Link> envolviendo la tarjeta entera porque dentro conviven otras
-            dos acciones (Agregar / Cotizar) y anidar enlaces es HTML
-            inválido. `aria-hidden` + `tabIndex={-1}`: el nombre del producto
-            de abajo ya es el enlace que anuncia un lector de pantalla, y
-            duplicarlo sería anunciar dos veces el mismo destino. */}
-        <Link
-          href={`/productos/${product.slug}`}
-          aria-hidden="true"
-          tabIndex={-1}
-          className="absolute inset-0 z-[1]"
-        >
-          <span className="sr-only">{product.name}</span>
-        </Link>
       </div>
 
       <div className="p-6 flex-1 flex flex-col">
@@ -98,8 +90,31 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
             )}
           </div>
           
+          {/* EL NOMBRE ES EL ENLACE, Y ESE ENLACE ES TODA LA TARJETA.
+
+              Antes había un <Link> superpuesto sobre la foto con
+              `aria-hidden` + `tabIndex={-1}`: la parte grande y obvia de la
+              tarjeta sí llevaba a la ficha con el dedo o el ratón, pero para
+              el teclado y el lector de pantalla ese destino no existía, y el
+              título —que es el nombre accesible natural de la tarjeta— era
+              texto muerto.
+
+              Ahora el enlace real envuelve el título y se estira con
+              `after:absolute after:inset-0` sobre la tarjeta entera (que es
+              `relative`). Un solo elemento interactivo para «ir a este
+              producto»: un solo tope de tabulación, con nombre accesible
+              correcto, y la foto sigue siendo pulsable. No se anida nada
+              dentro del <a> —anidar interactivos sería HTML inválido—: las
+              acciones de abajo (Agregar / Cotizar / Ver especificaciones)
+              son HERMANAS y suben a `z-[2]` para quedar por encima de la
+              capa estirada y seguir pulsándose por separado. */}
           <h3 className="font-semibold text-xl tracking-tight text-[#0A2540] leading-tight mb-3 group-hover:text-[#059669] transition-colors">
-            {product.name}
+            <Link
+              href={`/productos/${product.slug}`}
+              className="after:absolute after:inset-0 after:z-[1] after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#059669]"
+            >
+              {product.name}
+            </Link>
           </h3>
           
           <p className="text-gray-600 t-body line-clamp-3 leading-snug">
@@ -130,7 +145,7 @@ export default function ProductCard({ product, showSector = true }: ProductCardP
 
             `min-h-[44px]` en el enlace: medía 28 px de alto reales. No es un
             botón, pero es un destino táctil y el mínimo es el mismo. */}
-        <div className="pt-5 mt-auto flex flex-col-reverse sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-x-3 gap-y-2 border-t border-gray-100">
+        <div className="relative z-[2] pt-5 mt-auto flex flex-col-reverse sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-x-3 gap-y-2 border-t border-gray-100">
           <Link
             href={`/productos/${product.slug}`}
             className="inline-flex min-h-[44px] items-center justify-center sm:justify-start text-sm font-medium text-[#047857] hover:underline whitespace-nowrap active:opacity-70 transition-opacity"
