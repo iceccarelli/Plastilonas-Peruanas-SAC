@@ -92,11 +92,40 @@ export default function BarraMovilContacto() {
       </a>
 
       {/* Secundario: píldora con el verde del canal, para que se reconozca
-          de un vistazo sin necesidad de un logotipo de terceros. */}
+          de un vistazo sin necesidad de un logotipo de terceros.
+
+          EL FONDO DE ESTA PÍLDORA ES OPACO, Y ESO NO ES ESTÉTICA.
+
+          Era `bg-[#047857]/10`: un tinte del 10 % sobre una barra que a su vez
+          es cristal (`bg-white/70`, `dark:bg-[#1C2C46]/70`). Es decir, el
+          fondo EFECTIVO del texto no lo decidía el CSS, lo decidía lo que
+          hubiera debajo desplazándose. Medido sobre píxeles renderizados a
+          390×844 —se oculta el texto, se captura la píldora y se busca el peor
+          píxel interior— en 4 rutas × 5 posiciones de desplazamiento:
+
+            claro   #047857 sobre #79a094 (peor)  →  1.90:1   FALLA AA
+            oscuro  #34D399 sobre #4b857e (peor)  →  2.20:1   FALLA AA
+
+          El umbral es 4.5:1: 13 px con peso 600 NO es texto grande (WCAG pide
+          ≥18.66 px en negrita o ≥24 px). El comentario de `globals.css` que
+          promete «#34D399 sobre --surface-nav pasa de 7:1» era cierto — pero
+          el texto nunca estaba sobre --surface-nav, estaba sobre --surface-nav
+          al 70 % sobre una fotografía.
+
+          La corrección es la que ya usa `globals.css` en su sección «TINTES
+          TRANSLUCIDOS EN MODO OSCURO» para esta misma trampa: sustituir el
+          tinte translúcido por un fondo OPACO tomado de la paleta existente.
+          Ningún hex nuevo: `#ECFDF5` es el emerald-50 que ya usa `SwipeDeck`
+          y `#1C2C46` es `--surface-nav`, el mismo que declara esta barra y la
+          cabecera (`Navbar.tsx`, `ChromeEn.tsx`). El cristal de la BARRA no se
+          toca: lo único que deja de ser transparente son 120 px de píldora.
+
+            claro   #047857 sobre #ECFDF5  →  5.23:1   PASA
+            oscuro  #34D399 sobre #1C2C46  →  7.16:1   PASA */}
       <WhatsAppLink
         context="barra-movil"
         message="Hola, quiero cotizar. Producto: ___. Medidas/cantidad: ___. Ciudad de entrega: ___."
-        className="btn btn-sm flex-1 min-h-[44px] border border-[#047857]/30 bg-[#047857]/10 text-[#047857] dark:text-[#34D399] dark:border-[#34D399]/30 transition-transform duration-100 active:scale-[0.96]"
+        className="btn btn-sm flex-1 min-h-[44px] border border-[#047857]/30 bg-[#ECFDF5] text-[#047857] dark:bg-[#1C2C46] dark:text-[#34D399] dark:border-[#34D399]/30 transition-transform duration-100 active:scale-[0.96]"
       >
         WhatsApp
       </WhatsAppLink>

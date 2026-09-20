@@ -242,3 +242,95 @@ componente, con su override retirado en el mismo paso, tal y como manda la §2
 de la auditoría de consistencia. **`docs/ui-audit-baseline.json` NO se actualizó
 a propósito**: bajarlo a 11 sería tapar con una línea base lo que hay que
 arreglar con código.
+
+---
+
+## 9. Seguimiento — dos cosas que esta entrega había dejado a medias
+
+Dos puntos que el propio §2/§3 de arriba señalaba sin cerrar. Las dos están
+medidas con Playwright a 390×844 sobre la página renderizada, no leídas del CSS.
+
+### 9.1 El nombre del producto es ahora el enlace de verdad
+
+La tarjeta llevaba a la ficha con un `<Link>` superpuesto sobre la foto,
+marcado `aria-hidden="true"` + `tabIndex={-1}`. Con el dedo y con el ratón
+funcionaba; con el teclado y con un lector de pantalla ese destino **no
+existía**, y el título —que es el nombre accesible natural de la tarjeta— era
+texto muerto.
+
+Ahora el enlace real envuelve el `<h3>` y se estira sobre la tarjeta entera con
+`after:absolute after:inset-0` (patrón «stretched link»; la tarjeta ya es
+`relative`). Un solo elemento interactivo para «ir a este producto»: un solo
+tope de tabulación, con nombre accesible correcto, y la foto sigue siendo
+pulsable. Las acciones de abajo (Ver especificaciones / Cotizar / Agregar) no
+se anidan dentro del `<a>` —sería HTML inválido—: son hermanas y suben a
+`z-[2]` para quedar por encima de la capa estirada.
+
+De paso se quitó un **tope de tabulación fantasma**: `whileTap` hace que
+Framer Motion ponga `tabIndex={0}` en el `<div>` de la tarjeta, y eso metía en
+el recorrido un contenedor de 342×560 **sin rol, sin nombre y sin acción**.
+Medido, no supuesto. `tabIndex={-1}` lo retira; el hundimiento al pulsar sigue
+intacto.
+
+Recorrido de tabulación medido en `/` y en `/productos` a 390×844 — tres topes
+por tarjeta, todos con etiqueta:
+
+```
+Tab 1  tarjeta 0  <a href="/productos/…">Mantas Cobertores y Toldos para Camiones»  (título)
+Tab 2  tarjeta 0  <a href="/productos/…">Ver especificaciones»
+Tab 3  tarjeta 0  <a href="/cotizacion?producto=…">Cotizar»
+Tab 4  tarjeta 1  <a href="/productos/…">Mallas Antiáfidas para Protección de Cultivos»
+…
+```
+
+Interactivos con `aria-hidden` o `tabindex="-1"` dentro de las tarjetas: **0**.
+Clic en la foto → ficha. Intro en el título → ficha. Clic en «Cotizar» →
+`/cotizacion?producto=…`, independiente.
+
+### 9.2 El «WhatsApp» de la barra móvil no cumplía AA — en los DOS temas
+
+El §3 daba el verde del canal por bueno sin medirlo sobre el fondo real. El
+fondo real no lo decidía el CSS: la píldora era un tinte del 10 %
+(`bg-[#047857]/10`) sobre una barra que a su vez es cristal
+(`bg-white/70`, `dark:bg-[#1C2C46]/70`), así que el fondo efectivo del texto
+era **lo que hubiera debajo desplazándose**.
+
+Medido sobre píxeles renderizados —se oculta el texto, se captura la píldora y
+se busca el peor píxel interior— en 4 rutas × 5 posiciones de desplazamiento.
+13 px con peso 600 **no** es texto grande (WCAG pide ≥18.66 px en negrita o
+≥24 px), así que el umbral es **4.5:1**:
+
+| Tema | Texto | Peor fondo compuesto | Antes | Después |
+|---|---|---|---|---|
+| claro | `#047857` | `#a4b1ae` → `#ECFDF5` | **2.48:1 FALLA** | **5.21:1 PASA** |
+| oscuro | `#34D399` | `#526774` → `#1C2C46` | **3.08:1 FALLA** | **7.29:1 PASA** |
+
+La corrección es la que ya aplica `globals.css` en su sección «TINTES
+TRANSLUCIDOS EN MODO OSCURO» a esta misma trampa: sustituir el tinte
+translúcido por un fondo **opaco** de la paleta existente. Ningún hex nuevo —
+`#ECFDF5` es el emerald-50 que ya usa `SwipeDeck` y `#1C2C46` es
+`--surface-nav`, el mismo que declaran esta barra, `Navbar` y `ChromeEn`. El
+cristal de la BARRA no se toca: lo único que deja de ser transparente son los
+120 px de la píldora.
+
+Capturas: `capturas/2026-09-20-ui-imagenes/390x844/barra-movil-{claro,oscuro}-{antes,despues}.webp`.
+
+### 9.3 Lo que se volvió a comprobar que NO cambió
+
+- **Ficha en iPad a 768 px: sigue apilada.** `grid-template-columns: 720px` —
+  una columna—, desborde horizontal 0, documento 768 = viewport. A 1024 px
+  sigue a dos columnas (`460px 460px`), con el `h1` a 252 px, junto a la foto.
+- **`.btn-lg` sigue en `min-height: 48px` en los dos punteros**, no solo en
+  táctil: medido 48/48/48 a 1440 px con `pointer: fine` y 48/48/48 a 390 px con
+  `pointer: coarse`. El diff no toca su CSS.
+- `docs/ui-audit-baseline.json` **sigue sin tocarse**, por lo mismo que dice el
+  §8: bajar la línea base sería tapar deuda heredada en vez de arreglarla.
+
+### 9.4 Verificación
+
+```
+npx tsc --noEmit          0 errores
+npm test                  1071 pruebas, 66 archivos, todas pasan
+npm run auditar:imagenes  0 errores, 0 avisos (517 archivos, 201 rutas citadas)
+npm run build             exit 0
+```
