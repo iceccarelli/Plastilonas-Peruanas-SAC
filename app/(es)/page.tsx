@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import { SITE, HORARIO } from '@/lib/site';
 import { FABRICACION_PROPIA_COUNT, YEARS_OPERATING } from '@/lib/facts';
 import Link from 'next/link';
-import { ArrowRight, Phone, ShieldCheck, MapPin, Truck, FileText } from 'lucide-react';
+import { ArrowRight, Phone, ShieldCheck, MapPin, Truck, FileText, Plus } from 'lucide-react';
 import { products, productFamilies, sectors, productosPrioritarios } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
-import FeaturedDeck from '@/components/FeaturedDeck';
 import SectorTicker from '@/components/SectorTicker';
-import FamilyCarousel from '@/components/FamilyCarousel';
+import ExplorarCatalogo, { type FamiliaResumen } from '@/components/ExplorarCatalogo';
+import PorQueAcordeon from '@/components/PorQueAcordeon';
 import ServiceTabs from '@/components/ServiceTabs';
 import { tomasDe } from '@/lib/galeria';
 
@@ -84,7 +84,21 @@ export default function Home() {
   // Novedades de portada: SOLO briefs de comprador. El changelog de las
   // superficies para agentes (/ai.txt, método editorial) vive en /novedades.
   const novedadesComprador = novedades.filter((n) => n.audiencia !== 'operacion');
-  const featuredProducts = [...products].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
+  /**
+   * Las 11 familias con sus líneas destacadas, resueltas AQUÍ (servidor) y no
+   * en el componente: el conteo y la selección salen del propio catálogo, que
+   * es la única fuente que puede saberlos. `featured` manda; si una familia no
+   * tiene ninguna marcada, se toman sus primeras líneas, que es mejor que un
+   * panel vacío. Máximo tres: el panel es un índice, no un catálogo.
+   */
+  const familiasResumen: FamiliaResumen[] = productFamilies.map((fam) => {
+    const deLaFamilia = products.filter((p) => p.category === fam.name);
+    const destacados = [...deLaFamilia]
+      .sort((a, b) => Number(!!b.featured) - Number(!!a.featured))
+      .slice(0, 3)
+      .map((p) => ({ slug: p.slug, name: p.name, shortDescription: p.shortDescription }));
+    return { name: fam.name, slug: fam.slug, tagline: fam.tagline, total: deLaFamilia.length, destacados };
+  });
   // Conteo REAL de soluciones por sector (se recalcula solo al editar el catálogo).
   const sectorStats = sectors
     .map((sec) => ({ sector: sec, count: products.filter((p) => p.sector.includes(sec)).length }))
@@ -263,28 +277,26 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== 2 · CATÁLOGO ===== */}
-      {/* section-lift ya no hace falta aquí: la lámina 1b es la que sube
-          sobre el hero; este bloque continúa sobre el mismo fondo blanco. */}
+      {/* ===== 2 · EXPLORAR CATÁLOGO — UN bloque donde había dos.
+           «Explore el catálogo por familia» (carrusel de familias) y
+           «Nuestras líneas insignia» (baraja de las 36 fichas) hacían la misma
+           pregunta dos veces, las dos rotaban solas y ninguna contestaba a la
+           otra. Ahora la familia que se elige DECIDE qué líneas se ven. Lo que
+           se fue es la repetición: todas las familias de `productFamilies`,
+           sus taglines y las líneas destacadas siguen aquí, y el recuento de
+           cada una sale del propio catálogo. Ver ExplorarCatalogo.tsx. ===== */}
       <section className="bg-white section-pad">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
-            <SectionHeading eyebrow="Todo lo que necesita, en un solo lugar" title="Explore el catálogo por familia" className="mb-6" action={<Link href="/productos" className="hidden md:flex items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Ver todo el catálogo <ArrowRight className="w-4 h-4" /></Link>} />
+            <SectionHeading eyebrow="Todo lo que necesita, en un solo lugar" title="Explorar catálogo" size="compact" className="mb-6" action={<Link href="/productos" className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Ver catálogo completo <ArrowRight className="w-4 h-4" /></Link>} />
           </Reveal>
           <Reveal delay={0.05}>
             <SectorTicker items={sectorStats} />
           </Reveal>
           <Reveal delay={0.1}>
-            <FamilyCarousel families={productFamilies} />
+            <ExplorarCatalogo familias={familiasResumen} />
           </Reveal>
           <p className="text-xs text-gray-400 mt-6 text-center">Fabricación propia, importación directa y líneas especializadas por proyecto — con ficha técnica y respaldo en cada cotización.</p>
-
-          <Reveal className="mt-20">
-            <SectionHeading eyebrow="Nuestras soluciones estrella" title="Nuestras líneas insignia" className="mb-9" action={<Link href="/productos" className="text-sm font-medium flex items-center gap-1.5 text-[#059669] hover:underline">Ver catálogo completo <ArrowRight className="w-4 h-4" /></Link>} />
-          </Reveal>
-          <Reveal delay={0.05}>
-            <FeaturedDeck products={featuredProducts} />
-          </Reveal>
         </div>
       </section>
 
@@ -308,10 +320,32 @@ export default function Home() {
               action={<Link href="/configurador/lona" className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-[#059669] hover:underline">Abrir el configurador completo <ArrowRight className="w-4 h-4" /></Link>}
             />
           </Reveal>
+          {/* EL CONFIGURADOR SE ABRE, NO SE IMPONE.
+              Medido a 390 px antes de esta entrega: 4733 px de los 17237 que
+              medía la portada entera. Un 27 % del desplazamiento del teléfono
+              para una herramienta de siete pasos que el comprador usa cuando
+              YA decidió especificar, no mientras hojea. Nada se retira: el
+              encabezado, la descripción y el enlace al configurador completo
+              siguen siempre visibles, y el despiece está a un toque. Cerrado
+              también en escritorio, a propósito: la portada debe tener la
+              misma forma en los dos sitios, sólo más densa cuanto más ancha.
+              `<details>` nativo — sin JavaScript, con teclado y lector de
+              pantalla ya resueltos. */}
           <Reveal delay={0.05}>
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-9">
-              <LonaConfigurador />
-            </div>
+            <details className="group rounded-2xl border border-gray-100 bg-white [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-6 min-h-[64px]">
+                <span className="min-w-0">
+                  <span className="block font-semibold text-[#0A2540]">Arme su lona paso a paso</span>
+                  <span className="mt-0.5 block text-sm text-gray-500">Siete decisiones — material, gramaje, ancho, color, acabado, confección y tratamientos.</span>
+                </span>
+                <span aria-hidden="true" className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-gray-200 text-[#0A2540] transition-transform duration-200 group-open:rotate-45">
+                  <Plus className="w-4 h-4" />
+                </span>
+              </summary>
+              <div className="border-t border-gray-100 p-6 md:p-9">
+                <LonaConfigurador />
+              </div>
+            </details>
           </Reveal>
         </div>
       </section>
@@ -323,7 +357,12 @@ export default function Home() {
       <section className="bg-white section-pad">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
-            <SectionHeading eyebrow="Más que fabricación" title="Servicios integrales, de principio a fin" className="mb-10" />
+            {/* `size="compact"`: este título tiene 39 caracteres y a 390 px
+                caía en TRES líneas de 28 px — 92 px de tipografía antes de
+                que apareciera la primera pestaña, con las pestañas ya por
+                debajo del pliegue. No se bajó `.t-h2` para todo el sitio:
+                ver el comentario de SectionHeading.tsx. */}
+            <SectionHeading eyebrow="Más que fabricación" title="Servicios integrales, de principio a fin" size="compact" className="mb-6 md:mb-10" />
           </Reveal>
           <Reveal delay={0.05}>
             <ServiceTabs
@@ -346,22 +385,19 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
             <div className="text-xs tracking-[2px] text-[#10B981] font-semibold mb-3">POR QUÉ ELEGIRNOS</div>
-            <h2 className="t-h2 font-semibold leading-tight max-w-3xl mb-4">La ventaja de un solo proveedor, sin intermediarios</h2>
-            <p className="text-white/60 max-w-2xl leading-relaxed mb-12">Desde 2009 fabricamos e instalamos con equipo propio. Una sola responsabilidad, del diseño a la obra.</p>
+            <h2 className="t-h2-compact font-semibold leading-tight max-w-3xl mb-3">La ventaja de un solo proveedor, sin intermediarios</h2>
+            <p className="text-white/60 max-w-2xl leading-relaxed mb-8">Desde 2009 fabricamos e instalamos con equipo propio. Una sola responsabilidad, del diseño a la obra.</p>
           </Reveal>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-9 md:gap-8">
-            {whyus.map((item, i) => (
-              <Reveal key={i} delay={0.04 * i}>
-                <div className="border-t border-white/15 pt-5">
-                  <div className="text-4xl md:text-5xl font-semibold tracking-tighter text-[#10B981] mb-3">0{i + 1}</div>
-                  <div className="font-semibold text-base md:text-lg mb-2 leading-snug">{item.title}</div>
-                  <p className="text-white/60 text-sm leading-relaxed">{item.content}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+          {/* Cuatro argumentos plegados en vez de cuatro tarjetas altas: la
+              sección medía 1156 px a 390 px, un segundo bloque de altura
+              completa después del de servicios. El texto no se toca —sigue
+              entero en el HTML— sólo deja de estar desplegado por defecto.
+              Ver PorQueAcordeon.tsx. */}
+          <Reveal delay={0.05}>
+            <PorQueAcordeon items={whyus} />
+          </Reveal>
           <Reveal delay={0.1}>
-            <div className="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+            <div className="mt-10 pt-8 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
               <p className="text-white/70 text-sm max-w-xl">Compromiso real con la calidad y el cliente satisfecho — desde 2009 en el Perú.</p>
               <Link href="/nosotros" className="btn border border-white/30 text-white hover:bg-white/10 shrink-0">Conozca nuestra historia <ArrowRight className="w-4 h-4" /></Link>
             </div>

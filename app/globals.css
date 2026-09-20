@@ -251,7 +251,15 @@ a:hover, button:hover {
    esos elementos quedaban como bloques BLANCOS con tinta clara encima -> el
    encabezado y la primera columna de la tabla comparativa eran ilegibles.
    Ampliar el selector es aditivo y arregla tambien cualquier pagina futura. */
-.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label, a, button).bg-white {
+/* `details` y `summary` se añadieron a estas listas al introducir los dos
+   pliegues de la portada —el configurador de lona y «por qué elegirnos»—.
+   Medido en oscuro a 390 px: el `<details class="bg-white">` no estaba en el
+   selector, así que conservaba el fondo BLANCO mientras la capa de tinta de
+   más abajo sí alcanzaba a su texto y lo volvía claro: 1.17:1, texto
+   invisible. Es exactamente el mismo fallo que ya documenta el comentario de
+   arriba para tablas y chips, con otra etiqueta. Ampliar la lista es
+   aditivo, igual que entonces. */
+.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label, a, button, details, summary).bg-white {
   background-color: var(--surface-raised);
 }
 
@@ -276,14 +284,14 @@ a:hover, button:hover {
 .dark main :is(input, textarea)::placeholder {
   color: var(--text-muted);
 }
-.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label).bg-gray-50,
-.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label).bg-gray-100 {
+.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label, details, summary).bg-gray-50,
+.dark main :is(div, section, article, aside, li, p, span, dl, dd, dt, table, thead, tbody, tr, th, td, nav, ul, ol, figure, label, details, summary).bg-gray-100 {
   background-color: var(--surface-muted);
 }
 
 /* 1.4.11: tarjeta #16233A vs pagina #0B1220 = 1.19:1, por debajo de 3.0.
    box-shadow en vez de border: no desplaza el layout. */
-.dark main :is(div, section, article).bg-white {
+.dark main :is(div, section, article, details).bg-white {
   box-shadow: 0 0 0 1px var(--border);
 }
 
@@ -509,6 +517,16 @@ button[aria-pressed="true"] {
 }
 @media (prefers-reduced-motion: reduce) {
   .ticker-track { animation: none; flex-wrap: wrap; width: auto; }
+  /* LA COPIA DEL BUCLE NO SE PINTA CUANDO NO HAY BUCLE.
+     La marquesina duplica la lista de sectores para que el desplazamiento no
+     tenga costura, y la copia ya va con `aria-hidden` porque no es contenido.
+     Pero con el movimiento desactivado la pista deja de desplazarse y pasa a
+     `flex-wrap: wrap`: entonces las 12 píldoras y sus 12 duplicados se
+     apilan a la vista. Medido a 390 px con el ajuste del sistema activo: 24
+     píldoras en doce filas, la mitad repetidas, justo en la sección que esta
+     entrega existe para compactar. Quien pide menos movimiento no pide el
+     doble de contenido. */
+  .ticker-track > [aria-hidden='true'] { display: none; }
 }
 
 /* ═══════════ CONTRASTE WCAG AA — verificado por medición ═══════════
@@ -755,6 +773,17 @@ main h1, main h2, main h3 { letter-spacing: -0.02em; }
 /* ── Escala tipográfica (usar estas, no píxeles sueltos) ── */
 .t-display { font-size: clamp(2.25rem, 5vw, 3.5rem); line-height: 1.05; letter-spacing: -0.03em; }
 .t-h2      { font-size: clamp(1.75rem, 3.5vw, 2.5rem); line-height: 1.1; letter-spacing: -0.02em; }
+/* Variante COMPACTA del h2, para los títulos largos de la portada.
+   No se bajó `.t-h2`: lo comparten /servicios, /nosotros, la banda «por qué
+   elegirnos» y el bloque de la trilogía, y sus títulos son cortos —una o dos
+   líneas— y se leen bien a 28 px. El problema no era la escala, era el
+   producto de la escala por un título de 39 caracteres: «Servicios
+   integrales, de principio a fin» ocupaba tres líneas de 28 px (92 px de
+   tipografía) antes de que empezara la primera pestaña, y a 390 px eso es
+   casi un tercio de la pantalla gastado en un rótulo. A 22 px cabe en dos
+   líneas. El tope superior (2rem) mantiene la jerarquía en escritorio, donde
+   el problema no existe. */
+.t-h2-compact { font-size: clamp(1.375rem, 2.6vw, 2rem); line-height: 1.15; letter-spacing: -0.02em; }
 .t-h3      { font-size: 1.25rem; line-height: 1.3; letter-spacing: -0.01em; }
 .t-body    { font-size: 0.9375rem; line-height: 1.6; }   /* = 15px, ahora tokenizado */
 .t-caption { font-size: 0.8125rem; line-height: 1.5; }   /* = 13px */

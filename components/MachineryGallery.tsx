@@ -125,13 +125,24 @@ export default function MachineryGallery() {
   );
 
   return (
-    <section className="bg-white py-20 overflow-hidden">
+    /* `section-pad` en vez de `py-20` fijo: el token de la casa ya baja a
+       3 rem en el teléfono, y esta sección era la única de la portada que se
+       quedaba con 5 rem arriba y abajo en todos los anchos.
+
+       NO es un segundo hero. Se comprobó midiendo, no a ojo: a 390 px la
+       tarjeta central es `aspect-[16/10]` sobre 342 px de ancho, o sea 214 px
+       de alto — un cuarto de la pantalla, no una pantalla entera. La sección
+       completa medía 855 px y eso es encabezado + escenario + tira de
+       miniaturas, no una portada repetida. Así que no se difiere tras un
+       «Ver planta» ni se esconde: se compacta. */
+    <section className="bg-white section-pad overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <SectionHeading
           eyebrow="Cómo se fabrica"
           title="El proceso, paso a paso"
           description="Doce categorías de maquinaria que intervienen en la fabricación de textiles industriales — para que vea exactamente qué hay detrás de cada Big Bag, geomembrana y carpa."
-          className="mb-6"
+          size="compact"
+          className="mb-5"
         />
 
         <div className="flex items-center justify-between mb-5">
@@ -314,7 +325,7 @@ export default function MachineryGallery() {
                 aria-selected={active}
                 aria-label={`${m.orden}. ${m.titulo}`}
                 onClick={() => goTo(i)}
-                className={`group relative shrink-0 snap-start w-36 sm:w-44 rounded-xl overflow-hidden text-left ring-1 transition-all ${
+                className={`group relative shrink-0 snap-start w-28 sm:w-44 rounded-xl overflow-hidden text-left ring-1 transition-all ${
                   active ? 'ring-2 ring-[#059669] shadow-md' : 'ring-gray-200 hover:ring-gray-400 hover:shadow-sm'
                 }`}
               >
