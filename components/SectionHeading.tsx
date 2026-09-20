@@ -21,6 +21,21 @@ interface Props {
   tone?: 'dark' | 'light'; // light = texto claro sobre fondos oscuros
   className?: string;
   action?: ReactNode; // p.ej. enlace "Ver todo" alineado a la derecha
+  /**
+   * Escala del título.
+   *
+   *  - 'default' (`.t-h2`, 28 → 40 px) — la de todo el sitio. No se toca.
+   *  - 'compact' (`.t-h2-compact`, 22 → 32 px) — OPT-IN, para los títulos
+   *    largos que en un teléfono se leen como una valla publicitaria.
+   *
+   * Por qué una variante y no bajar `.t-h2`: la clase compartida la usan
+   * /servicios, /nosotros y dos bloques más de la portada, con títulos
+   * cortos que están bien a 28 px. Sólo dos encabezados de la portada
+   * tienen el problema, y es por la LONGITUD del texto, no por la escala.
+   * Cambiar el token compartido habría encogido cinco encabezados sanos
+   * para arreglar dos.
+   */
+  size?: 'default' | 'compact';
 }
 
 export default function SectionHeading({
@@ -31,6 +46,7 @@ export default function SectionHeading({
   tone = 'dark',
   className = '',
   action,
+  size = 'default',
 }: Props) {
   const alignCls = align === 'center' ? 'text-center mx-auto items-center' : 'text-left';
   const titleColor = tone === 'light' ? 'text-white' : 'text-[#0A2540]';
@@ -43,7 +59,7 @@ export default function SectionHeading({
           {eyebrow}
         </span>
       )}
-      <h2 className={`t-h2 font-semibold ${titleColor}`}>
+      <h2 className={`${size === 'compact' ? 't-h2-compact' : 't-h2'} font-semibold ${titleColor}`}>
         {title}
       </h2>
       {description && (
