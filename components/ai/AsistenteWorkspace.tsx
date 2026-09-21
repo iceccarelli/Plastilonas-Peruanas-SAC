@@ -251,8 +251,9 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
   const readinessSignals: ReadinessSignals = {
     productName: rfqDraft?.payload.producto ?? productosVistos[0]?.name ?? pageContext.product?.name ?? null,
     cantidad: rfqDraft?.payload.cantidad ?? null,
-    // Ninguna tool ni PageContext capturan ciudad de entrega hoy — ver lib/ai/readiness.ts.
-    ciudad: null,
+    // `buildRFQ` ya captura ciudad de entrega cuando el usuario la dio en el
+    // chat (lib/ai/tools.ts#RFQPayloadSchema) — nunca se adivina de otro dato.
+    ciudad: rfqDraft?.payload.ciudad ?? null,
     aplicacion: aplicacionConocida,
     nombre: rfqDraft?.payload.nombre ?? null,
     telefono: rfqDraft?.payload.telefono ?? null,
@@ -272,6 +273,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
       'Hola, vengo del asistente de Plastilonas AI y quiero cotizar:',
       readinessSignals.productName ? `Producto: ${readinessSignals.productName}` : null,
       readinessSignals.cantidad ? `Cantidad/medidas: ${readinessSignals.cantidad}` : null,
+      readinessSignals.ciudad ? `Ciudad de entrega: ${readinessSignals.ciudad}` : null,
       rfqDraft?.payload.mensaje ? `Detalle: ${rfqDraft.payload.mensaje}` : null,
     ].filter((l): l is string => Boolean(l));
     return lineas.join('\n');
@@ -291,6 +293,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
     else if (rfqDraft?.payload.producto) params.set('producto', rfqDraft.payload.producto);
     else if (pageContext.product?.slug) params.set('producto', pageContext.product.slug);
     if (rfqDraft?.payload.mensaje) params.set('nota', rfqDraft.payload.mensaje);
+    if (rfqDraft?.payload.ciudad) params.set('ciudad', rfqDraft.payload.ciudad);
     return `/cotizacion?${params.toString()}`;
   }
 
@@ -594,6 +597,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
               {rfqDraft ? (
                 <div className="text-sm text-[#0A2540] dark:text-[var(--text)] space-y-1">
                   {rfqDraft.payload.producto && <p>Producto: {rfqDraft.payload.producto}</p>}
+                  {rfqDraft.payload.ciudad && <p>Ciudad de entrega: {rfqDraft.payload.ciudad}</p>}
                   {rfqDraft.missingFields.length > 0 ? (
                     <p className="text-xs text-amber-700">Falta: {rfqDraft.missingFields.join(', ')}</p>
                   ) : (

@@ -456,6 +456,7 @@ const RFQPayloadSchema = z.object({
   telefono: z.string().trim().min(6).max(40).optional(),
   producto: z.string().trim().max(200).optional(),
   cantidad: z.string().trim().max(80).optional(),
+  ciudad: z.string().trim().max(80).optional(),
   mensaje: z.string().trim().max(4000).optional(),
   language: z.enum(['es', 'en', 'pt']).optional(),
   slug: z.string().trim().max(120).optional(),
@@ -466,8 +467,10 @@ export const buildRFQ = tool({
   description:
     'Da FORMA a una solicitud de cotización con los datos que el usuario ya proporcionó en la conversación, ' +
     'lista para que la interfaz la envíe a POST /api/lead. Esta tool NUNCA envía la solicitud ni crea el lead — ' +
-    'solo arma el payload. NUNCA inventes nombre, email, teléfono o empresa: si el usuario no los dio, ' +
-    'déjalos fuera y dilo en missingFields. El origen siempre es "chat".',
+    'solo arma el payload. NUNCA inventes nombre, email, teléfono, empresa o ciudad: si el usuario no los dio, ' +
+    'déjalos fuera y dilo en missingFields. `ciudad` es la ciudad de ENTREGA del pedido — solo se llena cuando el ' +
+    'usuario la dijo explícitamente, nunca se adivina de otro dato (ej. no asumas la ciudad de una obra o sector). ' +
+    'El origen siempre es "chat".',
   parameters: RFQPayloadSchema.omit({ origen: true }),
   execute: async (input) => {
     const payload = RFQPayloadSchema.parse({ ...input, origen: 'chat' });

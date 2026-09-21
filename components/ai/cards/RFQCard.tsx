@@ -18,6 +18,7 @@ export default function RFQCard({ payload, readyToSubmit, missingFields, followU
   if (payload.slug) params.set('producto', payload.slug);
   else if (payload.producto) params.set('producto', payload.producto);
   if (payload.mensaje) params.set('nota', payload.mensaje);
+  if (payload.ciudad) params.set('ciudad', payload.ciudad);
 
   return (
     <CardShell accent>
@@ -37,6 +38,12 @@ export default function RFQCard({ payload, readyToSubmit, missingFields, followU
           <>
             <dt className="text-gray-500 dark:text-[var(--text-muted)]">Cantidad</dt>
             <dd className="text-[#0A2540] dark:text-[var(--text)]">{payload.cantidad}</dd>
+          </>
+        )}
+        {payload.ciudad && (
+          <>
+            <dt className="text-gray-500 dark:text-[var(--text-muted)]">Ciudad de entrega</dt>
+            <dd className="text-[#0A2540] dark:text-[var(--text)]">{payload.ciudad}</dd>
           </>
         )}
         {payload.nombre && (

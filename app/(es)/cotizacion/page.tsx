@@ -29,6 +29,7 @@ export default async function CotizacionPage({
     comparativa?: string;
     nota?: string;
     notas?: string;
+    ciudad?: string;
     origen?: string;
   }>;
 }) {
@@ -70,6 +71,13 @@ export default async function CotizacionPage({
    * evento de analítica, no a la pantalla.
    */
   const origen = (params.origen ?? '').slice(0, 40).replace(/[^a-z0-9:_-]/gi, '') || undefined;
+  /**
+   * Ciudad de entrega que el asistente ya capturó (`buildRFQ` →
+   * `readinessSignals.ciudad`, ver components/ai/AsistenteWorkspace.tsx y
+   * lib/ai/tools.ts). Antes se descartaba en silencio: quien ya la dio en el
+   * chat volvía a escribirla en el campo obligatorio del formulario.
+   */
+  const ciudad = (params.ciudad ?? '').slice(0, 80) || undefined;
   const preselectedMessage =
     [
       comparativa.length
@@ -109,6 +117,7 @@ export default async function CotizacionPage({
         preselectedProduct={preselectedProduct}
         slugOrigen={slugOrigen}
         preselectedMessage={preselectedMessage}
+        preselectedCiudad={ciudad}
         origen={origen}
       />
     </div>

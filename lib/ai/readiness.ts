@@ -8,17 +8,17 @@
  * se intenta adivinar un campo leyendo texto libre del chat con regex: eso
  * sería inventar una señal que no existe.
  *
- * SEÑALES REALES DISPONIBLES HOY (y por qué el resto del checklist puede
- * quedar honestamente "desconocido" durante toda la conversación):
+ * SEÑALES REALES DISPONIBLES HOY:
  *  - producto: `buildRFQ` (payload.producto/slug) o cualquier tarjeta de
  *    producto derivada de `getProduct`/`searchProducts`, o el producto de la
  *    página desde la que se abrió `/asistente` (`PageContext.product`).
  *  - cantidad: `buildRFQ` (payload.cantidad) — el único lugar del esquema
  *    actual que registra una cantidad o medida.
- *  - ciudad: NINGUNA tool ni `PageContext` capturan ciudad/entrega hoy
- *    (`RFQPayloadSchema` no tiene ese campo). Este campo queda desconocido
- *    hasta que exista una fuente real; no se infiere de `mensaje` porque eso
- *    sería leer texto libre y arriesgar un dato equivocado.
+ *  - ciudad: `buildRFQ` (payload.ciudad, ver `RFQPayloadSchema` en
+ *    lib/ai/tools.ts) — solo cuando el usuario la dijo explícitamente en el
+ *    chat. Sigue sin inferirse de `mensaje` con regex: eso sería leer texto
+ *    libre y arriesgar un dato equivocado; la única fuente es el campo
+ *    estructurado que la tool ya valida.
  *  - aplicacion: `getApplication` cuando la tool encontró un hub real
  *    (`found: true`) — el nombre del hub es la señal, no una suposición.
  *  - contacto: `buildRFQ` (payload.nombre + payload.telefono/email).
@@ -43,7 +43,7 @@ export interface ReadinessSignals {
   productName?: string | null;
   /** Cantidad o medidas, tal como las armó `buildRFQ`. */
   cantidad?: string | null;
-  /** Ciudad de entrega. Hoy no hay tool que la capture (ver comentario arriba). */
+  /** Ciudad de entrega, tal como la armó `buildRFQ` (ver comentario arriba). */
   ciudad?: string | null;
   /** Nombre del hub de aplicación que `getApplication` encontró de verdad. */
   aplicacion?: string | null;

@@ -33,7 +33,7 @@ describe('buildReadinessChecklist', () => {
     expect(cantidad.detail).toBe('500 m2');
   });
 
-  it('ciudad queda desconocida aunque haya otras señales: no existe tool que la capture hoy', () => {
+  it('ciudad queda desconocida mientras el usuario no la haya dado (no se infiere de otras señales)', () => {
     const campos = buildReadinessChecklist({
       productName: 'Big bag',
       cantidad: '200 unidades',
@@ -43,6 +43,13 @@ describe('buildReadinessChecklist', () => {
     const ciudad = campos.find((c) => c.id === 'ciudad')!;
     expect(ciudad.known).toBe(false);
     expect(isReadyToQuote(campos)).toBe(false);
+  });
+
+  it('ciudad conocida solo con el campo ciudad de buildRFQ, nunca adivinada del resto', () => {
+    const campos = buildReadinessChecklist({ ciudad: 'Arequipa' });
+    const ciudad = campos.find((c) => c.id === 'ciudad')!;
+    expect(ciudad.known).toBe(true);
+    expect(ciudad.detail).toBe('Arequipa');
   });
 
   it('aplicación conocida solo cuando getApplication encontró un hub real', () => {

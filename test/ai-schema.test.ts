@@ -193,6 +193,11 @@ describe('AssistantResponse: rfq', () => {
       AssistantResponse.safeParse({ ...base, submitTo: '/api/otro-endpoint' }).success,
     ).toBe(false);
   });
+  it('acepta ciudad de entrega en el payload', () => {
+    expect(
+      AssistantResponse.safeParse({ ...base, payload: { ...base.payload, ciudad: 'Piura' } }).success,
+    ).toBe(true);
+  });
 });
 
 describe('AssistantResponse: nextAction', () => {

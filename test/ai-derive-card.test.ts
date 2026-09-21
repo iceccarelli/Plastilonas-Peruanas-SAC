@@ -137,7 +137,7 @@ describe('deriveCardsFromToolResult: tool con dato real -> tarjeta real', () => 
   });
 
   it('buildRFQ -> RFQResponse con el mismo payload y submitTo que la tool arma', async () => {
-    const out = await exec(buildRFQ)({ producto: products[0].name }, {} as any);
+    const out = await exec(buildRFQ)({ producto: products[0].name, ciudad: 'Cusco' }, {} as any);
     const cards = deriveCardsFromToolResult({ toolName: 'buildRFQ', result: out });
     expect(cards).toHaveLength(1);
     const card = cards[0];
@@ -146,6 +146,7 @@ describe('deriveCardsFromToolResult: tool con dato real -> tarjeta real', () => 
       expect(card.submitTo).toBe('/api/lead');
       expect(card.readyToSubmit).toBe(out.readyToSubmit);
       expect(card.payload.producto).toBe(products[0].name);
+      expect(card.payload.ciudad).toBe('Cusco');
     }
   });
 });
