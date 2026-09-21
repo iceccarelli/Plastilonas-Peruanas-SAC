@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { FileCheck2 } from 'lucide-react';
 import type { z } from 'zod';
 import type { RFQResponse } from '@/lib/ai/schema';
+import { trackQuoteStarted } from '@/lib/analytics';
 import { CardShell, CardEyebrow, CardFollowUp } from './CardShell';
 
 type Props = z.infer<typeof RFQResponse>;
@@ -58,6 +59,7 @@ export default function RFQCard({ payload, readyToSubmit, missingFields, followU
       )}
       <Link
         href={`/cotizacion?${params.toString()}`}
+        onClick={() => trackQuoteStarted('asistente', payload.producto, payload.slug)}
         className="mt-4 inline-flex items-center justify-center w-full text-sm font-semibold bg-[#0A2540] hover:bg-[#047857] text-white px-4 py-2.5 rounded-2xl transition-colors"
       >
         Revisar y enviar cotización
