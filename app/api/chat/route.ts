@@ -119,7 +119,50 @@ Directrices de respuesta:
 
 Responde siempre en español natural y profesional.`;
 
+// -----------------------------------------------------------------------------
+// Rate limiting — mismo patrón en memoria que app/api/lead/route.ts (mapa
+// IP -> {n, t}, ventana de 10 minutos). El chat admite más turnos por sesión
+// que un formulario de una sola vez, así que el límite es más alto que el de
+// /api/lead (12/10min): 30 peticiones / 10 minutos por IP. Es una defensa
+// contra abuso/spam del endpoint que llama a Anthropic, no una cuota de
+// producto — no hay Stripe ni facturación de uso involucrada (fuera de
+// alcance de esta fase).
+const CHAT_RATE_LIMIT = 30;
+const CHAT_RATE_WINDOW_MS = 10 * 60 * 1000;
+const chatBuckets = new Map<string, { n: number; t: number }>();
+
+function chatLimited(ip: string): boolean {
+  const now = Date.now();
+  const hit = chatBuckets.get(ip);
+  if (!hit || now - hit.t > CHAT_RATE_WINDOW_MS) {
+    chatBuckets.set(ip, { n: 1, t: now });
+    return false;
+  }
+  hit.n += 1;
+  return hit.n > CHAT_RATE_LIMIT;
+}
+
 export async function POST(req: Request) {
+  // Falla cerrado y PRIMERO: se comprueba antes que la configuración de la
+  // clave y antes de leer el body, así que nunca se llega a streamText/
+  // Anthropic para una IP que ya excedió el límite. Mismo enlace de WhatsApp
+  // que ya usa el widget (lib/whatsapp.ts) — nunca una URL escrita a mano.
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
+  if (chatLimited(ip)) {
+    return Response.json(
+      {
+        error: 'rate_limited',
+        message:
+          'Estás enviando muchas consultas seguidas. Espera unos minutos, o escríbenos directo por WhatsApp.',
+        whatsappUrl: WHATSAPP_CIERRE,
+      },
+      { status: 429 },
+    );
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json({ error: 'chat_not_configured' }, { status: 503 });
   }
