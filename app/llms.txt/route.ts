@@ -573,6 +573,7 @@ ${recursosLista}
 ## Páginas clave
 
 - [Inicio](${base}/)
+- [Plastilonas AI (asistente comercial)](${base}/asistente)
 - [Catálogo completo](${base}/productos)
 - [Servicios: fabricación e instalación](${base}/servicios)
 - [Nosotros](${base}/nosotros)

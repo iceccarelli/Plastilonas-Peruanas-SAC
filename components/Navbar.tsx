@@ -79,6 +79,12 @@ const NAV: Entrada[] = [
     hijos: INDUSTRIAS.map((i) => ({ href: `/industria/${i.slug}`, label: i.nombre })),
   },
   { tipo: 'enlace', href: '/servicios', label: 'Servicios' },
+  // Espacio de trabajo del asistente (app/(es)/asistente/page.tsx). Es un
+  // enlace suelto, no un grupo: no tiene subrutas propias. Entra al mismo
+  // arreglo NAV que los demás para que useEntradasQueCaben() decida si cabe
+  // inline o se repliega en «Más» — ver el comentario de esa función: nunca
+  // desaparece un enlace, solo cambia dónde vive.
+  { tipo: 'enlace', href: '/asistente', label: 'Plastilonas AI' },
   {
     tipo: 'grupo',
     href: '/recursos',

@@ -46,8 +46,12 @@ describe('navegación principal', () => {
   it('declara exactamente las entradas de primer nivel esperadas', () => {
     // Etapa 2: cuatro entradas + CTA «Cotizar». Soluciones y Nosotros viven
     // bajo Recursos; el CTA es un enlace fijo a /cotizacion, no una entrada.
+    // Fase 2 de Plastilonas AI (docs/entregas) añadió una quinta entrada,
+    // enlace suelto a /asistente: sigue por debajo del límite de siete que
+    // prueba la siguiente afirmación, y useEntradasQueCaben() decide en
+    // tiempo real qué cabe inline y qué se repliega en «Más».
     expect(primerNivel.map((e) => e.label)).toEqual([
-      'Productos', 'Industrias', 'Servicios', 'Recursos',
+      'Productos', 'Industrias', 'Servicios', 'Plastilonas AI', 'Recursos',
     ]);
   });
 
