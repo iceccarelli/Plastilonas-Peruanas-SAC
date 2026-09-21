@@ -33,14 +33,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import type { Message } from 'ai';
 import Link from 'next/link';
-import { Bot, Camera, FileUp, ImageIcon, Send, User } from 'lucide-react';
+import { Bot, Camera, CheckCircle2, FileUp, ImageIcon, MessageCircle, Send, User } from 'lucide-react';
 import ChatMarkdown from '@/components/ChatMarkdown';
 import AssistantCard from '@/components/ai/AssistantCard';
 import { deriveCardsFromToolResult } from '@/lib/ai/derive-card';
 import type { AssistantResponse } from '@/lib/ai/schema';
 import { getOrCreateProjectId } from '@/lib/ai/project-id';
 import { INICIOS, seguimientosPara } from '@/lib/chat/intents';
-import { trackAsistenteEngaged, trackQuoteStarted } from '@/lib/analytics';
+import { trackAsistenteEngaged, trackQuoteStarted, trackWhatsAppClick } from '@/lib/analytics';
+import { whatsappUrl } from '@/lib/whatsapp';
+import { buildReadinessChecklist, isReadyToQuote, type ReadinessSignals } from '@/lib/ai/readiness';
 import type { PageContext } from '@/lib/ai/context';
 
 interface Props {
@@ -143,6 +145,55 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
   }, [cardsPorMensaje]);
 
   const consultasDelUsuario = messages.filter((m) => m.role === 'user').length;
+
+  /**
+   * Señal real de "uso/aplicación conocida": `getApplication` (lib/ai/tools.ts)
+   * devolvió un hub real (`found: true`). No se mapea a una tarjeta hoy
+   * (ver lib/ai/derive-card.ts), así que se lee directo del tool-invocation —
+   * el mismo dato que ya viaja en `message.parts`, nunca un texto adivinado.
+   */
+  const aplicacionConocida = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const parts = messages[i].parts ?? [];
+      for (const part of parts) {
+        if (part.type !== 'tool-invocation') continue;
+        const invocation = part.toolInvocation;
+        if (invocation.toolName !== 'getApplication' || invocation.state !== 'result') continue;
+        const result = invocation.result as { found?: boolean; application?: { name?: string } } | undefined;
+        if (result?.found && result.application?.name) return result.application.name;
+      }
+    }
+    return null;
+  }, [messages]);
+
+  const readinessSignals: ReadinessSignals = {
+    productName: rfqDraft?.payload.producto ?? productosVistos[0]?.name ?? pageContext.product?.name ?? null,
+    cantidad: rfqDraft?.payload.cantidad ?? null,
+    // Ninguna tool ni PageContext capturan ciudad de entrega hoy — ver lib/ai/readiness.ts.
+    ciudad: null,
+    aplicacion: aplicacionConocida,
+    nombre: rfqDraft?.payload.nombre ?? null,
+    telefono: rfqDraft?.payload.telefono ?? null,
+    email: rfqDraft?.payload.email ?? null,
+  };
+  const checklist = buildReadinessChecklist(readinessSignals);
+  const listoParaCotizar = isReadyToQuote(checklist);
+
+  /**
+   * Mensaje de WhatsApp armado con el MISMO brief que ya alimenta la RFQCard
+   * y este panel (producto, cantidad, nota) — nunca un texto genérico de
+   * relleno. Canal paralelo a /cotizacion, no un reemplazo: quien prefiere
+   * WhatsApp no tiene que repetir lo que ya contó en el chat.
+   */
+  function mensajeWhatsApp(): string {
+    const lineas = [
+      'Hola, vengo del asistente de Plastilonas AI y quiero cotizar:',
+      readinessSignals.productName ? `Producto: ${readinessSignals.productName}` : null,
+      readinessSignals.cantidad ? `Cantidad/medidas: ${readinessSignals.cantidad}` : null,
+      rfqDraft?.payload.mensaje ? `Detalle: ${rfqDraft.payload.mensaje}` : null,
+    ].filter((l): l is string => Boolean(l));
+    return lineas.join('\n');
+  }
 
   /**
    * MISMA construcción de querystring que components/ai/cards/RFQCard.tsx —
@@ -361,6 +412,42 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
 
             <div>
               <h3 className="text-xs uppercase tracking-wide text-gray-400 dark:text-[var(--text-muted)] mb-2">
+                Datos para cotizar
+              </h3>
+              {listoParaCotizar ? (
+                <p className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+                  <CheckCircle2 className="w-4 h-4" /> Listo para cotizar
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {checklist.map((campo) =>
+                    campo.known ? (
+                      <span
+                        key={campo.id}
+                        className="inline-flex items-center gap-1 text-xs rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 px-3 py-1"
+                        title={campo.detail}
+                      >
+                        <CheckCircle2 className="w-3 h-3" /> {campo.label}
+                      </span>
+                    ) : (
+                      <button
+                        key={campo.id}
+                        type="button"
+                        disabled={isLoading}
+                        onClick={() => enviarIntencion(campo.question)}
+                        className="text-xs rounded-full border border-dashed border-gray-300 dark:border-[var(--border)] text-gray-500 dark:text-[var(--text-muted)] hover:border-[#059669] hover:text-[#047857] px-3 py-1 transition-colors"
+                        title={`Preguntar: ${campo.question}`}
+                      >
+                        + {campo.label}
+                      </button>
+                    ),
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <h3 className="text-xs uppercase tracking-wide text-gray-400 dark:text-[var(--text-muted)] mb-2">
                 Cotización en curso
               </h3>
               {rfqDraft ? (
@@ -386,7 +473,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
               )}
             </div>
 
-            <div className="pt-3 border-t border-gray-100 dark:border-[var(--border)]">
+            <div className="pt-3 border-t border-gray-100 dark:border-[var(--border)] space-y-2">
               <Link
                 href={hrefCotizacion('asistente')}
                 onClick={() =>
@@ -396,6 +483,16 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
               >
                 Cotizar ahora
               </Link>
+              {/* Canal paralelo, no un reemplazo del formulario: mismo brief real (lib/whatsapp.ts#whatsappUrl). */}
+              <a
+                href={whatsappUrl(mensajeWhatsApp())}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackWhatsAppClick('asistente')}
+                className="inline-flex items-center justify-center gap-1.5 w-full text-sm font-semibold border border-emerald-200 text-emerald-700 hover:bg-emerald-50 px-4 py-2.5 rounded-2xl transition-colors"
+              >
+                <MessageCircle className="w-4 h-4" /> Cotizar por WhatsApp
+              </a>
             </div>
           </div>
         </section>

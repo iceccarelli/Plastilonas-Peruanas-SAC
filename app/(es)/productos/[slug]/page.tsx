@@ -30,6 +30,7 @@ import { ACCIONES } from '@/lib/acciones';
 import { faqsDeRuta } from '@/lib/consultas-dinero';
 import { configuradorDe } from '@/lib/configuradores';
 import { SlidersHorizontal } from 'lucide-react';
+import AsistenteAiLink from '@/components/AsistenteAiLink';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -220,6 +221,14 @@ export default async function ProductDetailPage({ params }: Props) {
               <Phone className="w-4 h-4" /> RFQ por WhatsApp
             </WhatsAppLink>
             <DatasheetButton slug={product.slug} nombre={product.name} />
+            {/* Secundario, deliberadamente: el RFQ y el WhatsApp de arriba
+                convierten; este solo ofrece resolver dudas antes de decidirse,
+                con el mismo PageContext (lib/ai/context.ts) ya precargado. */}
+            <AsistenteAiLink
+              query={`producto=${encodeURIComponent(product.slug)}`}
+              context={`producto:${product.slug}`}
+              className="btn btn-lg btn-ghost w-full sm:w-auto font-medium"
+            />
           </div>
 
           {/* EL DESVÍO QUE PRODUCE UN RFQ MEJOR. Cuando esta ficha tiene

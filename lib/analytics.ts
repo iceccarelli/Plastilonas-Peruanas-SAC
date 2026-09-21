@@ -84,6 +84,20 @@ export function trackAsistenteEngaged(): void {
   trackEvent('asistente_engaged');
 }
 
+/**
+ * Clic en un CTA secundario "Preguntar a Plastilonas AI" (Sprint A —
+ * entradas contextuales) que SALE de una página de contenido hacia
+ * `/asistente`. No es `asistente_engaged` (eso mide el primer mensaje
+ * DENTRO de `/asistente`, ya cargada) ni `chatbot_engaged` (el widget
+ * flotante): es el momento anterior, la intención de abrir el espacio
+ * completo desde una ficha, familia, calculadora, guía, hub de
+ * aplicación/industria o el configurador. `context` identifica esa
+ * superficie de salida, igual patrón que `trackWhatsAppClick`.
+ */
+export function trackAsistenteCtaClick(context: string): void {
+  trackEvent('asistente_cta_click', { context });
+}
+
 /** Descarga de ficha técnica u otro documento. */
 export function trackDocumentDownload(documento: string, producto?: string): void {
   trackEvent('document_download', { documento, producto: producto ?? 'general' });

@@ -23,6 +23,7 @@ import FotoReferencial from '@/components/FotoReferencial';
 import RielComercial from '@/components/RielComercial';
 import { ranurasErrorCompra } from '@/lib/imagenes';
 import { OG_IMAGEN } from '@/lib/meta';
+import AsistenteAiLink from '@/components/AsistenteAiLink';
 import {
   breadcrumbSchema,
   faqSchema,
@@ -400,6 +401,14 @@ export default async function IndustriaPage({ params }: Props) {
         >
           Otros sectores
         </Link>
+        {/* Secundario: no compite con los dos botones de cotización de
+            arriba, solo ofrece resolver dudas de este sector antes de pedir
+            el formulario. */}
+        <AsistenteAiLink
+          query="pageType=industry"
+          context={`industria:${ind.slug}`}
+          className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-6 py-3 font-medium text-gray-700 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
+        />
       </div>
     </div>
   );

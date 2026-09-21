@@ -24,6 +24,7 @@ import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
 import CierreComercial from '@/components/CierreComercial';
 import { ACCIONES } from '@/lib/acciones';
 import { faqsDeRuta } from '@/lib/consultas-dinero';
+import AsistenteAiLink from '@/components/AsistenteAiLink';
 
 /**
  * Plantilla de artículo técnico.
@@ -455,6 +456,16 @@ export default async function ArticlePage({ params }: Props) {
           </div>
         </section>
       )}
+
+      {/* Secundario, antes del cierre comercial: quien termina de leer una
+          guía técnica suele tener una duda puntual, no todavía un RFQ. */}
+      <div className="mb-6 text-center">
+        <AsistenteAiLink
+          query="pageType=guide"
+          context={`recursos:${slug}`}
+          className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
+        />
+      </div>
 
       <CierreComercial
         contexto="recursos:guia"

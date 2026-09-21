@@ -7,6 +7,7 @@ import { calculadoraPorSlug, valoresIniciales, ADVERTENCIA } from '@/lib/calcula
 import { numeroPE } from '@/lib/format';
 import { trackEvent } from '@/lib/analytics';
 import WhatsAppLink from '@/components/WhatsAppLink';
+import AsistenteAiLink from '@/components/AsistenteAiLink';
 
 /**
  * Formulario de una calculadora de predimensionamiento.
@@ -244,10 +245,19 @@ function Formulario({ calc }: { calc: NonNullable<ReturnType<typeof calculadoraP
           >
             Enviar este predimensionado a cotización
           </Link>
+          {/* Tercero, aún más secundario que los dos de arriba: para quien
+              quiere entender el resultado antes de escribirle a alguien.
+              `calculadora=` precarga el PageContext (lib/ai/context.ts) con
+              este mismo método, sin repetir el slug. */}
+          <AsistenteAiLink
+            query={`calculadora=${encodeURIComponent(calc.slug)}`}
+            context={`calculadora:${calc.slug}`}
+            className="btn btn-ghost w-full sm:w-auto"
+          />
         </div>
         <p className="text-xs text-gray-500">
           Nada de lo que escriba aquí sale de su navegador. El resumen solo viaja si usted pulsa
-          uno de los dos botones de arriba.
+          uno de los tres botones de arriba.
         </p>
       </div>
     </div>
