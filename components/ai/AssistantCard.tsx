@@ -9,6 +9,7 @@ import CalculationCard from './cards/CalculationCard';
 import MissingInformationCard from './cards/MissingInformationCard';
 import RFQCard from './cards/RFQCard';
 import NextActionCard from './cards/NextActionCard';
+import VisionObservationCard from './cards/VisionObservationCard';
 
 /**
  * DESPACHADOR de tarjetas — un componente por variante real del discriminated
@@ -39,6 +40,8 @@ export default function AssistantCard({ response }: { response: AssistantRespons
       return <RFQCard {...response} />;
     case 'nextAction':
       return <NextActionCard {...response} />;
+    case 'visionObservation':
+      return <VisionObservationCard {...response} />;
     default: {
       const _exhaustive: never = response;
       return _exhaustive;

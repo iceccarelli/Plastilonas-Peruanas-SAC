@@ -28,7 +28,7 @@ Buscar `TODO(HUMAN)` en el repositorio localiza el punto exacto.
       Variables `GOOGLE_SITE_VERIFICATION` / `BING_SITE_VERIFICATION` ya
       soportadas en el layout.
 
-## 2. Adjuntos del formulario RFQ (Etapa 2)
+## 2. Adjuntos del formulario RFQ (Etapa 2) y fotos de /asistente (Sprint C)
 
 - [ ] Crear en Supabase el bucket **`rfq-adjuntos`** (privado) con política
       RLS que permita `INSERT` anónimo y bloquee `SELECT` público. El
@@ -36,6 +36,15 @@ Buscar `TODO(HUMAN)` en el repositorio localiza el punto exacto.
       navegador cuando `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`
       existen; sin bucket, el lead viaja con los nombres de archivo y la nota
       «adjuntar por correo».
+- [ ] **MISMO bucket**, prefijo `asistente/` — no se creó un segundo bucket.
+      Las fotos que se suben en /asistente (components/ai/AsistenteWorkspace.tsx,
+      lib/ai/vision-upload.ts#archiveVisionImage) intentan una copia
+      best-effort ahí con el MISMO patrón (`supabaseBrowser`, nunca
+      `supabaseAdmin`). A diferencia del formulario de RFQ, el análisis de la
+      foto (`/api/vision`) NO depende de que esta copia tenga éxito: la foto
+      viaja en base64 directo al endpoint, así que el análisis funciona
+      aunque el bucket siga sin existir — lo único que falta sin el bucket es
+      quedarse con una copia de la foto para revisión posterior.
 
 ## 3. Operación comercial (Etapa 5)
 
