@@ -36,11 +36,11 @@ import Link from 'next/link';
 import { Bot, Camera, FileUp, ImageIcon, Send, User } from 'lucide-react';
 import ChatMarkdown from '@/components/ChatMarkdown';
 import AssistantCard from '@/components/ai/AssistantCard';
-import { deriveCardFromToolResult } from '@/lib/ai/derive-card';
+import { deriveCardsFromToolResult } from '@/lib/ai/derive-card';
 import type { AssistantResponse } from '@/lib/ai/schema';
 import { getOrCreateProjectId } from '@/lib/ai/project-id';
 import { INICIOS, seguimientosPara } from '@/lib/chat/intents';
-import { trackChatbotEngaged } from '@/lib/analytics';
+import { trackAsistenteEngaged, trackQuoteStarted } from '@/lib/analytics';
 import type { PageContext } from '@/lib/ai/context';
 
 interface Props {
@@ -60,8 +60,7 @@ function cardsFromMessage(message: Message): AssistantResponse[] {
     if (part.type !== 'tool-invocation') continue;
     const invocation = part.toolInvocation;
     if (invocation.state !== 'result') continue;
-    const card = deriveCardFromToolResult({ toolName: invocation.toolName, result: invocation.result });
-    if (card) cards.push(card);
+    cards.push(...deriveCardsFromToolResult({ toolName: invocation.toolName, result: invocation.result }));
   }
   return cards;
 }
@@ -94,7 +93,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
     if (isLoading) return;
     if (!engaged.current) {
       engaged.current = true;
-      trackChatbotEngaged();
+      trackAsistenteEngaged();
     }
     void append({ role: 'user', content: mensaje });
   };
@@ -102,7 +101,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     if (!engaged.current) {
       engaged.current = true;
-      trackChatbotEngaged();
+      trackAsistenteEngaged();
     }
     handleSubmit(e);
   };
@@ -355,7 +354,11 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
                   ) : (
                     <p className="text-xs text-emerald-700">Lista para enviar</p>
                   )}
-                  <Link href="/cotizacion?origen=asistente" className="text-xs font-medium text-[#047857] hover:underline">
+                  <Link
+                    href="/cotizacion?origen=asistente"
+                    onClick={() => trackQuoteStarted('asistente', rfqDraft.payload.producto)}
+                    className="text-xs font-medium text-[#047857] hover:underline"
+                  >
                     Ir al formulario →
                   </Link>
                 </div>
@@ -369,6 +372,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
             <div className="pt-3 border-t border-gray-100 dark:border-[var(--border)]">
               <Link
                 href="/cotizacion?origen=asistente"
+                onClick={() => trackQuoteStarted('asistente', pageContext.product?.name)}
                 className="block text-center text-sm font-semibold bg-[#0A2540] hover:bg-[#047857] text-white px-4 py-2.5 rounded-2xl transition-colors"
               >
                 Cotizar ahora

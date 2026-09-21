@@ -73,6 +73,17 @@ export function trackChatbotEngaged(): void {
   trackEvent('chatbot_engaged');
 }
 
+/**
+ * Primer mensaje enviado en `/asistente` (Fase 3): el espacio de trabajo
+ * dedicado, no el widget flotante. Evento propio (no `chatbot_engaged`)
+ * porque la superficie es distinta y el negocio quiere poder comparar cuánta
+ * intención entra por cada una; se dispara una sola vez por sesión de
+ * `/asistente`, igual que `trackChatbotEngaged` para el widget.
+ */
+export function trackAsistenteEngaged(): void {
+  trackEvent('asistente_engaged');
+}
+
 /** Descarga de ficha técnica u otro documento. */
 export function trackDocumentDownload(documento: string, producto?: string): void {
   trackEvent('document_download', { documento, producto: producto ?? 'general' });
