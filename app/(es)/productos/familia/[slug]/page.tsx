@@ -18,6 +18,7 @@ import { ACCIONES } from '@/lib/acciones';
 import { faqsDeRuta } from '@/lib/consultas-dinero';
 import CinePlayer from '@/components/CinePlayer';
 import { cineDeFamilia, RUTA_CINE, duracionLegible } from '@/lib/cine';
+import AsistenteAiLink from '@/components/AsistenteAiLink';
 
 /**
  * Página de familia (/productos/familia/[slug]).
@@ -334,6 +335,18 @@ export default async function FamilyPage({ params }: Props) {
       </section>
 
       <RielComercial ruta={`/productos/familia/${slug}`} className="mb-12" />
+
+      {/* Secundario, junto al cierre comercial: para quien todavía está
+          comparando dentro de la familia y prefiere preguntar antes de
+          escribir el RFQ. `pageType=family` deja que el asistente sepa en
+          qué familia está sin que la persona lo repita. */}
+      <div className="mb-6 text-center">
+        <AsistenteAiLink
+          query="pageType=family"
+          context={`familia:${slug}`}
+          className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
+        />
+      </div>
 
       <CierreComercial
         contexto="familia"

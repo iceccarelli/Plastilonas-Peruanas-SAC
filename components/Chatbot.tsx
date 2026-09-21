@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useChat } from '@ai-sdk/react';
-import { trackChatbotEngaged } from '@/lib/analytics';
+import { trackChatbotEngaged, trackAsistenteCtaClick } from '@/lib/analytics';
 import { X, Send, Bot, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -12,6 +12,7 @@ import { whatsappUrl, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 import { INICIOS, seguimientosPara } from '@/lib/chat/intents';
 import ChatMarkdown from '@/components/ChatMarkdown';
 import { Sparkles } from 'lucide-react';
+import { inferPageType } from '@/lib/ai/context';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,14 +20,28 @@ export default function Chatbot() {
 
   /**
    * CTA hacia el espacio de trabajo completo (app/(es)/asistente/page.tsx).
-   * Si el visitante está en una ficha de producto, se lo pasamos como
-   * `?producto=slug` para que /asistente precargue el mismo PageContext
-   * (lib/ai/context.ts) sin que la persona tenga que repetirlo.
+   * Usa el MISMO heurístico que ya resuelve el prompt del chat
+   * (`inferPageType`, lib/ai/context.ts) para no mantener una segunda
+   * regex que se desincroniza de la primera. Si el visitante está en una
+   * ficha de producto o en una calculadora, además se pasa el slug —mismos
+   * nombres de query param que ya lee /asistente (`producto`, `calculadora`)—
+   * para que la página precargue el mismo PageContext sin que la persona
+   * tenga que repetirlo. Para el resto de tipos reales (familia, aplicación,
+   * industria, guía…) se pasa `pageType`, que /asistente valida contra
+   * `PAGE_TYPES` antes de usarlo.
    */
-  const productoDeRuta = pathname?.startsWith('/productos/') && !pathname.includes('/familia')
-    ? pathname.split('/').filter(Boolean)[1]
-    : undefined;
-  const hrefAsistente = productoDeRuta ? `/asistente?producto=${encodeURIComponent(productoDeRuta)}` : '/asistente';
+  const pageType = inferPageType(pathname);
+  const segmentos = pathname?.split('?')[0].replace(/\/+$/, '').split('/').filter(Boolean) ?? [];
+  const productoDeRuta = pageType === 'product' ? segmentos[1] : undefined;
+  const calculadoraDeRuta = pageType === 'calculator' ? segmentos[1] : undefined;
+
+  const queryAsistente = new URLSearchParams();
+  if (productoDeRuta) queryAsistente.set('producto', productoDeRuta);
+  if (calculadoraDeRuta) queryAsistente.set('calculadora', calculadoraDeRuta);
+  if (pageType !== 'other' && pageType !== 'product' && pageType !== 'calculator') {
+    queryAsistente.set('pageType', pageType);
+  }
+  const hrefAsistente = queryAsistente.toString() ? `/asistente?${queryAsistente.toString()}` : '/asistente';
 
   const engaged = useRef(false);
   const { messages, input, handleInputChange, handleSubmit, append, isLoading, error } = useChat({
@@ -172,6 +187,7 @@ export default function Chatbot() {
                   una salida a más espacio para quien lo necesita. */}
               <Link
                 href={hrefAsistente}
+                onClick={() => trackAsistenteCtaClick(`widget:${pageType}`)}
                 className="flex items-center justify-center gap-1.5 bg-gray-50 hover:bg-gray-100 border-b border-gray-100 text-[#047857] text-xs font-semibold py-2"
               >
                 <Sparkles className="w-3.5 h-3.5" /> Abrir Plastilonas AI (espacio completo)

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, FileText } from 'lucide-react';
 import DatasheetButton from '@/components/DatasheetButton';
 import LonaExploded from '@/components/LonaExploded';
+import AsistenteAiLink from '@/components/AsistenteAiLink';
 import {
   BarraProporcion,
   IconoConfeccion,
@@ -643,6 +644,15 @@ export default function LonaConfigurador({
             <FileText className="h-4 w-4" />
             Pedir cotización con ficha técnica
           </Link>
+          {/* Secundario dentro del mismo grupo de cierre: para quien duda
+              entre opciones del configurador antes de mandar el RFQ.
+              `origen=configurador-lona` marca de qué flujo viene, junto con
+              el producto real al que corresponde esta hoja. */}
+          <AsistenteAiLink
+            query="producto=lona-plastificada-rafia-polytarp&origen=configurador-lona"
+            context="configurador-lona"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-gray-200 px-5 py-3 text-sm font-medium text-[#0A2540] hover:border-[#059669] hover:text-[#047857] transition-colors"
+          />
         </div>
         {/* LA FICHA, EN SU PROPIA LÍNEA. No entra en el grupo de arriba: ése
             pasa a fila a partir de `sm` y un tercer botón con rótulo largo lo

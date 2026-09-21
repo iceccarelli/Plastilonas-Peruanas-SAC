@@ -38,6 +38,30 @@ export type PageType =
   | 'project'
   | 'other';
 
+/**
+ * Lista en tiempo de ejecución de `PageType`, para validar un `pageType`
+ * que llega como texto (query param de `/asistente`, por ejemplo) sin
+ * duplicar el tipo a mano y sin confiar en una aserción ciega.
+ */
+export const PAGE_TYPES: PageType[] = [
+  'home',
+  'product',
+  'catalog',
+  'family',
+  'application',
+  'industry',
+  'solution',
+  'guide',
+  'glossary',
+  'calculator',
+  'quote',
+  'article',
+  'report',
+  'news',
+  'project',
+  'other',
+];
+
 export type ChatLanguage = 'es' | 'en' | 'pt';
 
 /** Recorte honesto del producto: solo campos que ya existen en el catálogo. */

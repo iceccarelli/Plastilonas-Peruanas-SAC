@@ -10,6 +10,7 @@ import { JsonLd } from '@/components/JsonLd';
 import { webPageSchema, breadcrumbSchema, imageObjectSchema, itemListSchema } from '@/lib/schema';
 import WhatsAppLink from '@/components/WhatsAppLink';
 import { respuestaDirectaAplicacion, rfqWhatsAppAplicacion } from '@/lib/respuesta-directa';
+import AsistenteAiLink from '@/components/AsistenteAiLink';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -106,6 +107,13 @@ export default async function AplicacionPage({ params }: Props) {
         >
           RFQ por WhatsApp
         </WhatsAppLink>
+        {/* Secundario: para quien todavía está definiendo el alcance antes
+            de pedir el RFQ. */}
+        <AsistenteAiLink
+          query="pageType=application"
+          context={`aplicacion:${app.slug}`}
+          className="inline-flex items-center border border-gray-200 hover:bg-gray-50 px-5 py-3 rounded-2xl font-medium text-[#047857]"
+        />
       </div>
       <h2 className="mt-12 text-xl font-semibold text-[#0A2540]">Qué preguntamos</h2>
       <ol className="mt-3 list-decimal pl-5 text-gray-700 space-y-1">
