@@ -15,6 +15,7 @@ import {
   webPageSchema,
 } from '@/lib/schema';
 import PreguntasDeCompra from '@/components/PreguntasDeCompra';
+import AsistenteAiLink from '@/components/AsistenteAiLink';
 
 type Props = { params: Promise<{ slug: string }> };
 export const dynamicParams = false;
@@ -124,7 +125,17 @@ export default async function GuidePage({ params }: Props) {
         {g.questions.map((q) => <li key={q}>{q}</li>)}
       </ul>
       <p className="mt-6 text-sm text-gray-500">{g.disclaimer}</p>
-      <Link href="/cotizacion" className="btn mt-8 inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">Abrir RFQ</Link>
+      <div className="mt-8 flex flex-wrap items-center gap-3">
+        <Link href="/cotizacion" className="btn inline-flex bg-[#0A2540] text-white px-5 py-3 rounded-2xl">Abrir RFQ</Link>
+        {/* Secundario: quien termina de leer una guía técnica suele tener una
+            duda puntual antes de cotizar, no todavía un RFQ completo — mismo
+            patrón que app/(es)/recursos/[slug]/page.tsx. */}
+        <AsistenteAiLink
+          query={g.relatedProductSlugs[0] ? `producto=${encodeURIComponent(g.relatedProductSlugs[0])}` : undefined}
+          context={`biblioteca:${g.slug}`}
+          className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-5 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
+        />
+      </div>
       <ul className="mt-8 space-y-2 text-sm">
         {related.map((p) => (
           <li key={p.slug}><Link href={`/productos/${p.slug}`} className="text-[#059669]">{p.name}</Link></li>

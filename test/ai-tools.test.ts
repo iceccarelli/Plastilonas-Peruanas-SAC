@@ -238,6 +238,17 @@ describe('buildRFQ: nunca inventa datos de contacto ni hace un POST', () => {
     expect(out.readyToSubmit).toBe(true);
     expect(out.missingFields).toEqual([]);
   });
+
+  it('captura ciudad de entrega cuando el usuario la dio, sin inventarla si no la dio', async () => {
+    const conCiudad = await exec(buildRFQ)(
+      { producto: 'mallas-antiafidas', ciudad: 'Arequipa' },
+      {} as any,
+    );
+    expect(conCiudad.payload.ciudad).toBe('Arequipa');
+
+    const sinCiudad = await exec(buildRFQ)({ producto: 'mallas-antiafidas' }, {} as any);
+    expect(sinCiudad.payload.ciudad).toBeUndefined();
+  });
 });
 
 describe('buildRFQ -> /cotizacion: el payload real llega intacto al formulario', () => {
@@ -280,6 +291,23 @@ describe('buildRFQ -> /cotizacion: el payload real llega intacto al formulario',
     const resueltoPorSlug = products.find((p) => p.slug === params.get('producto'));
     expect(resueltoPorSlug?.slug).toBe(real!.slug);
     expect(resueltoPorSlug?.name).toBe(real!.name);
+  });
+
+  it('la ciudad de entrega que dio el usuario sobrevive como ?ciudad= hacia /cotizacion', async () => {
+    const real = products.find((p) => Boolean(p.slug));
+    expect(real, 'el catálogo real no debería estar vacío').toBeDefined();
+
+    const out = await exec(buildRFQ)(
+      { slug: real!.slug, ciudad: 'Trujillo' },
+      {} as any,
+    );
+
+    // Misma construcción de querystring que RFQCard.tsx.
+    const params = new URLSearchParams({ origen: 'asistente' });
+    if (out.payload.slug) params.set('producto', out.payload.slug);
+    if (out.payload.ciudad) params.set('ciudad', out.payload.ciudad);
+
+    expect(params.get('ciudad')).toBe('Trujillo');
   });
 
   it('sin slug (solo nombre), /cotizacion igual puede resolver el producto por nombre', async () => {

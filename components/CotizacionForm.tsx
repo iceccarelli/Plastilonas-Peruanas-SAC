@@ -181,6 +181,8 @@ interface Props {
   slugOrigen?: string;
   /** Texto inicial del mensaje (p. ej. comparativa). */
   preselectedMessage?: string;
+  /** Ciudad de entrega preseleccionada (?ciudad= del asistente, ver lib/ai/tools.ts#buildRFQ). */
+  preselectedCiudad?: string;
   /**
    * Superficie de la que salió el visitante: 'chat', 'configurador',
    * 'calculadora'. Se declara en el enlace (?origen=) y viaja al lead y al
@@ -207,6 +209,7 @@ export default function CotizacionForm({
   preselectedProduct,
   slugOrigen,
   preselectedMessage,
+  preselectedCiudad,
   origen,
 }: Props) {
   const t = T[idioma];
@@ -230,6 +233,7 @@ export default function CotizacionForm({
     defaultValues: {
       producto: preselectedProduct || '',
       mensaje: preselectedMessage || '',
+      ciudadEntrega: preselectedCiudad || '',
     },
   });
 
@@ -242,7 +246,12 @@ export default function CotizacionForm({
         (Object.keys(borrador) as (keyof FormData)[]).forEach((k) => {
           const v = borrador[k];
           // Lo que trae la URL manda sobre el borrador.
-          if (v && !(k === 'producto' && preselectedProduct) && !(k === 'mensaje' && preselectedMessage)) {
+          if (
+            v &&
+            !(k === 'producto' && preselectedProduct) &&
+            !(k === 'mensaje' && preselectedMessage) &&
+            !(k === 'ciudadEntrega' && preselectedCiudad)
+          ) {
             setValue(k, v);
           }
         });
@@ -270,6 +279,9 @@ export default function CotizacionForm({
   React.useEffect(() => {
     if (preselectedMessage) setValue('mensaje', preselectedMessage);
   }, [preselectedMessage, setValue]);
+  React.useEffect(() => {
+    if (preselectedCiudad) setValue('ciudadEntrega', preselectedCiudad);
+  }, [preselectedCiudad, setValue]);
   /**
    * `rfq_start` se dispara una vez por combinación de producto, slug y origen.
    * `origen` entró en el arreglo de dependencias porque el evento lo usa: sin

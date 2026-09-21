@@ -130,6 +130,7 @@ export const RFQResponse = z.object({
     telefono: z.string().trim().max(40).optional(),
     producto: z.string().trim().max(200).optional(),
     cantidad: z.string().trim().max(80).optional(),
+    ciudad: z.string().trim().max(80).optional(),
     mensaje: z.string().trim().max(4000).optional(),
     language: z.enum(['es', 'en', 'pt']).optional(),
     slug: z.string().trim().max(120).optional(),
