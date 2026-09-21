@@ -105,6 +105,10 @@ export function seccionPaginas(): EntradaSitemap[] {
     { url: `${SITE.url}/distribuidores`, lastModified: paginas, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE.url}/confianza`, lastModified: paginas, changeFrequency: "yearly", priority: 0.7 },
     { url: `${SITE.url}/metodo`, lastModified: paginas, changeFrequency: "yearly", priority: 0.7 },
+    // Espacio de trabajo del asistente (Fase 2 de Plastilonas AI): página real
+    // con contenido propio (no un estado de comprador como /carrito), así que
+    // sí se indexa y se declara aquí como el resto de páginas institucionales.
+    { url: `${SITE.url}/asistente`, lastModified: paginas, changeFrequency: "monthly", priority: 0.6 },
     // La puerta de los programas y los agentes: describe las superficies de
     // datos abiertas y, cuando está desplegada, la API con servidor MCP.
     { url: `${SITE.url}${RUTA_INTEGRACIONES}`, lastModified: paginas, changeFrequency: "monthly", priority: 0.7 },

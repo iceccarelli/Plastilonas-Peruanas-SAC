@@ -7,12 +7,26 @@ import { X, Send, Bot, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 import { whatsappUrl, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 import { INICIOS, seguimientosPara } from '@/lib/chat/intents';
 import ChatMarkdown from '@/components/ChatMarkdown';
+import { Sparkles } from 'lucide-react';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  /**
+   * CTA hacia el espacio de trabajo completo (app/(es)/asistente/page.tsx).
+   * Si el visitante está en una ficha de producto, se lo pasamos como
+   * `?producto=slug` para que /asistente precargue el mismo PageContext
+   * (lib/ai/context.ts) sin que la persona tenga que repetirlo.
+   */
+  const productoDeRuta = pathname?.startsWith('/productos/') && !pathname.includes('/familia')
+    ? pathname.split('/').filter(Boolean)[1]
+    : undefined;
+  const hrefAsistente = productoDeRuta ? `/asistente?producto=${encodeURIComponent(productoDeRuta)}` : '/asistente';
 
   const engaged = useRef(false);
   const { messages, input, handleInputChange, handleSubmit, append, isLoading, error } = useChat({
@@ -152,6 +166,16 @@ export default function Chatbot() {
                   <X className="w-4 h-4" />
                 </button>
               </div>
+
+              {/* CTA aditivo hacia el espacio de trabajo completo. No cambia
+                  nada del comportamiento existente del widget: solo ofrece
+                  una salida a más espacio para quien lo necesita. */}
+              <Link
+                href={hrefAsistente}
+                className="flex items-center justify-center gap-1.5 bg-gray-50 hover:bg-gray-100 border-b border-gray-100 text-[#047857] text-xs font-semibold py-2"
+              >
+                <Sparkles className="w-3.5 h-3.5" /> Abrir Plastilonas AI (espacio completo)
+              </Link>
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-gray-50 text-sm">
