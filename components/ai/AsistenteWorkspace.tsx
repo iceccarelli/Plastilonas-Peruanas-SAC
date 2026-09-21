@@ -33,7 +33,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import type { Message } from 'ai';
 import Link from 'next/link';
-import { Bot, Camera, CheckCircle2, FileUp, ImageIcon, MessageCircle, Send, User } from 'lucide-react';
+import { Bot, Camera, CheckCircle2, FileUp, ImageIcon, Loader2, MessageCircle, Send, User } from 'lucide-react';
 import ChatMarkdown from '@/components/ChatMarkdown';
 import AssistantCard from '@/components/ai/AssistantCard';
 import { deriveCardsFromToolResult } from '@/lib/ai/derive-card';
@@ -44,6 +44,8 @@ import { trackAsistenteEngaged, trackQuoteStarted, trackWhatsAppClick } from '@/
 import { whatsappUrl } from '@/lib/whatsapp';
 import { buildReadinessChecklist, isReadyToQuote, type ReadinessSignals } from '@/lib/ai/readiness';
 import type { PageContext } from '@/lib/ai/context';
+import { archiveVisionImage, readFileAsBase64, validateVisionFile } from '@/lib/ai/vision-upload';
+import { canUploadVisionImage, registerVisionUpload } from '@/lib/ai/vision-quota';
 
 interface Props {
   /** Contexto de página ya resuelto en el servidor (lib/ai/context.ts). */
@@ -72,6 +74,18 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
   const [projectId, setProjectId] = useState<string | null>(null);
   const engaged = useRef(false);
 
+  /**
+   * TARJETAS DE ANÁLISIS DE FOTO — no viven en `messages` (no son turnos de
+   * chat: `/api/vision` es un endpoint aparte, no `streamText`) pero se
+   * muestran en la misma columna de "Resultados" que las demás tarjetas
+   * reales. Ver lib/ai/vision-readiness.ts para por qué NUNCA tocan
+   * `readinessSignals`/`checklist` de abajo.
+   */
+  const [visionCards, setVisionCards] = useState<{ id: string; card: AssistantResponse }[]>([]);
+  const [visionStatus, setVisionStatus] = useState<{ state: 'idle' | 'uploading' | 'error'; message?: string }>({
+    state: 'idle',
+  });
+
   useEffect(() => {
     setProjectId(getOrCreateProjectId());
   }, []);
@@ -99,6 +113,65 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
     }
     void append({ role: 'user', content: mensaje });
   };
+
+  /**
+   * SUBE Y ANALIZA UNA FOTO — nunca simula un resultado mientras espera:
+   * `visionStatus` pasa a 'uploading' y la tarjeta solo se agrega tras una
+   * respuesta REAL de `/api/vision` (lib/ai/vision.ts hace cumplir en
+   * código que esa respuesta tenga las cuatro categorías obligatorias).
+   * Cualquier fallo —tipo/peso inválido, cuota de sesión agotada, red,
+   * clave de Anthropic ausente, respuesta del modelo mal formada— termina en
+   * `visionStatus.state === 'error'` con el mismo tipo de mensaje de
+   * WhatsApp que ya usa el resto del sitio, nunca en un análisis inventado.
+   */
+  async function subirYAnalizarFoto(file: File) {
+    const errorValidacion = validateVisionFile(file);
+    if (errorValidacion) {
+      setVisionStatus({ state: 'error', message: errorValidacion });
+      return;
+    }
+    if (!canUploadVisionImage()) {
+      setVisionStatus({
+        state: 'error',
+        message: 'Alcanzó el máximo de fotos de esta sesión. Puede enviarla directo por WhatsApp.',
+      });
+      return;
+    }
+
+    setVisionStatus({ state: 'uploading' });
+    // Best-effort, no bloquea el análisis: ver decisión documentada en
+    // lib/ai/vision-upload.ts sobre por qué el análisis no depende de esto.
+    void archiveVisionImage(file, projectId ?? 'sin-sesion');
+
+    try {
+      const imageBase64 = await readFileAsBase64(file);
+      const res = await fetch('/api/vision', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64, mediaType: file.type }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.observation) {
+        setVisionStatus({
+          state: 'error',
+          message:
+            typeof data?.message === 'string'
+              ? data.message
+              : 'No se pudo analizar la foto. Puede enviarla directo por WhatsApp.',
+        });
+        return;
+      }
+      registerVisionUpload();
+      setVisionCards((prev) => [...prev, { id: `vision-${Date.now()}-${prev.length}`, card: data.observation }]);
+      setVisionStatus({ state: 'idle' });
+      setTab('resultados');
+    } catch {
+      setVisionStatus({
+        state: 'error',
+        message: 'No se pudo analizar la foto. Puede enviarla directo por WhatsApp.',
+      });
+    }
+  }
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     if (!engaged.current) {
@@ -165,6 +238,15 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
     }
     return null;
   }, [messages]);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const onArchivoFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (file) void subirYAnalizarFoto(file);
+  };
 
   const readinessSignals: ReadinessSignals = {
     productName: rfqDraft?.payload.producto ?? productosVistos[0]?.name ?? pageContext.product?.name ?? null,
@@ -283,7 +365,13 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
               ))}
 
               {sinConversacion && !isLoading && (
-                <EmptyState onIntencion={enviarIntencion} disabled={isLoading} />
+                <EmptyState
+                  onIntencion={enviarIntencion}
+                  disabled={isLoading}
+                  onSubirImagen={() => fileInputRef.current?.click()}
+                  onTomarFoto={() => cameraInputRef.current?.click()}
+                  subiendoFoto={visionStatus.state === 'uploading'}
+                />
               )}
 
               {chipsSeguimiento.length > 0 && (
@@ -327,7 +415,55 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
               )}
             </div>
 
+            {/* Estado de la foto: nunca silencioso ni fingido — "subiendo",
+                error con salida a WhatsApp, o nada cuando está inactivo. */}
+            {visionStatus.state === 'uploading' && (
+              <p className="px-4 py-2 text-xs text-gray-500 dark:text-[var(--text-muted)] flex items-center gap-1.5 border-t border-gray-100 dark:border-[var(--border)]">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Analizando la foto…
+              </p>
+            )}
+            {visionStatus.state === 'error' && (
+              <p className="px-4 py-2 text-xs text-amber-800 bg-amber-50 border-t border-amber-100 flex items-center justify-between gap-2">
+                <span>{visionStatus.message}</span>
+                <a
+                  href={whatsappUrl(visionStatus.message ?? 'Hola, quisiera enviar una foto para mi cotización.')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-medium flex-shrink-0"
+                >
+                  WhatsApp
+                </a>
+              </p>
+            )}
+
+            {/* Inputs ocultos reales — accesibles desde EmptyState y desde aquí, sin duplicar lógica de subida. */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={onArchivoFoto}
+              className="sr-only"
+            />
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              capture="environment"
+              onChange={onArchivoFoto}
+              className="sr-only"
+            />
+
             <form onSubmit={onSubmit} className="p-3 border-t border-gray-100 dark:border-[var(--border)] flex gap-2">
+              <button
+                type="button"
+                disabled={visionStatus.state === 'uploading'}
+                onClick={() => fileInputRef.current?.click()}
+                title="Subir una foto para que el asistente la analice"
+                aria-label="Subir imagen"
+                className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 border border-gray-200 dark:border-[var(--border)] text-gray-500 dark:text-[var(--text-muted)] hover:border-[#059669] hover:text-[#047857] disabled:opacity-50 transition-colors"
+              >
+                <ImageIcon className="w-4 h-4" />
+              </button>
               <input
                 value={input}
                 onChange={handleInputChange}
@@ -349,6 +485,11 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
 
         {/* ─────────────────────── Tarjetas estructuradas ─────────────────────── */}
         <section className={`${tab === 'resultados' ? 'block' : 'hidden'} lg:block space-y-4`}>
+          {/* Tarjetas de foto: fuera del flujo de `messages` (endpoint aparte,
+              ver subirYAnalizarFoto), así que se muestran primero, siempre. */}
+          {visionCards.map(({ id, card }) => (
+            <AssistantCard key={id} response={card} />
+          ))}
           {cardsPorMensaje
             .filter(({ message }) => message.role === 'assistant' && message.id !== 'welcome')
             .map(({ message, cards }) =>
@@ -361,7 +502,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
                 />
               ),
             )}
-          {sinConversacion && (
+          {sinConversacion && visionCards.length === 0 && (
             <div className="bg-white dark:bg-[var(--surface-raised)] border border-dashed border-gray-200 dark:border-[var(--border)] rounded-3xl p-8 text-center text-sm text-gray-400 dark:text-[var(--text-muted)]">
               Las tarjetas de producto, cotización y predimensionamiento aparecerán aquí a medida que converse con el
               asistente.
@@ -501,13 +642,19 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
   );
 }
 
-/** Estado vacío: título, subtexto, atajos honestos y stubs de carga "próximamente". */
+/** Estado vacío: título, subtexto, atajos honestos, y subida de fotos real (el documento sigue "próximamente"). */
 function EmptyState({
   onIntencion,
   disabled,
+  onSubirImagen,
+  onTomarFoto,
+  subiendoFoto,
 }: {
   onIntencion: (mensaje: string) => void;
   disabled: boolean;
+  onSubirImagen: () => void;
+  onTomarFoto: () => void;
+  subiendoFoto: boolean;
 }) {
   return (
     <div className="pl-10 space-y-4">
@@ -532,14 +679,31 @@ function EmptyState({
         ))}
       </div>
 
-      {/* Stubs de carga: visiblemente deshabilitados. No se pretende analizar
-          ninguna imagen o documento que no llega a ningún lado. */}
+      {/* Subir imagen y tomar foto: reales, suben a /api/vision (ver
+          subirYAnalizarFoto). "Subir documento" sigue siendo un stub — este
+          sprint solo cubre imágenes, nunca planos/PDF que no se analizan. */}
       <div>
-        <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mb-2">Adjuntar contexto (próximamente)</p>
+        <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] mb-2">
+          Adjuntar una foto ayuda al asistente a entender su proyecto
+        </p>
         <div className="flex flex-wrap gap-2">
-          <UploadStub icon={ImageIcon} label="Subir imagen" />
+          <button
+            type="button"
+            disabled={subiendoFoto}
+            onClick={onSubirImagen}
+            className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-[var(--text-muted)] border border-gray-200 dark:border-[var(--border)] hover:border-[#059669] hover:text-[#047857] rounded-full px-3.5 py-2 disabled:opacity-50 transition-colors"
+          >
+            <ImageIcon className="w-3.5 h-3.5" /> Subir imagen
+          </button>
+          <button
+            type="button"
+            disabled={subiendoFoto}
+            onClick={onTomarFoto}
+            className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-[var(--text-muted)] border border-gray-200 dark:border-[var(--border)] hover:border-[#059669] hover:text-[#047857] rounded-full px-3.5 py-2 disabled:opacity-50 transition-colors"
+          >
+            <Camera className="w-3.5 h-3.5" /> Tomar foto
+          </button>
           <UploadStub icon={FileUp} label="Subir documento" />
-          <UploadStub icon={Camera} label="Tomar foto" />
         </div>
       </div>
     </div>
@@ -551,7 +715,7 @@ function UploadStub({ icon: Icon, label }: { icon: typeof ImageIcon; label: stri
     <button
       type="button"
       disabled
-      title="Próximamente: el análisis de imágenes y documentos aún no está conectado."
+      title="Próximamente: el análisis de documentos aún no está conectado."
       className="inline-flex items-center gap-1.5 text-xs text-gray-400 dark:text-[var(--text-muted)] border border-dashed border-gray-200 dark:border-[var(--border)] rounded-full px-3.5 py-2 cursor-not-allowed"
     >
       <Icon className="w-3.5 h-3.5" /> {label}

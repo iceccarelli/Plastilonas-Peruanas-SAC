@@ -141,6 +141,37 @@ export const RFQResponse = z.object({
   ...BaseFields,
 });
 
+/**
+ * OBSERVACIÓN DE IMAGEN — Sprint C (subida de foto que gana una cotización).
+ *
+ * Alimentada por `app/api/vision/route.ts`, que llama a un modelo con visión
+ * de Anthropic sobre una foto que la persona subió en /asistente. La regla de
+ * negocio que este esquema hace cumplir EN CÓDIGO, no solo en el prompt:
+ *
+ *  - `observed`: solo lo literalmente visible (color, textura aparente,
+ *    daño/desgaste visible, forma aproximada) — nunca una medida exacta.
+ *  - `inference`: una conjetura EXPLÍCITAMENTE marcada como tal (p. ej.
+ *    "podría ser polietileno de alta densidad, a confirmar"). Nunca se
+ *    presenta como hecho.
+ *  - `unknown`: obligatorio y NUNCA vacío — dimensiones exactas, grado de
+ *    material, certificaciones son SIEMPRE desconocidas desde una foto. Si el
+ *    modelo devolviera un arreglo vacío aquí, `safeParse` rechaza la
+ *    respuesta completa: no hay forma de "olvidar" declarar lo desconocido.
+ *  - `requiresConfirmation`: obligatorio y nunca vacío — qué debe verificar
+ *    una persona antes de cotizar con esta foto.
+ *
+ * Ninguna certificación ni precio puede aparecer aquí: no hay campo para
+ * ellos, y `VISION_SYSTEM_PROMPT` (lib/ai/vision.ts) lo prohíbe explícitamente.
+ */
+export const VisionObservationResponse = z.object({
+  type: z.literal('visionObservation'),
+  observed: z.array(z.string().trim().min(1).max(300)).min(1).max(8),
+  inferences: z.array(z.string().trim().min(1).max(300)).max(5).default([]),
+  unknown: z.array(z.string().trim().min(1).max(200)).min(1),
+  requiresConfirmation: z.array(z.string().trim().min(1).max(300)).min(1),
+  ...BaseFields,
+});
+
 export const NextActionResponse = z.object({
   type: z.literal('nextAction'),
   action: z.enum(['cotizar', 'whatsapp', 'contacto']),
@@ -159,6 +190,7 @@ export const AssistantResponse = z.discriminatedUnion('type', [
   MissingInformationResponse,
   RFQResponse,
   NextActionResponse,
+  VisionObservationResponse,
 ]);
 
 export type AssistantResponse = z.infer<typeof AssistantResponse>;
@@ -172,4 +204,11 @@ export type AssistantResponse = z.infer<typeof AssistantResponse>;
  * un ensamblador de "brief" completo). Agregar la variante antes que la tool
  * es exactamente el error que este documento evita: un shape que el modelo
  * puede rellenar sin datos reales detrás.
+ *
+ * `visionObservation` SÍ tiene un endpoint real detrás (`app/api/vision/
+ * route.ts`) — no es un adelanto sin datos. No reutiliza `evidence` porque
+ * `EvidenceResponse.sourceType` es un enum cerrado de fuentes YA verificadas
+ * del sitio (facts/framework/guide/glossary/project); una foto no es
+ * ninguna de esas, y forzarla ahí borraría la distinción observado/inferido/
+ * desconocido que este sprint existe para proteger.
  */
