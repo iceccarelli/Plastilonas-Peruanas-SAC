@@ -144,6 +144,23 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
 
   const consultasDelUsuario = messages.filter((m) => m.role === 'user').length;
 
+  /**
+   * MISMA construcción de querystring que components/ai/cards/RFQCard.tsx —
+   * un solo camino hacia /cotizacion, nunca una segunda lógica que pueda
+   * divergir. Antes, estos dos enlaces del panel "Mi proyecto" solo mandaban
+   * `?origen=asistente` y descartaban el slug/producto y la nota que
+   * buildRFQ ya había armado (visibles arriba, en la propia RFQCard), así
+   * que llegar por aquí perdía lo que la persona ya contó en el chat.
+   */
+  function hrefCotizacion(origen: 'asistente' | 'asistente-proyecto'): string {
+    const params = new URLSearchParams({ origen });
+    if (rfqDraft?.payload.slug) params.set('producto', rfqDraft.payload.slug);
+    else if (rfqDraft?.payload.producto) params.set('producto', rfqDraft.payload.producto);
+    else if (pageContext.product?.slug) params.set('producto', pageContext.product.slug);
+    if (rfqDraft?.payload.mensaje) params.set('nota', rfqDraft.payload.mensaje);
+    return `/cotizacion?${params.toString()}`;
+  }
+
   return (
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6">
       {/* Encabezado ligero: quién es y en qué página se apoya (si viene de una). */}
@@ -355,8 +372,8 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
                     <p className="text-xs text-emerald-700">Lista para enviar</p>
                   )}
                   <Link
-                    href="/cotizacion?origen=asistente"
-                    onClick={() => trackQuoteStarted('asistente', rfqDraft.payload.producto)}
+                    href={hrefCotizacion('asistente-proyecto')}
+                    onClick={() => trackQuoteStarted('asistente', rfqDraft.payload.producto, rfqDraft.payload.slug)}
                     className="text-xs font-medium text-[#047857] hover:underline"
                   >
                     Ir al formulario →
@@ -371,8 +388,10 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
 
             <div className="pt-3 border-t border-gray-100 dark:border-[var(--border)]">
               <Link
-                href="/cotizacion?origen=asistente"
-                onClick={() => trackQuoteStarted('asistente', pageContext.product?.name)}
+                href={hrefCotizacion('asistente')}
+                onClick={() =>
+                  trackQuoteStarted('asistente', rfqDraft?.payload.producto ?? pageContext.product?.name, rfqDraft?.payload.slug ?? pageContext.product?.slug)
+                }
                 className="block text-center text-sm font-semibold bg-[#0A2540] hover:bg-[#047857] text-white px-4 py-2.5 rounded-2xl transition-colors"
               >
                 Cotizar ahora

@@ -239,3 +239,60 @@ describe('buildRFQ: nunca inventa datos de contacto ni hace un POST', () => {
     expect(out.missingFields).toEqual([]);
   });
 });
+
+describe('buildRFQ -> /cotizacion: el payload real llega intacto al formulario', () => {
+  /**
+   * Cierra el hueco documentado en la Fase 4: no había una prueba que
+   * conectara la SALIDA real de buildRFQ (con un slug REAL del catálogo,
+   * nunca inventado) con lo que components/ai/cards/RFQCard.tsx arma como
+   * querystring y lo que app/(es)/cotizacion/page.tsx lee. No renderiza
+   * React (este repo no corre jsdom, ver vitest.config.ts): reproduce
+   * literalmente la construcción de `params` de RFQCard —la única lógica que
+   * conecta ambos extremos— sobre el resultado real de la tool.
+   */
+  it('el slug real de la tool sobrevive como ?producto= y lo resuelve /cotizacion al mismo producto', async () => {
+    const real = products.find((p) => Boolean(p.slug));
+    expect(real, 'el catálogo real no debería estar vacío').toBeDefined();
+
+    const out = await exec(buildRFQ)(
+      {
+        slug: real!.slug,
+        producto: real!.name,
+        mensaje: `Necesito cotizar ${real!.name} para un proyecto.`,
+        cantidad: '500 m2',
+      },
+      {} as any,
+    );
+
+    // Misma construcción de querystring que RFQCard.tsx (nunca un segundo
+    // POST ni una transformación distinta del mismo payload).
+    const params = new URLSearchParams({ origen: 'asistente' });
+    if (out.payload.slug) params.set('producto', out.payload.slug);
+    else if (out.payload.producto) params.set('producto', out.payload.producto);
+    if (out.payload.mensaje) params.set('nota', out.payload.mensaje);
+
+    expect(params.get('producto')).toBe(real!.slug);
+    expect(params.get('nota')).toBe(out.payload.mensaje);
+
+    // Lo que app/(es)/cotizacion/page.tsx hace con `?producto=`: primero
+    // intenta resolverlo como slug exacto — debe caer en el MISMO producto
+    // real que produjo la tool, nunca en uno distinto ni en undefined.
+    const resueltoPorSlug = products.find((p) => p.slug === params.get('producto'));
+    expect(resueltoPorSlug?.slug).toBe(real!.slug);
+    expect(resueltoPorSlug?.name).toBe(real!.name);
+  });
+
+  it('sin slug (solo nombre), /cotizacion igual puede resolver el producto por nombre', async () => {
+    const real = products[0];
+    const out = await exec(buildRFQ)({ producto: real.name }, {} as any);
+
+    const params = new URLSearchParams({ origen: 'asistente' });
+    if (out.payload.slug) params.set('producto', out.payload.slug);
+    else if (out.payload.producto) params.set('producto', out.payload.producto);
+
+    // Ruta de respaldo real de app/(es)/cotizacion/page.tsx cuando el
+    // parámetro no calza con ningún slug: buscar por nombre exacto.
+    const resueltoPorNombre = products.find((p) => p.name === params.get('producto'));
+    expect(resueltoPorNombre?.slug).toBe(real.slug);
+  });
+});
