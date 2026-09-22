@@ -33,7 +33,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import type { Message } from 'ai';
 import Link from 'next/link';
-import { Bot, Camera, CheckCircle2, FileUp, ImageIcon, Loader2, MessageCircle, Send, User } from 'lucide-react';
+import { Bot, Camera, Check, CheckCircle2, FileUp, ImageIcon, Loader2, MessageCircle, Pencil, Send, User, X } from 'lucide-react';
 import ChatMarkdown from '@/components/ChatMarkdown';
 import AssistantCard from '@/components/ai/AssistantCard';
 import { deriveCardsFromToolResult } from '@/lib/ai/derive-card';
@@ -42,7 +42,21 @@ import { getOrCreateProjectId } from '@/lib/ai/project-id';
 import { INICIOS, seguimientosPara } from '@/lib/chat/intents';
 import { trackAsistenteEngaged, trackQuoteStarted, trackWhatsAppClick } from '@/lib/analytics';
 import { whatsappUrl } from '@/lib/whatsapp';
-import { buildReadinessChecklist, isReadyToQuote, type ReadinessSignals } from '@/lib/ai/readiness';
+import {
+  buildReadinessChecklist,
+  isReadyToQuote,
+  mergeReadinessSignals,
+  resolveProductSlug,
+  type ReadinessField,
+  type ReadinessFieldId,
+  type ReadinessSources,
+} from '@/lib/ai/readiness';
+import {
+  clearProjectDraftField,
+  patchProjectDraft,
+  readProjectDraft,
+  type ProjectDraft,
+} from '@/lib/ai/project-draft';
 import type { PageContext } from '@/lib/ai/context';
 import { archiveVisionImage, readFileAsBase64, validateVisionFile } from '@/lib/ai/vision-upload';
 import { canUploadVisionImage, registerVisionUpload } from '@/lib/ai/vision-quota';
@@ -75,6 +89,22 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
   const engaged = useRef(false);
 
   /**
+   * BORRADOR DEL PROYECTO — Sprint E.2. El estado estructurado que faltaba
+   * para cerrar el bucle: antes, el checklist sólo leía el ÚLTIMO `buildRFQ`
+   * de la conversación, así que bastaba con que el modelo no volviera a
+   * llamar la tool en el turno siguiente para que un chip ya resuelto se
+   * apagara y "Listo para cotizar" no encendiera nunca. Vive en
+   * localStorage (lib/ai/project-draft.ts), al lado del id de proyecto.
+   *
+   * Arranca vacío SIEMPRE, incluso en el cliente: leer localStorage durante
+   * el primer render daría un HTML distinto al del servidor. Se hidrata en
+   * el efecto de abajo, igual que `projectId`.
+   */
+  const [draft, setDraft] = useState<ProjectDraft>({});
+  /** Campo del checklist con el formulario de confirmación abierto, si hay alguno. */
+  const [confirmando, setConfirmando] = useState<ReadinessFieldId | null>(null);
+
+  /**
    * TARJETAS DE ANÁLISIS DE FOTO — no viven en `messages` (no son turnos de
    * chat: `/api/vision` es un endpoint aparte, no `streamText`) pero se
    * muestran en la misma columna de "Resultados" que las demás tarjetas
@@ -88,6 +118,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
 
   useEffect(() => {
     setProjectId(getOrCreateProjectId());
+    setDraft(readProjectDraft());
   }, []);
 
   const { messages, input, handleInputChange, handleSubmit, append, isLoading, error } = useChat({
@@ -200,10 +231,10 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
   );
 
   const productosVistos = useMemo(() => {
-    const vistos = new Map<string, { name: string; url: string }>();
+    const vistos = new Map<string, { slug: string; name: string; url: string }>();
     for (const { cards } of cardsPorMensaje) {
       for (const card of cards) {
-        if (card.type === 'product') vistos.set(card.slug, { name: card.name, url: card.url });
+        if (card.type === 'product') vistos.set(card.slug, { slug: card.slug, name: card.name, url: card.url });
       }
     }
     return [...vistos.values()];
@@ -248,19 +279,99 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
     if (file) void subirYAnalizarFoto(file);
   };
 
-  const readinessSignals: ReadinessSignals = {
-    productName: rfqDraft?.payload.producto ?? productosVistos[0]?.name ?? pageContext.product?.name ?? null,
-    cantidad: rfqDraft?.payload.cantidad ?? null,
-    // `buildRFQ` ya captura ciudad de entrega cuando el usuario la dio en el
-    // chat (lib/ai/tools.ts#RFQPayloadSchema) — nunca se adivina de otro dato.
-    ciudad: rfqDraft?.payload.ciudad ?? null,
-    aplicacion: aplicacionConocida,
-    nombre: rfqDraft?.payload.nombre ?? null,
-    telefono: rfqDraft?.payload.telefono ?? null,
-    email: rfqDraft?.payload.email ?? null,
-  };
+  /**
+   * LAS CUATRO FUENTES REALES, EN UN SOLO OBJETO — Sprint E.2, tarea 3.
+   * `mergeReadinessSignals` (lib/ai/readiness.ts) fija la precedencia y es
+   * lógica pura: se puede probar con fixtures, sin DOM y sin una llamada
+   * viva al modelo (test/ai-readiness-merge.test.ts).
+   */
+  const readinessSources: ReadinessSources = useMemo(
+    () => ({
+      draft,
+      rfq: rfqDraft?.payload ?? null,
+      tools: {
+        productName: productosVistos[0]?.name ?? null,
+        productSlug: productosVistos[0]?.slug ?? null,
+        aplicacion: aplicacionConocida,
+      },
+      pageContext: { product: pageContext.product ?? null },
+    }),
+    [draft, rfqDraft, productosVistos, aplicacionConocida, pageContext.product],
+  );
+
+  /**
+   * EL BORRADOR ABSORBE LO QUE LAS TOOLS YA CONFIRMARON.
+   *
+   * `buildRFQ` y `getApplication` son fuentes admitidas (ver el encabezado de
+   * lib/ai/project-draft.ts): el modelo no las inventa, transcribe al esquema
+   * algo que la persona dijo explícitamente. Guardarlas hace que el dato
+   * sobreviva a los turnos en que el modelo no vuelve a llamar la tool —que
+   * era justo el agujero— y a una recarga de página.
+   *
+   * NO se absorbe el producto que viene de `productosVistos` ni de
+   * `pageContext`: haber MIRADO una ficha no es haber PEDIDO ese producto.
+   * Esos dos siguen como señal viva en la fusión de arriba (encienden el
+   * chip mientras duran) pero nunca se fijan al proyecto sin que la persona
+   * lo confirme. Fijarlos sería convertir una visita en una decisión.
+   */
+  useEffect(() => {
+    const patch: Partial<ProjectDraft> = {};
+    const payload = rfqDraft?.payload;
+    if (payload) {
+      if (payload.producto) patch.productName = payload.producto;
+      if (payload.slug) patch.productoSlug = payload.slug;
+      if (payload.cantidad) patch.cantidad = payload.cantidad;
+      if (payload.ciudad) patch.ciudad = payload.ciudad;
+      if (payload.nombre) patch.nombre = payload.nombre;
+      if (payload.telefono) patch.telefono = payload.telefono;
+      if (payload.email) patch.email = payload.email;
+      if (payload.mensaje) patch.nota = payload.mensaje;
+    }
+    if (aplicacionConocida) patch.aplicacion = aplicacionConocida;
+    if (Object.keys(patch).length === 0) return;
+    setDraft(patchProjectDraft(patch, rfqDraft ? 'rfq' : 'tool'));
+  }, [rfqDraft, aplicacionConocida]);
+
+  const readinessSignals = useMemo(() => mergeReadinessSignals(readinessSources), [readinessSources]);
   const checklist = buildReadinessChecklist(readinessSignals);
   const listoParaCotizar = isReadyToQuote(checklist);
+
+  /** Slug real del producto — el dato que nunca se puede perder camino a /cotizacion. */
+  const productoSlug = resolveProductSlug(readinessSources);
+  /** Nota del proyecto: lo que la persona confirmó, o el detalle que armó `buildRFQ`. */
+  const notaProyecto = draft.nota ?? rfqDraft?.payload.mensaje ?? null;
+
+  /**
+   * CHIP DESCONOCIDO → PREGUNTA → CONFIRMACIÓN (Sprint E.2, tarea 2).
+   *
+   * Antes, pulsar un chip sólo mandaba la pregunta al chat y ahí moría: si la
+   * persona respondía y el modelo no llamaba `buildRFQ`, el dato no llegaba a
+   * ninguna parte y el chip seguía gris. Ahora hace las dos cosas —pregunta
+   * en la conversación Y abre el campo de confirmación— para que exista
+   * SIEMPRE un camino que escribe estado estructurado sin depender de que el
+   * modelo acierte a llamar la tool.
+   *
+   * Lo que este camino NO hace: leer la respuesta en texto libre del chat e
+   * intentar adivinar de ahí la ciudad. Sólo se guarda lo que la persona
+   * escribió en el campo y confirmó con el botón.
+   */
+  const pedirCampo = (campo: ReadinessField) => {
+    setConfirmando(campo.id);
+    enviarIntencion(campo.question);
+  };
+
+  /** Guarda lo confirmado en la UI. Único origen: lo que la persona tecleó. */
+  const confirmarCampo = (patch: Partial<ProjectDraft>) => {
+    setDraft(patchProjectDraft(patch, 'confirmado'));
+    setConfirmando(null);
+  };
+
+  const borrarCampoDelBorrador = (campos: Array<Parameters<typeof clearProjectDraftField>[0]>) => {
+    let siguiente = draft;
+    for (const campo of campos) siguiente = clearProjectDraftField(campo);
+    setDraft(siguiente);
+    setConfirmando(null);
+  };
 
   /**
    * Mensaje de WhatsApp armado con el MISMO brief que ya alimenta la RFQCard
@@ -274,7 +385,8 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
       readinessSignals.productName ? `Producto: ${readinessSignals.productName}` : null,
       readinessSignals.cantidad ? `Cantidad/medidas: ${readinessSignals.cantidad}` : null,
       readinessSignals.ciudad ? `Ciudad de entrega: ${readinessSignals.ciudad}` : null,
-      rfqDraft?.payload.mensaje ? `Detalle: ${rfqDraft.payload.mensaje}` : null,
+      readinessSignals.aplicacion ? `Aplicación: ${readinessSignals.aplicacion}` : null,
+      notaProyecto ? `Detalle: ${notaProyecto}` : null,
     ].filter((l): l is string => Boolean(l));
     return lineas.join('\n');
   }
@@ -289,11 +401,13 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
    */
   function hrefCotizacion(origen: 'asistente' | 'asistente-proyecto'): string {
     const params = new URLSearchParams({ origen });
-    if (rfqDraft?.payload.slug) params.set('producto', rfqDraft.payload.slug);
-    else if (rfqDraft?.payload.producto) params.set('producto', rfqDraft.payload.producto);
-    else if (pageContext.product?.slug) params.set('producto', pageContext.product.slug);
-    if (rfqDraft?.payload.mensaje) params.set('nota', rfqDraft.payload.mensaje);
-    if (rfqDraft?.payload.ciudad) params.set('ciudad', rfqDraft.payload.ciudad);
+    // Slug primero SIEMPRE: /cotizacion resuelve el slug contra el catálogo
+    // real y preselecciona el producto; con sólo el nombre puede no casar y
+    // el comprador tiene que volver a elegirlo. El nombre es el respaldo.
+    if (productoSlug) params.set('producto', productoSlug);
+    else if (readinessSignals.productName) params.set('producto', readinessSignals.productName);
+    if (notaProyecto) params.set('nota', notaProyecto);
+    if (readinessSignals.ciudad) params.set('ciudad', readinessSignals.ciudad);
     return `/cotizacion?${params.toString()}`;
   }
 
@@ -558,35 +672,56 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
               <h3 className="text-xs uppercase tracking-wide text-gray-400 dark:text-[var(--text-muted)] mb-2">
                 Datos para cotizar
               </h3>
-              {listoParaCotizar ? (
-                <p className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+              {listoParaCotizar && !confirmando && (
+                <p className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 mb-2">
                   <CheckCircle2 className="w-4 h-4" /> Listo para cotizar
                 </p>
-              ) : (
-                <div className="flex flex-wrap gap-1.5">
-                  {checklist.map((campo) =>
-                    campo.known ? (
-                      <span
-                        key={campo.id}
-                        className="inline-flex items-center gap-1 text-xs rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 px-3 py-1"
-                        title={campo.detail}
-                      >
-                        <CheckCircle2 className="w-3 h-3" /> {campo.label}
-                      </span>
-                    ) : (
-                      <button
-                        key={campo.id}
-                        type="button"
-                        disabled={isLoading}
-                        onClick={() => enviarIntencion(campo.question)}
-                        className="text-xs rounded-full border border-dashed border-gray-300 dark:border-[var(--border)] text-gray-500 dark:text-[var(--text-muted)] hover:border-[#059669] hover:text-[#047857] px-3 py-1 transition-colors"
-                        title={`Preguntar: ${campo.question}`}
-                      >
-                        + {campo.label}
-                      </button>
-                    ),
-                  )}
-                </div>
+              )}
+              {/*
+                Los chips se muestran SIEMPRE, también con el checklist
+                completo: antes, al encender "Listo para cotizar"
+                desaparecían, y con ellos la única forma de ver —o corregir—
+                lo que el proyecto había registrado. Un dato de entrega
+                equivocado que ya no se puede revisar es peor que uno que
+                falta. Ahora un chip verde es un botón: lo abre para editarlo.
+              */}
+              <div className="flex flex-wrap gap-1.5">
+                {checklist.map((campo) =>
+                  campo.known ? (
+                    <button
+                      key={campo.id}
+                      type="button"
+                      onClick={() => setConfirmando(confirmando === campo.id ? null : campo.id)}
+                      aria-expanded={confirmando === campo.id}
+                      className="group inline-flex items-center gap-1 text-xs rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-400 px-3 py-1 transition-colors"
+                      title={campo.detail ? `${campo.detail} — pulse para corregir` : 'Pulse para corregir'}
+                    >
+                      <CheckCircle2 className="w-3 h-3" /> {campo.label}
+                      <Pencil className="w-2.5 h-2.5 opacity-0 group-hover:opacity-60 transition-opacity" />
+                    </button>
+                  ) : (
+                    <button
+                      key={campo.id}
+                      type="button"
+                      onClick={() => pedirCampo(campo)}
+                      aria-expanded={confirmando === campo.id}
+                      className="text-xs rounded-full border border-dashed border-gray-300 dark:border-[var(--border)] text-gray-500 dark:text-[var(--text-muted)] hover:border-[#059669] hover:text-[#047857] px-3 py-1 transition-colors"
+                      title={`Preguntar y confirmar: ${campo.question}`}
+                    >
+                      + {campo.label}
+                    </button>
+                  ),
+                )}
+              </div>
+
+              {confirmando && (
+                <ConfirmarCampo
+                  campo={checklist.find((c) => c.id === confirmando)!}
+                  draft={draft}
+                  onConfirmar={confirmarCampo}
+                  onBorrar={borrarCampoDelBorrador}
+                  onCancelar={() => setConfirmando(null)}
+                />
               )}
             </div>
 
@@ -605,7 +740,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
                   )}
                   <Link
                     href={hrefCotizacion('asistente-proyecto')}
-                    onClick={() => trackQuoteStarted('asistente', rfqDraft.payload.producto, rfqDraft.payload.slug)}
+                    onClick={() => trackQuoteStarted('asistente', readinessSignals.productName ?? undefined, productoSlug ?? undefined)}
                     className="text-xs font-medium text-[#047857] hover:underline"
                   >
                     Ir al formulario →
@@ -622,7 +757,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
               <Link
                 href={hrefCotizacion('asistente')}
                 onClick={() =>
-                  trackQuoteStarted('asistente', rfqDraft?.payload.producto ?? pageContext.product?.name, rfqDraft?.payload.slug ?? pageContext.product?.slug)
+                  trackQuoteStarted('asistente', readinessSignals.productName ?? undefined, productoSlug ?? undefined)
                 }
                 className="block text-center text-sm font-semibold bg-[#0A2540] hover:bg-[#047857] text-white px-4 py-2.5 rounded-2xl transition-colors"
               >
@@ -643,6 +778,175 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
         </section>
       </div>
     </div>
+  );
+}
+
+/**
+ * CONFIRMACIÓN DE UN CAMPO DEL CHECKLIST — Sprint E.2, tarea 2.
+ *
+ * ESTE ES EL ÚNICO CAMINO por el que un dato escrito por la persona entra al
+ * `ProjectDraft`. La regla que hace cumplir en código: se guarda EXACTAMENTE
+ * lo que se tecleó en estos campos y se envió con "Confirmar". Nunca se lee
+ * el texto libre del chat para adivinar una ciudad, una cantidad ni un
+ * contacto — ni siquiera cuando la respuesta parece obvia. Una ciudad de
+ * entrega adivinada se paga en un flete perdido.
+ *
+ * `contacto` es el único chip con tres entradas porque el checklist lo trata
+ * como un solo campo (nombre + teléfono o email, ver buildReadinessChecklist).
+ */
+function ConfirmarCampo({
+  campo,
+  draft,
+  onConfirmar,
+  onBorrar,
+  onCancelar,
+}: {
+  campo: ReadinessField;
+  draft: ProjectDraft;
+  onConfirmar: (patch: Partial<ProjectDraft>) => void;
+  onBorrar: (campos: Array<Parameters<typeof clearProjectDraftField>[0]>) => void;
+  onCancelar: () => void;
+}) {
+  const esContacto = campo.id === 'contacto';
+  const [nombre, setNombre] = useState(draft.nombre ?? '');
+  const [telefono, setTelefono] = useState(draft.telefono ?? '');
+  const [email, setEmail] = useState(draft.email ?? '');
+  const [valor, setValor] = useState(() => {
+    if (campo.id === 'producto') return draft.productName ?? '';
+    if (campo.id === 'cantidad') return draft.cantidad ?? '';
+    if (campo.id === 'ciudad') return draft.ciudad ?? '';
+    if (campo.id === 'aplicacion') return draft.aplicacion ?? '';
+    return '';
+  });
+  const primerCampo = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    primerCampo.current?.focus();
+  }, []);
+
+  /** Contacto necesita nombre + al menos una vía; el resto, un valor no vacío. */
+  const puedeConfirmar = esContacto
+    ? Boolean(nombre.trim() && (telefono.trim() || email.trim()))
+    : Boolean(valor.trim());
+
+  /** Hay algo guardado que se pueda quitar (no basta con que el chip esté verde). */
+  const camposGuardados = esContacto
+    ? (['nombre', 'telefono', 'email'] as const).filter((c) => draft[c])
+    : ([campo.id === 'producto' ? 'productName' : campo.id] as const).filter(
+        (c) => draft[c as keyof ProjectDraft],
+      );
+
+  function enviar(e: React.FormEvent) {
+    e.preventDefault();
+    if (!puedeConfirmar) return;
+    if (esContacto) {
+      onConfirmar({ nombre, telefono, email });
+      return;
+    }
+    if (campo.id === 'producto') onConfirmar({ productName: valor });
+    else if (campo.id === 'cantidad') onConfirmar({ cantidad: valor });
+    else if (campo.id === 'ciudad') onConfirmar({ ciudad: valor });
+    else if (campo.id === 'aplicacion') onConfirmar({ aplicacion: valor });
+  }
+
+  const inputClase =
+    'w-full text-sm rounded-xl border border-gray-200 dark:border-[var(--border)] bg-white dark:bg-[var(--surface)] text-[#0A2540] dark:text-[var(--text)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#059669]/40 focus:border-[#059669]';
+
+  return (
+    <form
+      onSubmit={enviar}
+      className="mt-3 rounded-2xl border border-gray-200 dark:border-[var(--border)] bg-gray-50 dark:bg-[var(--surface)] p-3 space-y-2"
+    >
+      <p className="text-xs text-gray-600 dark:text-[var(--text-muted)]">{campo.question}</p>
+
+      {esContacto ? (
+        <>
+          <label className="sr-only" htmlFor="confirmar-nombre">
+            Nombre
+          </label>
+          <input
+            id="confirmar-nombre"
+            ref={primerCampo}
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            placeholder="Nombre y apellido"
+            autoComplete="name"
+            maxLength={120}
+            className={inputClase}
+          />
+          <label className="sr-only" htmlFor="confirmar-telefono">
+            Teléfono
+          </label>
+          <input
+            id="confirmar-telefono"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
+            placeholder="Teléfono (WhatsApp)"
+            inputMode="tel"
+            autoComplete="tel"
+            maxLength={40}
+            className={inputClase}
+          />
+          <label className="sr-only" htmlFor="confirmar-email">
+            Email
+          </label>
+          <input
+            id="confirmar-email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            inputMode="email"
+            autoComplete="email"
+            maxLength={180}
+            className={inputClase}
+          />
+          <p className="text-[11px] text-gray-400 dark:text-[var(--text-muted)]">
+            Con el nombre y una vía de contacto basta.
+          </p>
+        </>
+      ) : (
+        <>
+          <label className="sr-only" htmlFor={`confirmar-${campo.id}`}>
+            {campo.label}
+          </label>
+          <input
+            id={`confirmar-${campo.id}`}
+            ref={primerCampo}
+            value={valor}
+            onChange={(e) => setValor(e.target.value)}
+            placeholder={campo.label}
+            maxLength={campo.id === 'cantidad' || campo.id === 'ciudad' ? 80 : 200}
+            className={inputClase}
+          />
+        </>
+      )}
+
+      <div className="flex items-center gap-2 pt-0.5">
+        <button
+          type="submit"
+          disabled={!puedeConfirmar}
+          className="inline-flex items-center gap-1 text-xs font-semibold bg-[#047857] hover:bg-[#059669] disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded-xl transition-colors"
+        >
+          <Check className="w-3 h-3" /> Confirmar
+        </button>
+        <button
+          type="button"
+          onClick={onCancelar}
+          className="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-[var(--text-muted)] hover:text-[#0A2540] dark:hover:text-[var(--text)] px-2 py-1.5 transition-colors"
+        >
+          <X className="w-3 h-3" /> Cancelar
+        </button>
+        {camposGuardados.length > 0 && (
+          <button
+            type="button"
+            onClick={() => onBorrar([...camposGuardados] as Array<Parameters<typeof clearProjectDraftField>[0]>)}
+            className="ml-auto text-xs text-gray-400 dark:text-[var(--text-muted)] hover:text-amber-700 px-2 py-1.5 transition-colors"
+          >
+            Quitar
+          </button>
+        )}
+      </div>
+    </form>
   );
 }
 
