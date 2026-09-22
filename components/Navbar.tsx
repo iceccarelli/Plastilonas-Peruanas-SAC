@@ -760,7 +760,19 @@ export default function Navbar() {
                 >
                   {user.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.image} alt="" className="w-5 h-5 rounded-full" />
+                    // Avatar del proveedor de sesión: `<img>` y no `<Image>`
+                    // porque el host es de terceros y variable. `lazy` +
+                    // `async` porque es decorativo, mide 20×20 y no debe
+                    // competir por red ni bloquear el hilo con el LCP.
+                    <img
+                      src={user.image}
+                      alt=""
+                      width={20}
+                      height={20}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-5 h-5 rounded-full"
+                    />
                   ) : (
                     <LayoutDashboard className="w-4 h-4" />
                   )}
