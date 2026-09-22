@@ -60,6 +60,7 @@ import {
 import type { PageContext } from '@/lib/ai/context';
 import { archiveVisionImage, readFileAsBase64, validateVisionFile } from '@/lib/ai/vision-upload';
 import { canUploadVisionImage, registerVisionUpload } from '@/lib/ai/vision-quota';
+import { buildVisionConfirmationPatch } from '@/lib/ai/vision-readiness';
 
 interface Props {
   /** Contexto de página ya resuelto en el servidor (lib/ai/context.ts). */
@@ -115,6 +116,8 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
   const [visionStatus, setVisionStatus] = useState<{ state: 'idle' | 'uploading' | 'error'; message?: string }>({
     state: 'idle',
   });
+  /** Índices de `observed` ya adjuntados al proyecto, por id de tarjeta de foto (Sprint F). */
+  const [visionConfirmadas, setVisionConfirmadas] = useState<Record<string, number[]>>({});
 
   useEffect(() => {
     setProjectId(getOrCreateProjectId());
@@ -366,6 +369,26 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
     setConfirmando(null);
   };
 
+  /**
+   * ADJUNTA UNA OBSERVACIÓN DE FOTO AL PROYECTO — Sprint F.
+   *
+   * `buildVisionConfirmationPatch` (lib/ai/vision-readiness.ts) es quien hace
+   * cumplir las dos reglas: sólo un tick de `observed` es confirmable, y el
+   * patch resultante sólo puede tocar `nota` y `visionEvidenceIds`. De aquí
+   * NUNCA sale una cantidad, una ciudad ni una certificación: una medida
+   * sacada de una foto es una cotización equivocada.
+   */
+  const confirmarObservacionDeFoto = (cardId: string, card: AssistantResponse, observedIndex: number) => {
+    if (card.type !== 'visionObservation') return;
+    const patch = buildVisionConfirmationPatch(card, observedIndex, cardId, draft.nota);
+    if (!patch) return;
+    setDraft(patchProjectDraft(patch, 'confirmado'));
+    setVisionConfirmadas((previo) => ({
+      ...previo,
+      [cardId]: [...new Set([...(previo[cardId] ?? []), observedIndex])],
+    }));
+  };
+
   const borrarCampoDelBorrador = (campos: Array<Parameters<typeof clearProjectDraftField>[0]>) => {
     let siguiente = draft;
     for (const campo of campos) siguiente = clearProjectDraftField(campo);
@@ -605,7 +628,14 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
           {/* Tarjetas de foto: fuera del flujo de `messages` (endpoint aparte,
               ver subirYAnalizarFoto), así que se muestran primero, siempre. */}
           {visionCards.map(({ id, card }) => (
-            <AssistantCard key={id} response={card} />
+            <AssistantCard
+              key={id}
+              response={card}
+              visionConfirm={{
+                onConfirmarObservacion: (index) => confirmarObservacionDeFoto(id, card, index),
+                observacionesConfirmadas: visionConfirmadas[id] ?? [],
+              }}
+            />
           ))}
           {cardsPorMensaje
             .filter(({ message }) => message.role === 'assistant' && message.id !== 'welcome')

@@ -9,7 +9,7 @@ import CalculationCard from './cards/CalculationCard';
 import MissingInformationCard from './cards/MissingInformationCard';
 import RFQCard from './cards/RFQCard';
 import NextActionCard from './cards/NextActionCard';
-import VisionObservationCard from './cards/VisionObservationCard';
+import VisionObservationCard, { type VisionConfirmProps } from './cards/VisionObservationCard';
 
 /**
  * DESPACHADOR de tarjetas — un componente por variante real del discriminated
@@ -18,7 +18,18 @@ import VisionObservationCard from './cards/VisionObservationCard';
  * `never` de abajo), en vez de dejar que una tarjeta desconocida caiga en un
  * genérico silencioso.
  */
-export default function AssistantCard({ response }: { response: AssistantResponse }) {
+export default function AssistantCard({
+  response,
+  visionConfirm,
+}: {
+  response: AssistantResponse;
+  /**
+   * Puente foto → proyecto (Sprint F). Opcional y exclusivo de la tarjeta de
+   * visión: ninguna otra variante lo recibe, así que no hay forma de que un
+   * "confirmar" se cuele en una tarjeta que no sea una observación de foto.
+   */
+  visionConfirm?: VisionConfirmProps;
+}) {
   switch (response.type) {
     case 'narrative':
       return <NarrativeCard {...response} />;
@@ -41,7 +52,7 @@ export default function AssistantCard({ response }: { response: AssistantRespons
     case 'nextAction':
       return <NextActionCard {...response} />;
     case 'visionObservation':
-      return <VisionObservationCard {...response} />;
+      return <VisionObservationCard {...response} {...visionConfirm} />;
     default: {
       const _exhaustive: never = response;
       return _exhaustive;

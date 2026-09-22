@@ -36,3 +36,70 @@ type VisionObservation = Extract<AssistantResponse, { type: 'visionObservation' 
 export function deriveReadinessSignalFromVision(_card: VisionObservation): Partial<ReadinessSignals> {
   return {};
 }
+
+// ---------------------------------------------------------------------------
+// PUENTE HONESTO FOTO → PROYECTO — Sprint F
+// ---------------------------------------------------------------------------
+/**
+ * La decisión de arriba sigue intacta: NINGUNA foto marca sola un campo del
+ * checklist. Lo que este sprint agrega es el único puente admisible — que la
+ * PERSONA confirme una observación concreta para adjuntarla a su proyecto.
+ *
+ * Lo que cambia respecto a la regla de arriba: nada automático. Sigue siendo
+ * la persona quien afirma, igual que en el formulario de confirmación de
+ * chips (Sprint E.2). Lo que el código hace cumplir aquí:
+ *
+ *  1. SÓLO se puede confirmar un tick de `observed`. `inferences`, `unknown`
+ *     y `requiresConfirmation` no son confirmables — no hay índice que los
+ *     alcance, y un índice fuera de `observed` devuelve `null`.
+ *  2. Una observación confirmada NUNCA llena `cantidad`, `ciudad`,
+ *     `productoSlug`, `productName`, `aplicacion` ni ningún campo de
+ *     contacto. El patch que devuelve esta función sólo puede tocar `nota` y
+ *     `visionEvidenceIds`: es texto de contexto para quien cotiza, no un
+ *     dato estructurado. Una foto no da una medida ni una ciudad, y un
+ *     grado de material o una certificación no se leen de una imagen jamás.
+ *
+ * Ese punto 2 es el que vale dinero: una cantidad sacada de una foto es una
+ * cotización equivocada, y una certificación sacada de una foto es una
+ * afirmación que la empresa no puede sostener.
+ */
+
+/** Recorte de `ProjectDraft` que este puente puede tocar. Nada más existe aquí. */
+export interface VisionConfirmationPatch {
+  nota: string;
+  visionEvidenceIds: string[];
+}
+
+/** Prefijo que deja rastro del origen en la nota: quien cotiza sabe que salió de una foto. */
+export const VISION_NOTE_PREFIX = 'Observado en foto:';
+
+/**
+ * Devuelve el patch para adjuntar UNA observación confirmada al proyecto, o
+ * `null` si el índice no corresponde a un tick de `observed` (lo que incluye
+ * cualquier intento de confirmar una inferencia o un desconocido).
+ *
+ * `notaActual` se recibe para poder anexar sin perder lo que ya había, y
+ * para no repetir dos veces la misma observación.
+ */
+export function buildVisionConfirmationPatch(
+  card: VisionObservation,
+  observedIndex: number,
+  evidenceId: string,
+  notaActual?: string | null,
+): VisionConfirmationPatch | null {
+  const texto = card.observed[observedIndex];
+  if (typeof texto !== 'string' || !texto.trim()) return null;
+  if (!evidenceId.trim()) return null;
+
+  const linea = `${VISION_NOTE_PREFIX} ${texto.trim()}`;
+  const previa = (notaActual ?? '').trim();
+  if (previa.split('\n').includes(linea)) {
+    // Ya estaba adjuntada: se devuelve el mismo estado en vez de duplicarla.
+    return { nota: previa, visionEvidenceIds: [evidenceId.trim()] };
+  }
+
+  return {
+    nota: previa ? `${previa}\n${linea}` : linea,
+    visionEvidenceIds: [evidenceId.trim()],
+  };
+}
