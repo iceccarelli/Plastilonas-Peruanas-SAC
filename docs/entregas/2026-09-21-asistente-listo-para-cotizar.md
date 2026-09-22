@@ -1,7 +1,7 @@
 # Cierre del embudo — "Listo para cotizar" ya puede disparar
 
 **Rama:** `claude/inspiring-curie-k1av8i`
-**Fecha:** 2026-09-21
+**Fecha:** 2026-09-21 · **Ampliado:** 2026-09-22 (Sprints E.2, F, G, H, I)
 **Base:** `main @ c1c1556` (PR de cierre del sprint "asistente" ya en producción).
 **Continúa de:** `docs/entregas/2026-09-21-plastilonas-ai-cierre.md`.
 
@@ -105,71 +105,285 @@ técnico sin salida al asistente (gap ya señalado en el cierre anterior:
 con `context: 'biblioteca:<slug>'` para atribución y `producto=<slug
 relacionado>` cuando la guía declara uno.
 
-## Qué queda sin hacer en este pase (honesto, no fingido)
+## Sprint E.2 — El bucle de readiness, cerrado de verdad
 
-El resto de Sprint E–I definía un alcance mayor (borrador de proyecto en
-`localStorage`, confirmación de campos de visión, Playwright E2E contra
-producción, barrido completo de reachability/orphans de Sprint H, y el
-trabajo de carga/lazy de Sprint I). Este pase se concentró en el ítem de
-mayor apalancamiento («cash antes que coherencia antes que velocidad», como
-pide el mandato) y en cerrarlo con pruebas reales, en vez de tocar
-superficialmente ocho frentes a la vez:
+El Sprint E hizo que `ciudad` pudiera llegar. No alcanzaba, por dos agujeros
+que se veían solo al usar el asistente como lo usa un comprador:
 
-- **Sprint F** (vision → draft, checkbox de confirmación por campo
-  OBSERVADO): no se tocó. `lib/ai/vision-readiness.ts` sigue sin alimentar
-  `readinessSignals` — sigue siendo la barrera correcta, documentada en el
-  propio archivo, y no se debilitó.
-- **Sprint G.2/G.3** (Playwright E2E contra build de producción, burst-test
-  de rate limiting): no se ejecutó una suite Playwright nueva en este pase.
-  Sí se corrieron y verificaron en verde, contra el build real:
-  `npm run auditar:imagenes` (0 errores, 0 avisos) y
-  `npm run auditar:navegacion` (0 errores, 184 opciones × 5 anchos).
-- **Sprint H** (barrido completo de orphans/reachability más allá del gap de
-  biblioteca cerrado arriba, consolidación de CTAs duplicados): no se hizo
-  un inventario nuevo. La única señal que corrió en este pase
-  (`auditar:imagenes`, `huerfanas.test.ts`) no encontró huérfanos nuevos.
-- **Sprint I** (lazy/priority/defer): no se tocó ningún archivo de imágenes,
-  layout o carga. Cero binarios modificados (no aplicaba: no se tocó
-  ninguno).
+1. **El checklist leía únicamente el ÚLTIMO `buildRFQ` de la conversación.**
+   Bastaba con que el modelo no volviera a llamar la tool en el turno
+   siguiente para que un chip ya resuelto volviera a gris. "Listo para
+   cotizar" dependía de que el modelo acertara a llamar una tool en el turno
+   correcto — es decir, de la suerte.
+2. **Los chips solo mandaban la pregunta al chat.** Si la persona respondía
+   y el modelo no llamaba `buildRFQ`, el dato no llegaba a ninguna parte.
 
-## Verificación de "cero regresiones vs. #30"
+### Qué se construyó
 
-- `npx vitest run` en la rama base (`main @ c1c1556`, sin estos cambios): 76
-  archivos / 1189 pruebas en verde.
-- Misma corrida sobre esta rama: 76 archivos / **1193** pruebas en verde (4
-  nuevas, 0 fallidas, 0 saltadas).
-- `npm run build` limpio en ambas ramas.
-- `npm run auditar:viewport` (17 dispositivos × 4 rutas) da el **mismo
-  resultado exacto** en `main` y en esta rama: 3 errores de recorte en
-  Galaxy Fold (280px, cabecera "Cotizar") y 3 avisos de área táctil
-  (producto en `/productos` a 430/412px, `<input>` en `/cotizacion` a
-  2560px). Se confirmó corriendo el audit sobre el árbol *stasheado* al
-  commit base antes de restaurar los cambios de esta rama: son defectos
-  preexistentes de la navbar y de la grilla de `/productos`/`/cotizacion`
-  que este sprint no toca ni intenta resolver (fuera de alcance: tocar la
-  navbar exige el mismo audit + `auditar:navegacion`, y no es donde está el
-  dinero de este sprint).
-- `npm run auditar:navegacion` (17 dispositivos donde aplica, 12 grupos de
-  menú, 184 opciones): 0 errores.
+- **`lib/ai/project-draft.ts` (nuevo).** Estado estructurado del proyecto en
+  `localStorage`, al lado de `pp_asistente_project_id`. Campos:
+  `productoSlug`, `productName`, `cantidad`, `ciudad`, `aplicacion`,
+  `nombre`, `telefono`, `email`, `nota`, `visionEvidenceIds[]`.
+  Cuatro fuentes admitidas y ninguna más: `pageContext`, resultado de tool,
+  `buildRFQ`, o confirmación explícita en la UI. Un patch vacío **nunca**
+  borra un dato ya confirmado; `clearProjectDraftField` es el único camino
+  para quitar uno. Nunca lanza: en SSR, en modo privado o con `localStorage`
+  bloqueado se comporta como un borrador vacío.
+- **`mergeReadinessSignals` / `resolveProductSlug` en `lib/ai/readiness.ts`.**
+  Funden las cuatro fuentes con precedencia explícita —confirmado >
+  `buildRFQ` > tool > `pageContext`— y son **lógica pura**: sin DOM, sin
+  modelo, probables con fixtures.
+- **Chip desconocido → pregunta en el chat *y* campo de confirmación.** Hay
+  siempre un camino que escribe estado estructurado sin depender de que el
+  modelo llame la tool. Solo se guarda lo que la persona teclea y confirma:
+  no se lee el texto libre del chat para adivinar una ciudad.
+- **Los chips ya no desaparecen al completarse.** Antes, al encender "Listo
+  para cotizar" se ocultaban, y con ellos la única forma de *revisar* lo que
+  el proyecto había registrado. Un dato de entrega equivocado que ya no se
+  puede corregir es peor que uno que falta. Ahora un chip verde es un botón
+  que lo abre para editarlo.
+- **El borrador absorbe `buildRFQ` y `getApplication`**, así el dato
+  sobrevive a los turnos sin tool y a una recarga. **No** absorbe el producto
+  de `pageContext` ni de `productosVistos`: haber mirado una ficha no es
+  haber pedido ese producto. Esos siguen como señal viva, nunca como
+  decisión fijada.
+
+### Antes / después (E.2)
+
+| Pregunta | Antes de E.2 | Después |
+|---|---|---|
+| ¿Un chip resuelto puede volver a gris? | Sí, en cuanto el modelo dejaba de llamar `buildRFQ` | No: el borrador lo retiene |
+| ¿Sobrevive a una recarga de página? | No | Sí (`localStorage`) |
+| ¿Hay camino a "Listo" sin llamada al modelo? | No | Sí, por confirmación en la UI |
+| ¿Se puede corregir un dato equivocado? | No: los chips se ocultaban al completarse | Sí: cada chip verde se abre para editar |
+| ¿Se adivina la ciudad del texto libre? | — | No, y hay prueba de ello |
+
+## Sprint F — Puente honesto foto → proyecto
+
+Tras una tarjeta de visión válida, cada tick de **OBSERVADO** se puede
+adjuntar al proyecto con "Confirmar para el proyecto". Nada automático:
+sigue siendo la persona quien afirma.
+
+Dos reglas, hechas cumplir **en código** y no solo en el prompt:
+
+1. **Solo OBSERVADO es confirmable.** El callback se pasa únicamente a esa
+   sección; INFERENCIA, DESCONOCIDO y REQUIERE CONFIRMACIÓN se renderizan
+   sin callback, así que no existe en el árbol un botón capaz de
+   confirmarlas. Además `buildVisionConfirmationPatch` devuelve `null` para
+   cualquier índice fuera de `observed`.
+2. **Lo confirmado entra como NOTA, nunca como dato estructurado.** El patch
+   solo puede tocar `nota` y `visionEvidenceIds`. De una foto no sale una
+   cantidad, una ciudad ni una certificación: una medida sacada de una foto
+   es una cotización equivocada, y una certificación sacada de una foto es
+   una afirmación que la empresa no puede sostener.
+
+`deriveReadinessSignalFromVision` **sigue devolviendo `{}`**: ninguna foto
+marca sola un chip. El compilador refuerza la separación —
+`VisionConfirmationPatch` no comparte ninguna propiedad con
+`ProjectDraftSignals`, así que pasarlo a `mergeReadinessSignals` no compila
+(TS2559). La subida de documento sigue siendo stub, sin cambios.
+
+## Sprint G — La prueba que sí vale dinero
+
+`scripts/camino-dinero.mjs` + `scripts/probar-dinero.sh`
+(**`npm run probar:dinero`**): navegador real contra el sitio **compilado**.
+
+Las 1234 pruebas de vitest leen archivos y llaman funciones. Pueden demostrar
+que `mergeReadinessSignals` enciende "Listo para cotizar" con las cinco
+señales, pero **no** que un comprador llegue a ponerlas. Entre la función
+correcta y la venta hay un CTA en la ficha, un panel visible, un formulario
+que tiene que *escribir* estado y un `/cotizacion` que tiene que llegar
+precargado. Cada uno ha estado roto alguna vez con la suite entera en verde.
+
+- **TRAMO 1** — ficha → CTA contextual → `/asistente?producto=` → confirmar
+  cantidad, ciudad, uso y contacto → "Listo para cotizar" → `/cotizacion`
+  con ciudad y producto precargados → brief de WhatsApp con los mismos datos
+  y sin ningún precio. Cada confirmación se verifica leyendo el borrador del
+  propio navegador: un "Confirmar" que no escribe estado es justo el fallo
+  que esta prueba existe para ver.
+- **TRAMO 2** — foto: o analiza de verdad, o dice que no puede. Nunca inventa.
+- **TRAMO 3** — ráfaga a `/api/chat` → 429; `/api/vision` sigue limitando por
+  su cuenta. Va al final a propósito: agotar el cubo deja el chat limitado
+  10 minutos, y cualquier tramo posterior mediría un sitio artificialmente
+  roto.
+- **TRAMO 4** — alcanzabilidad (ver Sprint H).
+
+**El Tramo 1 no necesita clave de Anthropic, y eso no es un atajo de la
+prueba: es la propiedad que el Sprint E.2 existe para dar.** Si el camino a
+"Listo para cotizar" dependiera de que el modelo acertara a llamar
+`buildRFQ`, esta prueba no podría correr sin clave — y el comprador tampoco
+podría cotizar cuando el modelo no la llamara.
+
+**Resultado: 26/26 comprobaciones.**
+
+### Dos defectos del arnés, encontrados al usarlo
+
+1. **El apagado dejaba un servidor vivo ocupando el puerto.** `kill`
+   mataba el `npx`, no su hijo `next-server`. La ejecución siguiente
+   encontraba algo que contestaba, lo daba por "servidor listo" y medía el
+   servidor **viejo** creyendo medir el nuevo. Medido: la ráfaga dio 429 en
+   la petición 1 porque el cubo ya estaba gastado de la corrida anterior.
+   Ahora se apaga el grupo de procesos (`setsid` + `kill -PGID`) y se aborta
+   si el puerto ya responde. **El mismo fallo estaba en
+   `scripts/diagnostico.sh`**, que es el único instrumento del repositorio
+   que mide la página renderizada.
+2. **`getByText` compara por subcadena e ignorando mayúsculas**, así que
+   buscar "Análisis de foto" daba positivo dentro del mensaje de error "El
+   análisis de fotos no está disponible". La prueba entraba en la rama
+   equivocada. La tarjeta se detecta ahora por texto exclusivo suyo.
+
+### Limitación declarada
+
+La rama del Tramo 2 que confirma una observación real solo corre **con**
+`ANTHROPIC_API_KEY` (sin clave, `/api/vision` responde 503 y lo que se
+comprueba es que la UI lo dice en vez de inventar — que también es una
+prueba, no una excusa). La lógica de confirmación en sí está cubierta por
+`test/ai-vision-readiness.test.ts`, que no necesita clave.
+
+## Sprint H — Una sola pila, sin huérfanos
+
+### Alcanzabilidad: 14 callejones sin salida, cerrados
+
+El TRAMO 4 mide si una página que informa ofrece **algún** camino a cotizar
+dentro de su contenido. Se mide dentro de `<main>` a propósito: el navbar y
+el pie tienen enlaces a `/cotizacion` y a WhatsApp en todas las páginas, así
+que comprobarlos daría verde siempre y no diría nada.
+
+**Lo que encontró:** las **14 entradas de `/novedades`** terminaban en "ver
+todas las novedades" y "feed RSS", y nada más. Quien llegaba desde una
+búsqueda leía el artículo y se iba. Eran las únicas páginas de contenido del
+sitio así.
+
+**Arreglo:** bloque de salida en `novedades/[slug]` con el patrón que ya usan
+`biblioteca/[slug]` y `recursos/[slug]` — RFQ como camino principal y
+`AsistenteAiLink` de secundario (`pageType=news`, un `PageType` real). **No
+hay un segundo asistente ni un segundo formulario.** El bloque editorial de
+registro y RSS sigue intacto debajo: no se cambia la voz.
+
+Exclusiones, con su motivo escrito en el código: los endpoints de máquina
+(`catalogo.json`, `terminos.json`, `formulas.json` — datos para agentes, no
+páginas que alguien lee) y las **raíces** de sección, cuyo trabajo es
+repartir hacia las hijas. Eso se comprueba aparte: una raíz que no enlaza a
+ninguna hija es tan callejón sin salida como un artículo sin CTA.
+
+**Resultado: 178 páginas de contenido con salida, 6 raíces repartiendo.**
+
+### Cuatro formas de encontrar Chromium, y solo una funcionaba
+
+`auditar:navegacion`, `auditar:viewport`, `audit-ui` y el arné de
+`diagnostico/` tenían cuatro estrategias distintas y **tres nombres de
+variable** (`PLAYWRIGHT_CHROMIUM`, `PLAYWRIGHT_CHROMIUM_PATH`,
+`DIAG_CHROME`). Las dos primeras morían con «run `npx playwright install`»
+sin decir que había un Chromium a dos directorios de distancia — es decir,
+dos auditorías del repositorio estaban **apagadas** sin que nada lo dijera.
+
+Ahora las cuatro lanzan con `LANZAR` de `scripts/diagnostico/rutas.mjs`, que
+ya sabía buscar en orden; las variables viejas se aceptan como alias.
+`audit-ui.mjs` lo importa de forma dinámica para no convertir `playwright`
+en dependencia obligatoria.
+
+`npm run auditar:navegacion` vuelve a correr: **0 errores, 45 destinos, 12
+grupos × 184 opciones en los 5 anchos.**
+
+### Medios: nada borrado, nada re-codificado
+
+`npm run auditar:imagenes`: **0 errores, 0 avisos** (517 archivos en
+`public/`, 201 rutas citadas). **Cero binarios modificados**: ni un WebP ni
+un mp4 regenerado, movido o borrado.
+
+**32 WebP sin ninguna cita** (ni por ruta, ni por nombre, ni por slug), 1,6 MB
+en total. Se **listan, no se purgan**, como pide el mandato:
+
+| Grupo | Archivos | Peso |
+|---|---|---|
+| `/images/industria/*` (variantes de ilustración no cableadas) | 17 | ~700 KB |
+| `/images/proceso/*-2.webp` (segundas tomas no cableadas) | 12 | ~250 KB |
+| `/images/galeria/geomembranas-pvc-*-2.webp` | 3 | ~500 KB |
+
+Ningún `.mp4` quedó huérfano: los editoriales siguen citados y en uso.
+
+### Información: sin inconsistencias
+
+`npm run seo:consistency`: 67 plantillas · 239 URLs públicas · 25 endpoints
+de máquina · **0 inconsistencias**. Las 2 huérfanas que reporta son las
+declaradas a propósito (retorno de pasarela, acceso de clientes) y
+`huerfanas.test.ts` sigue en verde.
+
+## Sprint I — Velocidad: medido, y casi todo ya estaba bien
+
+Este sprint es corto **a propósito**. Lo que se encontró al auditar es que
+la capa de rendimiento ya estaba afinada:
+
+- Las 15 imágenes con `fill` **ya tenían** su `sizes`. Ninguna faltaba.
+- `priority` es condicional en todos los casos (`index === 0`, `i === 0`,
+  `prioridadCartel`) menos el logo del navbar, que sí está sobre el pliegue
+  en todas las páginas. No hay un `priority` de más.
+- `MachineryGallery` ya trae `loading`/`decoding` correctos, con `eager`
+  solo en la primera toma. `CinePlayer` usa `preload="metadata"` con póster.
+
+**Lo único que faltaba:** el avatar del proveedor de sesión en el navbar, un
+`<img>` de 20×20 decorativo sin `loading` ni `decoding`. Ahora `lazy` +
+`async`, con `width`/`height` explícitos.
+
+### Dos experimentos medidos y revertidos
+
+Valen más escritos que callados:
+
+| Experimento | Hipótesis | Medido | Decisión |
+|---|---|---|---|
+| `Chatbot` con `next/dynamic` desde el layout | Arranca cerrado y `@ai-sdk/react` solo lo usan él y `/asistente`: parecía el candidato obvio | 99 rutas idénticas, 2 rutas **+1 kB**, trozo compartido con el **mismo hash** | Revertido |
+| `LonaConfigurador` con `next/dynamic` (SSR conservado) | 711 líneas, el componente de cliente más grande de la portada, muy por debajo del pliegue | Portada **201 → 202 kB** | Revertido |
+
+Next 15 ya divide por ruta; el `dynamic()` manual solo agregaba el
+envoltorio. Enviar cualquiera de los dos habría sido mover sin avanzar.
+
+## Gates — resultado final
+
+| Gate | Resultado |
+|---|---|
+| `npx tsc --noEmit` | limpio |
+| `npm test` | **78 archivos / 1234 pruebas**, 0 fallidas (línea base de la rama: 76/1193 → **+2 archivos, +41 pruebas, 0 regresiones**) |
+| `npm run seo:claims` | 3 archivos / 34 pruebas en verde |
+| `afirmaciones.test.ts` / `dominio-migracion.test.ts` | **sin tocar** (verificado con `git diff --name-only`) |
+| `npm run auditar:imagenes` | 0 errores, 0 avisos |
+| `npm run auditar:navegacion` | 0 errores, 45 destinos |
+| `npm run auditar:viewport` | 3 errores + 3 avisos — **exactamente la línea base conocida** |
+| `npm run probar:dinero` | **26/26** |
+| `npm run build` | limpio |
+
+### Sobre el viewport: ninguna regresión nueva
+
+Los 3 errores (Galaxy Fold 280px, «Cotizar» recortado en `/`, `/productos`,
+`/industria/mineria`) y los 3 avisos táctiles son **los mismos que ya había**
+y están declarados fuera de alcance en el mandato. Ninguna de las 4 rutas
+auditadas cambia de plantilla en los commits de este pase — verificado con
+`git diff --name-only 6b6e362..HEAD`. Tras tocar `Navbar.tsx` (avatar) se
+volvieron a correr `auditar:viewport` y `auditar:navegacion`, como exige la
+ley de producto, con resultado idéntico.
 
 ## Bloqueos humanos (documentados, no simulados)
 
-Sin cambios respecto al cierre anterior — se listan de nuevo porque siguen
-vigentes y condicionan Sprint F/adjuntos:
+Siguen vigentes y **no se tocó ninguno**:
 
 - Bucket `rfq-adjuntos` en Supabase Storage + política RLS de `INSERT`
-  anónimo (hoy los adjuntos de `/cotizacion` viajan como lista de nombres si
-  el bucket no existe).
+  anónimo. Condiciona los adjuntos de `/cotizacion` y la subida de documento
+  del asistente (que por eso sigue siendo stub).
 - `CRM_WEBHOOK_URL` / `N8N_WEBHOOK_URL` para reenvío del lead.
 - `RESEND_API_KEY` (opcional) para copia por correo del RFQ.
-- Decisión `www` vs. apex en `CANONICAL_ORIGIN` — no tocada.
+- Decisión `www` vs. apex en `CANONICAL_ORIGIN` — **no tocada**.
 - `verificado: true` en `lib/projects.ts` antes de publicar cualquier obra o
   cliente nuevo — no se agregó ninguno.
+- `ANTHROPIC_API_KEY` en el entorno de CI si se quiere que el Tramo 2 de
+  `probar:dinero` ejercite el análisis real de foto.
+
+`wa.me` ya funciona y se usa tal cual.
 
 ## Cómo seguir desde aquí
 
-El siguiente ítem de mayor apalancamiento es Sprint F (confirmar campos
-OBSERVADO de una foto hacia el `ProjectDraft`/`buildRFQ`) porque cierra el
-puente que ya existe a medias entre `/api/vision` y la cotización. Después,
-Sprint G.2 (Playwright real contra un build servido) verificaría en CI lo
-que aquí se verificó a mano.
+1. **Correr `npm run probar:dinero` en CI** con clave, para cubrir la rama de
+   visión real del Tramo 2.
+2. **Cablear o retirar los 32 WebP sin citar** — decisión editorial, no
+   técnica: o se usan en las páginas de industria y proceso para las que se
+   generaron, o se archivan. No se tocan desde aquí.
+3. **Desbloquear `rfq-adjuntos`** es lo que convierte la subida de documento
+   de stub en producto.
