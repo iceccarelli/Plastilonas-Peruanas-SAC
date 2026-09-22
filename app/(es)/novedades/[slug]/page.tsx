@@ -13,6 +13,7 @@ import { JsonLd } from '@/components/JsonLd';
 import TrackView from '@/components/TrackView';
 import { articleSchema, breadcrumbSchema, webPageSchema } from '@/lib/schema';
 import { descripcionDeTexto, OG_IMAGEN } from '@/lib/meta';
+import AsistenteAiLink from '@/components/AsistenteAiLink';
 
 /**
  * Entrada del registro fechado.
@@ -189,7 +190,44 @@ export default async function NovedadPage({ params }: Props) {
         )}
       </nav>
 
-      <div className="rounded-3xl border border-gray-100 p-8 text-center">
+      {/*
+        SALIDA A COTIZAR — Sprint H (alcanzabilidad).
+        Esta entrada terminaba en "ver todas las novedades" y "feed RSS", y
+        nada más: quien llegaba desde una búsqueda leía el artículo y se iba,
+        porque el único camino a cotizar estaba en la barra de navegación.
+        Medido con `npm run probar:dinero`: las 14 entradas del registro eran
+        callejones sin salida, las únicas páginas de contenido del sitio que
+        lo eran.
+
+        El orden es el de siempre (ver biblioteca/[slug] y recursos/[slug]):
+        el RFQ es el camino principal y el asistente va de secundario, porque
+        quien acaba de leer un artículo del sector suele tener una duda
+        puntual antes que un RFQ completo. No se promete nada nuevo ni se
+        cambia la voz editorial: el bloque de registro y RSS sigue intacto
+        justo debajo.
+      */}
+      <div className="rounded-3xl border border-gray-100 p-8">
+        <h2 className="text-lg font-semibold text-[#0A2540]">¿Esto le toca de cerca?</h2>
+        <p className="mt-2 text-sm text-gray-700">
+          Si está evaluando un material o una especificación para su proyecto, podemos revisarlo con el catálogo real
+          —sin precios ni certificaciones inventadas— y armar la cotización con lo que usted confirme.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <Link
+            href="/cotizacion?origen=novedades"
+            className="inline-flex items-center justify-center rounded-2xl bg-[#0A2540] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#059669]"
+          >
+            Abrir RFQ
+          </Link>
+          <AsistenteAiLink
+            query={`pageType=news&origen=${encodeURIComponent(`novedad:${n.slug}`)}`}
+            context={`novedad:${n.slug}`}
+            className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-5 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-[#059669]/40 hover:text-[#059669]"
+          />
+        </div>
+      </div>
+
+      <div className="mt-6 rounded-3xl border border-gray-100 p-8 text-center">
         <p className="mb-5 text-gray-700">
           El registro completo, con feed para suscribirse sin dejar un correo.
         </p>

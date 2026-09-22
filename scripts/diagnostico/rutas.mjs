@@ -127,6 +127,10 @@ import { chromium } from 'playwright';
 
 const CANDIDATOS = () => [
   process.env.DIAG_CHROME,
+  // Alias históricos de las otras auditorías, que ahora lanzan desde aquí:
+  // quien ya tenía una de estas exportada no debe notar la unificación.
+  process.env.PLAYWRIGHT_CHROMIUM,
+  process.env.PLAYWRIGHT_CHROMIUM_PATH,
   (() => {
     try {
       return chromium.executablePath();

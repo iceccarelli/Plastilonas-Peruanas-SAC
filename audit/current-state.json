@@ -1,11 +1,11 @@
 {
   "generadoPor": "scripts/auditar-estado.mjs",
-  "commit": "dac865f",
+  "commit": "f9a6506",
   "resumen": {
-    "plantillasDePagina": 65,
-    "urlsPublicas": 237,
+    "plantillasDePagina": 67,
+    "urlsPublicas": 239,
     "endpointsMaquina": 25,
-    "endpointsApi": 5,
+    "endpointsApi": 6,
     "productos": 40,
     "familias": 11,
     "industrias": 5,
@@ -194,7 +194,7 @@
         "/cotizacion",
         "/productos/[slug]"
       ],
-      "lineas": 129
+      "lineas": 137
     },
     {
       "ruta": "/aplicaciones",
@@ -214,6 +214,23 @@
         "/aplicaciones/[slug]"
       ],
       "lineas": 49
+    },
+    {
+      "ruta": "/asistente",
+      "archivo": "app/(es)/asistente/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITLE} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": null,
+      "canonical": "/asistente",
+      "esquemas": [
+        "breadcrumbSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [],
+      "lineas": 104
     },
     {
       "ruta": "/biblioteca/[slug]",
@@ -243,7 +260,7 @@
         "/cotizacion",
         "/productos/[slug]"
       ],
-      "lineas": 140
+      "lineas": 151
     },
     {
       "ruta": "/biblioteca",
@@ -525,7 +542,7 @@
       "enlacesSalientes": [
         "/"
       ],
-      "lineas": 117
+      "lineas": 126
     },
     {
       "ruta": "/dashboard",
@@ -778,7 +795,7 @@
         "/recursos/[slug]",
         "/soluciones/[slug]"
       ],
-      "lineas": 407
+      "lineas": 416
     },
     {
       "ruta": "/industria",
@@ -1063,9 +1080,10 @@
       ],
       "enlacesSalientes": [
         "/confianza",
-        "/contacto"
+        "/contacto",
+        "/oficio"
       ],
-      "lineas": 122
+      "lineas": 150
     },
     {
       "ruta": "/novedades/[slug]",
@@ -1104,7 +1122,7 @@
         "/novedades/[slug]",
         "/novedades/rss.xml"
       ],
-      "lineas": 214
+      "lineas": 252
     },
     {
       "ruta": "/novedades",
@@ -1132,6 +1150,30 @@
       "lineas": 221
     },
     {
+      "ruta": "/oficio",
+      "archivo": "app/(es)/oficio/page.tsx",
+      "dinamica": false,
+      "instancias": 1,
+      "slugs": null,
+      "title": "${TITULO} | ${SITE.name}",
+      "tituloDerivado": true,
+      "h1": "El oficio",
+      "canonical": "RUTA_CINE",
+      "esquemas": [
+        "breadcrumbSchema",
+        "videoObjectSchema",
+        "webPageSchema"
+      ],
+      "enlacesSalientes": [
+        "/confianza",
+        "/cotizacion",
+        "/oficio",
+        "/productos",
+        "/productos/familia/[slug]"
+      ],
+      "lineas": 192
+    },
+    {
       "ruta": "/",
       "archivo": "app/(es)/page.tsx",
       "dinamica": false,
@@ -1153,9 +1195,10 @@
         "/nosotros",
         "/novedades",
         "/novedades/[slug]",
+        "/oficio",
         "/productos"
       ],
-      "lineas": 414
+      "lineas": 492
     },
     {
       "ruta": "/privacidad",
@@ -1239,11 +1282,12 @@
         "/industria/mineria",
         "/industria/saneamiento-y-agua",
         "/industria/transporte-logistica",
+        "/oficio",
         "/productos",
         "/productos/[slug]",
         "/soluciones/[slug]"
       ],
-      "lineas": 439
+      "lineas": 497
     },
     {
       "ruta": "/productos/familia/[slug]/comparar",
@@ -1313,13 +1357,14 @@
       "enlacesSalientes": [
         "/",
         "/cotizacion",
+        "/oficio",
         "/productos",
         "/productos/[slug]",
         "/productos/familia/[slug]",
         "/productos/familia/[slug]/comparar",
         "/recursos/[slug]"
       ],
-      "lineas": 316
+      "lineas": 363
     },
     {
       "ruta": "/productos",
@@ -1408,7 +1453,7 @@
         "/recursos",
         "/recursos/[slug]/guia.pdf"
       ],
-      "lineas": 471
+      "lineas": 482
     },
     {
       "ruta": "/recursos",
@@ -1805,6 +1850,11 @@
     {
       "ruta": "/api/lead",
       "archivo": "app/api/lead/route.ts",
+      "publico": false
+    },
+    {
+      "ruta": "/api/vision",
+      "archivo": "app/api/vision/route.ts",
       "publico": false
     },
     {
@@ -2887,6 +2937,7 @@
       "/[...resto]",
       "/aplicaciones/[slug]",
       "/aplicaciones",
+      "/asistente",
       "/biblioteca/[slug]",
       "/biblioteca",
       "/big-bags",
@@ -2926,6 +2977,7 @@
       "/nosotros",
       "/novedades/[slug]",
       "/novedades",
+      "/oficio",
       "/",
       "/privacidad",
       "/productos/[slug]",
@@ -2943,10 +2995,11 @@
       "/ventilacion-minera",
       "/pt"
     ],
-    "aristas": 256,
+    "aristas": 267,
     "enlacesGlobales": [
       "/",
       "/aplicaciones",
+      "/asistente",
       "/biblioteca",
       "/big-bags",
       "/calculadoras",
@@ -2981,6 +3034,7 @@
       "/metodo",
       "/nosotros",
       "/novedades",
+      "/oficio",
       "/privacidad",
       "/productos",
       "/productos/[slug]",
@@ -3003,6 +3057,7 @@
       "/[...resto]": 2,
       "/aplicaciones": 1,
       "/aplicaciones/[slug]": 2,
+      "/asistente": 1,
       "/biblioteca": 1,
       "/biblioteca/[slug]": 2,
       "/big-bags": 1,
@@ -3047,6 +3102,7 @@
       "/nosotros": 1,
       "/novedades": 1,
       "/novedades/[slug]": 1,
+      "/oficio": 1,
       "/privacidad": 1,
       "/productos": 1,
       "/productos/[slug]": 1,
