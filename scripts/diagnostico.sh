@@ -27,10 +27,27 @@ BASE="http://localhost:${PUERTO}"
 REGISTRO="$(mktemp -t next-start-XXXX.log)"
 SERVIDOR=""
 
+# SE APAGA EL GRUPO ENTERO, NO SÓLO EL `npx`.
+#
+# Esto decía `kill "$SERVIDOR"`, y $SERVIDOR es el `npx`, que a su vez lanza
+# un `next-server` hijo. Matar al padre dejaba al hijo vivo OCUPANDO EL
+# PUERTO. Y ahí está el daño: la siguiente ejecución encontraba algo que
+# contestaba en ese puerto, daba por bueno "servidor listo" y medía el
+# servidor VIEJO —código anterior, límites de tasa ya gastados— creyendo que
+# medía el nuevo. Un arné que mide en silencio la cosa equivocada es peor
+# que uno que no corre: el verde es falso y nadie lo sabe.
+#
+# `setsid` pone el servidor en su propio grupo de procesos y `kill -TERM -PGID`
+# se lleva al padre y al hijo. Si `setsid` no existe, se cae a matar al `npx`
+# y a sus hijos directos, y la comprobación de puerto de más abajo atrapa lo
+# que quede.
 apagar() {
   if [ -n "$SERVIDOR" ] && kill -0 "$SERVIDOR" 2>/dev/null; then
     echo "── Apagando el servidor de pruebas ──"
-    kill "$SERVIDOR" 2>/dev/null || true
+    kill -TERM "-${SERVIDOR}" 2>/dev/null || {
+      pkill -TERM -P "$SERVIDOR" 2>/dev/null || true
+      kill -TERM "$SERVIDOR" 2>/dev/null || true
+    }
     wait "$SERVIDOR" 2>/dev/null || true
   fi
   # Idempotente: `interrumpir` apaga y sale, y el trap EXIT vuelve a llamar a
@@ -66,8 +83,17 @@ else
   echo "── Reutilizando la compilación de .next (use --build para rehacerla) ──"
 fi
 
+# NUNCA MEDIR EL SERVIDOR DE OTRO. Si algo ya contesta en este puerto, el
+# bucle de espera de abajo lo daría por "listo" y toda la medición saldría de
+# un proceso que no es el que acabamos de compilar.
+if curl -fsS "${BASE}/version.json" >/dev/null 2>&1; then
+  echo "Ya hay un servidor respondiendo en ${BASE}." >&2
+  echo "Apáguelo (o use PUERTO=<otro>) para no medir una compilación vieja." >&2
+  exit 1
+fi
+
 echo "── Levantando el sitio en ${BASE} ──"
-npx next start -p "$PUERTO" > "$REGISTRO" 2>&1 &
+setsid npx next start -p "$PUERTO" > "$REGISTRO" 2>&1 &
 SERVIDOR=$!
 
 # Esperar a que CONTESTE, no a que el proceso exista: arrancar tarda segundos y

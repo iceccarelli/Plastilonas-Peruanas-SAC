@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:smoke": "bash scripts/smoke.sh",
+    "probar:dinero": "bash scripts/probar-dinero.sh",
     "audit:ui": "node scripts/audit-ui.mjs",
     "auditar:viewport": "node scripts/auditar-viewport.mjs",
     "auditar:imagenes": "node scripts/auditar-imagenes.mjs",
