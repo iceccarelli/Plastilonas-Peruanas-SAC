@@ -31,6 +31,7 @@
  *    que no ejecute JavaScript los ve igual. Se verifica sobre el HTML crudo.
  */
 import { chromium } from 'playwright';
+import { LANZAR } from './diagnostico/rutas.mjs';
 import { spawn } from 'node:child_process';
 import { setTimeout as esperar } from 'node:timers/promises';
 
@@ -94,9 +95,25 @@ async function irA(pagina, ruta) {
 arrancar();
 if (!(await esperarServidor())) { console.error('No arrancó el servidor. ¿Falta `npm run build`?'); parar(); process.exit(1); }
 
-const navegador = await chromium.launch(
-  process.env.PLAYWRIGHT_CHROMIUM ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM } : {},
-);
+/*
+ * CÓMO SE LANZA EL NAVEGADOR — una sola respuesta para todo el repositorio.
+ *
+ * Aquí había una estrategia propia: `PLAYWRIGHT_CHROMIUM` o, si no,
+ * "que Playwright resuelva el suyo". En este contenedor Playwright resuelve
+ * `chromium_headless_shell-1148`, que no existe, y la auditoría moría con el
+ * cartel de "run npx playwright install" — sin decir que sí hay un Chromium
+ * a dos directorios de distancia. Entre los cuatro scripts de navegador del
+ * repositorio había cuatro estrategias y tres nombres de variable distintos
+ * (`PLAYWRIGHT_CHROMIUM`, `PLAYWRIGHT_CHROMIUM_PATH`, `DIAG_CHROME`), y sólo
+ * una de las cuatro funcionaba.
+ *
+ * `LANZAR` (scripts/diagnostico/rutas.mjs) es esa que funciona: busca en
+ * orden —variable de entorno, el que Playwright haya instalado, rutas de
+ * contenedores preaprovisionados, el Chromium del sistema— y añade los
+ * `--no-sandbox` sin los que Chromium no arranca en un contenedor.
+ * `PLAYWRIGHT_CHROMIUM` se sigue respetando como alias.
+ */
+const navegador = await chromium.launch(LANZAR);
 
 console.log(`\nNavegación — ${ANCHOS.length} anchos × ${RUTAS.length} rutas\n`);
 

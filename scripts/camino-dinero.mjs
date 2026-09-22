@@ -253,6 +253,71 @@ if (hayInput) {
   }
 }
 
+// ───────────────── TRAMO 4 — ninguna página comercial sin salida ───────────
+/**
+ * REACHABILITY (Sprint H). Una página que informa y no ofrece ningún camino a
+ * cotizar es una página que cuesta dinero: el comprador termina de leer,
+ * asiente, y se va. El navbar y el pie tienen enlaces a /cotizacion y a
+ * WhatsApp en TODAS las páginas, así que comprobarlos daría verde siempre y
+ * no diría nada — por eso se mide DENTRO de `main`, donde vive el contenido
+ * de la página y donde una salida es realmente contextual.
+ *
+ * Salidas admitidas: /cotizacion, /asistente, /contacto o wa.me. Se prefiere
+ * `AsistenteAiLink` (components/AsistenteAiLink.tsx) cuando falta una, pero
+ * cualquiera de las cuatro cierra el bucle y ninguna es un segundo embudo.
+ */
+console.error('\n── TRAMO 4: ninguna página comercial es un callejón sin salida ──');
+
+const COMERCIALES = await (async () => {
+  const html = await (await fetch(`${BASE}/sitemap.xml`)).text();
+  const mapas = [...html.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+  const rutas = new Set();
+  for (const mapa of mapas) {
+    const xml = await (await fetch(`${BASE}${mapa}`)).text();
+    for (const m of xml.matchAll(/<loc>([^<]+)<\/loc>/g)) rutas.add(new URL(m[1]).pathname);
+  }
+  const SECCIONES =
+    'productos|aplicaciones|industria|soluciones|biblioteca|recursos|informes|glosario|calculadoras|local|novedades';
+  return [...rutas].filter((r) => {
+    if (!new RegExp(`^/(${SECCIONES})(/|$)`).test(r)) return false;
+    // Endpoints de MÁQUINA (catalogo.json, terminos.json, formulas.json): son
+    // datos para agentes, no páginas que alguien lee. Pedirles un CTA no
+    // tiene sentido — y el sitio ya los cuenta aparte ("endpoints de
+    // máquina" en scripts/auditar-estado.mjs).
+    if (/\.(json|xml|txt)$/.test(r)) return false;
+    // Las RAÍCES de sección (/productos, /biblioteca…) son navegación: su
+    // trabajo es repartir hacia las hijas, y eso se comprueba por separado
+    // más abajo. Exigirles además un CTA propio mediría otra cosa.
+    if (new RegExp(`^/(${SECCIONES})$`).test(r)) return false;
+    return true;
+  });
+})();
+
+const sinSalida = [];
+for (const ruta of COMERCIALES) {
+  await p.goto(BASE + ruta, { waitUntil: 'domcontentloaded' });
+  const salidas = await p
+    .locator('main a[href^="/cotizacion"], main a[href^="/asistente"], main a[href^="/contacto"], main a[href*="wa.me"]')
+    .count();
+  if (salidas === 0) sinSalida.push(ruta);
+}
+ok(
+  `las ${COMERCIALES.length} páginas de contenido ofrecen salida a cotizar en su contenido`,
+  sinSalida.length === 0,
+  sinSalida.length ? sinSalida.slice(0, 12).join(', ') : 'todas',
+);
+
+// Y las raíces de sección hacen SU trabajo: repartir hacia las hijas. Una
+// raíz que no enlaza a nada es tan callejón sin salida como un artículo sin
+// CTA, sólo que se ve distinto.
+const raicesMudas = [];
+for (const raiz of ['/productos', '/aplicaciones', '/industria', '/biblioteca', '/calculadoras', '/novedades']) {
+  await p.goto(BASE + raiz, { waitUntil: 'domcontentloaded' });
+  const hijas = await p.locator(`main a[href^="${raiz}/"]`).count();
+  if (hijas === 0) raicesMudas.push(raiz);
+}
+ok('las raíces de sección reparten hacia sus páginas hijas', raicesMudas.length === 0, raicesMudas.join(', ') || 'todas');
+
 // ───────────────────────── TRAMO 3 — límites que protegen ──────────────────
 // AL FINAL A PROPÓSITO: agotar el cubo de /api/chat deja el chat limitado
 // durante 10 minutos para esta IP, así que cualquier tramo posterior mediría
@@ -283,6 +348,6 @@ ok('los dos límites son independientes', (chat.primer429 ?? 0) !== (vision.prim
 
 await nav.close();
 
-guardar('camino-dinero.json', { base: BASE, slug, conClaveAnthropic: HAY_CLAVE, fallos, resultados: R });
+guardar('camino-dinero.json', { base: BASE, slug, conClaveAnthropic: HAY_CLAVE, sinSalida, raicesMudas, fallos, resultados: R });
 console.error(`\n${fallos === 0 ? '✔' : '✖'} camino-dinero: ${R.length - fallos}/${R.length} comprobaciones`);
 process.exit(fallos > 0 ? 1 : 0);

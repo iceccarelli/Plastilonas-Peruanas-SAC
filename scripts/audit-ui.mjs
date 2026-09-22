@@ -26,8 +26,26 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
    hace falta para esta auditoría. Si no está, se explica cómo instalarla en
    vez de reventar con un stack trace. */
 let chromium;
+/**
+ * `LANZAR` viene de scripts/diagnostico/rutas.mjs y es la ÚNICA forma de
+ * localizar Chromium en este repositorio: busca en orden (variable de
+ * entorno, el que Playwright instaló, rutas de contenedores, el del
+ * sistema) y añade los `--no-sandbox` sin los que no arranca en un
+ * contenedor. Aquí había una estrategia propia con `PLAYWRIGHT_CHROMIUM_PATH`
+ * — una de las cuatro que tenía el repositorio, con tres nombres de variable
+ * distintos, de las que sólo funcionaba una. La variable se sigue
+ * respetando: rutas.mjs la acepta como alias.
+ *
+ * Se importa DENTRO del try, y de forma dinámica, para no perder lo que este
+ * bloque protege: rutas.mjs importa `playwright` en su primera línea, así
+ * que un import estático habría convertido una dependencia opcional en
+ * obligatoria y esta auditoría reventaría con un stack trace en vez de
+ * explicar cómo instalarla.
+ */
+let LANZAR = {};
 try {
   ({ chromium } = await import('playwright'));
+  ({ LANZAR } = await import('./diagnostico/rutas.mjs'));
 } catch {
   console.error(
     'Falta playwright. Instálelo solo cuando vaya a auditar:\n' +
@@ -149,13 +167,7 @@ const AUDIT = () => {
   return out;
 };
 
-/* En entornos donde Playwright no descargó su navegador (CI, contenedores),
-   se admite un Chromium del sistema vía PLAYWRIGHT_CHROMIUM_PATH. */
-const browser = await chromium.launch(
-  process.env.PLAYWRIGHT_CHROMIUM_PATH
-    ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
-    : {},
-);
+const browser = await chromium.launch(LANZAR);
 const informe = [];
 for (const [vp, w, h] of VIEWPORTS) {
   for (const theme of ['light', 'dark']) {
