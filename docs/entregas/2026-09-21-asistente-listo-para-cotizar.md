@@ -347,19 +347,62 @@ envoltorio. Enviar cualquiera de los dos habría sido mover sin avanzar.
 | `afirmaciones.test.ts` / `dominio-migracion.test.ts` | **sin tocar** (verificado con `git diff --name-only`) |
 | `npm run auditar:imagenes` | 0 errores, 0 avisos |
 | `npm run auditar:navegacion` | 0 errores, 45 destinos |
-| `npm run auditar:viewport` | 3 errores + 3 avisos — **exactamente la línea base conocida** |
+| `npm run auditar:viewport` | **0 errores** + 3 avisos táctiles (antes: 3 errores, exit 1) |
 | `npm run probar:dinero` | **26/26** |
 | `npm run build` | limpio |
 
-### Sobre el viewport: ninguna regresión nueva
+### Sobre el viewport: de 3 errores a 0
 
-Los 3 errores (Galaxy Fold 280px, «Cotizar» recortado en `/`, `/productos`,
-`/industria/mineria`) y los 3 avisos táctiles son **los mismos que ya había**
-y están declarados fuera de alcance en el mandato. Ninguna de las 4 rutas
-auditadas cambia de plantilla en los commits de este pase — verificado con
-`git diff --name-only 6b6e362..HEAD`. Tras tocar `Navbar.tsx` (avatar) se
-volvieron a correr `auditar:viewport` y `auditar:navegacion`, como exige la
-ley de producto, con resultado idéntico.
+Durante el pase, los 3 errores se trataron como línea base intocable, y así
+se empujó el PR. **CI lo rechazó** — y al mirar la base apareció lo
+importante: `main @ c1c1556` fallaba con la **salida byte a byte idéntica**.
+`main` llevaba en rojo desde el 20 de septiembre, seis ejecuciones seguidas;
+el último verde fue `420a888`. Con la base en rojo, la red de seguridad del
+repositorio estaba apagada: una regresión nueva no se distinguía de la que
+ya estaba.
+
+El mandato excluye estos 3 defectos **salvo que sean triviales**. Lo eran.
+
+**El auditor decía «cabecera» y el defecto nunca estuvo en la cabecera.** El
+CTA «Cotizar» del navbar es `!hidden md:!inline-flex`: a 280 px ni siquiera
+se renderiza. Lo que se salía era la **barra móvil fija de abajo**
+(`BarraMovilContacto`), construida con `<nav>` — y `zona()` de
+`scripts/auditar-viewport.mjs` etiqueta como cabecera todo lo que viva dentro
+de un `<nav>`. Eso explica también por qué fallaba en `/`, `/productos` e
+`/industria/mineria` pero no en `/cotizacion`: ahí la barra devuelve `null`.
+
+**Causa real:** un hijo de flex arranca con `min-width: auto` —«nunca más
+estrecho que mi contenido»—, así que `flex-1` y `flex-[1.4]` repartían lo que
+sobraba pero no podían ceder cuando faltaba. Medido en Chromium sobre el
+build, en `/` a 280 px: disponible 196 px, ocupado 100 + 121 = 221 px, borde
+derecho de «Cotizar» en **293** con vista de 280. El CTA principal de la
+barra móvil —la única píldora sólida, la acción que paga el sitio— se salía
+**25 px de pantalla** en el teléfono más estrecho que el sitio declara
+soportar.
+
+**Arreglo:** `min-w-0` en las dos píldoras.
+
+| Ancho | «Cotizar», antes → después |
+|---|---|
+| 280 px | der **293 → 268** (cabe exacto en el cuadro de relleno) |
+| 320 px | der 308 → 308 (sin cambio) |
+| 360 px | 115/161 → **idéntico** |
+| 390 px | 127/179 → **idéntico** |
+
+Solo actúa cuando el espacio no alcanza. Objetivos táctiles holgados a
+280 px: 115×48 y 82×44.
+
+Quedan los **3 avisos táctiles** preexistentes (`/productos` a 430/412 px,
+`<input>` de `/cotizacion` a 2560 px): son avisos, no errores, no hacen
+fallar el gate y siguen fuera de alcance.
+
+Tras tocar `Navbar.tsx` (avatar) y `BarraMovilContacto.tsx` se corrieron
+`auditar:viewport` y `auditar:navegacion`, como exige la ley de producto.
+
+**Lección que vale más que el arreglo:** dar por buena una «línea base
+conocida» sin comprobar si la base estaba verde. Bastaba mirar el historial
+de CI de `main`. Un gate que lleva seis commits en rojo no es una línea
+base: es un gate apagado.
 
 ## Bloqueos humanos (documentados, no simulados)
 
