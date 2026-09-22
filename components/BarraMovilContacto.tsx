@@ -125,16 +125,45 @@ export default function BarraMovilContacto() {
       <WhatsAppLink
         context="barra-movil"
         message="Hola, quiero cotizar. Producto: ___. Medidas/cantidad: ___. Ciudad de entrega: ___."
-        className="btn btn-sm flex-1 min-h-[44px] border border-[#047857]/30 bg-[#ECFDF5] text-[#047857] dark:bg-[#1C2C46] dark:text-[#34D399] dark:border-[#34D399]/30 transition-transform duration-100 active:scale-[0.96]"
+        className="btn btn-sm flex-1 min-w-0 min-h-[44px] border border-[#047857]/30 bg-[#ECFDF5] text-[#047857] dark:bg-[#1C2C46] dark:text-[#34D399] dark:border-[#34D399]/30 transition-transform duration-100 active:scale-[0.96]"
       >
         WhatsApp
       </WhatsAppLink>
 
       {/* Primario: la única píldora sólida de la barra. 48 px de alto, que es
-          lo que pide una acción principal bajo el pulgar. */}
+          lo que pide una acción principal bajo el pulgar.
+
+          `min-w-0` EN ESTA PÍLDORA Y EN LA DE WHATSAPP NO ES COSMÉTICA.
+
+          Un hijo de flex arranca con `min-width: auto`, que en la práctica
+          significa «nunca más estrecho que mi contenido». Con eso, `flex-1` y
+          `flex-[1.4]` podían repartir el espacio sobrante pero NO podían
+          ceder cuando faltaba. Medido en Chromium sobre el build, en `/` a
+          280 px (Galaxy Fold cerrado):
+
+            disponible para las dos píldoras   196 px
+            lo que ocupaban                    100 + 121 = 221 px
+            borde derecho de «Cotizar»         293 px  (vista: 280)
+
+          Es decir: el CTA principal de la barra móvil —la única píldora
+          sólida, la acción que paga el sitio— se salía 25 px de la pantalla
+          en el teléfono más estrecho que el sitio declara soportar. No se
+          veía en el resto de anchos porque a partir de 320 px sobra sitio y
+          el reparto nunca llega a pedir que nadie se encoja.
+
+          `min-w-0` devuelve a `flex-shrink` la capacidad de actuar. A 320 px
+          y por encima no cambia ni un píxel: sólo actúa cuando el espacio no
+          alcanza, que era exactamente el caso que fallaba.
+
+          Esto es lo que `npm run auditar:viewport` venía marcando como
+          «recortado en cabecera» en `/`, `/productos` e
+          `/industria/mineria`: el auditor etiqueta como cabecera todo lo que
+          vive dentro de un `<nav>` (ver `zona()` en
+          scripts/auditar-viewport.mjs) y esta barra es un `<nav>`. El defecto
+          nunca estuvo en la cabecera. */}
       <Link
         href="/cotizacion"
-        className="btn btn-accent flex-[1.4] !min-h-[48px] dark:bg-[#10B981] dark:text-[#0A2540] transition-transform duration-100 active:scale-[0.96]"
+        className="btn btn-accent flex-[1.4] min-w-0 !min-h-[48px] dark:bg-[#10B981] dark:text-[#0A2540] transition-transform duration-100 active:scale-[0.96]"
       >
         <FileText className="w-4 h-4" /> Cotizar
       </Link>
