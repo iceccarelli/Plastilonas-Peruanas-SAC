@@ -32,6 +32,10 @@ export interface LeadPayload {
   utm_campaign?: string;
   utm_term?: string;
   utm_content?: string;
+  channel?: 'ai_assistant' | 'organic_search' | 'social' | 'paid' | 'campaign' | 'referral' | 'direct';
+  referrer_host?: string;
+  landing_path?: string;
+  ad_click?: boolean;
   /** Ruta (con query) desde la que se envió el RFQ. */
   path?: string;
   /** Slug del producto de origen, si el enlace lo trajo. */

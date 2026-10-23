@@ -17,6 +17,10 @@
  *             brief de WhatsApp con los mismos datos.
  *   TRAMO 2 — foto: o analiza de verdad, o falla diciéndolo. Nunca inventa.
  *   TRAMO 3 — límites de /api/chat y /api/vision.
+ *   TRAMO 5 — envío REAL de un RFQ desde el navegador: con un destino que
+ *             confirma, el comprador ve «registrada» + código y el CRM recibe
+ *             la atribución de la sesión; con un destino que falla, el
+ *             comprador NO ve «registrada» y conserva la salida a WhatsApp.
  *
  * NO NECESITA CLAVE DE ANTHROPIC PARA EL TRAMO 1. Eso no es un atajo de la
  * prueba: es la propiedad que el Sprint E.2 existe para dar. Si el camino a
@@ -345,6 +349,82 @@ ok('/api/chat corta con 429 tras la ráfaga', chat.ultimo === 429, `primer 429 e
 const vision = await ráfaga('/api/vision', { imageBase64: 'x', mediaType: 'image/png' }, 14);
 ok('/api/vision sigue limitando por su cuenta', vision.ultimo === 429, `primer 429 en la petición ${vision.primer429}`);
 ok('los dos límites son independientes', (chat.primer429 ?? 0) !== (vision.primer429 ?? -1) || true);
+
+// ───────────────── TRAMO 5 — envío real del RFQ, éxito y fallo honestos ───────
+/**
+ * El servidor de prueba no tiene base de datos (ver probar-dinero.sh) y su CRM
+ * es el servidor de abajo. Por eso un CRM que responde 200 es el ÚNICO destino
+ * durable (durabilidad «forwarded») y uno que responde 500 deja la solicitud
+ * sin destino: el segundo caso es exactamente el que antes mostraba «Solicitud
+ * registrada» sin que nadie la hubiera recibido.
+ */
+console.error('\n── TRAMO 5: envío real del RFQ desde el navegador ──');
+const { createServer } = await import('node:http');
+const recibidos = [];
+const crm = createServer((req, res) => {
+  let b = '';
+  req.on('data', (c) => (b += c));
+  req.on('end', () => {
+    let j = {};
+    try { j = JSON.parse(b); } catch { /* cuerpo no JSON */ }
+    recibidos.push({ headers: req.headers, j });
+    res.statusCode = /FALLA-SINTETICA/.test(String(j.mensaje ?? '')) ? 500 : 200;
+    res.end('{}');
+  });
+});
+await new Promise((r) => crm.listen(Number(process.env.DIAG_CRM_PORT || 4011), '127.0.0.1', r));
+
+async function enviarRfq(ctxN, mensaje, desde) {
+  const pg = await ctxN.newPage();
+  await pg.goto(desde, { waitUntil: 'domcontentloaded' });
+  if (!pg.url().includes('/cotizacion')) {
+    await pg.locator('main a[href^="/cotizacion"]').first().click();
+    await pg.waitForURL(/\/cotizacion/, { timeout: 15000 });
+  }
+  await pg.waitForSelector('#rfq-nombre', { timeout: 15000 });
+  await pg.fill('#rfq-nombre', 'Prueba Automatizada');
+  await pg.fill('#rfq-empresa', 'ACME Sintetico SAC');
+  await pg.fill('#rfq-email', 'sintetico@example.com');
+  await pg.fill('#rfq-telefono', '999000111');
+  await pg.fill('#rfq-ciudad', 'Arequipa');
+  await pg.fill('#rfq-mensaje', mensaje);
+  await pg.locator('form button[type="submit"]').click();
+  return pg;
+}
+
+try {
+  // 5a — destino que confirma, llegando desde un asistente de IA a una FICHA
+  //      (no a /cotizacion): la campaña debe sobrevivir a la navegación.
+  const ctxOk = await nav.newContext({ viewport: { width: 1280, height: 900 } });
+  ctxOk.on('page', async (np) => { if (await np.opener().catch(() => null)) np.close().catch(() => {}); });
+  const antes = recibidos.length;
+  const pOk = await enviarRfq(ctxOk, 'Solicitud sintetica automatizada de prueba de extremo a extremo.', `${BASE}/productos/${slug}?utm_source=chatgpt.com`);
+  await pOk.getByRole('heading', { name: /Solicitud registrada/ }).waitFor({ timeout: 25000 }).catch(() => {});
+  const textoOk = await pOk.locator('main').innerText();
+  const codigo = /RFQ-\d{8}-[A-Z2-9]{8}/.exec(textoOk)?.[0];
+  ok('con un destino que confirma, el comprador ve «Solicitud registrada»', /Solicitud registrada/.test(textoOk));
+  ok('y ve el código RFQ emitido por el servidor', Boolean(codigo), codigo ?? '(sin código)');
+  const hit = recibidos.slice(antes).find((h) => h.j.rfqId === codigo);
+  ok('el CRM recibió ESA solicitud con el mismo código', Boolean(hit), hit ? '' : `recibidos: ${recibidos.length - antes}`);
+  ok('el CRM la recibió con Idempotency-Key = código', hit?.headers['idempotency-key'] === codigo);
+  ok('la campaña de la ficha sobrevivió hasta el RFQ (canal ai_assistant)', hit?.j.channel === 'ai_assistant', `canal=${hit?.j.channel}`);
+  ok('con utm_source y página de entrada correctos', hit?.j.utm_source === 'chatgpt.com' && hit?.j.landing_path === `/productos/${slug}`, `landing=${hit?.j.landing_path}`);
+  await ctxOk.close();
+
+  // 5b — destino que falla: NO debe decir «registrada» y debe ofrecer WhatsApp.
+  const ctxKo = await nav.newContext({ viewport: { width: 1280, height: 900 } });
+  ctxKo.on('page', async (np) => { if (await np.opener().catch(() => null)) np.close().catch(() => {}); });
+  const pKo = await enviarRfq(ctxKo, 'FALLA-SINTETICA: el destino responde 500 a propósito.', `${BASE}/cotizacion`);
+  await pKo.getByRole('heading', { name: /Falta un paso/ }).waitFor({ timeout: 25000 }).catch(() => {});
+  const textoKo = await pKo.locator('main').innerText();
+  ok('si ningún destino confirma, NO dice «Solicitud registrada»', !/Solicitud registrada/.test(textoKo));
+  ok('explica que el equipo aún no la recibió', /No pudimos guardar su solicitud/.test(textoKo));
+  ok('no muestra ningún código RFQ', !/RFQ-\d{8}-/.test(textoKo));
+  ok('conserva el botón para enviarla por WhatsApp', (await pKo.locator('a[href*="wa.me"]').count()) > 0);
+  await ctxKo.close();
+} finally {
+  await new Promise((r) => crm.close(r));
+}
 
 await nav.close();
 

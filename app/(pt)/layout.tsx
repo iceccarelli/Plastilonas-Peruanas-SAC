@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import StructuredData from '@/components/StructuredData';
 import Analytics from '@/components/Analytics';
+import AttributionCapture from '@/components/AttributionCapture';
 import ConsentBanner from '@/components/ConsentBanner';
 import AuthProvider from '@/components/AuthProvider';
 import { SITE } from '@/lib/site';
@@ -62,6 +63,7 @@ export default function PortugueseLayout({ children }: { children: React.ReactNo
         <span id="top" aria-hidden="true" />
         <StructuredData />
         <Analytics />
+        <AttributionCapture />
         <AuthProvider>
           <Navbar />
           <main className="min-h-screen">{children}</main>

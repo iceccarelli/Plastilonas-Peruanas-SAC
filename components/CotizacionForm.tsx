@@ -36,6 +36,7 @@ import { toast } from 'sonner';
 import { buildQuoteMessage, openWhatsApp, saveQuoteLocally, whatsappUrl } from '@/lib/whatsapp';
 import { trackQuoteRequest, trackQuoteStarted } from '@/lib/analytics';
 import { postLead, nuevaClaveIdempotencia, pedirSubida } from '@/lib/lead';
+import { read as readAtribucion } from '@/lib/attribution';
 import { errorRuc, normalizarRuc } from '@/lib/ruc';
 
 const EXTENSIONES = ['pdf', 'jpg', 'jpeg', 'png', 'dwg', 'dxf'];
@@ -204,10 +205,21 @@ interface Props {
   origen?: string;
 }
 
-function leerUtm(): Record<string, string> {
+function leerUtm(): Record<string, string | boolean> {
   if (typeof window === 'undefined') return {};
+  // Primer contacto de la sesión (sobrevive a la navegación hasta /cotizacion)…
+  let guardada: Record<string, unknown> = {};
+  try {
+    guardada = (readAtribucion(window.sessionStorage) ?? {}) as unknown as Record<string, unknown>;
+  } catch {
+    /* sessionStorage bloqueado */
+  }
+  const out: Record<string, string | boolean> = {};
+  for (const [k, v] of Object.entries(guardada)) {
+    if (typeof v === 'string' || typeof v === 'boolean') out[k] = v;
+  }
+  // …y una campaña explícita en la URL actual siempre manda.
   const q = new URLSearchParams(window.location.search);
-  const out: Record<string, string> = {};
   for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']) {
     const v = q.get(k);
     if (v) out[k] = v;

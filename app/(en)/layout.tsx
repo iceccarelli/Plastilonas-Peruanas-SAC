@@ -4,6 +4,7 @@ import '../globals.css';
 import { HeaderEn, FooterEn } from '@/components/ChromeEn';
 import StructuredData from '@/components/StructuredData';
 import Analytics from '@/components/Analytics';
+import AttributionCapture from '@/components/AttributionCapture';
 import ConsentBanner from '@/components/ConsentBanner';
 import AuthProvider from '@/components/AuthProvider';
 import { SITE } from '@/lib/site';
@@ -61,6 +62,7 @@ export default function EnglishLayout({ children }: { children: React.ReactNode 
         <span id="top" aria-hidden="true" />
         <StructuredData />
         <Analytics />
+        <AttributionCapture />
         <AuthProvider>
           <HeaderEn />
           <main className="min-h-screen">{children}</main>
