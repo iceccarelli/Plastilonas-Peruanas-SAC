@@ -32,7 +32,9 @@ Buscar `TODO(HUMAN)` en el repositorio localiza el punto exacto.
 
 - [ ] Aplicar en Supabase, en orden, `supabase/schema.sql`,
       `supabase/migrations/20261023000000_rfq_durable_pipeline.sql` y
-      `supabase/migrations/20261023010000_rfq_attachments_staff.sql`. La segunda
+      `supabase/migrations/20261023010000_rfq_attachments_staff.sql` y
+      `supabase/migrations/20261023020000_rfq_quotations.sql` (cotizaciones
+      versionadas, funciones `lead_quote_*`). La segunda
       **crea el bucket privado `rfq-adjuntos`** (20 MB, sin políticas anónimas).
       Los navegadores suben con URLs firmadas que emite `/api/lead/upload-url`;
       ya no se necesita ninguna política RLS de INSERT anónimo. Sin la
