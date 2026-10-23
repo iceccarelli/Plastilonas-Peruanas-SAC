@@ -42,9 +42,35 @@ function desdeElRepositorio() {
   return JSON.parse(salida.trim().split('\n').pop());
 }
 
-const { key: KEY, site: SITE_CANONICO } = desdeElRepositorio();
-const SITE_URL = SITE_CANONICO.replace(/\/$/, '');
-const KEY_LOCATION = `${SITE_URL}/indexnow-key.txt`;
+const { key: KEY, site: SITE_REPO } = desdeElRepositorio();
+/** Donde se PREGUNTA qué origen canónico sirve el despliegue. */
+const BASE = (process.env.INDEXNOW_BASE || SITE_REPO).replace(/\/$/, '');
+/** Origen canónico EFECTIVO; se fija en main() con resolverOrigen(). */
+let SITE_URL = BASE;
+let KEY_LOCATION = `${SITE_URL}/indexnow-key.txt`;
+
+/**
+ * El origen canónico lo decide el DESPLIEGUE, no este repositorio: el
+ * interruptor de la mudanza (NEXT_PUBLIC_CANONICAL_HOST) vive en Vercel y este
+ * script corre en GitHub Actions, donde esa variable no existe. Con el origen
+ * leído de lib/site.ts, el día de la mudanza el sitemap pasaría a listar
+ * www.plastilonas.com mientras el script seguiría exigiendo el host de Vercel:
+ * aborto por «URLs de otro host» y ningún buscador enterado. /version.json
+ * dice qué origen sirve realmente ese despliegue; si no responde o no es
+ * https, se conserva el del repositorio (comportamiento anterior).
+ */
+async function resolverOrigen() {
+  try {
+    const r = await fetch(`${BASE}/version.json`, { signal: AbortSignal.timeout(15000) });
+    if (r.ok) {
+      const u = new URL(String((await r.json()).siteUrl));
+      if (u.protocol === 'https:' || u.hostname === '127.0.0.1') return u.origin;
+    }
+  } catch {
+    /* sin version.json: se usa el origen del repositorio */
+  }
+  return BASE;
+}
 const ENDPOINT = 'https://api.indexnow.org/indexnow';
 const MAX_URLS_PER_REQUEST = 10000;
 
@@ -95,6 +121,9 @@ async function urlsFromSitemap() {
 }
 
 async function main() {
+  SITE_URL = await resolverOrigen();
+  KEY_LOCATION = `${SITE_URL}/indexnow-key.txt`;
+  if (SITE_URL !== BASE) console.log(`Origen canónico del despliegue: ${SITE_URL} (consultado en ${BASE})`);
   if (!KEY || !KEY_PATTERN.test(KEY)) {
     console.error('La clave de lib/indexnow.ts tiene un formato inválido (8–128 caracteres alfanuméricos o guiones).');
     process.exit(1);
@@ -102,7 +131,7 @@ async function main() {
 
   // Verificamos la prueba de propiedad ANTES de enviar: si el archivo no
   // devuelve exactamente la clave, el envío obtendrá 403 y no lo sabríamos.
-  const proof = await fetch(KEY_LOCATION);
+  const proof = await fetch(KEY_LOCATION, { signal: AbortSignal.timeout(15000) });
   const proofText = proof.ok ? (await proof.text()).trim() : '';
   if (proofText !== KEY) {
     console.error(
