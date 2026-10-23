@@ -44,23 +44,35 @@ export interface LeadPayload {
   origen?: string;
   /** Referencias de adjuntos: ruta en Storage o nombre del archivo. */
   archivos?: string[];
+  /** Ver nuevaClaveIdempotencia(). */
+  idempotencyKey?: string;
 }
 
 export interface LeadResultado {
+  /** La solicitud quedó guardada (o un canal externo confirmó): es recepción. */
+  accepted: boolean;
+  /** Igual a `accepted`; se conserva por compatibilidad. */
   ok: boolean;
-  /** Código RFQ-AAAAMMDD-XXXX que emite /api/lead. */
+  /** Código RFQ-AAAAMMDD-XXXXXXXX que emite /api/lead; solo si `accepted`. */
   rfqId?: string;
+  /** Qué debe hacer el comprador si no hubo recepción. */
+  customerAction?: 'none' | 'send_via_whatsapp' | 'retry_later';
+}
+
+/** Clave por envío: un reintento del mismo formulario no duplica la solicitud. */
+export function nuevaClaveIdempotencia(): string {
+  try {
+    return crypto.randomUUID().replace(/-/g, '');
+  } catch {
+    return `k${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`.padEnd(16, '0');
+  }
 }
 
 /**
- * Devuelve el resultado en vez de tragárselo.
- *
- * Antes era `Promise<void>`: el código RFQ que /api/lead genera para cada
- * solicitud existía, viajaba en la respuesta y se descartaba en el cliente.
- * El comprador se quedaba sin acuse de recibo y, si el navegador bloqueaba la
- * ventana de WhatsApp, sin ninguna prueba de que su solicitud había entrado.
- * Sigue siendo best-effort: un fallo de red devuelve `ok: false` y no lanza,
- * porque el lead ya viajó por el otro canal.
+ * Devuelve el resultado REAL en vez de tragárselo. `accepted: true` solo si el
+ * servidor confirmó que la solicitud quedó guardada; un fallo de red, un 4xx o
+ * un 503 devuelven `accepted: false` y el formulario lo comunica con el canal
+ * alterno (WhatsApp) en lugar de decir "registrada". Nunca lanza.
  */
 export async function postLead(lead: LeadPayload): Promise<LeadResultado> {
   try {
@@ -70,10 +82,19 @@ export async function postLead(lead: LeadPayload): Promise<LeadResultado> {
       body: JSON.stringify(lead),
       keepalive: true,
     });
-    if (!res.ok) return { ok: false };
-    const data = (await res.json()) as { ok?: boolean; rfqId?: string };
-    return { ok: Boolean(data.ok), rfqId: data.rfqId };
+    const data = (await res.json().catch(() => ({}))) as {
+      accepted?: boolean;
+      rfqId?: string;
+      customerAction?: LeadResultado['customerAction'];
+    };
+    const accepted = res.ok && data.accepted === true;
+    return {
+      accepted,
+      ok: accepted,
+      rfqId: accepted ? data.rfqId : undefined,
+      customerAction: accepted ? 'none' : (data.customerAction ?? 'send_via_whatsapp'),
+    };
   } catch {
-    return { ok: false };
+    return { accepted: false, ok: false, customerAction: 'send_via_whatsapp' };
   }
 }

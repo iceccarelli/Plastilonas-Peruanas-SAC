@@ -1,216 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { SITE } from '@/lib/site';
-import { isSupabaseConfigured, supabaseAdmin } from '@/lib/supabase';
+import { isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseLeadStore } from '@/lib/lead-store';
+import { clientIp, logEvent, submitLead } from '@/lib/lead-service';
 
-const SITE_HOST = SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+export const runtime = 'nodejs';
+// Dos entregas en paralelo con tope de 6 s cada una caben de sobra.
+export const maxDuration = 20;
 
-const LeadSchema = z.object({
-  nombre: z.string().trim().min(1).max(120).optional(),
-  contact: z.string().trim().min(1).max(120).optional(),
-  empresa: z.string().trim().max(160).optional().default(''),
-  email: z.string().trim().email().max(180),
-  telefono: z.string().trim().min(6).max(40),
-  whatsapp: z.string().trim().max(40).optional(),
-  producto: z.string().trim().max(200).optional(),
-  industry: z.string().trim().max(80).optional(),
-  application: z.string().trim().max(240).optional(),
-  cantidad: z.string().trim().max(80).optional(),
-  dimensions: z.string().trim().max(120).optional(),
-  material: z.string().trim().max(80).optional(),
-  country: z.string().trim().max(80).optional(),
-  city: z.string().trim().max(80).optional(),
-  deliveryCountry: z.string().trim().max(80).optional(),
-  deliveryCity: z.string().trim().max(80).optional(),
-  fechaNecesaria: z.string().trim().max(40).optional(),
-  mensaje: z.string().trim().max(4000).optional(),
-  language: z.enum(['es', 'en', 'pt']).optional(),
-  /** RUC ya normalizado (el formulario lo valida con módulo 11). Antes el
-      esquema lo omitía y safeParse lo descartaba en silencio. */
-  ruc: z.string().trim().regex(/^\d{11}$/).optional(),
-  // ── Atribución: campos ocultos del formulario ────────────────────────────
-  utm_source: z.string().trim().max(120).optional(),
-  utm_medium: z.string().trim().max(120).optional(),
-  utm_campaign: z.string().trim().max(120).optional(),
-  utm_term: z.string().trim().max(120).optional(),
-  utm_content: z.string().trim().max(120).optional(),
-  path: z.string().trim().max(400).optional(),
-  slug: z.string().trim().max(120).optional(),
-  /** Superficie de origen: 'chat', 'configurador', 'calculadora'. */
-  origen: z.string().trim().max(40).optional(),
-  /** Referencias de adjuntos (ruta en Storage o nombre del archivo). */
-  archivos: z.array(z.string().trim().max(300)).max(5).optional(),
-});
-
-const buckets = new Map<string, { n: number; t: number }>();
-
-function limited(ip: string): boolean {
-  const now = Date.now();
-  const hit = buckets.get(ip);
-  if (!hit || now - hit.t > 10 * 60 * 1000) {
-    buckets.set(ip, { n: 1, t: now });
-    return false;
-  }
-  hit.n += 1;
-  return hit.n > 12;
-}
-
-/** URL de origen del lead: la ruta que envió el formulario, no una fija. */
-function fuenteDe(lead: { path?: string; origen?: string }): string {
-  const ruta = (lead.path ?? '/cotizacion').split('?')[0];
-  return `${SITE_HOST}${ruta}${lead.origen ? ` (${lead.origen})` : ''}`;
-}
-
-function rfqId(): string {
-  const d = new Date();
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(d.getUTCDate()).padStart(2, '0');
-  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `RFQ-${y}${m}${day}-${rand}`;
-}
+const MAX_BODY_BYTES = 32 * 1024;
+const headers = { 'Cache-Control': 'no-store' };
 
 export async function POST(req: NextRequest) {
-  const ip =
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    req.headers.get('x-real-ip') ||
-    'unknown';
-  if (limited(ip)) {
-    return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 });
+  // Tope de cuerpo ANTES de parsear: el formulario real pesa unos 2 KB.
+  const declared = Number(req.headers.get('content-length') ?? 0);
+  if (declared > MAX_BODY_BYTES) {
+    return NextResponse.json({ ok: false, accepted: false, error: 'payload_too_large' }, { status: 413, headers });
   }
-
+  let text: string;
+  try {
+    text = await req.text();
+  } catch {
+    return NextResponse.json({ ok: false, accepted: false, error: 'invalid_json' }, { status: 400, headers });
+  }
+  if (text.length > MAX_BODY_BYTES) {
+    return NextResponse.json({ ok: false, accepted: false, error: 'payload_too_large' }, { status: 413, headers });
+  }
   let json: unknown;
   try {
-    json = await req.json();
+    json = JSON.parse(text);
   } catch {
-    return NextResponse.json({ ok: false, error: 'invalid_json' }, { status: 400 });
+    return NextResponse.json({ ok: false, accepted: false, error: 'invalid_json' }, { status: 400, headers });
   }
 
-  const parsed = LeadSchema.safeParse(json);
-  if (!parsed.success) {
-    return NextResponse.json({ ok: false, error: 'invalid_fields' }, { status: 400 });
-  }
-  const lead = parsed.data;
-  const id = rfqId();
-  const contact = lead.nombre || lead.contact || '';
-
-  let persisted = false;
-  if (isSupabaseConfigured()) {
+  let store = null;
+  if (isSupabaseConfigured() && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     try {
-      const admin = supabaseAdmin();
-      const { error } = await admin.from('quotes').insert({
-        customer_email: lead.email,
-        full_name: contact,
-        company: lead.empresa,
-        phone: lead.telefono,
-        product: lead.producto ?? null,
-        quantity: lead.cantidad ?? null,
-        rfq_code: id,
-        country: lead.deliveryCountry || lead.country || null,
-        industry: lead.industry ?? null,
-        status: 'NEW',
-        /**
-         * La ruta REAL de la que salió el lead. Estaba fija en /cotizacion, de
-         * modo que una solicitud enviada desde /en/rfq llegaba al CRM
-         * etiquetada como si viniera del formulario en español.
-         */
-        source: fuenteDe(lead),
-        payload: lead,
-        message: [
-          lead.application,
-          lead.dimensions,
-          lead.material,
-          lead.country && `Origen: ${lead.city || ''} ${lead.country}`.trim(),
-          lead.deliveryCountry &&
-            `Entrega: ${lead.deliveryCity || ''} ${lead.deliveryCountry}`.trim(),
-          lead.mensaje,
-        ]
-          .filter(Boolean)
-          .join('\n'),
-      });
-      persisted = !error;
-      if (error) console.error('[lead] supabase', error.message);
-    } catch (err) {
-      console.error('[lead] supabase unavailable', err);
-    }
-  }
-
-  // CRM_WEBHOOK_URL es el nombre estable (Etapa 5); N8N_WEBHOOK_URL se
-  // mantiene por compatibilidad con la configuración existente.
-  const webhook = process.env.CRM_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL;
-  let forwarded = false;
-  if (webhook) {
-    try {
-      const res = await fetch(webhook, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...lead,
-          rfqId: id,
-          persisted,
-          source: fuenteDe(lead),
-          receivedAt: new Date().toISOString(),
-        }),
-      });
-      forwarded = res.ok;
+      store = supabaseLeadStore();
     } catch {
-      forwarded = false;
+      logEvent('store_unavailable', { level: 'error' });
     }
   }
-
-  // Resend (opcional, Etapa 5): copia del RFQ al buzón comercial. Sin las
-  // variables no se intenta nada; un fallo de correo no rompe el lead, que ya
-  // viajó por WhatsApp y quedó en Supabase/webhook si están configurados.
-  let emailed = false;
-  const resendKey = process.env.RESEND_API_KEY;
-  const emailTo = process.env.LEAD_EMAIL_TO || SITE.email;
-  if (resendKey) {
-    try {
-      const cuerpo = [
-        `RFQ ${id}`,
-        `Nombre: ${contact}`,
-        `Empresa: ${lead.empresa || '—'}`,
-        lead.ruc ? `RUC: ${lead.ruc}` : null,
-        `Email: ${lead.email}`,
-        `Teléfono: ${lead.telefono}`,
-        lead.producto ? `Producto: ${lead.producto}` : null,
-        lead.cantidad ? `Medidas/cantidad: ${lead.cantidad}` : null,
-        lead.deliveryCity ? `Ciudad de entrega: ${lead.deliveryCity}` : null,
-        lead.fechaNecesaria ? `Fecha requerida: ${lead.fechaNecesaria}` : null,
-        lead.mensaje ? `Detalle: ${lead.mensaje}` : null,
-        lead.archivos?.length ? `Adjuntos: ${lead.archivos.join(', ')}` : null,
-        lead.path ? `Página de origen: ${lead.path}` : null,
-        lead.slug ? `Slug de producto: ${lead.slug}` : null,
-      ]
-        .filter(Boolean)
-        .join('\n');
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: process.env.LEAD_EMAIL_FROM || `RFQ Web <onboarding@resend.dev>`,
-          to: [emailTo],
-          subject: `${id} — ${lead.producto || 'consulta general'} (${lead.deliveryCity || 'sin ciudad'})`,
-          text: cuerpo,
-        }),
-      });
-      emailed = res.ok;
-      if (!res.ok) console.error('[lead] resend', res.status);
-    } catch (err) {
-      console.error('[lead] resend unavailable', err);
-    }
-  }
-
-  // Email / WhatsApp remain the commercial channels. Persistence failure is
-  // logged, never thrown: the buyer already has the RFQ id in the response.
-  return NextResponse.json({
-    ok: true,
-    rfqId: id,
-    persisted,
-    forwarded,
-    emailed,
-  });
+  const { status, body } = await submitLead(json, clientIp(req.headers), { store });
+  return NextResponse.json(body, { status, headers });
 }

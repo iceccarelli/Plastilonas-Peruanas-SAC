@@ -86,9 +86,10 @@ describe('los dos extremos del enlace al RFQ coinciden', () => {
   it('el origen viaja hasta el lead y hasta el CRM', () => {
     // Sin esto, «¿cuántos RFQ salen del chat?» no tiene respuesta posible.
     expect(readFileSync(join(raiz, 'lib/lead.ts'), 'utf8')).toContain('origen?: string');
-    const api = readFileSync(join(raiz, 'app/api/lead/route.ts'), 'utf8');
-    expect(api, 'zod descarta en silencio lo que no declara').toMatch(/origen:\s*z\.string\(\)/);
-    expect(api, 'la fuente del lead es la ruta real, no una fija').toContain('fuenteDe(lead)');
+    const esquema = readFileSync(join(raiz, 'lib/lead-schema.ts'), 'utf8');
+    const servicio = readFileSync(join(raiz, 'lib/lead-service.ts'), 'utf8');
+    expect(esquema, 'zod descarta en silencio lo que no declara').toMatch(/origen:\s*z\.string\(\)/);
+    expect(servicio, 'la fuente del lead es la ruta real, no una fija').toContain('fuenteDe(lead)');
   });
 
   it('las superficies que producen solicitudes se identifican', () => {
