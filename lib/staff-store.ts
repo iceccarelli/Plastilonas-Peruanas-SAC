@@ -7,6 +7,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { BUCKET } from '@/lib/attachments';
 import { normalizeStatus, transitionError, type LeadStatus } from '@/lib/lead-workflow';
 import type { Channel, DeliveryStatus } from '@/lib/lead-store';
+import { quoteErrorOf, toCents, type QuoteError, type QuoteInputT } from '@/lib/quotations';
 
 export interface LeadSummary {
   id: string;
@@ -32,7 +33,10 @@ export interface LeadDetail extends LeadSummary {
   deliveryDetail: Array<{ channel: Channel; status: DeliveryStatus; attempts: number; lastError: string | null; lastHttpStatus: number | null; nextAttemptAt: string | null }>;
   attachments: Array<{ id: string; filename: string; sizeBytes: number | null; mimeType: string | null }>;
   events: Array<{ actor: string; action: string; from: string | null; to: string | null; note: string | null; at: string }>;
+  quotes: Array<{ id: string; version: number; status: string; amountCents: number; currency: string; validUntil: string | null; summary: string; notes: string | null; createdBy: string; issuedBy: string | null; issuedAt: string | null; resolutionReason: string | null }>;
 }
+
+export type QuoteResult = { ok: true } | { ok: false; error: QuoteError };
 
 export type ActionResult = { ok: true } | { ok: false; error: 'not_found' | 'invalid_transition' | 'reason_required' | 'conflict' | 'failed' };
 
@@ -43,6 +47,9 @@ export interface StaffStore {
   transition(id: string, actor: string, to: LeadStatus, reason?: string): Promise<ActionResult>;
   attachmentUrl(attachmentId: string, actor: string): Promise<string | null>;
   requeueDelivery(id: string, actor: string, channel: Channel): Promise<ActionResult>;
+  createQuote(leadId: string, actor: string, input: QuoteInputT): Promise<QuoteResult>;
+  issueQuote(quoteId: string, actor: string): Promise<QuoteResult>;
+  resolveQuote(quoteId: string, actor: string, outcome: 'accepted' | 'rejected', reason?: string): Promise<QuoteResult>;
 }
 
 type QuoteRow = {
@@ -57,6 +64,7 @@ type DetailRow = Omit<QuoteRow, 'lead_deliveries' | 'lead_attachments'> & {
   message: string | null; loss_reason: string | null; payload: Record<string, unknown> | null;
   lead_deliveries?: Array<{ channel: Channel; status: DeliveryStatus; attempts: number; last_error: string | null; last_http_status: number | null; next_attempt_at: string | null }>;
   lead_attachments?: Array<{ id: string; filename: string; size_bytes: number | null; mime_type: string | null }>;
+  lead_quotes?: Array<{ id: string; version: number; status: string; amount_cents: number | string; currency: string; valid_until: string | null; summary: string; notes: string | null; created_by: string; issued_by: string | null; issued_at: string | null; resolution_reason: string | null }>;
   lead_events?: Array<{ actor: string; action: string; from_value: string | null; to_value: string | null; note: string | null; created_at: string }>;
 };
 
@@ -101,7 +109,7 @@ export function supabaseStaffStore(db: SupabaseClient = supabaseAdmin()): StaffS
     async getLead(id) {
       const { data, error } = await db
         .from('quotes')
-        .select('*, lead_deliveries(*), lead_attachments(*), lead_events(*)')
+        .select('*, lead_deliveries(*), lead_attachments(*), lead_events(*), lead_quotes(*)')
         .eq('id', id)
         .maybeSingle();
       if (error || !data) return null;
@@ -117,6 +125,11 @@ export function supabaseStaffStore(db: SupabaseClient = supabaseAdmin()): StaffS
         })),
         attachments: (r.lead_attachments ?? []).map((a) => ({
           id: a.id, filename: a.filename, sizeBytes: a.size_bytes, mimeType: a.mime_type,
+        })),
+        quotes: [...(r.lead_quotes ?? [])].sort((a, b) => b.version - a.version).map((x) => ({
+          id: x.id, version: x.version, status: x.status, amountCents: Number(x.amount_cents), currency: x.currency,
+          validUntil: x.valid_until, summary: x.summary, notes: x.notes, createdBy: x.created_by,
+          issuedBy: x.issued_by, issuedAt: x.issued_at, resolutionReason: x.resolution_reason,
         })),
         events: [...(r.lead_events ?? [])]
           .sort((a, b) => b.created_at.localeCompare(a.created_at))
@@ -178,6 +191,24 @@ export function supabaseStaffStore(db: SupabaseClient = supabaseAdmin()): StaffS
       if (!data?.length) return { ok: false, error: 'not_found' };
       await audit(id, actor, 'retry_delivery', null, channel);
       return { ok: true };
+    },
+
+    async createQuote(leadId, actor, i) {
+      const { error } = await db.rpc('lead_quote_create', {
+        p_quote: leadId, p_actor: actor, p_amount: toCents(i.amount), p_currency: i.currency,
+        p_valid_until: i.validUntil, p_summary: i.summary, p_notes: i.notes ?? null,
+      });
+      return error ? { ok: false, error: quoteErrorOf(error.message) } : { ok: true };
+    },
+
+    async issueQuote(quoteId, actor) {
+      const { error } = await db.rpc('lead_quote_issue', { p_id: quoteId, p_actor: actor });
+      return error ? { ok: false, error: quoteErrorOf(error.message) } : { ok: true };
+    },
+
+    async resolveQuote(quoteId, actor, outcome, reason) {
+      const { error } = await db.rpc('lead_quote_resolve', { p_id: quoteId, p_actor: actor, p_outcome: outcome, p_reason: reason ?? null });
+      return error ? { ok: false, error: quoteErrorOf(error.message) } : { ok: true };
     },
   };
 }

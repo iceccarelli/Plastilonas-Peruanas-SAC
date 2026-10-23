@@ -18,6 +18,12 @@ const MSG: Record<string, string> = {
   assigned: 'Responsable asignado.', status_updated: 'Estado actualizado.', retried: 'Reintento ejecutado: revise el estado de entrega.',
   invalid_transition: 'Transición no permitida desde el estado actual.', reason_required: 'Perder un lead exige un motivo.',
   conflict: 'Otra persona cambió este lead mientras tanto. Recargue e intente de nuevo.', assignee_invalid: 'Responsable no autorizado.',
+  quote_created: 'Borrador de cotización creado (aún NO es una oferta).', quote_issued: 'Cotización emitida: es la oferta vigente.',
+  quote_accepted: 'Aceptación registrada: lead ganado.', quote_rejected: 'Rechazo registrado: lead perdido.',
+  quote_invalid: 'Datos de cotización inválidos (importe, moneda, vigencia o resumen).', lead_not_ready: 'Califique el lead antes de cotizar.',
+  quote_not_draft: 'Solo un borrador puede emitirse.', validity_required: 'La vigencia debe ser una fecha futura.',
+  quote_not_issued: 'Solo la oferta vigente admite resultado.', invalid_outcome: 'Resultado inválido.', lead_not_found: 'Lead no encontrado.',
+  quote_not_found: 'Cotización no encontrada.',
   not_found: 'No encontrado.', failed: 'No se pudo completar la acción.',
 };
 
@@ -95,6 +101,46 @@ export default async function StaffLead({ params, searchParams }: { params: Prom
             <select name="to" className={box}>{next.map((s) => <option key={s} value={s}>{s}</option>)}</select>
             <input name="reason" maxLength={500} placeholder="Motivo (obligatorio para LOST)" className={box} />
             <button className={box}>Actualizar</button>
+          </form>
+        )}
+      </section>
+
+      <section className="mt-8">
+        <h2 className="text-lg font-semibold">Cotizaciones</h2>
+        <p className="text-sm text-gray-600">El importe lo fija una persona del personal; el sitio no calcula precios. Solo una cotización <b>emitida</b> es una oferta.</p>
+        {lead.quotes.length === 0 && <p className="mt-2 text-sm">Sin cotizaciones.</p>}
+        <ul className="mt-2 space-y-3 text-sm">
+          {lead.quotes.map((q) => (
+            <li key={q.id} className="rounded border p-3">
+              <div><b>v{q.version}</b> · {q.status} · {(q.amountCents / 100).toLocaleString('es-PE', { minimumFractionDigits: 2 })} {q.currency}{q.validUntil ? ` · vigente hasta ${q.validUntil}` : ''}</div>
+              <div className="whitespace-pre-wrap">{q.summary}</div>
+              {q.resolutionReason && <div>Motivo: {q.resolutionReason}</div>}
+              {q.status === 'draft' && (
+                <form method="post" action={`/api/staff/quotes/${q.id}/issue`} className="mt-2">
+                  <input type="hidden" name="lead" value={lead.id} />
+                  <button className={box}>Emitir como oferta</button>
+                </form>
+              )}
+              {q.status === 'issued' && (
+                <form method="post" action={`/api/staff/quotes/${q.id}/resolve`} className="mt-2 flex flex-wrap gap-2">
+                  <input type="hidden" name="lead" value={lead.id} />
+                  <input name="reason" maxLength={500} placeholder="Motivo (obligatorio si rechaza)" className={box} />
+                  <button name="outcome" value="accepted" className={box}>El cliente aceptó</button>
+                  <button name="outcome" value="rejected" className={box}>El cliente rechazó</button>
+                </form>
+              )}
+            </li>
+          ))}
+        </ul>
+        {['QUALIFIED', 'QUOTE_PREPARATION', 'QUOTED'].includes(lead.status) && (
+          <form method="post" action={`/api/staff/leads/${lead.id}/quotes`} className="mt-4 grid gap-2 sm:grid-cols-2">
+            <h3 className="sm:col-span-2 font-semibold">Nueva versión (borrador)</h3>
+            <input name="amount" required inputMode="decimal" placeholder="Importe, p. ej. 12500.50" className={box} />
+            <select name="currency" className={box}><option>PEN</option><option>USD</option></select>
+            <input name="validUntil" type="date" required className={box} />
+            <textarea name="summary" required minLength={10} maxLength={4000} placeholder="Especificación cotizada (producto, medidas, cantidad, condiciones de entrega)" className={`${box} sm:col-span-2`} />
+            <textarea name="notes" maxLength={4000} placeholder="Notas internas (opcional)" className={`${box} sm:col-span-2`} />
+            <button className={`${box} sm:col-span-2`}>Crear borrador</button>
           </form>
         )}
       </section>
