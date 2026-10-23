@@ -57,6 +57,8 @@ export interface LeadResultado {
   rfqId?: string;
   /** Qué debe hacer el comprador si no hubo recepción. */
   customerAction?: 'none' | 'send_via_whatsapp' | 'retry_later';
+  /** Adjuntos pedidos vs asociados: si difieren, el comprador debe enviarlos por otro medio. */
+  attachments?: { requested: number; attached: number };
 }
 
 /** Clave por envío: un reintento del mismo formulario no duplica la solicitud. */
@@ -86,6 +88,7 @@ export async function postLead(lead: LeadPayload): Promise<LeadResultado> {
       accepted?: boolean;
       rfqId?: string;
       customerAction?: LeadResultado['customerAction'];
+      attachments?: LeadResultado['attachments'];
     };
     const accepted = res.ok && data.accepted === true;
     return {
@@ -93,8 +96,34 @@ export async function postLead(lead: LeadPayload): Promise<LeadResultado> {
       ok: accepted,
       rfqId: accepted ? data.rfqId : undefined,
       customerAction: accepted ? 'none' : (data.customerAction ?? 'send_via_whatsapp'),
+      attachments: data.attachments,
     };
   } catch {
     return { accepted: false, ok: false, customerAction: 'send_via_whatsapp' };
+  }
+}
+
+export interface SubidaFirmada {
+  path: string;
+  token: string;
+}
+
+/**
+ * Pide al servidor una URL firmada para UN archivo. El servidor valida tipo y
+ * tamaño; el navegador sube directo a Storage (sin política anónima) y luego
+ * envía la ruta devuelta en `archivos`. Devuelve null si no se pudo.
+ */
+export async function pedirSubida(f: { name: string; type: string; size: number }): Promise<SubidaFirmada | null> {
+  try {
+    const res = await fetch('/api/lead/upload-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: f.name, type: f.type, size: f.size }),
+    });
+    if (!res.ok) return null;
+    const d = (await res.json()) as Partial<SubidaFirmada>;
+    return d.path && d.token ? { path: d.path, token: d.token } : null;
+  } catch {
+    return null;
   }
 }

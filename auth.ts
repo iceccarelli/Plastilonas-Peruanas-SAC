@@ -73,6 +73,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     authorized({ auth }) {
       return Boolean(auth?.user);
     },
+    // El proveedor viaja en el JWT: el acceso del personal (lib/staff.ts) exige
+    // Google, el único cuyo correo llega verificado.
+    jwt({ token, account }) {
+      if (account) token.provider = account.provider;
+      return token;
+    },
+    session({ session, token }) {
+      (session as unknown as { provider?: unknown }).provider = token.provider;
+      return session;
+    },
   },
 });
 

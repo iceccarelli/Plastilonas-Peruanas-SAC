@@ -40,6 +40,7 @@ const NO_PUBLICAS: Record<string, string> = {
   carrito: 'estado del comprador, no contenido',
   checkout: 'estado del comprador, no contenido',
   dashboard: 'tras autenticación',
+  staff: 'área del personal: autenticada, noindex y bloqueada en robots.txt',
   login: 'tras autenticación',
   en: 'se anuncia por hreflang desde la portada, no como sección',
   pt: 'se anuncia por hreflang desde la portada, no como sección',

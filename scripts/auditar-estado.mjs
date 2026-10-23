@@ -483,6 +483,7 @@ const HUERFANAS_PERMITIDAS = {
   '/checkout/exito': 'retorno de la pasarela: se llega desde Stripe, no desde el sitio',
   '/login': 'acceso de clientes: bloqueado en robots.txt y enlazado sólo cuando Auth.js está configurado',
   '/dashboard': 'tras autenticación',
+  '/staff': 'área del personal: autenticada, noindex y bloqueada en robots.txt',
 };
 
 const huerfanas = rutas

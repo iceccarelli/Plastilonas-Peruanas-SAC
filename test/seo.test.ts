@@ -55,7 +55,7 @@ describe('robots.txt', () => {
   it('NINGÚN agente —ni los de IA— puede rastrear rutas privadas', () => {
     for (const rule of rules) {
       const disallow = Array.isArray(rule.disallow) ? rule.disallow : [rule.disallow];
-      for (const priv of ['/dashboard', '/login', '/api/', '/carrito', '/checkout']) {
+      for (const priv of ['/dashboard', '/login', '/staff', '/api/', '/carrito', '/checkout']) {
         expect(disallow).toContain(priv);
       }
     }

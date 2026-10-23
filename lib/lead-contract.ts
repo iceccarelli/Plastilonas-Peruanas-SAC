@@ -27,6 +27,8 @@ export interface LeadResponse {
   /** La misma solicitud ya existía (reintento): no se duplicó ni se re-entregó. */
   duplicate?: boolean;
   delivery: { crm: ChannelState; email: ChannelState };
+  /** Adjuntos: cuántos se pidieron y cuántos quedaron asociados a la solicitud. */
+  attachments: { requested: number; attached: number };
   /** Qué debe hacer el comprador: nada, o usar el canal alterno. */
   customerAction: 'none' | 'send_via_whatsapp' | 'retry_later';
   error?: string;
