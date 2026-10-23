@@ -30,6 +30,7 @@ export async function deepChecks(env: Record<string, string | undefined> = proce
   await probe('migration_pipeline', 'quotes', 'idempotency_key, ip_hash', '20261023000000_rfq_durable_pipeline.sql');
   await probe('migration_deliveries', 'lead_deliveries', 'id', '20261023000000_rfq_durable_pipeline.sql');
   await probe('migration_attachments_staff', 'lead_attachments', 'id', '20261023010000_rfq_attachments_staff.sql');
+  await probe('migration_quotations', 'lead_quotes', 'id', '20261023020000_rfq_quotations.sql');
 
   try {
     const { data, error } = await db.storage.getBucket(BUCKET);
