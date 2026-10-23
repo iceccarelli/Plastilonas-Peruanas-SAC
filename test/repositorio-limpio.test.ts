@@ -58,6 +58,9 @@ const RAIZ_PERMITIDA = new Set<string>([
   // donde la herramienta lo busca; moverlo a docs/ lo haría invisible para
   // ella. Se añade aquí con su motivo, que es lo que esta prueba exige.
   '.gemini-contributor.md',
+  // Vercel solo lee los crons de vercel.json en la raíz: el reintento de las
+  // entregas del RFQ (/api/cron/lead-deliveries) depende de este archivo.
+  'vercel.json',
 ]);
 
 const ARTEFACTO = [
