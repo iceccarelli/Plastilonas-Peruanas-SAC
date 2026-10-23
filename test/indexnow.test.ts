@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { isValidIndexNowKey, INDEXNOW_KEY_PATTERN, INDEXNOW_KEY, INDEXNOW_KEY_PATH } from '@/lib/indexnow';
@@ -201,4 +201,59 @@ describe('URLs de retorno de Stripe', () => {
       else process.env.NEXT_PUBLIC_SITE_URL = original;
     }
   });
+});
+
+describe('el origen que se envía a IndexNow lo decide el despliegue (mudanza de dominio)', () => {
+  const ROOT_ = process.cwd();
+  let servidores: import('node:http').Server[] = [];
+  afterEach(() => { servidores.forEach((s) => s.close()); servidores = []; });
+
+  async function levantar(handler: (url: string) => [number, string]) {
+    const { createServer } = await import('node:http');
+    const srv = createServer((req, res) => { const [c, b] = handler(req.url ?? ''); res.statusCode = c; res.end(b); });
+    servidores.push(srv);
+    await new Promise<void>((r) => srv.listen(0, '127.0.0.1', r));
+    return `http://127.0.0.1:${(srv.address() as import('node:net').AddressInfo).port}`;
+  }
+  async function correr(base: string) {
+    const { execFile } = await import('node:child_process');
+    return new Promise<{ code: number; out: string }>((resolve) => {
+      execFile('node', ['scripts/submit-indexnow.mjs', '--dry-run'], { cwd: ROOT_, env: { ...process.env, INDEXNOW_BASE: base }, timeout: 60000 },
+        (err, stdout, stderr) => resolve({ code: err ? (err as { code?: number }).code ?? 1 : 0, out: `${stdout}${stderr}` }));
+    });
+  }
+
+  it('si /version.json declara otro origen (www tras la mudanza), envía ESE host y no el del repositorio', async () => {
+    const { INDEXNOW_KEY } = await import('@/lib/indexnow');
+    let canonico = '';
+    canonico = await levantar((u) =>
+      u === '/indexnow-key.txt' ? [200, INDEXNOW_KEY]
+      : u === '/sitemap.xml' ? [200, `<urlset><url><loc>${canonico}/pagina-1</loc></url><url><loc>${canonico}/pagina-2</loc></url></urlset>`]
+      : [404, '']);
+    const r = await correr(await levantar((u) => (u === '/version.json' ? [200, JSON.stringify({ siteUrl: canonico })] : [404, ''])));
+    expect(r.code).toBe(0);
+    expect(r.out).toContain(`Origen canónico del despliegue: ${canonico}`);
+    expect(r.out).toContain(`${canonico}/pagina-1`);
+    expect(r.out).toContain('2 URLs');
+    expect(r.out).toContain('--dry-run: no se envió nada');
+  }, 90000);
+
+  it('sin /version.json conserva el comportamiento anterior (origen del repositorio/base)', async () => {
+    const { INDEXNOW_KEY } = await import('@/lib/indexnow');
+    let base = '';
+    base = await levantar((u) =>
+      u === '/indexnow-key.txt' ? [200, INDEXNOW_KEY]
+      : u === '/sitemap.xml' ? [200, `<urlset><url><loc>${base}/x</loc></url></urlset>`]
+      : [404, '']);
+    const r = await correr(base);
+    expect(r.code).toBe(0);
+    expect(r.out).not.toContain('Origen canónico del despliegue');
+  }, 90000);
+
+  it('si el origen declarado no sirve la prueba de propiedad, ABORTA (no envía a medias)', async () => {
+    const canonico = await levantar(() => [404, '']);
+    const r = await correr(await levantar((u) => (u === '/version.json' ? [200, JSON.stringify({ siteUrl: canonico })] : [404, ''])));
+    expect(r.code).not.toBe(0);
+    expect(r.out).toContain('La prueba de propiedad falló');
+  }, 90000);
 });
