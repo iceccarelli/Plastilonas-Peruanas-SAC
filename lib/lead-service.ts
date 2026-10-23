@@ -163,6 +163,7 @@ export async function submitLead(
         if (r.kind === 'created') {
           quoteId = r.quote.id;
           rfqId = r.quote.rfqId;
+          if (r.degraded) logEvent('migration_pending', { level: 'error', rfq: rfqId });
         } else if (r.kind === 'duplicate') {
           logEvent('lead_duplicate', { rfq: r.quote.rfqId });
           const d = r.deliveries;
