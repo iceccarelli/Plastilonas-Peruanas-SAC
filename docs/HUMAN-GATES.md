@@ -30,12 +30,16 @@ Buscar `TODO(HUMAN)` en el repositorio localiza el punto exacto.
 
 ## 2. Adjuntos del formulario RFQ (Etapa 2) y fotos de /asistente (Sprint C)
 
-- [ ] Crear en Supabase el bucket **`rfq-adjuntos`** (privado) con política
-      RLS que permita `INSERT` anónimo y bloquee `SELECT` público. El
-      formulario (components/CotizacionForm.tsx) ya sube ahí directo desde el
-      navegador cuando `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-      existen; sin bucket, el lead viaja con los nombres de archivo y la nota
-      «adjuntar por correo».
+- [ ] Aplicar en Supabase, en orden, `supabase/schema.sql`,
+      `supabase/migrations/20261023000000_rfq_durable_pipeline.sql` y
+      `supabase/migrations/20261023010000_rfq_attachments_staff.sql`. La segunda
+      **crea el bucket privado `rfq-adjuntos`** (20 MB, sin políticas anónimas).
+      Los navegadores suben con URLs firmadas que emite `/api/lead/upload-url`;
+      ya no se necesita ninguna política RLS de INSERT anónimo. Sin la
+      migración el formulario manda los adjuntos como «adjuntar por correo».
+- [ ] Vercel: `STAFF_EMAILS` (correos del personal, separados por coma) y
+      credenciales de Google en Auth.js. `/staff` solo admite esos correos con
+      login Google; sin la variable nadie entra.
 - [ ] **MISMO bucket**, prefijo `asistente/` — no se creó un segundo bucket.
       Las fotos que se suben en /asistente (components/ai/AsistenteWorkspace.tsx,
       lib/ai/vision-upload.ts#archiveVisionImage) intentan una copia

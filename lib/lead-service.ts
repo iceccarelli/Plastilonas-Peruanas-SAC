@@ -18,6 +18,7 @@ import {
   attempt, enabledChannels, toOutcome, type DeliveryContext, type EnvLike,
 } from '@/lib/lead-delivery';
 import type { Channel, LeadStore } from '@/lib/lead-store';
+import type { AttachmentStore } from '@/lib/attachment-store';
 
 const SITE_HOST = SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 export const RATE_WINDOW_MS = 10 * 60 * 1000;
@@ -94,6 +95,7 @@ function response(p: Partial<LeadResponse> & { accepted: boolean; durability: Du
     ok: p.accepted,
     customerAction: p.accepted ? 'none' : 'send_via_whatsapp',
     persisted: p.durability === 'database',
+    attachments: { requested: 0, attached: 0 },
     forwarded: delivery.crm === 'delivered',
     emailed: delivery.email === 'delivered',
     ...p,
@@ -103,6 +105,7 @@ function response(p: Partial<LeadResponse> & { accepted: boolean; durability: Du
 
 export interface ServiceDeps {
   store: LeadStore | null;
+  attachments?: AttachmentStore | null;
   env?: EnvLike;
 }
 
@@ -195,6 +198,21 @@ export async function submitLead(
     }
   }
 
+  // Adjuntos: solo se asocian rutas que el servidor emitió y cuyo objeto existe.
+  // Una referencia inválida o un fallo NO anula la solicitud, pero queda
+  // contado para que el comprador sepa que ese archivo no llegó.
+  const attachments = { requested: lead.archivos?.length ?? 0, attached: 0 };
+  if (persisted && quoteId && deps.attachments && attachments.requested) {
+    try {
+      attachments.attached = (await deps.attachments.attach(quoteId, lead.archivos!)).attached;
+    } catch (err) {
+      logEvent('attach_failed', { level: 'error', rfq: rfqId, reason: (err as Error).message.slice(0, 80) });
+    }
+  }
+  if (attachments.attached < attachments.requested) {
+    logEvent('attachments_incomplete', { level: 'warn', rfq: rfqId, requested: attachments.requested, attached: attachments.attached });
+  }
+
   // Entrega en paralelo con tiempo acotado. Un fallo queda REGISTRADO para
   // reintento; no se convierte en éxito ni se pierde.
   const ctx: DeliveryContext = { rfqId, lead, source, persisted, receivedAt };
@@ -224,11 +242,11 @@ export async function submitLead(
     logEvent('lead_not_accepted', { level: 'error', store: Boolean(store), channels: channels.length });
     return {
       status: 503,
-      body: response({ accepted: false, durability, error: 'not_persisted', delivery }),
+      body: response({ accepted: false, durability, error: 'not_persisted', delivery, attachments }),
     };
   }
   logEvent('lead_accepted', { rfq: rfqId, durability, crm: delivery.crm, email: delivery.email });
-  return { status: 200, body: response({ accepted: true, durability, rfqId, delivery }) };
+  return { status: 200, body: response({ accepted: true, durability, rfqId, delivery, attachments }) };
 }
 
 /** Reintenta entregas vencidas. Lo invoca el cron; devuelve conteos sin PII. */

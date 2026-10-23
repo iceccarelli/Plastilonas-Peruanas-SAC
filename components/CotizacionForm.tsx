@@ -35,7 +35,7 @@ import { Send, CheckCircle, Paperclip, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { buildQuoteMessage, openWhatsApp, saveQuoteLocally, whatsappUrl } from '@/lib/whatsapp';
 import { trackQuoteRequest, trackQuoteStarted } from '@/lib/analytics';
-import { postLead, nuevaClaveIdempotencia } from '@/lib/lead';
+import { postLead, nuevaClaveIdempotencia, pedirSubida } from '@/lib/lead';
 import { errorRuc, normalizarRuc } from '@/lib/ruc';
 
 const EXTENSIONES = ['pdf', 'jpg', 'jpeg', 'png', 'dwg', 'dxf'];
@@ -96,6 +96,7 @@ const T = {
     noRegTitulo: 'Falta un paso: envíe su solicitud por WhatsApp',
     noRegAbrio: 'No pudimos guardar su solicitud en nuestro registro comercial. Se abrió WhatsApp con su solicitud: pulse enviar ahí; es el canal que sí la entrega al equipo.',
     noRegBloqueado: 'No pudimos guardar su solicitud en nuestro registro comercial y su navegador bloqueó WhatsApp. Use el botón de abajo para enviarla: hasta entonces el equipo NO la ha recibido.',
+    adjFaltan: 'Algún archivo adjunto NO llegó con la solicitud. Envíelo por WhatsApp o por correo citando su código.',
     toastNoReg: 'Su solicitud aún no fue recibida',
     toastNoRegDesc: 'No pudimos registrarla. Envíela por WhatsApp para que llegue al equipo comercial.',
     errMax: `Máximo ${MAX_ARCHIVOS} archivos.`,
@@ -132,6 +133,7 @@ const T = {
     noRegTitulo: 'One step left: send your request via WhatsApp',
     noRegAbrio: 'We could not save your request in our commercial record. WhatsApp opened with your request: press send there; that is the channel that delivers it to the team.',
     noRegBloqueado: 'We could not save your request in our commercial record and your browser blocked WhatsApp. Use the button below to send it: until then the team has NOT received it.',
+    adjFaltan: 'An attached file did NOT arrive with the request. Send it via WhatsApp or email quoting your reference.',
     toastNoReg: 'Your request has not been received yet',
     toastNoRegDesc: 'We could not register it. Send it via WhatsApp so it reaches the sales team.',
     errMax: `Maximum ${MAX_ARCHIVOS} files.`,
@@ -228,7 +230,7 @@ export default function CotizacionForm({
   const [archivos, setArchivos] = React.useState<File[]>([]);
   const [errorArchivos, setErrorArchivos] = React.useState<string | null>(null);
   /** Acuse de recibo: código RFQ, si la ventana de WhatsApp abrió, y el enlace. */
-  const [acuse, setAcuse] = React.useState<{ rfqId?: string; aceptada: boolean; abrio: boolean; href: string } | null>(null);
+  const [acuse, setAcuse] = React.useState<{ rfqId?: string; aceptada: boolean; adjFaltan: boolean; abrio: boolean; href: string } | null>(null);
   /** Una clave por formulario: reenviar tras un fallo no duplica la solicitud. */
   const claveEnvio = React.useRef<string>('');
   const productoObligatorio = Boolean(preselectedProduct);
@@ -331,34 +333,26 @@ export default function CotizacionForm({
   };
 
   /**
-   * Sube los adjuntos directo del navegador a Supabase Storage (bucket
-   * `rfq-adjuntos`) si está configurado. Devuelve la lista de referencias
-   * (ruta subida o solo el nombre si no hay almacenamiento).
-   * TODO(HUMAN): crear el bucket `rfq-adjuntos` (privado, escritura anónima
-   * vía política RLS de INSERT) en Supabase — ver docs/HUMAN-GATES.md.
+   * Sube cada adjunto con una URL firmada que emite el servidor (valida tipo y
+   * tamaño y fija la ruta). El bucket es privado y sin política anónima.
+   * Devuelve rutas subidas; un archivo que no subió viaja como nota «adjuntar
+   * por correo» y el servidor lo cuenta como NO adjuntado.
    *
-   * EL CLIENTE DE SUPABASE SE CARGA AQUÍ, NO ARRIBA. Importado de forma
-   * estática, `@supabase/supabase-js` pesaba 53 kB comprimidos en el paquete
-   * INICIAL de /cotizacion y /en/rfq: las dos páginas por las que entra el
-   * dinero eran las más pesadas del sitio (208 kB frente a los 102 kB de
-   * base) por una biblioteca que la mayoría de los RFQ nunca llega a usar —
-   * sólo se necesita si alguien adjunta un plano.
-   *
-   * Con `await import()` después de la salida temprana, el navegador descarga
-   * esos 53 kB únicamente cuando hay archivos y se pulsa enviar; es decir,
-   * cuando la persona ya decidió cotizar y una espera de red se justifica.
-   * Nunca antes, y nunca para quien sólo escribe medidas y ciudad.
+   * EL CLIENTE DE SUPABASE SE CARGA AQUÍ, NO ARRIBA: pesa 53 kB comprimidos y
+   * solo se necesita si alguien adjunta un plano.
    */
-  async function subirArchivos(rfqRef: string): Promise<string[]> {
+  async function subirArchivos(): Promise<string[]> {
     if (archivos.length === 0) return [];
+    const nota = (f: File, motivo: string) => `${f.name} (${Math.round(f.size / 1024)} KB — ${motivo})`;
     const { supabaseBrowser } = await import('@/lib/supabase');
     const sb = supabaseBrowser();
-    if (!sb) return archivos.map((f) => `${f.name} (${Math.round(f.size / 1024)} KB — adjuntar por correo)`);
+    if (!sb) return archivos.map((f) => nota(f, 'adjuntar por correo'));
     const refs: string[] = [];
     for (const f of archivos) {
-      const ruta = `${rfqRef}/${Date.now()}-${f.name.replace(/[^\w.\-]/g, '_')}`;
-      const { error } = await sb.storage.from('rfq-adjuntos').upload(ruta, f);
-      refs.push(error ? `${f.name} (no se pudo subir — adjuntar por correo)` : ruta);
+      const firma = await pedirSubida(f);
+      if (!firma) { refs.push(nota(f, 'no se pudo subir — adjuntar por correo')); continue; }
+      const { error } = await sb.storage.from('rfq-adjuntos').uploadToSignedUrl(firma.path, firma.token, f);
+      refs.push(error ? nota(f, 'no se pudo subir — adjuntar por correo') : firma.path);
     }
     return refs;
   }
@@ -366,11 +360,10 @@ export default function CotizacionForm({
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     const ruc = normalizarRuc(data.ruc ?? '') || undefined;
-    const rfqRef = `web-${Date.now().toString(36)}`;
 
     let refsArchivos: string[] = [];
     try {
-      refsArchivos = await subirArchivos(rfqRef);
+      refsArchivos = await subirArchivos();
     } catch {
       refsArchivos = archivos.map((f) => f.name);
     }
@@ -428,7 +421,7 @@ export default function CotizacionForm({
 
     const abrio = openWhatsApp(message);
     trackQuoteRequest(data.producto, slugOrigen);
-    setAcuse({ rfqId: resultado.rfqId, aceptada: resultado.accepted, abrio, href: whatsappUrl(message) });
+    setAcuse({ rfqId: resultado.rfqId, aceptada: resultado.accepted, adjFaltan: Boolean(resultado.attachments && resultado.attachments.attached < resultado.attachments.requested), abrio, href: whatsappUrl(message) });
 
     // El borrador solo se borra si la solicitud quedó recibida: si no, el
     // comprador puede volver a intentarlo sin reescribirla.
@@ -502,6 +495,9 @@ export default function CotizacionForm({
             : acuse?.abrio ? t.okAbrio : t.okBloqueado}{' '}
           {acuse?.aceptada && t.sla}
         </p>
+        {acuse?.adjFaltan && (
+          <p role="alert" className="mx-auto mt-3 max-w-md text-sm font-medium text-amber-700">{t.adjFaltan}</p>
+        )}
 
         {/* Salida manual: un window.open bloqueado dejaba al comprador mirando
             un mensaje que hablaba de una ventana que nunca se abrió. */}

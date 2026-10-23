@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { supabaseLeadStore } from '@/lib/lead-store';
+import { supabaseAttachmentStore } from '@/lib/attachment-store';
 import { clientIp, logEvent, submitLead } from '@/lib/lead-service';
 
 export const runtime = 'nodejs';
@@ -33,13 +34,15 @@ export async function POST(req: NextRequest) {
   }
 
   let store = null;
+  let attachments = null;
   if (isSupabaseConfigured() && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     try {
       store = supabaseLeadStore();
+      attachments = supabaseAttachmentStore();
     } catch {
       logEvent('store_unavailable', { level: 'error' });
     }
   }
-  const { status, body } = await submitLead(json, clientIp(req.headers), { store });
+  const { status, body } = await submitLead(json, clientIp(req.headers), { store, attachments });
   return NextResponse.json(body, { status, headers });
 }
