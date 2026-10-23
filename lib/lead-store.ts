@@ -3,6 +3,7 @@
  * es la de producción; la de memoria (test/helpers) aplica las MISMAS
  * restricciones de unicidad para probar el flujo sin red.
  */
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabaseAdmin } from '@/lib/supabase';
 import type { LeadInput } from '@/lib/lead-schema';
 
@@ -31,7 +32,8 @@ export interface DeliveryOutcome {
 }
 
 export type InsertResult =
-  | { kind: 'created'; quote: QuoteRow }
+  /** `degraded`: la migración del pipeline aún no está aplicada; se guardó sin clave de idempotencia. */
+  | { kind: 'created'; quote: QuoteRow; degraded?: boolean }
   | { kind: 'rfq_collision' }
   | { kind: 'duplicate'; quote: QuoteRow; deliveries: Record<string, DeliveryStatus> };
 
@@ -68,33 +70,44 @@ export function fuenteMensaje(lead: LeadInput): string {
     .join('\n');
 }
 
-export function supabaseLeadStore(): LeadStore {
-  const db = supabaseAdmin();
+/** Columna/tabla inexistente: Postgres 42703/42P01 o PostgREST PGRST204/PGRST205. */
+export function isMissingSchema(code: string | undefined): boolean {
+  return code === '42703' || code === '42P01' || code === 'PGRST204' || code === 'PGRST205';
+}
+
+export function supabaseLeadStore(db: SupabaseClient = supabaseAdmin()): LeadStore {
 
   return {
     async insertQuote(q) {
       const { lead } = q;
-      const { data, error } = await db
+      const row = {
+        customer_email: lead.email,
+        full_name: lead.nombre || lead.contact || '',
+        company: lead.empresa,
+        phone: lead.telefono,
+        product: lead.producto ?? null,
+        quantity: lead.cantidad ?? null,
+        rfq_code: q.rfqId,
+        country: lead.deliveryCountry || lead.country || null,
+        industry: lead.industry ?? null,
+        status: 'NEW',
+        source: q.source,
+        payload: lead,
+        message: fuenteMensaje(lead),
+      };
+      let { data, error } = await db
         .from('quotes')
-        .insert({
-          customer_email: lead.email,
-          full_name: lead.nombre || lead.contact || '',
-          company: lead.empresa,
-          phone: lead.telefono,
-          product: lead.producto ?? null,
-          quantity: lead.cantidad ?? null,
-          rfq_code: q.rfqId,
-          idempotency_key: q.idempotencyKey,
-          ip_hash: q.ipHash,
-          country: lead.deliveryCountry || lead.country || null,
-          industry: lead.industry ?? null,
-          status: 'NEW',
-          source: q.source,
-          payload: lead,
-          message: fuenteMensaje(lead),
-        })
+        .insert({ ...row, idempotency_key: q.idempotencyKey, ip_hash: q.ipHash })
         .select('id, rfq_code')
         .single();
+      // Despliegue antes de aplicar la migración: guardar el lead sin las
+      // columnas nuevas es mejor que perderlo. Sin idempotencia hasta migrar.
+      if (error && isMissingSchema(error.code)) {
+        ({ data, error } = await db.from('quotes').insert(row).select('id, rfq_code').single());
+        if (!error && data) {
+          return { kind: 'created', quote: { id: data.id, rfqId: data.rfq_code }, degraded: true };
+        }
+      }
       if (!error && data) return { kind: 'created', quote: { id: data.id, rfqId: data.rfq_code } };
 
       if (error?.code === '23505') {
