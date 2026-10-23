@@ -35,7 +35,7 @@ import { Send, CheckCircle, Paperclip, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { buildQuoteMessage, openWhatsApp, saveQuoteLocally, whatsappUrl } from '@/lib/whatsapp';
 import { trackQuoteRequest, trackQuoteStarted } from '@/lib/analytics';
-import { postLead } from '@/lib/lead';
+import { postLead, nuevaClaveIdempotencia } from '@/lib/lead';
 import { errorRuc, normalizarRuc } from '@/lib/ruc';
 
 const EXTENSIONES = ['pdf', 'jpg', 'jpeg', 'png', 'dwg', 'dxf'];
@@ -87,12 +87,17 @@ const T = {
     quitar: (n: string) => `Quitar ${n}`,
     enviar: 'Enviar solicitud de cotización', enviando: 'Preparando su solicitud…',
     sla: SLA_COTIZACION,
-    nota: 'Su solicitud se abre en WhatsApp lista para enviar y llega también a nuestro registro comercial. Sin listas de precios en líneas a medida: cada RFQ se responde con especificación.',
+    nota: 'Su solicitud se abre en WhatsApp lista para enviar y se guarda en nuestro registro comercial. Sin listas de precios en líneas a medida: cada RFQ se responde con especificación.',
     okTitulo: 'Solicitud registrada',
     okCodigo: 'Código de su solicitud:',
     okAbrio: 'Se abrió WhatsApp con su solicitud estructurada: pulse enviar ahí y quedará en manos del equipo comercial.',
     okBloqueado: 'Su navegador bloqueó la ventana de WhatsApp, pero la solicitud ya entró en nuestro registro comercial.',
     okEnlace: 'Abrir WhatsApp con mi solicitud',
+    noRegTitulo: 'Falta un paso: envíe su solicitud por WhatsApp',
+    noRegAbrio: 'No pudimos guardar su solicitud en nuestro registro comercial. Se abrió WhatsApp con su solicitud: pulse enviar ahí; es el canal que sí la entrega al equipo.',
+    noRegBloqueado: 'No pudimos guardar su solicitud en nuestro registro comercial y su navegador bloqueó WhatsApp. Use el botón de abajo para enviarla: hasta entonces el equipo NO la ha recibido.',
+    toastNoReg: 'Su solicitud aún no fue recibida',
+    toastNoRegDesc: 'No pudimos registrarla. Envíela por WhatsApp para que llegue al equipo comercial.',
     errMax: `Máximo ${MAX_ARCHIVOS} archivos.`,
     errTipo: (n: string) => `Formato no admitido: ${n}. Use PDF, JPG, PNG, DWG o DXF.`,
     errPeso: (n: string) => `${n} supera los 20 MB.`,
@@ -118,12 +123,17 @@ const T = {
     quitar: (n: string) => `Remove ${n}`,
     enviar: 'Send request for quotation', enviando: 'Preparing your request…',
     sla: SLA_QUOTE_EN,
-    nota: 'Your request opens in WhatsApp ready to send and also reaches our commercial record. No price lists on made-to-measure lines: every RFQ is answered with a specification.',
+    nota: 'Your request opens in WhatsApp ready to send and is saved in our commercial record. No price lists on made-to-measure lines: every RFQ is answered with a specification.',
     okTitulo: 'Request registered',
     okCodigo: 'Your request reference:',
     okAbrio: 'WhatsApp opened with your structured request: press send there and it reaches the sales team.',
     okBloqueado: 'Your browser blocked the WhatsApp window, but the request already reached our commercial record.',
     okEnlace: 'Open WhatsApp with my request',
+    noRegTitulo: 'One step left: send your request via WhatsApp',
+    noRegAbrio: 'We could not save your request in our commercial record. WhatsApp opened with your request: press send there; that is the channel that delivers it to the team.',
+    noRegBloqueado: 'We could not save your request in our commercial record and your browser blocked WhatsApp. Use the button below to send it: until then the team has NOT received it.',
+    toastNoReg: 'Your request has not been received yet',
+    toastNoRegDesc: 'We could not register it. Send it via WhatsApp so it reaches the sales team.',
     errMax: `Maximum ${MAX_ARCHIVOS} files.`,
     errTipo: (n: string) => `Unsupported format: ${n}. Use PDF, JPG, PNG, DWG or DXF.`,
     errPeso: (n: string) => `${n} exceeds 20 MB.`,
@@ -218,7 +228,9 @@ export default function CotizacionForm({
   const [archivos, setArchivos] = React.useState<File[]>([]);
   const [errorArchivos, setErrorArchivos] = React.useState<string | null>(null);
   /** Acuse de recibo: código RFQ, si la ventana de WhatsApp abrió, y el enlace. */
-  const [acuse, setAcuse] = React.useState<{ rfqId?: string; abrio: boolean; href: string } | null>(null);
+  const [acuse, setAcuse] = React.useState<{ rfqId?: string; aceptada: boolean; abrio: boolean; href: string } | null>(null);
+  /** Una clave por formulario: reenviar tras un fallo no duplica la solicitud. */
+  const claveEnvio = React.useRef<string>('');
   const productoObligatorio = Boolean(preselectedProduct);
 
   const {
@@ -411,24 +423,33 @@ export default function CotizacionForm({
       origen,
       archivos: refsArchivos,
       language: idioma,
+      idempotencyKey: (claveEnvio.current ||= nuevaClaveIdempotencia()),
     });
 
     const abrio = openWhatsApp(message);
     trackQuoteRequest(data.producto, slugOrigen);
-    setAcuse({ rfqId: resultado.rfqId, abrio, href: whatsappUrl(message) });
+    setAcuse({ rfqId: resultado.rfqId, aceptada: resultado.accepted, abrio, href: whatsappUrl(message) });
 
-    try {
-      window.localStorage.removeItem(BORRADOR_KEY);
-    } catch {
-      /* best-effort */
+    // El borrador solo se borra si la solicitud quedó recibida: si no, el
+    // comprador puede volver a intentarlo sin reescribirla.
+    if (resultado.accepted) {
+      try {
+        window.localStorage.removeItem(BORRADOR_KEY);
+      } catch {
+        /* best-effort */
+      }
     }
 
     setIsSubmitting(false);
     setIsSuccess(true);
-    toast.success(abrio ? t.toastOk : t.toastBloq, {
-      description: abrio ? t.toastOkDesc : t.toastBloqDesc,
-      duration: 9000,
-    });
+    if (resultado.accepted) {
+      toast.success(abrio ? t.toastOk : t.toastBloq, {
+        description: abrio ? t.toastOkDesc : t.toastBloqDesc,
+        duration: 9000,
+      });
+    } else {
+      toast.warning(t.toastNoReg, { description: t.toastNoRegDesc, duration: 12000 });
+    }
   };
 
   const campo =
@@ -462,7 +483,9 @@ export default function CotizacionForm({
     return (
       <div className="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-10 text-center">
         <CheckCircle className="mx-auto mb-4 h-10 w-10 text-[#059669]" />
-        <div className="text-xl font-semibold text-[#0A2540]">{t.okTitulo}</div>
+        <div className="text-xl font-semibold text-[#0A2540]">
+          {acuse && !acuse.aceptada ? t.noRegTitulo : t.okTitulo}
+        </div>
 
         {/* ACUSE DE RECIBO. El código RFQ lo emite /api/lead y hasta ahora se
             descartaba en el cliente: el comprador se iba sin nada que citar si
@@ -474,13 +497,15 @@ export default function CotizacionForm({
         )}
 
         <p className="mx-auto mt-3 max-w-md text-sm text-gray-600">
-          {acuse?.abrio ? t.okAbrio : t.okBloqueado}{' '}
-          {t.sla}
+          {acuse && !acuse.aceptada
+            ? acuse.abrio ? t.noRegAbrio : t.noRegBloqueado
+            : acuse?.abrio ? t.okAbrio : t.okBloqueado}{' '}
+          {acuse?.aceptada && t.sla}
         </p>
 
         {/* Salida manual: un window.open bloqueado dejaba al comprador mirando
             un mensaje que hablaba de una ventana que nunca se abrió. */}
-        {acuse && !acuse.abrio && (
+        {acuse && (!acuse.abrio || !acuse.aceptada) && (
           <a
             href={acuse.href}
             target="_blank"

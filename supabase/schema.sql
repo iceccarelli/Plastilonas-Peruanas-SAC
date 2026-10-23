@@ -174,3 +174,7 @@ create unique index if not exists quotes_rfq_code_uidx on public.quotes(rfq_code
 create index if not exists quotes_status_created_idx on public.quotes(status, created_at desc);
 -- Stages (text): NEW | TECHNICAL_REVIEW | PRICING | EXPORT_REVIEW | QUOTE_READY | QUOTE_SENT | NEGOTIATION | WON | LOST
 
+
+-- Entrega durable del RFQ (idempotencia, estado por canal, límite de tasa):
+-- supabase/migrations/20261023000000_rfq_durable_pipeline.sql. Aplicar después
+-- de este archivo; el handler de /api/lead lo exige para confirmar recepción.

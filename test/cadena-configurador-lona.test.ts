@@ -260,12 +260,13 @@ describe('la especificación llega entera hasta el RFQ', () => {
   });
 
   it('/api/lead no descarta el origen y lo reenvía al CRM', () => {
-    const src = leer('app/api/lead/route.ts');
-    expect(src, 'zod descarta en silencio lo que no declara').toMatch(/origen:\s*z\.string\(\)/);
-    // El webhook recibe el lead entero (`...lead`) más la fuente compuesta.
-    expect(src).toContain('...lead,');
-    expect(src).toContain('source: fuenteDe(lead)');
-    expect(src).toMatch(/lead\.origen\s*\?\s*` \(\$\{lead\.origen\}\)`/);
+    expect(leer('lib/lead-schema.ts'), 'zod descarta en silencio lo que no declara').toMatch(/origen:\s*z\.string\(\)/);
+    // El webhook recibe el lead entero (`...ctx.lead`) más la fuente compuesta.
+    expect(leer('lib/lead-delivery.ts')).toContain('...ctx.lead,');
+    expect(leer('lib/lead-delivery.ts')).toContain('source: ctx.source');
+    const svc = leer('lib/lead-service.ts');
+    expect(svc).toContain('fuenteDe(lead)');
+    expect(svc).toMatch(/lead\.origen\s*\?\s*` \(\$\{lead\.origen\}\)`/);
   });
 });
 

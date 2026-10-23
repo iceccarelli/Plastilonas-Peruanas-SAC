@@ -323,7 +323,7 @@ describe('etapa 11 — el camino en inglés se cierra', () => {
 
   it('el lead declara su idioma, campo que /api/lead aceptaba y nunca recibía', () => {
     expect(leer('components/CotizacionForm.tsx')).toContain('language: idioma');
-    expect(leer('app/api/lead/route.ts')).toContain("language: z.enum(['es', 'en', 'pt'])");
+    expect(leer('lib/lead-schema.ts')).toContain("language: z.enum(['es', 'en', 'pt'])");
   });
 
   it('las páginas en inglés están en el sitemap y enlazadas entre sí', () => {
