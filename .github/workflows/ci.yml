@@ -100,3 +100,12 @@ jobs:
         # prueba lo notaba: ni el HTML ni el layout estaban mal, lo que fallaba
         # era el trayecto.
         run: npm run auditar:navegacion
+
+      - name: Camino del dinero (navegador, extremo a extremo)
+        # Recorre ficha -> asistente -> cotizacion y ENVIA un RFQ sintetico
+        # contra el build, con un CRM de prueba local: comprueba que el
+        # comprador solo ve «registrada» cuando alguien lo recibio y que la
+        # campana de la sesion llega al registro. Corre sin base real ni
+        # correo (el script blanquea esas variables). Reutiliza el .next ya
+        # compilado arriba.
+        run: npm run probar:dinero

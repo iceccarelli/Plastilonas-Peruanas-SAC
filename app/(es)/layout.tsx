@@ -12,6 +12,7 @@ import AuthProvider from '@/components/AuthProvider';
 import StructuredData from '@/components/StructuredData';
 import { SITE } from '@/lib/site';
 import Analytics from '@/components/Analytics';
+import AttributionCapture from '@/components/AttributionCapture';
 import ConsentBanner from '@/components/ConsentBanner';
 import BarraMovilContacto from '@/components/BarraMovilContacto';
 import { OG_IMAGEN } from '@/lib/meta';
@@ -137,6 +138,7 @@ export default function RootLayout({
         <span id="top" aria-hidden="true" />
         <StructuredData />
         <Analytics />
+        <AttributionCapture />
         <AuthProvider>
           <Navbar />
           <main className="min-h-screen">

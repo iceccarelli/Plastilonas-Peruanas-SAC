@@ -56,8 +56,16 @@ if curl -fsS "${BASE}/version.json" >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "── Levantando el sitio en ${BASE} ──"
-setsid npx next start -p "$PUERTO" > "$REGISTRO" 2>&1 &
+# TRAMO 5 envía un RFQ sintético de verdad. El servidor de prueba recibe un CRM
+# FALSO (lo levanta camino-dinero.mjs en este puerto) y se le BLANQUEAN Supabase
+# y Resend: la prueba jamás escribe en una base real ni manda un correo real,
+# aunque el .env.local de quien la corre tenga credenciales.
+export DIAG_CRM_PORT="${DIAG_CRM_PORT:-4011}"
+echo "── Levantando el sitio en ${BASE} (CRM de prueba en :${DIAG_CRM_PORT}) ──"
+CRM_WEBHOOK_URL="http://127.0.0.1:${DIAG_CRM_PORT}/lead" N8N_WEBHOOK_URL="" \
+  NEXT_PUBLIC_SUPABASE_URL="" NEXT_PUBLIC_SUPABASE_ANON_KEY="" SUPABASE_SERVICE_ROLE_KEY="" \
+  RESEND_API_KEY="" CRM_WEBHOOK_SECRET="" \
+  setsid npx next start -p "$PUERTO" > "$REGISTRO" 2>&1 &
 SERVIDOR=$!
 
 for _ in $(seq 1 60); do

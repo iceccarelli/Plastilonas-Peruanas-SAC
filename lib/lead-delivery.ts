@@ -95,6 +95,7 @@ export function emailText(ctx: DeliveryContext): string {
     lead.mensaje ? `Detalle: ${lead.mensaje}` : null,
     lead.archivos?.length ? `Adjuntos: ${lead.archivos.join(', ')}` : null,
     lead.path ? `Página de origen: ${lead.path}` : null,
+    lead.channel ? `Canal: ${lead.channel}${lead.referrer_host ? ` (${lead.referrer_host})` : ''}` : null,
     lead.slug ? `Slug de producto: ${lead.slug}` : null,
   ]
     .filter(Boolean)

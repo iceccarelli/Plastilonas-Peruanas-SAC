@@ -45,7 +45,7 @@ export default async function StaffLead({ params, searchParams }: { params: Prom
         <div><b>Empresa:</b> {lead.company ?? '—'} {typeof lead.payload.ruc === 'string' ? `· RUC ${lead.payload.ruc}` : ''}</div>
         <div><b>Producto:</b> {lead.product ?? '—'} · <b>Cantidad:</b> {lead.quantity ?? '—'}</div>
         <div><b>Origen:</b> {lead.source ?? '—'}</div>
-        <div><b>Atribución:</b> {['utm_source', 'utm_medium', 'utm_campaign'].map((k) => (lead.payload[k] ? `${k}=${String(lead.payload[k])}` : null)).filter(Boolean).join(' · ') || '—'}</div>
+        <div><b>Atribución:</b> {['channel', 'referrer_host', 'utm_source', 'utm_medium', 'utm_campaign'].map((k) => (lead.payload[k] ? `${k}=${String(lead.payload[k])}` : null)).filter(Boolean).join(' · ') || '—'}</div>
         <div><b>Responsable:</b> {lead.assignedTo ?? 'sin asignar'}</div>
         {lead.lossReason && <div><b>Motivo de pérdida:</b> {lead.lossReason}</div>}
         <pre className="mt-2 whitespace-pre-wrap rounded bg-gray-50 p-3">{lead.message ?? ''}</pre>

@@ -29,6 +29,11 @@ export const LeadSchema = z.object({
   utm_campaign: z.string().trim().max(120).optional(),
   utm_term: z.string().trim().max(120).optional(),
   utm_content: z.string().trim().max(120).optional(),
+  /** Canal de primer contacto de la sesión (lib/attribution.ts). */
+  channel: z.enum(['ai_assistant', 'organic_search', 'social', 'paid', 'campaign', 'referral', 'direct']).optional(),
+  referrer_host: z.string().trim().max(120).optional(),
+  landing_path: z.string().trim().max(400).optional(),
+  ad_click: z.boolean().optional(),
   path: z.string().trim().max(400).optional(),
   slug: z.string().trim().max(120).optional(),
   /** Superficie de origen: 'chat', 'configurador', 'calculadora'. */
