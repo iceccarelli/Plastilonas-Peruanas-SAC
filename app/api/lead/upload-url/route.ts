@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { supabaseAttachmentStore } from '@/lib/attachment-store';
 import { checkUpload } from '@/lib/attachments';
+import { readBoundedText } from '@/lib/http-limits';
 import { clientIp, hashIp, logEvent } from '@/lib/lead-service';
 
 export const runtime = 'nodejs';
@@ -35,8 +36,9 @@ export async function POST(req: NextRequest) {
   if (limited(hashIp(clientIp(req.headers)))) {
     return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429, headers });
   }
-  const text = await req.text().catch(() => '');
-  if (text.length > 2048) return NextResponse.json({ ok: false, error: 'payload_too_large' }, { status: 413, headers });
+  const body = await readBoundedText(req, 2048);
+  if (!body.ok) return NextResponse.json({ ok: false, error: body.reason === 'too_large' ? 'payload_too_large' : 'invalid_json' }, { status: body.reason === 'too_large' ? 413 : 400, headers });
+  const text = body.text;
   let parsed;
   try { parsed = Body.safeParse(JSON.parse(text)); } catch { parsed = null; }
   if (!parsed?.success) return NextResponse.json({ ok: false, error: 'invalid_fields' }, { status: 400, headers });

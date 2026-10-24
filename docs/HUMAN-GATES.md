@@ -27,6 +27,21 @@ Buscar `TODO(HUMAN)` en el repositorio localiza el punto exacto.
       Variables `GOOGLE_SITE_VERIFICATION` / `BING_SITE_VERIFICATION` ya
       soportadas en el layout.
 
+## 2.0 RFQ en producción — estado verificado el 2026-10-24 y acciones solo del propietario
+
+Verificado con la API de Vercel (nombres de variables, sin leer valores): el
+proyecto de producción tiene solo `NEXT_PUBLIC_API_URL` y `ANTHROPIC_API_KEY`.
+**No hay** `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`,
+`STAFF_EMAILS`, `CRM_WEBHOOK_URL` ni `RESEND_API_KEY`; y la organización de
+Supabase conectada no tiene ningún proyecto de Plastilonas. Consecuencia:
+`/api/lead` responde 503 `not_persisted` (honesto: el comprador es enviado a
+WhatsApp) salvo que un canal externo confirme. No se envió ningún lead sintético.
+
+- [ ] Crear el proyecto Supabase de Plastilonas y aplicar, en orden, `schema.sql` y las tres migraciones (ver abajo).
+- [ ] En Vercel (Production): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET` (aleatorio, ≥32 caracteres), `STAFF_EMAILS`, y al menos un canal: `CRM_WEBHOOK_URL` o `RESEND_API_KEY`.
+- [ ] En GitHub (Settings → Secrets → Actions): `CRON_SECRET` (el mismo) y `SITE_ORIGIN` (el origen de producción). Activa `.github/workflows/lead-retry.yml`: reintenta cada 15 min y **falla —con aviso por correo de GitHub— si hay entregas en dead-letter o el endpoint no responde**. El cron diario de `vercel.json` queda de respaldo (Hobby no admite más).
+- [ ] Tras configurar: `GET /api/health?deep=1` con el token de diagnóstico debe listar base, almacenamiento y migraciones en verde antes de anunciar el formulario.
+
 ## 2. Adjuntos del formulario RFQ (Etapa 2) y fotos de /asistente (Sprint C)
 
 - [ ] Aplicar en Supabase, en orden, `supabase/schema.sql`,

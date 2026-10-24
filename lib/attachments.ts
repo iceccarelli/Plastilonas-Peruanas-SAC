@@ -55,3 +55,40 @@ export function parseRef(ref: string): { dir: string; filename: string; path: st
   const m = REF.exec(ref.trim());
   return m ? { dir: `incoming/${m[1]}`, filename: m[2], path: ref.trim() } : null;
 }
+
+/** Bytes que se leen del inicio de un objeto para comprobar que es lo que dice ser. */
+export const SIGNATURE_BYTES = 1024;
+
+const startsWith = (b: Uint8Array, sig: number[]) => sig.every((v, i) => b[i] === v);
+const ascii = (b: Uint8Array) => new TextDecoder('latin1').decode(b);
+
+/**
+ * El tipo y la extensión los declara el cliente; la CABECERA del archivo no se
+ * puede declarar. Se exige que coincida con la extensión: un HTML o un
+ * ejecutable renombrado a .pdf no se asocia a la solicitud. No es un antivirus
+ * ni un análisis de contenido: el archivo sigue siendo entrada no confiable y
+ * solo se sirve como descarga firmada.
+ */
+export function matchesSignature(ext: string, head: Uint8Array): boolean {
+  if (!head.length) return false;
+  switch (ext) {
+    case 'pdf':
+      // La especificación tolera basura antes de «%PDF-» dentro del primer KB.
+      return ascii(head).includes('%PDF-');
+    case 'jpg':
+    case 'jpeg':
+      return startsWith(head, [0xff, 0xd8, 0xff]);
+    case 'png':
+      return startsWith(head, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    case 'dwg':
+      // Versiones AC1002…AC1032: «AC10» + dígitos.
+      return /^AC10\d\d/.test(ascii(head.subarray(0, 6)));
+    case 'dxf': {
+      if (ascii(head.subarray(0, 22)) === 'AutoCAD Binary DXF\r\n') return true;
+      if (head.includes(0)) return false;
+      return /^\s*0\s*\r?\n\s*SECTION/.test(ascii(head));
+    }
+    default:
+      return false;
+  }
+}

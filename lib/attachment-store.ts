@@ -4,14 +4,17 @@
  * Ciclo de vida:
  *   1. createUpload   -> URL firmada de un solo uso para UNA ruta incoming/<id>/<archivo>.
  *   2. (navegador sube directo; el bucket no tiene política anónima)
- *   3. attach         -> al enviar el RFQ el servidor verifica que el objeto EXISTE y
- *                        lo asocia a la solicitud; rutas que no emitió él se rechazan.
+ *   3. attach         -> al enviar el RFQ el servidor verifica que el objeto EXISTE, que
+ *                        no excede el tope y que su cabecera coincide con la extensión,
+ *                        y lo asocia a la solicitud; rutas que no emitió él se rechazan.
  *   4. purgeAbandoned -> borra lo subido y nunca asociado tras N días.
  */
 import { randomBytes } from 'node:crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabaseAdmin } from '@/lib/supabase';
-import { BUCKET, buildPath, parseRef } from '@/lib/attachments';
+import {
+  BUCKET, MAX_BYTES, SIGNATURE_BYTES, buildPath, extensionOf, matchesSignature, parseRef,
+} from '@/lib/attachments';
 
 export interface AttachResult {
   attached: number;
@@ -26,6 +29,22 @@ export interface AttachmentStore {
 
 export function supabaseAttachmentStore(db: SupabaseClient = supabaseAdmin()): AttachmentStore {
   const bucket = () => db.storage.from(BUCKET);
+
+  /** Primeros bytes del objeto, por URL firmada y Range. null si no se pudo leer. */
+  async function head(path: string): Promise<Uint8Array | null> {
+    try {
+      const { data } = await bucket().createSignedUrl(path, 60);
+      if (!data?.signedUrl) return null;
+      const res = await fetch(data.signedUrl, {
+        headers: { Range: `bytes=0-${SIGNATURE_BYTES - 1}` },
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!res.ok) return null;
+      return new Uint8Array(await res.arrayBuffer()).subarray(0, SIGNATURE_BYTES);
+    } catch {
+      return null;
+    }
+  }
 
   return {
     async createUpload(filename) {
@@ -45,6 +64,10 @@ export function supabaseAttachmentStore(db: SupabaseClient = supabaseAdmin()): A
         const obj = objs?.find((o) => o.name === p.filename);
         if (error || !obj) { rejected++; continue; }
         const meta = (obj.metadata ?? {}) as { size?: number; mimetype?: string };
+        if (typeof meta.size === 'number' && (meta.size <= 0 || meta.size > MAX_BYTES)) { rejected++; continue; }
+        // Fallo cerrado: si no se puede leer la cabecera, el archivo no se asocia.
+        const bytes = await head(p.path);
+        if (!bytes || !matchesSignature(extensionOf(p.filename), bytes)) { rejected++; continue; }
         const { error: insErr } = await db.from('lead_attachments').insert({
           quote_id: quoteId, path: p.path, filename: p.filename,
           size_bytes: meta.size ?? null, mime_type: meta.mimetype ?? null,
