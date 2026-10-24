@@ -39,11 +39,11 @@ do $$ begin
   alter table public.lead_quotes add constraint lead_quotes_items_array_check
     check (jsonb_typeof(line_items) = 'array' and jsonb_array_length(line_items) <= 40);
 exception when duplicate_object then null; end $$;
-do $$ begin
-  -- Una oferta emitida siempre lleva instantánea y huella.
-  alter table public.lead_quotes add constraint lead_quotes_snapshot_check
-    check (status = 'draft' or snapshot_hash is not null) not valid;
-exception when duplicate_object then null; end $$;
+-- Una oferta emitida con el flujo nuevo siempre lleva instantánea y huella: lo garantiza
+-- lead_quote_issue (única vía de emisión) y lo vigila quote_integrity_report. NO es una
+-- restricción CHECK a propósito: una oferta emitida ANTES de esta migración no tiene
+-- instantánea y debe poder seguir resolviéndose (aceptada/rechazada) sin error.
+alter table public.lead_quotes drop constraint if exists lead_quotes_snapshot_check;
 
 -- ---------------------------------------------------------------- validación
 create or replace function public.lead_quote_check_totals(

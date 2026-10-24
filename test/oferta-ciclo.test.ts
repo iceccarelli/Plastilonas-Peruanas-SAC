@@ -365,6 +365,28 @@ describe('ciclo de la oferta en Postgres real', () => {
     expect((await db.query(`select public.lead_quote_verify($1) as ok`, [id])).rows[0]).toEqual({ ok: true });
   });
 
+  it('actualización de una base en uso: la oferta emitida ANTES de esta migración sigue pudiendo resolverse', async () => {
+    const { PGlite } = await import('@electric-sql/pglite');
+    const { readFileSync, readdirSync } = await import('node:fs');
+    const sql = (f: string) => readFileSync(`supabase/${f}`, 'utf8');
+    const old = new PGlite();
+    await old.exec(`create schema auth; create function auth.jwt() returns jsonb language sql as $$ select '{}'::jsonb $$;`);
+    await old.exec(sql('schema.sql').replace(/create extension if not exists "pgcrypto";/, ''));
+    const files = readdirSync('supabase/migrations').sort();
+    for (const f of files) if (f <= '20261023020000_rfq_quotations.sql') await old.exec(sql(`migrations/${f}`));
+    const l = (await old.query(`insert into public.quotes(customer_email, status, rfq_code, payload) values ('a@b.co','QUALIFIED','RFQ-OLD-1','{}'::jsonb) returning id`)).rows[0] as { id: string };
+    await old.query(`select * from public.lead_quote_create($1,'v@p.com',5000,'PEN','2099-01-01','Oferta heredada completa',null)`, [l.id]);
+    const q = (await old.query(`select id from public.lead_quotes`)).rows[0] as { id: string };
+    await old.query(`select * from public.lead_quote_issue($1,'v@p.com')`, [q.id]);
+
+    for (const f of files) if (f > '20261023020000_rfq_quotations.sql') await old.exec(sql(`migrations/${f}`));
+    expect((await old.query(`select status, amount_cents::int as a from public.lead_quotes`)).rows[0]).toEqual({ status: 'issued', a: 5000 });
+    // Sin instantánea (se emitió antes), pero el personal puede registrar el resultado como siempre.
+    const r = await rpcOver(old).rpc('lead_quote_resolve', { p_id: q.id, p_actor: 'v@p.com', p_outcome: 'accepted', p_reason: null });
+    expect(r.error).toBeNull();
+    expect((await old.query(`select status from public.quotes`)).rows[0]).toEqual({ status: 'WON' });
+  });
+
   it('RLS activa y sin políticas en las tablas nuevas', async () => {
     for (const t of ['quote_access_tokens', 'quote_deliveries', 'webhook_events', 'rate_limits']) {
       expect((await db.query(`select relrowsecurity from pg_class where relname=$1`, [t])).rows[0], t).toEqual({ relrowsecurity: true });
