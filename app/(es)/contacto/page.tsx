@@ -7,16 +7,17 @@ import { MAPA_URL } from '@/components/NAP';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+// zod/mini: mismo contrato de validación con una fracción del peso en el navegador (este formulario viaja al cliente).
+import * as z from 'zod/mini';
 import { toast } from 'sonner';
 import { buildContactMessage, openWhatsApp } from '@/lib/whatsapp';
 
 const contactSchema = z.object({
-  nombre: z.string().min(3),
-  email: z.string().email(),
-  telefono: z.string().min(9),
-  asunto: z.string().min(5),
-  mensaje: z.string().min(20),
+  nombre: z.string().check(z.minLength(3)),
+  email: z.email(),
+  telefono: z.string().check(z.minLength(9)),
+  asunto: z.string().check(z.minLength(5)),
+  mensaje: z.string().check(z.minLength(20)),
 });
 
 type ContactForm = z.infer<typeof contactSchema>;

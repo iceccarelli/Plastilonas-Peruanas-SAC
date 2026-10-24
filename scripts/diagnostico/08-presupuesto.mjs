@@ -35,8 +35,15 @@ if (!existsSync(MANIFIESTO)) {
 // el build. Lo detectó la primera ejecución del propio script.
 const PRESUPUESTO = [
   // Portada, catálogo y el cuestionario del marco: llevan carruseles, filtros
-  // y tarjetas, y son las páginas más ricas del sitio.
-  { patron: /^\/\(es\)\/(page|productos\/page|marco\/evaluacion\/page)$/, kb: 195, nombre: 'portada y catálogo' },
+  // y tarjetas, y son las páginas más ricas del sitio. 205: la portada medía
+  // 197,6 kB cuando el límite era 195 (el script no corría en CI y nadie lo vio);
+  // se fija en lo medido + ~4 % de margen para que el CI atrape el próximo salto.
+  { patron: /^\/\(es\)\/(page|productos\/page|marco\/evaluacion\/page)$/, kb: 205, nombre: 'portada y catálogo' },
+  // Clientes interactivos con estado propio: el asistente trae el cliente de chat
+  // del AI SDK 7 (useChat, transporte y analizador del flujo; medido +35 kB sobre
+  // el SDK anterior, el precio de cerrar los avisos altos de seguridad) y el
+  // configurador de lona su motor visual. Medidos: 177,4 y 154,5 kB.
+  { patron: /\/(asistente|configurador\/lona)\/page$/, kb: 185, nombre: 'asistente y configurador' },
   // Formularios: react-hook-form + zod + resolvers son un coste real y
   // justificado. Supabase NO: se carga sólo si alguien adjunta un plano.
   { patron: /\/(cotizacion|en\/rfq|contacto)\/page$/, kb: 165, nombre: 'formularios' },

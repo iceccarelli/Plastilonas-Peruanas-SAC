@@ -30,7 +30,8 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+// zod/mini: misma validación con una fracción del peso en el navegador (la página que produce el negocio).
+import * as z from 'zod/mini';
 import { Send, CheckCircle, Paperclip, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { buildQuoteMessage, openWhatsApp, saveQuoteLocally, whatsappUrl } from '@/lib/whatsapp';
@@ -149,29 +150,26 @@ const T = {
 
 function esquema(productoObligatorio: boolean) {
   return z.object({
-    nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
-    empresa: z.string().min(2, 'Ingrese el nombre de su empresa'),
-    ruc: z
-      .string()
-      .optional()
-      .superRefine((v, ctx) => {
+    nombre: z.string().check(z.minLength(3, 'El nombre debe tener al menos 3 caracteres')),
+    empresa: z.string().check(z.minLength(2, 'Ingrese el nombre de su empresa')),
+    ruc: z.optional(z.string()).check(
+      z.superRefine((v, ctx) => {
         const msg = errorRuc(v ?? '');
-        if (msg) ctx.addIssue({ code: z.ZodIssueCode.custom, message: msg });
+        if (msg) ctx.addIssue({ code: 'custom', message: msg });
       }),
-    email: z.string().email('Ingrese un correo electrónico válido'),
-    telefono: z
-      .string()
-      .min(9, 'Ingrese un número de teléfono válido')
-      .regex(/^[0-9+\s()-]+$/, 'Formato de teléfono inválido'),
+    ),
+    email: z.email('Ingrese un correo electrónico válido'),
+    telefono: z.string().check(
+      z.minLength(9, 'Ingrese un número de teléfono válido'),
+      z.regex(/^[0-9+\s()-]+$/, 'Formato de teléfono inválido'),
+    ),
     producto: productoObligatorio
-      ? z.string().min(1, 'Indique el producto que quiere cotizar')
-      : z.string().optional(),
-    cantidad: z.string().optional(),
-    ciudadEntrega: z.string().min(2, 'Indique la ciudad de entrega'),
-    fechaNecesaria: z.string().optional(),
-    mensaje: z
-      .string()
-      .min(15, 'Describa su requerimiento con más detalle (mínimo 15 caracteres)'),
+      ? z.string().check(z.minLength(1, 'Indique el producto que quiere cotizar'))
+      : z.optional(z.string()),
+    cantidad: z.optional(z.string()),
+    ciudadEntrega: z.string().check(z.minLength(2, 'Indique la ciudad de entrega')),
+    fechaNecesaria: z.optional(z.string()),
+    mensaje: z.string().check(z.minLength(15, 'Describa su requerimiento con más detalle (mínimo 15 caracteres)')),
   });
 }
 
