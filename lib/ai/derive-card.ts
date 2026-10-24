@@ -10,8 +10,8 @@
  * fabricar una tarjeta con datos inventados para "aparentar" estructura,
  * este archivo solo construye una tarjeta cuando el AI SDK YA devolvió, en el
  * mismo mensaje, el resultado real de una tool de lib/ai/tools.ts (expuesto
- * por `useChat` en `message.parts` como `tool-invocation` con
- * `state: 'result'`). Cada mapeo de abajo es una copia literal de campos que
+ * por `useChat` en `message.parts` como `tool-<nombre>` con
+ * `state: 'output-available'`; ver lib/ai/tool-parts.ts). Cada mapeo de abajo es una copia literal de campos que
  * la tool ya calculó contra una lib de dominio real — nunca un valor puesto a
  * mano.
  *

@@ -46,10 +46,10 @@ jobs:
         run: npm ci
 
       - name: Auditoría de dependencias en producción
-        # Bloquea críticas del árbol que SE DESPLIEGA (--omit=dev). Las altas
-        # restantes sin parche compatible están razonadas en docs/HUMAN-GATES.md;
-        # una crítica nueva rompe el build en vez de enterarnos por un correo.
-        run: npm audit --omit=dev --audit-level=critical
+        # Bloquea altas y críticas del árbol que SE DESPLIEGA (--omit=dev); hoy
+        # el árbol de producción no tiene ninguna. Los avisos solo de desarrollo
+        # (compilador de Tailwind 3, moderados) no se despliegan.
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Tipos
         run: npx tsc --noEmit
@@ -126,3 +126,10 @@ jobs:
         # y rechazar -> repetición, otro origen, reemplazo, vencimiento y fallo
         # del proveedor. Ningún servicio real: Supabase y Resend son locales.
         run: npm run probar:oferta
+
+      - name: Asistente de punta a punta (Anthropic falso local)
+        # El cliente del chat (useChat del AI SDK 7) y /api/chat cambiaron de
+        # contrato: un navegador real envía, recibe el flujo, pinta tarjetas de
+        # herramientas reales y muestra un fallo del proveedor sin filtrar su
+        # detalle. ANTHROPIC_BASE_URL apunta a un servidor local: sin saldo ni red.
+        run: npm run probar:asistente

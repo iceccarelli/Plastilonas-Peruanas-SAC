@@ -2,7 +2,9 @@
   "name": "plastilonas-peruanas",
   "version": "1.0.0",
   "private": true,
-  "engines": { "node": "24.x" },
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -14,6 +16,7 @@
     "test:smoke": "bash scripts/smoke.sh",
     "probar:dinero": "bash scripts/probar-dinero.sh",
     "probar:oferta": "bash scripts/probar-oferta.sh",
+    "probar:asistente": "bash scripts/probar-asistente.sh",
     "audit:ui": "node scripts/audit-ui.mjs",
     "auditar:viewport": "node scripts/auditar-viewport.mjs",
     "auditar:imagenes": "node scripts/auditar-imagenes.mjs",
@@ -48,11 +51,11 @@
     "diagnostico:peso": "node scripts/diagnostico/08-presupuesto.mjs"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^1.2.12",
-    "@ai-sdk/react": "^1.2.12",
-    "@hookform/resolvers": "^3.9.1",
+    "@ai-sdk/anthropic": "4.0.87",
+    "@ai-sdk/react": "4.0.156",
+    "@hookform/resolvers": "5.9.2",
     "@supabase/supabase-js": "^2.45.4",
-    "ai": "^4.3.16",
+    "ai": "7.0.152",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.4",
     "date-fns": "^4.1.0",
@@ -68,7 +71,7 @@
     "sonner": "^1.7.1",
     "stripe": "^17.5.0",
     "tailwind-merge": "^2.6.0",
-    "zod": "^3.24.1",
+    "zod": "4.6.7",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
@@ -87,6 +90,12 @@
     "sharp": "^0.35.3",
     "tailwindcss": "^3.4.17",
     "typescript": "^5",
-    "vitest": "^2.1.8"
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.31"
+    }
   }
 }

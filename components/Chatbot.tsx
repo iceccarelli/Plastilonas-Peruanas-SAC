@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { useChat } from '@ai-sdk/react';
+import { textOf, useAsistenteChat } from '@/components/ai/useAsistenteChat';
 import { trackChatbotEngaged, trackAsistenteCtaClick } from '@/lib/analytics';
 import { X, Send, Bot, User } from 'lucide-react';
 import Image from 'next/image';
@@ -44,15 +44,9 @@ export default function Chatbot() {
   const hrefAsistente = queryAsistente.toString() ? `/asistente?${queryAsistente.toString()}` : '/asistente';
 
   const engaged = useRef(false);
-  const { messages, input, handleInputChange, handleSubmit, append, isLoading, error } = useChat({
-    api: '/api/chat',
-    initialMessages: [
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content: '¡Hola! Soy el asistente de Plastilonas Peruanas, fabricante en Chorrillos desde 2009. No invento precios ni certificaciones. ¿Qué necesita cubrir, ventilar o contener?',
-      },
-    ],
+  const { messages, input, handleInputChange, handleSubmit, append, isLoading, error } = useAsistenteChat({
+    welcome:
+      '¡Hola! Soy el asistente de Plastilonas Peruanas, fabricante en Chorrillos desde 2009. No invento precios ni certificaciones. ¿Qué necesita cubrir, ventilar o contener?',
   });
 
   const toggleChat = () => setIsOpen(!isOpen);
@@ -68,7 +62,7 @@ export default function Chatbot() {
       engaged.current = true;
       trackChatbotEngaged();
     }
-    void append({ role: 'user', content: mensaje });
+    void append(mensaje);
   };
 
   // El estado "vacío" es solo el saludo: aún no hay ningún turno del usuario.
@@ -81,15 +75,16 @@ export default function Chatbot() {
       ? seguimientosPara(
           messages
             .slice(-2)
-            .map((m) => m.content)
+            .map((m) => textOf(m))
             .join('\n'),
         ).slice(0, 3)
       : [];
   // Semilla del botón de WhatsApp: la última consulta real del usuario, para
   // que el comercial reciba el contexto y no un «hola» vacío.
-  const ultimaConsulta = [...messages].reverse().find((m) => m.role === 'user')?.content;
-  const semillaWhatsApp = ultimaConsulta
-    ? `Hola, vengo del asistente del sitio. Mi consulta: ${ultimaConsulta}`
+  const ultimaConsulta = [...messages].reverse().find((m) => m.role === 'user');
+  const ultimaConsultaTexto = ultimaConsulta ? textOf(ultimaConsulta) : '';
+  const semillaWhatsApp = ultimaConsultaTexto
+    ? `Hola, vengo del asistente del sitio. Mi consulta: ${ultimaConsultaTexto}`
     : 'Hola, quisiera hacer una consulta sobre sus productos.';
 
   return (
@@ -213,9 +208,9 @@ export default function Chatbot() {
                       }`}
                     >
                       {message.role === 'assistant' ? (
-                        <ChatMarkdown content={message.content} />
+                        <ChatMarkdown content={textOf(message)} />
                       ) : (
-                        message.content
+                        textOf(message)
                       )}
                     </div>
                     {message.role === 'user' && (

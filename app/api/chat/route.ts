@@ -1,9 +1,12 @@
 import { anthropic } from '@ai-sdk/anthropic';
-import { streamText } from 'ai';
+import { convertToModelMessages, createUIMessageStreamResponse, isStepCount, streamText, toUIMessageStream } from 'ai';
 import { products, productFamilies, productosPrioritarios } from '@/lib/products';
 import { HORARIO, TELEFONOS, SITE } from '@/lib/site';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { chatTools } from '@/lib/ai/tools';
+import { readBoundedText } from '@/lib/http-limits';
+import { aiLimited, globalCap, safeError } from '@/lib/ai/abuse';
+import { CHAT_MAX_BODY_BYTES, parseChatRequest } from '@/lib/ai/chat-request';
 
 // Asistente comercial con Claude (Vercel AI SDK).
 // Requiere ANTHROPIC_API_KEY en el entorno. Sin la clave, respondemos 503 y
@@ -120,38 +123,23 @@ Directrices de respuesta:
 Responde siempre en español natural y profesional.`;
 
 // -----------------------------------------------------------------------------
-// Rate limiting — mismo patrón en memoria que app/api/lead/route.ts (mapa
-// IP -> {n, t}, ventana de 10 minutos). El chat admite más turnos por sesión
-// que un formulario de una sola vez, así que el límite es más alto que el de
-// /api/lead (12/10min): 30 peticiones / 10 minutos por IP. Es una defensa
-// contra abuso/spam del endpoint que llama a Anthropic, no una cuota de
-// producto — no hay Stripe ni facturación de uso involucrada (fuera de
-// alcance de esta fase).
-const CHAT_RATE_LIMIT = 30;
-const CHAT_RATE_WINDOW_MS = 10 * 60 * 1000;
-const chatBuckets = new Map<string, { n: number; t: number }>();
+// Abuso y coste. 30 peticiones / 10 min por IP y un tope GLOBAL por hora (gasto).
+// El contador es compartido entre instancias (Postgres) y cae a memoria si la
+// base no está o no responde (lib/ai/abuse.ts). Se comprueba PRIMERO: nunca se
+// llega a leer el cuerpo ni a Anthropic para una IP ya limitada.
+const CHAT_LIMITS = {
+  scope: 'chat',
+  perIp: { windowSeconds: 600, max: 30 },
+  globalPerHour: globalCap(process.env, 'AI_CHAT_GLOBAL_PER_HOUR', 600),
+} as const;
 
-function chatLimited(ip: string): boolean {
-  const now = Date.now();
-  const hit = chatBuckets.get(ip);
-  if (!hit || now - hit.t > CHAT_RATE_WINDOW_MS) {
-    chatBuckets.set(ip, { n: 1, t: now });
-    return false;
-  }
-  hit.n += 1;
-  return hit.n > CHAT_RATE_LIMIT;
-}
+/** Tiempo máximo de la llamada al modelo: por debajo de maxDuration para poder responder algo útil. */
+const modelTimeoutMs = () => Number(process.env.AI_MODEL_TIMEOUT_MS) || 25_000;
+
+const bad = (status: number, error: string) => Response.json({ error }, { status });
 
 export async function POST(req: Request) {
-  // Falla cerrado y PRIMERO: se comprueba antes que la configuración de la
-  // clave y antes de leer el body, así que nunca se llega a streamText/
-  // Anthropic para una IP que ya excedió el límite. Mismo enlace de WhatsApp
-  // que ya usa el widget (lib/whatsapp.ts) — nunca una URL escrita a mano.
-  const ip =
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    req.headers.get('x-real-ip') ||
-    'unknown';
-  if (chatLimited(ip)) {
+  if (await aiLimited(req.headers, CHAT_LIMITS)) {
     return Response.json(
       {
         error: 'rate_limited',
@@ -167,52 +155,60 @@ export async function POST(req: Request) {
     return Response.json({ error: 'chat_not_configured' }, { status: 503 });
   }
 
+  // Tope REAL de cuerpo y esquema estricto ANTES de tocar el modelo.
+  const body = await readBoundedText(req, CHAT_MAX_BODY_BYTES);
+  if (!body.ok) return bad(body.reason === 'too_large' ? 413 : 400, body.reason === 'too_large' ? 'payload_too_large' : 'bad_request');
+  let json: unknown;
   try {
-    const { messages, currentPage } = await req.json();
+    json = JSON.parse(body.text);
+  } catch {
+    return bad(400, 'bad_request');
+  }
+  const parsed = parseChatRequest(json);
+  if (!parsed.ok) return bad(parsed.error === 'invalid_request' ? 400 : 413, parsed.error);
 
-    const pageContext =
-      typeof currentPage === 'string' && currentPage.length > 0
-        ? `\n\nContexto: el usuario esta viendo la pagina ${currentPage}. ` +
-          'Si es una ficha de producto, centrate en sus especificaciones y en ' +
-          'que datos necesitas para cotizarlo. Si es el catalogo, ayudale a ' +
-          'filtrar por sector. Si es la portada, ofrece un panorama por sector.'
-        : '';
+  try {
+    const pageContext = parsed.currentPage
+      ? `\n\nContexto: el usuario esta viendo la pagina ${parsed.currentPage}. ` +
+        'Si es una ficha de producto, centrate en sus especificaciones y en ' +
+        'que datos necesitas para cotizarlo. Si es el catalogo, ayudale a ' +
+        'filtrar por sector. Si es la portada, ofrece un panorama por sector.'
+      : '';
 
     const result = streamText({
       model: anthropic('claude-haiku-4-5'),
-      system: SYSTEM_PROMPT + pageContext,
-      messages,
+      instructions: SYSTEM_PROMPT + pageContext,
+      messages: await convertToModelMessages(parsed.messages),
       temperature: 0.65,
-      maxTokens: 700,
+      maxOutputTokens: 700,
       tools: chatTools,
       // Permite: 1 turno de tool call + 1 turno de respuesta en texto usando
       // el resultado. Las tools de lib/ai/tools.ts son de solo lectura sobre
       // libs de dominio (o, en el caso de buildRFQ, arman un payload sin
       // enviarlo), así que no hay efectos secundarios que limitar aquí.
-      maxSteps: 4,
+      stopWhen: isStepCount(4),
+      maxRetries: 1,
+      abortSignal: AbortSignal.timeout(modelTimeoutMs()),
       onError: ({ error }) => {
-        console.error('[chat] streamText error:', error);
+        console.error('[chat] streamText error:', safeError(error));
       },
     });
 
-    return result.toDataStreamResponse({
-      getErrorMessage: (error) => {
-        const msg = error instanceof Error ? error.message : String(error);
-        console.error('[chat] toDataStreamResponse error:', msg);
-        if (/credit|billing|balance/i.test(msg)) {
-          return 'El asistente no está disponible temporalmente. Escríbanos por WhatsApp.';
-        }
-        if (/401|api key|authentication/i.test(msg)) {
-          return 'El asistente no está disponible temporalmente. Escríbanos por WhatsApp.';
-        }
-        return 'El asistente no está disponible en este momento. Escríbanos por WhatsApp.';
-      },
+    return createUIMessageStreamResponse({
+      stream: toUIMessageStream({
+        stream: result.stream,
+        tools: chatTools,
+        // Mensaje FIJO al cliente: el detalle del proveedor (claves, saldo,
+        // cuotas) se registra en el servidor y nunca viaja al navegador.
+        onError: (error) => {
+          console.error('[chat] stream error:', safeError(error));
+          return 'El asistente no está disponible en este momento. Escríbanos por WhatsApp.';
+        },
+      }),
     });
   } catch (err) {
-    console.error('[chat] fatal error:', err);
-    return Response.json(
-      { error: 'chat_failed', detail: err instanceof Error ? err.message : String(err) },
-      { status: 500 }
-    );
+    console.error('[chat] fatal error:', safeError(err));
+    // Sin `detail`: un mensaje de error interno no es para el visitante.
+    return Response.json({ error: 'chat_failed' }, { status: 500 });
   }
 }

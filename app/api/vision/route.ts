@@ -1,9 +1,11 @@
 import { anthropic } from '@ai-sdk/anthropic';
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { VISION_SYSTEM_PROMPT, VisionModelOutputSchema, parseVisionObservation } from '@/lib/ai/vision';
-import { VISION_MAX_BYTES, VISION_MIME_ALLOWLIST } from '@/lib/ai/vision-upload';
+import { BASE64_RE, VISION_MAX_BYTES, VISION_MIME_ALLOWLIST, matchesImageSignature } from '@/lib/ai/vision-upload';
+import { readBoundedText } from '@/lib/http-limits';
+import { aiLimited, globalCap, safeError } from '@/lib/ai/abuse';
 
 // Análisis de imagen del asistente (Sprint C). Requiere ANTHROPIC_API_KEY,
 // igual que app/api/chat/route.ts: sin la clave, 503 y el cliente ofrece
@@ -17,27 +19,18 @@ export const maxDuration = 30;
 const WHATSAPP_FOTO = whatsappUrl('Hola, quisiera que revisen una foto para mi cotización.');
 
 // -----------------------------------------------------------------------------
-// Rate limiting — MISMO patrón en memoria que app/api/chat/route.ts y
-// app/api/lead/route.ts (mapa IP -> {n, t}, ventana de 10 minutos). El límite
-// es más bajo que el del chat (30/10min) porque cada petición aquí es una
-// llamada a un modelo con visión (más cara) y porque ya existe una cuota de
-// cliente en lib/ai/vision-quota.ts (6 fotos/sesión) que cubre el uso normal;
-// este límite por IP es la defensa que esa cuota de cliente NO puede ser: no
-// se puede evadir borrando localStorage.
-const VISION_RATE_LIMIT = 10;
-const VISION_RATE_WINDOW_MS = 10 * 60 * 1000;
-const visionBuckets = new Map<string, { n: number; t: number }>();
+// Abuso y coste. Más estricto que el chat (cada llamada es un modelo con visión):
+// 10 fotos / 10 min por IP y un tope GLOBAL por hora. Contador compartido entre
+// instancias (Postgres) con respaldo en memoria: lib/ai/abuse.ts.
+const VISION_LIMITS = {
+  scope: 'vision',
+  perIp: { windowSeconds: 600, max: 10 },
+  globalPerHour: globalCap(process.env, 'AI_VISION_GLOBAL_PER_HOUR', 120),
+} as const;
 
-function visionLimited(ip: string): boolean {
-  const now = Date.now();
-  const hit = visionBuckets.get(ip);
-  if (!hit || now - hit.t > VISION_RATE_WINDOW_MS) {
-    visionBuckets.set(ip, { n: 1, t: now });
-    return false;
-  }
-  hit.n += 1;
-  return hit.n > VISION_RATE_LIMIT;
-}
+/** 20 MB en base64 (×4/3) más el sobre JSON. Se corta la lectura al pasarlo. */
+const VISION_MAX_BODY_BYTES = Math.ceil((VISION_MAX_BYTES * 4) / 3) + 1024;
+const modelTimeoutMs = () => Number(process.env.AI_MODEL_TIMEOUT_MS) || 25_000;
 
 const RequestSchema = z.object({
   imageBase64: z.string().trim().min(1),
@@ -50,11 +43,7 @@ function fallback(status: number, error: string, message: string) {
 
 export async function POST(req: Request) {
   // Falla cerrado y PRIMERO, antes de leer el body — mismo orden que /api/chat.
-  const ip =
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    req.headers.get('x-real-ip') ||
-    'unknown';
-  if (visionLimited(ip)) {
+  if (await aiLimited(req.headers, VISION_LIMITS)) {
     return fallback(
       429,
       'rate_limited',
@@ -66,9 +55,15 @@ export async function POST(req: Request) {
     return fallback(503, 'vision_not_configured', 'El análisis de fotos no está disponible por ahora.');
   }
 
+  const raw = await readBoundedText(req, VISION_MAX_BODY_BYTES);
+  if (!raw.ok) {
+    return raw.reason === 'too_large'
+      ? fallback(413, 'file_too_large', 'La foto supera los 20 MB. Envíela por WhatsApp.')
+      : fallback(400, 'bad_request', 'No se pudo leer la foto enviada.');
+  }
   let body: unknown;
   try {
-    body = await req.json();
+    body = JSON.parse(raw.text);
   } catch {
     return fallback(400, 'bad_request', 'No se pudo leer la foto enviada.');
   }
@@ -90,12 +85,17 @@ export async function POST(req: Request) {
   if (approxBytes > VISION_MAX_BYTES) {
     return fallback(413, 'file_too_large', 'La foto supera los 20 MB. Envíela por WhatsApp.');
   }
+  // Lo declarado no basta: base64 bien formado y cabecera acorde al tipo.
+  const head = Buffer.from(imageBase64.slice(0, 64), 'base64');
+  if (!BASE64_RE.test(imageBase64) || !matchesImageSignature(mediaType, head)) {
+    return fallback(400, 'bad_request', 'El archivo no es una imagen válida. Use JPG, PNG o WEBP, o envíela por WhatsApp.');
+  }
 
   try {
-    const { object } = await generateObject({
+    const { output: object } = await generateText({
       model: anthropic('claude-haiku-4-5'),
-      schema: VisionModelOutputSchema,
-      system: VISION_SYSTEM_PROMPT,
+      output: Output.object({ schema: VisionModelOutputSchema }),
+      instructions: VISION_SYSTEM_PROMPT,
       messages: [
         {
           role: 'user',
@@ -104,19 +104,21 @@ export async function POST(req: Request) {
               type: 'text',
               text: 'Analice esta foto siguiendo exactamente las cuatro categorías de la instrucción del sistema.',
             },
-            { type: 'image', image: `data:${mediaType};base64,${imageBase64}` },
+            { type: 'file', mediaType, data: imageBase64 },
           ],
         },
       ],
       temperature: 0.3,
-      maxTokens: 700,
+      maxOutputTokens: 700,
+      maxRetries: 1,
+      abortSignal: AbortSignal.timeout(modelTimeoutMs()),
     });
 
     const observation = parseVisionObservation(object);
     if (!observation) {
       // El modelo respondió algo que no cumple la estructura obligatoria
       // (p. ej. "unknown" vacío). Nunca se muestra una tarjeta a medias.
-      console.error('[vision] respuesta del modelo no cumplió el esquema obligatorio', object);
+      console.error('[vision] respuesta del modelo no cumplió el esquema obligatorio');
       return fallback(
         502,
         'vision_invalid_response',
@@ -126,7 +128,7 @@ export async function POST(req: Request) {
 
     return Response.json({ observation });
   } catch (err) {
-    console.error('[vision] fatal error:', err);
+    console.error('[vision] fatal error:', safeError(err));
     return fallback(
       500,
       'vision_failed',
