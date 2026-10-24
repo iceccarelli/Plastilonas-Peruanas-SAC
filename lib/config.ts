@@ -45,6 +45,11 @@ export const INTEGRATIONS: IntegrationDef[] = [
     whenOff: 'No se envía copia del RFQ por correo.',
   },
   {
+    id: 'quotes', label: 'Envío de cotizaciones al cliente (enlace seguro)',
+    all: ['QUOTE_LINK_SECRET'], optional: ['RESEND_WEBHOOK_SECRET'],
+    whenOff: 'Las cotizaciones emitidas quedan guardadas pero NO se envían: la entrega aparece «bloqueada» en /staff.',
+  },
+  {
     id: 'retries', label: 'Reintentos de entrega (cron)',
     all: ['CRON_SECRET'],
     whenOff: 'Las entregas fallidas no se reintentan solas y /api/cron/lead-deliveries responde 503.',
@@ -101,6 +106,11 @@ export function integrationStatus(def: IntegrationDef, env: EnvLike): Integratio
   if (def.id === 'crm' && has(env, 'CRM_WEBHOOK_SECRET') && !anyPresent) {
     state = 'misconfigured';
     miss = ['CRM_WEBHOOK_URL'];
+  }
+  // Un secreto de enlace corto es adivinable por fuerza bruta offline: no cuenta como configurado.
+  if (def.id === 'quotes' && state === 'configured' && (env.QUOTE_LINK_SECRET ?? '').trim().length < 32) {
+    state = 'misconfigured';
+    miss = ['QUOTE_LINK_SECRET (mínimo 32 caracteres)'];
   }
   return {
     id: def.id, label: def.label, state, missing: state === 'configured' ? [] : miss,

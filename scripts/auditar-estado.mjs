@@ -484,6 +484,7 @@ const HUERFANAS_PERMITIDAS = {
   '/login': 'acceso de clientes: bloqueado en robots.txt y enlazado sólo cuando Auth.js está configurado',
   '/dashboard': 'tras autenticación',
   '/staff': 'área del personal: autenticada, noindex y bloqueada en robots.txt',
+  '/oferta/[token]': 'enlace personal de la cotización: se recibe por correo, lleva un token, es noindex y robots.txt lo bloquea',
 };
 
 const huerfanas = rutas
