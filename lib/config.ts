@@ -1,3 +1,4 @@
+import { estadoMigracion } from './site';
 /**
  * Contrato único de configuración de integraciones.
  *
@@ -126,6 +127,8 @@ export function domainStatus(env: EnvLike): IntegrationStatus {
   if (a?.startsWith('invalid:') || b?.startsWith('invalid:')) problems.push('canonical_host_invalid');
   if (a && b && a !== b) problems.push('NEXT_PUBLIC_CANONICAL_HOST≠CANONICAL_ORIGIN');
   if (env.ENFORCE_BRAND_DOMAIN === 'true' && !a && !b) problems.push('ENFORCE_BRAND_DOMAIN sin dominio canónico');
+  const configurado = estadoMigracion(env);
+  if (configurado === 'invalida') problems.push('host canónico distinto de www (el apex lo redirige Vercel a www: bucle)');
   const set = Boolean(a || b);
   return {
     id: 'domain', label: 'Dominio canónico',

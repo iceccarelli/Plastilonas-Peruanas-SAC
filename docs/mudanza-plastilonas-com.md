@@ -33,13 +33,13 @@ para poder compararla después.
 
 ## 2. Qué ya está preparado en este repositorio
 
-- **El interruptor.** `CANONICAL_ORIGIN` (vacío hoy, a propósito). Al ponerlo
-  en `https://plastilonas.com`, `lib/site.ts` mueve `SITE.url` y con él
+- **El interruptor.** `NEXT_PUBLIC_CANONICAL_HOST` (vacío hoy, a propósito; `CANONICAL_ORIGIN` es el alias heredado). Al ponerlo
+  en `https://www.plastilonas.com` (único valor válido; el apex se rechaza), `lib/site.ts` mueve `SITE.url` y con él
   sitemap, robots (`Host` y `Sitemap`), canonicals, Open Graph, JSON-LD,
   `/llms.txt`, `/llms-full.txt`, `/ai.txt`, `/entidad.json` y los espejos
   Markdown — en el mismo despliegue, sin tocar código.
-- **www → apex con 308** y **noindex + `Link rel=canonical` en `*.vercel.app`**:
-  ya escritos en `middleware.ts`, condicionados a `migracionActiva()`. Mientras
+- **apex → www con 308** (en la plataforma de Vercel desde ya, y en `middleware.ts` con `ENFORCE_BRAND_DOMAIN`) y **noindex + `Link rel=canonical` en `*.vercel.app`**:
+  ya escritos; la política es `decidirHost()` en `lib/site.ts`. Mientras
   la variable esté vacía, no degradan nada (incidente documentado en
   `test/dominio-migracion.test.ts`).
 - **El mapa folleto → slug nuevo**: los 308 de cada ruta del sitio antiguo ya
@@ -80,28 +80,28 @@ para poder compararla después.
 1. [ ] **DNS**: apuntar `plastilonas.com` (A/ALIAS) y `www.plastilonas.com`
        (CNAME) al proyecto de Vercel; verificar el dominio en Settings → Domains.
 2. [ ] **Variable**: en Vercel → Settings → Environment Variables:
-       `CANONICAL_ORIGIN = https://plastilonas.com` → redeploy.
+       `NEXT_PUBLIC_CANONICAL_HOST = https://www.plastilonas.com` → redeploy.
 
-Con eso, automáticamente: `SITE.url` pasa al apex; www → apex con 308; el host
+Con eso, automáticamente: `SITE.url` pasa a www; el host
 de Vercel emite `noindex` + canónica al apex; los 308 del folleto quedan
 activos; `/confianza`, `/ai.txt`, `/llms.txt`, robots y sitemap cuentan la
 misma historia nueva.
 
-**Nadie más que el propietario ejecuta este paso.** Poner `CANONICAL_ORIGIN`
+**Nadie más que el propietario ejecuta este paso.** Poner `NEXT_PUBLIC_CANONICAL_HOST`
 antes del DNS desindexa el único host vivo.
 
 ### Día +1
 
 - [ ] `curl -sI` la matriz de §1: las cuatro combinaciones deben terminar en
-      `https://plastilonas.com` (308 en cadena corta).
+      `https://www.plastilonas.com` (un solo 308).
 - [ ] `curl -sI https://plastilonas-peruanas-sac.vercel.app/` → debe traer
-      `X-Robots-Tag: noindex` y `Link: rel=canonical` al apex.
-- [ ] Enviar `https://plastilonas.com/sitemap.xml` en GSC y en Bing.
+      `X-Robots-Tag: noindex` y `Link: rel=canonical` a www.
+- [ ] Enviar `https://www.plastilonas.com/sitemap.xml` en GSC y en Bing.
 - [ ] `node scripts/submit-indexnow.mjs` (IndexNow con las URLs de dinero).
 - [ ] Pedir indexación manual en GSC de: `/`, `/productos`, las nueve URLs
       comerciales de `/llms.txt` («URLs comerciales canónicas») y `/confianza`.
 - [ ] Verificar `https://plastilonas.com/ai.txt`, `/llms.txt`, `/robots.txt`:
-      deben declarar el apex, no el host de Vercel.
+      deben declarar www, no el host de Vercel.
 
 ### Día +7
 
@@ -114,7 +114,7 @@ antes del DNS desindexa el único host vivo.
 
 ## 4. Qué NO se hace
 
-- No se rellena `CANONICAL_ORIGIN` desde el código ni antes del DNS
+- No se rellena `NEXT_PUBLIC_CANONICAL_HOST` desde el código ni antes del DNS
   (`test/dominio-migracion.test.ts` protege el invariante).
 - No se redirige el host de Vercel a `plastilonas.com` mientras ese dominio
   sirva el folleto: sería mandar el sitio bueno al sitio viejo.
@@ -173,24 +173,25 @@ un error de memoria.
 `NEXT_PUBLIC_SITE_URL` **no interviene**: es sólo para las URLs de retorno de
 Stripe. No tocarla creyendo que es del dominio.
 
-### 6.2 Decisión previa: apex o www — hay que tomarla antes de escribir nada
+### 6.2 Decisión tomada: el canónico es `www`
 
-El repositorio **no es unánime** y esto tiene que resolverlo una persona:
+Resuelta (antes este runbook y HUMAN-GATES se contradecían). Evidencia, no gusto:
+en el proyecto de Vercel `www.plastilonas.com` es el dominio principal y
+`plastilonas.com` tiene una redirección 308 de plataforma hacia `www`. Un
+canónico en el apex haría que el middleware (www → apex) y Vercel (apex → www)
+se redirigieran en bucle. Por eso `lib/site.ts` **rechaza** el apex
+(`estadoMigracion() === 'invalida'`: origen por defecto, sin noindex, sin 308) y
+`/api/health?deep=1` lo marca como mala configuración.
 
-- `lib/site.ts` declara `HOST_OBJETIVO = "https://www.plastilonas.com"`.
-- `docs/HUMAN-GATES.md` §1 pide `NEXT_PUBLIC_CANONICAL_HOST=https://www.plastilonas.com`.
-- La §3 de este mismo runbook (día 0) dice `CANONICAL_ORIGIN = https://plastilonas.com` (apex).
+Estados, todos calculados en `lib/site.ts`: `pendiente` (hoy) → `canonico`
+(variable = `https://www.plastilonas.com`) → `forzado` (+ `ENFORCE_BRAND_DOMAIN=true`).
+Las previsualizaciones (`VERCEL_ENV=preview`) llevan siempre noindex y nunca se
+redirigen.
 
-`middleware.ts` acepta las dos —`migracionActiva()` compara ignorando el
-`www.`— así que **ninguna de las dos falla un test**; simplemente eligen
-grafos distintos, y el 308 de la §2 de este runbook (www → apex) sólo tiene
-sentido si el canónico es el apex.
-
-- [ ] **Decidir, por escrito, cuál es el host canónico definitivo.**
-- [ ] Corregir el documento que quede desalineado (este runbook o HUMAN-GATES),
-      para que el próximo lector no encuentre dos respuestas.
-- [ ] Usar ese mismo host en DNS, en la variable y en Search Console. Cambiar
-      de opinión después del día 0 cuesta una segunda migración.
+Estado verificado el 2026-10-24 con la API de Vercel: ambos dominios están
+añadidos y verificados en el proyecto, pero `www.plastilonas.com` sigue con un
+registro A hacia el hosting antiguo (`misconfigured: true`). La puerta de DNS
+sigue **cerrada**; las variables siguen vacías.
 
 ### 6.3 Antes de tocar nada (día −1)
 

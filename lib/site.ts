@@ -15,13 +15,14 @@
  *
  * La mudanza NO se hace editando este archivo. Se hace en tres pasos:
  *
- *   1. DNS: apuntar www.plastilonas.com al proyecto de Vercel y verificar el
- *      dominio en el panel (Settings → Domains). TODO(HUMAN).
+ *   1. DNS: apuntar www.plastilonas.com al proyecto de Vercel (Settings →
+ *      Domains; el apex ya redirige 308 a www en la plataforma). TODO(HUMAN).
  *   2. Variable de entorno, en Vercel → Settings → Environment Variables:
  *
  *          NEXT_PUBLIC_CANONICAL_HOST = https://www.plastilonas.com
  *
- *      (CANONICAL_ORIGIN se sigue leyendo por compatibilidad; la nueva gana.)
+ *      (CANONICAL_ORIGIN se sigue leyendo por compatibilidad; la nueva gana.
+ *      El apex NO es un valor válido: ver `estadoMigracion`.)
  *      Con esa sola variable, en el mismo despliegue y sin tocar código:
  *      · SITE.url pasa a www.plastilonas.com, y con él sitemap, robots,
  *        llms.txt, metadataBase, canonicals, OG y todos los bloques JSON-LD;
@@ -29,8 +30,8 @@
  *        Vercel, para que deje de competir por las mismas consultas.
  *   3. ENFORCE_BRAND_DOMAIN=true — SOLO tras confirmar que el DNS y el SSL
  *      de www sirven este proyecto: activa la redirección 308 dura de
- *      vercel.app (y del apex) hacia www. Ver middleware.ts y
- *      docs/HUMAN-GATES.md.
+ *      vercel.app, del apex y de http hacia https://www. Ver `decidirHost`
+ *      y docs/HUMAN-GATES.md.
  *
  * MIENTRAS LA VARIABLE ESTÉ VACÍA no ocurre nada de lo anterior, y eso es
  * deliberado: emitir noindex en el host de Vercel antes de que exista un
@@ -58,37 +59,127 @@
  */
 const ORIGEN_POR_DEFECTO = "https://plastilonas-peruanas-sac.vercel.app";
 
-/**
- * Host canónico objetivo de la mudanza. NO es el host vigente: el vigente lo
- * decide la variable de entorno. Documentado aquí para que middleware, /confianza
- * y docs/mudanza hablen del mismo destino.
- */
-const HOST_OBJETIVO = "https://www.plastilonas.com";
+/** Dominio de marca (apex). No es canónico: sólo se usa para reconocer la variante. */
+const DOMINIO_MARCA = "plastilonas.com";
 
-function originFromEnv(): string {
-  // NEXT_PUBLIC_CANONICAL_HOST es el interruptor documentado de la mudanza
-  // (visible también en el cliente). CANONICAL_ORIGIN se mantiene por
-  // compatibilidad con la configuración anterior de Vercel.
-  const raw = (
-    process.env.NEXT_PUBLIC_CANONICAL_HOST ||
-    process.env.CANONICAL_ORIGIN ||
-    ""
-  ).trim();
-  if (!raw) return ORIGEN_POR_DEFECTO;
+/**
+ * EL host canónico definitivo: www. Decidido por evidencia, no por gusto: en
+ * Vercel el proyecto ya tiene `www` como dominio principal y el apex con una
+ * redirección 308 de plataforma hacia `www`. Un canónico en el apex haría que
+ * este middleware (apex ← www) y Vercel (www ← apex) se redirigieran el uno al
+ * otro en bucle, así que un valor apex se RECHAZA en vez de aceptarse.
+ */
+const HOST_OBJETIVO = `https://www.${DOMINIO_MARCA}`;
+
+type Entorno = Record<string, string | undefined>;
+
+/**
+ * ESTADO DE LA MUDANZA — uno solo, explícito, calculado de las variables.
+ *
+ *  · pendiente: sin variable (o apuntando a otro host). Nada degrada el host
+ *    actual: ni noindex ni redirecciones. Estado de producción hoy.
+ *  · invalida:  la variable nombra el apex o el dominio de marca con ruta/http.
+ *    Se ignora (origen por defecto) y el middleware no hace nada: un valor
+ *    ambiguo nunca puede desindexar el sitio.
+ *  · canonico:  la variable es el host objetivo. El grafo entero pasa a www y
+ *    el host de Vercel emite noindex + Link canonical. Reversible.
+ *  · forzado:   canonico + ENFORCE_BRAND_DOMAIN=true (puerta humana: DNS y TLS
+ *    de www confirmados). Añade el 308 duro hacia www.
+ */
+export type EstadoMigracion = "pendiente" | "invalida" | "canonico" | "forzado";
+
+/**
+ * NEXT_PUBLIC_CANONICAL_HOST gana; CANONICAL_ORIGIN sólo se lee si esa está
+ * vacía (compatibilidad con la configuración anterior de Vercel).
+ */
+function valorConfigurado(env: Entorno): string {
+  return (env.NEXT_PUBLIC_CANONICAL_HOST || env.CANONICAL_ORIGIN || "").trim();
+}
+
+function analizarOrigen(env: Entorno): { origen: string; estado: EstadoMigracion; host: string | null } {
+  const raw = valorConfigurado(env);
+  const defecto = { origen: ORIGEN_POR_DEFECTO, estado: "pendiente" as EstadoMigracion, host: null };
+  if (!raw) return defecto;
+  let u: URL;
   try {
-    const u = new URL(raw);
-    if (u.protocol !== "https:") return ORIGEN_POR_DEFECTO;
-    return raw.replace(/\/$/, "");
+    u = new URL(raw);
   } catch {
-    return ORIGEN_POR_DEFECTO;
+    return defecto;
   }
+  if (u.protocol !== "https:") return defecto;
+  const host = u.hostname.toLowerCase();
+  const esMarca = host === DOMINIO_MARCA || host.endsWith(`.${DOMINIO_MARCA}`);
+  if (esMarca) {
+    // Sólo se acepta el host objetivo, sin ruta ni credenciales. Cualquier otra
+    // variante de marca (apex, subdominios) es una mala configuración.
+    const limpio = u.pathname === "/" && !u.search && !u.hash && !u.username && !u.port;
+    if (host !== `www.${DOMINIO_MARCA}` || !limpio) {
+      return { origen: ORIGEN_POR_DEFECTO, estado: "invalida", host };
+    }
+    return {
+      origen: u.origin,
+      estado: env.ENFORCE_BRAND_DOMAIN === "true" ? "forzado" : "canonico",
+      host,
+    };
+  }
+  // Otro host https (p. ej. una prueba): se usa como origen pero NO activa la mudanza.
+  return { origen: u.origin, estado: "pendiente", host: null };
+}
+
+export function estadoMigracion(env: Entorno = process.env): EstadoMigracion {
+  return analizarOrigen(env).estado;
+}
+
+export function origenCanonico(env: Entorno = process.env): string {
+  return analizarOrigen(env).origen;
+}
+
+export type DecisionHost =
+  | { accion: "ninguna" }
+  | { accion: "redirigir"; destino: string }
+  | { accion: "noindex"; canonica: string | null };
+
+/**
+ * Qué hacer con una petición según host, protocolo y estado de la mudanza.
+ * Función pura: el middleware sólo la aplica. Conserva ruta y query.
+ *
+ *  · Despliegues de previsualización (VERCEL_ENV=preview): siempre noindex y
+ *    NUNCA redirección —se prueban en su propio host—. No son el sitio vigente.
+ *  · pendiente / invalida: no hacer nada (invariante de test/dominio-migracion).
+ *  · canonico: el host *.vercel.app de producción emite noindex + canonical.
+ *  · forzado: 308 desde *.vercel.app de producción, desde el apex y desde http
+ *    hacia https://www, en un solo salto.
+ */
+export function decidirHost(
+  peticion: { host: string; protocolo?: string | null; ruta: string; query?: string },
+  env: Entorno = process.env,
+): DecisionHost {
+  const host = peticion.host.split(":")[0].toLowerCase();
+  const esVercel = host.endsWith(".vercel.app");
+  if (esVercel && env.VERCEL_ENV === "preview") {
+    return { accion: "noindex", canonica: null };
+  }
+  const { estado, host: destino } = analizarOrigen(env);
+  if ((estado !== "canonico" && estado !== "forzado") || !destino) {
+    return { accion: "ninguna" };
+  }
+  const canonica = `https://${destino}${peticion.ruta}${peticion.query ?? ""}`;
+  if (estado === "forzado") {
+    const variante = host === DOMINIO_MARCA;
+    const sinTls = host === destino && peticion.protocolo === "http";
+    if (esVercel || variante || sinTls) {
+      return { accion: "redirigir", destino: canonica };
+    }
+  }
+  if (esVercel) return { accion: "noindex", canonica: `https://${destino}${peticion.ruta}` };
+  return { accion: "ninguna" };
 }
 
 export const SITE = {
-  url: originFromEnv(),
+  url: origenCanonico(),
   /** Alias legible: host canónico VIGENTE (el que emite canonicals, OG y JSON-LD). */
-  canonicalHost: originFromEnv(),
-  brandHost: "plastilonas.com",
+  canonicalHost: origenCanonico(),
+  brandHost: DOMINIO_MARCA,
   /** Destino de la mudanza de dominio. Solo informativo hasta que el env lo active. */
   targetHost: HOST_OBJETIVO,
 

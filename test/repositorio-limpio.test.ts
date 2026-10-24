@@ -61,6 +61,8 @@ const RAIZ_PERMITIDA = new Set<string>([
   // Vercel solo lee los crons de vercel.json en la raíz: el reintento de las
   // entregas del RFQ (/api/cron/lead-deliveries) depende de este archivo.
   'vercel.json',
+  // Versión de Node para desarrollo local; CI y Vercel usan 24 (engines en package.json).
+  '.nvmrc',
 ]);
 
 const ARTEFACTO = [

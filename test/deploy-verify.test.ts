@@ -136,7 +136,7 @@ describe('cobertura: nada se publica sin verificarse', () => {
      * Ahora se recorta el bloque real del archivo y se ejecuta. Si alguien
      * cambia el ancla, esto se entera el mismo día.
      */
-    const bloque = /SITE_URL="\$\{CANONICAL_ORIGIN[\s\S]*?\nfi\n/.exec(script)?.[0];
+    const bloque = /SITE_URL="\$\{NEXT_PUBLIC_CANONICAL_HOST[\s\S]*?\nfi\n/.exec(script)?.[0];
     expect(bloque, 'no se encontró el bloque que resuelve el origen en el script').toBeTruthy();
 
     const resuelto = execFileSync(
@@ -145,7 +145,7 @@ describe('cobertura: nada se publica sin verificarse', () => {
       {
         cwd: process.cwd(),
         encoding: 'utf8',
-        env: { ...process.env, CANONICAL_ORIGIN: '', NEXT_PUBLIC_SITE_URL: '' },
+        env: { ...process.env, NEXT_PUBLIC_CANONICAL_HOST: '', CANONICAL_ORIGIN: '', NEXT_PUBLIC_SITE_URL: '' },
       },
     );
     expect(resuelto, 'la extracción del origen devolvió vacío: el verificador no puede verificar nada').not.toBe('');

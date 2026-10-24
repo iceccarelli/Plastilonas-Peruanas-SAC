@@ -18,8 +18,7 @@ Buscar `TODO(HUMAN)` en el repositorio localiza el punto exacto.
       checklist de corte: `docs/mudanza-plastilonas-com.md` §6. Lleva los
       nombres reales de las cuatro variables que el código lee hoy y el orden
       en que se aplican (DNS -> SSL -> variable -> redeploy -> `ENFORCE_BRAND_DOMAIN`).
-      **Ojo:** §6.2 documenta que este archivo y ese runbook no coinciden en si
-      el canónico es el apex o `www`; hay que decidirlo por escrito antes.
+      El canónico es `www` (decidido en §6.2: el apex se rechaza en código).
 - [ ] Completar el inventario de URLs del Apache legado en
       `docs/redirects-legado-apache.md` y cargar las redirecciones página a
       página.
