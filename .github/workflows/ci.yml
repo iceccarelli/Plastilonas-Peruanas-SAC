@@ -39,14 +39,23 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Instalar dependencias
         run: npm ci
 
+      - name: Auditoría de dependencias en producción
+        # Bloquea críticas del árbol que SE DESPLIEGA (--omit=dev). Las altas
+        # restantes sin parche compatible están razonadas en docs/HUMAN-GATES.md;
+        # una crítica nueva rompe el build en vez de enterarnos por un correo.
+        run: npm audit --omit=dev --audit-level=critical
+
       - name: Tipos
         run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
 
       - name: Pruebas
         run: npx vitest run --reporter=dot

@@ -759,11 +759,11 @@ export default function Navbar() {
                   className="btn btn-sm btn-ghost !hidden xl:!inline-flex font-medium"
                 >
                   {user.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     // Avatar del proveedor de sesión: `<img>` y no `<Image>`
                     // porque el host es de terceros y variable. `lazy` +
                     // `async` porque es decorativo, mide 20×20 y no debe
                     // competir por red ni bloquear el hilo con el LCP.
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={user.image}
                       alt=""
