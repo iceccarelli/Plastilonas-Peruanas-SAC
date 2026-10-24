@@ -62,7 +62,7 @@ fi
 # aunque el .env.local de quien la corre tenga credenciales.
 export DIAG_CRM_PORT="${DIAG_CRM_PORT:-4011}"
 echo "── Levantando el sitio en ${BASE} (CRM de prueba en :${DIAG_CRM_PORT}) ──"
-CRM_WEBHOOK_URL="http://127.0.0.1:${DIAG_CRM_PORT}/lead" N8N_WEBHOOK_URL="" \
+ALLOW_PRIVATE_WEBHOOKS=true CRM_WEBHOOK_URL="http://127.0.0.1:${DIAG_CRM_PORT}/lead" N8N_WEBHOOK_URL="" \
   NEXT_PUBLIC_SUPABASE_URL="" NEXT_PUBLIC_SUPABASE_ANON_KEY="" SUPABASE_SERVICE_ROLE_KEY="" \
   RESEND_API_KEY="" CRM_WEBHOOK_SECRET="" \
   setsid npx next start -p "$PUERTO" > "$REGISTRO" 2>&1 &

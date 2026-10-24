@@ -72,7 +72,7 @@ describe('contrato de recepción', () => {
 
   it('la base falla pero el CRM confirmó 2xx: accepted con durabilidad "forwarded", persisted=false', async () => {
     const crm = await listen(() => 200);
-    const r = await submitLead(lead(), '4.4.4.4', { store: memoryLeadStore({ failInsert: true }), env: { CRM_WEBHOOK_URL: crm.url } });
+    const r = await submitLead(lead(), '4.4.4.4', { store: memoryLeadStore({ failInsert: true }), env: { CRM_WEBHOOK_URL: crm.url, ALLOW_PRIVATE_WEBHOOKS: 'true' } });
     expect(r.status).toBe(200);
     expect(r.body).toMatchObject({ accepted: true, durability: 'forwarded', persisted: false });
     expect(r.body.delivery.crm).toBe('delivered');
@@ -91,7 +91,7 @@ describe('idempotencia y códigos', () => {
   it('el mismo envío dos veces (misma clave) no duplica ni vuelve a entregar', async () => {
     const crm = await listen(() => 200);
     const store = memoryLeadStore();
-    const env = { CRM_WEBHOOK_URL: crm.url };
+    const env = { CRM_WEBHOOK_URL: crm.url, ALLOW_PRIVATE_WEBHOOKS: 'true' };
     const k = { idempotencyKey: 'abcd1234abcd1234abcd' };
     const a = await submitLead(lead(k), '6.6.6.6', { store, env });
     const b = await submitLead(lead(k), '6.6.6.6', { store, env });
@@ -137,7 +137,7 @@ describe('entrega por canal', () => {
   it('CRM recibe el evento esperado, firmado, con Idempotency-Key = código RFQ', async () => {
     const crm = await listen(() => 200);
     const store = memoryLeadStore();
-    const r = await submitLead(lead(), '10.0.0.1', { store, env: { CRM_WEBHOOK_URL: crm.url, CRM_WEBHOOK_SECRET: 's3cret' } });
+    const r = await submitLead(lead(), '10.0.0.1', { store, env: { CRM_WEBHOOK_URL: crm.url, ALLOW_PRIVATE_WEBHOOKS: 'true', CRM_WEBHOOK_SECRET: 's3cret' } });
     expect(crm.hits).toHaveLength(1);
     const hit = crm.hits[0];
     expect(hit.headers['idempotency-key']).toBe(r.body.rfqId);
@@ -164,7 +164,7 @@ describe('entrega por canal', () => {
   it('CRM 500: el lead se acepta (base) pero el canal queda "failed" y registrado para reintento', async () => {
     const crm = await listen(() => 500);
     const store = memoryLeadStore();
-    const r = await submitLead(lead(), '10.0.0.3', { store, env: { CRM_WEBHOOK_URL: crm.url } });
+    const r = await submitLead(lead(), '10.0.0.3', { store, env: { CRM_WEBHOOK_URL: crm.url, ALLOW_PRIVATE_WEBHOOKS: 'true' } });
     expect(r.status).toBe(200);
     expect(r.body.delivery.crm).toBe('failed');
     expect(r.body.forwarded).toBe(false);
@@ -176,7 +176,7 @@ describe('entrega por canal', () => {
   it('un CRM que no responde se corta por tiempo y no cuelga la petición', async () => {
     const crm = await listen(() => -1);
     const t0 = Date.now();
-    const r = await submitLead(lead(), '10.0.0.4', { store: memoryLeadStore(), env: { CRM_WEBHOOK_URL: crm.url } });
+    const r = await submitLead(lead(), '10.0.0.4', { store: memoryLeadStore(), env: { CRM_WEBHOOK_URL: crm.url, ALLOW_PRIVATE_WEBHOOKS: 'true' } });
     expect(Date.now() - t0).toBeLessThan(9000);
     expect(r.body.delivery.crm).toBe('failed');
   }, 15000);
@@ -184,7 +184,7 @@ describe('entrega por canal', () => {
   it('el error registrado nunca contiene datos del cliente', async () => {
     const crm = await listen(() => 500);
     const store = memoryLeadStore();
-    await submitLead(lead(), '10.0.0.5', { store, env: { CRM_WEBHOOK_URL: crm.url } });
+    await submitLead(lead(), '10.0.0.5', { store, env: { CRM_WEBHOOK_URL: crm.url, ALLOW_PRIVATE_WEBHOOKS: 'true' } });
     expect(JSON.stringify([...store.deliveries.values()])).not.toContain('qa+rfq@example.com');
   });
 });
@@ -194,7 +194,7 @@ describe('reintentos y recuperación', () => {
     let up = false;
     const crm = await listen(() => (up ? 200 : 503));
     const store = memoryLeadStore();
-    const env = { CRM_WEBHOOK_URL: crm.url };
+    const env = { CRM_WEBHOOK_URL: crm.url, ALLOW_PRIVATE_WEBHOOKS: 'true' };
     await submitLead(lead(), '11.0.0.1', { store, env });
     const d = [...store.deliveries.values()][0];
     expect(d.status).toBe('failed');
@@ -218,8 +218,8 @@ describe('reintentos y recuperación', () => {
   it('entregas aún no vencidas no se reintentan', async () => {
     const crm = await listen(() => 500);
     const store = memoryLeadStore();
-    await submitLead(lead(), '11.0.0.2', { store, env: { CRM_WEBHOOK_URL: crm.url } });
-    const run = await retryDueDeliveries(store, { CRM_WEBHOOK_URL: crm.url });
+    await submitLead(lead(), '11.0.0.2', { store, env: { CRM_WEBHOOK_URL: crm.url, ALLOW_PRIVATE_WEBHOOKS: 'true' } });
+    const run = await retryDueDeliveries(store, { CRM_WEBHOOK_URL: crm.url, ALLOW_PRIVATE_WEBHOOKS: 'true' });
     expect(run.processed).toBe(0);
   });
 });

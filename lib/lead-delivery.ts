@@ -7,6 +7,7 @@
  */
 import { createHmac } from 'node:crypto';
 import { SITE } from '@/lib/site';
+import { assertPublicDestination } from '@/lib/outbound';
 import type { LeadInput } from '@/lib/lead-schema';
 import type { Channel, DeliveryOutcome } from '@/lib/lead-store';
 
@@ -62,6 +63,9 @@ export function crmBody(ctx: DeliveryContext): string {
 export async function deliverCrm(ctx: DeliveryContext, env: EnvLike = process.env): Promise<AttemptResult> {
   const url = env.CRM_WEBHOOK_URL || env.N8N_WEBHOOK_URL;
   if (!url) return { ok: false, error: 'not_configured' };
+  // SSRF: el destino del CRM es configuración, pero se exige https y una dirección pública.
+  const dest = await assertPublicDestination(url, env);
+  if (!dest.ok) return { ok: false, error: 'destination_blocked' };
   const body = crmBody(ctx);
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -72,7 +76,7 @@ export async function deliverCrm(ctx: DeliveryContext, env: EnvLike = process.en
     headers['X-Plastilonas-Signature'] = `sha256=${createHmac('sha256', env.CRM_WEBHOOK_SECRET).update(body).digest('hex')}`;
   }
   try {
-    const res = await fetch(url, { method: 'POST', headers, body, signal: AbortSignal.timeout(DELIVERY_TIMEOUT_MS) });
+    const res = await fetch(dest.url, { method: 'POST', headers, body, redirect: 'error', signal: AbortSignal.timeout(DELIVERY_TIMEOUT_MS) });
     return httpResult(res.status);
   } catch (err) {
     return { ok: false, error: classify(err) };

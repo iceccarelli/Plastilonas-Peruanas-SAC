@@ -320,6 +320,28 @@ if [ "$n" -le 2 ]; then ok "sólo perfiles sociales reales ($n)"; else
 if grep -q 'href="https://www.instagram.com/"' <<< "$home"; then
   bad "perfil marcador de Instagram visible"; else ok "sin perfiles marcadores"; fi
 
+echo "— Vivacidad y preparación (distintas) —"
+# /api/health dice que el PROCESO responde; /api/ready dice si puede SERVIR cada
+# función. Un sitio vivo puede no ser capaz de guardar un RFQ: por eso se miran las dos.
+if grep -q '"status": *"ok"' <<< "$(cuerpo /api/health)"; then ok "/api/health: el proceso responde"; else bad "/api/health no responde ok"; fi
+for fn in rfq quote upload; do
+  listo=$(curl -s -m 30 "$BASE_URL/api/ready?function=$fn" 2>/dev/null)
+  estado=$(grep -o '"status": *"[a-z_]*"' <<< "$listo" | head -1 | sed 's/.*"\([a-z_]*\)"$/\1/')
+  if grep -qiE 'supabase|postgres|secret|key|error|@' <<< "$listo"; then bad "/api/ready?function=$fn expone detalle interno"; fi
+  case "$estado" in
+    ready) ok "puede servir «$fn»" ;;
+    degraded) ok "puede servir «$fn» (con avisos: ver /api/health?deep=1)" ;;
+    *)
+      # Hoy la producción no tiene base configurada (docs/HUMAN-GATES.md §2.0): informar,
+      # y exigir solo cuando el propietario lo pide (EXIGIR_LISTO=1) tras configurarla.
+      if [ "${EXIGIR_LISTO:-0}" = "1" ]; then bad "NO puede servir «$fn» ($estado)"; else
+        printf '  \033[33m!\033[0m «%s» no está lista (%s) — informativo; EXIGIR_LISTO=1 lo vuelve un fallo\n' "$fn" "${estado:-sin respuesta}"; fi ;;
+  esac
+done
+# El enlace de una oferta nunca se indexa ni se cachea.
+cab=$(curl -sI -m 30 "$BASE_URL/oferta/$(printf 'A%.0s' $(seq 1 43))" 2>/dev/null)
+if grep -qi 'x-robots-tag:.*noindex' <<< "$cab" || grep -qi 'noindex' <<< "$(curl -s -m 30 "$BASE_URL/oferta/$(printf 'A%.0s' $(seq 1 43))" | head -c 4000)"; then ok "/oferta/<token> es noindex"; else bad "/oferta/<token> podría indexarse"; fi
+
 echo ""
 printf 'Resultado: \033[32m%s correctas\033[0m, ' "$pass"
 if [ "$fail" -eq 0 ]; then printf '\033[32m0 fallos\033[0m\n'; else printf '\033[31m%s fallos\033[0m\n' "$fail"; fi
