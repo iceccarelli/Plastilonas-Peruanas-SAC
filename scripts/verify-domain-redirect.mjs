@@ -55,14 +55,14 @@ const TIEMPO_LIMITE = Number(process.env.TIMEOUT_MS || 12000);
  * porque «ese ya lo comprobamos».
  */
 function origenCanonico() {
-  const env = process.env.CANONICAL_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL;
+  const env = process.env.NEXT_PUBLIC_CANONICAL_HOST || process.env.CANONICAL_ORIGIN;
   if (env) return env.replace(/\/$/, '');
   const src = readFileSync(join(RAIZ, 'lib/site.ts'), 'utf8');
-  const m = src.match(/process\.env\.NEXT_PUBLIC_SITE_URL \|\|\s*"(https:\/\/[^"]+)"/);
+  const m = src.match(/^const ORIGEN_POR_DEFECTO\s*=\s*"(https:\/\/[^"]+)"/m);
   if (!m) {
     console.error(
       'No se pudo deducir el origen canónico de lib/site.ts.\n' +
-        'Pase CANONICAL_ORIGIN=https://… al ejecutar este script.',
+        'Pase NEXT_PUBLIC_CANONICAL_HOST=https://… al ejecutar este script.',
     );
     process.exit(2);
   }
@@ -156,7 +156,7 @@ if (!EXIGIR) {
       'este proyecto: mientras el DNS no cambie no hay redirección que exigir.\n' +
       'La mudanza son dos pasos, y están documentados en lib/site.ts:\n' +
       '  1. DNS: apuntar plastilonas.com al proyecto de Vercel y verificarlo en Settings → Domains.\n' +
-      `  2. Vercel → Environment Variables: CANONICAL_ORIGIN = https://plastilonas.com\n` +
+      `  2. Vercel → Environment Variables: NEXT_PUBLIC_CANONICAL_HOST = https://www.plastilonas.com (el apex NO es canónico: Vercel lo redirige a www)\n` +
       'El día que ambos estén hechos, active VERIFICAR_DOMINIO=1 en CI y este script\n' +
       'pasa a romper el build ante cualquier 200, 404, 302 o redirección a la portada.',
   );

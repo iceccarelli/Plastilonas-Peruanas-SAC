@@ -69,15 +69,15 @@ Lo que conviene saber sin abrirlo:
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Checkout hospedado | No hay pago en línea |
 | `N8N_WEBHOOK_URL` | Reenvío de leads | `/api/lead` responde 200 y no reenvía |
 | `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GTM_ID` | Analítica | No se carga ningún script de terceros |
-| **`CANONICAL_ORIGIN`** | Interruptor de mudanza de dominio. **La única que mueve `SITE.url`** | **Ver el aviso de abajo** |
+| **`NEXT_PUBLIC_CANONICAL_HOST`** (alias heredado `CANONICAL_ORIGIN`) | Interruptor de mudanza de dominio; el único valor válido es `https://www.plastilonas.com`. **Las únicas que mueven `SITE.url`** | **Ver el aviso de abajo** |
 | `NEXT_PUBLIC_SITE_URL` | URLs de retorno de Stripe, y sólo eso | No afecta al origen canónico |
 
-> **`CANONICAL_ORIGIN` puede desindexar el sitio entero.** Cuando su valor
+> **`NEXT_PUBLIC_CANONICAL_HOST` puede desindexar el sitio entero.** Cuando su valor
 > coincide con el host canónico, `middleware.ts` emite
 > `X-Robots-Tag: noindex, nofollow` en cualquier host `*.vercel.app` — que es
 > donde vive el sitio hoy. Está **vacío a propósito**. Sólo se rellena el día
-> que el DNS de `plastilonas.com` apunte a este proyecto, y ese mismo día
-> `SITE.url` en `lib/site.ts` pasa a ese dominio. `test/dominio-migracion.test.ts`
+> que el DNS de `www.plastilonas.com` apunte a este proyecto, y ese mismo día
+> `SITE.url` pasa a ese host (lib/site.ts). `test/dominio-migracion.test.ts`
 > vigila el interruptor.
 
 El chatbot corre sobre **Anthropic**, no sobre OpenAI. `@ai-sdk/openai` no está
@@ -184,7 +184,7 @@ Esta parte del sitio existe a propósito y conviene no romperla.
 
 Vercel, preset Next.js, sin configuración especial. `main` despliega solo.
 
-Antes de tocar el dominio, leer el aviso de `CANONICAL_ORIGIN` del apartado 3.
+Antes de tocar el dominio, leer el aviso de `NEXT_PUBLIC_CANONICAL_HOST` del apartado 3.
 Tras un despliegue con rutas nuevas:
 
 ```bash

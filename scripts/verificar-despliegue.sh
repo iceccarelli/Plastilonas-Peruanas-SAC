@@ -36,8 +36,8 @@ set -uo pipefail
 # durante 300 segundos y concluía que el despliegue no había llegado — mientras
 # el sitio servía perfectamente el commit correcto.
 #
-# Ahora se resuelve en el mismo orden que originFromEnv(): CANONICAL_ORIGIN
-# primero, y si no está, el literal de reserva que ese archivo declara. No se
+# Ahora se resuelve en el mismo orden que origenCanonico(): NEXT_PUBLIC_CANONICAL_HOST,
+# luego CANONICAL_ORIGIN, y si no está, el literal de reserva que ese archivo declara. No se
 # escribe ningún host a mano aquí: test/dominio.test.ts rompe el build si
 # alguien lo intenta, y con razón — un verificador con su propia copia del
 # dominio es el archivo que se queda atrás el día de la migración.
@@ -48,7 +48,7 @@ set -uo pipefail
 # algo estable, y `process.env.…` no lo era. Ahora se ancla en la CONSTANTE que
 # originFromEnv() devuelve por defecto, que es un nombre y no un camino de
 # ejecución, y test/deploy-verify.test.ts comprueba que siga casando.
-SITE_URL="${CANONICAL_ORIGIN:-}"
+SITE_URL="${NEXT_PUBLIC_CANONICAL_HOST:-${CANONICAL_ORIGIN:-}}"
 if [ -z "$SITE_URL" ]; then
   SITE_URL=$(grep -E '^const ORIGEN_POR_DEFECTO' lib/site.ts \
     | grep -oE '"https://[^"]+"' | head -1 | tr -d '"')
@@ -61,7 +61,7 @@ BASE_URL="${BASE_URL:-$SITE_URL}"
 # en la primera línea, no en la línea trescientos.
 if [ -z "$BASE_URL" ]; then
   printf '\033[31mNo se pudo resolver el origen del sitio desde lib/site.ts.\033[0m\n'
-  echo "Pase BASE_URL=https://… al ejecutar, o revise originFromEnv() en lib/site.ts."
+  echo "Pase BASE_URL=https://… al ejecutar, o revise origenCanonico() en lib/site.ts."
   exit 2
 fi
 ESPERA_MAX="${ESPERA_MAX:-300}"   # segundos

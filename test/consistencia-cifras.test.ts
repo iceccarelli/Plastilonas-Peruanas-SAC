@@ -77,7 +77,7 @@ describe('las cifras derivan del dato, no del teclado', () => {
   });
 });
 
-describe('sólo CANONICAL_ORIGIN mueve el origen canónico', () => {
+describe('sólo las variables de dominio mueven el origen canónico', () => {
   /**
    * NEXT_PUBLIC_SITE_URL existe para las URLs de retorno de Stripe y
    * .env.example la trae puesta a http://localhost:3000. Mientras fue el
@@ -87,13 +87,13 @@ describe('sólo CANONICAL_ORIGIN mueve el origen canónico', () => {
    */
   it('SITE.url no se mueve por la variable de Stripe', () => {
     const src = readFileSync(join(raiz, 'lib/site.ts'), 'utf8');
-    const fn = /function originFromEnv[\s\S]*?\n}/.exec(src)?.[0] ?? '';
-    expect(fn, 'no se encontró originFromEnv').not.toBe('');
+    const fn = /function (valorConfigurado|analizarOrigen)[\s\S]*?\n}/g.exec(src)?.[0] ?? '';
+    expect(fn, 'no se encontró la lectura del origen').not.toBe('');
     expect(
       fn,
       'NEXT_PUBLIC_SITE_URL volvió al fallback del origen: es la variable de Stripe',
     ).not.toContain('NEXT_PUBLIC_SITE_URL');
-    expect(fn).toContain('CANONICAL_ORIGIN');
+    expect(src).toMatch(/NEXT_PUBLIC_CANONICAL_HOST \|\| env\.CANONICAL_ORIGIN/);
   });
 
   it('el origen vigente es https y sin barra final', () => {

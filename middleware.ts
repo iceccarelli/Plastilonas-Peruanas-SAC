@@ -1,89 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { decidirHost } from "@/lib/site";
+
 /**
- * ESTRATEGIA DE DOMINIO — con interruptor doble, no con fe.
+ * ESTRATEGIA DE DOMINIO — la política vive en lib/site.ts (`decidirHost`) y
+ * aquí sólo se aplica, para que se pueda probar sin levantar Next.
  *
- * El objetivo final es que https://www.plastilonas.com sea el único origen
- * indexable y que el host de Vercel deje de competir. Pero el sitio HOY vive
- * en plastilonas-peruanas-sac.vercel.app: degradar ese host antes de que el
- * DNS de la marca apunte aquí no consolida autoridad, la borra.
- *
- * Dos interruptores, dos niveles de compromiso:
- *
- *  1. NEXT_PUBLIC_CANONICAL_HOST=https://www.plastilonas.com
- *     (o el heredado CANONICAL_ORIGIN). Retargetea TODO el grafo — canonicals,
- *     sitemap índice, OG, JSON-LD, /ai.txt, /llms.txt, /entidad.json — vía
- *     lib/site.ts, y este middleware emite en el host de Vercel
- *     `X-Robots-Tag: noindex` + `Link rel=canonical` al dominio de marca.
- *     Reversible: se borra la variable y todo vuelve.
- *
- *  2. ENFORCE_BRAND_DOMAIN=true — SOLO cuando una persona confirmó que el DNS
- *     y el certificado de www.plastilonas.com sirven este proyecto
- *     (TODO(HUMAN) — ver docs/HUMAN-GATES.md). Convierte la señal suave en
- *     redirección dura: 308 de *.vercel.app (y del apex, si el canónico es
- *     www) hacia el host canónico, ruta y query intactas.
- *
- * Mientras el interruptor 1 esté vacío, NADA degrada la indexabilidad del
- * host actual; mientras el 2 no sea 'true', no hay redirecciones duras.
- * test/dominio-migracion.test.ts protege el primer invariante.
+ * Host canónico único: https://www.<marca>. Estados (pendiente → canonico →
+ * forzado) y sus invariantes: ver lib/site.ts y docs/mudanza-plastilonas-com.md.
+ * Mientras no haya variable, NADA degrada el host vigente; el 308 duro sólo
+ * existe con ENFORCE_BRAND_DOMAIN=true, que es una puerta humana (DNS + TLS).
  */
-const CANONICAL_HOST = (process.env.CANONICAL_HOST || "plastilonas.com").replace(/^www\./, "");
-
-/** Host canónico completo (con www si el env lo trae), sin protocolo. */
-function hostCanonico(env: Record<string, string | undefined> = process.env): string | null {
-  const raw = (env.NEXT_PUBLIC_CANONICAL_HOST || env.CANONICAL_ORIGIN || "").trim();
-  if (!raw) return null;
-  try {
-    return new URL(raw).hostname.toLowerCase();
-  } catch {
-    return null;
-  }
-}
-
-/** ¿El dominio de marca ya sirve este proyecto? Solo entonces se degrada Vercel. */
-export function migracionActiva(
-  env: Record<string, string | undefined> = process.env,
-): boolean {
-  const h = hostCanonico(env);
-  return h !== null && h.replace(/^www\./, "") === CANONICAL_HOST;
-}
-
-/** ¿Redirección dura activada por una persona? (DNS + SSL confirmados). */
-export function redireccionDuraActiva(
-  env: Record<string, string | undefined> = process.env,
-): boolean {
-  return env.ENFORCE_BRAND_DOMAIN === "true" && migracionActiva(env);
-}
-
 export function middleware(req: NextRequest) {
-  const host = (req.headers.get("host") || "").split(":")[0].toLowerCase();
-  const url = req.nextUrl.clone();
+  const url = req.nextUrl;
+  const decision = decidirHost({
+    host: req.headers.get("host") || "",
+    protocolo: req.headers.get("x-forwarded-proto"),
+    ruta: url.pathname,
+    query: url.search,
+  });
 
-  const isVercel = host.endsWith(".vercel.app");
-  const migrado = migracionActiva();
-  const destino = hostCanonico(); // p. ej. www.plastilonas.com
-  const forzar = redireccionDuraActiva();
-
-  // Redirección dura: vercel.app y la variante de marca no canónica (apex si
-  // el canónico es www, o www si el canónico es el apex) → host canónico, 308.
-  if (forzar && destino && host !== destino) {
-    const esVarianteMarca =
-      host === CANONICAL_HOST || host === `www.${CANONICAL_HOST}`;
-    if (isVercel || esVarianteMarca) {
-      url.hostname = destino;
-      url.protocol = "https:";
-      url.port = "";
-      return NextResponse.redirect(url, 308);
-    }
+  if (decision.accion === "redirigir") {
+    return NextResponse.redirect(decision.destino, 308);
   }
 
   const res = NextResponse.next();
 
-  // Señal suave: el host de Vercel deja de competir ÚNICAMENTE cuando hay un
-  // dominio de marca vivo que pueda recibir esa autoridad. Antes, sería suicidio.
-  if (isVercel && migrado && destino) {
+  if (decision.accion === "noindex") {
     res.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
-    res.headers.set("Link", `<https://${destino}${url.pathname}>; rel="canonical"`);
+    if (decision.canonica) {
+      res.headers.set("Link", `<${decision.canonica}>; rel="canonical"`);
+    }
   }
 
   {
