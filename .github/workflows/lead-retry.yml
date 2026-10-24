@@ -1,0 +1,55 @@
+name: RFQ — reintentos y vigilancia
+
+# POR QUÉ EXISTE. vercel.json programa el cron de reintentos UNA vez al día
+# (el plan Hobby no admite más y rechaza el despliegue si se intenta). Con
+# retrocesos de 1, 5 y 15 minutos eso significaba que una entrega fallida
+# esperaba hasta 24 h por intento y llegaba a «dead» en seis días.
+#
+# Este flujo llama al mismo endpoint cada 15 minutos y además es la ALERTA: si
+# hay entregas muertas (ok=false) o el endpoint no responde, el trabajo falla y
+# GitHub avisa por correo al propietario. No hace nada hasta que existan los
+# secretos del repositorio (ver docs/HUMAN-GATES.md §RFQ).
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lead-retry
+  cancel-in-progress: false
+
+jobs:
+  reintentar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      SITE_ORIGIN: ${{ secrets.SITE_ORIGIN }}
+    steps:
+      - name: Llamar al endpoint de reintentos
+        run: |
+          if [ -z "$CRON_SECRET" ] || [ -z "$SITE_ORIGIN" ]; then
+            echo "Sin CRON_SECRET/SITE_ORIGIN en los secretos del repositorio: no hay nada que vigilar todavía."
+            exit 0
+          fi
+          code=$(curl -sS -m 90 -o resp.json -w '%{http_code}' \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${SITE_ORIGIN%/}/api/cron/lead-deliveries" || echo 000)
+          echo "HTTP ${code}"
+          if [ "$code" != "200" ]; then
+            echo "::error::El endpoint de reintentos respondió ${code} (503 = base o CRON_SECRET sin configurar en Vercel)"
+            exit 1
+          fi
+          # Solo contadores, nunca datos de clientes (el endpoint no los devuelve).
+          python3 - <<'PY'
+          import json, sys
+          d = json.load(open("resp.json"))
+          print(json.dumps({k: d.get(k) for k in ("ok", "run", "health")}))
+          if not d.get("ok"):
+              print("::error::Hay entregas RFQ en dead-letter: recuperar desde /staff (reintento manual)")
+              sys.exit(1)
+          PY
