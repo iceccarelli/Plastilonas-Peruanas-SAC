@@ -19,6 +19,8 @@ import {
 } from '@/lib/lead-delivery';
 import type { Channel, LeadStore } from '@/lib/lead-store';
 import type { AttachmentStore } from '@/lib/attachment-store';
+import { hitAll, type RpcClient } from '@/lib/rate-limit';
+import { leadRules } from '@/lib/lead-abuse';
 
 const SITE_HOST = SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 export const RATE_WINDOW_MS = 10 * 60 * 1000;
@@ -105,6 +107,8 @@ function response(p: Partial<LeadResponse> & { accepted: boolean; durability: Du
 
 export interface ServiceDeps {
   store: LeadStore | null;
+  /** Contador atómico compartido entre instancias (rate_limit_hit). Opcional: sin él solo rigen los demás topes. */
+  limiter?: RpcClient | null;
   attachments?: AttachmentStore | null;
   env?: EnvLike;
 }
@@ -144,6 +148,14 @@ export async function submitLead(
     } catch {
       logEvent('rate_check_unavailable', { level: 'warn' });
     }
+  }
+  // Contador ATÓMICO compartido (por IP y por correo). `countRecentByIp` de arriba
+  // lee y decide en dos pasos —ráfagas simultáneas pasan todas—; este incrementa
+  // y decide en uno. Si el contador falla se ABRE: el RFQ de un comprador real no
+  // se pierde por una caída del limitador (siguen la idempotencia y el tope de cuerpo).
+  if (!limited && deps.limiter) {
+    const v = await hitAll(deps.limiter, leadRules(ipHash, lead.email), 'open');
+    if (!v.allowed) limited = true;
   }
   if (limited) {
     logEvent('rate_limited', { level: 'warn' });

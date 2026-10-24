@@ -153,6 +153,11 @@ describe('POST /api/lead/upload-url (validación previa a Storage)', () => {
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'http://127.0.0.1:9');
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'anon');
     vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'service');
+    // El contador compartido (rate_limit_hit) responde «permitido»: aquí se prueba la validación, no el límite.
+    vi.doMock('@/lib/supabase', () => ({
+      isSupabaseConfigured: () => true,
+      supabaseAdmin: () => ({ rpc: async () => ({ data: { allowed: true, remaining: 9 }, error: null }) }),
+    }));
     const { POST } = await import('@/app/api/lead/upload-url/route');
     return POST(new Request('http://localhost/api/lead/upload-url', { method: 'POST', body: JSON.stringify(body), headers: { 'x-real-ip': '30.0.0.' + Math.floor(Math.random() * 250) } }) as never);
   };
@@ -164,6 +169,7 @@ describe('POST /api/lead/upload-url (validación previa a Storage)', () => {
   });
   it('sin Supabase configurado responde 503 explícito', async () => {
     vi.resetModules();
+    vi.doUnmock('@/lib/supabase');
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', '');
     const { POST } = await import('@/app/api/lead/upload-url/route');
     const res = await POST(new Request('http://localhost/x', { method: 'POST', body: '{}' }) as never);

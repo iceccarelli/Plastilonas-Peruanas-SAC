@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { isSupabaseConfigured, supabaseAdmin } from '@/lib/supabase';
+import { hitAll } from '@/lib/rate-limit';
+import { uploadRules } from '@/lib/lead-abuse';
 import { supabaseAttachmentStore } from '@/lib/attachment-store';
 import { checkUpload } from '@/lib/attachments';
 import { readBoundedText } from '@/lib/http-limits';
@@ -15,26 +17,23 @@ const Body = z.object({
   size: z.number().int().positive(),
 });
 
-// Tope por IP en memoria: una URL firmada solo permite UNA ruta y caduca, así
-// que el riesgo es volumen de objetos, no acceso.
-const hits = new Map<string, { n: number; t: number }>();
-const WINDOW = 10 * 60 * 1000;
-const MAX = 20;
-function limited(key: string): boolean {
-  const now = Date.now();
-  const h = hits.get(key);
-  if (!h || now - h.t > WINDOW) { hits.set(key, { n: 1, t: now }); return false; }
-  h.n += 1;
-  return h.n > MAX;
-}
+// Límites COMPARTIDOS entre instancias (lib/lead-abuse.ts, Postgres): un Map en
+// memoria deja pasar N× el tope, una vez por instancia en caliente. Falla
+// CERRADO: sin contador no se emiten URLs (sin base tampoco hay Storage).
 
 /** Emite una URL firmada de subida para un archivo ya validado en el servidor. */
 export async function POST(req: NextRequest) {
   if (!isSupabaseConfigured() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return NextResponse.json({ ok: false, error: 'storage_not_configured' }, { status: 503, headers });
   }
-  if (limited(hashIp(clientIp(req.headers)))) {
-    return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429, headers });
+  const verdict = await hitAll(supabaseAdmin(), uploadRules(hashIp(clientIp(req.headers))), 'closed');
+  if (!verdict.allowed) {
+    const unavailable = 'unavailable' in verdict;
+    logEvent('upload_url_limited', { level: 'warn', unavailable });
+    return NextResponse.json(
+      { ok: false, error: unavailable ? 'limiter_unavailable' : 'rate_limited' },
+      { status: unavailable ? 503 : 429, headers: { ...headers, 'Retry-After': String(verdict.retryAfterSeconds) } },
+    );
   }
   const body = await readBoundedText(req, 2048);
   if (!body.ok) return NextResponse.json({ ok: false, error: body.reason === 'too_large' ? 'payload_too_large' : 'invalid_json' }, { status: body.reason === 'too_large' ? 413 : 400, headers });

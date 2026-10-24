@@ -71,6 +71,7 @@ una sola vez, entrega con estados `queued / blocked / sent / confirmed / failed 
       Los navegadores suben con URLs firmadas que emite `/api/lead/upload-url`;
       ya no se necesita ninguna política RLS de INSERT anónimo. Sin la
       migración el formulario manda los adjuntos como «adjuntar por correo».
+- [ ] **Antivirus / análisis de contenido de adjuntos: NO existe.** Hoy cada adjunto solo pasa por tipo, tamaño (20 MB) y comprobación de la cabecera contra la extensión (pdf/jpg/png/dwg/dxf), y el personal lo descarga como archivo (URL firmada de 5 min), nunca en línea; `/staff` lo marca «no verificado». Nada en el sitio dice que un archivo fue escaneado. Si se quiere escaneo, hace falta un servicio externo (p. ej. ClamAV en un worker o un API de pago) con credenciales del propietario; hasta entonces no se debe afirmar lo contrario.
 - [ ] Vercel: `STAFF_EMAILS` (correos del personal, separados por coma) y
       credenciales de Google en Auth.js. `/staff` solo admite esos correos con
       login Google; sin la variable nadie entra.
