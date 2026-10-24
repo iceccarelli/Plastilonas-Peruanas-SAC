@@ -31,6 +31,7 @@ export async function deepChecks(env: Record<string, string | undefined> = proce
   await probe('migration_deliveries', 'lead_deliveries', 'id', '20261023000000_rfq_durable_pipeline.sql');
   await probe('migration_attachments_staff', 'lead_attachments', 'id', '20261023010000_rfq_attachments_staff.sql');
   await probe('migration_quotations', 'lead_quotes', 'id', '20261023020000_rfq_quotations.sql');
+  await probe('migration_quote_journey', 'quote_deliveries', 'id', '20261024000000_quotation_customer_journey.sql');
 
   try {
     const { data, error } = await db.storage.getBucket(BUCKET);
@@ -56,6 +57,15 @@ export async function deepChecks(env: Record<string, string | undefined> = proce
     const { count, error } = await db.from('lead_deliveries').select('id', { count: 'exact', head: true }).eq('status', status);
     if (error) continue;
     out.push({ id: `deliveries_${status}`, status: status === 'dead' && count ? 'fail' : 'pass', detail: `${count ?? 0} entregas en estado ${status}.` });
+  }
+
+  // Cotizaciones al cliente: lo que importa es que NO haya ofertas emitidas que el cliente no recibió.
+  const { data: qh, error: qhErr } = await db.rpc('quote_delivery_health');
+  if (!qhErr && qh) {
+    const h = qh as Record<string, number>;
+    out.push({ id: 'quote_deliveries_dead', status: h.dead > 0 ? 'fail' : 'pass', detail: `${h.dead ?? 0} cotizaciones sin entregar (agotaron reintentos o rebotaron).` });
+    out.push({ id: 'quote_deliveries_blocked', status: h.blocked > 0 ? 'fail' : 'pass', detail: `${h.blocked ?? 0} cotizaciones bloqueadas por configuración (correo o secreto del enlace).` });
+    out.push({ id: 'quote_deliveries_confirmed', status: h.confirmed > 0 ? 'pass' : 'skip', detail: h.confirmed > 0 ? `${h.confirmed} entregas con confirmación del proveedor.` : 'Aún sin confirmación del proveedor (webhook): entrega al buzón no demostrada.' });
   }
   return out;
 }

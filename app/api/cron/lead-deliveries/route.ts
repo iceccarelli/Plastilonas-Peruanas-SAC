@@ -3,6 +3,9 @@ import { timingSafeEqual } from 'node:crypto';
 import { supabaseLeadStore } from '@/lib/lead-store';
 import { supabaseAttachmentStore } from '@/lib/attachment-store';
 import { logEvent, retryDueDeliveries } from '@/lib/lead-service';
+import { quoteStore } from '@/lib/quote-store';
+import { runQuoteDeliveries } from '@/lib/quote-delivery';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -32,7 +35,21 @@ export async function GET(req: NextRequest) {
     const purge = await supabaseAttachmentStore().purgeAbandoned(7).catch(() => ({ removed: -1 }));
     const health = await store.deliveryHealth();
     if (health.dead > 0) logEvent('delivery_backlog_dead', { level: 'error', dead: health.dead });
-    return NextResponse.json({ ok: health.dead === 0, run, health, purge }, { headers: { 'Cache-Control': 'no-store' } });
+
+    // Cotizaciones al cliente: independientes de los leads. Un fallo aquí no tapa el estado de los RFQ.
+    const qs = quoteStore();
+    const quotesRun = await runQuoteDeliveries(qs).catch((err) => {
+      logEvent('quote_delivery_run_failed', { level: 'error', reason: (err as Error).message.slice(0, 80) });
+      return null;
+    });
+    const quotes = await qs.health().catch(() => null);
+    if (quotes && quotes.dead > 0) logEvent('quote_delivery_dead', { level: 'error', dead: quotes.dead });
+    if (quotes && quotes.blocked > 0) logEvent('quote_delivery_blocked', { level: 'warn', blocked: quotes.blocked });
+    // Contadores de límite de tasa caducados.
+    await supabaseAdmin().rpc('rate_limit_purge', { p_older_than_seconds: 86400 }).then(() => undefined, () => undefined);
+
+    const ok = health.dead === 0 && quotesRun !== null && quotes !== null && quotes.dead === 0 && quotes.blocked === 0;
+    return NextResponse.json({ ok, run, health, purge, quotes: { run: quotesRun, health: quotes } }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (err) {
     logEvent('cron_failed', { level: 'error', reason: (err as Error).message.slice(0, 80) });
     return NextResponse.json({ ok: false, error: 'store_unavailable' }, { status: 503 });

@@ -1,10 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { readFileSync, readdirSync } from 'node:fs';
-import { QuoteInput, toCents, quoteErrorOf } from '@/lib/quotations';
+import { QuoteDraftInput, computeDraft, lineAmountCents, toCents, quoteErrorOf } from '@/lib/quotations';
 
 describe('entrada de cotización', () => {
-  const ok = { amount: '12500.50', currency: 'PEN', validUntil: '2099-01-01', summary: 'Mangas Ø600 x 50 m, 12 unidades, entrega Arequipa' };
+  const item = { description: 'Manga de ventilación Ø600 mm, 50 m', quantity: '12', unit: 'UND', unitPrice: '1042.00' };
+  const ok = {
+    currency: 'PEN', validUntil: '2099-01-01', summary: 'Mangas Ø600 x 50 m, 12 unidades, entrega Arequipa',
+    items: [item], taxTreatment: 'included', taxLabel: 'IGV incluido',
+  };
   it('convierte a céntimos sin coma flotante', () => {
     expect(toCents('12500.50')).toBe(1250050);
     expect(toCents('12500.5')).toBe(1250050);
@@ -12,14 +16,35 @@ describe('entrada de cotización', () => {
     expect(toCents('1')).toBe(100);
     expect(toCents('0.07')).toBe(7);
   });
-  it('valida importe, moneda, fecha y resumen', () => {
-    expect(QuoteInput.safeParse(ok).success).toBe(true);
-    for (const bad of [{ amount: '-5' }, { amount: '1,5' }, { amount: '1.234' }, { amount: '' }, { currency: 'EUR' }, { validUntil: '31/12/2099' }, { summary: 'corto' }]) {
-      expect(QuoteInput.safeParse({ ...ok, ...bad }).success, JSON.stringify(bad)).toBe(false);
-    }
+  it('valida moneda, fecha, resumen, partidas e impuestos', () => {
+    expect(QuoteDraftInput.safeParse(ok).success).toBe(true);
+    const bad: Array<Record<string, unknown>> = [
+      { currency: 'EUR' }, { validUntil: '31/12/2099' }, { summary: 'corto' }, { items: [] },
+      { items: [{ ...item, quantity: '0' }] }, { items: [{ ...item, quantity: '1.2345' }] }, { items: [{ ...item, unitPrice: '-5' }] },
+      { items: [{ ...item, unitPrice: '1,5' }] }, { items: [{ ...item, description: 'ab' }] },
+      { taxTreatment: undefined }, { taxTreatment: 'iva' }, { taxLabel: '' },
+      { taxTreatment: 'excluded' }, // adicional sin importe
+    ];
+    for (const b of bad) expect(QuoteDraftInput.safeParse({ ...ok, ...b }).success, JSON.stringify(b)).toBe(false);
+    expect(QuoteDraftInput.safeParse({ ...ok, taxTreatment: 'excluded', taxAmount: '2250.00' }).success).toBe(true);
+  });
+  it('multiplica con enteros y redondea medio hacia arriba', () => {
+    expect(lineAmountCents('12', 104200)).toBe(1250400);
+    expect(lineAmountCents('0.5', 101)).toBe(51); // 50.5 -> 51
+    expect(lineAmountCents('0.001', 100)).toBe(0);
+    expect(lineAmountCents('1234567.123', 100)).toBe(123456712); // sin coma flotante
+  });
+  it('el impuesto solo se suma si es adicional', () => {
+    const base = QuoteDraftInput.parse(ok);
+    expect(computeDraft(base).totalCents).toBe(1250400);
+    const ex = QuoteDraftInput.parse({ ...ok, taxTreatment: 'excluded', taxAmount: '2250.72' });
+    expect(computeDraft(ex)).toMatchObject({ subtotalCents: 1250400, taxCents: 225072, totalCents: 1475472 });
+    const exempt = QuoteDraftInput.parse({ ...ok, taxTreatment: 'exempt', taxLabel: 'Exonerado — base legal indicada por contabilidad' });
+    expect(computeDraft(exempt).totalCents).toBe(1250400);
   });
   it('traduce los errores de las funciones SQL a códigos estables', () => {
     expect(quoteErrorOf('P0001: validity_required')).toBe('validity_required');
+    expect(quoteErrorOf('tax_required')).toBe('tax_required');
     expect(quoteErrorOf('error raro del driver')).toBe('failed');
     expect(quoteErrorOf(undefined)).toBe('failed');
   });
@@ -38,7 +63,10 @@ describe('cotizaciones en Postgres real', () => {
   const lead = async (status: string) =>
     ((await db.query(`insert into public.quotes(customer_email, rfq_code, status) values ('a@b.co', 'R-' || gen_random_uuid(), $1) returning id`, [status])).rows[0] as { id: string }).id;
   const create = (id: string, amount = 1250050, cur = 'PEN', until = '2099-01-01', summary = 'Especificación cotizada completa') =>
-    db.query(`select * from public.lead_quote_create($1, 'ventas@p.com', $2, $3, $4::date, $5, null)`, [id, amount, cur, until, summary]);
+    db.query(
+      `select * from public.lead_quote_create($1, 'ventas@p.com', $2, $3, $4::date, $5, null, '[]'::jsonb, 'included', 'IGV incluido', null, null)`,
+      [id, amount, cur, until, summary],
+    );
   const issue = (qid: string) => db.query(`select * from public.lead_quote_issue($1, 'ventas@p.com')`, [qid]);
   const resolve = (qid: string, o: string, r: string | null) => db.query(`select * from public.lead_quote_resolve($1, 'ventas@p.com', $2, $3)`, [qid, o, r]);
   const status = async (id: string) => ((await db.query(`select status, loss_reason from public.quotes where id=$1`, [id])).rows[0] as { status: string; loss_reason: string | null });
@@ -79,7 +107,8 @@ describe('cotizaciones en Postgres real', () => {
     const b = qid(await create(l)); await issue(b);
     const r = await db.query(`select version, status from public.lead_quotes where quote_id=$1 order by version`, [l]);
     expect(r.rows).toEqual([{ version: 1, status: 'superseded' }, { version: 2, status: 'issued' }]);
-    await expect(db.query(`update public.lead_quotes set status='issued' where quote_id=$1 and version=1`, [l])).rejects.toThrow(/lead_quotes_one_issued_uidx/);
+    // Una oferta reemplazada no puede resucitar: ni por la restricción de vigente única ni por la guarda de estados.
+    await expect(db.query(`update public.lead_quotes set status='issued' where quote_id=$1 and version=1`, [l])).rejects.toThrow(/quote_status_invalid|lead_quotes_one_issued_uidx/);
   });
 
   it('un borrador ya emitido no se puede emitir dos veces', async () => {
