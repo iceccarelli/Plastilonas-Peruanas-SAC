@@ -35,6 +35,7 @@ export default async function StaffLeads({ searchParams }: { searchParams: Promi
       <nav className="mt-4 flex flex-wrap gap-2 text-sm" aria-label="Filtros">
         <Link className="underline" href="/staff">Todos</Link>
         <Link className="underline" href="/staff?problemas=1">Con entrega fallida</Link>
+        <Link className="underline" href="/staff/embudo">Embudo comercial</Link>
         {STATUSES.map((s) => <Link key={s} className="underline" href={`/staff?estado=${s}`}>{s}</Link>)}
       </nav>
       {error && <p role="alert" className="mt-6 text-red-700">No se pudo leer la base de datos. Revise que la migración esté aplicada.</p>}

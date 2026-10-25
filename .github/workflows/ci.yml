@@ -72,6 +72,12 @@ jobs:
         # La única verificación que ve un error de prerenderizado.
         run: npx next build
 
+      - name: Presupuesto de JavaScript por ruta
+        # El paquete inicial de cada página se lee del manifiesto del build: crece
+        # un import razonable a la vez hasta que la página que cobra pesa el doble.
+        # Los presupuestos son lo medido + ~4 %; un salto mayor rompe el CI.
+        run: node scripts/diagnostico/08-presupuesto.mjs
+
       - name: Auditar el HTML generado
         # Enlaces rotos, títulos duplicados, páginas sin <h1> ni canónico,
         # JSON-LD con @id colgantes. Nada de eso rompe la compilación y todo
