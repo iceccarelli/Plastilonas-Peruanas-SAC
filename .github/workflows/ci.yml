@@ -116,6 +116,14 @@ jobs:
         # era el trayecto.
         run: npm run auditar:navegacion
 
+      - name: Accesibilidad real (axe, WCAG 2.2 AA)
+        # axe-core en Chromium sobre 16 rutas x 4 modos (móvil/escritorio,
+        # claro/oscuro): contraste, nombres accesibles, roles, regiones. Cero
+        # hallazgos es la línea base; cualquier violación nueva falla el PR.
+        # Antes solo la oferta tenía axe en CI: el resto dependía de que alguien
+        # corriera el diagnóstico a mano.
+        run: npm run auditar:a11y
+
       - name: Camino del dinero (navegador, extremo a extremo)
         # Recorre ficha -> asistente -> cotizacion y ENVIA un RFQ sintetico
         # contra el build, con un CRM de prueba local: comprueba que el

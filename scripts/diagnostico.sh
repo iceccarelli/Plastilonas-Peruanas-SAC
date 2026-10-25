@@ -117,8 +117,8 @@ echo "   servidor listo"
 
 export DIAG_BASE="$BASE"
 FALLOS=0
-for PASO in \
-  01-maquetacion 02-interaccion 03-arquitectura 04-accesibilidad 07-solapamiento 08-presupuesto
+# PASOS="04-accesibilidad" ejecuta solo esos (lo usa CI para la compuerta de a11y).
+for PASO in ${PASOS:-01-maquetacion 02-interaccion 03-arquitectura 04-accesibilidad 07-solapamiento 08-presupuesto}
 do
   echo
   echo "── ${PASO} ──"
