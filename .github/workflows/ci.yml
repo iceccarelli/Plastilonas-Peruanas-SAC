@@ -34,7 +34,9 @@ concurrency:
 jobs:
   verificar:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 30: la CI ya tardaba ~19 min y la compuerta de accesibilidad (#47) la
+    # llevó a >20; el límite anterior mató el último paso (asistente) a medias.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
