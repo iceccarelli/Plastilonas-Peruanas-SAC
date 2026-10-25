@@ -4,6 +4,7 @@ import { quoteStore } from '@/lib/quote-store';
 import { NO_STORE_HEADERS, limitDecide, sameSite, tokenFrom } from '@/lib/oferta-http';
 import { readBoundedText } from '@/lib/http-limits';
 import { logEvent } from '@/lib/lead-service';
+import { bumpCounter } from '@/lib/ops';
 
 export const runtime = 'nodejs';
 
@@ -41,6 +42,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tok
   const r = await quoteStore(db).decide(t.hash, outcome, reason, key);
   if (!r.ok) {
     logEvent('oferta_decision_rejected', { level: 'warn', error: r.error });
+    if (r.error === 'link_invalid' || r.error === 'link_revoked' || r.error === 'link_expired') await bumpCounter(db, 'oferta-invalid');
     return back(r.error);
   }
   logEvent('oferta_decision', { outcome: r.outcome, replayed: r.replayed });

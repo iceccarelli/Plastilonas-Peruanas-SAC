@@ -50,6 +50,11 @@ export const INTEGRATIONS: IntegrationDef[] = [
     whenOff: 'Las cotizaciones emitidas quedan guardadas pero NO se envían: la entrega aparece «bloqueada» en /staff.',
   },
   {
+    id: 'alerts', label: 'Destino de alertas (webhook)',
+    all: ['ALERT_WEBHOOK_URL'],
+    whenOff: 'Las averías (entregas muertas, cotizaciones bloqueadas, cron detenido) solo se ven en /api/health?deep=1 y en el flujo de GitHub: nadie recibe un aviso.',
+  },
+  {
     id: 'retries', label: 'Reintentos de entrega (cron)',
     all: ['CRON_SECRET'],
     whenOff: 'Las entregas fallidas no se reintentan solas y /api/cron/lead-deliveries responde 503.',

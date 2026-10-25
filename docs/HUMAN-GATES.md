@@ -57,6 +57,27 @@ una sola vez, entrega con estados `queued / blocked / sent / confirmed / failed 
 - [ ] **Confirmar los datos legales que salen en el PDF**: razón social, RUC 20523135385 y domicilio de `lib/site.ts`, antes de emitir la primera oferta real. El PDF no incluye ninguna cifra, plazo, garantía ni impuesto que el personal no haya escrito.
 - [ ] Prueba controlada con una dirección propia (no de un cliente): emitir una oferta de ensayo, comprobar la llegada, abrir el enlace, rechazarla con motivo «prueba».
 
+## 2.2 Operación: alertas, estado y migraciones
+
+**Estado del código (implementado y probado; no conectado a producción):**
+`/api/health` = vivacidad · `/api/ready?function=rfq|quote|upload` = si el sitio PUEDE servir esa función ahora (escribe en la base, mira el esquema, el bucket y el latido; público y solo con estados) · `/api/health?deep=1` (Bearer `CRON_SECRET`) = detalle: migraciones, bucket privado, entregas muertas/bloqueadas, integridad de ofertas, latido del cron, destino de alertas. El cron deja un latido y evalúa condiciones; las alertas salen **una vez**, se repiten tras 6 h y avisan la recuperación una sola vez.
+
+- [ ] `ALERT_WEBHOOK_URL` (Vercel, Production): Slack/Teams/n8n entrante (https y público; las URL internas se rechazan). Sin él nadie recibe aviso salvo el correo del flujo de GitHub.
+- [ ] Probar el canal: GitHub → Actions → «RFQ — reintentos y vigilancia» → Run workflow → marcar *probar_alerta* (o `POST /api/ops/alert-test` con el Bearer). Debe llegar un mensaje rotulado «Prueba».
+- [ ] Opcional pero recomendable: un *log drain* de Vercel hacia el sistema de logs que se use; las tasas de error y la latencia por ruta salen de ahí (el sitio emite eventos JSON sin datos personales: `lead_not_accepted`, `delivery_failed`, `oferta_decision_rejected`, `staff_denied`…). El código no mide percentiles de latencia por sí mismo.
+- [ ] Tras configurar todo: `EXIGIR_LISTO=1 npm run verify:deploy` debe pasar; sin esa variable `/api/ready` solo se informa.
+
+**Migraciones — orden y despliegue seguro** (todas son aditivas e idempotentes; se aplican en este orden):
+`schema.sql` → `20261023000000_rfq_durable_pipeline` → `20261023010000_rfq_attachments_staff` → `20261023020000_rfq_quotations` → `20261024000000_quotation_customer_journey` → `20261024010000_ops_observability`.
+
+1. **Antes de aplicar**: backup (Supabase → Database → Backups; con PITR, anotar la hora) y, si hay datos, ensayar en una *branch* de Supabase.
+2. **Migrar primero, desplegar después.** El código nuevo exige las funciones nuevas; las migraciones nunca borran columnas ni datos (la única sustitución de funciones —`lead_quote_create/issue`— conserva la llamada antigua válida por parámetros con valor por defecto).
+3. Aplicar de una en una en el SQL editor o con `supabase db push`; comprobar `GET /api/health?deep=1`: cada migración tiene su sonda (`migration_*`) y debe pasar a verde.
+4. Si algo falla a medias: cada archivo es idempotente, se corrige y se vuelve a ejecutar completo. No hay *down*: el retroceso es restaurar el backup.
+5. La CI aplica **todas** las migraciones sobre una base vacía y, aparte, sobre una base con datos del esquema anterior (`test/oferta-ciclo.test.ts`, `test/ops-observabilidad.test.ts`).
+
+**Restauración (ensayo recomendado una vez al configurar y tras cada cambio grande):** restaurar el backup en un proyecto/branch *nuevo*, apuntar un despliegue de *preview* a él y comprobar: `GET /api/health?deep=1` (todo verde), `select public.quote_integrity_report();` → `hashMismatch = 0` e `issuedWithoutSnapshot = 0` (toda oferta emitida conserva su huella; las emitidas antes de la migración de cotizaciones aparecerán en `issuedWithoutSnapshot` y es esperado), y abrir un enlace de oferta de prueba. Un ensayo equivalente con datos sintéticos corre en CI (`restauración…` en `test/ops-observabilidad.test.ts`); **no sustituye** el ensayo real con el backup de Supabase, que no se ha hecho (no existe aún el proyecto).
+
 ## 2. Adjuntos del formulario RFQ (Etapa 2) y fotos de /asistente (Sprint C)
 
 - [ ] Aplicar en Supabase, en orden, `supabase/schema.sql`,

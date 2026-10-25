@@ -5,6 +5,7 @@
 import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { BUCKET } from '@/lib/attachments';
 import { canCaptureLeads } from '@/lib/config';
+import { alertConfigured, HEARTBEAT_RETRY, HEARTBEAT_STALE_S } from '@/lib/ops';
 
 export interface Check {
   id: string;
@@ -32,6 +33,7 @@ export async function deepChecks(env: Record<string, string | undefined> = proce
   await probe('migration_attachments_staff', 'lead_attachments', 'id', '20261023010000_rfq_attachments_staff.sql');
   await probe('migration_quotations', 'lead_quotes', 'id', '20261023020000_rfq_quotations.sql');
   await probe('migration_quote_journey', 'quote_deliveries', 'id', '20261024000000_quotation_customer_journey.sql');
+  await probe('migration_ops', 'ops_heartbeats', 'name', '20261024010000_ops_observability.sql');
 
   try {
     const { data, error } = await db.storage.getBucket(BUCKET);
@@ -67,5 +69,29 @@ export async function deepChecks(env: Record<string, string | undefined> = proce
     out.push({ id: 'quote_deliveries_blocked', status: h.blocked > 0 ? 'fail' : 'pass', detail: `${h.blocked ?? 0} cotizaciones bloqueadas por configuración (correo o secreto del enlace).` });
     out.push({ id: 'quote_deliveries_confirmed', status: h.confirmed > 0 ? 'pass' : 'skip', detail: h.confirmed > 0 ? `${h.confirmed} entregas con confirmación del proveedor.` : 'Aún sin confirmación del proveedor (webhook): entrega al buzón no demostrada.' });
   }
+
+  // Operación: ¿corre el proceso de reintentos? ¿se conservan íntegras las ofertas? ¿hay a dónde avisar?
+  if (env.CRON_SECRET) {
+    const { data: age, error: ageErr } = await db.rpc('ops_heartbeat_age', { p_name: HEARTBEAT_RETRY });
+    if (!ageErr) {
+      out.push({
+        id: 'retry_heartbeat',
+        status: age === null ? 'skip' : age > HEARTBEAT_STALE_S ? 'fail' : 'pass',
+        detail: age === null ? 'El proceso de reintentos aún no ha corrido correctamente.' : `Último latido correcto hace ${Math.round(Number(age) / 60)} min.`,
+      });
+    }
+  }
+  const { data: integ, error: integErr } = await db.rpc('quote_integrity_report');
+  if (!integErr && integ) {
+    const r = integ as { checked: number; hashMismatch: number; issuedWithoutSnapshot: number };
+    out.push({
+      id: 'quote_integrity', status: r.hashMismatch + r.issuedWithoutSnapshot > 0 ? 'fail' : 'pass',
+      detail: `${r.checked} ofertas verificadas; ${r.hashMismatch} con huella distinta; ${r.issuedWithoutSnapshot} emitidas sin instantánea.`,
+    });
+  }
+  out.push({
+    id: 'alert_destination', status: alertConfigured(env) ? 'pass' : 'skip',
+    detail: alertConfigured(env) ? 'Hay destino de alertas configurado (usar POST /api/ops/alert-test para probarlo).' : 'Sin ALERT_WEBHOOK_URL: las averías no avisan a nadie.',
+  });
   return out;
 }

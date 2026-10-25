@@ -4,6 +4,7 @@ import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { quoteStore, type PublicQuoteView } from '@/lib/quote-store';
 import { formatMoney } from '@/lib/quote-document';
 import { limitView, tokenFrom } from '@/lib/oferta-http';
+import { bumpCounter } from '@/lib/ops';
 import { SITE } from '@/lib/site';
 import { whatsappUrl } from '@/lib/whatsapp';
 import ImprimirBoton from '@/components/oferta/ImprimirBoton';
@@ -64,6 +65,7 @@ export default async function OfertaPage({ params, searchParams }: { params: Pro
   } catch {
     return <Unavailable title="Servicio no disponible" text="No pudimos consultar su oferta. Inténtelo de nuevo en unos minutos." />;
   }
+  if (view.state === 'not_found') await bumpCounter(db, 'oferta-invalid');
   if (view.state === 'not_found') return <Unavailable title="Enlace no válido" text="Este enlace no corresponde a ninguna oferta." />;
   if (view.state === 'expired') return <Unavailable title="El enlace venció" text="La vigencia de esta oferta terminó. Solicite una actualización a nuestro equipo comercial." />;
   if (view.state === 'revoked') {

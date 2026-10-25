@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireStaff } from '@/lib/staff';
 import { supabaseStaffStore, type StaffStore } from '@/lib/staff-store';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { isSupabaseConfigured, supabaseAdmin } from '@/lib/supabase';
+import { bumpCounter } from '@/lib/ops';
+import { logEvent } from '@/lib/lead-service';
 
 /** CSRF: un POST de formulario solo vale si su Origin es este mismo sitio. */
 export function sameOrigin(req: NextRequest): boolean {
@@ -28,7 +30,12 @@ export async function staffGate(req: NextRequest, opts: { write: boolean }): Pro
   }
   const actor = await requireStaff();
   // 404 y no 403: el área del personal no revela que existe.
-  if (!actor) return { ok: false, response: NextResponse.json({ ok: false, error: 'not_found' }, { status: 404, headers: NO_STORE }) };
+  if (!actor) {
+    // Anomalía de autorización: se cuenta (sin identidad ni IP) para alertar si hay una ráfaga.
+    logEvent('staff_denied', { level: 'warn', write: opts.write });
+    if (isSupabaseConfigured() && process.env.SUPABASE_SERVICE_ROLE_KEY) await bumpCounter(supabaseAdmin(), 'staff-denied');
+    return { ok: false, response: NextResponse.json({ ok: false, error: 'not_found' }, { status: 404, headers: NO_STORE }) };
+  }
   if (!isSupabaseConfigured() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return { ok: false, response: NextResponse.json({ ok: false, error: 'store_not_configured' }, { status: 503, headers: NO_STORE }) };
   }
