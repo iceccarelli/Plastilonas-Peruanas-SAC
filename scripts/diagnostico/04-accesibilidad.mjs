@@ -79,3 +79,7 @@ for (const [k, v] of Object.entries(porRegla).sort((a, b) => (orden[a[0].split('
   if (v.res) console.error(`   ${v.res.slice(0, 160)}`);
 }
 console.error(`\ntotal de hallazgos: ${todo.length}`);
+// Compuerta: cualquier violación (o ruta que no cargó) falla el proceso. Línea
+// base medida el 2026-10-25: 0 hallazgos en 16 rutas x 4 modos. Si una regla
+// nueva de axe marca algo legítimo, se corrige la página; no se baja el listón.
+if (todo.length > 0) process.exit(1);

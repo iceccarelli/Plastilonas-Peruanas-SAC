@@ -34,7 +34,9 @@ concurrency:
 jobs:
   verificar:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 30: la CI ya tardaba ~19 min y la compuerta de accesibilidad (#47) la
+    # llevó a >20; el límite anterior mató el último paso (asistente) a medias.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -115,6 +117,14 @@ jobs:
         # prueba lo notaba: ni el HTML ni el layout estaban mal, lo que fallaba
         # era el trayecto.
         run: npm run auditar:navegacion
+
+      - name: Accesibilidad real (axe, WCAG 2.2 AA)
+        # axe-core en Chromium sobre 16 rutas x 4 modos (móvil/escritorio,
+        # claro/oscuro): contraste, nombres accesibles, roles, regiones. Cero
+        # hallazgos es la línea base; cualquier violación nueva falla el PR.
+        # Antes solo la oferta tenía axe en CI: el resto dependía de que alguien
+        # corriera el diagnóstico a mano.
+        run: npm run auditar:a11y
 
       - name: Camino del dinero (navegador, extremo a extremo)
         # Recorre ficha -> asistente -> cotizacion y ENVIA un RFQ sintetico

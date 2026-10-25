@@ -46,6 +46,7 @@
     "diagnostico": "bash scripts/diagnostico.sh",
     "diagnostico:navegador": "node -e \"import('./scripts/diagnostico/rutas.mjs').then(m=>console.log(m.CHROME ?? 'NINGUNO — npx playwright install chromium'))\"",
     "diagnostico:a11y": "node scripts/diagnostico/04-accesibilidad.mjs",
+    "auditar:a11y": "PASOS=04-accesibilidad bash scripts/diagnostico.sh",
     "diagnostico:maqueta": "node scripts/diagnostico/01-maquetacion.mjs",
     "diagnostico:enlaces": "node scripts/diagnostico/03-arquitectura.mjs",
     "diagnostico:capturas": "node scripts/diagnostico/05-capturas.mjs",
