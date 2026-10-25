@@ -2,6 +2,8 @@ import { defineConfig } from 'vitest/config';
 import { resolve } from 'node:path';
 
 export default defineConfig({
+  // Las páginas de servidor (.tsx) se renderizan a HTML en pruebas con el runtime JSX automático, como Next.
+  esbuild: { jsx: 'automatic' },
   test: {
     environment: 'node', // por-archivo se puede cambiar con // @vitest-environment jsdom
     globals: true,

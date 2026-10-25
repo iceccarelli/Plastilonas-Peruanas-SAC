@@ -45,6 +45,17 @@ describe('contrato de configuración', () => {
   });
 });
 
+describe('cotizaciones al cliente', () => {
+  it('apagado sin secreto; un secreto corto es un error, no una configuración válida', () => {
+    expect(by(configReport({}), 'quotes').state).toBe('disabled');
+    expect(by(configReport({ QUOTE_LINK_SECRET: 'corto' }), 'quotes')).toMatchObject({ state: 'misconfigured' });
+    expect(by(configReport({ QUOTE_LINK_SECRET: 'x'.repeat(32) }), 'quotes').state).toBe('configured');
+  });
+  it('nunca devuelve el valor del secreto', () => {
+    expect(JSON.stringify(configReport({ QUOTE_LINK_SECRET: 'secreto-ENLACE-' + 'x'.repeat(30) }))).not.toContain('secreto-ENLACE');
+  });
+});
+
 describe('contrato de dominio', () => {
   it('detecta las dos variables canónicas en conflicto', () => {
     const d = domainStatus({ NEXT_PUBLIC_CANONICAL_HOST: 'https://www.plastilonas.com', CANONICAL_ORIGIN: 'https://plastilonas.com' });

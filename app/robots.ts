@@ -16,7 +16,7 @@ import { SUPERFICIES_MAQUINA } from "@/lib/superficies-maquina";
 /** Rutas sin valor de indexación (privadas, transaccionales o de API). */
 // /version.json es un endpoint de operación (qué commit sirve el sitio):
 // ya va con X-Robots-Tag: noindex, y aquí se evita además el rastreo.
-const DISALLOW = ["/dashboard", "/login", "/staff", "/api/", "/carrito", "/checkout", "/version.json"];
+const DISALLOW = ["/dashboard", "/login", "/staff", "/api/", "/carrito", "/checkout", "/oferta/", "/version.json"];
 
 /** Agentes de IA y buscadores que permitimos de forma explícita. */
 const ALLOWED_AGENTS = [

@@ -42,13 +42,31 @@ WhatsApp) salvo que un canal externo confirme. No se envió ningún lead sintét
 - [ ] En GitHub (Settings → Secrets → Actions): `CRON_SECRET` (el mismo) y `SITE_ORIGIN` (el origen de producción). Activa `.github/workflows/lead-retry.yml`: reintenta cada 15 min y **falla —con aviso por correo de GitHub— si hay entregas en dead-letter o el endpoint no responde**. El cron diario de `vercel.json` queda de respaldo (Hobby no admite más).
 - [ ] Tras configurar: `GET /api/health?deep=1` con el token de diagnóstico debe listar base, almacenamiento y migraciones en verde antes de anunciar el formulario.
 
+## 2.1 Cotización al cliente — qué falta fuera del código
+
+Implementado y probado (vitest sobre Postgres real, recorrido en navegador con
+proveedor de correo local): borrador con partidas e impuestos explícitos,
+emisión con instantánea inmutable, PDF reproducible, enlace seguro `/oferta/<token>`
+(hash en base, vence con la vigencia, se revoca al reemplazar), aceptar/rechazar
+una sola vez, entrega con estados `queued / blocked / sent / confirmed / failed / dead`.
+**No está conectado ni verificado en producción** hasta completar:
+
+- [ ] Aplicar la migración `20261024000000_quotation_customer_journey.sql` (después de las anteriores). `/api/health?deep=1` marca `migration_quote_journey` en rojo mientras falte.
+- [ ] Vercel (Production): `QUOTE_LINK_SECRET` (≥32 caracteres aleatorios; rotarlo invalida los enlaces ya enviados) y `RESEND_API_KEY` con un remitente de **dominio verificado** en Resend (`LEAD_EMAIL_FROM`). Sin ellas, emitir funciona pero la entrega queda **bloqueada** y `/staff` lo dice.
+- [ ] Resend → Webhooks: apuntar a `<origen>/api/webhooks/resend` (eventos `email.delivered`, `email.bounced`, `email.complained`) y poner el secreto `whsec_…` en `RESEND_WEBHOOK_SECRET`. Sin esto una entrega nunca pasa de «enviada» a «confirmada».
+- [ ] **Confirmar los datos legales que salen en el PDF**: razón social, RUC 20523135385 y domicilio de `lib/site.ts`, antes de emitir la primera oferta real. El PDF no incluye ninguna cifra, plazo, garantía ni impuesto que el personal no haya escrito.
+- [ ] Prueba controlada con una dirección propia (no de un cliente): emitir una oferta de ensayo, comprobar la llegada, abrir el enlace, rechazarla con motivo «prueba».
+
 ## 2. Adjuntos del formulario RFQ (Etapa 2) y fotos de /asistente (Sprint C)
 
 - [ ] Aplicar en Supabase, en orden, `supabase/schema.sql`,
       `supabase/migrations/20261023000000_rfq_durable_pipeline.sql` y
       `supabase/migrations/20261023010000_rfq_attachments_staff.sql` y
       `supabase/migrations/20261023020000_rfq_quotations.sql` (cotizaciones
-      versionadas, funciones `lead_quote_*`). La segunda
+      versionadas, funciones `lead_quote_*`) y
+      `supabase/migrations/20261024000000_quotation_customer_journey.sql`
+      (partidas, instantánea inmutable con SHA-256, enlaces seguros, entrega de
+      cotizaciones y límite de tasa compartido). La segunda
       **crea el bucket privado `rfq-adjuntos`** (20 MB, sin políticas anónimas).
       Los navegadores suben con URLs firmadas que emite `/api/lead/upload-url`;
       ya no se necesita ninguna política RLS de INSERT anónimo. Sin la

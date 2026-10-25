@@ -118,3 +118,11 @@ jobs:
         # correo (el script blanquea esas variables). Reutiliza el .next ya
         # compilado arriba.
         run: npm run probar:dinero
+
+      - name: Recorrido de la oferta (navegador, extremo a extremo)
+        # Base limpia (schema + TODAS las migraciones) -> oferta emitida -> el
+        # cron real envía el correo a un proveedor local de captura -> el enlace
+        # DEL CORREO se abre en Chromium (escritorio y móvil, con axe) -> aceptar
+        # y rechazar -> repetición, otro origen, reemplazo, vencimiento y fallo
+        # del proveedor. Ningún servicio real: Supabase y Resend son locales.
+        run: npm run probar:oferta
