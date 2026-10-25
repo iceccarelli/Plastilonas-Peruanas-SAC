@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { isSupabaseConfigured, supabaseAdmin } from '@/lib/supabase';
 import { supabaseLeadStore } from '@/lib/lead-store';
 import { supabaseAttachmentStore } from '@/lib/attachment-store';
 import { readBoundedText } from '@/lib/http-limits';
@@ -30,14 +30,16 @@ export async function POST(req: NextRequest) {
 
   let store = null;
   let attachments = null;
+  let limiter = null;
   if (isSupabaseConfigured() && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     try {
       store = supabaseLeadStore();
       attachments = supabaseAttachmentStore();
+      limiter = supabaseAdmin();
     } catch {
       logEvent('store_unavailable', { level: 'error' });
     }
   }
-  const { status, body } = await submitLead(json, clientIp(req.headers), { store, attachments });
+  const { status, body } = await submitLead(json, clientIp(req.headers), { store, attachments, limiter });
   return NextResponse.json(body, { status, headers });
 }
