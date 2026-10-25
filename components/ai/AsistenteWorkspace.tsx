@@ -30,8 +30,9 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useChat } from '@ai-sdk/react';
-import type { Message } from 'ai';
+import { textOf, useAsistenteChat } from '@/components/ai/useAsistenteChat';
+import type { UIMessage } from 'ai';
+import { completedToolResults } from '@/lib/ai/tool-parts';
 import Link from 'next/link';
 import { Bot, Camera, Check, CheckCircle2, FileUp, ImageIcon, Loader2, MessageCircle, Pencil, Send, User, X } from 'lucide-react';
 import ChatMarkdown from '@/components/ChatMarkdown';
@@ -72,14 +73,10 @@ interface Props {
 type Tab = 'conversa' | 'resultados' | 'proyecto';
 
 /** Tarjetas derivadas de tool-invocations reales para UN mensaje del asistente. */
-function cardsFromMessage(message: Message): AssistantResponse[] {
-  const parts = message.parts ?? [];
+function cardsFromMessage(message: UIMessage): AssistantResponse[] {
   const cards: AssistantResponse[] = [];
-  for (const part of parts) {
-    if (part.type !== 'tool-invocation') continue;
-    const invocation = part.toolInvocation;
-    if (invocation.state !== 'result') continue;
-    cards.push(...deriveCardsFromToolResult({ toolName: invocation.toolName, result: invocation.result }));
+  for (const { toolName, result } of completedToolResults(message)) {
+    cards.push(...deriveCardsFromToolResult({ toolName, result }));
   }
   return cards;
 }
@@ -124,17 +121,10 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
     setDraft(readProjectDraft());
   }, []);
 
-  const { messages, input, handleInputChange, handleSubmit, append, isLoading, error } = useChat({
-    api: '/api/chat',
-    body: { currentPage },
-    initialMessages: [
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content:
-          '¡Hola! Soy Plastilonas AI. Trabajo con el catálogo real de la empresa: no invento precios, certificaciones ni obras. Cuénteme qué necesita cubrir, ventilar, contener o transportar.',
-      },
-    ],
+  const { messages, input, handleInputChange, handleSubmit, append, isLoading, error } = useAsistenteChat({
+    currentPage,
+    welcome:
+      '¡Hola! Soy Plastilonas AI. Trabajo con el catálogo real de la empresa: no invento precios, certificaciones ni obras. Cuénteme qué necesita cubrir, ventilar, contener o transportar.',
   });
 
   const sinConversacion = messages.length <= 1;
@@ -145,7 +135,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
       engaged.current = true;
       trackAsistenteEngaged();
     }
-    void append({ role: 'user', content: mensaje });
+    void append(mensaje);
   };
 
   /**
@@ -221,7 +211,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
       ? seguimientosPara(
           messages
             .slice(-2)
-            .map((m) => m.content)
+            .map((m) => textOf(m))
             .join('\n'),
         ).slice(0, 3)
       : [];
@@ -261,12 +251,9 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
    */
   const aplicacionConocida = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i--) {
-      const parts = messages[i].parts ?? [];
-      for (const part of parts) {
-        if (part.type !== 'tool-invocation') continue;
-        const invocation = part.toolInvocation;
-        if (invocation.toolName !== 'getApplication' || invocation.state !== 'result') continue;
-        const result = invocation.result as { found?: boolean; application?: { name?: string } } | undefined;
+      for (const { toolName, result: r } of completedToolResults(messages[i])) {
+        if (toolName !== 'getApplication') continue;
+        const result = r as { found?: boolean; application?: { name?: string } } | undefined;
         if (result?.found && result.application?.name) return result.application.name;
       }
     }
@@ -494,7 +481,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
                         : 'bg-gray-50 dark:bg-[var(--surface-muted)] rounded-tl-none'
                     }`}
                   >
-                    {message.role === 'assistant' ? <ChatMarkdown content={message.content} /> : message.content}
+                    {message.role === 'assistant' ? <ChatMarkdown content={textOf(message)} /> : textOf(message)}
                   </div>
                   {message.role === 'user' && (
                     <div className="w-7 h-7 bg-gray-200 text-gray-600 rounded-2xl flex-shrink-0 flex items-center justify-center mt-0.5">
@@ -645,7 +632,7 @@ export default function AsistenteWorkspace({ pageContext, currentPage }: Props) 
               ) : (
                 <AssistantCard
                   key={message.id}
-                  response={{ type: 'narrative', text: message.content || '…' }}
+                  response={{ type: 'narrative', text: textOf(message) || '…' }}
                 />
               ),
             )}

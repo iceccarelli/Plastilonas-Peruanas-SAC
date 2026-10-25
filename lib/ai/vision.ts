@@ -5,7 +5,7 @@
  * en el prompt:
  *  - `VISION_SYSTEM_PROMPT` se lo repite al modelo en la propia instrucción.
  *  - `VisionModelOutputSchema` es el shape que se le PIDE al modelo
- *    (`generateObject`, app/api/vision/route.ts) — `unknown` y
+ *    (`generateText` + `Output.object`, app/api/vision/route.ts) — `unknown` y
  *    `requiresConfirmation` son arreglos obligatorios y no vacíos, así que
  *    un modelo que "olvida" declarar lo desconocido produce una respuesta que
  *    `safeParse` rechaza, no una tarjeta a medias.
@@ -38,7 +38,7 @@ REGLA CRÍTICA — NUNCA rompible:
 Responde siempre en español, en frases cortas y concretas.`;
 
 /**
- * Shape que se le pide al modelo vía `generateObject` — SIN el discriminante
+ * Shape que se le pide al modelo vía `Output.object` — SIN el discriminante
  * `type` (lo añade el endpoint) y sin `followUp` (no aplica a una respuesta
  * de análisis de imagen). Los mínimos no-vacíos son la aplicación en código
  * de la regla de arriba: el modelo no puede devolver un `unknown: []`.

@@ -30,7 +30,7 @@ const fuenteAssistantCard = readFileSync(join(raiz, rutaAssistantCard), 'utf8');
 
 /** Las variantes reales del discriminated union — nunca una lista a mano. */
 const variantes = AssistantResponse.options.map(
-  (option) => (option.shape.type._def as { value: string }).value,
+  (option) => (option.shape.type as unknown as { value: string }).value,
 );
 
 describe('AssistantCard cubre cada variante real de AssistantResponse', () => {

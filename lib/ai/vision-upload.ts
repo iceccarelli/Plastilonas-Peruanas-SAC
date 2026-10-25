@@ -83,3 +83,25 @@ export async function archiveVisionImage(file: File, projectId: string): Promise
     return null;
   }
 }
+
+/**
+ * ¿La CABECERA del archivo coincide con el tipo declarado? El tipo lo declara el
+ * cliente; los primeros bytes no se pueden declarar. Un HTML o un ejecutable
+ * con `mediaType: image/png` no llega al modelo.
+ */
+export function matchesImageSignature(mime: VisionMimeType, head: Uint8Array): boolean {
+  const at = (i: number, ...b: number[]) => b.every((v, k) => head[i + k] === v);
+  switch (mime) {
+    case 'image/jpeg':
+      return at(0, 0xff, 0xd8, 0xff);
+    case 'image/png':
+      return at(0, 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a);
+    case 'image/webp': // RIFF....WEBP
+      return at(0, 0x52, 0x49, 0x46, 0x46) && at(8, 0x57, 0x45, 0x42, 0x50);
+    default:
+      return false;
+  }
+}
+
+/** Base64 estándar, con relleno opcional y sin espacios: nada que decodificar "a medias". */
+export const BASE64_RE = /^[A-Za-z0-9+/]+={0,2}$/;

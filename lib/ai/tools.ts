@@ -83,7 +83,7 @@ export const searchProducts = tool({
   description:
     'Busca productos reales del catálogo de Plastilonas por texto libre, familia (category) o sector. ' +
     'Úsala en vez de recordar el catálogo de memoria: solo devuelve lo que existe en lib/products.ts.',
-  parameters: z.object({
+  inputSchema: z.object({
     query: z
       .string()
       .trim()
@@ -134,7 +134,7 @@ export const searchProducts = tool({
 // -----------------------------------------------------------------------------
 export const getProduct = tool({
   description: 'Devuelve la ficha completa de un producto real por su slug exacto.',
-  parameters: z.object({
+  inputSchema: z.object({
     slug: z.string().trim().describe('Slug del producto, p.ej. "mallas-antiafidas".'),
   }),
   execute: async ({ slug }) => {
@@ -153,7 +153,7 @@ export const compareProducts = tool({
   description:
     'Compara 2 a 4 productos reales lado a lado (categoría, sector, sourcing, especificaciones). ' +
     'Nunca compara contra un competidor: solo entre líneas del propio catálogo.',
-  parameters: z.object({
+  inputSchema: z.object({
     slugs: z.array(z.string().trim()).min(2).max(4),
   }),
   execute: async ({ slugs }) => {
@@ -175,7 +175,7 @@ export const getProductFamily = tool({
   description:
     'Devuelve una familia de producto (category) con su tagline y los productos reales que contiene. ' +
     'Sin argumentos, lista todas las familias.',
-  parameters: z.object({
+  inputSchema: z.object({
     category: z
       .string()
       .trim()
@@ -210,7 +210,7 @@ export const getApplication = tool({
   description:
     'Devuelve una aplicación/hub real (problema, enfoque, productos asociados y límites declarados: notClaimed). ' +
     'Sin slug, lista las aplicaciones disponibles.',
-  parameters: z.object({
+  inputSchema: z.object({
     slug: z.string().trim().optional(),
   }),
   execute: async ({ slug }) => {
@@ -232,7 +232,7 @@ export const getGuide = tool({
   description:
     'Devuelve una guía técnica real (secciones, productos y sectores relacionados). ' +
     'Sin slug, lista las guías disponibles con su ruta real en /recursos.',
-  parameters: z.object({
+  inputSchema: z.object({
     slug: z.string().trim().optional(),
   }),
   execute: async ({ slug }) => {
@@ -264,7 +264,7 @@ export const getCompanyFact = tool({
   description:
     'ÚNICA fuente permitida para cifras de la empresa (años operando, cantidad de productos, ' +
     'familias, cuántas líneas se fabrican en planta propia). Nunca afirmes un número que no venga de aquí.',
-  parameters: z.object({
+  inputSchema: z.object({
     fact: CompanyFactKey.describe('Qué cifra pedir, o "all" para todas.'),
   }),
   execute: async ({ fact }) => {
@@ -287,7 +287,7 @@ export const getFrameworkRequirement = tool({
     'Devuelve pilares y criterios reales del Marco de Especificación (lib/framework.ts): ' +
     'qué pregunta hacer, por qué importa y qué riesgo corre un proyecto sin ese dato. ' +
     'Sin argumentos, lista los pilares. Con pillarId, devuelve sus criterios.',
-  parameters: z.object({
+  inputSchema: z.object({
     pillarId: PillarIdEnum.optional(),
     criterionId: z.string().trim().optional().describe('Id de un criterio específico dentro del pilar.'),
   }),
@@ -321,7 +321,7 @@ export const listCalculations = tool({
     'Lista las calculadoras de predimensionamiento reales (lib/calculadoras.ts): slug, pregunta que ' +
     'responden y los campos numéricos que piden. Úsala antes de runCalculation para saber qué slug y ' +
     'qué campos existen — nunca inventes un slug de calculadora.',
-  parameters: z.object({}),
+  inputSchema: z.object({}),
   execute: async () => ({
     calculadoras: calculadoras.map((c) => ({
       slug: c.slug,
@@ -349,7 +349,7 @@ export const runCalculation = tool({
     'NO es un cálculo de ingeniería firmado: usa siempre los avisos y noCubre que la calculadora devuelve. ' +
     'Los campos que falten se completan con el valor por defecto publicado de la calculadora, nunca con un ' +
     'número inventado por el modelo — pide el dato real al usuario si es crítico.',
-  parameters: z.object({
+  inputSchema: z.object({
     slug: CalculatorSlugEnum,
     valores: z
       .record(z.string(), z.number())
@@ -386,7 +386,7 @@ export const getGlossaryTerm = tool({
   description:
     'Define un término técnico real del glosario (definición corta citable + por qué importa). ' +
     'Úsala para cualquier sigla o palabra técnica en vez de definirla de memoria.',
-  parameters: z.object({
+  inputSchema: z.object({
     slug: z.string().trim().optional().describe('Slug del término. Si no se sabe, usa "termino" para buscar por texto.'),
     termino: z.string().trim().optional().describe('Texto del término a buscar cuando no se conoce el slug.'),
   }),
@@ -419,7 +419,7 @@ export const getPublishedProjects = tool({
     'Lista proyectos/obras REALES y verificados (nunca inventes un cliente u obra que no esté aquí). ' +
     'Usa exclusivamente projectsPublicados (verificado=true); puede devolver una lista vacía, y eso es correcto: ' +
     'en ese caso di honestamente que no hay evidencia publicada todavía.',
-  parameters: z.object({
+  inputSchema: z.object({
     sector: z.string().trim().optional().describe('Filtra por industrySlug si se conoce.'),
   }),
   execute: async ({ sector }) => {
@@ -471,7 +471,7 @@ export const buildRFQ = tool({
     'déjalos fuera y dilo en missingFields. `ciudad` es la ciudad de ENTREGA del pedido — solo se llena cuando el ' +
     'usuario la dijo explícitamente, nunca se adivina de otro dato (ej. no asumas la ciudad de una obra o sector). ' +
     'El origen siempre es "chat".',
-  parameters: RFQPayloadSchema.omit({ origen: true }),
+  inputSchema: RFQPayloadSchema.omit({ origen: true }),
   execute: async (input) => {
     const payload = RFQPayloadSchema.parse({ ...input, origen: 'chat' });
     const missingFields = (['nombre', 'email', 'telefono'] as const).filter(
