@@ -56,28 +56,33 @@ export default function ContactoPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <input {...register('nombre')} placeholder="Nombre completo" className="form-input w-full px-5 py-3.5 border border-gray-200 rounded-2xl" />
+                <label htmlFor="contacto-nombre" className="block text-sm font-medium text-[#0A2540] mb-1.5">Nombre completo</label>
+                <input id="contacto-nombre" {...register('nombre')} placeholder="Nombre completo" className="form-input w-full px-5 py-3.5 border border-gray-200 rounded-2xl" />
                 {errors.nombre && <p className="text-xs text-red-500 mt-1">{errors.nombre.message}</p>}
               </div>
               <div>
-                <input {...register('email')} type="email" placeholder="Correo electrónico" className="form-input w-full px-5 py-3.5 border border-gray-200 rounded-2xl" />
+                <label htmlFor="contacto-email" className="block text-sm font-medium text-[#0A2540] mb-1.5">Correo electrónico</label>
+                <input id="contacto-email" {...register('email')} type="email" placeholder="Correo electrónico" className="form-input w-full px-5 py-3.5 border border-gray-200 rounded-2xl" />
                 {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
               </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <input {...register('telefono')} placeholder="Teléfono / WhatsApp" className="form-input w-full px-5 py-3.5 border border-gray-200 rounded-2xl" />
+                <label htmlFor="contacto-telefono" className="block text-sm font-medium text-[#0A2540] mb-1.5">Teléfono / WhatsApp</label>
+                <input id="contacto-telefono" {...register('telefono')} placeholder="Teléfono / WhatsApp" className="form-input w-full px-5 py-3.5 border border-gray-200 rounded-2xl" />
                 {errors.telefono && <p className="text-xs text-red-500 mt-1">{errors.telefono.message}</p>}
               </div>
               <div>
-                <input {...register('asunto')} placeholder="Asunto de su consulta" className="form-input w-full px-5 py-3.5 border border-gray-200 rounded-2xl" />
+                <label htmlFor="contacto-asunto" className="block text-sm font-medium text-[#0A2540] mb-1.5">Asunto de su consulta</label>
+                <input id="contacto-asunto" {...register('asunto')} placeholder="Asunto de su consulta" className="form-input w-full px-5 py-3.5 border border-gray-200 rounded-2xl" />
                 {errors.asunto && <p className="text-xs text-red-500 mt-1">{errors.asunto.message}</p>}
               </div>
             </div>
 
             <div>
-              <textarea {...register('mensaje')} rows={6} placeholder="Cuéntenos sobre su proyecto o consulta..." className="form-input w-full px-5 py-4 border border-gray-200 rounded-3xl resize-y" />
+              <label htmlFor="contacto-mensaje" className="block text-sm font-medium text-[#0A2540] mb-1.5">Mensaje</label>
+                <textarea id="contacto-mensaje" {...register('mensaje')} rows={6} placeholder="Cuéntenos sobre su proyecto o consulta..." className="form-input w-full px-5 py-4 border border-gray-200 rounded-3xl resize-y" />
               {errors.mensaje && <p className="text-xs text-red-500 mt-1">{errors.mensaje.message}</p>}
             </div>
 
